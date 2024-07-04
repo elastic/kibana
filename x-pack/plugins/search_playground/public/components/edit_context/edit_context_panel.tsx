@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useController, useFormContext } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
@@ -26,8 +26,9 @@ import { AnalyticsEvents } from '../../analytics/constants';
 
 export const EditContextPanel: React.FC = () => {
   const usageTracker = useUsageTracker();
-  const { getValues } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const selectedIndices: string[] = useWatch<ChatForm, ChatFormFields.indices>({
+    name: ChatFormFields.indices,
+  });
   const { fields } = useIndicesFields(selectedIndices);
   const defaultFields = getDefaultSourceFields(fields);
 
@@ -39,7 +40,7 @@ export const EditContextPanel: React.FC = () => {
 
   const {
     field: { onChange: onChangeSourceFields, value: sourceFields },
-  } = useController({
+  } = useController<ChatForm, ChatFormFields.sourceFields>({
     name: ChatFormFields.sourceFields,
     defaultValue: defaultFields,
   });
@@ -65,6 +66,7 @@ export const EditContextPanel: React.FC = () => {
             label={i18n.translate('xpack.searchPlayground.editContext.docsRetrievedCount', {
               defaultMessage: 'Number of documents sent to LLM',
             })}
+            fullWidth
           >
             <EuiSelect
               options={[
@@ -87,6 +89,7 @@ export const EditContextPanel: React.FC = () => {
               ]}
               value={docSize}
               onChange={handleDocSizeChange}
+              fullWidth
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -104,7 +107,7 @@ export const EditContextPanel: React.FC = () => {
             </EuiFlexItem>
             {Object.entries(fields).map(([index, group]) => (
               <EuiFlexItem grow={false} key={index}>
-                <EuiFormRow label={index}>
+                <EuiFormRow label={index} fullWidth>
                   <EuiSuperSelect
                     data-test-subj={`contextFieldsSelectable_${index}`}
                     options={group.source_fields.map((field) => ({
@@ -114,6 +117,7 @@ export const EditContextPanel: React.FC = () => {
                     }))}
                     valueOfSelected={sourceFields[index]?.[0]}
                     onChange={(value) => updateSourceField(index, value)}
+                    fullWidth
                   />
                 </EuiFormRow>
               </EuiFlexItem>

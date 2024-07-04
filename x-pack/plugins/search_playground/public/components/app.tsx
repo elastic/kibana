@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useFormContext } from 'react-hook-form';
+import { QueryMode } from './query_mode/query_mode';
 import { SetupPage } from './setup_page/setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
@@ -19,11 +20,18 @@ interface AppProps {
   showDocs?: boolean;
 }
 
+export enum ViewMode {
+  chat = 'chat',
+  query = 'query',
+}
+
 export const App: React.FC<AppProps> = ({ showDocs = false }) => {
   const [showSetupPage, setShowSetupPage] = useState(true);
+  const [selectedMode, setSelectedMode] = useState<ViewMode>(ViewMode.chat);
   const { watch } = useFormContext<ChatForm>();
   const { data: connectors } = useLoadConnectors();
   const hasSelectedIndices = watch(ChatFormFields.indices).length;
+  const handleModeChange = (id: string) => setSelectedMode(id as ViewMode);
 
   useEffect(() => {
     if (showSetupPage && connectors?.length && hasSelectedIndices) {
@@ -33,7 +41,12 @@ export const App: React.FC<AppProps> = ({ showDocs = false }) => {
 
   return (
     <>
-      <Header showDocs={showDocs} />
+      <Header
+        showDocs={showDocs}
+        onModeChange={handleModeChange}
+        selectedMode={selectedMode}
+        isActionsDisabled={showSetupPage}
+      />
       <KibanaPageTemplate.Section
         alignment="top"
         restrictWidth={false}
@@ -45,7 +58,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false }) => {
         paddingSize="none"
         className="eui-fullHeight"
       >
-        {showSetupPage ? <SetupPage /> : <Chat />}
+        {showSetupPage ? <SetupPage /> : selectedMode === ViewMode.chat ? <Chat /> : <QueryMode />}
       </KibanaPageTemplate.Section>
     </>
   );

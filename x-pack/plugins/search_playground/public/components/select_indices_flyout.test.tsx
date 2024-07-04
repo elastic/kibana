@@ -37,7 +37,7 @@ describe('SelectIndicesFlyout', () => {
     mockedUseSourceIndicesFields.mockReturnValue({
       indices: ['index1', 'index2'],
       setIndices: jest.fn(),
-      fields: undefined,
+      fields: {},
       loading: false,
       addIndex: () => {},
       removeIndex: () => {},
@@ -93,7 +93,7 @@ describe('SelectIndicesFlyout', () => {
     mockedUseSourceIndicesFields.mockReturnValueOnce({
       indices: [],
       setIndices: jest.fn(),
-      fields: undefined,
+      fields: {},
       loading: false,
       addIndex: () => {},
       removeIndex: () => {},

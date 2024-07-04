@@ -108,12 +108,14 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
           />{' '}
         </>
       }
+      fullWidth
     >
       <EuiSuperSelect
         data-test-subj="summarizationModelSelect"
         options={modelsOption}
-        valueOfSelected={getOptionValue(selectedModel)}
+        valueOfSelected={selectedModel && getOptionValue(selectedModel)}
         onChange={onChange}
+        fullWidth
       />
     </EuiFormRow>
   );

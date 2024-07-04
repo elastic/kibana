@@ -9,7 +9,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiLink,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -17,6 +17,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWatch } from 'react-hook-form';
+import { docLinks } from '../../common/doc_links';
 import { EditContextPanel } from './edit_context/edit_context_panel';
 import { ChatForm, ChatFormFields } from '../types';
 import { useManagementLink } from '../hooks/use_management_link';
@@ -27,7 +28,7 @@ export const ChatSidebar: React.FC = () => {
   const selectedModel = useWatch<ChatForm, ChatFormFields.summarizationModel>({
     name: ChatFormFields.summarizationModel,
   });
-  const managementLink = useManagementLink(selectedModel.connectorId);
+  const managementLink = useManagementLink(selectedModel?.connectorId);
   const panels = [
     {
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
@@ -60,14 +61,16 @@ export const ChatSidebar: React.FC = () => {
         defaultMessage: 'Context',
       }),
       extraAction: (
-        <EuiText size="xs">
-          <p>
-            <FormattedMessage
-              id="xpack.searchPlayground.sidebar.contextLearnMore"
-              defaultMessage="Learn more"
-            />
-          </p>
-        </EuiText>
+        <EuiLink
+          href={docLinks.context}
+          target="_blank"
+          data-test-subj="hidden-fields-documentation-link"
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.sidebar.contextLearnMore"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
       ),
       children: <EditContextPanel />,
     },

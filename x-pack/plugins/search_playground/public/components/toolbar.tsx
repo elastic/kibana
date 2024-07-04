@@ -9,12 +9,10 @@ import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { DataActionButton } from './data_action_button';
 import { ViewCodeAction } from './view_code/view_code_action';
-import { ViewQueryAction } from './view_query/view_query_action';
 
 export const Toolbar: React.FC = () => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="playground-header-actions">
-      <ViewQueryAction />
       <DataActionButton />
       <ViewCodeAction />
     </EuiFlexGroup>

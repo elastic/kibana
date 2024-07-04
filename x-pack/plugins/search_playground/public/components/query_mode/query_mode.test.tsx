@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { ViewQueryFlyout } from './view_query_flyout';
+import { render, screen } from '@testing-library/react';
+import { QueryMode } from './query_mode';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -47,22 +47,15 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   return <FormProvider {...methods}>{children}</FormProvider>;
 };
 
-describe('ViewQueryFlyout component tests', () => {
-  const onCloseMock = jest.fn();
-
+describe('QueryMode component tests', () => {
   beforeEach(() => {
     render(
       <IntlProvider locale="en">
         <MockFormProvider>
-          <ViewQueryFlyout onClose={onCloseMock} />
+          <QueryMode />
         </MockFormProvider>
       </IntlProvider>
     );
-  });
-
-  it('calls onClose when the close button is clicked', () => {
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-    expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
   it('should see the view elasticsearch query', async () => {

@@ -7,6 +7,7 @@
 
 import {
   EuiBetaBadge,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiPageHeaderSection,
   EuiPageTemplate,
@@ -18,13 +19,36 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { PlaygroundHeaderDocs } from './playground_header_docs';
 import { Toolbar } from './toolbar';
+import { ViewMode } from './app';
 
 interface HeaderProps {
   showDocs?: boolean;
+  selectedMode: string;
+  onModeChange: (mode: string) => void;
+  isActionsDisabled?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ showDocs = false }) => {
+export const Header: React.FC<HeaderProps> = ({
+  selectedMode,
+  onModeChange,
+  showDocs = false,
+  isActionsDisabled = false,
+}) => {
   const { euiTheme } = useEuiTheme();
+  const options = [
+    {
+      id: ViewMode.chat,
+      label: i18n.translate('xpack.searchPlayground.header.view.chat', {
+        defaultMessage: 'Chat',
+      }),
+    },
+    {
+      id: ViewMode.query,
+      label: i18n.translate('xpack.searchPlayground.header.view.query', {
+        defaultMessage: 'Query',
+      }),
+    },
+  ];
 
   return (
     <EuiPageTemplate.Header
@@ -54,6 +78,16 @@ export const Header: React.FC<HeaderProps> = ({ showDocs = false }) => {
             alignment="middle"
           />
         </EuiFlexGroup>
+      </EuiPageHeaderSection>
+      <EuiPageHeaderSection>
+        <EuiButtonGroup
+          legend="viewMode"
+          options={options}
+          idSelected={selectedMode}
+          onChange={onModeChange}
+          buttonSize="compressed"
+          isDisabled={isActionsDisabled}
+        />
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>
         <EuiFlexGroup alignItems="center">

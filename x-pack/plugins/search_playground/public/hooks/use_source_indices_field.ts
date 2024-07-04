@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { useController, useFormContext } from 'react-hook-form';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
-import { useKibana } from './use_kibana';
-import { APIRoutes, IndicesQuerySourceFields } from '../types';
+import { useIndicesFields } from './use_indices_fields';
 import { ChatForm, ChatFormFields } from '../types';
 import {
   createQuery,
@@ -36,7 +34,6 @@ export const getIndicesWithNoSourceFields = (
 
 export const useSourceIndicesFields = () => {
   const usageTracker = useUsageTracker();
-  const { services } = useKibana();
   const [loading, setLoading] = useState<boolean>(false);
   const [noFieldsIndicesWarning, setNoFieldsIndicesWarning] = useState<string | null>(null);
   const { resetField } = useFormContext<ChatForm>();
@@ -55,27 +52,15 @@ export const useSourceIndicesFields = () => {
   });
 
   const {
-    field: { onChange: onSourceFieldsChange },
+    field: { onChange: onSourceFieldsChange, value: sourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
   });
-
-  const { data: fields } = useQuery({
-    enabled: selectedIndices.length > 0,
-    queryKey: ['fields', selectedIndices.toString()],
-    queryFn: async () => {
-      const response = await services.http.post<IndicesQuerySourceFields>(
-        APIRoutes.POST_QUERY_SOURCE_FIELDS,
-        {
-          body: JSON.stringify({ indices: selectedIndices }),
-        }
-      );
-      return response;
-    },
-  });
+  // const selectedIndices = useWatch({ name: ChatFormFields.indices });
+  const { fields, isLoading } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
-    if (fields) {
+    if (fields && !isLoading) {
       resetField(ChatFormFields.queryFields);
 
       const defaultFields = getDefaultQueryFields(fields);
@@ -90,7 +75,15 @@ export const useSourceIndicesFields = () => {
       }
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
-      onSourceFieldsChange(defaultSourceFields);
+
+      const mergedSettledAndDefaultFields = Object.entries(defaultSourceFields).reduce(
+        (result, [index, defaultSourceField]) => {
+          return { ...result, [index]: sourceFields[index] || defaultSourceField };
+        },
+        {}
+      );
+
+      onSourceFieldsChange(mergedSettledAndDefaultFields);
       usageTracker?.count(
         AnalyticsEvents.sourceFieldsLoaded,
         Object.values(fields)?.flat()?.length
@@ -100,7 +93,7 @@ export const useSourceIndicesFields = () => {
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fields]);
+  }, [fields, isLoading]);
 
   const addIndex = (newIndex: IndexName) => {
     const newIndices = [...selectedIndices, newIndex];

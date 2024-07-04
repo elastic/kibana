@@ -31,13 +31,17 @@ interface SelectIndicesFlyout {
 }
 
 export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) => {
+  const [query, setQuery] = useState<string>('');
+  const { indices, isLoading: isIndicesLoading } = useQueryIndices(query);
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
-  const { indices, isLoading: isIndicesLoading } = useQueryIndices();
   const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
   const handleSelectOptions = (options: EuiSelectableOption[]) => {
     setSelectedTempIndices(
       options.filter((option) => option.checked === 'on').map((option) => option.label)
     );
+  };
+  const handleSearchChange = (searchValue: string) => {
+    setQuery(searchValue);
   };
 
   const handleSaveQuery = () => {
@@ -55,6 +59,9 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <EuiSpacer />
           <EuiSelectable
             searchable
+            searchProps={{
+              onChange: handleSearchChange,
+            }}
             options={[
               {
                 label: i18n.translate(
