@@ -367,6 +367,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
           paramType: 'unnamed',
           text: ctx.getText(),
           name: '',
+          value: '',
           location: getPosition(ctx.start, ctx.stop),
           incomplete: Boolean(ctx.exception),
         };

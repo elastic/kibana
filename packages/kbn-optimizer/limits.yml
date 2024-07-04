@@ -95,6 +95,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
+  logsDataAccess: 16759
   logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
@@ -102,7 +103,7 @@ pageLoadAssetSize:
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82210
+  ml: 85000
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269

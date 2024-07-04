@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -20,7 +20,7 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { flyoutCancelText } from '../../../common/translations';
-import { useDatasetQualityFlyout } from '../../hooks';
+import { useDatasetQualityFlyout, useDatasetDetailsTelemetry } from '../../hooks';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
@@ -40,6 +40,12 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     loadingState,
     flyoutLoading,
   } = useDatasetQualityFlyout();
+
+  const { startTracking } = useDatasetDetailsTelemetry();
+
+  useEffect(() => {
+    startTracking();
+  }, [startTracking]);
 
   return (
     <EuiFlyout

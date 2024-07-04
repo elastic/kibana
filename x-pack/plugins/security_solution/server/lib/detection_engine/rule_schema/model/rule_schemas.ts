@@ -268,6 +268,7 @@ export const MachineLearningSpecificRuleParams = z.object({
   type: z.literal('machine_learning'),
   anomalyThreshold: AnomalyThreshold,
   machineLearningJobId: z.array(z.string()),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type MachineLearningRuleParams = BaseRuleParams & MachineLearningSpecificRuleParams;
