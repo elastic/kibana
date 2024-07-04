@@ -178,17 +178,23 @@ export async function suggest(
         const fieldsMap: Map<string, ESQLRealField> = await new Map();
         const anyVariables = collectVariables([], fieldsMap, innerText);
 
-        return await getFieldsOrFunctionsSuggestions(
-          ['any'],
-          astContext.command.name,
-          '',
-          getFieldsByType,
-          {
-            functions: true,
-            fields: false,
-            variables: nodeArg ? undefined : anyVariables,
-          }
-        );
+        return [
+          // varX =
+          buildNewVarDefinition(findNewVariable(anyVariables)),
+
+          // functions
+          ...(await getFieldsOrFunctionsSuggestions(
+            ['any'],
+            astContext.command.name,
+            '',
+            getFieldsByType,
+            {
+              functions: true,
+              fields: false,
+              variables: nodeArg ? undefined : anyVariables,
+            }
+          )),
+        ];
       }
     }
 

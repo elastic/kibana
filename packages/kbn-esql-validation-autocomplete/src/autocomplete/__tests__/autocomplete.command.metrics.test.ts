@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  setup,
-  indexes,
-  integrations,
-  getFunctionSignaturesByReturnType,
-  getFieldNamesByType,
-} from './helpers';
+import { setup, indexes, integrations, getFunctionSignaturesByReturnType } from './helpers';
 
 const visibleIndices = indexes
   .filter(({ hidden }) => !hidden)
@@ -24,7 +18,7 @@ const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
 });
 
 const allEvaFunctions = getFunctionSignaturesByReturnType(
-  'stats',
+  'metrics',
   'any',
   {
     evalMath: true,
@@ -36,7 +30,7 @@ const allEvaFunctions = getFunctionSignaturesByReturnType(
 );
 
 const allGroupingFunctions = getFunctionSignaturesByReturnType(
-  'stats',
+  'metrics',
   'any',
   {
     grouping: true,
@@ -97,12 +91,12 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... <aggregates> ...', () => {
-      test.only('lists possible aggregations on space after index list', async () => {
+      test('lists possible aggregations on space after index list', async () => {
         const { assertSuggestions } = await setup();
         const expected = ['var0 =', ...allAggFunctions, ...allEvaFunctions];
 
         await assertSuggestions('metrics a /', expected);
-        // await assertSuggestions('METRICS a /', expected);
+        await assertSuggestions('METRICS a /', expected);
       });
 
       // test('on assignment expression, shows all agg and eval functions', async () => {

@@ -18,7 +18,7 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
     }),
     // type agg because it can also be used as an aggregation...
     type: 'agg',
-    supportedCommands: ['stats'],
+    supportedCommands: ['stats', 'metrics'],
     supportedOptions: ['by'],
     signatures: [
       {
