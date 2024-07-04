@@ -24,11 +24,8 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import {
-  CustomFieldConfiguration,
-  CustomFieldTypes,
-  TemplateConfiguration,
-} from '../../../common/types/domain';
+import type { CustomFieldConfiguration, TemplateConfiguration } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';

@@ -730,21 +730,23 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          templates: [  {
-            key: 'test_template_4',
-            name: 'Fourth test template',
-            caseFields: {
-              title: 'Case with sample template 4',
-              description: 'case desc',
-              customFields: [
-                {
-                  key: customFieldsConfigurationMock[0].key,
-                  type: CustomFieldTypes.TEXT,
-                  value: 'this is a text field value',
-                },
-              ],
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                title: 'Case with sample template 4',
+                description: 'case desc',
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                ],
+              },
             },
-          },],
+          ],
         },
       }));
 
@@ -781,8 +783,7 @@ describe('ConfigureCases', () => {
               caseFields: {
                 title: 'Case with sample template 4',
                 description: 'case desc',
-                customFields: [
-                ],
+                customFields: [],
               },
             },
           ],
@@ -798,28 +799,29 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          templates: [ 
+          templates: [
             {
               key: 'test_template_4',
               name: 'Fourth test template',
-              caseFields: null
-            }
+              caseFields: null,
+            },
           ],
         },
       }));
 
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(
-        await screen.findByTestId(`add-custom-field`)
-      );
+      userEvent.click(await screen.findByTestId(`add-custom-field`));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'New custom field');
       userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.paste(screen.getByTestId('text-custom-field-default-value'), 'This is a default value');
-      
+      userEvent.paste(
+        screen.getByTestId('text-custom-field-default-value'),
+        'This is a default value'
+      );
+
       userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
@@ -832,14 +834,14 @@ describe('ConfigureCases', () => {
           },
           closureType: 'close-by-user',
           customFields: [
-           ...customFieldsConfigurationMock,
-           {
-              key: expect.anything(), 
-              label: 'New custom field', 
-              type: CustomFieldTypes.TEXT as const, 
-              required: true, 
-              defaultValue: 'This is a default value'
-            }
+            ...customFieldsConfigurationMock,
+            {
+              key: expect.anything(),
+              label: 'New custom field',
+              type: CustomFieldTypes.TEXT as const,
+              required: true,
+              defaultValue: 'This is a default value',
+            },
           ],
           templates: [
             {
@@ -870,11 +872,11 @@ describe('ConfigureCases', () => {
                   {
                     key: expect.anything(),
                     type: CustomFieldTypes.TEXT as const,
-                    value: 'This is a default value'
-                  }
-                ]
-              }
-            }
+                    value: 'This is a default value',
+                  },
+                ],
+              },
+            },
           ],
           id: '',
           version: '',

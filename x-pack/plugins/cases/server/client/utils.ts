@@ -16,12 +16,11 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
-import {
+import type {
   CaseCustomField,
   CaseSeverity,
   CaseStatuses,
   CustomFieldsConfiguration,
-  CustomFieldTypes,
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
 } from '../../common/types/domain';
@@ -33,6 +32,7 @@ import {
   ExternalReferenceStorageType,
   PersistableStateAttachmentPayloadRt,
   UserCommentAttachmentPayloadRt,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
