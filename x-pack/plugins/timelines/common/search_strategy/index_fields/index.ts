@@ -71,8 +71,10 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  * everything you need via the `fields` property on the data view
  * you are working with? Or perhaps you need a description for a
  * particular field? Consider using the EcsFlat module from `@kbn/ecs`
+ * NOTE: This "Omit" type is necesssary as some places expect the format field to be a string,
+ * this will be aligned with the spec near term.
  */
-export type BrowserField = FieldSpec;
+export type BrowserField = Omit<FieldSpec, 'format'> & { format?: string };
 
 type FieldCategoryName = string;
 
