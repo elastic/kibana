@@ -127,6 +127,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/esql-utils",
     "@kbn/core-lifecycle-browser",
-    "@kbn/json-schemas",
-  ],
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/json-schemas"
+  ]
 }
