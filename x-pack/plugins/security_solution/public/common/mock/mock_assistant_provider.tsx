@@ -50,6 +50,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       http={mockHttp}
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
+      currentAppId={'test'}
     >
       {children}
     </AssistantProvider>
