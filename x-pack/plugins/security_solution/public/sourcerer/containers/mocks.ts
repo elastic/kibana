@@ -30,7 +30,6 @@ export const mockSourcererScope: SelectedDataView = {
           aggregatable: false,
           esTypes: undefined,
           format: undefined,
-          indexes: mockPatterns,
           name: '_id',
           searchable: true,
           subType: undefined,
