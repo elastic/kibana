@@ -168,16 +168,12 @@ export async function createAgentPolicyWithPackages({
     });
   }
 
-  const enrollmentToken = await ensureDefaultEnrollmentAPIKeyForAgentPolicy(
-    soClient,
-    esClient,
-    agentPolicy.id
-  );
+  await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
   // Create the agentless agent
-  if (agentPolicy.supports_agentless && enrollmentToken) {
-    await agentPolicyService.createAgentlessAgent(agentPolicy, enrollmentToken);
+  if (agentPolicy.supports_agentless) {
+    await agentPolicyService.createAgentlessAgent(esClient, soClient, agentPolicy);
   }
 
   return agentPolicy;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import https from 'https';
+
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
@@ -28,6 +30,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
+import { SslConfig, sslSchema } from '@kbn/server-http-tools';
+
+import axios from 'axios';
 
 import {
   getAllowedOutputTypeForPolicy,
@@ -68,7 +74,6 @@ import {
 } from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
-  EnrollmentAPIKey,
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
@@ -109,6 +114,8 @@ import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
+import { listEnrollmentApiKeys } from './api_keys';
+import { listFleetServerHosts } from './fleet_server_host';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -1081,24 +1088,79 @@ class AgentPolicyService {
     };
   }
 
-  public async createAgentlessAgent(agentPolicy: AgentPolicy, enrollmentToken: EnrollmentAPIKey) {
+  public async createAgentlessAgent(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy
+  ) {
     if (agentPolicy.supports_agentless) {
-      const agentlessApiUrl = appContextService.getConfig()?.agentless?.api.url;
-      console.log('agentlessApiUrl', agentlessApiUrl);
+      const policyId = agentPolicy.id;
+      const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
+        perPage: SO_SEARCH_LIMIT,
+        showInactive: true,
+        kuery: `policy_id:"${policyId}"`,
+      });
 
-      const deploymentName = agentPolicy.name;
-      console.log('deploymentName', deploymentName);
+      const { items: fleetHosts } = await listFleetServerHosts(soClient);
+      // TODO: change this when we add the internal fleet server config
+      const defaultFleetHost =
+        fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
+
+      if (!defaultFleetHost || !enrollmentApiKeys.length) {
+        throw new FleetError(
+          'Error creating agentless agent: missing fleet host or enrollment api key'
+        );
+      }
+      const fleetToken = enrollmentApiKeys[0].api_key;
+      const fleetUrl = defaultFleetHost?.host_urls[0];
+
+      const agentlessApiUrl = appContextService.getConfig()?.agentless?.api.url;
+      if (!agentlessApiUrl) {
+        throw new FleetError('Error creating agentless agent: missing agentless api url');
+      }
 
       const stackVersion = appContextService.getKibanaVersion();
-      console.log('stackVersion', stackVersion);
+      const agentlessApiCreateDeploymentUrl = `${agentlessApiUrl}/deployments`;
+      const body = {
+        policy_id: policyId,
+        fleet_url: fleetUrl,
+        fleet_token: fleetToken,
+        stack_version: stackVersion,
+      };
 
-      const policyId = agentPolicy.id;
-      console.log('policyId', policyId);
+      const tlsConfig = new SslConfig(
+        sslSchema.validate({
+          enabled: true,
+          // generate locally with https://serverfault.com/a/224127
+          certificate: 'config/certs/node.crt',
+          key: 'config/certs/node.key',
+          clientAuthentication: 'required',
+        })
+      );
 
-      // const fleetToken = appContextService.().authc.apiKeys.;
-      // console.log('fleetToken', fleetToken);
+      try {
+        const res = await axios.post(agentlessApiCreateDeploymentUrl, body, {
+          headers: {
+            'Content-type': 'application/json',
+          },
+          method: 'POST',
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: tlsConfig.rejectUnauthorized,
+            cert: tlsConfig.certificate,
+            key: tlsConfig.key,
+            // ca: tlsConfig.ca,
+          }),
+          // signal: abortController.signal,
+        });
 
-      console.log('enrollemntToken', enrollmentToken);
+        if (res.status !== 200) {
+          throw new FleetError(`Error creating agentless agent: ${res.statusText}`);
+        }
+
+        return res.data;
+      } catch (error) {
+        throw new FleetError(`Error creating agentless agent: ${error}`);
+      }
     }
   }
 
