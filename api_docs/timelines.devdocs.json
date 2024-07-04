@@ -1538,14 +1538,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
           {
@@ -1591,14 +1583,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -1635,14 +1619,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -1693,28 +1669,6 @@
             "tags": [],
             "label": "aggregatable",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.fields",
-            "type": "Object",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "{ [x: string]: Partial<",
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserField",
-                "text": "BrowserField"
-              },
-              ">; }"
-            ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3933,15 +3887,9 @@
         "label": "BrowserFields",
         "description": [],
         "signature": [
-          "{ [x: string]: Partial<",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.BrowserField",
-            "text": "BrowserField"
-          },
-          ">; }"
+          "{ [x: string]: ",
+          "FieldCategory",
+          "; }"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": true,
@@ -4265,14 +4213,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
           },
           {
@@ -4410,14 +4350,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
