@@ -704,7 +704,6 @@ function TestForm({
         setOptionsSelected={setSelectedEqlOptions}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
-        browserFields={{}}
         isQueryBarValid={true}
         setIsQueryBarValid={jest.fn()}
         setIsThreatQueryBarValid={jest.fn()}

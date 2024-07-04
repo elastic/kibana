@@ -3129,20 +3129,20 @@
                 "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
               },
               {
-                "plugin": "files",
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client_factory.ts"
               },
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/search_strategy/search_strategy.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
               },
               {
                 "plugin": "cases",
