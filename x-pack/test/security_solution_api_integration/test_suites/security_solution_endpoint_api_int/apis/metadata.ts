@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
