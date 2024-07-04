@@ -25,7 +25,7 @@ export class UpdateESQLQueryAction implements Action<Context> {
   constructor(protected readonly data: DataPublicPluginStart) {}
 
   public getDisplayName(): string {
-    return i18n.translate('textBasedLanguages.updateESQLQueryLabel', {
+    return i18n.translate('esql.updateESQLQueryLabel', {
       defaultMessage: 'Update the ES|QL query in the editor',
     });
   }

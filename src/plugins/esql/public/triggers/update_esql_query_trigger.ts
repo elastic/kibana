@@ -13,10 +13,10 @@ export const UPDATE_ESQL_QUERY_TRIGGER = 'UPDATE_ESQL_QUERY_TRIGGER';
 
 export const updateESQLQueryTrigger: Trigger = {
   id: UPDATE_ESQL_QUERY_TRIGGER,
-  title: i18n.translate('textBasedLanguages.triggers.updateEsqlQueryTrigger', {
+  title: i18n.translate('esql.triggers.updateEsqlQueryTrigger', {
     defaultMessage: 'Update ES|QL query',
   }),
-  description: i18n.translate('textBasedLanguages.triggers.updateEsqlQueryTriggerDescription', {
+  description: i18n.translate('esql.triggers.updateEsqlQueryTriggerDescription', {
     defaultMessage: 'Update ES|QL query with a new one',
   }),
 };
