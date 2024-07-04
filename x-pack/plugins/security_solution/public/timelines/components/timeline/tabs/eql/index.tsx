@@ -271,7 +271,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       {!unifiedComponentsInTimelineDisabled ? (
         <>
           <InPortal node={eqlEventsCountPortalNode}>
-            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+            {totalCount >= 0 ? (
+              <EventsCountBadge data-test-subj="eql-events-count">{totalCount}</EventsCountBadge>
+            ) : null}
           </InPortal>
           {NotesFlyoutMemo}
           <FullWidthFlexGroup>

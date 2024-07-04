@@ -2041,8 +2041,8 @@ export const defaultTimelineProps: CreateTimelineProps = {
   timeline: {
     activeTab: TimelineTabs.query,
     prevActiveTab: TimelineTabs.query,
-    columns: defaultTimelineColumns,
-    defaultColumns: defaultTimelineColumns,
+    columns: timelineDefaults.columns,
+    defaultColumns: timelineDefaults.defaultColumns,
     dataProviders: [
       {
         and: [],

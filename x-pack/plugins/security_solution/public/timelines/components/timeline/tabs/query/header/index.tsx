@@ -92,7 +92,9 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
       <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? (
+          <EventsCountBadge data-test-subj="query-events-count">{totalCount}</EventsCountBadge>
+        ) : null}
       </InPortal>
       <EuiFlexGroup gutterSize="s" direction="column">
         {unifiedComponentsInTimelineDisabled &&

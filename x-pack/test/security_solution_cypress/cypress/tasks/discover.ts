@@ -18,6 +18,8 @@ import {
   DISCOVER_ESQL_INPUT_EXPAND,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
+import { GET_UNIFIED_FIELD_LIST_FIELD, UNIFIED_TABLE } from '../screens/unified_timeline';
+import { drag, drop } from './common';
 import { goToEsqlTab } from './timeline';
 
 export const switchDataViewTo = (dataviewName: string) => {
@@ -109,6 +111,38 @@ export const addFieldToTable = (fieldId: string) => {
   searchForField(fieldId);
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().should('exist');
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
+  clearFieldSearch();
+};
+
+export const dragFieldToTable = (columnId: string) => {
+  searchForField(columnId);
+  cy.get(GET_UNIFIED_FIELD_LIST_FIELD(columnId)).first().should('exist');
+  cy.get(GET_UNIFIED_FIELD_LIST_FIELD(columnId)).first().as('agentType');
+
+  cy.get('@agentType').trigger('mousedown');
+
+  cy.get('@agentType').trigger('drag', { clientX: 500, clientY: 0 });
+  cy.get('@agentType').trigger('drop');
+
+  cy.pause();
+  cy.get(GET_UNIFIED_FIELD_LIST_FIELD(columnId))
+    .first()
+    .then((currentSubject) => {
+      drag(currentSubject);
+    });
+
+  cy.pause();
+
+  cy.get(UNIFIED_TABLE).then((subj) => {
+    drop(subj);
+  });
+
+  // .first()
+  // .trigger('mousedown', {
+  //   which: 1,
+  // })
+  // .trigger('mousemove', { clientX: 500, clientY: 0 })
+  // .trigger('mouseup');
   clearFieldSearch();
 };
 

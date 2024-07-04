@@ -9,6 +9,8 @@ import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const TIMELINE_DETAILS_FLYOUT_BTN = getDataTestSubjectSelector('docTableExpandToggleColumn');
 
+export const UNIFIED_TABLE = getDataTestSubjectSelector('discoverDocTable');
+
 export const HOST_DETAILS_LINK = getDataTestSubjectSelector('host-details-button');
 
 export const USER_DETAILS_LINK = getDataTestSubjectSelector('users-link-anchor');
@@ -49,3 +51,6 @@ export const GET_UNIFIED_DATA_GRID_CELL = (columnId: string, rowIndex: number) =
     'dataGridRowCell'
   )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .unifiedDataTable__cellValue`;
 };
+
+export const GET_UNIFIED_FIELD_LIST_FIELD = (columnId: string) =>
+  `${getDataTestSubjectSelector(`field-${columnId}`)}`;
