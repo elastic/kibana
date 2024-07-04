@@ -44,7 +44,7 @@ export function registerSummarizationFunction({
           },
           type: {
             type: 'string',
-            description: `The type can be: "user_instruction" or "contextual". "user_instruction": the entry will be included in the system message if it fits within the token budget and it will be marked as a user instruction. "contextual": the entry will be included if it semantically matches the user's prompt. If matching it will be included as part of the context instead of the system prompt`,
+            description: `The type can be: "user_instruction" or "contextual". A "user_instruction" entry will be included in the system message if it fits within the token budget and it will be marked as a user instruction. A "contextual" entry will be included as part of the context function response (and not the system message) if it semantically matches the user's prompt.`,
             enum: [KnowledeBaseType.UserInstruction, KnowledeBaseType.Contextual],
           },
           confidence: {
