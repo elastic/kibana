@@ -13,7 +13,8 @@ import {
   getDefaultSystemPrompt,
 } from './helpers';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation, Prompt } from '../../..';
+import { Conversation } from '../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const tilde = '`';
 const codeDelimiter = '```';
@@ -61,28 +62,28 @@ ${codeDelimiter}
 This query will filter the events based on the condition that the ${tilde}user.name${tilde} field should exactly match the value \"9dcc9960-78cf-4ef6-9a2e-dbd5816daa60\".`;
 
 describe('useConversation helpers', () => {
-  const allSystemPrompts: Prompt[] = [
+  const allSystemPrompts: PromptResponse[] = [
     {
       id: '1',
       content: 'Prompt 1',
       name: 'Prompt 1',
-      promptType: 'user',
+      promptType: 'quick',
     },
     {
       id: '2',
       content: 'Prompt 2',
       name: 'Prompt 2',
-      promptType: 'user',
+      promptType: 'quick',
       isNewConversationDefault: true,
     },
     {
       id: '3',
       content: 'Prompt 3',
       name: 'Prompt 3',
-      promptType: 'user',
+      promptType: 'quick',
     },
   ];
-  const allSystemPromptsNoDefault: Prompt[] = allSystemPrompts.filter(
+  const allSystemPromptsNoDefault: PromptResponse[] = allSystemPrompts.filter(
     ({ isNewConversationDefault }) => isNewConversationDefault !== true
   );
 
@@ -237,25 +238,25 @@ describe('useConversation helpers', () => {
 });
 
 describe('getConversationApiConfig', () => {
-  const allSystemPrompts: Prompt[] = [
+  const allSystemPrompts: PromptResponse[] = [
     {
       id: '1',
       content: 'Prompt 1',
       name: 'Prompt 1',
-      promptType: 'user',
+      promptType: 'quick',
     },
     {
       id: '2',
       content: 'Prompt 2',
       name: 'Prompt 2',
-      promptType: 'user',
+      promptType: 'quick',
       isNewConversationDefault: true,
     },
     {
       id: '3',
       content: 'Prompt 3',
       name: 'Prompt 3',
-      promptType: 'user',
+      promptType: 'quick',
     },
   ];
 
@@ -390,7 +391,7 @@ describe('getConversationApiConfig', () => {
   });
 
   test('should return the first system prompt if both conversation system prompt and default new system prompt do not exist', () => {
-    const allSystemPromptsNoDefault: Prompt[] = allSystemPrompts.filter(
+    const allSystemPromptsNoDefault: PromptResponse[] = allSystemPrompts.filter(
       ({ isNewConversationDefault }) => isNewConversationDefault !== true
     );
 
@@ -418,7 +419,7 @@ describe('getConversationApiConfig', () => {
   });
 
   test('should return the first system prompt if conversation system prompt does not exist within all system prompts', () => {
-    const allSystemPromptsNoDefault: Prompt[] = allSystemPrompts.filter(
+    const allSystemPromptsNoDefault: PromptResponse[] = allSystemPrompts.filter(
       ({ isNewConversationDefault }) => isNewConversationDefault !== true
     );
 
