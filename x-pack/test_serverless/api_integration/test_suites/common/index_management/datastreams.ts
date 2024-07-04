@@ -24,7 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Data streams', function () {
     // see details: https://github.com/elastic/kibana/issues/187372
     this.tags(['failsOnMKI']);
-
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -38,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
+      // see details: https://github.com/elastic/kibana/issues/187372
       it.skip('returns an array of data streams', async () => {
         const { body: dataStreams, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams`)
@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
+      // see details: https://github.com/elastic/kibana/issues/187372
       it.skip('returns a single data stream by ID', async () => {
         const { body: dataStream, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
