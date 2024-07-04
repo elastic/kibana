@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-const TRANSFORM_ID_MAX_LENGTH = 64;
-
 import { EntityDefinition } from '@kbn/entities-schema';
-import { EntityDefinitionIdTooLong } from '../errors/entity_definition_id_too_long_error';
+import { EntityDefinitionIdInvalid } from '../errors/entity_definition_id_invalid';
 import { generateHistoryTransformId } from './generate_history_transform_id';
 import { generateLatestTransformId } from './generate_latest_transform_id';
+
+const TRANSFORM_ID_MAX_LENGTH = 64;
 
 export function validateDefinitionCanCreateValidTransformIds(definition: EntityDefinition) {
   const historyTransformId = generateHistoryTransformId(definition);
@@ -20,10 +20,17 @@ export function validateDefinitionCanCreateValidTransformIds(definition: EntityD
     TRANSFORM_ID_MAX_LENGTH - Math.max(historyTransformId.length, latestTransformId.length);
 
   if (spareChars < 0) {
-    throw new EntityDefinitionIdTooLong(
+    throw new EntityDefinitionIdInvalid(
       `Entity definition ID is too long (max = ${
         definition.id.length + spareChars
       }); the resulting transform ID will be invalid`
+    );
+  }
+
+  const transformIdRegex = /^[a-z0-9_-]+$/;
+  if (!transformIdRegex.test(definition.id)) {
+    throw new EntityDefinitionIdInvalid(
+      'Entity definition ID must contain only lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores.'
     );
   }
 }
