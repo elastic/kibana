@@ -80,6 +80,10 @@ export interface FieldCategory {
   fields: Record<string, Partial<BrowserField>>;
 }
 
+export interface FieldCategory {
+  fields: Record<string, Partial<BrowserField>>;
+}
+
 /**
  * @deprecated use fields list on dataview / "indexPattern"
  * about to use browserFields? Reconsider! Maybe you can accomplish

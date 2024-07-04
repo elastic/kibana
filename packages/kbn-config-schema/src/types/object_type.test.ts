@@ -338,9 +338,29 @@ test('allow and remove unknown keys when unknowns = `ignore`', () => {
   });
 });
 
-test('unknowns = `ignore` affects only own keys', () => {
+test('unknowns = `ignore` is recursive if no explicit preferences in sub-keys', () => {
   const type = schema.object(
     { foo: schema.object({ bar: schema.string() }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(
+    type.validate({
+      foo: {
+        bar: 'bar',
+        baz: 'baz',
+      },
+    })
+  ).toEqual({
+    foo: {
+      bar: 'bar',
+    },
+  });
+});
+
+test('unknowns = `ignore` respects local preferences in sub-keys', () => {
+  const type = schema.object(
+    { foo: schema.object({ bar: schema.string() }, { unknowns: 'forbid' }) },
     { unknowns: 'ignore' }
   );
 
@@ -354,7 +374,7 @@ test('unknowns = `ignore` affects only own keys', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
 });
 
-describe('nested unknows', () => {
+describe('nested unknowns', () => {
   test('allow unknown keys when unknowns = `allow`', () => {
     const type = schema.object({
       myObj: schema.object({ foo: schema.string({ defaultValue: 'test' }) }, { unknowns: 'allow' }),
@@ -427,11 +447,36 @@ describe('nested unknows', () => {
       },
     });
   });
-
-  test('unknowns = `ignore` affects only own keys', () => {
+  test('unknowns = `ignore` is recursive if no explicit preferences in sub-keys', () => {
     const type = schema.object({
       myObj: schema.object(
         { foo: schema.object({ bar: schema.string() }) },
+        { unknowns: 'ignore' }
+      ),
+    });
+
+    expect(
+      type.validate({
+        myObj: {
+          foo: {
+            bar: 'bar',
+            baz: 'baz',
+          },
+        },
+      })
+    ).toEqual({
+      myObj: {
+        foo: {
+          bar: 'bar',
+        },
+      },
+    });
+  });
+
+  test('unknowns = `ignore` respects local preferences in sub-keys', () => {
+    const type = schema.object({
+      myObj: schema.object(
+        { foo: schema.object({ bar: schema.string() }, { unknowns: 'forbid' }) },
         { unknowns: 'ignore' }
       ),
     });
