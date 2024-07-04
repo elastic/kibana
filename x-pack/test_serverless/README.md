@@ -54,15 +54,14 @@ configurations.
 
 **If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[observability|search|security]/common_configs`).**
 
-In case a common test needs to be skipped for one of the projects, there are the following
-suite tags available to do so: `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be
-added like this to a test suite:
+In case a common test needs to be skipped for one of the projects 
+(in both regular pipelines that start KBN in serverless mode [against serverless ES] & pipelines creating serverless projects in MKI [Cloud]),
+there are the following suite tags available to do so: 
+`skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
 ```
 describe('my test suite', function () {
-  // skip tests in both regular KBN serverless pipelines that start Kibana in serverless mode against serverless ES node, 
-  // and pipelines creating serverless projects in MKI (Cloud)
-  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']); 
+  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
   // or for a single tag: this.tags('skipSvlSec');
   [...]
 });
