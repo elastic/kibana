@@ -27,7 +27,7 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { docLinks } from '../../../common/doc_links';
-import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
+import { createQuery } from '../../utils/create_query';
 
 const isQueryFieldSelected = (
   queryFields: ChatForm[ChatFormFields.queryFields],
@@ -41,13 +41,11 @@ export const QueryMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const usageTracker = useUsageTracker();
   const { fields, isFieldsLoading } = useSourceIndicesFields();
-  const defaultFields = getDefaultQueryFields(fields);
 
   const {
     field: { onChange: queryFieldsOnChange, value: queryFields },
   } = useController<ChatForm, ChatFormFields.queryFields>({
     name: ChatFormFields.queryFields,
-    defaultValue: defaultFields,
   });
 
   const {

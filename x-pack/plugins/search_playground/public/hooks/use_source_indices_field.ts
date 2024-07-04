@@ -51,6 +51,12 @@ export const useSourceIndicesFields = () => {
   });
 
   const {
+    field: { onChange: onQueryFieldsOnChange },
+  } = useController<ChatForm, ChatFormFields.queryFields>({
+    name: ChatFormFields.queryFields,
+  });
+
+  const {
     field: { onChange: onSourceFieldsChange, value: sourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
@@ -65,6 +71,7 @@ export const useSourceIndicesFields = () => {
       const defaultSourceFields = getDefaultSourceFields(fields);
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
+      onQueryFieldsOnChange(defaultFields);
 
       const mergedSettledAndDefaultFields = Object.entries(defaultSourceFields).reduce(
         (result, [index, defaultSourceField]) => {
