@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Opts } from '@formatjs/ts-transformer';
 import ts from 'typescript';
 type TypeScript = typeof ts;
 
@@ -16,6 +17,11 @@ const MESSAGE_DESC_KEYS: Array<keyof MessageDescriptor> = [
   'ignoreTag',
 ];
 import type { MessageDescriptor } from '../types';
+
+export interface ExtractorOpts extends Opts {
+  onMsgWithValuesExtracted: (filePath: string, msgs: MessageDescriptor[]) => void;
+}
+
 export { MessageDescriptor };
 
 /**
@@ -86,7 +92,7 @@ export function extractMessagesFromCallExpression(
   typescript: TypeScript,
   factory: ts.NodeFactory,
   node: ts.CallExpression,
-  opts: any = { onMsgWithValuesExtracted: () => {} },
+  opts: ExtractorOpts = { onMsgWithValuesExtracted: () => {} },
   sf: ts.SourceFile
 ): ts.VisitResult<ts.CallExpression> {
   if (isMemberMethodFormatMessageCall(typescript, node)) {

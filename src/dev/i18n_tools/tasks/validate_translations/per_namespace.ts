@@ -45,17 +45,25 @@ export const validateMessages = ({
 const formatJsRunner = async (
   filePaths: string[],
   namespace: string,
-  errorReporter: ErrorReporter
+  errorReporter: ErrorReporter,
+  ignoreFlags: { ignoreMalformed?: boolean }
 ) => {
   const allNamespaceMessages = new Map();
+  const { ignoreMalformed } = ignoreFlags;
   for (const filePath of filePaths) {
     const source = await readFileAsync(filePath, 'utf8');
     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
 
-    validateMessages({
-      extractedMessages,
-      namespace,
-    });
+    try {
+      validateMessages({
+        extractedMessages,
+        namespace,
+      });
+    } catch (err) {
+      if (!ignoreMalformed) {
+        throw err;
+      }
+    }
 
     extractedMessages.forEach((extractedMessage) => {
       if (allNamespaceMessages.has(extractedMessage.id)) {
@@ -90,10 +98,16 @@ const formatJsRunner = async (
 export const runForNamespacePath = async (
   namespace: string,
   namespaceRoots: string[],
-  errorReporter: ErrorReporter
+  errorReporter: ErrorReporter,
+  ignoreFlags: { ignoreMalformed?: boolean }
 ) => {
   const namespacePaths = await globNamespacePaths(namespaceRoots);
-  const allNamespaceMessages = await formatJsRunner(namespacePaths, namespace, errorReporter);
+  const allNamespaceMessages = await formatJsRunner(
+    namespacePaths,
+    namespace,
+    errorReporter,
+    ignoreFlags
+  );
 
   return allNamespaceMessages;
 };

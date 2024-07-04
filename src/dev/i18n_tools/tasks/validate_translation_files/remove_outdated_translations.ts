@@ -9,14 +9,17 @@
 import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
 import { verifyMessageDescriptor } from '../../extractors/formatjs';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
+import { TaskReporter } from '../../utils/task_reporter';
 export const removeOutdatedTranslations = ({
   context,
   namespacedTranslatedMessages,
   filterNamespaces,
+  taskReporter,
 }: {
   context: I18nCheckTaskContext;
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
   filterNamespaces?: string[];
+  taskReporter: TaskReporter;
 }) => {
   for (const [namespace, translatedMessages] of namespacedTranslatedMessages) {
     if (filterNamespaces) {
@@ -33,8 +36,13 @@ export const removeOutdatedTranslations = ({
     if (!extractedMessages) {
       // the whole namespace is removed from the codebase. remove from file.
       namespacedTranslatedMessages.delete(namespace);
+      taskReporter.log(`The whole namespace ${namespace} has been removed from the codebase.`);
     } else {
-      const updatedMessages = removeOutdatedMessages(extractedMessages, translatedMessages);
+      const updatedMessages = removeOutdatedMessages(
+        extractedMessages,
+        translatedMessages,
+        taskReporter
+      );
       namespacedTranslatedMessages.set(namespace, updatedMessages);
     }
   }
@@ -44,7 +52,8 @@ export const removeOutdatedTranslations = ({
 
 export const removeOutdatedMessages = (
   extractedMessages: MessageDescriptor[],
-  translationMessages: Array<[string, string]>
+  translationMessages: Array<[string, string]>,
+  taskReporter: TaskReporter
 ): Array<[string, string]> => {
   return translationMessages.filter(([translatedId, translatedMessage]) => {
     const messageDescriptor = extractedMessages.find(({ id }) => id === translatedId);
@@ -58,6 +67,7 @@ export const removeOutdatedMessages = (
       );
       return true;
     } catch (err) {
+      taskReporter.log(`Found an incompatible message with id ${translatedId}`);
       // failed to verify message against latest descriptor. remove from file.
       return false;
     }

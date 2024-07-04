@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Opts, transformWithTs } from '@formatjs/ts-transformer';
+import { transformWithTs } from '@formatjs/ts-transformer';
 
 import difference from 'lodash/difference';
 import * as icuParser from '@formatjs/icu-messageformat-parser';
@@ -14,14 +14,14 @@ import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 import ts from 'typescript';
 type TypeScript = typeof ts;
 
-import { extractMessagesFromCallExpression, MessageDescriptor } from './call_expt';
+import { extractMessagesFromCallExpression, MessageDescriptor, ExtractorOpts } from './call_expt';
 import { extractMessageFromJsxComponent } from './react';
 
 function getVisitor(
   typescript: TypeScript,
   ctx: ts.TransformationContext,
   sf: ts.SourceFile,
-  opts: Opts
+  opts: ExtractorOpts
 ) {
   const visitor: ts.Visitor = (node: ts.Node): ts.Node => {
     let newNode: ts.Node = node;
@@ -43,10 +43,7 @@ function getVisitor(
   return visitor;
 }
 
-export function normalizeI18nTranslateSignature(
-  typescript: TypeScript,
-  opts: Opts & { onMsgWithValuesExtracted: any }
-) {
+export function normalizeI18nTranslateSignature(typescript: TypeScript, opts: ExtractorOpts) {
   const transformFn: ts.TransformerFactory<ts.SourceFile> = (ctx) => {
     return (sf) => {
       return typescript.visitEachChild(sf, getVisitor(typescript, ctx, sf, opts), ctx);
@@ -56,7 +53,7 @@ export function normalizeI18nTranslateSignature(
   return transformFn;
 }
 
-export const extractValues = (elements) => {
+export const extractValues = (elements: MessageFormatElement[]) => {
   return elements.reduce((acc, element) => {
     if (icuParser.isTagElement(element)) {
       acc.push(element.value);
@@ -143,7 +140,6 @@ export const verifyMessageIdStartsWithNamespace = (
 };
 
 export async function extractI18nMessageDescriptors(fileName: string, source: string) {
-  // let extractedMessages: any[] = [];
   const extractedMessages = new Map<string, MessageDescriptor>();
 
   try {
@@ -161,7 +157,7 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
           normalizeI18nTranslateSignature(ts, {
             extractSourceLocation: true,
             ast: true,
-            onMsgWithValuesExtracted(filePath, msgs) {
+            onMsgWithValuesExtracted(_, msgs) {
               msgs.map((msg) => {
                 const newDefinition = { ...msg };
                 const { id } = msg;
@@ -174,7 +170,7 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
             extractSourceLocation: true,
             removeDefaultMessage: true,
             ast: true,
-            onMsgExtracted(filePath, msgs) {
+            onMsgExtracted(_, msgs) {
               msgs.map((msg) => {
                 const { id } = msg;
                 if (extractedMessages.has(id)) {

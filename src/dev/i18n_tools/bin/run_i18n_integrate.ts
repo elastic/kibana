@@ -32,7 +32,10 @@ const runStartTime = Date.now();
 const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 run(
-  async ({ flags: { source, target, 'include-config': includeConfig }, log }) => {
+  async ({
+    flags: { source, target, 'include-config': includeConfig, 'dry-run': dryRun },
+    log,
+  }) => {
     if (typeof source !== 'string' || typeof target !== 'string') {
       throw createFailError(
         `${chalk.white.bgRed(' I18N ERROR ')} --target and --source options should be specified.`
@@ -45,7 +48,9 @@ run(
       );
     }
 
-    const kibanaRootPaths = ['./src', './packages', './x-pack'];
+    if (typeof dryRun !== 'boolean') {
+      throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --dry-run can't have a value`);
+    }
 
     const list = new Listr<I18nCheckTaskContext>(
       [
@@ -71,7 +76,7 @@ run(
           title: 'Validating translation files',
           task: (context, task) =>
             validateTranslationFiles(context, task, {
-              fix: true,
+              fix: !dryRun,
               filterTranslationFiles: [target],
             }),
         },

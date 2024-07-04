@@ -7,4 +7,3 @@
  */
 
 export const I18N_RC = '.i18nrc.json';
-export const KIBANA_TRANSLATIONS_DIR = '';

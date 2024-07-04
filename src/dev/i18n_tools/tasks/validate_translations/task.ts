@@ -13,12 +13,13 @@ import { ErrorReporter } from '../../utils/error_reporter';
 
 export interface TaskOptions {
   filterNamespaces?: string[];
+  ignoreMalformed?: boolean;
 }
 
 export const validateTranslationsTask: TaskSignature<TaskOptions> = (
   context,
   task,
-  { filterNamespaces }
+  { filterNamespaces, ignoreMalformed }
 ) => {
   const { config } = context;
   const errorReporter = new ErrorReporter({ name: 'Validate Translations' });
@@ -38,7 +39,6 @@ export const validateTranslationsTask: TaskSignature<TaskOptions> = (
             if (filterNamespaces && filterNamespaces.length) {
               return filterNamespaces.some((filterNamespace) => filterNamespace === namespace);
             }
-
             return true;
           });
 
@@ -50,7 +50,8 @@ export const validateTranslationsTask: TaskSignature<TaskOptions> = (
             const allNamespaceMessages = await runForNamespacePath(
               namespace,
               namespacePaths,
-              errorReporter
+              errorReporter,
+              { ignoreMalformed }
             );
             const messagesCount = allNamespaceMessages.size;
             parent.title = `[${iter + 1}/${

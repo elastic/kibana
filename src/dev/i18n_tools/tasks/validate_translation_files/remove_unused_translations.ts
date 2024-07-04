@@ -8,16 +8,19 @@
 
 import { difference } from 'lodash';
 import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
+import { TaskReporter } from '../../utils/task_reporter';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
 
 export const removeUnusedTranslations = ({
   context,
   namespacedTranslatedMessages,
   filterNamespaces,
+  taskReporter,
 }: {
   context: I18nCheckTaskContext;
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
   filterNamespaces?: string[];
+  taskReporter: TaskReporter;
 }) => {
   for (const [namespace, translatedMessages] of namespacedTranslatedMessages) {
     if (filterNamespaces) {
@@ -32,9 +35,14 @@ export const removeUnusedTranslations = ({
     const extractedMessages = context.messages.get(namespace);
     if (!extractedMessages) {
       // the whole namespace is removed from the codebase. remove from file.
+      taskReporter.log(`The whole namespace ${namespace} has been removed from the codebase.`);
       namespacedTranslatedMessages.delete(namespace);
     } else {
-      const updatedMessages = removeUnusedMessages(extractedMessages, translatedMessages);
+      const updatedMessages = removeUnusedMessages(
+        extractedMessages,
+        translatedMessages,
+        taskReporter
+      );
       namespacedTranslatedMessages.set(namespace, updatedMessages);
     }
   }
@@ -44,7 +52,8 @@ export const removeUnusedTranslations = ({
 
 export const removeUnusedMessages = (
   extractedMessages: MessageDescriptor[],
-  translationMessages: Array<[string, string]>
+  translationMessages: Array<[string, string]>,
+  taskReporter: TaskReporter
 ): Array<[string, string]> => {
   const extractedMessagesIds = [...extractedMessages].map(({ id }) => id);
   const translationMessagesIds = [...translationMessages.map(([id]) => id)];
@@ -53,6 +62,9 @@ export const removeUnusedMessages = (
   if (unusedTranslations.length > 0) {
     return translationMessages.filter(([id]) => {
       const isUnused = unusedTranslations.find((unusedTranslationId) => unusedTranslationId === id);
+      if (isUnused) {
+        taskReporter.log(`Message with Id ${id} is no longer used.`);
+      }
       return !isUnused;
     });
   }

@@ -23,10 +23,19 @@ export interface TaskOptions {
   fix?: boolean;
   filterNamespaces?: string[];
   filterTranslationFiles?: string[];
+  ignoreUnused?: boolean;
+  ignoreIncompatible?: boolean;
 }
 export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, task, options) => {
-  const { config } = context;
-  const { filterNamespaces, filterTranslationFiles, fix = false } = options;
+  const { config, taskReporter } = context;
+  const {
+    filterNamespaces,
+    filterTranslationFiles,
+    fix = false,
+
+    ignoreUnused,
+    ignoreIncompatible,
+  } = options;
   const errorReporter = new ErrorReporter({ name: 'Validate Translation Files' });
 
   if (!config || !Object.keys(config.paths).length) {
@@ -55,32 +64,35 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
 
             parent.title = `Verifying transltion file ${filePath}`;
             task.output = `Grouping by namespace`;
-            const namespacedTranslatedMessages = groupMessagesByNamespace(
+            let namespacedTranslatedMessages = groupMessagesByNamespace(
               translationInput,
               namespaces
             );
-
-            parent.title = `Removing unused translations`;
-            const withoutUnusedTranslation = removeUnusedTranslations({
-              namespacedTranslatedMessages,
-              filterNamespaces,
-              context,
-            });
-
-            parent.title = `Removing outdated translations`;
-            const withoutOutdatedTranslations = removeOutdatedTranslations({
-              namespacedTranslatedMessages: withoutUnusedTranslation,
-              filterNamespaces,
-              context,
-            });
-
+            if (!ignoreUnused) {
+              parent.title = `Removing unused translations`;
+              namespacedTranslatedMessages = removeUnusedTranslations({
+                namespacedTranslatedMessages,
+                filterNamespaces,
+                context,
+                taskReporter,
+              });
+            }
+            if (!ignoreIncompatible) {
+              parent.title = `Removing incompatible translations`;
+              namespacedTranslatedMessages = removeOutdatedTranslations({
+                namespacedTranslatedMessages,
+                filterNamespaces,
+                context,
+                taskReporter,
+              });
+            }
             parent.title = fix
               ? `Updating translation file`
               : `Dry-run detected. No fixes will be commited to file.`;
             if (fix) {
               await updateTranslationFile({
                 formats: translationInput.formats,
-                namespacedTranslatedMessages: withoutOutdatedTranslations,
+                namespacedTranslatedMessages,
                 targetFilePath: filePath,
               });
             }

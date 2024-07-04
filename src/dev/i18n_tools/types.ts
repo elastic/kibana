@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ListrTaskWrapper, DefaultRenderer, SimpleRenderer } from 'listr2';
+import type { ListrTaskWrapper, DefaultRenderer, SimpleRenderer } from 'listr2';
+import type { TaskReporter } from './utils/task_reporter';
 
 export interface MessageDescriptor {
   id: string;
@@ -23,6 +24,7 @@ export interface MessageDescriptor {
 export interface I18nCheckTaskContext {
   config?: I18nConfig;
   messages: Map<string, MessageDescriptor[]>;
+  taskReporter: TaskReporter;
 }
 
 export interface I18nConfig {

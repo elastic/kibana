@@ -14,8 +14,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from '../utils';
-import { I18nCheckTaskContext } from '../types';
-import { KIBANA_TRANSLATIONS_DIR } from '../constants';
+import { I18nCheckTaskContext, MessageDescriptor } from '../types';
 
 import {
   checkConfigs,
@@ -24,6 +23,7 @@ import {
   validateTranslationsTask,
   validateTranslationFiles,
 } from '../tasks';
+import { TaskReporter } from '../utils/task_reporter';
 
 const toolingLog = new ToolingLog({
   level: 'info',
@@ -39,12 +39,15 @@ const skipOnNoTranslations = ({ config }: I18nCheckTaskContext) =>
 run(
   async ({
     flags: {
+      // checks inside translation files
       'ignore-incompatible': ignoreIncompatible,
-      'ignore-malformed': ignoreMalformed,
-      'ignore-missing': ignoreMissing,
       'ignore-unused': ignoreUnused,
-      'include-config': includeConfig,
+
+      // checks against codebase
+      'ignore-malformed': ignoreMalformed,
       'ignore-untracked': ignoreUntracked,
+
+      'include-config': includeConfig,
       namespace: namespace,
       fix = false,
       path,
@@ -55,14 +58,13 @@ run(
       fix &&
       (ignoreIncompatible !== undefined ||
         ignoreUnused !== undefined ||
-        ignoreMalformed !== undefined ||
-        ignoreMissing !== undefined ||
-        ignoreUntracked !== undefined)
+        ignoreUntracked !== undefined ||
+        ignoreMalformed !== undefined)
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --namespace, --ignore-malformed, --ignore-unused or --ignore-missing,  --ignore-untracked is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --namespace, --ignore-unused, --ignore-malformed, --ignore-untracked is allowed when --fix is set.`
       );
     }
 
@@ -76,6 +78,19 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
+    if (
+      (typeof ignoreIncompatible !== 'undefined' && typeof ignoreIncompatible !== 'boolean') ||
+      (typeof ignoreUnused !== 'undefined' && typeof ignoreUnused !== 'boolean') ||
+      (typeof ignoreMalformed !== 'undefined' && typeof ignoreMalformed !== 'boolean') ||
+      (typeof ignoreUntracked !== 'undefined' && typeof ignoreUntracked !== 'boolean')
+    ) {
+      throw createFailError(
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} --ignore-incompatible, --ignore-malformed, --ignore-unused, and --ignore-untracked can't have a value`
+      );
+    }
+
     if (typeof namespace === 'boolean') {
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --namespace require a value`);
     }
@@ -84,7 +99,6 @@ run(
 
     const kibanaRootPaths = ['./src', './packages', './x-pack'];
     const rootPaths = Array().concat(path || kibanaRootPaths);
-    const translationFilesRoots = [KIBANA_TRANSLATIONS_DIR];
 
     const list = new Listr<I18nCheckTaskContext>(
       [
@@ -101,7 +115,11 @@ run(
         {
           title: 'Validating i18n Messages',
           skip: skipOnNoTranslations,
-          task: (context, task) => validateTranslationsTask(context, task, { filterNamespaces }),
+          task: (context, task) =>
+            validateTranslationsTask(context, task, {
+              filterNamespaces,
+              ignoreMalformed,
+            }),
         },
         {
           title: 'Checking Untracked i18n Messages outside defined namespaces',
@@ -112,7 +130,12 @@ run(
           title: 'Validating translation files',
           skip: skipOnNoTranslations,
           task: (context, task) =>
-            validateTranslationFiles(context, task, { filterNamespaces, fix }),
+            validateTranslationFiles(context, task, {
+              filterNamespaces,
+              fix,
+              ignoreIncompatible,
+              ignoreUnused,
+            }),
         },
       ],
       {
@@ -123,8 +146,9 @@ run(
     );
 
     try {
-      const messages: Map<string, { message: string }> = new Map();
-      await list.run({ messages });
+      const messages: Map<string, MessageDescriptor[]> = new Map();
+      const taskReporter = new TaskReporter();
+      await list.run({ messages, taskReporter });
 
       reportTime(runStartTime, 'total', {
         success: true,
