@@ -90,3 +90,17 @@ export const Prompt = (instructions: string, options: PromptTemplateOptions): st
     gemini: GeminiPrompt,
   }[options.type || 'openai'](systemInstructions);
 };
+
+interface QuestionRewritePromptOptions {
+  type: 'openai' | 'mistral' | 'anthropic' | 'gemini';
+}
+
+export const QuestionRewritePrompt = (options: QuestionRewritePromptOptions): string => {
+  const systemInstructions = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. Rewrite the question in the question language. Keep the answer to a single sentence. Do not use quotes.`;
+  return {
+    openai: OpenAIPrompt,
+    mistral: MistralPrompt,
+    anthropic: AnthropicPrompt,
+    gemini: GeminiPrompt,
+  }[options.type || 'openai'](systemInstructions);
+};

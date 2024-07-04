@@ -14,12 +14,11 @@ import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   ActionsClientChatOpenAI,
-  ActionsClientLlm,
   ActionsClientSimpleChatModel,
   getDefaultArguments,
 } from '@kbn/langchain/server';
 import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import { Prompt } from '../../common/prompt';
+import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 
 export const getChatParams = async (
   {
@@ -37,13 +36,19 @@ export const getChatParams = async (
     logger: Logger;
     request: KibanaRequest;
   }
-): Promise<{ chatModel: BaseLanguageModel; chatPrompt: string; connector: Connector }> => {
+): Promise<{
+  chatModel: BaseLanguageModel;
+  chatPrompt: string;
+  questionRewritePrompt: string;
+  connector: Connector;
+}> => {
   const abortController = new AbortController();
   const abortSignal = abortController.signal;
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const connector = await actionsClient.get({ id: connectorId });
   let chatModel;
   let chatPrompt;
+  let questionRewritePrompt;
   let llmType;
 
   switch (connector.actionTypeId) {
@@ -65,39 +70,47 @@ export const getChatParams = async (
         context: true,
         type: 'openai',
       });
+      questionRewritePrompt = QuestionRewritePrompt({
+        type: 'openai',
+      });
       break;
     case BEDROCK_CONNECTOR_ID:
       llmType = 'bedrock';
-      chatModel = new ActionsClientLlm({
+      chatModel = new ActionsClientSimpleChatModel({
         actionsClient,
         logger,
         connectorId,
         model,
-        traceId: uuidv4(),
         llmType,
         temperature: getDefaultArguments(llmType).temperature,
+        streaming: true,
       });
       chatPrompt = Prompt(prompt, {
         citations,
         context: true,
         type: 'anthropic',
       });
+      questionRewritePrompt = QuestionRewritePrompt({
+        type: 'anthropic',
+      });
       break;
     case GEMINI_CONNECTOR_ID:
       llmType = 'gemini';
       chatModel = new ActionsClientSimpleChatModel({
-        actions,
+        actionsClient,
         logger,
-        request,
         connectorId,
         model,
         llmType,
         temperature: getDefaultArguments(llmType).temperature,
-        streaming: false,
+        streaming: true,
       });
       chatPrompt = Prompt(prompt, {
         citations,
         context: true,
+        type: 'gemini',
+      });
+      questionRewritePrompt = QuestionRewritePrompt({
         type: 'gemini',
       });
       break;
@@ -105,9 +118,9 @@ export const getChatParams = async (
       break;
   }
 
-  if (!chatModel || !chatPrompt) {
+  if (!chatModel || !chatPrompt || !questionRewritePrompt) {
     throw new Error('Invalid connector id');
   }
 
-  return { chatModel, chatPrompt, connector };
+  return { chatModel, chatPrompt, questionRewritePrompt, connector };
 };
