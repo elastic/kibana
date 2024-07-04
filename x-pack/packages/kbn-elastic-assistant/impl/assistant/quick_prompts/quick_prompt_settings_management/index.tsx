@@ -14,7 +14,10 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { QuickPrompt } from '../types';
+import {
+  PromptResponse,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -32,11 +35,13 @@ import { useAssistantContext } from '../../../assistant_context';
 interface Props {
   handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
-  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
-  quickPromptSettings: QuickPrompt[];
+  onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
+  quickPromptSettings: PromptResponse[];
   resetSettings?: () => void;
-  selectedQuickPrompt: QuickPrompt | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
+  selectedQuickPrompt: PromptResponse | undefined;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 const QuickPromptSettingsManagementComponent = ({
@@ -47,11 +52,13 @@ const QuickPromptSettingsManagementComponent = ({
   resetSettings,
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: Props) => {
   const { nameSpace, basePromptContexts } = useAssistantContext();
 
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
-  const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<QuickPrompt | null>();
+  const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<PromptResponse | null>();
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
     openFlyout: openConfirmModal,
@@ -61,10 +68,12 @@ const QuickPromptSettingsManagementComponent = ({
   const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
     onSelectedQuickPromptChange,
     setUpdatedQuickPromptSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   const onEditActionClicked = useCallback(
-    (prompt: QuickPrompt) => {
+    (prompt: PromptResponse) => {
       onQuickPromptSelectionChange(prompt);
       openFlyout();
     },
@@ -72,9 +81,9 @@ const QuickPromptSettingsManagementComponent = ({
   );
 
   const onDeleteActionClicked = useCallback(
-    (prompt: QuickPrompt) => {
+    (prompt: PromptResponse) => {
       setDeletedQuickPrompt(prompt);
-      onQuickPromptDeleted(prompt.title);
+      onQuickPromptDeleted(prompt.id);
       openConfirmModal();
     },
     [onQuickPromptDeleted, openConfirmModal]
@@ -123,10 +132,10 @@ const QuickPromptSettingsManagementComponent = ({
 
   const confirmationTitle = useMemo(
     () =>
-      deletedQuickPrompt?.title
-        ? i18n.DELETE_QUICK_PROMPT_MODAL_TITLE(deletedQuickPrompt.title)
+      deletedQuickPrompt?.name
+        ? i18n.DELETE_QUICK_PROMPT_MODAL_TITLE(deletedQuickPrompt.name)
         : i18n.DELETE_QUICK_PROMPT_MODAL_DEFAULT_TITLE,
-    [deletedQuickPrompt?.title]
+    [deletedQuickPrompt?.name]
   );
 
   return (
@@ -161,6 +170,8 @@ const QuickPromptSettingsManagementComponent = ({
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
           setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+          promptsBulkActions={promptsBulkActions}
+          setPromptsBulkActions={setPromptsBulkActions}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedQuickPrompt && (
