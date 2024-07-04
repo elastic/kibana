@@ -21,7 +21,7 @@ import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { isQueryRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
+import { isQueryRule, isEsqlRule, isEqlRule } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import {
@@ -68,7 +68,7 @@ export const validateResponseActionsPermissions = async (
 
   if (
     !experimentalFeatures.endpointResponseActionsEnabled ||
-    (!isQueryRule(ruleUpdate.type) && !isEsqlRule(ruleUpdate.type))
+    (!isQueryRule(ruleUpdate.type) && !isEsqlRule(ruleUpdate.type) && !isEqlRule(ruleUpdate.type))
   ) {
     return;
   }

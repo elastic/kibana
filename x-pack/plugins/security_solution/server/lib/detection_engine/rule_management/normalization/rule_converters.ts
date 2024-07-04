@@ -115,6 +115,7 @@ export const typeSpecificSnakeToCamel = (
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
         alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     case 'esql': {
@@ -230,6 +231,9 @@ const patchEqlParams = (
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
     alertSuppression:
       convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
+    responseActions:
+      params.response_actions?.map(transformRuleToAlertResponseAction) ??
+      existingRule.responseActions,
   };
 };
 
@@ -243,6 +247,9 @@ const patchEsqlParams = (
     query: params.query ?? existingRule.query,
     alertSuppression:
       convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
+    responseActions:
+      params.response_actions?.map(transformRuleToAlertResponseAction) ??
+      existingRule.responseActions,
   };
 };
 
@@ -634,6 +641,7 @@ export const typeSpecificCamelToSnake = (
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
         alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'esql': {

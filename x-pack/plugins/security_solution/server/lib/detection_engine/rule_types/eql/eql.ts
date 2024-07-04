@@ -14,6 +14,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
@@ -44,6 +45,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import type { CreateQueryRuleAdditionalOptions } from '../types';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -65,6 +67,7 @@ interface EqlExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const eqlExecutor = async ({
@@ -87,6 +90,7 @@ export const eqlExecutor = async ({
   alertWithSuppression,
   isAlertSuppressionActive,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -181,6 +185,17 @@ export const eqlExecutor = async ({
             : getMaxSignalsWarning();
 
         result.warningMessages.push(maxSignalsWarning);
+      }
+
+      if (
+        completeRule.ruleParams.responseActions?.length &&
+        result.createdSignalsCount &&
+        scheduleNotificationResponseActionsService
+      ) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals.map(expandDottedObject),
+          responseActions: completeRule.ruleParams.responseActions,
+        });
       }
 
       return result;

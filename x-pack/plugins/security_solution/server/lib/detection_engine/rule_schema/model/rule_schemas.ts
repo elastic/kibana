@@ -170,6 +170,7 @@ export const EqlSpecificRuleParams = z.object({
   timestampField: TimestampField.optional(),
   tiebreakerField: TiebreakerField.optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;

@@ -16,11 +16,13 @@ import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
+import type { CreateQueryRuleAdditionalOptions } from '../types';
 
 export const createEqlAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & CreateQueryRuleAdditionalOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version, licensing } = createOptions;
+  const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -125,6 +127,7 @@ export const createEqlAlertType = (
         alertWithSuppression,
         isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
         experimentalFeatures,
+        scheduleNotificationResponseActionsService,
       });
       return { ...result, state };
     },
