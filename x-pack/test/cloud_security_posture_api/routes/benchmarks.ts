@@ -41,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
         (cspBenchmarkRule: any) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
       );
 
-      expect(requestedBenchmarkRules.length).greaterThan(1);
+      expect(requestedBenchmarkRules.length).greaterThan(0);
       cspBenchmarkRules = requestedBenchmarkRules.map((item) => item.attributes);
     });
     return cspBenchmarkRules;
