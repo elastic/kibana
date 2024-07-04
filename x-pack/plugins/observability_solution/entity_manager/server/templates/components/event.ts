@@ -6,10 +6,7 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ENTITY_BASE_PREFIX,
-  ENTITY_SCHEMA_VERSION_V1,
-} from '@kbn/entityManager-plugin/common/constants_entities';
+import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V1 } from '../../../common/constants_entities';
 
 export const entitiesEventComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
   name: `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_event`,
