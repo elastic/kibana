@@ -94,7 +94,10 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       .map((node) => ({ skipped: true, node }));
 
     // cache codeowners for quicker lookup
-    const reversedCodeowners = getPathsWithOwnersReversed();
+    let reversedCodeowners = [];
+    try {
+      reversedCodeowners = getPathsWithOwnersReversed();
+    } catch {}
 
     const commandLine = prettifyCommandLine(process.argv);
 
