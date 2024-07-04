@@ -22,15 +22,12 @@ export default function ({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/185216
   describe('Inference endpoints', function () {
     after(async () => {
-      // Cleanup inference endpoints created for testing
       try {
-        log.debug(`Deleting inference endpoint`);
-        await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
         log.debug(`Deleting underlying trained model`);
         await ml.api.deleteTrainedModelES(modelId);
         await ml.testResources.cleanMLSavedObjects();
       } catch (err) {
-        log.debug('[Cleanup error] Error deleting inference endpoint');
+        log.debug('[Cleanup error] Error deleting trained model or saved ml objects');
         throw err;
       }
     });
@@ -52,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         const responseBody = createInferenceEndpointResponse.body;
         const responseStatus = createInferenceEndpointResponse.status;
         if (responseStatus === 408) {
-          // handles the case when it takes a while to download and start trained model
+          // handle the case when it takes a while to download and start trained model
           expect(responseBody).to.have.property('error');
           expect(responseBody.error).to.have.property('reason');
           expect(responseBody.error.reason).to.eql(
@@ -73,6 +70,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(inferenceEndpoints).to.be.ok();
       expect(inferenceEndpoints.some((i) => i.model_id === inferenceId)).to.be(true);
+    });
+    it('can delete inference endpoint', async () => {
+      log.debug(`Deleting inference endpoint`);
+      await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
+      log.debug('> Inference endpoint deleted');
     });
   });
 }
