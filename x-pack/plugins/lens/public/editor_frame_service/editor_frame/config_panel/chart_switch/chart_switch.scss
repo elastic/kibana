@@ -5,6 +5,30 @@
   }
 }
 
+.lnsChartSwitch__options {
+  width: 400px;
+  margin-inline: -8px;
+  
+  // search input
+  > .euiFormControlLayout, > .euiSelectableListItem {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  // deprecated label
+  .euiSelectableList__groupLabel {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  // overriding the margin-right that's too big
+  .euiSelectableListItem__prepend {
+    margin-right: 8px;
+  }
+  // override the paddings from eui for selectable list items
+  .euiSelectableListItem--paddingSmall .euiSelectableListItem__content {
+    padding: 8px;
+  }
+}
+
 .lnsChartSwitch__summaryIcon {
   transform: translateY(-1px);
   color: $euiTextSubduedColor;

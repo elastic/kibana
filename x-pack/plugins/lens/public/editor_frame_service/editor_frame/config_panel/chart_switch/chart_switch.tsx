@@ -15,10 +15,15 @@ import {
   EuiFlexItem,
   EuiSelectable,
   EuiSelectableOption,
+  useEuiTheme,
+  EuiIconTip,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/react';
+import { ExperimentalBadge } from '../../../../shared_components';
 import {
   Visualization,
   FramePublicAPI,
@@ -41,7 +46,7 @@ import {
   selectDatasourceStates,
 } from '../../../../state_management';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ChartOptionAppend } from './chart_option_append';
+import { ChartOption } from './chart_option';
 
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
@@ -66,10 +71,14 @@ export interface ChartSwitchProps {
   layerId: string;
 }
 
-type SelectableEntry = EuiSelectableOption<{ value: string }>;
+type SelectableEntry = EuiSelectableOption<{
+  value: string;
+  description?: string;
+  icon?: IconType;
+}>;
 
-const MAX_LIST_HEIGHT = 380;
-const ENTRY_HEIGHT = 32;
+const MAX_LIST_HEIGHT = 296;
+const ENTRY_HEIGHT = 52;
 
 function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   if (list.length === 0) {
@@ -284,9 +293,11 @@ export const ChartSwitch = memo(function ChartSwitch({
       const deprecatedChartSwitchPositions: VisChartSwitchPosition[] = [];
       Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
         for (const visualizationType of v.visualizationTypes) {
+          // todo: wildcard, fuzzy search add
           const isSearchMatch =
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
-            visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
+            visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm) ||
+            visualizationType.description?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
             const visualizationEntry = {
               ...visualizationType,
@@ -304,24 +315,31 @@ export const ChartSwitch = memo(function ChartSwitch({
       });
 
       const toSelectableEntry = (v: VisChartSwitchPosition): SelectableEntry => {
+        const isChecked = subVisualizationId === v.id;
+        const dataLossWarning = getDataLossWarning(v.selection.dataLoss);
         return {
           'aria-label': v.fullLabel || v.label,
           className: 'lnsChartSwitch__option',
-          key: `${v.visualizationId}:${v.id}`,
+          key: `${v.visualizationId}:${v.id}`, // todo: should we simplify?
           value: `${v.visualizationId}:${v.id}`,
           'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
           label: v.fullLabel || v.label,
-          prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
-          append:
-            v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-              <ChartOptionAppend
-                dataLoss={v.selection.dataLoss}
-                showExperimentalBadge={v.showExperimentalBadge}
-                id={v.selection.subVisualizationId}
-              />
-            ) : null,
+          prepend: (
+            <EuiFlexItem grow={false}>
+              {isChecked && <EuiIcon type="check" />}
+              {dataLossWarning && (
+                <DataLossWarning content={dataLossWarning} id={v.selection.subVisualizationId} />
+              )}
+              {!dataLossWarning && !isChecked && <EuiIcon type="empty" />}
+            </EuiFlexItem>
+          ),
+          data: {
+            description: v.description,
+            icon: v.icon,
+          },
+          append: v.showExperimentalBadge ? <ExperimentalBadge size="m" /> : null,
           // Apparently checked: null is not valid for TS
-          ...(subVisualizationId === v.id && { checked: 'on' }),
+          ...(isChecked && { checked: 'on' }),
         };
       };
 
@@ -382,8 +400,8 @@ export const ChartSwitch = memo(function ChartSwitch({
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
-              {i18n.translate('xpack.lens.configPanel.visualizationType', {
-                defaultMessage: 'Visualization type',
+              {i18n.translate('xpack.lens.configPanel.visualizationTypes', {
+                defaultMessage: 'Visualization types',
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -399,6 +417,17 @@ export const ChartSwitch = memo(function ChartSwitch({
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
             onChange: (value) => setSearchTerm(value),
+            placeholder: i18n.translate('xpack.lens.chartSwitch.search', {
+              defaultMessage: 'Search visualizations',
+            }),
+          }}
+          renderOption={(option, searchValue) => (
+            <ChartOption option={option} searchValue={searchValue} />
+          )}
+          listProps={{
+            rowHeight: ENTRY_HEIGHT,
+            showIcons: false,
+            isVirtualized: false,
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {
@@ -411,13 +440,19 @@ export const ChartSwitch = memo(function ChartSwitch({
             commitSelection(visualizationsLookup[id].selection);
           }}
           noMatchesMessage={
-            <FormattedMessage
-              id="xpack.lens.chartSwitch.noResults"
-              defaultMessage="No results found for {term}."
-              values={{
-                term: <strong>{searchTerm}</strong>,
-              }}
-            />
+            <div
+              css={css`
+                display: inline;
+              `}
+            >
+              <FormattedMessage
+                id="xpack.lens.chartSwitch.noResults"
+                defaultMessage="No results found for {term}."
+                values={{
+                  term: <strong>{searchTerm}</strong>,
+                }}
+              />
+            </div>
           }
         >
           {(list, search) => (
@@ -483,3 +518,41 @@ function getTopSuggestion(
     suggestions[0]
   );
 }
+
+export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything' | 'columns') => {
+  if (dataLoss === 'nothing') {
+    return;
+  }
+  if (dataLoss === 'everything') {
+    return i18n.translate('xpack.lens.chartSwitch.dataLossEverything', {
+      defaultMessage: 'Changing to this visualization clears the current configuration.',
+    });
+  }
+  if (dataLoss === 'layers') {
+    return i18n.translate('xpack.lens.chartSwitch.dataLossLayersDescription', {
+      defaultMessage:
+        'Changing to this visualization modifies currently selected layer`s configuration and removes all other layers.',
+    });
+  } else
+    return i18n.translate('xpack.lens.chartSwitch.dataLossColumns', {
+      defaultMessage: `Changing to this visualization modifies the current configuration.`,
+    });
+};
+
+const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
+  const { euiTheme } = useEuiTheme();
+  if (!content) return null;
+  return (
+    <EuiIconTip
+      size="m"
+      aria-label={content}
+      type="dot"
+      color={euiTheme.colors.warning}
+      content={content}
+      iconProps={{
+        className: 'lnsChartSwitch__chartIcon',
+        'data-test-subj': `lnsChartSwitchPopoverAlert_${id}`,
+      }}
+    />
+  );
+};
