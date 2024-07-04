@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types';
 import { timelineSelectors } from '../../../../timelines/store';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
@@ -80,6 +81,7 @@ export interface AddNewNoteProps {
  * The checkbox is automatically checked if the flyout is opened from a timeline and that timeline is saved. It is disabled if the flyout is NOT opened from a timeline.
  */
 export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
+  const { telemetry } = useKibana().services;
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
   const [editorValue, setEditorValue] = useState('');
@@ -110,8 +112,11 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
         },
       })
     );
+    telemetry.reportAddNoteFromExpandableFlyoutClicked({
+      isRelatedToATimeline: checked && activeTimeline?.savedObjectId !== null,
+    });
     setEditorValue('');
-  }, [activeTimeline?.savedObjectId, checked, dispatch, editorValue, eventId]);
+  }, [activeTimeline?.savedObjectId, checked, dispatch, editorValue, eventId, telemetry]);
 
   // show a toast if the create note call fails
   useEffect(() => {
