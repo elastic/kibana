@@ -1012,8 +1012,8 @@
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "common",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.RuleFormErrors",
-                "text": "RuleFormErrors"
+                "section": "def-common.RuleFormParamsErrors",
+                "text": "RuleFormParamsErrors"
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
@@ -3181,10 +3181,10 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-common.RuleFormErrors",
+        "id": "def-common.RuleFormBaseErrors",
         "type": "Interface",
         "tags": [],
-        "label": "RuleFormErrors",
+        "label": "RuleFormBaseErrors",
         "description": [],
         "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
         "deprecated": false,
@@ -3192,10 +3192,122 @@
         "children": [
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.RuleFormErrors.Unnamed",
+            "id": "def-common.RuleFormBaseErrors.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormBaseErrors.interval",
+            "type": "Array",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormBaseErrors.consumer",
+            "type": "Array",
+            "tags": [],
+            "label": "consumer",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormBaseErrors.ruleTypeId",
+            "type": "Array",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormBaseErrors.actionConnectors",
+            "type": "Array",
+            "tags": [],
+            "label": "actionConnectors",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormBaseErrors.alertDelay",
+            "type": "Array",
+            "tags": [],
+            "label": "alertDelay",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormBaseErrors.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.RuleFormParamsErrors",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleFormParamsErrors",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleFormParamsErrors.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: string | string[] | RuleFormErrors",
+            "label": "[key: string]: string | string[] | RuleFormParamsErrors",
             "description": [],
             "signature": [
               "[key: string]:  string | string[] | ",
@@ -3203,8 +3315,8 @@
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "common",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.RuleFormErrors",
-                "text": "RuleFormErrors"
+                "section": "def-common.RuleFormParamsErrors",
+                "text": "RuleFormParamsErrors"
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
@@ -3691,8 +3803,8 @@
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "common",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.RuleFormErrors",
-                "text": "RuleFormErrors"
+                "section": "def-common.RuleFormParamsErrors",
+                "text": "RuleFormParamsErrors"
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",

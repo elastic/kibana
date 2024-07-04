@@ -8,6 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { getDataStreamSettings } from '.';
+import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 const accessLogsDataStream = 'logs-nginx.access-default';
 const errorLogsDataStream = 'logs-nginx.error-default';
 const dateStr1 = '1702998651925'; // .ds-logs-nginx.access-default-2023.12.19-000001
@@ -38,12 +39,13 @@ describe('getDataStreamSettings', () => {
     esClientMock.indices.getSettings.mockReturnValue(
       Promise.resolve(MOCK_NGINX_ERROR_INDEX_SETTINGS)
     );
+    esClientMock.indices.getDataStream.mockReturnValue(Promise.resolve(MOCK_NGINX_DATA_STREAM));
 
     const dataStreamSettings = await getDataStreamSettings({
       esClient: esClientMock,
       dataStream: errorLogsDataStream,
     });
-    expect(dataStreamSettings).toEqual({ createdOn: Number(dateStr3) });
+    expect(dataStreamSettings).toEqual({ createdOn: Number(dateStr3), integration: 'apache' });
   });
 
   it('returns the earliest creation date of a data stream with multiple backing indices', async () => {
@@ -51,12 +53,13 @@ describe('getDataStreamSettings', () => {
     esClientMock.indices.getSettings.mockReturnValue(
       Promise.resolve(MOCK_NGINX_ACCESS_INDEX_SETTINGS)
     );
+    esClientMock.indices.getDataStream.mockReturnValue(Promise.resolve(MOCK_NGINX_DATA_STREAM));
 
     const dataStreamSettings = await getDataStreamSettings({
       esClient: esClientMock,
       dataStream: accessLogsDataStream,
     });
-    expect(dataStreamSettings).toEqual({ createdOn: Number(dateStr1) });
+    expect(dataStreamSettings).toEqual({ createdOn: Number(dateStr1), integration: 'apache' });
   });
 });
 
@@ -224,4 +227,41 @@ const MOCK_INDEX_ERROR = {
     index: 'logs-nginx.error-default-01',
   },
   status: 404,
+};
+
+const MOCK_NGINX_DATA_STREAM: IndicesGetDataStreamResponse = {
+  data_streams: [
+    {
+      name: 'logs-apache.access-production',
+      timestamp_field: {
+        name: '@timestamp',
+      },
+      indices: [
+        {
+          index_name: '.ds-logs-apache.access-production-2024.07.03-000001',
+          index_uuid: 'xrGjQ-GFSeqAlUbyS0Fx-A',
+          prefer_ilm: true,
+          ilm_policy: 'logs',
+          managed_by: 'Index Lifecycle Management',
+        },
+      ],
+      generation: 1,
+      _meta: {
+        package: {
+          name: 'apache',
+        },
+        managed: true,
+        managed_by: 'fleet',
+      },
+      status: 'YELLOW',
+      template: 'logs-apache.access',
+      ilm_policy: 'logs',
+      next_generation_managed_by: 'Index Lifecycle Management',
+      prefer_ilm: true,
+      hidden: false,
+      system: false,
+      allow_custom_routing: false,
+      replicated: false,
+    },
+  ],
 };

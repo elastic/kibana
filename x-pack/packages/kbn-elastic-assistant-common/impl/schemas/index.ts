@@ -52,3 +52,6 @@ export * from './knowledge_base/bulk_crud_knowledge_base_route.gen';
 export * from './knowledge_base/common_attributes.gen';
 export * from './knowledge_base/crud_knowledge_base_route.gen';
 export * from './knowledge_base/find_knowledge_base_entries_route.gen';
+
+export * from './prompts/find_prompts_route.gen';
+export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';
