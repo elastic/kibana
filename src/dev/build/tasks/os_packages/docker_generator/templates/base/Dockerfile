@@ -156,6 +156,7 @@ RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
 RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
+ENV XPACK_SECURITY_FIPSMODE_ENABLED=true
 
 {{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
@@ -173,10 +174,6 @@ ENV PROFILER_SIGNAL=SIGUSR1
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
 {{/opensslLegacyProvider}}
-
-{{#fips}}
-RUN /usr/bin/echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >> /usr/share/kibana/config/kibana.yml
-{{/fips}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
