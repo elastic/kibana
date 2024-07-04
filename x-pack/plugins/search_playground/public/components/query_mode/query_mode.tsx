@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo } from 'react';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
@@ -41,7 +41,9 @@ export const QueryMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const usageTracker = useUsageTracker();
   const { fields, isFieldsLoading } = useSourceIndicesFields();
-
+  const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
+    name: ChatFormFields.sourceFields,
+  });
   const {
     field: { onChange: queryFieldsOnChange, value: queryFields },
   } = useController<ChatForm, ChatFormFields.queryFields>({
@@ -61,7 +63,7 @@ export const QueryMode: React.FC = () => {
     const updatedQueryFields = { ...queryFields, [index]: currentIndexFields };
 
     queryFieldsOnChange(updatedQueryFields);
-    elasticsearchQueryChange(createQuery(updatedQueryFields, fields));
+    elasticsearchQueryChange(createQuery(updatedQueryFields, sourceFields, fields));
     usageTracker?.count(AnalyticsEvents.queryFieldsUpdated, currentIndexFields.length);
   };
 
@@ -70,8 +72,9 @@ export const QueryMode: React.FC = () => {
   }, [usageTracker]);
 
   const query = useMemo(
-    () => !isFieldsLoading && JSON.stringify(createQuery(queryFields, fields), null, 2),
-    [queryFields, fields, isFieldsLoading]
+    () =>
+      !isFieldsLoading && JSON.stringify(createQuery(queryFields, sourceFields, fields), null, 2),
+    [isFieldsLoading, queryFields, sourceFields, fields]
   );
 
   return (
