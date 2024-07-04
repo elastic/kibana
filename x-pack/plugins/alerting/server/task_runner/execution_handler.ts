@@ -634,6 +634,7 @@ export class ExecutionHandler<
             throttle: action.frequency.throttle ?? null,
             actionHash: generateActionHash(action), // generateActionHash must be removed once all the hash identifiers removed from the task state
             uuid: action.uuid,
+            actionFrequency: action.frequency,
           })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 

@@ -192,6 +192,18 @@ const rawRuleAlertsFilterSchema = schema.object({
   ),
 });
 
+export const byweekdaySchema = schema.arrayOf(
+  schema.oneOf([
+    schema.literal('MO'),
+    schema.literal('TU'),
+    schema.literal('WE'),
+    schema.literal('TH'),
+    schema.literal('FR'),
+    schema.literal('SA'),
+    schema.literal('SU'),
+  ])
+);
+
 const rawRuleActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.maybe(schema.string()),
@@ -207,6 +219,9 @@ const rawRuleActionSchema = schema.object({
         schema.literal('onThrottleInterval'),
       ]),
       throttle: schema.nullable(schema.string()),
+      dtstart: schema.maybe(schema.string()),
+      tzid: schema.maybe(schema.string()),
+      byweekday: schema.maybe(byweekdaySchema),
     })
   ),
   alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
