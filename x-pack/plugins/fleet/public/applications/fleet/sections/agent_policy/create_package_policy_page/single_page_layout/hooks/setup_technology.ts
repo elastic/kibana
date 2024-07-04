@@ -28,10 +28,13 @@ export const useAgentless = () => {
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
   const isCloud = !!cloud?.isCloudEnabled;
-  const agentlessAPI = config.agentless?.api.url;
+  const agentlessAPIUrl = config.agentless?.api.url;
 
   const isAgentlessEnabled =
-    agentlessExperimentalFeatureEnabled && (isServerless || (isCloud && !!agentlessAPI));
+    agentlessExperimentalFeatureEnabled && (isServerless || (isCloud && !!agentlessAPIUrl));
+
+  const isAgentlessCloudEnabled = isCloud && isAgentlessEnabled && !!agentlessAPIUrl;
+  const isAgentlessServerlessEnabled = isServerless && isAgentlessEnabled;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -61,6 +64,9 @@ export const useAgentless = () => {
     return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
   };
   return {
+    agentlessAPIUrl,
+    isAgentlessCloudEnabled,
+    isAgentlessServerlessEnabled,
     isAgentlessEnabled,
     isAgentlessAgentPolicy,
     isAgentlessIntegration,
@@ -82,7 +88,12 @@ export function useSetupTechnology({
   packageInfo?: PackageInfo;
 }) {
   const { cloud } = useStartServices();
-  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
+  const {
+    isAgentlessEnabled,
+    isAgentlessIntegration,
+    isAgentlessCloudEnabled,
+    isAgentlessServerlessEnabled,
+  } = useAgentless();
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const [newAgentBasedPolicy] = useState<NewAgentPolicy | undefined>({ ...newAgentPolicy });
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
@@ -94,8 +105,6 @@ export function useSetupTechnology({
       supports_agentless: true,
     })
   );
-  const config = useConfig();
-  const agentlessAPI = config.agentless?.api.url;
 
   useEffect(() => {
     if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
@@ -129,14 +138,14 @@ export function useSetupTechnology({
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
-        if (agentlessAPI && cloud?.isCloudEnabled) {
+        if (isAgentlessCloudEnabled) {
           updateNewAgentPolicy(newAgentlessPolicy as NewAgentPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
         }
         // tech debt: remove this when Serverless uses the Agentless API
         // https://github.com/elastic/security-team/issues/9781
-        if (cloud?.isServerlessEnabled) {
+        if (isAgentlessServerlessEnabled) {
           updateNewAgentPolicy(newAgentlessPolicy as AgentPolicy);
           updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
@@ -155,9 +164,8 @@ export function useSetupTechnology({
     [
       isAgentlessEnabled,
       selectedSetupTechnology,
-      agentlessAPI,
-      cloud?.isCloudEnabled,
-      cloud?.isServerlessEnabled,
+      isAgentlessCloudEnabled,
+      isAgentlessServerlessEnabled,
       updateNewAgentPolicy,
       newAgentlessPolicy,
       setSelectedPolicyTab,
@@ -168,7 +176,6 @@ export function useSetupTechnology({
 
   return {
     handleSetupTechnologyChange,
-    isAgentlessEnabled,
     selectedSetupTechnology,
   };
 }

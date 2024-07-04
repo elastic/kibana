@@ -81,6 +81,7 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
+import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -341,15 +342,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-
-  const { isAgentlessEnabled, handleSetupTechnologyChange, selectedSetupTechnology } =
-    useSetupTechnology({
-      newAgentPolicy,
-      updateNewAgentPolicy,
-      updateAgentPolicies,
-      setSelectedPolicyTab,
-      packageInfo,
-    });
+  const { isAgentlessEnabled } = useAgentless();
+  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
+    newAgentPolicy,
+    updateNewAgentPolicy,
+    updateAgentPolicies,
+    setSelectedPolicyTab,
+    packageInfo,
+  });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (

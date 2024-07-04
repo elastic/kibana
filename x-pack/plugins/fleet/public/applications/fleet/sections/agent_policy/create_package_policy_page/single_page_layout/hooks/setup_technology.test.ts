@@ -13,7 +13,7 @@ import { sendGetOneAgentPolicy, useStartServices, useConfig } from '../../../../
 import { SelectedPolicyTab } from '../../components';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 
-import { useSetupTechnology } from './setup_technology';
+import { useAgentless, useSetupTechnology } from './setup_technology';
 
 jest.mock('../../../../../services');
 jest.mock('../../../../../hooks', () => ({
@@ -25,6 +25,132 @@ jest.mock('../../../../../hooks', () => ({
 jest.mock('../../../../../../../../common/services/generate_new_agent_policy');
 
 type MockFn = jest.MockedFunction<any>;
+
+describe('useAgentless', () => {
+  const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+
+  beforeEach(() => {
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      agentless: false,
+    } as any);
+    (useConfig as MockFn).mockReturnValue({
+      agentless: undefined,
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: false,
+        isCloudEnabled: false,
+      },
+    });
+    jest.clearAllMocks();
+  });
+
+  it('should should not return return isAgentless when agentless is not enabled', () => {
+    const { result } = renderHook(() => useAgentless());
+
+    expect(result.current.isAgentlessEnabled).toBeFalsy();
+    expect(result.current.agentlessAPIUrl).toBeFalsy();
+    expect(result.current.isAgentlessCloudEnabled).toBeFalsy();
+    expect(result.current.isAgentlessServerlessEnabled).toBeFalsy();
+  });
+  it('should should return agentlessAPIUrl when agentless config is set', () => {
+    const agentlessAPIUrl = 'https://agentless.api.url';
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        api: {
+          url: agentlessAPIUrl,
+        },
+      },
+    } as any);
+
+    const { result } = renderHook(() => useAgentless());
+
+    expect(result.current.agentlessAPIUrl).toBeTruthy();
+    expect(result.current.agentlessAPIUrl).toBe(agentlessAPIUrl);
+    expect(result.current.isAgentlessEnabled).toBeFalsy();
+    expect(result.current.isAgentlessCloudEnabled).toBeFalsy();
+    expect(result.current.isAgentlessServerlessEnabled).toBeFalsy();
+  });
+
+  it('should return isAgentlessEnabled as falsy if agentlessAPIUrl and experimental feature agentless is truthy without cloud or serverless', () => {
+    const agentlessAPIUrl = 'https://agentless.api.url';
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        api: {
+          url: agentlessAPIUrl,
+        },
+      },
+    } as any);
+
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      agentless: false,
+    } as any);
+
+    const { result } = renderHook(() => useAgentless());
+
+    expect(result.current.agentlessAPIUrl).toBeTruthy();
+    expect(result.current.isAgentlessEnabled).toBeFalsy();
+    expect(result.current.isAgentlessCloudEnabled).toBeFalsy();
+    expect(result.current.isAgentlessServerlessEnabled).toBeFalsy();
+  });
+
+  it('should return isAgentlessEnabled and isAgentlessCloudEnabled as truthy with isCloudEnabled', () => {
+    const agentlessAPIUrl = 'https://agentless.api.url';
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        api: {
+          url: agentlessAPIUrl,
+        },
+      },
+    } as any);
+
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      agentless: true,
+    } as any);
+
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: false,
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() => useAgentless());
+
+    expect(result.current.agentlessAPIUrl).toBeTruthy();
+    expect(result.current.isAgentlessEnabled).toBeTruthy();
+    expect(result.current.isAgentlessCloudEnabled).toBeTruthy();
+    expect(result.current.isAgentlessServerlessEnabled).toBeFalsy();
+  });
+  it('should return isAgentlessEnabled and isAgentlessServerlessEnabled as truthy with isServerlessEnabled', () => {
+    const agentlessAPIUrl = 'https://agentless.api.url';
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        api: {
+          url: agentlessAPIUrl,
+        },
+      },
+    } as any);
+
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      agentless: true,
+    } as any);
+
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: true,
+        isCloudEnabled: false,
+      },
+    });
+
+    const { result } = renderHook(() => useAgentless());
+
+    expect(result.current.agentlessAPIUrl).toBeTruthy();
+    expect(result.current.isAgentlessEnabled).toBeTruthy();
+    expect(result.current.isAgentlessCloudEnabled).toBeFalsy();
+    expect(result.current.isAgentlessServerlessEnabled).toBeTruthy();
+  });
+});
 
 describe('useSetupTechnology', () => {
   const updateNewAgentPolicyMock = jest.fn();
@@ -79,11 +205,10 @@ describe('useSetupTechnology', () => {
 
     expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
   it('should fetch agentless policy if agentless feature is enabled and isServerless is true', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -95,7 +220,6 @@ describe('useSetupTechnology', () => {
     await waitForNextUpdate();
 
     expect(sendGetOneAgentPolicy).toHaveBeenCalled();
-    expect(result.current.isAgentlessEnabled).toBeTruthy();
   });
 
   it('should create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url', async () => {
@@ -121,7 +245,6 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    expect(result.current.isAgentlessEnabled).toBeTruthy();
     expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
 
     act(() => {
@@ -153,7 +276,6 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    expect(result.current.isAgentlessEnabled).toBeFalsy();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
     act(() => {
@@ -182,7 +304,6 @@ describe('useSetupTechnology', () => {
 
     expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
