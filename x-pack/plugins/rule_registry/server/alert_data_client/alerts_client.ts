@@ -342,26 +342,29 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (result?.hits?.hits?.length > 0) {
-        if (result.hits.hits.some((hit) => !isValidAlert(hit))) {
-          const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
-          this.logger.error(errorMessage);
-          throw Boom.badData(errorMessage);
-        }
-
-        // @ts-expect-error type mismatch: SearchHit._id is optional
-        await this.ensureAllAuthorized(result.hits.hits, operation);
-
-        result.hits.hits.forEach((item) =>
-          this.auditLogger?.log(
-            alertAuditEvent({
-              action: operationAlertAuditActionMap[operation],
-              id: item._id,
-              ...this.getOutcome(operation),
-            })
-          )
-        );
+      if (!result?.hits?.hits?.length) {
+        return result;
       }
+
+      if (result.hits.hits.some((hit) => !isValidAlert(hit))) {
+        const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
+        this.logger.error(errorMessage);
+        throw Boom.badData(errorMessage);
+      }
+
+      // @ts-expect-error type mismatch: SearchHit._id is optional
+      await this.ensureAllAuthorized(result.hits.hits, operation);
+
+      result.hits.hits.forEach((item) =>
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: item._id,
+            ...this.getOutcome(operation),
+          })
+        )
+      );
+
       return result;
     } catch (error) {
       const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
