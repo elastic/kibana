@@ -9,6 +9,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import React, { useCallback } from 'react';
 import type { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ALERT_PREVIEW_BANNER } from './preview/constants';
 import { DocumentDetailsPreviewPanelKey } from './shared/constants/panel_keys';
 
@@ -46,6 +47,14 @@ export const AlertPreviewButton: FC<AlertPreviewButtonProps> = ({
   );
 
   return (
-    <EuiButtonIcon iconType="expand" data-test-subj={dataTestSubj} onClick={openAlertPreview} />
+    <EuiButtonIcon
+      iconType="expand"
+      data-test-subj={dataTestSubj}
+      onClick={openAlertPreview}
+      aria-label={i18n.translate('ack.securitySolution.flyout.right.alertPreview.ariaLabel', {
+        defaultMessage: 'Preview alert with id {id}',
+        values: { id },
+      })}
+    />
   );
 };

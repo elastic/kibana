@@ -50,6 +50,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
+export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
 export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTabProps) => {
@@ -107,7 +108,12 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
         ? [
             {
               render: (data: InputAlert) => (
-                <AlertPreviewButton id={data._id} indexName={data.input.index} scopeId={scopeId} />
+                <AlertPreviewButton
+                  id={data._id}
+                  indexName={data.input.index}
+                  scopeId={scopeId}
+                  data-test-subj={EXPAND_ALERT_TEST_ID}
+                />
               ),
               width: '5%',
             },
