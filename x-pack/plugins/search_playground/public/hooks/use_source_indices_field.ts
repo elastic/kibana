@@ -35,7 +35,6 @@ export const getIndicesWithNoSourceFields = (
 export const useSourceIndicesFields = () => {
   const usageTracker = useUsageTracker();
   const [loading, setLoading] = useState<boolean>(false);
-  const [noFieldsIndicesWarning, setNoFieldsIndicesWarning] = useState<string | null>(null);
   const { resetField } = useFormContext<ChatForm>();
 
   const {
@@ -56,7 +55,6 @@ export const useSourceIndicesFields = () => {
   } = useController({
     name: ChatFormFields.sourceFields,
   });
-  // const selectedIndices = useWatch({ name: ChatFormFields.indices });
   const { fields, isLoading } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
@@ -65,14 +63,6 @@ export const useSourceIndicesFields = () => {
 
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
-
-      const indicesWithNoSourceFields = getIndicesWithNoSourceFields(defaultSourceFields);
-
-      if (indicesWithNoSourceFields) {
-        setNoFieldsIndicesWarning(indicesWithNoSourceFields);
-      } else {
-        setNoFieldsIndicesWarning(null);
-      }
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
 
@@ -88,8 +78,6 @@ export const useSourceIndicesFields = () => {
         AnalyticsEvents.sourceFieldsLoaded,
         Object.values(fields)?.flat()?.length
       );
-    } else {
-      setNoFieldsIndicesWarning(null);
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,6 +110,5 @@ export const useSourceIndicesFields = () => {
     addIndex,
     removeIndex,
     setIndices,
-    noFieldsIndicesWarning,
   };
 };

@@ -13,24 +13,20 @@ import {
   EuiSelect,
   EuiSuperSelect,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { useIndicesFields } from '../../hooks/use_indices_fields';
-import { getDefaultSourceFields } from '../../utils/create_query';
 import { ChatForm, ChatFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 
 export const EditContextPanel: React.FC = () => {
   const usageTracker = useUsageTracker();
-  const selectedIndices: string[] = useWatch<ChatForm, ChatFormFields.indices>({
-    name: ChatFormFields.indices,
-  });
-  const { fields } = useIndicesFields(selectedIndices);
-  const defaultFields = getDefaultSourceFields(fields);
+  const { fields } = useSourceIndicesFields();
 
   const {
     field: { onChange: onChangeSize, value: docSize },
@@ -42,7 +38,6 @@ export const EditContextPanel: React.FC = () => {
     field: { onChange: onChangeSourceFields, value: sourceFields },
   } = useController<ChatForm, ChatFormFields.sourceFields>({
     name: ChatFormFields.sourceFields,
-    defaultValue: defaultFields,
   });
 
   const updateSourceField = (index: string, field: string) => {
@@ -108,17 +103,29 @@ export const EditContextPanel: React.FC = () => {
             {Object.entries(fields).map(([index, group]) => (
               <EuiFlexItem grow={false} key={index}>
                 <EuiFormRow label={index} fullWidth>
-                  <EuiSuperSelect
-                    data-test-subj={`contextFieldsSelectable_${index}`}
-                    options={group.source_fields.map((field) => ({
-                      value: field,
-                      inputDisplay: field,
-                      'data-test-subj': 'contextField',
-                    }))}
-                    valueOfSelected={sourceFields[index]?.[0]}
-                    onChange={(value) => updateSourceField(index, value)}
-                    fullWidth
-                  />
+                  {!!group.source_fields?.length ? (
+                    <EuiSuperSelect
+                      data-test-subj={`contextFieldsSelectable_${index}`}
+                      options={group.source_fields.map((field) => ({
+                        value: field,
+                        inputDisplay: field,
+                        'data-test-subj': 'contextField',
+                      }))}
+                      valueOfSelected={sourceFields[index]?.[0]}
+                      onChange={(value) => updateSourceField(index, value)}
+                      fullWidth
+                    />
+                  ) : (
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'xpack.searchPlayground.editContext.noSourceFieldWarning',
+                        { defaultMessage: 'No source fields found' }
+                      )}
+                      color="warning"
+                      iconType="warning"
+                      size="s"
+                    />
+                  )}
                 </EuiFormRow>
               </EuiFlexItem>
             ))}

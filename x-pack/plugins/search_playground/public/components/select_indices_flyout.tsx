@@ -121,7 +121,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.searchPlayground.setupPage.addDataSource.flyout.closeButton"
+                id="xpack.searchPlayground.addDataSource.flyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>

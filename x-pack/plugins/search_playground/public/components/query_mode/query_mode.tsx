@@ -79,6 +79,7 @@ export const QueryMode: React.FC = () => {
           lineNumbers
           transparentBackground
           data-test-subj="ViewElasticsearchQueryResult"
+          className="eui-yScroll"
         >
           {JSON.stringify(createQuery(queryFields, fields), null, 2)}
         </EuiCodeBlock>
