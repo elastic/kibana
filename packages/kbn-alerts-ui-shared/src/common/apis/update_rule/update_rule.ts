@@ -21,6 +21,14 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'schedule',
   'params',
   'alertDelay',
+];
+
+export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
+  'name',
+  'tags',
+  'schedule',
+  'params',
+  'alertDelay',
   'actions',
 ];
 

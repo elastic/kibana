@@ -27,7 +27,8 @@ import { LogErrorRateChart } from '../charts/log_error_rate_chart';
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
  */
-export const chartHeight = 288;
+
+const chartHeight = 400;
 
 export function LogsServiceOverview() {
   const { serviceName } = useApmServiceContext();
@@ -58,10 +59,10 @@ export function LogsServiceOverview() {
           <EuiFlexItem>
             <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               <EuiFlexItem grow={4}>
-                <LogRateChart height={400} />
+                <LogRateChart height={chartHeight} />
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <LogErrorRateChart height={400} />
+                <LogErrorRateChart height={chartHeight} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

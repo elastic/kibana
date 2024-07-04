@@ -89,6 +89,7 @@ export function createQuery(
                 },
                 inner_hits: {
                   size: 2,
+                  name: `${index}.${semanticField.field}`,
                   _source: [`${semanticField.field}.inference.chunks.text`],
                 },
               },
@@ -106,6 +107,7 @@ export function createQuery(
                 },
                 inner_hits: {
                   size: 2,
+                  name: `${index}.${semanticField.field}`,
                   _source: [`${semanticField.field}.inference.chunks.text`],
                 },
               },

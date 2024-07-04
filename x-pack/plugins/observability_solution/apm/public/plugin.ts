@@ -17,6 +17,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  SecurityServiceStart,
 } from '@kbn/core/public';
 import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -109,6 +110,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmServices {
+  securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
 
@@ -393,6 +395,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
+            securityService: coreStart.security,
             telemetry,
           },
         });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Services } from '../../services';
@@ -15,6 +15,7 @@ import { CreateIntegrationUpload } from './create_integration_upload';
 import { CreateIntegrationAssistant } from './create_integration_assistant';
 import { Page, PagePath } from '../../common/constants';
 import { useRoutesAuthorization } from '../../common/hooks/use_authorization';
+import { useIsAvailable } from '../../common/hooks/use_availability';
 
 interface CreateIntegrationProps {
   services: Services;
@@ -26,21 +27,23 @@ export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services 
     </TelemetryContextProvider>
   </KibanaContextProvider>
 ));
-
 CreateIntegration.displayName = 'CreateIntegration';
 
 const CreateIntegrationRouter = React.memo(() => {
   const { canUseIntegrationAssistant, canUseIntegrationUpload } = useRoutesAuthorization();
-
+  const isAvailable = useIsAvailable();
   return (
     <Switch>
-      {canUseIntegrationAssistant && (
-        <Route path={PagePath[Page.assistant]} component={CreateIntegrationAssistant} />
+      {isAvailable && canUseIntegrationAssistant && (
+        <Route path={PagePath[Page.assistant]} exact component={CreateIntegrationAssistant} />
       )}
-      {canUseIntegrationUpload && (
-        <Route path={PagePath[Page.upload]} component={CreateIntegrationUpload} />
+      {isAvailable && canUseIntegrationUpload && (
+        <Route path={PagePath[Page.upload]} exact component={CreateIntegrationUpload} />
       )}
-      <Route path={PagePath[Page.landing]} component={CreateIntegrationLanding} />
+
+      <Route path={PagePath[Page.landing]} exact component={CreateIntegrationLanding} />
+
+      <Route render={() => <Redirect to={PagePath[Page.landing]} />} />
     </Switch>
   );
 });

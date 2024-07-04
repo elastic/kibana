@@ -44,17 +44,11 @@ export function ServiceLink({
 }: ServiceLinkProps) {
   const apmRouter = useApmRouter();
 
-  let serviceLinkBase: string = '/services';
-
-  if (isMobileAgentName(agentName)) {
-    serviceLinkBase = '/mobile-services';
-  }
-
-  if (isLogsSignal(signalTypes)) {
-    serviceLinkBase = '/logs-services';
-  }
-
-  const serviceLink = `${serviceLinkBase}/{serviceName}/overview`;
+  const serviceLink = isMobileAgentName(agentName)
+    ? '/mobile-services/{serviceName}/overview'
+    : isLogsSignal(signalTypes)
+    ? '/logs-services/{serviceName}/overview'
+    : '/services/{serviceName}/overview';
 
   if (serviceName === OTHER_SERVICE_NAME) {
     return (

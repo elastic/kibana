@@ -66,7 +66,7 @@ export function LogRateChart({ height }: { height: number }) {
   ];
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
