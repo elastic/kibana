@@ -96,6 +96,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
     datasetQualityFlyoutFieldsListIntegrationDetails:
       'datasetQualityFlyoutFieldsList-integration_details',
+    datasetQualityFlyoutIntegrationLoading: 'datasetQualityFlyoutIntegrationLoading',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
     datasetQualityFlyoutIntegrationAction: (action: string) =>
       `datasetQualityFlyoutIntegrationAction${action}`,
@@ -161,6 +162,13 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async waitUntilTableInFlyoutLoaded() {
       await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiBasicTable-loading', 20 * 1000);
+    },
+
+    async waitUntilIntegrationsInFlyoutLoaded() {
+      await find.waitForDeletedByCssSelector(
+        '.euiSkeletonTitle .datasetQualityFlyoutIntegrationLoading',
+        10 * 1000
+      );
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
@@ -321,6 +329,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       if (isCollapsed) {
         await datasetExpandButton.click();
       }
+
+      await this.waitUntilIntegrationsInFlyoutLoaded();
     },
 
     async closeFlyout() {
