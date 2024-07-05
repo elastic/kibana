@@ -8,7 +8,7 @@
 import type {
   LogRateChange,
   SimpleSignificantItem,
-} from '@kbn/aiops-log-rate-analysis/queries/fetch_simple_log_rate_analysis';
+} from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis';
 
 export interface GetAiopsLogRateAnalysisFunctionResponse {
   content:

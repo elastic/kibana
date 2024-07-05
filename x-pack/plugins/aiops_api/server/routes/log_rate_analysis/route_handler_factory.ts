@@ -21,7 +21,7 @@ import {
 } from '@kbn/aiops-common/constants';
 // import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 // import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
-import { fetchSimpleLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_simple_log_rate_analysis';
+import { fetchLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis';
 
 // import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsApiLicense } from '../../types';
@@ -55,7 +55,7 @@ export function routeHandlerFactory(
       return response.forbidden();
     }
 
-    const client = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const executionContext = createExecutionContext(
       coreStart,
       AIOPS_API_PLUGIN_ID,
@@ -76,16 +76,18 @@ export function routeHandlerFactory(
       request.body;
 
     return await coreStart.executionContext.withContext(executionContext, async () => {
-      const logRateAnalysis = await fetchSimpleLogRateAnalysis(
-        client,
-        index,
-        start,
-        end,
-        timefield,
+      const logRateAnalysis = await fetchLogRateAnalysis({
+        esClient,
         abortSignal,
-        keywordFieldCandidates,
-        textFieldCandidates
-      );
+        arguments: {
+          index,
+          start,
+          end,
+          timefield,
+          keywordFieldCandidates,
+          textFieldCandidates,
+        },
+      });
 
       return response.ok({
         body: logRateAnalysis,

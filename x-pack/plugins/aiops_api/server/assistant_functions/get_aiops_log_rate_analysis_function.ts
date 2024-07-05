@@ -10,7 +10,7 @@ import dedent from 'dedent';
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { fetchSimpleLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_simple_log_rate_analysis';
+import { fetchLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis';
 
 import type { GetAiopsLogRateAnalysisFunctionResponse } from '../../common/types';
 
@@ -79,14 +79,16 @@ export function registerGetAiopsLogRateAnalysisFunction({
     async ({ arguments: args }, abortSignal): Promise<GetAiopsLogRateAnalysisFunctionResponse> => {
       const { esClient } = resources;
 
-      const resp = await fetchSimpleLogRateAnalysis(
+      const resp = await fetchLogRateAnalysis({
         esClient,
-        args.index,
-        args.start,
-        args.end,
-        args.timefield,
-        abortSignal
-      );
+        abortSignal,
+        arguments: {
+          index: args.index,
+          start: args.start,
+          end: args.end,
+          timefield: args.timefield,
+        },
+      });
 
       const { logRateChange, significantItems, dateHistogramBuckets, windowParameters } = resp;
 
