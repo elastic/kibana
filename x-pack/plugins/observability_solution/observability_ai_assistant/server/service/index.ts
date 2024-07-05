@@ -333,18 +333,18 @@ export class ObservabilityAIAssistantService {
     return fnClient;
   }
 
-  addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
+  addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
         this.kbService!.queue(
           entries.flatMap((entry) => {
             const entryWithSystemProperties = {
-              type: 'contextual' as const,
               ...entry,
               '@timestamp': new Date().toISOString(),
               doc_id: entry.id,
               public: true,
               confidence: 'high' as const,
+              type: 'contextual' as const,
               is_correction: false,
               labels: {
                 ...entry.labels,
@@ -375,7 +375,7 @@ export class ObservabilityAIAssistantService {
   }
 
   addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
-    this.addToKnowledgeBase(
+    this.addToKnowledgeBaseQueue(
       entries.map((entry) => {
         return {
           ...entry,

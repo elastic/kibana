@@ -132,7 +132,7 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       role,
     } = resources.params.body;
 
-    return client.createKnowledgeBaseEntry({
+    return client.addKnowledgeBaseEntry({
       entry: {
         id,
         text,

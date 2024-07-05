@@ -101,7 +101,7 @@ export interface Instruction {
 
 export type InstructionOrPlainText = string | Instruction;
 
-export enum KnowledeBaseType {
+export enum KnowledgeBaseType {
   UserInstruction = 'user_instruction',
   Contextual = 'contextual',
 }

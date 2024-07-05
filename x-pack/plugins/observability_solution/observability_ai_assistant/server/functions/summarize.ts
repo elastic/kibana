@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KnowledeBaseType } from '../../common/types';
+import { KnowledgeBaseType } from '../../common/types';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
 
@@ -45,7 +45,7 @@ export function registerSummarizationFunction({
           type: {
             type: 'string',
             description: `The type can be: "user_instruction" or "contextual". A "user_instruction" entry will be included in the system message if it fits within the token budget and it will be marked as a user instruction. A "contextual" entry will be included as part of the context function response (and not the system message) if it semantically matches the user's prompt.`,
-            enum: [KnowledeBaseType.UserInstruction, KnowledeBaseType.Contextual],
+            enum: [KnowledgeBaseType.UserInstruction, KnowledgeBaseType.Contextual],
           },
           confidence: {
             type: 'string',
@@ -73,7 +73,7 @@ export function registerSummarizationFunction({
       signal
     ) => {
       return client
-        .createKnowledgeBaseEntry({
+        .addKnowledgeBaseEntry({
           entry: {
             doc_id: id,
             role: KnowledgeBaseEntryRole.AssistantSummarization,

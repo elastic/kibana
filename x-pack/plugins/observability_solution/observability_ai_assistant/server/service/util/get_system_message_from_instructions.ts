@@ -47,7 +47,7 @@ export function getSystemMessageFromInstructions({
   // split request instructions into user instructions and registered instructions
   const [requestUserInstructions, requestRegisteredInstructions] = partition(
     requestInstructionsWithId,
-    (instruction) => instruction.user_instruction
+    (instruction) => instruction.user_instruction !== false
   );
 
   // all request instructions and KB instructions.

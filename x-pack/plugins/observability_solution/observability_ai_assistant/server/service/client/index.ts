@@ -159,7 +159,21 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = (params: {
+  complete = ({
+    functionClient,
+    connectorId,
+    simulateFunctionCalling,
+    instructions: requestInstructions = [],
+    messages: initialMessages,
+    signal,
+    responseLanguage = 'English',
+    persist,
+    kibanaPublicUrl,
+    isPublic,
+    title: predefinedTitle,
+    conversationId: predefinedConversationId,
+    disableFunctions = false,
+  }: {
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
@@ -181,22 +195,6 @@ export class ObservabilityAIAssistantClient {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
-        const {
-          functionClient,
-          connectorId,
-          simulateFunctionCalling,
-          instructions: requestInstructions = [],
-          messages: initialMessages,
-          signal,
-          responseLanguage = 'English',
-          persist,
-          kibanaPublicUrl,
-          isPublic,
-          title: predefinedTitle,
-          conversationId: predefinedConversationId,
-          disableFunctions = false,
-        } = params;
-
         if (responseLanguage) {
           requestInstructions.push(
             `You MUST respond in the users preferred language which is: ${responseLanguage}.`
@@ -721,7 +719,7 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.setup();
   };
 
-  createKnowledgeBaseEntry = async ({
+  addKnowledgeBaseEntry = async ({
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;

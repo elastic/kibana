@@ -49,7 +49,7 @@ const chatCompleteBaseRt = t.type({
               text: t.string,
             }),
             t.partial({
-              system: t.boolean,
+              user_instruction: t.boolean,
             }),
           ]),
         ])
@@ -244,7 +244,7 @@ async function chatComplete(
       persist,
       screenContexts,
       responseLanguage,
-      instructions,
+      instructions: requestInstructions,
       disableFunctions,
     },
   } = params;
@@ -269,7 +269,7 @@ async function chatComplete(
     signal,
     functionClient,
     responseLanguage,
-    instructions,
+    instructions: requestInstructions,
     simulateFunctionCalling,
     disableFunctions,
   });

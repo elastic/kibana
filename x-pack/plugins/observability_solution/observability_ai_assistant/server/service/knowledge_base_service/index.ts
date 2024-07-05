@@ -19,7 +19,7 @@ import {
   KnowledgeBaseEntry,
   KnowledgeBaseEntryRole,
   Instruction,
-  KnowledeBaseType,
+  KnowledgeBaseType,
 } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
@@ -442,7 +442,7 @@ export class KnowledgeBaseService {
             filter: [
               {
                 term: {
-                  type: KnowledeBaseType.UserInstruction,
+                  type: KnowledgeBaseType.UserInstruction,
                 },
               },
               ...getAccessQuery({ user, namespace }),
