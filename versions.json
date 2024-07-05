@@ -14,6 +14,12 @@
       "previousMinor": true
     },
     {
+      "version": "8.14.2",
+      "branch": "8.14",
+      "currentMajor": true,
+      "previousMinor": true
+    },
+    {
       "version": "7.17.23",
       "branch": "7.17",
       "previousMajor": true
