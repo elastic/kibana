@@ -62,7 +62,11 @@ import {
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import { isSimplifiedCreatePackagePolicyRequest, removeFieldsFromInputSchema } from './utils';
+import {
+  canUseMultipleAgentPolicies,
+  isSimplifiedCreatePackagePolicyRequest,
+  removeFieldsFromInputSchema,
+} from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -246,6 +250,11 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
     }
 
+    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+      throw new PackagePolicyRequestError(errorMessage);
+    }
+
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -407,6 +416,11 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
+    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+      throw new PackagePolicyRequestError(errorMessage);
+    }
+
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
