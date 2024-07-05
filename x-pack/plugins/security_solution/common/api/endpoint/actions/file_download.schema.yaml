@@ -7,6 +7,7 @@ paths:
     get:
       summary: File Download schema
       operationId: EndpointFileDownload
+      description: Download a file from an endpoint
       x-codegen-enabled: false
       x-labels:
         - ess

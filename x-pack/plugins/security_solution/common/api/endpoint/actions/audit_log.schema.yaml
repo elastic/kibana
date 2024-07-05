@@ -7,6 +7,7 @@ paths:
     get:
       summary: Get action audit log schema
       operationId: EndpointGetActionAuditLog
+      description: Get action audit log
       x-codegen-enabled: false
       x-labels:
         - ess

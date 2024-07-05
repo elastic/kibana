@@ -7,6 +7,7 @@ paths:
     post:
       summary: Execute Action
       operationId: EndpointExecuteAction
+      description: Execute a given command on an endpoint
       x-codegen-enabled: false
       x-labels:
         - ess
