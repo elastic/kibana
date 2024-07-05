@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { UsageCounters } from './types';
+export type { UsageCounters } from './types';
