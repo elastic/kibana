@@ -76,7 +76,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     Object.entries(validation).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || isZod(schema) || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
+          `Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
