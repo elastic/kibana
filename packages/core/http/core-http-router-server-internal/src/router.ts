@@ -26,8 +26,9 @@ import type {
   VersionedRouter,
   RouteRegistrar,
 } from '@kbn/core-http-server';
+import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
-import { isZod, RouteValidator } from './validator';
+import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
