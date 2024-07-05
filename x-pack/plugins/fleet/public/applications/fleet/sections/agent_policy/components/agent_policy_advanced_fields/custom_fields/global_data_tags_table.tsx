@@ -20,6 +20,7 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiCode,
+  EuiSpacer,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
@@ -423,15 +424,16 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   return (
     <>
       {globalDataTags.length === 0 && !isAdding ? (
-        <EuiPanel hasShadow={false}>
+        <EuiPanel color="subdued" paddingSize="l" className="eui-textCenter">
           <EuiText>
-            <h4>
+            <h5>
               <FormattedMessage
                 id="xpack.fleet.globalDataTagsTable.noFieldsMessage"
                 defaultMessage="This policy has no custom fields"
               />
-            </h4>
+            </h5>
           </EuiText>
+          <EuiSpacer size="xs" />
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButton

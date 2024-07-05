@@ -2211,7 +2211,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", \"analytics\" | \"uiSettings\">; data: ",
+              ", \"uiSettings\" | \"analytics\">; data: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -4585,7 +4585,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"other\" | \"normal\" | undefined"
+              "\"normal\" | \"other\" | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_top_values_bucket.tsx",
             "deprecated": false,

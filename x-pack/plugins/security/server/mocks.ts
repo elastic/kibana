@@ -7,13 +7,13 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 import { licenseMock } from '../common/licensing/index.mock';
-import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
-import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
@@ -79,6 +79,5 @@ export const securityMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
   createApiResponse: createApiResponseMock,
-  createMockAuthenticatedUser: (props: MockAuthenticatedUserProps = {}) =>
-    mockAuthenticatedUser(props),
+  createMockAuthenticatedUser: securityServiceMock.createMockAuthenticatedUser,
 };
