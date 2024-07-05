@@ -309,7 +309,7 @@ export default function (providerContext: FtrProviderContext) {
 
         await index.addFindings([cspmFinding1, cspmFinding2]);
 
-        await supertestWithoutAuth
+        const { status } = await supertestWithoutAuth
           .get('/internal/cloud_security_posture/benchmarks')
           .set(ELASTIC_HTTP_VERSION_HEADER, '2')
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -317,8 +317,8 @@ export default function (providerContext: FtrProviderContext) {
           .auth(
             'role_security_read_user_benchmark',
             cspSecurity.getPasswordForUser('role_security_read_user_benchmark')
-          )
-          .expect(200);
+          );
+        expect(status).to.equal(200);
       });
     });
   });

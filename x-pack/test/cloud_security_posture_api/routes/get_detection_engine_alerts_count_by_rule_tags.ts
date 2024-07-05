@@ -41,21 +41,31 @@ export default function (providerContext: FtrProviderContext) {
         await cspSecurity.createUsers();
       });
       it('GET detection_engine_rules API with user with read access', async () => {
-        await supertestWithoutAuth
-          .get('/internal/cloud_security_posture/detection_engine_rules/alerts/_status')
+        const { status } = await supertestWithoutAuth
+          .get(
+            '/internal/cloud_security_posture/detection_engine_rules/alerts/_status?tags=["CIS"]'
+          )
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
-          .auth('role_security_read_user', 'test123')
-          .expect(400);
+          .auth(
+            'role_security_read_user_alerts',
+            cspSecurity.getPasswordForUser('role_security_read_user_alerts')
+          );
+        expect(status).to.be(200);
       });
 
       it('GET detection_engine_rules API with user without read access', async () => {
-        await supertestWithoutAuth
-          .get('/internal/cloud_security_posture/detection_engine_rules/alerts/_status')
+        const { status } = await supertestWithoutAuth
+          .get(
+            '/internal/cloud_security_posture/detection_engine_rules/alerts/_status?tags=["CIS"]'
+          )
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
-          .auth('role_security_none_user', 'csp123')
-          .expect(403);
+          .auth(
+            'role_security_none_user_alerts',
+            cspSecurity.getPasswordForUser('role_security_none_user_alerts')
+          );
+        expect(status).to.be(403);
       });
     });
   });

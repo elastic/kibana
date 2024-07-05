@@ -168,7 +168,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('GET rules states API with user with read access', async () => {
-      await supertestWithoutAuth
+      const { status } = await supertestWithoutAuth
         .get(`/internal/cloud_security_posture/rules/_get_states?tags=CIS`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -176,12 +176,12 @@ export default function (providerContext: FtrProviderContext) {
         .auth(
           'role_security_read_user_benchmark',
           cspSecurity.getPasswordForUser('role_security_read_user_benchmark')
-        )
-        .expect(200);
+        );
+      expect(status).to.be(200);
     });
 
     it('GET rules states API API with user without read access', async () => {
-      await supertestWithoutAuth
+      const { status } = await supertestWithoutAuth
         .get(`/internal/cloud_security_posture/rules/_get_states`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -189,8 +189,8 @@ export default function (providerContext: FtrProviderContext) {
         .auth(
           'role_security_none_user_benchmark',
           cspSecurity.getPasswordForUser('role_security_none_user_benchmark')
-        )
-        .expect(403);
+        );
+      expect(status).to.be(403);
     });
   });
 }

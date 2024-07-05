@@ -135,6 +135,81 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         },
       ],
     },
+    {
+      name: 'role_security_read_alerts',
+      elasticsearch: {
+        indices: [
+          {
+            names: ['logs-cloud_security_posture.findings-*'],
+            privileges: ['read'],
+          },
+          {
+            names: ['logs-cloud_security_posture.findings_latest-*'],
+            privileges: ['read'],
+          },
+          {
+            names: ['logs-cloud_security_posture.scores-*'],
+            privileges: ['read'],
+          },
+          {
+            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
+            privileges: ['all'],
+          },
+          {
+            names: ['.alerts-security.alerts-*'],
+            privileges: ['all'],
+          },
+        ],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            siem: ['read'],
+            fleetv2: ['all'],
+            fleet: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
+    {
+      name: 'role_security_none_alerts',
+      elasticsearch: {
+        indices: [
+          {
+            names: ['logs-cloud_security_posture.findings-*'],
+            privileges: ['read'],
+          },
+          {
+            names: ['logs-cloud_security_posture.findings_latest-*'],
+            privileges: ['read'],
+          },
+          {
+            names: ['logs-cloud_security_posture.scores-*'],
+            privileges: ['read'],
+          },
+          {
+            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
+            privileges: ['all'],
+          },
+          {
+            names: ['.alerts-security.alerts-*'],
+            privileges: ['all'],
+          },
+        ],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            fleetv2: ['all'],
+            fleet: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
   ];
 
   const users = [
@@ -151,6 +226,12 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
       roles: ['role_security_read_benchmark'],
     },
     {
+      name: 'role_security_read_user_alerts',
+      full_name: 'user with 0 security privilege for',
+      password: 'csp123',
+      roles: ['role_security_read_alerts'],
+    },
+    {
       name: 'role_security_none_user',
       full_name: 'user with 0 security privilege',
       password: 'csp123',
@@ -161,6 +242,12 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
       full_name: 'user with 0 security privilege for',
       password: 'csp123',
       roles: ['role_security_none_benchmark'],
+    },
+    {
+      name: 'role_security_none_user_alerts',
+      full_name: 'user with 0 security privilege for',
+      password: 'csp123',
+      roles: ['role_security_none_alerts'],
     },
   ];
 
