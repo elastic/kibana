@@ -11,6 +11,7 @@ import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { D3SecurityRunActionResponseSchema } from '../../../common/d3security/schema';
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 
 describe('D3SecurityConnector', () => {
   const sampleBody = JSON.stringify({
@@ -38,23 +39,29 @@ describe('D3SecurityConnector', () => {
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
+    let connectorMetricsService: ConnectorMetricsService;
+
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
+      connectorMetricsService = new ConnectorMetricsService();
     });
     it('the D3 Security API call is successful with correct parameters', async () => {
-      const response = await connector.runApi({ body: sampleBody });
+      const response = await connector.runApi({ body: sampleBody }, connectorMetricsService);
       expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://example.com/api',
-        method: 'post',
-        responseSchema: D3SecurityRunActionResponseSchema,
-        data: sampleBodyFormatted,
-        headers: {
-          d3key: '123',
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          url: 'https://example.com/api',
+          method: 'post',
+          responseSchema: D3SecurityRunActionResponseSchema,
+          data: sampleBodyFormatted,
+          headers: {
+            d3key: '123',
+          },
         },
-      });
+        connectorMetricsService
+      );
       expect(response).toEqual({ result: 'success' });
     });
 
@@ -62,7 +69,9 @@ describe('D3SecurityConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.runApi({ body: sampleBody })).rejects.toThrow('API Error');
+      await expect(connector.runApi({ body: sampleBody }, connectorMetricsService)).rejects.toThrow(
+        'API Error'
+      );
     });
   });
 });

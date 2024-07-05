@@ -41,7 +41,8 @@ export const createExternalService = (
   actionId: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  connectorMetricsService: ConnectorMetricsService
 ): ExternalService => {
   const {
     createCommentJson,
@@ -99,10 +100,7 @@ export const createExternalService = (
 
   const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
-  const getIncident = async (
-    id: string,
-    connectorMetricsService: ConnectorMetricsService
-  ): Promise<GetIncidentResponse> => {
+  const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
       const getUrl = renderMustacheStringNoEscape(getIncidentUrl, {
         external: {
@@ -138,10 +136,9 @@ export const createExternalService = (
     }
   };
 
-  const createIncident = async (
-    { incident }: CreateIncidentParams,
-    connectorMetricsService: ConnectorMetricsService
-  ): Promise<ExternalServiceIncidentResponse> => {
+  const createIncident = async ({
+    incident,
+  }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
       const { description, id, severity, status: incidentStatus, tags, title } = incident;
       const normalizedUrl = validateAndNormalizeUrl(
@@ -180,7 +177,7 @@ export const createExternalService = (
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
       const externalId = getObjectValueByKeyAsString(data, createIncidentResponseKey)!;
-      const insertedIncident = await getIncident(externalId, connectorMetricsService);
+      const insertedIncident = await getIncident(externalId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
@@ -208,10 +205,10 @@ export const createExternalService = (
     }
   };
 
-  const updateIncident = async (
-    { incidentId, incident }: UpdateIncidentParams,
-    connectorMetricsService: ConnectorMetricsService
-  ): Promise<ExternalServiceIncidentResponse> => {
+  const updateIncident = async ({
+    incidentId,
+    incident,
+  }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
       const updateUrl = renderMustacheStringNoEscape(updateIncidentUrl, {
         external: {
@@ -262,7 +259,7 @@ export const createExternalService = (
         res,
       });
 
-      const updatedIncident = await getIncident(incidentId as string, connectorMetricsService);
+      const updatedIncident = await getIncident(incidentId as string);
 
       const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
@@ -290,10 +287,7 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async (
-    { incidentId, comment }: CreateCommentParams,
-    connectorMetricsService: ConnectorMetricsService
-  ): Promise<unknown> => {
+  const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
     try {
       if (!createCommentUrl || !createCommentJson || !createCommentMethod) {
         return;

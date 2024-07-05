@@ -15,6 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { snExternalServiceConfig } from '../lib/servicenow/config';
 import { itomEventParams, serviceNowChoices } from '../lib/servicenow/mocks';
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -33,8 +34,10 @@ const configurationUtilities = actionsConfigMock.create();
 
 describe('ServiceNow SIR service', () => {
   let service: ExternalServiceITOM;
+  let connectorMetricsService: ConnectorMetricsService;
 
   beforeEach(() => {
+    connectorMetricsService = new ConnectorMetricsService();
     service = createExternalService({
       credentials: {
         config: { apiUrl: 'https://example.com/', isOAuth: false },
@@ -44,6 +47,7 @@ describe('ServiceNow SIR service', () => {
       configurationUtilities,
       serviceConfig: snExternalServiceConfig['.servicenow-itom'],
       axiosInstance: axios,
+      connectorMetricsService,
     }) as ExternalServiceITOM;
   });
 
@@ -69,6 +73,7 @@ describe('ServiceNow SIR service', () => {
         url: 'https://example.com/api/global/em/jsonv2',
         method: 'post',
         data: { records: [itomEventParams] },
+        connectorMetricsService,
       });
     });
   });
@@ -85,6 +90,7 @@ describe('ServiceNow SIR service', () => {
         logger,
         configurationUtilities,
         url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=em_event^element=severity^language=en&sysparm_fields=label,value,dependent_value,element',
+        connectorMetricsService,
       });
     });
   });

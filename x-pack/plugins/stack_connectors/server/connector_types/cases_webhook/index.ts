@@ -70,7 +70,7 @@ export async function executor(
     CasesWebhookActionParamsType
   >
 ): Promise<ConnectorTypeExecutorResult<CasesWebhookExecutorResultData>> {
-  const { actionId, configurationUtilities, params, logger } = execOptions;
+  const { actionId, configurationUtilities, params, logger, connectorMetricsService } = execOptions;
   const { subAction, subActionParams } = params;
   let data: CasesWebhookExecutorResultData | undefined;
 
@@ -81,7 +81,8 @@ export async function executor(
       secrets: execOptions.secrets,
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    connectorMetricsService
   );
 
   if (!api[subAction]) {
@@ -98,14 +99,11 @@ export async function executor(
 
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-    data = await api.pushToService(
-      {
-        externalService,
-        params: pushToServiceParams,
-        logger,
-      },
-      execOptions.connectorMetricsService
-    );
+    data = await api.pushToService({
+      externalService,
+      params: pushToServiceParams,
+      logger,
+    });
 
     logger.debug(`response push to service for case id: ${data.id}`);
   }

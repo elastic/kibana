@@ -8,10 +8,7 @@
 import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
 import { TypeOf } from '@kbn/config-schema';
 import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
-import type {
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-  ConnectorMetricsService,
-} from '@kbn/actions-plugin/server/types';
+import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import {
   PostMessageParamsSchema,
   PostMessageSubActionParamsSchema,
@@ -87,15 +84,16 @@ export interface ValidChannelRouteResponse {
 
 export interface SlackApiService {
   validChannelId: (
-    channelId: string,
-    connectorMetricsService: ConnectorMetricsService
+    channelId: string
   ) => Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>>;
-  postMessage: (
-    { channels, channelIds, text }: PostMessageSubActionParams,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<ConnectorTypeExecutorResult<unknown>>;
-  postBlockkit: (
-    { channels, channelIds, text }: PostBlockkitSubActionParams,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<ConnectorTypeExecutorResult<unknown>>;
+  postMessage: ({
+    channels,
+    channelIds,
+    text,
+  }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
+  postBlockkit: ({
+    channels,
+    channelIds,
+    text,
+  }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

@@ -124,14 +124,14 @@ const slackApiExecutor = async ({
       secrets,
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    connectorMetricsService
   );
 
   if (subAction === 'validChannelId') {
     return await api.validChannelId({
       externalService,
       params: params.subActionParams,
-      connectorMetricsService,
     });
   }
 
@@ -139,7 +139,6 @@ const slackApiExecutor = async ({
     return await api.postMessage({
       externalService,
       params: params.subActionParams,
-      connectorMetricsService,
     });
   }
 
@@ -147,7 +146,6 @@ const slackApiExecutor = async ({
     return await api.postBlockkit({
       externalService,
       params: params.subActionParams,
-      connectorMetricsService,
     });
   }
 

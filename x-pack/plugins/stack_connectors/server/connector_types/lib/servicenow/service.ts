@@ -37,6 +37,7 @@ export const createExternalService: ServiceFactory = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
+  connectorMetricsService,
 }): ExternalService => {
   const { config, secrets } = credentials;
   const { table, importSetTable, useImportAPI, appScope } = serviceConfig;
@@ -132,6 +133,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         configurationUtilities,
         method: 'get',
+        connectorMetricsService, // TODO check if this is internal
       });
 
       checkInstance(res);
@@ -160,6 +162,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         configurationUtilities,
         method: 'get',
+        connectorMetricsService,
       });
 
       checkInstance(res);
@@ -178,6 +181,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         params,
         configurationUtilities,
+        connectorMetricsService,
       });
 
       checkInstance(res);
@@ -201,6 +205,7 @@ export const createExternalService: ServiceFactory = ({
         method: 'post',
         data: prepareIncident(useTableApi, incident),
         configurationUtilities,
+        connectorMetricsService,
       });
 
       checkInstance(res);
@@ -240,6 +245,7 @@ export const createExternalService: ServiceFactory = ({
           ...(useTableApi ? {} : { elastic_incident_id: incidentId }),
         },
         configurationUtilities,
+        connectorMetricsService,
       });
 
       checkInstance(res);
@@ -272,6 +278,7 @@ export const createExternalService: ServiceFactory = ({
         method: 'get',
         logger,
         configurationUtilities,
+        connectorMetricsService,
       });
 
       checkInstance(res);
@@ -350,6 +357,7 @@ export const createExternalService: ServiceFactory = ({
         url: fieldsUrl,
         logger,
         configurationUtilities,
+        connectorMetricsService,
       });
 
       checkInstance(res);
@@ -367,6 +375,7 @@ export const createExternalService: ServiceFactory = ({
         url: getChoicesURL(fields),
         logger,
         configurationUtilities,
+        connectorMetricsService,
       });
       checkInstance(res);
       return res.data.result;

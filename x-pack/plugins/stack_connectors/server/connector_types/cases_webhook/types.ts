@@ -7,7 +7,6 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,
@@ -45,22 +44,10 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service
 export interface ExternalService {
-  createComment: (
-    params: CreateCommentParams,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<unknown>;
-  createIncident: (
-    params: CreateIncidentParams,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<ExternalServiceIncidentResponse>;
-  getIncident: (
-    id: string,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<GetIncidentResponse>;
-  updateIncident: (
-    params: UpdateIncidentParams,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<ExternalServiceIncidentResponse>;
+  createComment: (params: CreateCommentParams) => Promise<unknown>;
+  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  getIncident: (id: string) => Promise<GetIncidentResponse>;
+  updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
 export interface CreateIncidentParams {
   incident: Incident;
@@ -104,10 +91,7 @@ export interface GetIncidentResponse {
 }
 
 export interface ExternalServiceApi {
-  pushToService: (
-    args: PushToServiceApiHandlerArgs,
-    connectorMetricsService: ConnectorMetricsService
-  ) => Promise<PushToServiceResponse>;
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
 }
 
 export type CasesWebhookExecutorResultData = ExternalServiceIncidentResponse;

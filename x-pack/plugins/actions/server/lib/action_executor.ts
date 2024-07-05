@@ -533,6 +533,8 @@ export class ActionExecutor {
           status: 'ok',
         };
 
+        // console.log('body bytes ==> ', connectorMetricsService.getRequestBodyByte());
+
         event.event = event.event || {};
 
         const { error, ...resultWithoutError } = result;

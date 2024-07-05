@@ -198,8 +198,16 @@ function getPagerDutyApiUrl(config: ConnectorTypeConfigType): string {
 async function executor(
   execOptions: PagerDutyConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, secrets, params, services, configurationUtilities, logger } =
-    execOptions;
+  const {
+    actionId,
+    config,
+    secrets,
+    params,
+    services,
+    configurationUtilities,
+    logger,
+    connectorMetricsService,
+  } = execOptions;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -213,7 +221,8 @@ async function executor(
     response = await postPagerduty(
       { apiUrl, data, headers, services },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorMetricsService
     );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.pagerduty.postingErrorMessage', {

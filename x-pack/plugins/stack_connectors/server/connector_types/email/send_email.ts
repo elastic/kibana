@@ -200,6 +200,7 @@ async function sendEmailWithNodemailer(
   // some deep properties, so need to use any here.
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
+  connectorMetricsService.addRequestBodyBytes(undefined, email);
   const result = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {

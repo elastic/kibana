@@ -10,6 +10,7 @@ import { omitBy, isNil } from 'lodash/fp';
 import { CaseConnector, getBasicAuthHeader, ServiceParams } from '@kbn/actions-plugin/server';
 import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 import {
   CreateIncidentData,
   ExternalServiceIncidentResponse,
@@ -117,7 +118,10 @@ export class ResilientConnector extends CaseConnector<
     return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   }
 
-  public async createIncident(incident: Incident): Promise<ExternalServiceIncidentResponse> {
+  public async createIncident(
+    incident: Incident,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<ExternalServiceIncidentResponse> {
     try {
       let data: CreateIncidentData = {
         name: incident.name,
@@ -150,19 +154,22 @@ export class ResilientConnector extends CaseConnector<
         };
       }
 
-      const res = await this.request({
-        url: `${this.urls.incident}?text_content_output_format=objects_convert`,
-        method: 'POST',
-        data,
-        headers: this.getAuthHeaders(),
-        responseSchema: schema.object(
-          {
-            id: schema.number(),
-            create_date: schema.number(),
-          },
-          { unknowns: 'allow' }
-        ),
-      });
+      const res = await this.request(
+        {
+          url: `${this.urls.incident}?text_content_output_format=objects_convert`,
+          method: 'POST',
+          data,
+          headers: this.getAuthHeaders(),
+          responseSchema: schema.object(
+            {
+              id: schema.number(),
+              create_date: schema.number(),
+            },
+            { unknowns: 'allow' }
+          ),
+        },
+        connectorMetricsService
+      );
 
       const { id, create_date: createDate } = res.data;
 
@@ -179,30 +186,33 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async updateIncident({
-    incidentId,
-    incident,
-  }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> {
+  public async updateIncident(
+    { incidentId, incident }: UpdateIncidentParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<ExternalServiceIncidentResponse> {
     try {
-      const latestIncident = await this.getIncident({ id: incidentId });
+      const latestIncident = await this.getIncident({ id: incidentId }, connectorMetricsService);
 
       // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
       const newIncident = omitBy(isNil, incident);
       const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident });
 
-      const res = await this.request({
-        method: 'PATCH',
-        url: `${this.urls.incident}/${incidentId}`,
-        data,
-        headers: this.getAuthHeaders(),
-        responseSchema: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
-      });
+      const res = await this.request(
+        {
+          method: 'PATCH',
+          url: `${this.urls.incident}/${incidentId}`,
+          data,
+          headers: this.getAuthHeaders(),
+          responseSchema: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
+        },
+        connectorMetricsService
+      );
 
       if (!res.data.success) {
         throw new Error('Error while updating incident');
       }
 
-      const updatedIncident = await this.getIncident({ id: incidentId });
+      const updatedIncident = await this.getIncident({ id: incidentId }, connectorMetricsService);
 
       return {
         title: `${updatedIncident.id}`,
@@ -220,15 +230,21 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async addComment({ incidentId, comment }: { incidentId: string; comment: string }) {
+  public async addComment(
+    { incidentId, comment }: { incidentId: string; comment: string },
+    connectorMetricsService: ConnectorMetricsService
+  ) {
     try {
-      await this.request({
-        method: 'POST',
-        url: this.urls.comment.replace('{inc_id}', incidentId),
-        data: { text: { format: 'text', content: comment } },
-        headers: this.getAuthHeaders(),
-        responseSchema: schema.object({}, { unknowns: 'allow' }),
-      });
+      await this.request(
+        {
+          method: 'POST',
+          url: this.urls.comment.replace('{inc_id}', incidentId),
+          data: { text: { format: 'text', content: comment } },
+          headers: this.getAuthHeaders(),
+          responseSchema: schema.object({}, { unknowns: 'allow' }),
+        },
+        connectorMetricsService
+      );
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -239,17 +255,23 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async getIncident({ id }: { id: string }): Promise<GetIncidentResponse> {
+  public async getIncident(
+    { id }: { id: string },
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<GetIncidentResponse> {
     try {
-      const res = await this.request({
-        method: 'GET',
-        url: `${this.urls.incident}/${id}`,
-        params: {
-          text_content_output_format: 'objects_convert',
+      const res = await this.request(
+        {
+          method: 'GET',
+          url: `${this.urls.incident}/${id}`,
+          params: {
+            text_content_output_format: 'objects_convert',
+          },
+          headers: this.getAuthHeaders(),
+          responseSchema: GetIncidentResponseSchema,
         },
-        headers: this.getAuthHeaders(),
-        responseSchema: GetIncidentResponseSchema,
-      });
+        connectorMetricsService
+      );
 
       return res.data;
     } catch (error) {
@@ -259,14 +281,20 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async getIncidentTypes(): Promise<GetIncidentTypesResponse> {
+  public async getIncidentTypes(
+    params: unknown,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<GetIncidentTypesResponse> {
     try {
-      const res = await this.request({
-        method: 'GET',
-        url: this.urls.incidentTypes,
-        headers: this.getAuthHeaders(),
-        responseSchema: GetIncidentTypesResponseSchema,
-      });
+      const res = await this.request(
+        {
+          method: 'GET',
+          url: this.urls.incidentTypes,
+          headers: this.getAuthHeaders(),
+          responseSchema: GetIncidentTypesResponseSchema,
+        },
+        connectorMetricsService
+      );
 
       const incidentTypes = res.data?.values ?? [];
 
@@ -281,14 +309,20 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async getSeverity(): Promise<GetSeverityResponse> {
+  public async getSeverity(
+    params: unknown,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<GetSeverityResponse> {
     try {
-      const res = await this.request({
-        method: 'GET',
-        url: this.urls.severity,
-        headers: this.getAuthHeaders(),
-        responseSchema: GetSeverityResponseSchema,
-      });
+      const res = await this.request(
+        {
+          method: 'GET',
+          url: this.urls.severity,
+          headers: this.getAuthHeaders(),
+          responseSchema: GetSeverityResponseSchema,
+        },
+        connectorMetricsService
+      );
 
       const severities = res.data?.values ?? [];
       return severities.map((type: { value: number; label: string }) => ({
@@ -302,14 +336,17 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async getFields() {
+  public async getFields(params: unknown, connectorMetricsService: ConnectorMetricsService) {
     try {
-      const res = await this.request({
-        method: 'GET',
-        url: this.getIncidentFieldsUrl(),
-        headers: this.getAuthHeaders(),
-        responseSchema: GetCommonFieldsResponseSchema,
-      });
+      const res = await this.request(
+        {
+          method: 'GET',
+          url: this.getIncidentFieldsUrl(),
+          headers: this.getAuthHeaders(),
+          responseSchema: GetCommonFieldsResponseSchema,
+        },
+        connectorMetricsService
+      );
 
       const fields = res.data.map((field) => {
         return {

@@ -112,7 +112,8 @@ export const createExternalService = (
     secrets: { token: string };
   },
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  connectorMetricsService: ConnectorMetricsService
 ): SlackApiService => {
   const { token } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
@@ -129,8 +130,7 @@ export const createExternalService = (
   };
 
   const validChannelId = async (
-    channelId: string,
-    connectorMetricsService: ConnectorMetricsService
+    channelId: string
   ): Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>> => {
     try {
       const validChannel = (): Promise<AxiosResponse<ValidChannelResponse>> => {
@@ -194,10 +194,11 @@ export const createExternalService = (
     return channelToUse;
   };
 
-  const postMessage = async (
-    { channels, channelIds = [], text }: PostMessageSubActionParams,
-    connectorMetricsService: ConnectorMetricsService
-  ): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  const postMessage = async ({
+    channels,
+    channelIds = [],
+    text,
+  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       const channelToUse = getChannelToUse({ channels, channelIds });
 
@@ -218,10 +219,11 @@ export const createExternalService = (
     }
   };
 
-  const postBlockkit = async (
-    { channels, channelIds = [], text }: PostBlockkitSubActionParams,
-    connectorMetricsService: ConnectorMetricsService
-  ): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  const postBlockkit = async ({
+    channels,
+    channelIds = [],
+    text,
+  }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       const channelToUse = getChannelToUse({ channels, channelIds });
       const blockJson = JSON.parse(text);

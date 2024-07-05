@@ -8,6 +8,7 @@
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
+import { ConnectorMetricsService } from '../lib';
 import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
 import { ExternalServiceIncidentResponse, ServiceParams } from './types';
@@ -57,36 +58,54 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
     return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
   }
 
-  public async testUrl({ url, data = {} }: { url: string; data?: Record<string, unknown> | null }) {
-    const res = await this.request({
-      url,
-      data,
-      headers: { 'X-Test-Header': 'test' },
-      responseSchema: schema.object({ status: schema.string() }),
-    });
+  public async testUrl(
+    { url, data = {} }: { url: string; data?: Record<string, unknown> | null },
+    connectorMetricsService: ConnectorMetricsService
+  ) {
+    const res = await this.request(
+      {
+        url,
+        data,
+        headers: { 'X-Test-Header': 'test' },
+        responseSchema: schema.object({ status: schema.string() }),
+      },
+      connectorMetricsService
+    );
 
     return res;
   }
 
-  public async testData({ data }: { data: Record<string, unknown> }) {
-    const res = await this.request({
-      url: 'https://example.com',
-      data: this.removeNullOrUndefinedFields(data),
-      headers: { 'X-Test-Header': 'test' },
-      responseSchema: schema.object({ status: schema.string() }),
-    });
+  public async testData(
+    { data }: { data: Record<string, unknown> },
+    connectorMetricsService: ConnectorMetricsService
+  ) {
+    const res = await this.request(
+      {
+        url: 'https://example.com',
+        data: this.removeNullOrUndefinedFields(data),
+        headers: { 'X-Test-Header': 'test' },
+        responseSchema: schema.object({ status: schema.string() }),
+      },
+      connectorMetricsService
+    );
 
     return res;
   }
 
-  public async testAuth({ headers }: { headers?: Record<string, unknown> } = {}) {
-    const res = await this.request({
-      url: 'https://example.com',
-      data: {},
-      auth: { username: 'username', password: 'password' },
-      headers: { 'X-Test-Header': 'test', ...headers },
-      responseSchema: schema.object({ status: schema.string() }),
-    });
+  public async testAuth(
+    { headers }: { headers?: Record<string, unknown> } = {},
+    connectorMetricsService: ConnectorMetricsService
+  ) {
+    const res = await this.request(
+      {
+        url: 'https://example.com',
+        data: {},
+        auth: { username: 'username', password: 'password' },
+        headers: { 'X-Test-Header': 'test', ...headers },
+        responseSchema: schema.object({ status: schema.string() }),
+      },
+      connectorMetricsService
+    );
 
     return res;
   }

@@ -12,7 +12,10 @@ import { IncomingMessage } from 'http';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import { Logger } from '@kbn/core/server';
-import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import {
+  ConnectorMetricsService,
+  ConnectorTokenClientContract,
+} from '@kbn/actions-plugin/server/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
   RunActionParamsSchema,
@@ -199,12 +202,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({
-    body,
-    model: reqModel,
-    signal,
-    timeout,
-  }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi(
+    { body, model: reqModel, signal, timeout }: RunActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<RunActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
@@ -223,7 +224,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       responseSchema: RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
-    const response = await this.request(requestArgs);
+    const response = await this.request(requestArgs, connectorMetricsService);
     const candidate = response.data.candidates[0];
     const usageMetadata = response.data.usageMetadata;
     const completionText = candidate.content.parts[0].text;
@@ -231,46 +232,47 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return { completion: completionText, usageMetadata };
   }
 
-  private async streamAPI({
-    body,
-    model: reqModel,
-    signal,
-    timeout,
-  }: RunActionParams): Promise<StreamingResponse> {
+  private async streamAPI(
+    { body, model: reqModel, signal, timeout }: RunActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<StreamingResponse> {
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = await this.getAccessToken();
 
-    const response = await this.request({
-      url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: StreamingResponseSchema,
-      data: body,
-      responseType: 'stream',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+    const response = await this.request(
+      {
+        url: `${this.url}${path}`,
+        method: 'post',
+        responseSchema: StreamingResponseSchema,
+        data: body,
+        responseType: 'stream',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        signal,
+        timeout: timeout ?? DEFAULT_TIMEOUT_MS,
       },
-      signal,
-      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-    });
+      connectorMetricsService
+    );
 
     return response.data.pipe(new PassThrough());
   }
 
-  public async invokeAI({
-    messages,
-    model,
-    temperature = 0,
-    signal,
-    timeout,
-  }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({
-      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
-      model,
-      signal,
-      timeout,
-    });
+  public async invokeAI(
+    { messages, model, temperature = 0, signal, timeout }: InvokeAIActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<InvokeAIActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+        model,
+        signal,
+        timeout,
+      },
+      connectorMetricsService
+    );
 
     return { message: res.completion, usageMetadata: res.usageMetadata };
   }
@@ -283,21 +285,20 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({
-    messages,
-    model,
-    stopSequences,
-    temperature = 0,
-    signal,
-    timeout,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamAPI({
-      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
-      model,
-      stopSequences,
-      signal,
-      timeout,
-    })) as unknown as IncomingMessage;
+  public async invokeStream(
+    { messages, model, stopSequences, temperature = 0, signal, timeout }: InvokeAIActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<IncomingMessage> {
+    const res = (await this.streamAPI(
+      {
+        body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+        model,
+        stopSequences,
+        signal,
+        timeout,
+      },
+      connectorMetricsService
+    )) as unknown as IncomingMessage;
     return res;
   }
 }

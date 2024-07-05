@@ -67,7 +67,6 @@ export class UnsecuredActionsClient {
     params,
     relatedSavedObjects,
     spaceId,
-    connectorMetricsService,
   }: UnsecuredExecuteOptions) {
     // Check that requesterId is allowed
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
@@ -91,7 +90,6 @@ export class UnsecuredActionsClient {
       relatedSavedObjects,
       spaceId,
       ...source,
-      connectorMetricsService,
     });
   }
 

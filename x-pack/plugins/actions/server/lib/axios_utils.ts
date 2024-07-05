@@ -42,7 +42,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
-  connectorMetricsService?: ConnectorMetricsService;
+  connectorMetricsService?: ConnectorMetricsService; // TODO make optional
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -106,7 +106,7 @@ export const patch = async <T = unknown>({
   data: T;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  connectorMetricsService: ConnectorMetricsService;
+  connectorMetricsService?: ConnectorMetricsService;
 }): Promise<AxiosResponse> => {
   return request({
     axios,

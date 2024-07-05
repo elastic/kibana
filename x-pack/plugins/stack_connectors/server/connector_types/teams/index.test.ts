@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsService, Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
 import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from '.';
@@ -34,10 +34,12 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: TeamsConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorMetricsService: ConnectorMetricsService;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
+  connectorMetricsService = new ConnectorMetricsService();
 });
 
 describe('connector registration', () => {
@@ -167,11 +169,17 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorMetricsService,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
+        "connectorMetricsService": ConnectorMetricsService {
+          "metrics": Object {
+            "requestBodyBytes": 0,
+          },
+        },
         "data": Object {
           "text": "this invocation should succeed",
         },
@@ -223,11 +231,17 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorMetricsService,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
+        "connectorMetricsService": ConnectorMetricsService {
+          "metrics": Object {
+            "requestBodyBytes": 0,
+          },
+        },
         "data": Object {
           "text": "this invocation should succeed",
         },

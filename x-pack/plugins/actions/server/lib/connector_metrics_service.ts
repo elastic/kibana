@@ -17,15 +17,12 @@ export class ConnectorMetricsService {
   };
 
   public addRequestBodyBytes(result?: AxiosError | AxiosResponse, body: string | object = '') {
-    this.metrics.requestBodyBytes = this.extractRequestBodyBytes(result, body);
+    const sBody = typeof body === 'string' ? body : JSON.stringify(body);
+    const bytes = result?.request?.headers?.['Content-Length'] || Buffer.byteLength(sBody, 'utf8');
+    this.metrics.requestBodyBytes = this.metrics.requestBodyBytes + bytes;
   }
 
   public getRequestBodyByte() {
     return this.metrics.requestBodyBytes;
-  }
-
-  private extractRequestBodyBytes(result?: AxiosError | AxiosResponse, body: string | object = '') {
-    const stringBody = typeof body === 'string' ? body : JSON.stringify(body);
-    return result?.request?.headers?.['Content-Length'] || Buffer.byteLength(stringBody, 'utf8');
   }
 }

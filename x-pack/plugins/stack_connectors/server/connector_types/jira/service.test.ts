@@ -14,6 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -135,8 +136,10 @@ const mockOldAPI = () =>
 
 describe('Jira service', () => {
   let service: ExternalService;
+  let connectorMetricsService: ConnectorMetricsService;
 
   beforeAll(() => {
+    connectorMetricsService = new ConnectorMetricsService();
     service = createExternalService(
       {
         // The trailing slash at the end of the url is intended.
@@ -145,7 +148,8 @@ describe('Jira service', () => {
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorMetricsService
     );
   });
 
@@ -162,7 +166,8 @@ describe('Jira service', () => {
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorMetricsService
         )
       ).toThrow();
     });
@@ -175,7 +180,8 @@ describe('Jira service', () => {
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorMetricsService
         )
       ).toThrow();
     });
@@ -188,7 +194,8 @@ describe('Jira service', () => {
             secrets: { apiToken: 'token' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorMetricsService
         )
       ).toThrow();
     });
@@ -201,7 +208,8 @@ describe('Jira service', () => {
             secrets: { email: 'elastic@elastic.com' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorMetricsService
         )
       ).toThrow();
     });
@@ -213,7 +221,8 @@ describe('Jira service', () => {
           secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorMetricsService
       );
 
       expect(axios.create).toHaveBeenCalledWith({
@@ -258,6 +267,7 @@ describe('Jira service', () => {
         url: 'https://coolsite.net/rest/api/2/issue/1',
         logger,
         configurationUtilities,
+        connectorMetricsService,
       });
     });
 
@@ -401,6 +411,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
           },
         },
+        connectorMetricsService,
       });
     });
 
@@ -459,6 +470,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
           },
         },
+        connectorMetricsService,
       });
     });
 
@@ -492,6 +504,7 @@ describe('Jira service', () => {
             parent: { key: 'RJ-107' },
           },
         },
+        connectorMetricsService,
       });
     });
 
@@ -561,6 +574,7 @@ describe('Jira service', () => {
               ...otherFields,
             },
           },
+          connectorMetricsService,
         });
       });
     });
@@ -631,6 +645,7 @@ describe('Jira service', () => {
             parent: { key: 'RJ-107' },
           },
         },
+        connectorMetricsService,
       });
     });
 
@@ -693,6 +708,7 @@ describe('Jira service', () => {
               ...otherFields,
             },
           },
+          connectorMetricsService,
         });
       });
     });
@@ -746,6 +762,7 @@ describe('Jira service', () => {
         configurationUtilities,
         url: 'https://coolsite.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },
+        connectorMetricsService,
       });
     });
 
@@ -802,6 +819,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: 'https://coolsite.net/rest/capabilities',
+        connectorMetricsService,
       });
     });
 
@@ -883,6 +901,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
+          connectorMetricsService,
         });
       });
 
@@ -957,6 +976,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
+          connectorMetricsService,
         });
       });
 
@@ -1032,6 +1052,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
+          connectorMetricsService,
         });
       });
 
@@ -1240,6 +1261,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
+        connectorMetricsService,
       });
     });
 
@@ -1266,6 +1288,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22`,
+        connectorMetricsService,
       });
     });
 
@@ -1344,6 +1367,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/issue/RJ-107`,
+        connectorMetricsService,
       });
     });
 

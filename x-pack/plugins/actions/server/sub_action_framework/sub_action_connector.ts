@@ -153,7 +153,6 @@ export abstract class SubActionConnector<Config, Secrets> {
       );
 
       const { auth, ...restConfig } = config;
-      const normalizedData = this.normalizeData(data);
 
       const res = await request({
         ...restConfig,
@@ -161,7 +160,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         url: normalizedURL,
         logger: this.logger,
         method,
-        data: normalizedData,
+        data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(auth, headers as AxiosHeaders),
         timeout,

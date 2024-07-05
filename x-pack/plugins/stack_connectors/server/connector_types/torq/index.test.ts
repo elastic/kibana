@@ -11,7 +11,12 @@ import axios from 'axios';
 import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import {
+  ConnectorMetricsService,
+  validateConfig,
+  validateParams,
+  validateSecrets,
+} from '@kbn/actions-plugin/server/lib';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -37,10 +42,12 @@ const services: Services = actionsMock.createServices();
 let actionType: TorqActionType;
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorMetricsService: ConnectorMetricsService;
 
 beforeAll(() => {
   actionType = getActionType();
   configurationUtilities = actionsConfigMock.create();
+  connectorMetricsService = new ConnectorMetricsService();
 });
 
 describe('actionType', () => {
@@ -171,12 +178,18 @@ describe('execute Torq action', () => {
       params: { body: '{"msg": "some data"}' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorMetricsService,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": [MockFunction],
+        "connectorMetricsService": ConnectorMetricsService {
+          "metrics": Object {
+            "requestBodyBytes": 0,
+          },
+        },
         "data": Object {
           "msg": "some data",
         },
