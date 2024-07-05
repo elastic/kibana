@@ -5,41 +5,60 @@
  * 2.0.
  */
 
+import {
+  PromptResponse,
+  PromptTypeEnum,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useCallback } from 'react';
-import { QuickPrompt } from '../types';
+import { useAssistantContext } from '../../../..';
 
 export const DEFAULT_COLOR = '#D36086';
 
 export const useQuickPromptEditor = ({
   onSelectedQuickPromptChange,
   setUpdatedQuickPromptSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: {
-  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
+  onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }) => {
+  const { currentAppId } = useAssistantContext();
   const onQuickPromptDeleted = useCallback(
-    (title: string) => {
-      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.title !== title));
+    (id: string) => {
+      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.id !== id));
+      setPromptsBulkActions({
+        ...promptsBulkActions,
+        delete: {
+          ids: [...(promptsBulkActions.delete?.ids ?? []), id],
+        },
+      });
     },
-    [setUpdatedQuickPromptSettings]
+    [promptsBulkActions, setPromptsBulkActions, setUpdatedQuickPromptSettings]
   );
 
   // When top level quick prompt selection changes
   const onQuickPromptSelectionChange = useCallback(
-    (quickPrompt?: QuickPrompt | string) => {
+    (quickPrompt?: PromptResponse | string) => {
       const isNew = typeof quickPrompt === 'string';
-      const newSelectedQuickPrompt: QuickPrompt | undefined = isNew
+      const newSelectedQuickPrompt: PromptResponse | undefined = isNew
         ? {
-            title: quickPrompt ?? '',
-            prompt: '',
+            name: quickPrompt,
+            id: quickPrompt,
+            content: '',
             color: DEFAULT_COLOR,
             categories: [],
+            promptType: PromptTypeEnum.quick,
+            consumer: currentAppId,
           }
         : quickPrompt;
 
       if (newSelectedQuickPrompt != null) {
         setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.title === newSelectedQuickPrompt.title);
+          const alreadyExists = prev.some((qp) => qp.name === newSelectedQuickPrompt.name);
 
           if (!alreadyExists) {
             return [...prev, newSelectedQuickPrompt];
@@ -47,11 +66,29 @@ export const useQuickPromptEditor = ({
 
           return prev;
         });
+
+        if (isNew) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            create: [
+              ...(promptsBulkActions.create ?? []),
+              {
+                ...newSelectedQuickPrompt,
+              },
+            ],
+          });
+        }
       }
 
       onSelectedQuickPromptChange(newSelectedQuickPrompt);
     },
-    [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
+    [
+      currentAppId,
+      onSelectedQuickPromptChange,
+      promptsBulkActions,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   return { onQuickPromptDeleted, onQuickPromptSelectionChange };
