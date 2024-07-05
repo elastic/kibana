@@ -205,10 +205,10 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
   /api/cases/configure:
     get:
-      summary: Retrieves external connection details, such as the closure type and default connector for cases in the default space.
+      summary: Get case settings in the default space
       operationId: getCaseConfigurationDefaultSpace
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.
+        Retrieves setting details such as the closure type, custom fields, templatse, and the default connector for cases in the default space. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
       tags:
         - cases
       parameters:
@@ -396,10 +396,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/4xx_response'
     post:
-      summary: Creates a case specific configuration that includes external connection details and custom fields.
+      summary: Add case settings in the default space
       operationId: setCaseConfigurationDefaultSpace
       description: |
-        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.
+        Case settings include external connection details, custom fields, and templates.  Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.
       tags:
         - cases
       parameters:
@@ -594,10 +594,10 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
   /api/cases/configure/{configurationId}:
     patch:
-      summary: Updates external connection details, such as the closure type and default connector for cases in the default space.
+      summary: Update case settings in the default space
       operationId: updateCaseConfigurationDefaultSpace
       description: |
-        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.
+        Updates setting details such as the closure type, custom fields, templates, and the default connector for cases in the default space. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the case was created.
       tags:
         - cases
       parameters:
@@ -1232,10 +1232,10 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
   /api/cases/configure/connectors/_find:
     get:
-      summary: Retrieves information about connectors in the default space.
+      summary: Get case connectors in the default space
       operationId: findCaseConnectorsDefaultSpace
       description: |
-        In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+        Retrieves information about connectors that are supported for use in cases in the default space. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
         - cases
       responses:
@@ -1471,10 +1471,10 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
   /s/{spaceId}/api/cases/configure:
     get:
-      summary: Retrieves external connection details, such as the closure type and default connector for cases.
+      summary: Get case settings
       operationId: getCaseConfiguration
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.
+        Retrieves setting details such as the closure type, custom fields, templates, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
       tags:
         - cases
       parameters:
@@ -1663,10 +1663,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/4xx_response'
     post:
-      summary: Creates a case specific configuration that includes external connection details and custom fields.
+      summary: Add case settings
       operationId: setCaseConfiguration
       description: |
-        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.
+        Case settings include external connection details, custom fields, and templates.  Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.
       tags:
         - cases
       parameters:
@@ -1862,10 +1862,10 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
   /s/{spaceId}/api/cases/configure/{configurationId}:
     patch:
-      summary: Updates external connection details, such as the closure type and default connector for cases.
+      summary: Update case settings
       operationId: updateCaseConfiguration
       description: |
-        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.
+        Updates setting details such as the closure type, custom fields, templates, and the default connector for cases. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the case was created.
       tags:
         - cases
       parameters:
@@ -2062,10 +2062,10 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
-      summary: Retrieves information about connectors.
+      summary: Get case connectors
       operationId: findCaseConnectors
       description: |
-        In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+        Retrieves information about connectors that are supported for use in cases. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
         - cases
       parameters:
