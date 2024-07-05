@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { z } from 'zod';
+import { z, isZod } from '@kbn/zod';
 import type { OpenAPIV3 } from 'openapi-types';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -15,16 +15,12 @@ import { validatePathParameters } from '../common';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
 
-const instanceofZodType = (type: any): type is z.ZodTypeAny => {
-  return !!type?._def?.typeName;
-};
-
 const createError = (message: string): Error => {
   return new Error(`[Zod converter] ${message}`);
 };
 
 function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAny {
-  if (!instanceofZodType(schema)) {
+  if (!isZod(schema)) {
     throw createError('Expected schema to be an instance of Zod');
   }
 }
@@ -216,4 +212,4 @@ export const convert = (schema: z.ZodTypeAny) => {
   };
 };
 
-export const is = instanceofZodType;
+export const is = isZod;

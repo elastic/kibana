@@ -7,7 +7,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { is, convert, convertPathParameters, convertQuery } from './lib';
+import { convert, convertPathParameters, convertQuery } from './lib';
 
 import { createLargeSchema } from './lib.test.util';
 
@@ -140,28 +140,6 @@ describe('zod', () => {
         ],
         shared: {},
       });
-    });
-  });
-
-  describe('is', () => {
-    test.each([
-      [{}, false],
-      [1, false],
-      [undefined, false],
-      [null, false],
-      [z.any(), true],
-      [z.object({}).default({}), true],
-      [z.never(), true],
-      [z.string(), true],
-      [z.number(), true],
-      [z.map(z.string(), z.number()), true],
-      [z.record(z.string(), z.number()), true],
-      [z.array(z.string()), true],
-      [z.object({}), true],
-      [z.union([z.string(), z.number()]), true],
-      [z.literal('yes').optional(), true],
-    ])('"is" correctly identifies %#', (value, result) => {
-      expect(is(value)).toBe(result);
     });
   });
 });
