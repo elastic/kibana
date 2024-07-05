@@ -23,10 +23,7 @@ import {
 } from '@kbn/unified-field-list';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  AvailableFields$,
-  DataDocuments$,
-} from '../../state_management/discover_data_state_container';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
@@ -129,10 +126,6 @@ export interface DiscoverSidebarResponsiveProps {
    * callback to execute on create dataview
    */
   onDataViewCreated: (dataView: DataView) => void;
-  /**
-   * list of available fields fetched from ES
-   */
-  availableFields$: AvailableFields$;
   /**
    * For customization and testing purposes
    */
@@ -291,20 +284,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewEditor } = services;
-  const { availableFields$ } = props;
-
-  useEffect(() => {
-    // For an external embeddable like the Field stats
-    // it is useful to know what fields are populated in the docs fetched
-    // or what fields are selected by the user
-
-    const availableFields =
-      props.columns.length > 0 ? props.columns : Object.keys(sidebarState.fieldCounts || {});
-    availableFields$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: availableFields,
-    });
-  }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) ||
