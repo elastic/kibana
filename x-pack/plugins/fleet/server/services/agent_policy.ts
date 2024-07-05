@@ -1102,7 +1102,8 @@ class AgentPolicyService {
       });
 
       const { items: fleetHosts } = await listFleetServerHosts(soClient);
-      // TODO: change this when we add the internal fleet server config
+      // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
+      // https://github.com/elastic/security-team/issues/9695
       const defaultFleetHost =
         fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
 
@@ -1168,27 +1169,6 @@ class AgentPolicyService {
       }
     }
   }
-
-  // getHttpsAgent(targetUrl: string, tls: ) {
-  //   const parsedTargetUrl = new URL(targetUrl);
-
-  //   const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost';
-  //   const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
-
-  //   // If using basic-auth, ignore certificate config
-
-  //   if (config.tls && config.tls.certificate && config.tls.key) {
-  //     const tlsConfig = new SslConfig(config.tls);
-
-  //     return new https.Agent({
-  //       rejectUnauthorized,
-  //       cert: tlsConfig.certificate,
-  //       key: tlsConfig.key,
-  //     });
-  //   }
-
-  //   return baseHttpsAgent;
-  // }
 
   public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
     await this.deployPolicies(soClient, [agentPolicyId]);
