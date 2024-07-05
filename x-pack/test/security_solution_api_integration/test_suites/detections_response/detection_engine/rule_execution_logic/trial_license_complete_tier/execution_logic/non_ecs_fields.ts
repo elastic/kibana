@@ -319,7 +319,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // The issue was found by customer and reported in
     // https://github.com/elastic/kibana/issues/187630
-    describe.only('saving non-ECS compliant text field in keyword', () => {
+    describe('saving non-ECS compliant text field in keyword', () => {
       it('should remove text field if the length of the string is more than 32766 bytes', async () => {
         const document = {
           'event.original': 'z'.repeat(32767),
@@ -332,6 +332,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         // invalid ECS field is getting removed
         expect(alertSource).not.toHaveProperty(['kibana.alert.original_event.original']);
+
+        // module is a keyword with `ignore_above` attribute which allows long text to be stored
+        expect(alertSource).toHaveProperty(['kibana.alert.original_event.module']);
       });
 
       it('should not remove text field if the length of the string is less than or equal to 32766 bytes', async () => {
