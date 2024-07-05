@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -108,33 +107,32 @@ export const SelectAllButton = () => {
     return null;
   }
 
-  return (
-    <>
-      <EuiScreenReaderOnly>
-        <span>
-          {i18n.translate('unifiedDataTable.selectRowsHeader', {
-            defaultMessage: 'Select rows',
-          })}
-        </span>
-      </EuiScreenReaderOnly>
-      <EuiCheckbox
-        id="select-all-docs-toggle"
-        aria-label={i18n.translate('unifiedDataTable.selectColumnHeader', {
-          defaultMessage: 'Select all rows',
-        })}
-        indeterminate={isIndeterminateForCurrentPage}
-        checked={areDocsSelectedForCurrentPage}
-        onChange={(e) => {
-          const shouldClearSelection = isIndeterminateForCurrentPage || !e.target.checked;
+  const title =
+    isIndeterminateForCurrentPage || areDocsSelectedForCurrentPage
+      ? i18n.translate('unifiedDataTable.deselectAllRowsOnPageColumnHeader', {
+          defaultMessage: 'Deselect all rows on the page',
+        })
+      : i18n.translate('unifiedDataTable.selectAllRowsOnPageColumnHeader', {
+          defaultMessage: 'Select all rows on the page',
+        });
 
-          if (shouldClearSelection) {
-            deselectSomeDocs(docIdsFromCurrentPage);
-          } else {
-            selectMoreDocs(docIdsFromCurrentPage);
-          }
-        }}
-      />
-    </>
+  return (
+    <EuiCheckbox
+      id="select-all-docs-on-page-toggle"
+      aria-label={title}
+      title={title}
+      indeterminate={isIndeterminateForCurrentPage}
+      checked={areDocsSelectedForCurrentPage}
+      onChange={(e) => {
+        const shouldClearSelection = isIndeterminateForCurrentPage || !e.target.checked;
+
+        if (shouldClearSelection) {
+          deselectSomeDocs(docIdsFromCurrentPage);
+        } else {
+          selectMoreDocs(docIdsFromCurrentPage);
+        }
+      }}
+    />
   );
 };
 
