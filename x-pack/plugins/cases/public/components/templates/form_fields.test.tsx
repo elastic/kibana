@@ -17,6 +17,7 @@ import { useGetChoicesResponse } from '../create/mock';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from './translations';
 import { FormFields } from './form_fields';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -394,5 +395,48 @@ describe('form fields', () => {
         true
       );
     });
+  });
+
+  it('does not render duplicate template tags', async () => {
+    const newProps = {
+      ...defaultProps,
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        templates: [
+          {
+            key: 'test_template_1',
+            name: 'Test',
+            tags: ['one', 'two'],
+            caseFields: {},
+          },
+          {
+            key: 'test_template_2',
+            name: 'Test 2',
+            tags: ['one', 'three'],
+            caseFields: {},
+          },
+        ],
+      },
+    };
+
+    appMockRenderer.render(
+      <FormTestComponent onSubmit={onSubmit} formDefaultValue={formDefaultValue}>
+        <FormFields {...newProps} />
+      </FormTestComponent>
+    );
+
+    const caseTags = await screen.findByTestId('template-tags');
+
+    userEvent.click(within(caseTags).getByTestId('comboBoxToggleListButton'));
+    await waitForEuiPopoverOpen();
+
+    /**
+     * RTL will throw an error if there are more that one
+     * element matching the text. This ensures that duplicated
+     * tags are removed. Docs: https://testing-library.com/docs/queries/about
+     */
+    expect(await screen.findByText('one'));
+    expect(await screen.findByText('two'));
+    expect(await screen.findByText('three'));
   });
 });
