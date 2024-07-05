@@ -18,13 +18,13 @@ export default function ({ getService }: FtrProviderContext) {
   const taskType = 'sparse_embedding';
   const service = 'elser';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/185216
-  describe.skip('Inference endpoints', function () {
-    // test adds new trained model '.elser_model_2_linux-x86_64', but does not clean it. Follow up tests are affected
-    this.tags(['failsOnMKI']);
+  describe('Inference endpoints', function () {
+    let modelsBeforeTest: any[] = [];
     before(async () => {
       log.debug(`Creating inference endpoint`);
       try {
+        const modelsInfo = await ml.api.getTrainedModelsES();
+        modelsBeforeTest = modelsInfo.trained_model_configs.map((model: any) => model.model_id);
         await ml.api.createInferenceEndpoint(inferenceId, taskType, {
           service,
           service_settings: {
@@ -43,6 +43,14 @@ export default function ({ getService }: FtrProviderContext) {
       try {
         log.debug(`Deleting inference endpoint`);
         await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
+
+        const modelsInfo = await ml.api.getTrainedModelsES();
+        let modelsAfterTest = modelsInfo.trained_model_configs.map((model: any) => model.model_id);
+
+        modelsAfterTest = modelsAfterTest.filter((model: any) => !modelsBeforeTest.includes(model));
+        for (const modelId of modelsAfterTest) {
+          await ml.api.deleteTrainedModelES(modelId);
+        }
       } catch (err) {
         log.debug('[Cleanup error] Error deleting inference endpoint');
         throw err;
