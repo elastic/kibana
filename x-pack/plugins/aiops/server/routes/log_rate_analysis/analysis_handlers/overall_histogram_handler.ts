@@ -42,19 +42,18 @@ export const overallHistogramHandlerFactory =
 
     try {
       overallTimeSeries = (
-        (await fetchHistogramsForFields(
+        (await fetchHistogramsForFields({
           esClient,
-          requestBody.index,
-          overallHistogramQuery,
-          // fields
-          histogramFields,
-          // samplerShardSize
-          -1,
-          undefined,
           abortSignal,
-          stateHandler.sampleProbability(),
-          RANDOM_SAMPLER_SEED
-        )) as [NumericChartData]
+          arguments: {
+            indexPattern: requestBody.index,
+            query: overallHistogramQuery,
+            fields: histogramFields,
+            samplerShardSize: -1,
+            randomSamplerProbability: stateHandler.sampleProbability(),
+            randomSamplerSeed: RANDOM_SAMPLER_SEED,
+          },
+        })) as [NumericChartData]
       )[0];
     } catch (e) {
       if (!isRequestAbortedError(e)) {

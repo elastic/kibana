@@ -163,27 +163,26 @@ export const groupingHandlerFactory =
             let cpgTimeSeries: NumericChartData;
             try {
               cpgTimeSeries = (
-                (await fetchHistogramsForFields(
+                (await fetchHistogramsForFields({
                   esClient,
-                  requestBody.index,
-                  histogramQuery,
-                  // fields
-                  [
-                    {
-                      fieldName: requestBody.timeFieldName,
-                      type: KBN_FIELD_TYPES.DATE,
-                      interval: overallTimeSeries.interval,
-                      min: overallTimeSeries.stats[0],
-                      max: overallTimeSeries.stats[1],
-                    },
-                  ],
-                  // samplerShardSize
-                  -1,
-                  undefined,
                   abortSignal,
-                  stateHandler.sampleProbability(),
-                  RANDOM_SAMPLER_SEED
-                )) as [NumericChartData]
+                  arguments: {
+                    indexPattern: requestBody.index,
+                    query: histogramQuery,
+                    fields: [
+                      {
+                        fieldName: requestBody.timeFieldName,
+                        type: KBN_FIELD_TYPES.DATE,
+                        interval: overallTimeSeries.interval,
+                        min: overallTimeSeries.stats[0],
+                        max: overallTimeSeries.stats[1],
+                      },
+                    ],
+                    samplerShardSize: -1,
+                    randomSamplerProbability: stateHandler.sampleProbability(),
+                    randomSamplerSeed: RANDOM_SAMPLER_SEED,
+                  },
+                })) as [NumericChartData]
               )[0];
             } catch (e) {
               if (!isRequestAbortedError(e)) {
