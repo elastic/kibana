@@ -9,6 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
+import { useCspmStatsApi } from '@kbn/cloud-security-posture-plugin/public';
+
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -122,6 +125,10 @@ export const HostPanel = ({
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
   const observedHost = useObservedHost(hostName, scopeId);
+  const getCSPSetupStatus = useCspSetupStatusApi();
+  const statusCspm = getCSPSetupStatus.data?.cspm?.status;
+  const getCSPMStats = useCspmStatsApi();
+  const totalFailed = getCSPMStats.data?.stats?.totalFailed;
 
   if (observedHost.isLoading) {
     return <FlyoutLoading />;
@@ -151,6 +158,8 @@ export const HostPanel = ({
               expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
+            <p>CSP status: {statusCspm}</p>
+            <p>Total Filed: {totalFailed}</p>
             <HostPanelContent
               hostName={hostName}
               observedHost={observedHostWithAnomalies}

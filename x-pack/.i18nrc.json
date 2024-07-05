@@ -27,6 +27,7 @@
     "xpack.dataQuality": "plugins/data_quality",
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
     "xpack.discover": "plugins/discover_enhanced",
+    "xpack.cloudSecurityPosture": "packages/kbn-cloud-security-posture",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
     "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
     "xpack.elasticAssistantCommon": "packages/kbn-elastic-assistant-common",

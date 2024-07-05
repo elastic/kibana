@@ -201,6 +201,7 @@
     "@kbn/cloud-integration-saml-provider-plugin": "link:x-pack/test/cloud_integration/plugins/saml_provider",
     "@kbn/cloud-links-plugin": "link:x-pack/plugins/cloud_integrations/cloud_links",
     "@kbn/cloud-plugin": "link:x-pack/plugins/cloud",
+    "@kbn/cloud-security-posture": "link:x-pack/packages/kbn-cloud-security-posture",
     "@kbn/cloud-security-posture-plugin": "link:x-pack/plugins/cloud_security_posture",
     "@kbn/code-editor": "link:packages/shared-ux/code_editor/impl",
     "@kbn/code-editor-mock": "link:packages/shared-ux/code_editor/mocks",

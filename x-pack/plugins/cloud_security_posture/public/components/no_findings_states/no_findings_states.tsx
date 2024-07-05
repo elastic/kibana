@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
@@ -29,7 +30,6 @@ import {
   NO_FINDINGS_STATUS_TEST_SUBJ,
 } from '../test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import type { IndexDetails, PostureTypes, CspStatusCode } from '../../../common/types_old';
 import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';

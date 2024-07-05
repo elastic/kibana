@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { STATUS_API_CURRENT_VERSION, STATUS_ROUTE_PATH } from '@kbn/cloud-security-posture';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture';
-import { useKibana } from '../hooks/use_kibana';
+import { UseQueryOptions, useQuery } from '@tanstack/react-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { CspSetupStatus } from './types';
+
+export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
+export const STATUS_API_CURRENT_VERSION = '1';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 
 export const useCspSetupStatusApi = (
   options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus>
 ) => {
-  const { http } = useKibana().services;
+  const { http } = useKibana<CoreStart>().services;
   return useQuery<CspSetupStatus, unknown, CspSetupStatus>(
     [getCspSetupStatusQueryKey],
     () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH, { version: STATUS_API_CURRENT_VERSION }),
