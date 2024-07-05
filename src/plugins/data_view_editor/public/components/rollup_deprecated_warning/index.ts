@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RollupBetaWarning } from './rollup_beta_warning';
+export { RollupDeprecatedWarning } from './rollup_deprecated_warning';
