@@ -738,15 +738,17 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                           }
                         )}
                       </p>
-                      <p>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                          {
-                            defaultMessage:
-                              'The default log path to be scraped is /var/log/*. You can change this path in the otel.yml file if needed.',
-                          }
-                        )}
-                      </p>
+                      {selectedTab !== 'kubernetes' && (
+                        <p>
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                            {
+                              defaultMessage:
+                                'The default log path to be scraped is /var/log/*. You can change this path in the otel.yml file if needed.',
+                            }
+                          )}
+                        </p>
+                      )}
                     </EuiCallOut>
 
                     {selectedContent.prompt}
