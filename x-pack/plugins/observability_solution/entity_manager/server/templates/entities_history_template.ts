@@ -17,7 +17,8 @@ import {
 export const entitiesHistoryIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
   name: ENTITY_HISTORY_INDEX_TEMPLATE_V1,
   _meta: {
-    description: 'The entities index template',
+    description:
+      "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",
     ecs_version: '8.0.0',
   },
   composed_of: [
