@@ -11,7 +11,10 @@ import type {
   RuleAction as AlertingRuleAction,
   RuleSystemAction as AlertingRuleSystemAction,
 } from '@kbn/alerting-plugin/common';
-import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
+import type {
+  NormalizedAlertAction,
+  NormalizedSystemAction,
+} from '@kbn/alerting-plugin/server/rules_client';
 import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
 import type {
   ResponseAction,
@@ -84,8 +87,7 @@ export const transformNormalizedRuleToAlertAction = ({
   params,
   frequency,
   alerts_filter: alertsFilter,
-}: NormalizedRuleAction): NormalizedAlertAction => ({
-  group,
+}: NormalizedRuleAction): NormalizedAlertAction | NormalizedSystemAction => ({
   id,
   params: params as AlertingRuleAction['params'],
   ...(alertsFilter && {
@@ -95,6 +97,7 @@ export const transformNormalizedRuleToAlertAction = ({
     alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
   }),
   ...(frequency && { frequency }),
+  ...(group && { group }),
 });
 
 export const transformAlertToNormalizedRuleAction = ({

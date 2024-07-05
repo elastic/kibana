@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 describe('bulkEditActionToRulesClientOperation', () => {
+  const actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as jest.Mocked<ActionsClient>;
   test('should transform tags bulk edit actions correctly', () => {
     expect(
-      bulkEditActionToRulesClientOperation({
+      bulkEditActionToRulesClientOperation(actionsClient, {
         type: BulkActionEditTypeEnum.add_tags,
         value: ['test'],
       })
@@ -25,7 +29,10 @@ describe('bulkEditActionToRulesClientOperation', () => {
   });
 
   expect(
-    bulkEditActionToRulesClientOperation({ type: BulkActionEditTypeEnum.set_tags, value: ['test'] })
+    bulkEditActionToRulesClientOperation(actionsClient, {
+      type: BulkActionEditTypeEnum.set_tags,
+      value: ['test'],
+    })
   ).toEqual([
     {
       field: 'tags',
@@ -35,7 +42,7 @@ describe('bulkEditActionToRulesClientOperation', () => {
   ]);
 
   expect(
-    bulkEditActionToRulesClientOperation({
+    bulkEditActionToRulesClientOperation(actionsClient, {
       type: BulkActionEditTypeEnum.delete_tags,
       value: ['test'],
     })
@@ -49,7 +56,7 @@ describe('bulkEditActionToRulesClientOperation', () => {
 
   test('should transform schedule bulk edit correctly', () => {
     expect(
-      bulkEditActionToRulesClientOperation({
+      bulkEditActionToRulesClientOperation(actionsClient, {
         type: BulkActionEditTypeEnum.set_schedule,
         value: {
           interval: '100m',
