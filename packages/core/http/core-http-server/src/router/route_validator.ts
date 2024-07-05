@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ObjectType, SchemaTypeError, Type } from '@kbn/config-schema';
+import { type ObjectType, SchemaTypeError, type Type } from '@kbn/config-schema';
+import type { ZodEsque } from '@kbn/zod';
 
 /**
  * Error to return when the validation is not successful.
@@ -71,10 +72,6 @@ export type RouteValidationFunction<T> = (
       value?: never;
       error: RouteValidationError;
     };
-
-export interface ZodEsque<V> {
-  _output: V;
-}
 
 /**
  * Allowed property validation options: either @kbn/config-schema validations or custom validation functions
