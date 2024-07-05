@@ -15,16 +15,25 @@ import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { fetchCategories } from './fetch_categories';
 
-export const fetchTopCategories = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  fieldNames: string[],
-  logger: Logger,
+export const fetchTopCategories = async ({
+  esClient,
+  abortSignal,
+  emitError,
+  logger,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  emitError: (m: string) => void;
+  abortSignal?: AbortSignal;
+  arguments: AiopsLogRateAnalysisSchema & {
+    fieldNames: string[];
+    sampleProbability?: number;
+  };
+}) => {
   // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1,
-  emitError: (m: string) => void,
-  abortSignal?: AbortSignal
-) => {
+  const { fieldNames, sampleProbability = 1, ...params } = args;
+
   const categoriesOverall = await fetchCategories(
     esClient,
     params,

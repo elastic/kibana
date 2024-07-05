@@ -183,15 +183,17 @@ export const topItemsHandlerFactory =
       } else if (isTextFieldCandidates(payload)) {
         const { textFieldCandidates: fieldNames } = payload;
 
-        const topCategoriesForField = await await fetchTopCategories(
+        const topCategoriesForField = await await fetchTopCategories({
           esClient,
-          requestBody,
-          fieldNames,
           logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        );
+          emitError: responseStream.pushError,
+          abortSignal,
+          arguments: {
+            ...requestBody,
+            fieldNames,
+            sampleProbability: stateHandler.sampleProbability(),
+          },
+        });
 
         if (topCategoriesForField.length > 0) {
           topCategories.push(...topCategoriesForField);
