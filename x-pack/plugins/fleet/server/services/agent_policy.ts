@@ -73,6 +73,7 @@ import {
   UUID_V5_NAMESPACE,
 } from '../../common/constants';
 import type {
+  AgentlessApiResponse,
   DeleteAgentPolicyResponse,
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
@@ -87,6 +88,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
+  AgentlessAgentCreateError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -1091,83 +1093,98 @@ class AgentPolicyService {
   public async createAgentlessAgent(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    agentPolicy: AgentPolicy
+    agentlessAgentPolicy: AgentPolicy
   ) {
-    if (agentPolicy.supports_agentless) {
-      const policyId = agentPolicy.id;
-      const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
-        perPage: SO_SEARCH_LIMIT,
-        showInactive: true,
-        kuery: `policy_id:"${policyId}"`,
-      });
+    if (!appContextService.getCloud()?.isCloudEnabled) {
+      throw new AgentlessAgentCreateError('Agentless agent not supported');
+    }
+    if (!agentlessAgentPolicy.supports_agentless) {
+      throw new AgentlessAgentCreateError('Agentless agent policy does not have agentless enabled');
+    }
 
-      const { items: fleetHosts } = await listFleetServerHosts(soClient);
-      // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-      // https://github.com/elastic/security-team/issues/9695
-      const defaultFleetHost =
-        fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    if (!agentlessConfig) {
+      throw new AgentlessAgentCreateError('missing agentless configuration');
+    }
 
-      if (!defaultFleetHost || !enrollmentApiKeys.length) {
-        throw new FleetError(
-          'Error creating agentless agent: missing fleet host or enrollment api key'
-        );
-      }
-      const fleetToken = enrollmentApiKeys[0].api_key;
-      const fleetUrl = defaultFleetHost?.host_urls[0];
+    const policyId = agentlessAgentPolicy.id;
+    const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
+      esClient,
+      policyId,
+      soClient
+    );
 
-      const agentlessConfig = appContextService.getConfig()?.agentless;
-      if (!agentlessConfig) {
-        throw new FleetError('Error creating agentless agent: missing agentless configuration');
-      }
+    const tlsConfig = new SslConfig(
+      sslSchema.validate({
+        enabled: true,
+        certificate: agentlessConfig.api.tls.certificate,
+        key: agentlessConfig.api.tls.key,
+      })
+    );
 
-      const stackVersion = appContextService.getKibanaVersion();
-      const agentlessApiCreateDeploymentUrl = `${agentlessConfig.api.url}/deployments`;
-      const body = {
-        policy_id: policyId,
-        fleet_url: fleetUrl,
-        fleet_token: fleetToken,
-        stack_version: stackVersion,
-      };
-
-      // following these examples:
-      // https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/synthetics/server/synthetics_service/service_api_client.ts#L88
-      // https://github.com/elastic/cloud-assets/pull/947/files
-      // https://github.com/elastic/kibana/pull/172427/files#top
-      const tlsConfig = new SslConfig(
-        sslSchema.validate({
-          enabled: true,
-          certificate: agentlessConfig.api.tls.certificate,
-          key: agentlessConfig.api.tls.key,
-        })
+    try {
+      const { data, status, statusText } = await axios.post<AgentlessApiResponse>(
+        `${agentlessConfig.api.url}/deployments`,
+        {
+          policy_id: policyId,
+          fleet_url: fleetUrl,
+          fleet_token: fleetToken,
+          stack_version: appContextService.getKibanaVersion(),
+        },
+        {
+          headers: {
+            'Content-type': 'application/json',
+          },
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: tlsConfig.rejectUnauthorized,
+            cert: tlsConfig.certificate,
+            key: tlsConfig.key,
+          }),
+        }
       );
 
-      try {
-        const { data, status, statusText } = await axios.post(
-          agentlessApiCreateDeploymentUrl,
-          body,
-          {
-            headers: {
-              'Content-type': 'application/json',
-            },
-            method: 'POST',
-            httpsAgent: new https.Agent({
-              rejectUnauthorized: tlsConfig.rejectUnauthorized,
-              cert: tlsConfig.certificate,
-              key: tlsConfig.key,
-            }),
-          }
+      // if status is not CREATED, throw an error
+      if (status !== 201) {
+        throw new AgentlessAgentCreateError(
+          `received response status: ${status} with message ${statusText}`
         );
-
-        // if status is not CREATED, throw an error
-        if (status !== 201) {
-          throw new FleetError(`Error creating agentless agent: ${statusText}`);
-        }
-
-        return data;
-      } catch (error) {
-        throw new FleetError(`Error creating agentless agent: ${error}`);
       }
+
+      return {
+        status,
+        data,
+      };
+    } catch (error) {
+      throw new AgentlessAgentCreateError(error);
     }
+  }
+
+  private async getFleetUrlAndTokenForAgentlessAgent(
+    esClient: ElasticsearchClient,
+    policyId: string,
+    soClient: SavedObjectsClientContract
+  ) {
+    const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
+      perPage: SO_SEARCH_LIMIT,
+      showInactive: true,
+      kuery: `policy_id:"${policyId}"`,
+    });
+
+    const { items: fleetHosts } = await listFleetServerHosts(soClient);
+    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
+    // https://github.com/elastic/security-team/issues/9695
+    const fleetHost =
+      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
+
+    if (!fleetHost) {
+      throw new AgentlessAgentCreateError('missing Fleet server host');
+    }
+    if (!enrollmentApiKeys.length) {
+      throw new AgentlessAgentCreateError('missing Fleet enrollment token');
+    }
+    const fleetToken = enrollmentApiKeys[0].api_key;
+    const fleetUrl = fleetHost?.host_urls[0];
+    return { fleetUrl, fleetToken };
   }
 
   public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
