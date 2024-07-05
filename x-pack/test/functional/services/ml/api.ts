@@ -256,7 +256,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async deleteInferenceEndpoint(inferenceId: string, taskType: string) {
       const { body, status } = await esSupertest.delete(`/_inference/${taskType}/${inferenceId}`);
       this.assertResponseStatusCode(200, status, body);
-
+      expect(body)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for delete inference endpoint should be acknowledged');
       return body;
     },
 
