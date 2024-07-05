@@ -63,23 +63,24 @@ export const resolveGrid = (originalLayout: GridRow, dragRequest?: GridData): Gr
   if (dragRequest) {
     gridLayout[dragRequest.id] = dragRequest;
   }
+  return gridLayout;
 
   // push all panels down if they collide with another panel
-  const sortedKeys = getKeysInOrder(gridLayout, dragRequest?.id);
+  // const sortedKeys = getKeysInOrder(gridLayout, dragRequest?.id);
 
-  for (const key of sortedKeys) {
-    const panel = gridLayout[key];
-    const collisions = getAllCollisionsWithPanel(panel, gridLayout, sortedKeys);
+  // for (const key of sortedKeys) {
+  //   const panel = gridLayout[key];
+  //   const collisions = getAllCollisionsWithPanel(panel, gridLayout, sortedKeys);
 
-    for (const collision of collisions) {
-      const rowOverlap = panel.row + panel.height - collision.row;
-      if (rowOverlap > 0) {
-        collision.row += rowOverlap;
-      }
-    }
-  }
-  const compactedGrid = compactGrid(gridLayout);
-  return compactedGrid;
+  //   for (const collision of collisions) {
+  //     const rowOverlap = panel.row + panel.height - collision.row;
+  //     if (rowOverlap > 0) {
+  //       collision.row += rowOverlap;
+  //     }
+  //   }
+  // }
+  // const compactedGrid = compactGrid(gridLayout);
+  // return compactedGrid;
 };
 
 export const compactGrid = (originalLayout: GridRow) => {

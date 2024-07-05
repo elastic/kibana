@@ -11,20 +11,39 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { GridCoordinate, GridData, PixelCoordinate, RuntimeGridSettings } from './types';
 
+export const getClosestGridRowIndex = ({
+  panelTopLeft,
+  gridDivs,
+}: {
+  panelTopLeft: PixelCoordinate;
+  gridDivs: Array<HTMLDivElement | null>;
+}): number => {
+  const panelTop = panelTopLeft.y;
+  for (const [index, div] of gridDivs.entries()) {
+    if (!div) continue;
+    const divTop = div.offsetTop;
+    const divBottom = divTop + div.clientHeight;
+    if (panelTop >= divTop && panelTop <= divBottom) {
+      return index;
+    }
+  }
+  return 0;
+};
+
 export const pixelCoordinateToGrid = ({
   runtimeSettings,
   gridOrigin,
-  pixel,
+  panelTopLeft,
   panel,
 }: {
   panel?: GridData;
-  pixel: PixelCoordinate;
+  panelTopLeft: PixelCoordinate;
   gridOrigin: PixelCoordinate;
   runtimeSettings: RuntimeGridSettings;
 }): GridCoordinate => {
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-  const localXCoordinate = pixel.x - gridOrigin.x;
-  const localYCoordinate = pixel.y - gridOrigin.y;
+  const localXCoordinate = panelTopLeft.x - gridOrigin.x;
+  const localYCoordinate = panelTopLeft.y - gridOrigin.y;
 
   const maxColumn = panel ? columnCount - panel.width : columnCount;
 

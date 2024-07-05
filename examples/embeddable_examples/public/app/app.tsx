@@ -23,13 +23,15 @@ import {
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
+import { GridPage } from './grid';
 
 const OVERVIEW_TAB_ID = 'overview';
 const REGISTER_EMBEDDABLE_TAB_ID = 'register';
+const GRID_TAB_ID = 'grid';
 const RENDER_TAB_ID = 'render';
 
 const App = () => {
-  const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
+  const [selectedTabId, setSelectedTabId] = useState(GRID_TAB_ID);
 
   function onSelectedTabChanged(tabId: string) {
     setSelectedTabId(tabId);
@@ -42,6 +44,10 @@ const App = () => {
 
     if (selectedTabId === REGISTER_EMBEDDABLE_TAB_ID) {
       return <RegisterEmbeddable />;
+    }
+
+    if (selectedTabId === GRID_TAB_ID) {
+      return <GridPage />;
     }
 
     return <Overview />;
@@ -73,6 +79,12 @@ const App = () => {
                 isSelected={RENDER_TAB_ID === selectedTabId}
               >
                 Rendering embeddables in your application
+              </EuiTab>
+              <EuiTab
+                onClick={() => onSelectedTabChanged(GRID_TAB_ID)}
+                isSelected={GRID_TAB_ID === selectedTabId}
+              >
+                Grid
               </EuiTab>
             </EuiTabs>
 

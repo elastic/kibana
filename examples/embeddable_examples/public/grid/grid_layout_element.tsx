@@ -29,12 +29,12 @@ export const KibanaGridElement = ({
   setResizingId: (id: string) => void;
   updateShift: (pos: { x: number; y: number }) => void;
 }) => {
-  const divRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
-      ref={divRef}
+      ref={panelRef}
       css={css`
         grid-column-start: ${gridData.column + 1};
         grid-column-end: ${gridData.column + 1 + gridData.width};
@@ -91,9 +91,9 @@ export const KibanaGridElement = ({
           onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.dropEffect = 'move';
-            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
-            const shiftX = e.clientX - divRef.current!.getBoundingClientRect().left;
-            const shiftY = e.clientY - divRef.current!.getBoundingClientRect().top;
+            // e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
+            const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().left;
+            const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().top;
             updateShift({ x: shiftX, y: shiftY });
             setDraggingId(id);
           }}
@@ -107,9 +107,9 @@ export const KibanaGridElement = ({
           onDragStart={(e) => {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.dropEffect = 'move';
-            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
-            const shiftX = e.clientX - divRef.current!.getBoundingClientRect().right;
-            const shiftY = e.clientY - divRef.current!.getBoundingClientRect().bottom;
+            // e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
+            const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().right;
+            const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().bottom;
             updateShift({ x: shiftX, y: shiftY });
             setResizingId(id);
           }}
@@ -130,7 +130,7 @@ export const KibanaGridElement = ({
               cursor: se-resize;
             }
           `}
-        ></div>
+        />
         {/* Contents */}
         <strong>id:</strong> {gridData.id}
       </EuiPanel>

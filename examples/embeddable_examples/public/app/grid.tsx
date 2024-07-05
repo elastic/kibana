@@ -7,16 +7,10 @@
  */
 
 import React, { useState } from 'react';
-import { GridLayout } from './types';
-import { KibanaGridLayout } from './grid_layout';
+import { KibanaGridLayout } from '../grid/grid_layout';
+import { GridLayout } from '../grid/types';
 
-export default {
-  title: 'Kibana Grid Layout POC',
-  description: 'POC of a new grid layout system for Kibana',
-  argTypes: {},
-};
-
-export const GridLayoutStorybook = () => {
+export const GridPage = () => {
   const [gridLayout1, setGridLayout1] = useState<GridLayout>([
     {
       panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
@@ -28,9 +22,9 @@ export const GridLayoutStorybook = () => {
       panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
       panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
     },
-    {
-      panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' },
-    },
+    // {
+    //   panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' },
+    // },
   ]);
 
   return (
