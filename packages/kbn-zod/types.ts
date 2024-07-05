@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from 'zod';
-export { isZod } from './util';
-export type { ZodEsque } from './types';
+export interface ZodEsque<V> {
+  _output: V;
+}

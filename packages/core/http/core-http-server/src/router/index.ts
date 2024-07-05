@@ -65,7 +65,6 @@ export type {
   RouteValidator,
   RouteValidatorRequestAndResponses,
   LazyValidator,
-  ZodEsque,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';

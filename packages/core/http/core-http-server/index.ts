@@ -106,7 +106,6 @@ export type {
   RouteValidatorFullConfigResponse,
   LazyValidator,
   RouteAccess,
-  ZodEsque,
 } from './src/router';
 export {
   validBodyOutput,

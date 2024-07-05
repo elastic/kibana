@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-export * from 'zod';
-export { isZod } from './util';
-export type { ZodEsque } from './types';
+import { expectAssignable } from 'tsd';
+import { ZodEsque } from './types';
+import { z } from '.';
+
+describe('ZodEsque', () => {
+  it('correctly extracts generic from Zod values', () => {
+    const s = z.object({ n: z.number() });
+    expectAssignable<ZodEsque<{ n: number }>>(s);
+  });
+});
