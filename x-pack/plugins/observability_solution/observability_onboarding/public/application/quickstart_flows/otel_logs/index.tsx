@@ -545,6 +545,8 @@ spec:
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
+
+sudo setcap 'cap_dac_read_search=ep' ./data/elastic-agent-*/elastic-agent
         
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
@@ -721,8 +723,8 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                   <EuiFlexGroup direction="column">
                     <EuiCallOut
                       title={i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataTitle',
-                        { defaultMessage: 'Historical logs will not be collected' }
+                        'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
+                        { defaultMessage: 'Default config limitations' }
                       )}
                       color="warning"
                       iconType="iInCircle"
@@ -733,6 +735,15 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                           {
                             defaultMessage:
                               'We only collect new log messages from the setup onward.',
+                          }
+                        )}
+                      </p>
+                      <p>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                          {
+                            defaultMessage:
+                              'The default log path to be scraped is /var/log/*. You can change this path in the otel.yml file if needed.',
                           }
                         )}
                       </p>
