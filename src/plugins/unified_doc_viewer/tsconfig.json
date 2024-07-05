@@ -34,7 +34,6 @@
     "@kbn/unified-data-table",
     "@kbn/core-notifications-browser",
     "@kbn/deeplinks-observability",
-    "@kbn/router-utils",
     "@kbn/share-plugin"
   ],
   "exclude": [

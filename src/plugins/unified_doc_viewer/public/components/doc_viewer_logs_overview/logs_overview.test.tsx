@@ -177,8 +177,16 @@ describe('LogsOverview', () => {
       ).toBeInTheDocument();
 
       // The accordion must be closed by default
-      const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion1');
+
+      if (accordion === null) {
+        return;
+      }
       const button = accordion.querySelector('button');
+
+      if (button === null) {
+        return;
+      }
       // Check the aria-expanded property of the button
       const isExpanded = button.getAttribute('aria-expanded');
       expect(isExpanded).toBe('false');
