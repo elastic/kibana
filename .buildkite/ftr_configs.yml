@@ -15,7 +15,6 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
-  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/apis/trial_license_complete_tier/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
