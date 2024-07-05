@@ -10,14 +10,16 @@
     border-radius: $euiBorderRadius !important;
   }
 
-  &--label {
-    @include euiTextTruncate;
+  &--labelWrapper {
     max-width: 40%;
-    background-color: transparent;
-    border-radius: $euiBorderRadius;
-
-    margin-left: 0 !important;
-    padding-left: 0 !important;
+    
+    .controlPanel--label {
+      @include euiTextTruncate;
+      background-color: transparent;
+      border-radius: $euiBorderRadius;
+      margin-left: 0 !important;
+      padding-left: 0 !important;
+    }
   }
 
   &--hideComponent {

@@ -9,7 +9,15 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
-import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiFormRow, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -135,12 +143,18 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                   controlTitle={panelTitle || defaultPanelTitle}
                   hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
                 />
+
                 {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : usingTwoLineLayout ? null : (
-                  <EuiFormLabel className="controlPanel--label">
-                    {panelTitle || defaultPanelTitle}
-                  </EuiFormLabel>
+                  <EuiToolTip
+                    anchorClassName="controlPanel--labelWrapper"
+                    content={panelTitle || defaultPanelTitle}
+                  >
+                    <EuiFormLabel className="controlPanel--label">
+                      {panelTitle || defaultPanelTitle}
+                    </EuiFormLabel>
+                  </EuiToolTip>
                 )}
               </>
             }

@@ -22,6 +22,7 @@
 }
 
 .rangeSliderAnchor__fieldNumber {
+  min-width: auto !important;
   font-weight: $euiFontWeightMedium;
   height: calc($euiButtonHeight - 3px) !important;
 
