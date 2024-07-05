@@ -6,10 +6,10 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENTITY_BASE_COMPONENT_TEMPLATE } from '../../../common/constants_entities';
+import { ENTITY_BASE_COMPONENT_TEMPLATE_V1 } from '../../../common/constants_entities';
 
 export const entitiesBaseComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: ENTITY_BASE_COMPONENT_TEMPLATE,
+  name: ENTITY_BASE_COMPONENT_TEMPLATE_V1,
   _meta: {
     description:
       "Component template for the ECS fields used in the Elastic Entity Model's entity discovery framework",

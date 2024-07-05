@@ -7,32 +7,32 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
-  ENTITY_HISTORY_INDEX_PREFIX,
-  ENTITY_HISTORY_PREFIX,
-  ENTITY_LATEST_INDEX_PREFIX,
-  ENTITY_LATEST_PREFIX,
+  ENTITY_HISTORY_INDEX_PREFIX_V1,
+  ENTITY_HISTORY_PREFIX_V1,
+  ENTITY_LATEST_INDEX_PREFIX_V1,
+  ENTITY_LATEST_PREFIX_V1,
 } from '../../../../common/constants_entities';
 
 // History
 function generateHistoryId(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_PREFIX}-${definition.id}`;
+  return `${ENTITY_HISTORY_PREFIX_V1}-${definition.id}`;
 }
 
 export const generateHistoryTransformId = generateHistoryId;
 export const generateHistoryIngestPipelineId = generateHistoryId;
 
 export function generateHistoryIndexName(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_INDEX_PREFIX}.${definition.id}`;
+  return `${ENTITY_HISTORY_INDEX_PREFIX_V1}.${definition.id}`;
 }
 
 // Latest
 function generateLatestId(definition: EntityDefinition) {
-  return `${ENTITY_LATEST_PREFIX}-${definition.id}`;
+  return `${ENTITY_LATEST_PREFIX_V1}-${definition.id}`;
 }
 
 export const generateLatestTransformId = generateLatestId;
 export const generateLatestIngestPipelineId = generateLatestId;
 
 export function generateLatestIndexName(definition: EntityDefinition) {
-  return `${ENTITY_LATEST_INDEX_PREFIX}.${definition.id}`;
+  return `${ENTITY_LATEST_INDEX_PREFIX_V1}.${definition.id}`;
 }

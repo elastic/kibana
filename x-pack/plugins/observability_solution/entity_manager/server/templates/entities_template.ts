@@ -7,24 +7,24 @@
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  ENTITY_BASE_COMPONENT_TEMPLATE,
-  ENTITY_ENTITY_COMPONENT_TEMPLATE,
-  ENTITY_EVENT_COMPONENT_TEMPLATE,
-  ENTITY_INDEX_TEMPLATE,
+  ENTITY_BASE_COMPONENT_TEMPLATE_V1,
+  ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
+  ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+  ENTITY_INDEX_TEMPLATE_V1,
   ENTITY_INDICES_PATTERN,
 } from '../../common/constants_entities';
 
 export const entitiesIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
-  name: ENTITY_INDEX_TEMPLATE,
+  name: ENTITY_INDEX_TEMPLATE_V1,
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework",
     ecs_version: '8.0.0',
   },
   composed_of: [
-    ENTITY_BASE_COMPONENT_TEMPLATE,
-    ENTITY_ENTITY_COMPONENT_TEMPLATE,
-    ENTITY_EVENT_COMPONENT_TEMPLATE,
+    ENTITY_BASE_COMPONENT_TEMPLATE_V1,
+    ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
+    ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ],
   index_patterns: [ENTITY_INDICES_PATTERN],
   priority: 1,
