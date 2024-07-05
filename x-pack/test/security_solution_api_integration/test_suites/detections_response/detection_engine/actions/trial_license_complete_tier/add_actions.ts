@@ -39,6 +39,34 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
+      it('creates rule with a new cases system action', async () => {
+        const ruleAction = {
+          id: '.system-action-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.name'],
+            },
+          },
+          action_type_id: '.cases',
+        };
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .send(
+            getCustomQueryRuleParams({
+              actions: [ruleAction],
+            })
+          )
+          .expect(200);
+
+        expect(body.actions).toEqual([expect.objectContaining(ruleAction)]);
+      });
+
       it('creates rule with a new webhook action', async () => {
         const webhookAction = await createWebHookRuleAction(supertest);
         const ruleAction = {

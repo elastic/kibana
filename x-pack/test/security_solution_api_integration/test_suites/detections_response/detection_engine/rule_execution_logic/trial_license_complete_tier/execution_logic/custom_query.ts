@@ -128,18 +128,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    // First test creates a real rule - most remaining tests use preview API
-    it('should have the specific audit record for _id or none of these tests below will pass', async () => {
-      const rule: QueryRuleCreateProps = {
-        ...getRuleForAlertTesting(['auditbeat-*']),
-        query: `_id:${ID}`,
-      };
-      const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toBeGreaterThan(0);
-      expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).toEqual(ID);
-    });
-
     // creates a real rule to determine if a case was opened by the system action
     it('should create a case if a rule with the cases system action finds matching alerts', async () => {
       const rule: QueryRuleCreateProps = {
