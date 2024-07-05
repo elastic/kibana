@@ -43,7 +43,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/alerts-as-data-utils",
-    "@kbn/kibana-react-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-ui-settings-browser",
   ]
