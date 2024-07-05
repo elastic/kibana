@@ -103,8 +103,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/170593
-  describe.skip('Add integration to policy', () => {
+  describe('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
     beforeEach(() => {

@@ -169,7 +169,7 @@ describe('createFiltersFromClickEvent', () => {
       });
 
       expect(queryString).toEqual(`from meow
-| where \`columnA\`=="2048"`);
+| WHERE \`columnA\`=="2048"`);
     });
   });
 });

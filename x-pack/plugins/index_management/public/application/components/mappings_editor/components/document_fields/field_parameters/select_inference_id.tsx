@@ -40,7 +40,7 @@ import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
-import { useLoadInferenceModels } from '../../../../../services/api';
+import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
@@ -134,7 +134,7 @@ export const SelectInferenceId = ({
     ];
   }, []);
 
-  const { isLoading, data: models } = useLoadInferenceModels();
+  const { isLoading, data: models } = useLoadInferenceEndpoints();
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
