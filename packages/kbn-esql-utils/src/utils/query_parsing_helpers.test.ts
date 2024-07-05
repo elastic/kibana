@@ -11,6 +11,7 @@ import {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
+  getTimeFieldFromESQLQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -134,6 +135,38 @@ describe('esql query helpers', () => {
 
     it('should return true for metrics with aggregations', () => {
       expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
+    });
+  });
+
+  describe('getTimeFieldFromESQLQuery', () => {
+    it('should return undefined if there are no time params', () => {
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
+    });
+
+    it('should return the time field if there is at least one time param', () => {
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?earliest')).toBe(
+        'time'
+      );
+    });
+
+    it('should return undefined if there is one named param but is not ?earliest or ?latest', () => {
+      expect(
+        getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
+      ).toBeUndefined();
+    });
+
+    it('should return undefined if there is one named param but is used without a time field', () => {
+      expect(
+        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?earliest)')
+      ).toBeUndefined();
+    });
+
+    it('should return the time field if there is at least one time param in the bucket function', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?earliest, ?latest)'
+        )
+      ).toBe('event.timefield');
     });
   });
 });
