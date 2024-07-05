@@ -12,9 +12,11 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
+import { SignalTypes } from '../../../../../../common/entities/types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { isLogsSignal } from '../../../../../utils/get_signal_type';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
@@ -32,12 +34,20 @@ interface ServiceLinkProps {
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
   serviceOverflowCount?: number;
+  signalTypes?: SignalTypes[];
 }
-export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
-  const { link } = useApmRouter();
+export function ServiceLink({
+  agentName,
+  query,
+  serviceName,
+  signalTypes = [SignalTypes.METRICS],
+}: ServiceLinkProps) {
+  const apmRouter = useApmRouter();
 
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
+    : isLogsSignal(signalTypes)
+    ? '/logs-services/{serviceName}/overview'
     : '/services/{serviceName}/overview';
 
   if (serviceName === OTHER_SERVICE_NAME) {
@@ -74,7 +84,7 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
       content={
         <StyledLink
           data-test-subj={`serviceLink_${agentName}`}
-          href={link(serviceLink, {
+          href={apmRouter.link(serviceLink, {
             path: { serviceName },
             query,
           })}

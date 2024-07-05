@@ -12,7 +12,7 @@ import type { RouteConfig } from '@kbn/core/server';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { appContextService, packagePolicyService } from '../../services';
+import { appContextService, licenseService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
 import type {
@@ -190,6 +190,29 @@ describe('When calling package policy', () => {
         },
       });
     });
+
+    it('should throw if no enterprise license and multiple policy_ids is provided', async () => {
+      const request = getCreateKibanaRequest({ ...newPolicy, policy_ids: ['1', '2'] } as any);
+      await createPackagePolicyHandler(context, request as any, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Reusable integration policies are only available with an Enterprise license',
+        },
+      });
+    });
+
+    it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const request = getCreateKibanaRequest({ ...newPolicy, policy_ids: ['1', '2'] } as any);
+      await createPackagePolicyHandler(context, request as any, response);
+      expect(response.customError).not.toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Reusable integration policies are only available with an Enterprise license',
+        },
+      });
+    });
   });
 
   describe('update api handler', () => {
@@ -337,6 +360,25 @@ describe('When calling package policy', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
       });
+    });
+
+    it('should throw if no enterprise license and multiple policy_ids is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
+      await routeHandler(context, request, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Reusable integration policies are only available with an Enterprise license',
+        },
+      });
+    });
+
+    it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
     });
   });
 
