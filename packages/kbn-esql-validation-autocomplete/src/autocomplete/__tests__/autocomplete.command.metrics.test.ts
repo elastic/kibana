@@ -196,11 +196,80 @@ describe('autocomplete.suggest', () => {
       });
     });
 
-    describe('... [ BY <grouping> ]', () => {
+    describe('... BY <grouping>', () => {
       test.skip('on space after aggregate field', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('METRICS a a=min(b) /', ['by $0', ',', '|']);
+      });
+
+      test.skip('on space after "BY" keyword', async () => {
+        const { assertSuggestions } = await setup();
+        const expected = [
+          'var0 =',
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ];
+
+        await assertSuggestions('METRICS a a=max(b) by /', expected);
+        await assertSuggestions('METRICS a a=max(b) BY /', expected);
+        await assertSuggestions('METRICS a a=min(b) by /', expected);
+      });
+
+      test('on space after grouping field', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('METRICS a a=c by d /', [',', '|']);
+      });
+
+      test.skip('after comma "," in grouping fields', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('METRICS a a=c by d, /', [
+          'var0 =',
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
+        await assertSuggestions('METRICS a a=min(b),/', [
+          'var0 =',
+          ...allAggFunctions,
+          ...allEvaFunctions,
+        ]);
+        await assertSuggestions('METRICS a avg(b) by c, /', [
+          'var0 =',
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+          ...allGroupingFunctions,
+        ]);
+      });
+
+      test.skip('on space before expression right hand side operand', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('METRICS a avg(b) by numberField % /', [
+          ...getFieldNamesByType('number'),
+          '`avg(b)`',
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...allGroupingFunctions,
+        ]);
+        await assertSuggestions('METRICS a avg(b) by var0 = /', [
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
+        await assertSuggestions('METRICS a avg(b) by c, var0 = /', [
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
+      });
+
+      test('on space after expression right hand side operand', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('METRICS a avg(b) by numberField % 2 /', [',', '|']);
       });
     });
   });
