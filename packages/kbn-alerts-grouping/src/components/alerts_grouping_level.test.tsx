@@ -9,17 +9,17 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { AlertsGroupingLevel, type AlertsGroupingLevelProps } from './alerts_grouping_level';
-import { useFindAlertsQuery } from '@kbn/alerts-ui-shared';
+import { useGetAlertsGroupAggregationsQuery } from '@kbn/alerts-ui-shared';
 import * as buildEsQueryModule from '@kbn/es-query/src/es_query/build_es_query';
 import { mockGroupingProps } from '../mocks/grouping_props.mock';
 import { groupingSearchResponse } from '../mocks/grouping_query.mock';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_find_alerts_query', () => ({
-  useFindAlertsQuery: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => ({
+  useGetAlertsGroupAggregationsQuery: jest.fn(),
 }));
 
-const mockUseFindAlertsQuery = useFindAlertsQuery as jest.Mock;
-mockUseFindAlertsQuery.mockReturnValue({
+const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as jest.Mock;
+mockUseGetAlertsGroupAggregationsQuery.mockReturnValue({
   loading: false,
   data: groupingSearchResponse,
 });
