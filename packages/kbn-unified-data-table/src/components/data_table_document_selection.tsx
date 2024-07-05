@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -315,6 +316,8 @@ export function DataTableDocumentToolbarBtn({
   );
 }
 
+const MAX_SELECTED_DOCS_FOR_COMPARE = 100;
+
 export const DataTableCompareToolbarBtn = ({
   selectedDocs,
   setIsCompareActive,
@@ -322,8 +325,10 @@ export const DataTableCompareToolbarBtn = ({
   selectedDocs: string[];
   setIsCompareActive: (value: boolean) => void;
 }) => {
-  return (
+  const isDisabled = selectedDocs.length > MAX_SELECTED_DOCS_FOR_COMPARE;
+  const button = (
     <EuiDataGridToolbarControl
+      disabled={isDisabled}
       iconType="diff"
       badgeContent={selectedDocs.length}
       data-test-subj="unifiedDataTableCompareSelectedDocuments"
@@ -337,4 +342,19 @@ export const DataTableCompareToolbarBtn = ({
       />
     </EuiDataGridToolbarControl>
   );
+
+  if (isDisabled) {
+    return (
+      <EuiToolTip
+        content={i18n.translate('unifiedDataTable.compareSelectedRowsButtonDisabledTooltip', {
+          defaultMessage: 'Select not more than {limit} rows to compare',
+          values: { limit: MAX_SELECTED_DOCS_FOR_COMPARE },
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }
+
+  return button;
 };
