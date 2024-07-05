@@ -11,6 +11,14 @@ import {
   RuleVersion,
   BaseCreateProps,
   TypeSpecificCreateProps,
+  EqlRuleCreateFields,
+  EsqlRuleCreateFields,
+  MachineLearningRuleCreateFields,
+  NewTermsRuleCreateFields,
+  QueryRuleCreateFields,
+  SavedQueryRuleCreateFields,
+  ThreatMatchRuleCreateFields,
+  ThresholdRuleCreateFields,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
@@ -19,7 +27,7 @@ import {
  * We omit some of them because they are not present in https://github.com/elastic/detection-rules.
  * Context: https://github.com/elastic/kibana/issues/180393
  */
-const PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>()([
+const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>()([
   'actions',
   'throttle',
   'meta',
@@ -27,7 +35,31 @@ const PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>()([
   'namespace',
   'alias_purpose',
   'alias_target_id',
-  'outcome',
+]);
+
+// `response_actions` is only part of the optional fields in QueryRuleCreateFields and SavedQueryRuleCreateFields
+const TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<
+  QueryRuleCreateFields | SavedQueryRuleCreateFields
+>()([
+  'response_actions',
+]);
+
+const QueryRuleAssetFields = QueryRuleCreateFields.omit(
+  TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
+);
+const SavedQueryRuleAssetFields = SavedQueryRuleCreateFields.omit(
+  TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
+);
+
+export const RuleAssetTypeSpecificCreateProps = z.discriminatedUnion('type', [
+  EqlRuleCreateFields,
+  QueryRuleAssetFields,
+  SavedQueryRuleAssetFields,
+  ThresholdRuleCreateFields,
+  MachineLearningRuleCreateFields,
+  NewTermsRuleCreateFields,
+  EsqlRuleCreateFields,
+  ThreatMatchRuleCreateFields,
 ]);
 
 function zodMaskFor<T>() {
@@ -54,8 +86,8 @@ function zodMaskFor<T>() {
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = BaseCreateProps.omit(PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
-  .and(TypeSpecificCreateProps)
+export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
+  .and(RuleAssetTypeSpecificCreateProps)
   .and(
     z.object({
       rule_id: RuleSignatureId,
