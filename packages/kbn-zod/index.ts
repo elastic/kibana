@@ -7,3 +7,4 @@
  */
 
 export * from 'zod';
+export { isZod } from './util';
