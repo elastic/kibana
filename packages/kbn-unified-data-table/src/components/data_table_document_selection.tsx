@@ -225,7 +225,7 @@ export function DataTableDocumentToolbarBtn({
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
-      ...(usedSelectedDocs.length < rows.length
+      ...(usedSelectedDocs.length < rows.length && rows.length > 1
         ? [
             <EuiContextMenuItem
               data-test-subj="dscGridSelectAllDocs"
@@ -238,7 +238,7 @@ export function DataTableDocumentToolbarBtn({
             >
               <FormattedMessage
                 id="unifiedDataTable.selectAllDocs"
-                defaultMessage="Select {rowsCount} {rowsCount, plural, one {row} other {rows}} on all pages"
+                defaultMessage="Select all {rowsCount} rows"
                 values={{
                   rowsCount: rows.length,
                 }}
