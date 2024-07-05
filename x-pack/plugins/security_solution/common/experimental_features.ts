@@ -154,6 +154,11 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
+   * Enables AI assistant on rule creation form when query has error
+   */
+  AIAssistantOnRuleCreationFormEnabled: false,
+
+  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
@@ -169,6 +174,11 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
+
+  /**
+   * Enables alerts suppression for machine learning rules
+   */
+  alertSuppressionForMachineLearningRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -227,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
-  unifiedManifestEnabled: false,
+  unifiedManifestEnabled: true,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
