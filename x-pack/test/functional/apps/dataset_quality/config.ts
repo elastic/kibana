@@ -27,6 +27,14 @@ export default async function createTestConfig({ readConfigFile }: FtrConfigProv
         });
       },
     },
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: [
+        ...functionalConfig.get('esTestCluster.serverArgs'),
+        // Enable LogsDB
+        'cluster.logsdb.enabled=true',
+      ],
+    },
     pageObjects,
   };
 }

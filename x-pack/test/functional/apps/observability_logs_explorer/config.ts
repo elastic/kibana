@@ -50,6 +50,14 @@ export default async function createTestConfig({
         });
       },
     },
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: [
+        ...functionalConfig.get('esTestCluster.serverArgs'),
+        // Enable LogsDB
+        'cluster.logsdb.enabled=true',
+      ],
+    },
   };
 }
 
