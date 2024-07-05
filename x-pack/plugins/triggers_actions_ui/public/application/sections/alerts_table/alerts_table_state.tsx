@@ -34,6 +34,7 @@ import type {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
 import { AlertsTable } from './alerts_table';
@@ -61,7 +62,7 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
-import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { AlertsTableContext } from './contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
 export type AlertsTableStateProps = {
@@ -175,7 +176,7 @@ const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
 
 const AlertsTableState = memo((props: AlertsTableStateProps) => {
   return (
-    <QueryClientProvider client={alertsTableQueryClient} context={AlertsTableQueryContext}>
+    <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
       <ErrorBoundary fallback={ErrorBoundaryFallback}>
         <AlertsTableStateWithQueryProvider {...props} />
       </ErrorBoundary>
@@ -324,9 +325,9 @@ const AlertsTableStateWithQueryProvider = memo(
 
     useEffect(() => {
       if (onLoaded && isInitialLoading && !isLoading && isSuccess) {
-        onLoaded();
+        onLoaded(alerts);
       }
-    }, [isInitialLoading, isLoading, isSuccess, onLoaded]);
+    }, [alerts, isInitialLoading, isLoading, isSuccess, onLoaded]);
 
     const mutedAlertIds = useMemo(() => {
       return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
@@ -384,7 +385,7 @@ const AlertsTableStateWithQueryProvider = memo(
       return {
         ids: Array.from(maintenanceWindowIds.values()),
         canFetchMaintenanceWindows: fetchMaintenanceWindows,
-        queryContext: AlertsTableQueryContext,
+        queryContext: AlertsQueryContext,
       };
     }, [fetchMaintenanceWindows, maintenanceWindowIds]);
 

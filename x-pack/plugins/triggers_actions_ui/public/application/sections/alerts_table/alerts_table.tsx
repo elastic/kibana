@@ -35,6 +35,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import type {
   AlertsTableProps,
@@ -49,7 +50,6 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
-import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const DefaultGridStyle: EuiDataGridStyle = {
@@ -323,7 +323,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     NonNullable<EuiDataGridStyle['rowClasses']>
   >({});
 
-  const queryClient = useQueryClient({ context: AlertsTableQueryContext });
+  const queryClient = useQueryClient({ context: AlertsQueryContext });
 
   const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
 

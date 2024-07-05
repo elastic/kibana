@@ -24,6 +24,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { UseQueryOptions } from '@tanstack/react-query/src/types';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
 import { Alert, EsQuerySnapshot, LegacyField } from '../types';
+import { AlertsQueryContext } from '../contexts/alerts_query_context';
 
 export interface UseSearchAlertsQueryParams {
   // Dependencies
@@ -184,6 +185,7 @@ export const useSearchAlertsQuery = (
       // To avoid flash of loading state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      context: AlertsQueryContext,
       ...(options as object),
     }
   );
