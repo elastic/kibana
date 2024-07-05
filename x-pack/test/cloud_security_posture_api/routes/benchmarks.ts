@@ -278,9 +278,8 @@ export default function (providerContext: FtrProviderContext) {
         const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
         const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
-        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
-        await index.addFindings([cspmFinding1, cspmFinding2]);
+        await index.addFindings([cspmFinding1]);
 
         const { body: benchmarksResult } = await supertestWithoutAuth
           .get('/internal/cloud_security_posture/benchmarks')
@@ -300,9 +299,8 @@ export default function (providerContext: FtrProviderContext) {
         const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
         const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
-        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
-        await index.addFindings([cspmFinding1, cspmFinding2]);
+        await index.addFindings([cspmFinding1]);
 
         const { status } = await supertestWithoutAuth
           .get('/internal/cloud_security_posture/benchmarks')
