@@ -1089,7 +1089,7 @@ export class AlertsClient {
     return this.find({
       featureIds,
       aggs: {
-        groupByField: {
+        groupByFields: {
           terms: {
             field: 'groupByField',
             size: MAX_ALERTS_GROUPING_QUERY_SIZE,
