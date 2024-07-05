@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
@@ -30,6 +30,7 @@ import {
   InlineScript,
   MappingRuntimeFields,
   QueryDslQueryContainer,
+  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
 import {
@@ -44,7 +45,11 @@ import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { TypeOf } from 'io-ts';
-import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE, MAX_ALERTS_GROUPING_QUERY_SIZE } from './constants';
+import {
+  MAX_ALERTS_GROUPING_QUERY_SIZE,
+  MAX_ALERTS_PAGES,
+  MAX_PAGINATED_ALERTS,
+} from './constants';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -133,7 +138,7 @@ interface GetAlertSummaryParams {
   fixedInterval?: string;
 }
 
-interface SingleSearchAfterAndAudit {
+interface SearchAlertsParams {
   id?: string | null;
   query?: string | object;
   aggs?: Record<string, any>;
@@ -211,9 +216,6 @@ export class AlertsClient {
 
   /**
    * Accepts an array of ES documents and executes ensureAuthorized for the given operation
-   * @param items
-   * @param operation
-   * @returns
    */
   private async ensureAllAuthorized(
     items: Array<{
@@ -275,12 +277,9 @@ export class AlertsClient {
   }
 
   /**
-   * This will be used as a part of the "find" api
-   * In the future we will add an "aggs" param
-   * @param param0
-   * @returns
+   * Searches alerts by id or query and audits the results
    */
-  private async singleSearchAfterAndAudit({
+  private async searchAlerts({
     id,
     query,
     aggs,
@@ -293,7 +292,7 @@ export class AlertsClient {
     lastSortIds = [],
     featureIds,
     runtimeMappings,
-  }: SingleSearchAfterAndAudit) {
+  }: SearchAlertsParams) {
     try {
       const alertSpaceId = this.spaceId;
       if (alertSpaceId == null) {
@@ -343,25 +342,28 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.hits.hits.every((hit) => isValidAlert(hit))) {
+      if (!result?.hits?.hits?.length) {
+        return result;
+      }
+
+      if (result.hits.hits.some((hit) => !isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
       }
 
-      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
-        await this.ensureAllAuthorized(result.hits.hits, operation);
+      // @ts-expect-error type mismatch: SearchHit._id is optional
+      await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.hits.hits.map((item) =>
-          this.auditLogger?.log(
-            alertAuditEvent({
-              action: operationAlertAuditActionMap[operation],
-              id: item._id,
-              ...this.getOutcome(operation),
-            })
-          )
-        );
-      }
+      result.hits.hits.forEach((item) =>
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: item._id,
+            ...this.getOutcome(operation),
+          })
+        )
+      );
 
       return result;
     } catch (error) {
@@ -373,8 +375,6 @@ export class AlertsClient {
 
   /**
    * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   * @param param0
-   * @returns
    */
   private async mgetAlertsAuditOperate({
     alerts,
@@ -429,8 +429,6 @@ export class AlertsClient {
 
   /**
    * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   * @param param0
-   * @returns
    */
   private async mgetAlertsAuditOperateStatus({
     alerts,
@@ -496,9 +494,7 @@ export class AlertsClient {
   }
 
   /**
-   * executes a search after to find alerts with query (+ authz filter)
-   * @param param0
-   * @returns
+   * Executes a search after to find alerts with query (+ authz filter)
    */
   private async queryAndAuditAllAlerts({
     index,
@@ -529,7 +525,7 @@ export class AlertsClient {
 
     while (hasSortIds) {
       try {
-        const result = await this.singleSearchAfterAndAudit({
+        const result = await this.searchAlerts({
           id: null,
           query,
           index,
@@ -612,7 +608,7 @@ export class AlertsClient {
   public async get({ id, index }: GetAlertParams) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const alert = await this.singleSearchAfterAndAudit({
+      const alert = await this.searchAlerts({
         id,
         index,
         operation: ReadOperations.Get,
@@ -650,7 +646,7 @@ export class AlertsClient {
       }
 
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const responseAlertSum = await this.singleSearchAfterAndAudit({
+      const responseAlertSum = await this.searchAlerts({
         index: (indexToUse ?? []).join(),
         operation: ReadOperations.Get,
         aggs: {
@@ -715,7 +711,7 @@ export class AlertsClient {
       let activeAlertCount = 0;
       let recoveredAlertCount = 0;
       (
-        ((responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
+        ((responseAlertSum?.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
           ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) ?? []
       ).forEach((b) => {
         if (b.key === ALERT_STATUS_ACTIVE) {
@@ -730,13 +726,15 @@ export class AlertsClient {
         recoveredAlertCount,
         activeAlerts:
           (
-            responseAlertSum.aggregations
+            responseAlertSum?.aggregations
               ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
         recoveredAlerts:
           (
-            (responseAlertSum.aggregations?.recovered_alerts as estypes.AggregationsFilterAggregate)
-              ?.container as estypes.AggregationsAutoDateHistogramAggregate
+            (
+              responseAlertSum?.aggregations
+                ?.recovered_alerts as estypes.AggregationsFilterAggregate
+            )?.container as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
       };
     } catch (error) {
@@ -752,7 +750,7 @@ export class AlertsClient {
     index,
   }: UpdateOptions<Params>) {
     try {
-      const alert = await this.singleSearchAfterAndAudit({
+      const alert = await this.searchAlerts({
         id,
         index,
         operation: WriteOperations.Update,
@@ -1009,8 +1007,7 @@ export class AlertsClient {
         }
       }
 
-      // first search for the alert by id, then use the alert info to check if user has access to it
-      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+      const alertsSearchResponse = await this.searchAlerts({
         query,
         aggs,
         _source,
@@ -1044,8 +1041,8 @@ export class AlertsClient {
     groupByField,
     aggregations,
     filters,
-    pageIndex = 0,
-    pageSize = DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
+    pageIndex,
+    pageSize,
     sort = [{ unitsCount: { order: 'desc' } }],
   }: {
     /**
@@ -1068,20 +1065,31 @@ export class AlertsClient {
     /**
      * Any sort options to apply to the groupByField aggregations
      */
-    sort?: object[];
+    sort?: SortCombinations[];
     /**
      * The page index to start from
      */
-    pageIndex?: number;
+    pageIndex: number;
     /**
      * The page size
      */
-    pageSize?: number;
+    pageSize: number;
   }) {
-    const uniqueValue = uuid();
+    const uniqueValue = uuidv4();
+    if (pageIndex > MAX_ALERTS_PAGES) {
+      throw Boom.badRequest(
+        `The provided pageIndex value is too high. The maximum allowed pageIndex value is ${MAX_ALERTS_PAGES}.`
+      );
+    }
+    if (Math.max(pageIndex, pageIndex * pageSize) > MAX_PAGINATED_ALERTS) {
+      throw Boom.badRequest(
+        `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
+      );
+    }
     return this.find({
+      featureIds,
       aggs: {
-        groupByFields: {
+        groupByField: {
           terms: {
             field: 'groupByField',
             size: MAX_ALERTS_GROUPING_QUERY_SIZE,
@@ -1101,7 +1109,6 @@ export class AlertsClient {
         unitsCount: { value_count: { field: 'groupByField' } },
         groupsCount: { cardinality: { field: 'groupByField' } },
       },
-      featureIds,
       query: {
         bool: {
           filter: filters,

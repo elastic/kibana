@@ -16,3 +16,13 @@ export const DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE = 10;
  * @external https://github.com/elastic/kibana/issues/151913
  */
 export const MAX_ALERTS_GROUPING_QUERY_SIZE = 10000;
+
+/**
+ * The maximum number of addressable pages
+ */
+export const MAX_ALERTS_PAGES = 100;
+
+/**
+ * The maximum number of alerts to paginate
+ */
+export const MAX_PAGINATED_ALERTS = 10000;

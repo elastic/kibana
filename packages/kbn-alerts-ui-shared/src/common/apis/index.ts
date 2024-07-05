@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './fetch_aad_fields';
-export * from './fetch_alert_fields';
-export * from './fetch_alert_index_names';
-export * from './fetch_rule_types';
+export * from './fetch_ui_health_status';
+export * from './fetch_alerting_framework_health';
+export * from './fetch_ui_config';
+export * from './create_rule';
+export * from './update_rule';
+export * from './resolve_rule';

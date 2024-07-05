@@ -5250,7 +5250,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"<\" | \">\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+              "\"contains\" | \"<\" | \">\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -6850,7 +6850,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"<\" | \">\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+          "\"contains\" | \"<\" | \">\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "packages/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,
@@ -23451,13 +23451,10 @@
                       {
                         "parentPluginId": "@kbn/search-connectors",
                         "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.jira.configuration.account_email.tooltip",
-                        "type": "Uncategorized",
+                        "type": "string",
                         "tags": [],
                         "label": "tooltip",
                         "description": [],
-                        "signature": [
-                          "null"
-                        ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
