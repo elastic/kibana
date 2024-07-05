@@ -584,3 +584,4 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/apis/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/apis/trial_license_complete_tier/configs/config.ts
