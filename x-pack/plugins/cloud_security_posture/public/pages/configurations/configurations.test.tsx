@@ -22,6 +22,7 @@ import * as statusHandlers from '../../../server/routes/status/status.handlers.m
 import {
   bsearchFindingsHandler,
   generateCspFinding,
+  generateMultipleCspFindings,
   rulesGetStatesHandler,
 } from './configurations.handlers.mock';
 
@@ -63,13 +64,7 @@ describe('<Findings />', () => {
     // Loading while checking the status API
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-    await waitFor(() =>
-      expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-    );
-    // loading findings
-    await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
-
-    expect(screen.getByText(/2 findings/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
     expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
     expect(screen.getByText(finding1.resource.id)).toBeInTheDocument();
@@ -99,12 +94,6 @@ describe('<Findings />', () => {
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
-
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
@@ -133,12 +122,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -170,12 +153,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -212,7 +189,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
-    }, 10000);
+    });
     it('remove filter', async () => {
       const finding1 = generateCspFinding('0001', 'failed');
       const finding2 = generateCspFinding('0002', 'passed');
@@ -256,12 +233,6 @@ describe('<Findings />', () => {
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
-
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
@@ -276,5 +247,110 @@ describe('<Findings />', () => {
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.getByText(finding2.resource.name)).toBeInTheDocument();
     });
+  });
+
+  describe('DistributionBar', () => {
+    it('renders the distribution bar', async () => {
+      server.use(statusHandlers.indexedHandler);
+      server.use(
+        bsearchFindingsHandler(
+          generateMultipleCspFindings({
+            count: 10,
+            failedCount: 3,
+          })
+        )
+      );
+
+      renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/10 findings/i)).toBeInTheDocument());
+
+      screen.getByRole('button', {
+        name: /passed findings: 7/i,
+      });
+      screen.getByRole('button', {
+        name: /failed findings: 3/i,
+      });
+
+      // Assert that the distribution bar has the correct percentages rendered
+      expect(screen.getByTestId('distribution_bar_passed')).toHaveStyle('flex: 7');
+      expect(screen.getByTestId('distribution_bar_failed')).toHaveStyle('flex: 3');
+    });
+
+    it('filters by passed findings when clicking on the passed findings button', async () => {
+      server.use(statusHandlers.indexedHandler);
+      server.use(
+        bsearchFindingsHandler(
+          generateMultipleCspFindings({
+            count: 2,
+            failedCount: 1,
+          })
+        )
+      );
+
+      renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+      const passedFindingsButton = screen.getByRole('button', {
+        name: /passed findings: 1/i,
+      });
+      userEvent.click(passedFindingsButton);
+
+      await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
+
+      screen.getByRole('button', {
+        name: /passed findings: 1/i,
+      });
+      screen.getByRole('button', {
+        name: /failed findings: 0/i,
+      });
+
+      // Assert that the distribution bar has the correct percentages rendered
+      expect(screen.getByTestId('distribution_bar_passed')).toHaveStyle('flex: 1');
+      expect(screen.getByTestId('distribution_bar_failed')).toHaveStyle('flex: 0');
+    }, 10000);
+    it('filters by failed findings when clicking on the failed findings button', async () => {
+      server.use(statusHandlers.indexedHandler);
+      server.use(
+        bsearchFindingsHandler(
+          generateMultipleCspFindings({
+            count: 2,
+            failedCount: 1,
+          })
+        )
+      );
+
+      renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+      const failedFindingsButton = screen.getByRole('button', {
+        name: /failed findings: 1/i,
+      });
+      userEvent.click(failedFindingsButton);
+
+      await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
+
+      screen.getByRole('button', {
+        name: /passed findings: 0/i,
+      });
+      screen.getByRole('button', {
+        name: /failed findings: 1/i,
+      });
+
+      // Assert that the distribution bar has the correct percentages rendered
+      expect(screen.getByTestId('distribution_bar_passed')).toHaveStyle('flex: 0');
+      expect(screen.getByTestId('distribution_bar_failed')).toHaveStyle('flex: 1');
+    }, 10000);
   });
 });
