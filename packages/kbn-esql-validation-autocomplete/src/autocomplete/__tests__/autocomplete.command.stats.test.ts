@@ -57,7 +57,7 @@ describe('autocomplete.suggest', () => {
       test('on space after aggregate field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=min(b) /', ['by $0', ',', '|']);
+        await assertSuggestions('from a | stats a=min(b) /', ['BY $0', ',', '|']);
       });
 
       test('on space after aggregate field with comma', async () => {
@@ -139,7 +139,7 @@ describe('autocomplete.suggest', () => {
       test('when typing right paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['by $0', ',', '|']);
+        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['BY $0', ',', '|']);
       });
 
       test('increments suggested variable name counter', async () => {

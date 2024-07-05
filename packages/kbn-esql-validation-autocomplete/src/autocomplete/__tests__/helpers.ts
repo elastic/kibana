@@ -226,9 +226,11 @@ export function getFunctionSignaturesByReturnType(
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map(({ type, name, signatures }) => {
       if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
+        return signatures.some(({ params }) => params.length > 1)
+          ? `${name.toUpperCase()} $0`
+          : name.toUpperCase();
       }
-      return `${name}($0)`;
+      return `${name.toUpperCase()}($0)`;
     });
 }
 

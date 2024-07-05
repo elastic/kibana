@@ -53,7 +53,7 @@ describe('autocomplete.suggest', () => {
         const { suggest } = await setup();
 
         const suggestions = await suggest('m/');
-        const hasCommand = !!suggestions.find((s) => s.label === 'metrics');
+        const hasCommand = !!suggestions.find((s) => s.label.toUpperCase() === 'METRICS');
 
         expect(hasCommand).toBe(true);
       });
