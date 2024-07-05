@@ -10,7 +10,6 @@ import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
-  TypeSpecificCreateProps,
   EqlRuleCreateFields,
   EsqlRuleCreateFields,
   MachineLearningRuleCreateFields,
