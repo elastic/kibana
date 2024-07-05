@@ -32,29 +32,31 @@ describe('Prebuilt rule asset schema', () => {
     expect(result.data).toEqual(getPrebuiltRuleMock());
   });
 
-  // The PrebuiltRuleAsset schema is built out of the rule schema,
-  // but the following fields are manually omitted.
-  // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
-  const omittedFields = [
-    'actions',
-    'throttle',
-    'meta',
-    'output_index',
-    'namespace',
-    'alias_purpose',
-    'alias_target_id',
-    'outcome',
-  ];
+  describe('ommited fields from the rule schema are ignored', () => {
+    // The PrebuiltRuleAsset schema is built out of the rule schema,
+    // but the following fields are manually omitted.
+    // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
+    const omittedFields = [
+      'actions',
+      'throttle',
+      'meta',
+      'output_index',
+      'namespace',
+      'alias_purpose',
+      'alias_target_id',
+      'outcome',
+    ];
 
-  test.each(omittedFields)('ignores %s since it`s an omitted field', (field) => {
-    const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
-      ...getPrebuiltRuleMock(),
-      [field]: 'some value',
-    };
+    test.each(omittedFields)('ignores %s since it`s an omitted field', (field) => {
+      const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
+        ...getPrebuiltRuleMock(),
+        [field]: 'some value',
+      };
 
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseSuccess(result);
-    expect(result.data).toEqual(getPrebuiltRuleMock());
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(getPrebuiltRuleMock());
+    });
   });
 
   test('[rule_id] does not validate', () => {
