@@ -1715,19 +1715,18 @@
     "@elastic/transport" "^8.4.0"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.5.1":
-  version "8.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.1.tgz#60c179e53ad81f5e26680e7e1c6cbffe4fb64aed"
-  integrity sha512-lc65i/cW6fGuRMt3pUte35sL8HxXM7TbYJwx1bHWcWn4aN3zv8i5RhPKFz+Wr/1ubfFOTrIoFYCP4h1uq2O/dQ==
+"@elastic/ems-client@8.5.2":
+  version "8.5.2"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.2.tgz#66f02940394d010169f60363cb540a57be0d3d5c"
+  integrity sha512-i4TlKz+Th1qwQWAcsn+Y0i2BcBdtfcI/Y4Xm7+qcAEkmYFmwCFCK4I1g3WOOrGdibjT0ZFjf4uoSlWMYrhU1DQ==
   dependencies:
-    "@types/geojson" "^7946.0.10"
-    "@types/lru-cache" "^5.1.0"
-    "@types/topojson-client" "^3.1.1"
-    "@types/topojson-specification" "^1.0.1"
+    "@types/geojson" "^7946.0.14"
+    "@types/topojson-client" "^3.1.4"
+    "@types/topojson-specification" "^1.0.5"
     chroma-js "^2.1.0"
     lodash "^4.17.15"
-    lru-cache "^6.0.0"
-    semver "7.5.4"
+    lru-cache "7.18.3"
+    semver "7.6.2"
     topojson-client "^3.1.0"
 
 "@elastic/eslint-plugin-eui@0.0.2":
@@ -10040,6 +10039,11 @@
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.10.tgz#6dfbf5ea17142f7f9a043809f1cd4c448cb68249"
   integrity sha512-Nmh0K3iWQJzniTuPRcJn5hxXkfB1T1pgB89SBig5PlJQU5yocazeu4jATJlaA0GYFKWMqDdvYemoSnF2pXgLVA==
 
+"@types/geojson@^7946.0.14":
+  version "7946.0.14"
+  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.14.tgz#319b63ad6df705ee2a65a73ef042c8271e696613"
+  integrity sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg==
+
 "@types/getos@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/getos/-/getos-3.0.0.tgz#582c758e99e9d634f31f471faf7ce59cf1c39a71"
@@ -11015,18 +11019,25 @@
   resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.2.tgz#721ca5c5d1a2988b4a886e35c2ffc5735b6afbdf"
   integrity sha512-PeHg/AtdW6aaIO2a+98Xj7rWY4KC1E6yOy7AFknJQ7VXUGNrMlyxDFxJo7HqLtjQms/ZhhQX52mLVW/EX3JGOw==
 
-"@types/topojson-client@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@types/topojson-client/-/topojson-client-3.1.1.tgz#d1396b2e79f530ef69bb162523cddf94576bd5a9"
-  integrity sha512-E4/Z2Xg56kVLRzYWem/6uOKVcVNqqxEqlWM9qCG2tCV1BxuzvvXC02/ELoGJWgtKkQhfycBPlMFEuTFdA/YiTg==
+"@types/topojson-client@^3.1.4":
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/@types/topojson-client/-/topojson-client-3.1.4.tgz#81b83f9ecd6542dc5c3df21967f992e3fe192c33"
+  integrity sha512-Ntf3ZSetMYy7z3PrVCvcqmdRoVhgKA9UKN0ZuuZf8Ts2kcyL4qK34IXBs6qO5fem62EK4k03PtkJPVoroVu4/w==
   dependencies:
     "@types/geojson" "*"
     "@types/topojson-specification" "*"
 
-"@types/topojson-specification@*", "@types/topojson-specification@^1.0.1":
+"@types/topojson-specification@*":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/topojson-specification/-/topojson-specification-1.0.1.tgz#a80cb294290b79f2d674d3f5938c544ed2bd9d80"
   integrity sha512-ZZYZUgkmUls9Uhxx2WZNt9f/h2+H3abUUjOVmq+AaaDFckC5oAwd+MDp95kBirk+XCXrYj0hfpI6DSUiJMrpYQ==
+  dependencies:
+    "@types/geojson" "*"
+
+"@types/topojson-specification@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@types/topojson-specification/-/topojson-specification-1.0.5.tgz#bf0009b2e0debb2d97237b124c00b9ea92570375"
+  integrity sha512-C7KvcQh+C2nr6Y2Ub4YfgvWvWCgP2nOQMtfhlnwsRL4pYmmwzBS7HclGiS87eQfDOU/DLQpX6GEscviaz4yLIQ==
   dependencies:
     "@types/geojson" "*"
 
@@ -22124,6 +22135,11 @@ lowlight@^1.14.0:
     fault "^1.0.0"
     highlight.js "~10.4.0"
 
+lru-cache@7.18.3, lru-cache@^7.14.1:
+  version "7.18.3"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.18.3.tgz#f793896e0fd0e954a59dfdd82f0773808df6aa89"
+  integrity sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==
+
 lru-cache@^10.0.1, "lru-cache@^9.1.1 || ^10.0.0":
   version "10.1.0"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.1.0.tgz#2098d41c2dc56500e6c88584aa656c84de7d0484"
@@ -22150,11 +22166,6 @@ lru-cache@^6.0.0:
   integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   dependencies:
     yallist "^4.0.0"
-
-lru-cache@^7.14.1:
-  version "7.18.3"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.18.3.tgz#f793896e0fd0e954a59dfdd82f0773808df6aa89"
-  integrity sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==
 
 lunr@^2.3.9:
   version "2.3.9"
@@ -27909,19 +27920,17 @@ semver@5.6.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.6.0.tgz#7e74256fbaa49c75aa7c7a205cc22799cac80004"
   integrity sha512-RS9R6R35NYgQn++fkDWaOmqGoj4Ek9gGs+DPxNUZKuwE183xjJroKvyo1IzVFeXvUrvmALy6FWD5xrdJT25gMg==
 
-semver@7.5.4:
-  version "7.5.4"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
-  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
-  dependencies:
-    lru-cache "^6.0.0"
-
 semver@7.6.0, semver@^7.3.2, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.0, semver@^7.5.2, semver@^7.5.3, semver@^7.5.4:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.0.tgz#1a46a4db4bffcccd97b743b5005c8325f23d4e2d"
   integrity sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==
   dependencies:
     lru-cache "^6.0.0"
+
+semver@7.6.2:
+  version "7.6.2"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.2.tgz#1e3b34759f896e8f14d6134732ce798aeb0c6e13"
+  integrity sha512-FNAIBWCx9qcRhoHcgcJ0gvU7SN1lYU2ZXuSfl04bSC5OpvDHFyJCjdNHomPXxjQlCBU67YW64PzY7/VIEH7F2w==
 
 semver@^6.0.0, semver@^6.1.0, semver@^6.1.2, semver@^6.3.0, semver@^6.3.1:
   version "6.3.1"
