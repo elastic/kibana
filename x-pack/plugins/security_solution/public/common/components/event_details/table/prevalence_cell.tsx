@@ -37,7 +37,7 @@ const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
     contextId: scopeId,
     eventId,
     field: data.field,
-    fieldFormat: data.format,
+    fieldFormat: typeof data.format === 'string' ? data.format : data?.format?.id,
     fieldFromBrowserField,
     fieldType: data.type,
     isObjectArray: data.isObjectArray,

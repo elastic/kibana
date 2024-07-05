@@ -69,7 +69,7 @@ export const FieldValueCell = React.memo(
                   <FormattedFieldValue
                     contextId={`${contextId}-${eventId}-${data.field}-${i}-${value}`}
                     eventId={eventId}
-                    fieldFormat={data.format}
+                    fieldFormat={typeof data.format === 'string' ? data.format : data.format?.id}
                     fieldName={data.field}
                     fieldFromBrowserField={fieldFromBrowserField}
                     fieldType={data.type}

@@ -69,7 +69,11 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           fieldName={enrichedFieldInfo.data.field}
           linkValue={enrichedFieldInfo.linkValue}
           fieldType={enrichedFieldInfo.data.type}
-          fieldFormat={enrichedFieldInfo.data.format}
+          fieldFormat={
+            typeof enrichedFieldInfo.data.format === 'string'
+              ? enrichedFieldInfo.data.format
+              : enrichedFieldInfo?.data?.format?.id
+          }
           isDraggable={false}
           truncate={false}
           isButton={statusPopoverVisible}

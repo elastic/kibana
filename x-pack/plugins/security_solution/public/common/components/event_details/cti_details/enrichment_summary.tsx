@@ -134,7 +134,10 @@ const EnrichmentSummaryComponent: React.FC<{
 
     const fieldsData: FieldsData = {
       field: field ?? '',
-      format: browserField?.format ?? '',
+      format:
+        typeof browserField?.format === 'string'
+          ? browserField?.format
+          : browserField?.format?.id ?? '',
       type: browserField?.type ?? '',
       isObjectArray: eventData?.isObjectArray ?? false,
     };

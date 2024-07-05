@@ -74,7 +74,7 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  * NOTE: This "Omit" type is necesssary as some places expect the format field to be a string,
  * this will be aligned with the spec near term.
  */
-export type BrowserField = Omit<FieldSpec, 'format'> & { format?: string };
+export type BrowserField = FieldSpec;
 
 type FieldCategoryName = string;
 

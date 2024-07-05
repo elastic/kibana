@@ -182,7 +182,7 @@ describe('helpers', () => {
             test_field_1: {
               aggregatable: true,
               esTypes: ['keyword'],
-              format: 'string',
+              format: { id: 'string' },
               name: 'test_field_1',
               readFromDocValues: true,
               searchable: true,
@@ -223,7 +223,7 @@ describe('helpers', () => {
             'foo.bar': {
               aggregatable: true,
               esTypes: ['keyword'],
-              format: 'string',
+              format: { id: 'string' },
               name: 'foo.bar',
               readFromDocValues: true,
               searchable: true,

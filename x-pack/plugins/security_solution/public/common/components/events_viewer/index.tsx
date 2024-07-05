@@ -33,6 +33,7 @@ import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import type { DataTableProps } from '@kbn/securitysolution-data-table/components/data_table';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
@@ -604,7 +605,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             pagination={pagination}
                             isEventRenderedView={tableView === 'eventRenderedView'}
                             rowHeightsOptions={rowHeightsOptions}
-                            getFieldBrowser={getFieldBrowser}
+                            getFieldBrowser={
+                              getFieldBrowser as unknown as DataTableProps['getFieldBrowser']
+                            }
                             getFieldSpec={getFieldSpec}
                           />
                         </StatefulEventContext.Provider>

@@ -66,7 +66,10 @@ export const RelatedAlertsBySourceEvent = React.memo<Props>(
       contextId: scopeId,
       eventId,
       fieldFromBrowserField,
-      fieldFormat: fieldFromBrowserField?.format,
+      fieldFormat:
+        typeof fieldFromBrowserField?.format === 'string'
+          ? fieldFromBrowserField.format
+          : fieldFromBrowserField?.format?.id,
       fieldType: fieldFromBrowserField?.type,
     });
 

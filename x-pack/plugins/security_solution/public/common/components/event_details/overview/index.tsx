@@ -174,7 +174,11 @@ export const Overview = React.memo<Props>(
               fieldName={ruleNameData.data.field}
               linkValue={ruleNameData.linkValue}
               fieldType={ruleNameData.data.type}
-              fieldFormat={ruleNameData.data.format}
+              fieldFormat={
+                typeof ruleNameData.data.format === 'string'
+                  ? ruleNameData.data?.format
+                  : ruleNameData.data?.format?.id
+              }
               isDraggable={false}
               truncate={false}
             />
