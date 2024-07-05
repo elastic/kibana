@@ -6,16 +6,26 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENTITY_HISTORY_BASE_PREFIX } from '../../common/constants_entities';
+import {
+  ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
+  ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+  ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
+  ENTITY_HISTORY_INDEX_PREFIX_V1,
+  ENTITY_HISTORY_INDEX_TEMPLATE_V1,
+} from '../../common/constants_entities';
 
 export const entitiesHistoryIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
-  name: 'entities_v1_history_index_template',
+  name: ENTITY_HISTORY_INDEX_TEMPLATE_V1,
   _meta: {
     description: 'The entities index template',
     ecs_version: '8.0.0',
   },
-  composed_of: ['entities_v1_history_base', 'entities_v1_event', 'entities_v1_entity'],
-  index_patterns: [`${ENTITY_HISTORY_BASE_PREFIX}.*`],
+  composed_of: [
+    ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
+    ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
+    ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+  ],
+  index_patterns: [`${ENTITY_HISTORY_INDEX_PREFIX_V1}.*`],
   priority: 1,
   template: {
     mappings: {
