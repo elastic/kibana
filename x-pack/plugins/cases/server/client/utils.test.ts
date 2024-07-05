@@ -1497,7 +1497,7 @@ describe('utils', () => {
       ]);
     });
 
-    it('does not change the exiating template custom field', () => {
+    it('does not change the existing template custom field', () => {
       const res = transformTemplateCustomFields({
         templates: [
           {
