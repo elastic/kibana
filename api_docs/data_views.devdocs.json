@@ -12926,6 +12926,10 @@
             "references": [
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -12933,16 +12937,12 @@
                 "path": "src/plugins/data/common/search/tabify/response_writer.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
                 "plugin": "@kbn/search-errors",
                 "path": "packages/kbn-search-errors/src/painless_error.tsx"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "savedObjectsManagement",

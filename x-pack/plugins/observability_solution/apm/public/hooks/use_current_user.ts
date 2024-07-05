@@ -8,26 +8,26 @@
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { ApmPluginStartDeps } from '../plugin';
+import { ApmServices } from '../plugin';
 
 export function useCurrentUser() {
   const {
-    services: { security },
-  } = useKibana<ApmPluginStartDeps>();
+    services: { securityService },
+  } = useKibana<ApmServices>();
 
   const [user, setUser] = useState<AuthenticatedUser>();
 
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const authenticatedUser = await security?.authc.getCurrentUser();
+        const authenticatedUser = await securityService.authc.getCurrentUser();
         setUser(authenticatedUser);
       } catch {
         setUser(undefined);
       }
     };
     getCurrentUser();
-  }, [security?.authc]);
+  }, [securityService.authc]);
 
   return user;
 }

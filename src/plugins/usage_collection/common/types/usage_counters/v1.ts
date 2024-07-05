@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
+export type CounterEventSource = 'server' | 'ui';
+
 export interface CounterMetric {
   domainId: string;
+  namespace?: string;
   counterName: string;
   counterType: string;
+  source: CounterEventSource;
   incrementBy: number;
 }
 
@@ -17,10 +21,14 @@ export interface CounterMetric {
  * Details about the counter to be incremented
  */
 export interface IncrementCounterParams {
+  /** The namespace to increment this counter on */
+  namespace?: string;
   /** The name of the counter **/
   counterName: string;
   /** The counter type ("count" by default) **/
   counterType?: string;
+  /** The source of the event we are counting */
+  source?: CounterEventSource;
   /** Increment the counter by this number (1 if not specified) **/
   incrementBy?: number;
 }
