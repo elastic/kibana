@@ -6,8 +6,13 @@ paths:
   /api/osquery/live_queries:
     get:
       summary: Find live queries
+      operationId: findLiveQueries
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
-          - $ref: './find_live_query.schema.yaml#/components/parameters/FindLiveQueryRequestQueryParameter'
+        - $ref: './find_live_query.schema.yaml#/components/parameters/FindLiveQueryRequestQueryParameter'
       responses:
         '200':
           description: OK
@@ -17,6 +22,11 @@ paths:
                 $ref: './find_live_query.schema.yaml#/components/schemas/SuccessResponse'
     post:
       summary: Create a live query
+      operationId: createLiveQuery
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -33,6 +43,11 @@ paths:
   /api/osquery/live_queries/{id}:
     get:
       summary: Get live query details
+      operationId: getLiveQueryDetails
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestQueryParameter'
         - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestParameter'
@@ -44,15 +59,20 @@ paths:
               schema:
                 $ref: './get_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
   /api/osquery/live_queries/{id}/results/{actionId}:
-      get:
-        summary: Get live query results
-        parameters:
-          - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsQueryParameter'
-          - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsParameter'
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: './get_live_query_results.schema.yaml#/components/schemas/SuccessResponse'
+    get:
+      summary: Get live query results
+      operationId: getLiveQueryResults
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
+      parameters:
+        - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsQueryParameter'
+        - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_live_query_results.schema.yaml#/components/schemas/SuccessResponse'

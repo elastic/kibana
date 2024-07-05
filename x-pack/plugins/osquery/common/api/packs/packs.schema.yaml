@@ -6,6 +6,11 @@ paths:
   /api/osquery/packs:
     get:
       summary: Find packs
+      operationId: findPacks
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
           - $ref: './find_packs.schema.yaml#/components/parameters/FindPacksRequestQueryParameter'
       responses:
@@ -17,6 +22,11 @@ paths:
                 $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
     post:
       summary: Create a packs
+      operationId: createPacks
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -33,6 +43,11 @@ paths:
   /api/osquery/packs/{id}:
     get:
       summary: Get packs details
+      operationId: getPacksDetails
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - $ref: './read_packs.schema.yaml#/components/parameters/ReadPacksRequestQueryParameter'
       responses:
@@ -44,6 +59,11 @@ paths:
                 $ref: './read_packs.schema.yaml#/components/schemas/SuccessResponse'
     delete:
       summary: Delete packs
+      operationId: deletePacks
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - $ref: './delete_packs.schema.yaml#/components/parameters/DeletePacksRequestQueryParameter'
       responses:
@@ -55,6 +75,11 @@ paths:
                 $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
     put:
       summary: Update packs
+      operationId: updatePacks
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:

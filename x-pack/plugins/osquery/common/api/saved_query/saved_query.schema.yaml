@@ -6,6 +6,11 @@ paths:
   /api/osquery/saved_queries:
     get:
       summary: Find saved queries
+      operationId: findSavedQueries
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
           - $ref: './find_saved_query.schema.yaml#/components/parameters/FindSavedQueryRequestQueryParameter'
       responses:
@@ -17,6 +22,11 @@ paths:
                 $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
     post:
       summary: Create a saved query
+      operationId: createSavedQuery
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -33,6 +43,11 @@ paths:
   /api/osquery/saved_queries/{id}:
     get:
       summary: Get saved query details
+      operationId: getSavedQueryDetails
+      x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - $ref: './read_saved_query.schema.yaml#/components/parameters/ReadSavedQueryRequestQueryParameter'
       responses:
@@ -44,6 +59,11 @@ paths:
                 $ref: './read_saved_query.schema.yaml#/components/schemas/SuccessResponse'
     delete:
           summary: Delete saved query
+          operationId: deleteSavedQuery
+          x-codegen-enabled: false
+          x-labels:
+            - ess
+            - serverless
           parameters:
             - $ref: './delete_saved_query.schema.yaml#/components/parameters/DeleteSavedQueryRequestQueryParameter'
           responses:
@@ -55,6 +75,11 @@ paths:
                     $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
     put:
           summary: Update saved query
+          operationId: updateSavedQuery
+          x-codegen-enabled: false
+          x-labels:
+            - ess
+            - serverless
           requestBody:
             required: true
             content:
