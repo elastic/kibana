@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import moment, { type MomentInput } from 'moment';
-/*
- * Mocking the constructor of moment, so we can control the time of the day.
- * This is to avoid flaky tests when starting to run before midnight and ending the test after midnight
- * because the logic might remove one extra document since we moved to the next day.
- */
-jest.doMock('moment', () => {
-  const mockedMoment = (date?: MomentInput) => moment(date ?? '2024-06-30T10:00:00.000Z');
-  Object.setPrototypeOf(mockedMoment, moment); // inherit the prototype of `moment` so it has all the same methods.
-  return mockedMoment;
-});
+import moment from 'moment';
 
+/**
+ * Mocking methods that are used to retrieve current time. This allows:
+ * 1) introducing OLD counters that can be rolled up
+ * 2) Removing flakiness for tests that are executed on a 2 day span (close to midnight)
+ * getCurrentTime => used by `SOR.incrementCounter` to determine 'updated_at'
+ * isSavedObjectOlderThan => used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+ */
 jest.mock('@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils', () => ({
   ...jest.requireActual('@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils'),
   getCurrentTime: jest.fn(),
@@ -51,19 +48,27 @@ const isSavedObjectOlderThanMock = isSavedObjectOlderThan as jest.MockedFunction
   typeof isSavedObjectOlderThan
 >;
 
+const NOW = '2024-06-30T10:00:00.000Z';
+const OLD = moment(NOW).subtract(USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS + 1, 'days');
+const RECENT = moment(NOW).subtract(USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1, 'days');
+const OLD_YMD = OLD.format('YYYYMMDD');
+const RECENT_YMD = RECENT.format('YYYYMMDD');
+const OLD_ISO = OLD.toISOString();
+const RECENT_ISO = RECENT.toISOString();
+
 const ALL_COUNTERS = [
-  'domain1:a:count:server:20240624:default',
-  'domain1:a:count:server:20240626:default',
-  'domain1:b:count:server:20240624:one',
-  'domain1:b:count:server:20240624:two',
-  'domain1:b:count:server:20240626:one',
-  'domain1:b:count:server:20240626:two',
-  'domain2:a:count:server:20240624:default',
-  'domain2:a:count:server:20240626:default',
-  'domain2:c:count:server:20240626:default',
+  `domain1:a:count:server:${OLD_YMD}:default`,
+  `domain1:a:count:server:${RECENT_YMD}:default`,
+  `domain1:b:count:server:${OLD_YMD}:one`,
+  `domain1:b:count:server:${OLD_YMD}:two`,
+  `domain1:b:count:server:${RECENT_YMD}:one`,
+  `domain1:b:count:server:${RECENT_YMD}:two`,
+  `domain2:a:count:server:${OLD_YMD}:default`,
+  `domain2:a:count:server:${RECENT_YMD}:default`,
+  `domain2:c:count:server:${RECENT_YMD}:default`,
 ];
 
-const RECENT_COUNTERS = ALL_COUNTERS.filter((key) => key.includes('20240626'));
+const RECENT_COUNTERS = ALL_COUNTERS.filter((key) => key.includes(RECENT_YMD));
 
 describe('usage-counters', () => {
   let esServer: TestElasticsearchUtils;
@@ -87,31 +92,12 @@ describe('usage-counters', () => {
     internalRepository = start.savedObjects.createInternalRepository([
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     ]);
+
+    // insert a bunch of usage counters in multiple namespaces
+    await createTestCounters(internalRepository);
   });
 
   it('deletes documents older that the retention period, from all namespaces', async () => {
-    // insert a bunch of usage counters in multiple namespaces
-    const old = [
-      createCounter('domain1', 'a', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS + 1),
-      createCounter('domain1', 'b', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS + 1, 'one'),
-      createCounter('domain1', 'b', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS + 1, 'two'),
-      createCounter('domain2', 'a', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS + 1),
-    ];
-
-    const recent = [
-      createCounter('domain1', 'a', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1),
-      createCounter('domain1', 'b', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1, 'one'),
-      createCounter('domain1', 'b', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1, 'two'),
-      createCounter('domain2', 'a', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1),
-      createCounter('domain2', 'c', USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1), // different counterName (does not have an old counterpart)
-    ];
-
-    getCurrentTimeMock.mockReturnValue('2024-06-24T10:00:00.000Z'); // 6 days old
-    await Promise.all(old.map((counter) => incrementCounter(internalRepository, counter)));
-
-    getCurrentTimeMock.mockReturnValue('2024-06-26T10:00:00.000Z'); // 4 days old
-    await Promise.all(recent.map((counter) => incrementCounter(internalRepository, counter)));
-
     // check that all documents are there
     const beforeRollup = await internalRepository.find<UsageCountersSavedObjectAttributes>({
       type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
@@ -126,9 +112,7 @@ describe('usage-counters', () => {
     ).toEqual(ALL_COUNTERS);
 
     // run the rollup logic
-    isSavedObjectOlderThanMock.mockImplementation(
-      ({ doc }) => doc.updated_at === '2024-06-24T10:00:00.000Z'
-    );
+    isSavedObjectOlderThanMock.mockImplementation(({ doc }) => doc.updated_at === OLD_ISO);
     await rollUsageCountersIndices(logger, internalRepository);
 
     // check only recent counters are present
@@ -151,33 +135,69 @@ describe('usage-counters', () => {
   });
 });
 
+async function createTestCounters(internalRepository: ISavedObjectsRepository) {
+  await createCounters(internalRepository, OLD_ISO, [
+    ['domain1', 'a', 'count', 'server', 28],
+    ['domain1', 'b', 'count', 'server', 29, 'one'],
+    ['domain1', 'b', 'count', 'server', 30, 'two'],
+    ['domain2', 'a', 'count', 'server', 31],
+  ]);
+
+  await createCounters(internalRepository, RECENT_ISO, [
+    ['domain1', 'a', 'count', 'server', 32],
+    ['domain1', 'b', 'count', 'server', 33, 'one'],
+    ['domain1', 'b', 'count', 'server', 34, 'two'],
+    ['domain2', 'a', 'count', 'server', 35],
+    ['domain2', 'c', 'count', 'server', 36],
+  ]);
+}
+
+// domainId, counterName, counterType, source, count, namespace?
+type CounterAttributes = [string, string, string, 'ui' | 'server', number, string?];
+
+async function createCounters(
+  internalRepository: ISavedObjectsRepository,
+  isoDate: string,
+  countersAttributes: CounterAttributes[]
+) {
+  // tamper SO `updated_at`
+  getCurrentTimeMock.mockReturnValue(isoDate);
+
+  await Promise.all(
+    countersAttributes
+      .map((attrs) => createCounter(isoDate, ...attrs))
+      .map((counter) => incrementCounter(internalRepository, counter))
+  );
+}
+
 function createCounter(
+  date: string,
   domainId: string,
   counterName: string,
-  ageDays: number = 0,
+  counterType: string,
+  source: 'server' | 'ui',
+  count: number,
   namespace?: string
 ): SavedObject<UsageCountersSavedObjectAttributes> {
-  const date = moment('2024-06-30T10:00:00.000Z').subtract(ageDays, 'days');
-
   const id = serializeCounterKey({
     domainId,
     counterName,
-    counterType: 'count',
+    counterType,
     namespace,
-    source: 'server',
+    source,
     date,
   });
   return {
     type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     id,
     ...(namespace && { namespaces: [namespace] }),
-    updated_at: date.format(), // illustrative purpose only, overriden by SOR
+    // updated_at: date // illustrative purpose only, overriden by SOR
     attributes: {
       domainId,
       counterName,
-      counterType: 'count',
-      source: 'server',
-      count: 28,
+      counterType,
+      source,
+      count,
     },
     references: [],
   };
