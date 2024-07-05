@@ -99,11 +99,11 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('METRICS a /', expected);
       });
 
-      // test('on assignment expression, shows all agg and eval functions', async () => {
-      //   const { assertSuggestions } = await setup();
+      test('on assignment expression, shows all agg and eval functions', async () => {
+        const { assertSuggestions } = await setup();
 
-      //   await assertSuggestions('from a | stats a=/', [...allAggFunctions, ...allEvaFunctions]);
-      // });
+        await assertSuggestions('metrics a a=/', [...allAggFunctions, ...allEvaFunctions]);
+      });
 
       // test('on space after aggregate field', async () => {
       //   const { assertSuggestions } = await setup();

@@ -7,13 +7,15 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import type {
+import {
   AstProviderFn,
   ESQLAstItem,
+  ESQLAstMetricsCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
+  Walker,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
@@ -173,14 +175,20 @@ export async function suggest(
     // otherwise a variable
 
     if (astContext.command.name === 'metrics') {
+      const metrics = astContext.command as ESQLAstMetricsCommand;
+
       if (astContext.commandPosition === 'aggregates') {
         const { nodeArg } = extractArgMeta(astContext.command, astContext.node);
         const fieldsMap: Map<string, ESQLRealField> = await new Map();
         const anyVariables = collectVariables([], fieldsMap, innerText);
+        const hasAssignmentExpression =
+          metrics.aggregates && Walker.hasFunction(metrics.aggregates, '=');
 
         return [
           // varX =
-          buildNewVarDefinition(findNewVariable(anyVariables)),
+          ...(hasAssignmentExpression
+            ? []
+            : [buildNewVarDefinition(findNewVariable(anyVariables))]),
 
           // functions
           ...(await getFieldsOrFunctionsSuggestions(
