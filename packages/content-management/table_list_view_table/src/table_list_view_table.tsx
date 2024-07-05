@@ -27,6 +27,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
+import {
+  UserAvatarTip,
+  ManagedAvatarTip,
+  NoCreatorTip,
+} from '@kbn/content-management-user-profiles';
 import type {
   OpenContentEditorParams,
   SavedObjectsReference,
@@ -43,15 +48,16 @@ import {
 import { useServices } from './services';
 import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
-import type { SortColumnField } from './components';
+import { type SortColumnField, getInitialSorting, saveSorting } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
-import { UserAvatarTip } from './components/user_avatar_tip';
-import { NoUsersTip } from './components/user_missing_tip';
 
 interface ContentEditorConfig
-  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+  extends Pick<
+    OpenContentEditorParams,
+    'isReadonly' | 'onSave' | 'customValidators' | 'showActivityView'
+  > {
   enabled?: boolean;
 }
 
@@ -144,6 +150,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
     field: SortColumnField;
     direction: Direction;
   };
+  sortColumnChanged: boolean;
   tableFilter: {
     createdBy: string[];
   };
@@ -354,8 +361,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return getReducer<T>();
   }, []);
 
-  const initialState = useMemo<State<T>>(
-    () => ({
+  const initialState = useMemo<State<T>>(() => {
+    const initialSort = getInitialSorting(entityName);
+    return {
       items: [],
       hasNoItems: undefined,
       totalItems: 0,
@@ -373,16 +381,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageSize: initialPageSize,
         pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
       },
-      tableSort: {
-        field: 'attributes.title' as const,
-        direction: 'asc',
-      },
+      tableSort: initialSort.tableSort,
+      sortColumnChanged: !initialSort.isDefault,
       tableFilter: {
         createdBy: [],
       },
-    }),
-    [initialPageSize]
-  );
+    };
+  }, [initialPageSize, entityName]);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -506,6 +511,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           title: item.attributes.title,
           description: item.attributes.description,
           tags,
+          createdAt: item.createdAt,
+          createdBy: item.createdBy,
+          updatedAt: item.updatedAt,
+          updatedBy: item.updatedBy,
+          managed: item.managed,
         },
         entityName,
         ...contentEditor,
@@ -575,11 +585,16 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             {i18n.translate('contentManagement.tableList.createdByColumnTitle', {
               defaultMessage: 'Creator',
             })}
-            <NoUsersTip />
           </>
         ),
-        render: (field: string, record: { createdBy?: string }) =>
-          record.createdBy ? <UserAvatarTip uid={record.createdBy} /> : null,
+        render: (field: string, record: { createdBy?: string; managed?: boolean }) =>
+          record.createdBy ? (
+            <UserAvatarTip uid={record.createdBy} />
+          ) : record.managed ? (
+            <ManagedAvatarTip entityName={entityName} />
+          ) : (
+            <NoCreatorTip iconType={'minus'} />
+          ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
         width: '100px',
@@ -597,7 +612,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
         ),
         sortable: true,
-        width: '150px',
+        width: '130px',
       });
     }
 
@@ -660,7 +675,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: '100px',
+        width: `${32 * actions.length}px`,
         actions,
       });
     }
@@ -683,6 +698,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     tableItemsRowActions,
     inspectItem,
+    entityName,
   ]);
 
   const itemsById = useMemo(() => {
@@ -795,14 +811,18 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const onSortChange = useCallback(
     (field: SortColumnField, direction: Direction) => {
+      const sort = {
+        field,
+        direction,
+      };
+      // persist the sorting changes caused by explicit user's interaction
+      saveSorting(entityName, sort);
+
       updateTableSortFilterAndPagination({
-        sort: {
-          field,
-          direction,
-        },
+        sort,
       });
     },
-    [updateTableSortFilterAndPagination]
+    [entityName, updateTableSortFilterAndPagination]
   );
 
   const onFilterChange = useCallback(
@@ -838,6 +858,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           field: fieldSerialized as SortColumnField,
           direction: criteria.sort.direction,
         };
+
+        // persist the sorting changes caused by explicit user's interaction
+        saveSorting(entityName, data.sort);
       }
 
       data.page = {
@@ -847,7 +870,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
       updateTableSortFilterAndPagination(data);
     },
-    [updateTableSortFilterAndPagination]
+    [updateTableSortFilterAndPagination, entityName]
   );
 
   const deleteSelectedItems = useCallback(async () => {

@@ -20,7 +20,7 @@ interface TableActionsProps {
   flattenedField: unknown;
   fieldMapping?: DataViewField;
   onFilter: DocViewFilterFn;
-  onToggleColumn: (field: string) => void;
+  onToggleColumn: ((field: string) => void) | undefined;
   ignoredValue: boolean;
 }
 
@@ -47,11 +47,13 @@ export const TableActions = ({
           onClick={() => onFilter(fieldMapping, flattenedField, '-')}
         />
       )}
-      <DocViewTableRowBtnToggleColumn
-        active={isActive}
-        fieldname={field}
-        onClick={() => onToggleColumn(field)}
-      />
+      {onToggleColumn && (
+        <DocViewTableRowBtnToggleColumn
+          active={isActive}
+          fieldname={field}
+          onClick={() => onToggleColumn(field)}
+        />
+      )}
       {onFilter && (
         <DocViewTableRowBtnFilterExists
           disabled={!fieldMapping || !fieldMapping.filterable}

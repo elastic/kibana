@@ -27,8 +27,7 @@ import {
   FetchSyncJobsResponse,
 } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
-import { CancelSyncsLogic, CancelSyncsLogicActions } from '../connector/cancel_syncs_logic';
-import { IndexViewActions, IndexViewLogic } from '../index_view_logic';
+import { SyncsLogic, SyncsLogicActions } from '../../shared/header_actions/syncs_logic';
 
 const UI_REFRESH_INTERVAL = 2000;
 
@@ -41,8 +40,8 @@ export interface SyncJobsViewActions {
   cancelSyncError: CancelSyncApiActions['apiError'];
   cancelSyncJob: CancelSyncApiActions['makeRequest'];
   cancelSyncSuccess: CancelSyncApiActions['apiSuccess'];
-  cancelSyncsApiError: CancelSyncsLogicActions['cancelSyncsApiError'];
-  cancelSyncsApiSuccess: CancelSyncsLogicActions['cancelSyncsApiSuccess'];
+  cancelSyncsApiError: SyncsLogicActions['cancelSyncsApiError'];
+  cancelSyncsApiSuccess: SyncsLogicActions['cancelSyncsApiSuccess'];
   fetchSyncJobs: Actions<FetchSyncJobsArgs, FetchSyncJobsResponse>['makeRequest'];
   fetchSyncJobsApiSuccess: Actions<FetchSyncJobsArgs, FetchSyncJobsResponse>['apiSuccess'];
   fetchSyncJobsError: Actions<FetchSyncJobsArgs, FetchSyncJobsResponse>['apiError'];
@@ -51,12 +50,13 @@ export interface SyncJobsViewActions {
   setCancelSyncJob: (syncJobId: ConnectorSyncJob['id'] | undefined) => {
     syncJobId: ConnectorSyncJob['id'] | null;
   };
+  setConnectorId: (connectorId: string | null) => { connectorId: string | null };
   setSelectedSyncJobCategory: (category: 'content' | 'access_control') => {
     category: 'content' | 'access_control';
   };
-  startAccessControlSync: IndexViewActions['startAccessControlSync'];
-  startIncrementalSync: IndexViewActions['startIncrementalSync'];
-  startSync: IndexViewActions['startSync'];
+  startAccessControlSync: SyncsLogicActions['startAccessControlSync'];
+  startIncrementalSync: SyncsLogicActions['startIncrementalSync'];
+  startSync: SyncsLogicActions['startSync'];
 }
 
 export interface SyncJobsViewValues {
@@ -77,6 +77,7 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
   actions: {
     refetchSyncJobs: true,
     setCancelSyncJob: (syncJobId) => ({ syncJobId: syncJobId ?? null }),
+    setConnectorId: (connectorId) => ({ connectorId }),
     setSelectedSyncJobCategory: (category) => ({ category }),
   },
   connect: {
@@ -95,14 +96,17 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
         'apiSuccess as cancelSyncSuccess',
         'makeRequest as cancelSyncJob',
       ],
-      CancelSyncsLogic,
-      ['cancelSyncsApiError', 'cancelSyncsApiSuccess', 'cancelSyncs'],
-      IndexViewLogic,
-      ['startSync', 'startIncrementalSync', 'startAccessControlSync'],
+      SyncsLogic,
+      [
+        'cancelSyncsApiError',
+        'cancelSyncsApiSuccess',
+        'cancelSyncs',
+        'startSync',
+        'startIncrementalSync',
+        'startAccessControlSync',
+      ],
     ],
     values: [
-      IndexViewLogic,
-      ['connectorId'],
       FetchSyncJobsApiLogic,
       ['data as syncJobsData', 'status as syncJobsStatus'],
       CancelSyncApiLogic,
@@ -168,6 +172,12 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
 
   path: ['enterprise_search', 'content', 'sync_jobs_view_logic'],
   reducers: {
+    connectorId: [
+      null,
+      {
+        setConnectorId: (_, { connectorId }) => connectorId,
+      },
+    ],
     selectedSyncJobCategory: [
       'content',
       {

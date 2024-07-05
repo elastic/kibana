@@ -6882,23 +6882,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.UserIdGetter",
-        "type": "Type",
-        "tags": [],
-        "label": "UserIdGetter",
-        "description": [],
-        "signature": [
-          "() => Promise<string | undefined>"
-        ],
-        "path": "src/plugins/data_views/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -13226,24 +13209,24 @@
                 "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
+                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
+                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/eql_query_bar/validators.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -17493,7 +17476,15 @@
                 "section": "def-common.DataViewField",
                 "text": "DataViewField"
               },
-              "; }; getFieldMapSorted: () => {}; }>"
+              "; }; getFieldMapSorted: () => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">; }>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
             "deprecated": false,

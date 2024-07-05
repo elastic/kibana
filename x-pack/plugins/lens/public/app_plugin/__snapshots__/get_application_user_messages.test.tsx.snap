@@ -14,10 +14,9 @@ Array [
         className="eui-textBreakWord"
         data-test-subj="missing-refs-failure"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Data view not found"
           id="xpack.lens.editorFrame.dataViewNotFound"
-          values={Object {}}
         />
       </p>
       <p
@@ -28,7 +27,7 @@ Array [
           }
         }
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found."
           id="xpack.lens.indexPattern.missingDataView"
           values={
@@ -89,6 +88,7 @@ Array [
     </React.Fragment>,
     "severity": "error",
     "shortMessage": "",
+    "uniqueId": "editor_missing_dataview",
   },
   Object {
     "displayLocations": Array [
@@ -100,6 +100,7 @@ Array [
     "longMessage": "Could not find the data view: missing_pattern",
     "severity": "error",
     "shortMessage": "",
+    "uniqueId": "editor_missing_expression_dataview",
   },
 ]
 `;

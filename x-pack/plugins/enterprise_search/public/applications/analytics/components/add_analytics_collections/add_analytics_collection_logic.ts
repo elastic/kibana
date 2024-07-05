@@ -96,7 +96,7 @@ export const AddAnalyticsCollectionLogic = kea<
     apiSuccess: async ({ name }) => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
-          defaultMessage: "Successfully added collection '{name}'",
+          defaultMessage: "Successfully added collection ''{name}''",
           values: {
             name,
           },

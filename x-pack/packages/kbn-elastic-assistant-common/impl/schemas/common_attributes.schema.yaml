@@ -28,3 +28,9 @@ components:
           type: string
           description: User name
 
+    SortOrder:
+      type: string
+      enum:
+        - 'asc'
+        - 'desc'
+

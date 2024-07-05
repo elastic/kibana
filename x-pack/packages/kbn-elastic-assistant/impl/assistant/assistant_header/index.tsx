@@ -14,9 +14,11 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -38,7 +40,12 @@ interface OwnProps {
   showAnonymizedValues: boolean;
   title: string;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
+  allPrompts: PromptResponse[];
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 type Props = OwnProps;
@@ -61,7 +68,10 @@ export const AssistantHeader: React.FC<Props> = ({
   showAnonymizedValues,
   title,
   conversations,
+  conversationsLoaded,
   refetchConversationsState,
+  allPrompts,
+  refetchPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -120,6 +130,7 @@ export const AssistantHeader: React.FC<Props> = ({
             isDisabled={isDisabled}
             conversations={conversations}
             onConversationDeleted={onConversationDeleted}
+            allPrompts={allPrompts}
           />
 
           <>
@@ -151,8 +162,10 @@ export const AssistantHeader: React.FC<Props> = ({
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}
+                  conversationsLoaded={conversationsLoaded}
                   refetchConversationsState={refetchConversationsState}
                   isFlyoutMode={false}
+                  refetchPrompts={refetchPrompts}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

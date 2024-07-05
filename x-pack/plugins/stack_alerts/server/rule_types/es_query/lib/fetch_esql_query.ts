@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { intersectionBy } from 'lodash';
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { EsqlTable, toEsQueryHits } from '../../../../common';
 
@@ -42,11 +45,22 @@ export async function fetchEsqlQuery({
 
   logger.debug(`ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
-  const response = await esClient.transport.request<EsqlTable>({
-    method: 'POST',
-    path: '/_query',
-    body: query,
-  });
+  let response: EsqlTable;
+  try {
+    response = await esClient.transport.request<EsqlTable>({
+      method: 'POST',
+      path: '/_query',
+      body: query,
+    });
+  } catch (e) {
+    if (e.message?.includes('verification_exception')) {
+      throw createTaskRunError(e, TaskErrorSource.USER);
+    }
+    throw e;
+  }
+
+  const hits = toEsQueryHits(response);
+  const sourceFields = getSourceFields(response);
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
 
@@ -60,10 +74,10 @@ export async function fetchEsqlQuery({
         took: 0,
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
-        hits: toEsQueryHits(response),
+        hits,
       },
       resultLimit: alertLimit,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,
     }),
     index: null,
@@ -97,4 +111,18 @@ export const getEsqlQuery = (
     },
   };
   return query;
+};
+
+export const getSourceFields = (results: EsqlTable) => {
+  const resultFields = results.columns.map((c) => ({
+    label: c.name,
+    searchPath: c.name,
+  }));
+  const alertFields = Object.keys(alertFieldMap);
+  const ecsFields = Object.keys(ecsFieldMap)
+    // exclude the alert fields that we don't want to override
+    .filter((key) => !alertFields.includes(key))
+    .map((key) => ({ label: key, searchPath: key }));
+
+  return intersectionBy(resultFields, ecsFields, 'label');
 };

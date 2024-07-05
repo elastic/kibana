@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewsContract, DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { SerializedSearchSourceFields } from '../..';
@@ -33,7 +34,11 @@ export const createSearchSource = (
   indexPatterns: DataViewsContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => {
-  const createFields = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+  let dataViewLazy: DataViewLazy | undefined;
+  const createFields = async (
+    searchSourceFields: SerializedSearchSourceFields = {},
+    useDataViewLazy = false
+  ) => {
     const { index, parent, ...restOfFields } = searchSourceFields;
     const fields: SearchSourceFields = {
       ...restOfFields,
@@ -41,10 +46,31 @@ export const createSearchSource = (
 
     // hydrating index pattern
     if (searchSourceFields.index) {
-      if (typeof searchSourceFields.index === 'string') {
-        fields.index = await indexPatterns.get(searchSourceFields.index);
+      if (!useDataViewLazy) {
+        fields.index =
+          typeof searchSourceFields.index === 'string'
+            ? await indexPatterns.get(searchSourceFields.index)
+            : await indexPatterns.create(searchSourceFields.index);
       } else {
-        fields.index = await indexPatterns.create(searchSourceFields.index);
+        dataViewLazy =
+          typeof searchSourceFields.index === 'string'
+            ? await indexPatterns.getDataViewLazy(searchSourceFields.index)
+            : await indexPatterns.createDataViewLazy(searchSourceFields.index);
+
+        const [spec, shortDotsEnable, metaFields] = await Promise.all([
+          dataViewLazy.toSpec(),
+          searchSourceDependencies.dataViews.getShortDotsEnable(),
+          searchSourceDependencies.dataViews.getMetaFields(),
+        ]);
+
+        const dataView = new DataView({
+          spec,
+          // field format functionality is not used within search source
+          fieldFormats: {} as FieldFormatsStartCommon,
+          shortDotsEnable,
+          metaFields,
+        });
+        fields.index = dataView;
       }
     }
 
@@ -55,8 +81,11 @@ export const createSearchSource = (
     return fields;
   };
 
-  const createSearchSourceFn = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
-    const fields = await createFields(searchSourceFields);
+  const createSearchSourceFn = async (
+    searchSourceFields: SerializedSearchSourceFields = {},
+    useDataViewLazy?: boolean
+  ) => {
+    const fields = await createFields(searchSourceFields, !!useDataViewLazy);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
 
     // todo: move to migration script .. create issue
@@ -64,6 +93,11 @@ export const createSearchSource = (
 
     if (typeof query !== 'undefined') {
       searchSource.setField('query', migrateLegacyQuery(query));
+    }
+    // using the dataViewLazy check as a type guard
+    if (useDataViewLazy && dataViewLazy) {
+      const dataViewFields = await searchSource.loadDataViewFields(dataViewLazy);
+      fields.index?.fields.replaceAll(Object.values(dataViewFields).map((fld) => fld.toSpec()));
     }
 
     return searchSource;

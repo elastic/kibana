@@ -24,6 +24,10 @@
     "@kbn/i18n-react",
     "@kbn/core-chrome-browser",
     "@kbn/features-plugin",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/deeplinks-management",
+    "@kbn/ebt-tools",
   ],
   "exclude": ["target/**/*"]
 }

@@ -18,7 +18,7 @@ import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
@@ -194,7 +194,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchReponse>
+            IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
             { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }

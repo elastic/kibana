@@ -255,11 +255,13 @@ export function WrappedHelper<ExtraCore>({
   const testState: AppState = merge({}, mockState, state);
 
   return (
-    <MountWithReduxProvider state={testState} useRealStore={useRealStore} store={store}>
-      <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
-        {children}
-      </MockRouter>
-    </MountWithReduxProvider>
+    <I18nProvider>
+      <MountWithReduxProvider state={testState} useRealStore={useRealStore} store={store}>
+        <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
+          {children}
+        </MockRouter>
+      </MountWithReduxProvider>
+    </I18nProvider>
   );
 }
 

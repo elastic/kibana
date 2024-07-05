@@ -1,8 +1,8 @@
 post:
-  summary: Retrieve sets of saved objects that you want to import into Kibana.
-  operationId: exportSavedObjects
+  summary: Export saved objects in the default space
+  operationId: exportSavedObjectsDefault
   description: |
-
+    Retrieve sets of saved objects that you want to import into Kibana.
     You must include `type` or `objects` in the request body.
 
     NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.

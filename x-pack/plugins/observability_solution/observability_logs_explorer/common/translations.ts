@@ -57,3 +57,10 @@ export const feedbackLinkTitle = i18n.translate(
 export const createSLoLabel = i18n.translate('xpack.observabilityLogsExplorer.createSlo', {
   defaultMessage: 'Create SLO',
 });
+
+export const datasetQualityLinkTitle = i18n.translate(
+  'xpack.observabilityLogsExplorer.datasetQualityLinkTitle',
+  {
+    defaultMessage: 'Data sets',
+  }
+);

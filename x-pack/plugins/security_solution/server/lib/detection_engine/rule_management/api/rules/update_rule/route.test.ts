@@ -13,6 +13,7 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
@@ -34,7 +35,7 @@ describe('Update rule route', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.rulesManagementClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     updateRuleRoute(server.router);
@@ -94,7 +95,7 @@ describe('Update rule route', () => {
     });
 
     it('returns a 403 if mlAuthz fails', async () => {
-      clients.rulesManagementClient.updateRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.updateRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
       const request = requestMock.create({

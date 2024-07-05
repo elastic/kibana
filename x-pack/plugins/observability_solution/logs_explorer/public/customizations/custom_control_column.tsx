@@ -141,7 +141,6 @@ export const createCustomControlColumnsConfiguration =
     };
 
     return {
-      leadingControlColumns: [checkBoxColumn],
-      trailingControlColumns: [actionsColumn],
+      leadingControlColumns: [checkBoxColumn, actionsColumn],
     };
   };

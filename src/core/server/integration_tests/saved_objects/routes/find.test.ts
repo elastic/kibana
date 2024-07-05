@@ -72,8 +72,9 @@ describe('GET /api/saved_objects/_find', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
+    const access = 'public';
 
-    registerFindRoute(router, { config, coreUsageData, logger });
+    registerFindRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

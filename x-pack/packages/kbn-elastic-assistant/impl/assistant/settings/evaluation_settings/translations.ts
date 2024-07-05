@@ -24,7 +24,7 @@ export const SETTINGS_DESCRIPTION = i18n.translate(
 export const RUN_DETAILS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.runDetailsTitle',
   {
-    defaultMessage: '🏃 Run Details',
+    defaultMessage: 'Run Details',
   }
 );
 
@@ -38,7 +38,7 @@ export const RUN_DETAILS_DESCRIPTION = i18n.translate(
 export const PREDICTION_DETAILS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.predictionDetailsTitle',
   {
-    defaultMessage: '🔮 Predictions',
+    defaultMessage: 'Predictions',
   }
 );
 
@@ -53,7 +53,7 @@ export const PREDICTION_DETAILS_DESCRIPTION = i18n.translate(
 export const EVALUATION_DETAILS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationDetailsTitle',
   {
-    defaultMessage: '🧮 Evaluation (Optional)',
+    defaultMessage: 'Evaluation (Optional)',
   }
 );
 
@@ -211,7 +211,10 @@ export const APM_URL_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.apmUrlDescription',
   {
     defaultMessage:
-      'URL for the Kibana APM app. Used to link to APM traces for evaluation results. Defaults to "$\\{basePath\\}/app/apm"',
+      'URL for the Kibana APM app. Used to link to APM traces for evaluation results. Defaults to "{defaultUrlPath}"',
+    values: {
+      defaultUrlPath: '${basePath}/app/apm',
+    },
   }
 );
 

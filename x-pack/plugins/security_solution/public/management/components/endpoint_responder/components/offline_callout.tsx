@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useAgentStatusHook } from '../../../hooks/agents/use_get_agent_status';
+import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface OfflineCalloutProps {
@@ -22,57 +20,9 @@ interface OfflineCalloutProps {
 }
 
 export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
-  const isEndpointAgent = agentType === 'endpoint';
-  const isSentinelOneAgent = agentType === 'sentinel_one';
-  const isCrowdstrikeAgent = agentType === 'crowdstrike';
-  const getAgentStatus = useAgentStatusHook();
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
+  const { data } = useGetAgentStatus(endpointId, agentType);
 
-  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'sentinelOneManualHostActionsEnabled'
-  );
-  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
-
-  const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
-    enabled: isEndpointAgent && !agentStatusClientEnabled,
-  });
-
-  const { data } = getAgentStatus([endpointId], agentType, {
-    enabled:
-      (sentinelOneManualHostActionsEnabled && isSentinelOneAgent) ||
-      (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAgent) ||
-      (isEndpointAgent && agentStatusClientEnabled),
-  });
-  const showOfflineCallout = useMemo(
-    () =>
-      (isEndpointAgent && endpointDetails?.host_status === HostStatus.OFFLINE) ||
-      (isSentinelOneAgent && data?.[endpointId].status === HostStatus.OFFLINE) ||
-      (isCrowdstrikeAgent && data?.[endpointId].status === HostStatus.OFFLINE),
-    [
-      data,
-      endpointDetails?.host_status,
-      endpointId,
-      isEndpointAgent,
-      isCrowdstrikeAgent,
-      isSentinelOneAgent,
-    ]
-  );
-
-  if (
-    (isEndpointAgent && !endpointDetails) ||
-    (isSentinelOneV1Enabled && isSentinelOneAgent && !data) ||
-    (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAgent && !data)
-  ) {
-    return null;
-  }
-
-  if (showOfflineCallout) {
+  if (data?.[endpointId].status === HostStatus.OFFLINE) {
     return (
       <>
         <EuiCallOut

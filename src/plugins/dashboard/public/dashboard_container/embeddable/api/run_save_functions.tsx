@@ -20,8 +20,11 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
-import { prefixReferencesFromPanel } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import {
+  DashboardContainerInput,
+  DashboardPanelMap,
+  prefixReferencesFromPanel,
+} from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -265,47 +268,69 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
       }
     };
 
-    let customModalTitle;
-    let newTitle = currentState.title;
+    (async () => {
+      try {
+        let customModalTitle;
+        let newTitle = currentState.title;
 
-    if (lastSavedId) {
-      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
-      newTitle = `${baseTitle} (${baseCount + 1})`;
+        if (lastSavedId) {
+          const [baseTitle, baseCount] = extractTitleAndCount(newTitle);
 
-      switch (interactionMode) {
-        case ViewMode.EDIT: {
-          customModalTitle = i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
-            defaultMessage: 'Save as new dashboard',
+          newTitle = `${baseTitle} (${baseCount + 1})`;
+
+          await checkForDuplicateDashboardTitle({
+            title: newTitle,
+            lastSavedTitle: currentState.title,
+            copyOnSave: true,
+            isTitleDuplicateConfirmed: false,
+            onTitleDuplicate(speculativeSuggestion) {
+              newTitle = speculativeSuggestion;
+            },
           });
-          break;
+
+          switch (interactionMode) {
+            case ViewMode.EDIT: {
+              customModalTitle = i18n.translate(
+                'dashboard.topNav.editModeInteractiveSave.modalTitle',
+                {
+                  defaultMessage: 'Save as new dashboard',
+                }
+              );
+              break;
+            }
+            case ViewMode.VIEW: {
+              customModalTitle = i18n.translate(
+                'dashboard.topNav.viewModeInteractiveSave.modalTitle',
+                {
+                  defaultMessage: 'Duplicate dashboard',
+                }
+              );
+              break;
+            }
+            default: {
+              customModalTitle = undefined;
+            }
+          }
         }
-        case ViewMode.VIEW: {
-          customModalTitle = i18n.translate('dashboard.topNav.viewModeInteractiveSave.modalTitle', {
-            defaultMessage: 'Duplicate dashboard',
-          });
-          break;
-        }
-        default: {
-          customModalTitle = undefined;
-        }
+
+        const dashboardDuplicateModal = (
+          <DashboardSaveModal
+            tags={currentState.tags}
+            title={newTitle}
+            onClose={() => resolve(undefined)}
+            timeRestore={currentState.timeRestore}
+            showStoreTimeOnSave={!lastSavedId}
+            description={currentState.description ?? ''}
+            showCopyOnSave={false}
+            onSave={onSaveAttempt}
+            customModalTitle={customModalTitle}
+          />
+        );
+        this.clearOverlays();
+        showSaveModal(dashboardDuplicateModal);
+      } catch (error) {
+        reject(error);
       }
-    }
-
-    const dashboardDuplicateModal = (
-      <DashboardSaveModal
-        tags={currentState.tags}
-        title={newTitle}
-        onClose={() => resolve(undefined)}
-        timeRestore={currentState.timeRestore}
-        showStoreTimeOnSave={!lastSavedId}
-        description={currentState.description ?? ''}
-        showCopyOnSave={false}
-        onSave={onSaveAttempt}
-        customModalTitle={customModalTitle}
-      />
-    );
-
-    this.clearOverlays();
-    showSaveModal(dashboardDuplicateModal);
+    })();
   });
 }

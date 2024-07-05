@@ -24,7 +24,7 @@ import { SenseEditor } from '../../models';
 export const useSendCurrentRequest = () => {
   const {
     services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo, storage },
-    startServices,
+    ...startServices
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
