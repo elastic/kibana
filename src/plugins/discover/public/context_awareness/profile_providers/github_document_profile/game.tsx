@@ -22,7 +22,7 @@ export const SpaceInvaders: React.FC<SpaceInvadersProps> = ({ avatarUrl }) => {
           <div className="invader">🐞👾🪲🐞👾🪲🐞👾🪲🐞</div>
         </div>
         <div className="invader_team shooter_btm">
-          <EuiAvatar size="m" name="Developer" imageUrl={avatarUrl} />
+          <EuiAvatar size="l" name="Developer" imageUrl={avatarUrl} />
         </div>
       </div>
     </div>

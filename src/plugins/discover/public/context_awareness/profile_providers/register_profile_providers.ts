@@ -31,6 +31,10 @@ import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
+import {
+  githubApiSummaryDataSourceProfileProvider,
+  githubApiSummaryDocumentProfileProvider,
+} from './github_document_profile/profile_summary_api';
 
 export const registerProfileProviders = ({
   rootProfileService,
@@ -52,6 +56,8 @@ export const registerProfileProviders = ({
     githubDataSourceProfileProvider.profileId,
     githubSummaryDocumentProfileProvider.profileId,
     githubSummaryDataSourceProfileProvider.profileId,
+    githubApiSummaryDocumentProfileProvider.profileId,
+    githubApiSummaryDataSourceProfileProvider.profileId,
     ...extractProfileIds(rootProfileProviders),
     ...extractProfileIds(dataSourceProfileProviders),
     ...extractProfileIds(documentProfileProviders),
@@ -70,6 +76,7 @@ export const registerProfileProviders = ({
       exampleDataSourceProfileProvider,
       githubDataSourceProfileProvider,
       githubSummaryDataSourceProfileProvider,
+      githubApiSummaryDataSourceProfileProvider,
       ...dataSourceProfileProviders,
     ],
     enabledProfileIds,
@@ -80,6 +87,7 @@ export const registerProfileProviders = ({
     availableProviders: [
       githubDocumentProfileProvider,
       githubSummaryDocumentProfileProvider,
+      githubApiSummaryDocumentProfileProvider,
       exampleDocumentProfileProvider,
       ...documentProfileProviders,
     ],
