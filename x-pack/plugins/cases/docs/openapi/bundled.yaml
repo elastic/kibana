@@ -4175,9 +4175,12 @@ components:
                   - toggle
         owner:
           $ref: '#/components/schemas/owners'
+        templates:
+          $ref: '#/components/schemas/templates'
     update_case_configuration_request:
       title: Update case configuration request
-      description: External connection details, such as the closure type and default connector for cases.
+      description: |
+        You can update settings such as the closure type, custom fields, templates, and the default connector for cases.
       type: object
       required:
         - version
@@ -4249,6 +4252,8 @@ components:
                 enum:
                   - text
                   - toggle
+        templates:
+          $ref: '#/components/schemas/templates'
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.
@@ -5214,7 +5219,7 @@ components:
               tags:
                 - Template tag 1
     set_case_configuration_request:
-      summary: Set the closure type and default connector for Stack Management cases.
+      summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:
         owner: cases
         connector:
@@ -5228,6 +5233,25 @@ components:
             label: my-text-field
             required: false
             type: text
+            defaultValue: My custom field default value.
+        templates:
+          - key: 505932fe-ee3a-4960-a661-c781b5acdb05
+            name: template-1
+            caseFields:
+              title: Default case title
+              tags:
+                - Default case tag
+              category: Default-category
+              description: A default description for cases.
+              assignees:
+                - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              customFields:
+                - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                  type: text
+                  value: A text field value for the template.
+            description: A description of the template.
+            tags:
+              - Template tag 1
     set_case_configuration_response:
       summary: This is an example response for case settings.
       value:
@@ -5237,8 +5261,27 @@ components:
             label: my-text-field
             required: false
             type: text
+            defaultValue: My custom field default value.
+        templates:
+          - key: 505932fe-ee3a-4960-a661-c781b5acdb05
+            name: template-1
+            caseFields:
+              title: Default case title
+              tags:
+                - Default case tag
+              category: Default-category
+              description: A default description for cases.
+              assignees:
+                - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              customFields:
+                - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                  type: text
+                  value: A text field value for the template.
+            description: A description of the template.
+            tags:
+              - Template tag 1
         owner: cases
-        created_at: '2023-10-01T17:07:17.767Z'
+        created_at: '2024-07-01T17:07:17.767Z'
         created_by:
           username: elastic
           email: null,
@@ -5261,6 +5304,9 @@ components:
           - source: comments
             target: comments
             action_type: append
+          - source: tags
+            target: labels
+            action_type: overwrite
         version: WzIwNzMsMV0=
         error: null
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
@@ -5279,6 +5325,7 @@ components:
             label: my-text-field
             required: true
             type: text
+            defaultValue: A new default value.
           - key: fcc6840d-eb14-42df-8aaf-232201a705ec
             label: my-toggle
             required: false
@@ -5292,18 +5339,19 @@ components:
             label: my-text-field
             required: true
             type: text
+            defaultValue: A new default value.
           - key: fcc6840d-eb14-42df-8aaf-232201a705ec
             label: my-toggle
             required: false
             type: toggle
         owner: cases
-        created_at: '2023-10-01T17:07:17.767Z'
+        created_at: '2024-07-01T17:07:17.767Z'
         created_by:
           username: elastic
-          email: null,
+          email: null
           full_name: null
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-        updated_at: '2023-10-19T00:52:42.401Z'
+        updated_at: '2024-07-19T00:52:42.401Z'
         updated_by:
           username: elastic
           full_name: null
@@ -5321,12 +5369,16 @@ components:
           - source: description
             target: description
             action_type: overwrite
+          - source: tags
+            target: labels
+            action_type: overwrite
           - source: comments
             target: comments
             action_type: append
-        version: zEzNSw1XQ==
+        version: WzI2LDNd
         error: null
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+        templates: []
     get_reporters_response:
       summary: A list of two users that opened cases
       value:
