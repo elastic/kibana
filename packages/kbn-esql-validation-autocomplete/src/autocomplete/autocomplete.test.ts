@@ -115,43 +115,43 @@ describe('autocomplete', () => {
   describe('New command', () => {
     testSuggestions(
       ' ',
-      sourceCommands.map((name) => name + ' $0')
+      sourceCommands.map((name) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
       'from a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name + ' $0')
+        .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
       'from a [metadata _id] | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name + ' $0')
+        .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
       'from a | eval var0 = a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name + ' $0')
+        .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
       'from a [metadata _id] | eval var0 = a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name + ' $0')
+        .map(({ name }) => name.toUpperCase() + ' $0')
     );
   });
 
   describe('show', () => {
-    testSuggestions('show ', ['info']);
+    testSuggestions('show ', ['INFO']);
     for (const fn of ['info']) {
       testSuggestions(`show ${fn} `, ['|']);
     }
   });
 
   describe('meta', () => {
-    testSuggestions('meta ', ['functions']);
+    testSuggestions('meta ', ['FUNCTIONS']);
     for (const fn of ['functions']) {
       testSuggestions(`meta ${fn} `, ['|']);
     }
@@ -263,8 +263,8 @@ describe('autocomplete', () => {
       ','
     );
 
-    testSuggestions('from index | WHERE stringField not ', ['like $0', 'rlike $0', 'in $0']);
-    testSuggestions('from index | WHERE stringField NOT ', ['like $0', 'rlike $0', 'in $0']);
+    testSuggestions('from index | WHERE stringField not ', ['LIKE $0', 'RLIKE $0', 'IN $0']);
+    testSuggestions('from index | WHERE stringField NOT ', ['LIKE $0', 'RLIKE $0', 'IN $0']);
     testSuggestions('from index | WHERE not ', [
       ...getFieldNamesByType('boolean'),
       ...getFunctionSignaturesByReturnType('eval', 'boolean', { evalMath: true }),
@@ -318,7 +318,7 @@ describe('autocomplete', () => {
         testSuggestions(`from a | ${subExpression} ${command} stringField `, [constantPattern]);
         testSuggestions(
           `from a | ${subExpression} ${command} stringField ${constantPattern} `,
-          (command === 'dissect' ? ['append_separator = $0'] : []).concat(['|'])
+          (command === 'dissect' ? ['APPEND_SEPARATOR = $0'] : []).concat(['|'])
         );
         if (command === 'dissect') {
           testSuggestions(
@@ -357,7 +357,7 @@ describe('autocomplete', () => {
 
   describe('rename', () => {
     testSuggestions('from a | rename ', getFieldNamesByType('any'));
-    testSuggestions('from a | rename stringField ', ['as $0']);
+    testSuggestions('from a | rename stringField ', ['AS $0']);
     testSuggestions('from a | rename stringField as ', ['var0']);
   });
 
@@ -403,7 +403,7 @@ describe('autocomplete', () => {
         testSuggestions(`from a ${prevCommand}| enrich _${mode.toUpperCase()}:`, policyNames, ':');
         testSuggestions(`from a ${prevCommand}| enrich _${camelCase(mode)}:`, policyNames, ':');
       }
-      testSuggestions(`from a ${prevCommand}| enrich policy `, ['on $0', 'with $0', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy `, ['ON $0', 'WITH $0', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
         'numberField',
@@ -417,7 +417,7 @@ describe('autocomplete', () => {
         'any#Char$Field',
         'kubernetes.something.something',
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with $0', ',', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['WITH $0', ',', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with `, [
         'var0 =',
         ...getPolicyFields('policy'),
@@ -464,8 +464,8 @@ describe('autocomplete', () => {
       ',',
       '|',
     ]);
-    testSuggestions('from index | EVAL stringField not ', ['like $0', 'rlike $0', 'in $0']);
-    testSuggestions('from index | EVAL stringField NOT ', ['like $0', 'rlike $0', 'in $0']);
+    testSuggestions('from index | EVAL stringField not ', ['LIKE $0', 'RLIKE $0', 'IN $0']);
+    testSuggestions('from index | EVAL stringField NOT ', ['LIKE $0', 'RLIKE $0', 'IN $0']);
     testSuggestions('from index | EVAL numberField in ', ['( $0 )']);
     testSuggestions(
       'from index | EVAL numberField in ( )',
