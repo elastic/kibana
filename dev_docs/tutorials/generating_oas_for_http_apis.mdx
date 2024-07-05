@@ -32,7 +32,7 @@ In `kibana.dev.yml` add the following configuration:
 server.oas.enabled: true
 ```
 
-Launch Kibana and issue the following request:
+Launch Kibana and send the following request:
 
 ```bash
 curl -s -uelastic:changeme http://localhost:5601/api/oas\?pathStartsWith\=/api/foo
@@ -161,7 +161,7 @@ This descriptions should now be reflected in the OAS generated for your route.
 OAS for public routes are written to the Kibana repo as a snapshot that will ultimately be published.
 
 <DocCallOut title="Under construction" color="warning">
-  At the time of writing we only the OAS for a subset of Kibana's HTTP APIs to give teams the chance to improve the quality of OAS.
+  At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
 
   If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core**.
 </DocCallOut>
