@@ -81,19 +81,21 @@ export const groupingHandlerFactory =
     );
 
     try {
-      const { fields, itemSets } = await fetchFrequentItemSets(
+      const { fields, itemSets } = await fetchFrequentItemSets({
         esClient,
-        requestBody.index,
-        JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
-        significantTerms,
-        requestBody.timeFieldName,
-        requestBody.deviationMin,
-        requestBody.deviationMax,
         logger,
-        stateHandler.sampleProbability(),
-        responseStream.pushError,
-        abortSignal
-      );
+        emitError: responseStream.pushError,
+        abortSignal,
+        arguments: {
+          index: requestBody.index,
+          searchQuery: JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
+          significantItems: significantTerms,
+          timeFieldName: requestBody.timeFieldName,
+          deviationMin: requestBody.deviationMin,
+          deviationMax: requestBody.deviationMax,
+          sampleProbability: stateHandler.sampleProbability(),
+        },
+      });
 
       if (significantCategories.length > 0 && significantTerms.length > 0) {
         const { fields: significantCategoriesFields, itemSets: significantCategoriesItemSets } =
