@@ -61,32 +61,45 @@ export interface SimpleSignificantItem {
 }
 
 /**
- * Fetches log rate analysis data.
+ * Asynchronously fetches log rate analysis from an Elasticsearch client.
+ * Use this function if you want to fetch log rate analysis in other contexts
+ * than the Log Rate Analysis UI in the ML plugin UI.
  *
- * @param esClient Elasticsearch client.
- * @param index The Elasticsearch source index pattern.
- * @param start The start of the time range, in Elasticsearch date math, like `now`.
- * @param end The end of the time range, in Elasticsearch date math, like `now-24h`.
- * @param timefield The Elasticesarch source index pattern time field.
- * @param abortSignal Abort signal.
- * @param keywordFieldCandidates Optional keyword field candidates.
- * @param textFieldCandidates Optional text field candidates.
- * @returns Log rate analysis data.
+ * @param {Object} params - The parameters for fetching log rate analysis.
+ * @param {ElasticsearchClient} params.esClient - The Elasticsearch client to use for the query.
+ * @param {AbortSignal} [params.abortSignal] - An optional abort signal to cancel the request.
+ * @param {Object} params.arguments - The arguments for the log rate analysis query.
+ * @param {string} params.arguments.index - The index to query against.
+ * @param {string} params.arguments.start - The start time for the query range.
+ * @param {string} params.arguments.end - The end time for the query range.
+ * @param {string} params.arguments.timefield - The field used to filter documents by time.
+ * @param {string[]} [params.arguments.keywordFieldCandidates] - Optional list of fields to be considered as keyword fields.
+ * @param {string[]} [params.arguments.textFieldCandidates] - Optional list of fields to be considered as text fields.
+ *
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
  */
-export const fetchSimpleLogRateAnalysis = async (
-  esClient: ElasticsearchClient,
-  index: string,
-  start: string,
-  end: string,
-  timefield: string,
-  abortSignal?: AbortSignal,
-  keywordFieldCandidates: string[] = [],
-  textFieldCandidates: string[] = []
-) => {
+export const fetchLogRateAnalysis = async ({
+  esClient,
+  abortSignal,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  arguments: {
+    index: string;
+    start: string;
+    end: string;
+    timefield: string;
+    keywordFieldCandidates?: string[];
+    textFieldCandidates?: string[];
+  };
+}) => {
   const debugStartTime = Date.now();
 
-  const earliestMs = dateMath.parse(start)?.valueOf();
-  const latestMs = dateMath.parse(end, { roundUp: true })?.valueOf();
+  const earliestMs = dateMath.parse(args.start)?.valueOf();
+  const latestMs = dateMath.parse(args.end, { roundUp: true })?.valueOf();
+
+  const { keywordFieldCandidates = [], textFieldCandidates = [] } = args;
 
   if (earliestMs === undefined || latestMs === undefined) {
     throw new Error('Could not parse time range');
@@ -94,7 +107,7 @@ export const fetchSimpleLogRateAnalysis = async (
 
   const searchQuery = {
     range: {
-      [timefield]: {
+      [args.timefield]: {
         gte: earliestMs,
         lte: latestMs,
         format: 'epoch_millis',
@@ -105,10 +118,10 @@ export const fetchSimpleLogRateAnalysis = async (
   // CHANGE POINT DETECTION
   const [error, resp] = await fetchChangePointDetection(
     esClient,
-    index,
+    args.index,
     earliestMs,
     latestMs,
-    timefield,
+    args.timefield,
     searchQuery,
     abortSignal
   );
@@ -126,11 +139,11 @@ export const fetchSimpleLogRateAnalysis = async (
     keywordFieldCandidates.length === 0 && textFieldCandidates.length === 0;
 
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
-    index,
+    index: args.index,
     start: earliestMs,
     end: latestMs,
     searchQuery: JSON.stringify(searchQuery),
-    timeFieldName: timefield,
+    timeFieldName: args.timefield,
     ...windowParameters,
   };
 

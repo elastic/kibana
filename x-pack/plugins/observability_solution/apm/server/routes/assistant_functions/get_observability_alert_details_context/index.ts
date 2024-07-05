@@ -12,8 +12,6 @@ import type {
 } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { fetchSimpleLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_simple_log_rate_analysis';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import { getApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
@@ -24,6 +22,7 @@ import {
   APMDownstreamDependency,
   getAssistantDownstreamDependencies,
 } from '../get_apm_downstream_dependencies';
+import { getLogRateAnalysis } from '../get_log_rate_analysis';
 import { getLogCategories, LogCategory } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
@@ -164,14 +163,21 @@ export const getAlertDetailsContextHandler = (
 
     // log rate analysis
     dataFetchers.push(async () => {
-      const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
-      const logRateAnalysis = await fetchSimpleLogRateAnalysis(
+      const logRateAnalysis = await getLogRateAnalysis({
+        apmEventClient,
         esClient,
-        index,
-        moment(alertStartedAt).subtract(15, 'minute').toISOString(),
-        moment(alertStartedAt).add(15, 'minute').toISOString(),
-        '@timestamp'
-      );
+        coreContext,
+        arguments: {
+          start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+          end: moment(alertStartedAt).add(15, 'minute').toISOString(),
+          entities: {
+            'service.name': serviceName,
+            'host.name': hostName,
+            'container.id': containerId,
+            'kubernetes.pod.name': kubernetesPodName,
+          },
+        },
+      });
 
       return {
         key: 'logRateAnalysis',
