@@ -39,9 +39,7 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
 // `response_actions` is only part of the optional fields in QueryRuleCreateFields and SavedQueryRuleCreateFields
 const TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<
   QueryRuleCreateFields | SavedQueryRuleCreateFields
->()([
-  'response_actions',
-]);
+>()(['response_actions']);
 
 const QueryRuleAssetFields = QueryRuleCreateFields.omit(
   TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
