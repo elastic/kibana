@@ -75,7 +75,6 @@ export class EntityManagerServerPlugin
     setupRoutes<RequestHandlerContext>({
       router,
       logger: this.logger,
-      spaces: plugins.spaces,
       server: this.server,
     });
 

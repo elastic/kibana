@@ -116,7 +116,6 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       assertHasCreatedDefinition(builtInServicesEntityDefinition, soClient, esClient);
@@ -159,7 +158,6 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       assertHasUninstalledDefinition(builtInServicesEntityDefinition, soClient, esClient);
@@ -200,7 +198,6 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       expect(soClient.create).toHaveBeenCalledTimes(0);

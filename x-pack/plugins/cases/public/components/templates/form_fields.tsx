@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiSteps } from '@elastic/eui';
+import { uniq } from 'lodash';
 import { CaseFormFields } from '../case_form_fields';
 import * as i18n from './translations';
 import type { ActionConnector } from '../../containers/configure/types';
@@ -33,9 +34,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { customFields: configurationCustomFields, templates } = currentConfiguration;
-  const configurationTemplateTags = templates
-    .map((template) => (template?.tags?.length ? template.tags : []))
-    .flat();
+  const configurationTemplateTags = getTemplateTags(templates);
 
   const firstStep = useMemo(
     () => ({
@@ -103,3 +102,6 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
 FormFieldsComponent.displayName = 'FormFields';
 
 export const FormFields = memo(FormFieldsComponent);
+
+const getTemplateTags = (templates: CasesConfigurationUI['templates']) =>
+  uniq(templates.map((template) => (template?.tags?.length ? template.tags : [])).flat());

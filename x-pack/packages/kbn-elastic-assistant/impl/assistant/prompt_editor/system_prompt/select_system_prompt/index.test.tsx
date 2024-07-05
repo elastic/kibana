@@ -11,9 +11,32 @@ import userEvent from '@testing-library/user-event';
 
 import { Props, SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { HttpSetup } from '@kbn/core/public';
+import { useFetchPrompts } from '../../../api';
+import { mockSystemPrompts } from '../../../../mock/system_prompt';
+import { DefinedUseQueryResult } from '@tanstack/react-query';
+
+jest.mock('../../../api/prompts/use_fetch_prompts');
+const http = {
+  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
+} as unknown as HttpSetup;
+
+jest.mocked(useFetchPrompts).mockReturnValue({
+  data: { page: 1, perPage: 1000, data: mockSystemPrompts, total: 10 },
+  isLoading: false,
+  refetch: jest.fn().mockResolvedValue({
+    isLoading: false,
+    data: {
+      ...mockSystemPrompts,
+    },
+  }),
+  isFetched: true,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as unknown as DefinedUseQueryResult<any, unknown>);
 
 const props: Props = {
-  allSystemPrompts: [
+  allPrompts: [
     {
       id: 'default-system-prompt',
       content: 'default',
@@ -31,6 +54,8 @@ const props: Props = {
 };
 
 const mockUseAssistantContext = {
+  http,
+  assistantAvailability: { isAssistantEnabled: true },
   allSystemPrompts: [
     {
       id: 'default-system-prompt',
