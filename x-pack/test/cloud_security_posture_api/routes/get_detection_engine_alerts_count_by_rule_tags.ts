@@ -37,8 +37,6 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET detection_engine_rules API with user that has specific access', async () => {
       before(async () => {
         await waitForPluginInitialized();
-        await cspSecurity.createRoles();
-        await cspSecurity.createUsers();
       });
       it('GET detection_engine_rules API with user with read access', async () => {
         const { status } = await supertestWithoutAuth

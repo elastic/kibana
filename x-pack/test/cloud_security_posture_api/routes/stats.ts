@@ -300,10 +300,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET stats API with user that has specific access', async () => {
-      before(async () => {
-        await cspSecurity.createRoles();
-        await cspSecurity.createUsers();
-      });
       beforeEach(async () => {
         await index.removeFindings();
         await index.removeScores();

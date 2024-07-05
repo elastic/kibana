@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
@@ -15,16 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    testFiles: [
-      require.resolve('./telemetry/telemetry.ts'),
-      require.resolve('./routes/vulnerabilities_dashboard.ts'),
-      require.resolve('./routes/stats.ts'),
-      require.resolve('./routes/csp_benchmark_rules_bulk_update.ts'),
-      require.resolve('./routes/csp_benchmark_rules_get_states.ts'),
-      require.resolve('./routes/benchmarks.ts'),
-      require.resolve('./routes/status.ts'),
-      require.resolve('./routes/get_detection_engine_alerts_count_by_rule_tags'),
-    ],
+    testFiles: [resolve(__dirname, './routes')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },

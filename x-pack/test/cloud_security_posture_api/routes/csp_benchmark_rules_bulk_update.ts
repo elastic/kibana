@@ -100,8 +100,6 @@ export default function (providerContext: FtrProviderContext) {
   describe('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized();
-      await cspSecurity.createRoles();
-      await cspSecurity.createUsers();
     });
 
     beforeEach(async () => {

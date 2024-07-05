@@ -37,8 +37,6 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET status API with user that has specific access', async () => {
       before(async () => {
         await waitForPluginInitialized();
-        await cspSecurity.createRoles();
-        await cspSecurity.createUsers();
       });
       it('GET stats API with user with read access', async () => {
         const { status } = await supertestWithoutAuth

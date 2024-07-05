@@ -265,11 +265,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Get Benchmark API', async () => {
-      before(async () => {
-        await cspSecurity.createRoles();
-        await cspSecurity.createUsers();
-      });
-
       beforeEach(async () => {
         await index.removeFindings();
         await kibanaServer.savedObjects.clean({

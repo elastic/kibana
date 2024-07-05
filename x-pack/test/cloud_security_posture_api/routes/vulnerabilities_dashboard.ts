@@ -189,10 +189,6 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('Vulnerability Dashboard API', async () => {
-    before(async () => {
-      await cspSecurity.createRoles();
-      await cspSecurity.createUsers();
-    });
     beforeEach(async () => {
       await waitForPluginInitialized();
       await index.addScores(scoresVulnerabilitiesMock);
