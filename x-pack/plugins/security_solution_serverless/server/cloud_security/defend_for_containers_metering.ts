@@ -76,6 +76,7 @@ export const getUsageRecords = async (
             {
               range: {
                 'event.ingested': {
+                  //Tech dect: https://github.com/elastic/security-team/issues/9895
                   // gt: searchFrom.toISOString(),
                   gte: `now-30m`,
                 },
