@@ -16,9 +16,9 @@ import type { Filter } from '@kbn/es-query';
 
 import { AlertsGrouping } from './alerts_grouping';
 
-import { useFindAlertsQuery } from '@kbn/alerts-ui-shared';
+import { useGetAlertsGroupAggregationsQuery } from '@kbn/alerts-ui-shared';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import { getQuery, groupingSearchResponse } from '../mocks/grouping_query.mock';
+import { groupingSearchResponse } from '../mocks/grouping_query.mock';
 import { useAlertsGroupingState } from '../contexts/alerts_grouping_context';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
@@ -29,8 +29,8 @@ import {
   mockOptions,
 } from '../mocks/grouping_props.mock';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_find_alerts_query', () => ({
-  useFindAlertsQuery: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => ({
+  useGetAlertsGroupAggregationsQuery: jest.fn(),
 }));
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_data_view', () => ({
@@ -51,7 +51,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('test-uuid'),
 }));
 
-const mockUseFindAlertsQuery = useFindAlertsQuery as jest.Mock;
+const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as jest.Mock;
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -93,7 +93,7 @@ const mockAlertsGroupingState = {
 describe('AlertsGrouping', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    mockUseFindAlertsQuery.mockImplementation(() => ({
+    mockUseGetAlertsGroupAggregationsQuery.mockImplementation(() => ({
       loading: false,
       data: groupingSearchResponse,
     }));
@@ -105,7 +105,7 @@ describe('AlertsGrouping', () => {
   });
 
   it('renders empty grouping table when group is selected without data', () => {
-    mockUseFindAlertsQuery.mockReturnValue(mockQueryResponse);
+    mockUseGetAlertsGroupAggregationsQuery.mockReturnValue(mockQueryResponse);
     window.localStorage.setItem(
       `grouping-table-${mockGroupingId}`,
       getMockStorageState(['kibana.alert.rule.name'])
@@ -141,14 +141,33 @@ describe('AlertsGrouping', () => {
         <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
-    expect(mockUseFindAlertsQuery).toHaveBeenLastCalledWith(
+    expect(mockUseGetAlertsGroupAggregationsQuery).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        params: getQuery({
-          selectedGroup: 'kibana.alert.rule.name',
-          uniqueValue: 'alerts-grouping-level-test-uuid',
-          timeRange: mockDate,
+        params: {
+          aggregations: {},
           featureIds: mockFeatureIds,
-        }),
+          groupByField: 'kibana.alert.rule.name',
+          filters: [
+            {
+              bool: {
+                filter: [],
+                must: [],
+                must_not: [],
+                should: [],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: mockDate.from,
+                  lte: mockDate.to,
+                },
+              },
+            },
+          ],
+          pageIndex: 0,
+          pageSize: 25,
+        },
       })
     );
   });
