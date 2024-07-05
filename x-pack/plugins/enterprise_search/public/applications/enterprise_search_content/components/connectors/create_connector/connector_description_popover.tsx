@@ -80,11 +80,11 @@ const connectorClientPopoverPanels = [
   },
 ];
 
-export interface ConnectorDescriptionBadgeProps {
+export interface ConnectorDescriptionPopoverProps {
   isNative: boolean;
 }
 
-export const ConnectorDescriptionBadge: React.FC<ConnectorDescriptionBadgeProps> = ({
+export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
