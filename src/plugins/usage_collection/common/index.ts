@@ -6,18 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const serializeUiCounterName = ({
-  appName,
-  eventName,
-}: {
-  appName: string;
-  eventName: string;
-}) => {
-  return `${appName}:${eventName}`;
-};
-
-export const deserializeUiCounterName = (key: string) => {
-  const [appName, ...restKey] = key.split(':');
-  const eventName = restKey.join(':');
-  return { appName, eventName };
-};
+export type { UsageCounters } from './types';
