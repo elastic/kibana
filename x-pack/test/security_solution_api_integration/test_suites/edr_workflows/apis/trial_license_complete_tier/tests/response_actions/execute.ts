@@ -14,8 +14,8 @@ import { ROLE } from '../../common/services/roles_users';
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointTestResources = getService('endpointTestResources');
-
-  describe('@ess @serverless Endpoint `execute` response action', function () {
+  // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
+  describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
 

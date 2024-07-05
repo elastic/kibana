@@ -24,7 +24,7 @@ export const generateConfig = async ({
 }): Promise<Config> => {
   return {
     ...baseConfig.getAll(),
-    testFiles: [require.resolve('../serverless')],
+    testFiles: [require.resolve('../tests')],
     dockerServers: createEndpointDockerConfig(),
     services,
     junit: {
