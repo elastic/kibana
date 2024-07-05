@@ -12,7 +12,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND, TIME_SYSTEM_PARAMS } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
@@ -199,6 +199,11 @@ function getFieldNamesByType(_requestedType: string | string[]) {
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
+}
+
+function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
+  return requestedType.includes('date') ? TIME_SYSTEM_PARAMS : [];
 }
 
 function getLiteralsByType(_type: string | string[]) {
@@ -1194,6 +1199,9 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs)
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
@@ -1216,6 +1224,9 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs)
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
@@ -1274,6 +1285,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'from a | eval var0=date_trunc()',
         [
+          ...TIME_SYSTEM_PARAMS.map((t) => `${t},`),
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { evalMath: true }, undefined, [
             'date_trunc',
