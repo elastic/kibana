@@ -9,6 +9,7 @@ export enum AssetCriticalityAuditActions {
   ASSET_CRITICALITY_INITIALIZE = 'asset_criticality_initialize',
   ASSET_CRITICALITY_UNASSIGN = 'asset_criticality_unassign',
   ASSET_CRITICALITY_GET = 'asset_criticality_get',
+  ASSET_CRITICALITY_SEARCH = 'asset_criticality_search',
   ASSET_CRITICALITY_PRIVILEGE_GET = 'asset_criticality_privilege_get',
   ASSET_CRITICALITY_STATUS_GET = 'asset_criticality_status_get',
   ASSET_CRITICALITY_UPDATE = 'asset_criticality_update',
