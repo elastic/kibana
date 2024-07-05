@@ -42,7 +42,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip delay="long" content={providerName}>
-          <CloudProviderIcon cloudProvider={cloudProvider} size="m" title={name} />
+          <CloudProviderIcon cloudProvider={cloudProvider} size="m" title={providerName} />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>
