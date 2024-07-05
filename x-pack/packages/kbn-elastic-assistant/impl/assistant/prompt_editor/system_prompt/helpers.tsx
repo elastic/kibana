@@ -13,7 +13,7 @@ import styled from 'styled-components';
 
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import type { Prompt } from '../../types';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
@@ -26,7 +26,10 @@ export const getOptionFromPrompt = ({
   name,
   showTitles = false,
   isFlyoutMode,
-}: Prompt & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
+}: PromptResponse & {
+  showTitles?: boolean;
+  isFlyoutMode: boolean;
+}): EuiSuperSelectOption<string> => ({
   value: id,
   inputDisplay: isFlyoutMode ? (
     name
@@ -60,13 +63,13 @@ export const getOptionFromPrompt = ({
 });
 
 interface GetOptionsProps {
-  prompts: Prompt[] | undefined;
+  prompts: PromptResponse[] | undefined;
   showTitles?: boolean;
   isFlyoutMode: boolean;
 }
 export const getOptions = ({
   prompts,
   showTitles = false,
-  isFlyoutMode = false,
+  isFlyoutMode,
 }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
   prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles, isFlyoutMode })) ?? [];
