@@ -107,6 +107,8 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
 
             // Assign the slo.instanceId
           ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
+        } else {
+          ctx["entity"]["id"] = ctx["bucket_key"];
         }
        `,
       },

@@ -25,6 +25,15 @@ export function generateLatestTransform(
     defer_validation: true,
     source: {
       index: `${generateHistoryIndexName(definition)}.*`,
+      // runtime_mappings: {
+      //   bucket_key: {
+      //     type: 'keyword',
+      //     script: {
+      //       source:
+      //         "if(doc.containsKey('a')) { emit(doc['a'].value)} else if (doc.containsKey('b')) { emit(doc['b'].value) }",
+      //     },
+      //   },
+      // },
     },
     dest: {
       index: generateLatestIndexName(definition),
@@ -49,15 +58,18 @@ export function generateLatestTransform(
         ['entity.displayName']: {
           terms: { field: 'entity.displayName.keyword' },
         },
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identityFields.${id.field}`]: {
-              terms: { field: `entity.identityFields.${id.field}`, missing_bucket: id.optional },
-            },
-          }),
-          {}
-        ),
+        // bucket_key: {
+        //   terms: { field: 'bucket_key' },
+        // },
+        // ...definition.identityFields.reduce(
+        //   (acc, id) => ({
+        //     ...acc,
+        //     [`entity.identityFields.${id.field}`]: {
+        //       terms: { field: `entity.identityFields.${id.field}`, missing_bucket: id.optional },
+        //     },
+        //   }),
+        //   {}
+        // ),
       },
       aggs: {
         ...generateLatestMetricAggregations(definition),

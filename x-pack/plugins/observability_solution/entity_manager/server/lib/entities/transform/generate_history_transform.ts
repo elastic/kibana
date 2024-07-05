@@ -42,6 +42,15 @@ export function generateHistoryTransform(
           },
         },
       }),
+      runtime_mappings: {
+        bucket_key: {
+          type: 'keyword',
+          script: {
+            source:
+              "if(doc.containsKey('a')) { emit(doc['a'].value)} else if (doc.containsKey('b')) { emit(doc['b'].value) }",
+          },
+        },
+      },
     },
     dest: {
       index: `${ENTITY_HISTORY_BASE_PREFIX}.noop`,
@@ -60,15 +69,18 @@ export function generateHistoryTransform(
     },
     pivot: {
       group_by: {
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identityFields.${id.field}`]: {
-              terms: { field: id.field, missing_bucket: id.optional },
-            },
-          }),
-          {}
-        ),
+        // ...definition.identityFields.reduce(
+        //   (acc, id) => ({
+        //     ...acc,
+        //     [`entity.identityFields.${id.field}`]: {
+        //       terms: { field: id.field, missing_bucket: id.optional },
+        //     },
+        //   }),
+        //   {}
+        // ),
+        bucket_key: {
+          terms: { field: 'bucket_key' },
+        },
         ['@timestamp']: {
           date_histogram: {
             field: definition.history.timestampField,
