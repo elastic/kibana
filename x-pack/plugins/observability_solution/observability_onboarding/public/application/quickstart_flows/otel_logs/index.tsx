@@ -71,7 +71,7 @@ export const OtelLogsPanel: React.FC = () => {
   const AGENT_CDN_BASE_URL = isServerless
     ? 'snapshots.elastic.co/8.15.0-474afc1d/downloads/beats/elastic-agent'
     : 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  // TODO change once otel flow is shown on serverless
+  // TODO change once otel flow should be shown on serverless
   // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
   const agentVersion = isServerless ? '8.15.0-SNAPSHOT' : stackVersion;
 
