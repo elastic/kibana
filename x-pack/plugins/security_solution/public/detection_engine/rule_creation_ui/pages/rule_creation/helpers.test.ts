@@ -587,6 +587,32 @@ describe('helpers', () => {
 
       expect(result).toEqual(expected);
     });
+
+    it('returns suppression fields for machine_learning rules', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'machine_learning',
+        machineLearningJobId: ['some_jobert_id'],
+        anomalyThreshold: 44,
+        groupByFields: ['event.type'],
+        groupByRadioSelection: GroupByOptions.PerTimePeriod,
+        groupByDuration: { value: 10, unit: 'm' },
+      };
+      const result = formatDefineStepData(mockStepData);
+
+      const expected: DefineStepRuleJson = {
+        machine_learning_job_id: ['some_jobert_id'],
+        anomaly_threshold: 44,
+        type: 'machine_learning',
+        alert_suppression: {
+          group_by: ['event.type'],
+          duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'suppress',
+        },
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
+    });
   });
 
   describe('formatScheduleStepData', () => {

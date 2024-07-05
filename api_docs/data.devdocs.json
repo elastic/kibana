@@ -11821,6 +11821,14 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
             },
             {

@@ -18,10 +18,13 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
-import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
 import { TEST_IDS } from '../../../constants';
@@ -29,10 +32,10 @@ import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_co
 import { SYSTEM_PROMPTS_TAB } from '../../../settings/const';
 
 export interface Props {
-  allSystemPrompts: Prompt[];
+  allPrompts: PromptResponse[];
   compressed?: boolean;
   conversation?: Conversation;
-  selectedPrompt: Prompt | undefined;
+  selectedPrompt: PromptResponse | undefined;
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
   isEditing?: boolean;
@@ -49,7 +52,7 @@ export interface Props {
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
 const SelectSystemPromptComponent: React.FC<Props> = ({
-  allSystemPrompts,
+  allPrompts,
   compressed = false,
   conversation,
   selectedPrompt,
@@ -68,21 +71,24 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
-  const [valueOfSelected, setValueOfSelected] = useState<string | undefined>(
-    selectedPrompt?.id ?? allSystemPrompts?.[0]?.id
+  const allSystemPrompts = useMemo(
+    () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
+    [allPrompts]
   );
+
+  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
+  const valueOfSelected = useMemo(() => selectedPrompt?.id, [selectedPrompt?.id]);
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (prompt: Prompt | undefined) => {
+    (promptId?: string) => {
       if (conversation && conversation.apiConfig) {
         setApiConfig({
           conversation,
           apiConfig: {
             ...conversation.apiConfig,
-            defaultSystemPromptId: prompt?.id,
+            defaultSystemPromptId: promptId,
           },
         });
       }
@@ -126,14 +132,11 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       // Note: if callback is provided, this component does not persist. Extract to separate component
       if (onSystemPromptSelectionChange != null) {
         onSystemPromptSelectionChange(selectedSystemPromptId);
-      } else {
-        setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
       }
-      setValueOfSelected(selectedSystemPromptId);
+      setSelectedSystemPrompt(selectedSystemPromptId);
       setIsEditing?.(false);
     },
     [
-      allSystemPrompts,
       onSystemPromptSelectionChange,
       setIsEditing,
       setIsSettingsModalVisible,
@@ -146,7 +149,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
     setSelectedSystemPrompt(undefined);
     setIsEditing?.(false);
     clearSelectedSystemPrompt?.();
-    setValueOfSelected(undefined);
   }, [clearSelectedSystemPrompt, setIsEditing, setSelectedSystemPrompt]);
 
   const onShowSelectSystemPrompt = useCallback(() => {
