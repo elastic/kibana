@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { hasRef } from './helpers/has_ref';
-import { traverseObject } from './helpers/traverse_object';
+import { hasRef } from './has_ref';
+import { traverseObject } from './traverse_object';
 
 /**
  * Traverse the OpenAPI document recursively and find all references
