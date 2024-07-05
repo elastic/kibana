@@ -32,10 +32,7 @@ export function SecuritySolutionEndpointRegistryHelpers() {
    */
   const packageRegistryOverride: string | undefined = process.env.PACKAGE_REGISTRY_URL_OVERRIDE;
 
-  const defaultRegistryConfigPath = path.join(
-    __dirname,
-    './apis/fixtures/package_registry_config.yml'
-  );
+  const defaultRegistryConfigPath = path.join(__dirname, './fixtures/package_registry_config.yml');
 
   const getRegistryUrlFromTestEnv = () => {
     let registryUrl: string | undefined;
