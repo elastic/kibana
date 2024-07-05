@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'error']);
+  const PageObjects = getPageObjects(['common', 'error', 'dashboard']);
   const ml = getService('ml');
 
   const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
@@ -53,6 +53,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'should load the stack management with the ML menu item being absent'
           );
           await ml.navigation.navigateToStackManagement({ expectMlLink: false });
+        });
+
+        it('should not register ML embeddables in the dashboard', async () => {
+          await ml.testExecution.logTestStep(
+            'should not contain ML embeddable in the Add panel list'
+          );
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.clickCreateDashboardPrompt();
+          await ml.dashboardEmbeddables.assertMlSectionExists(false);
         });
       });
     }
