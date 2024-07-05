@@ -151,6 +151,8 @@ components:
           $ref: '#/components/schemas/Comment'
         parameters:
           $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
 
     ProcessActionSchemas:
       allOf:

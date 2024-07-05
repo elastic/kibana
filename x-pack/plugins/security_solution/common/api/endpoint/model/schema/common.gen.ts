@@ -137,7 +137,7 @@ export const Parameters = z.object({});
 
 export type BaseActionSchema = z.infer<typeof BaseActionSchema>;
 export const BaseActionSchema = z.object({
-  endpoint_ids: EndpointIds.optional(),
+  endpoint_ids: EndpointIds,
   alert_ids: AlertIds.optional(),
   case_ids: CaseIds.optional(),
   comment: Comment.optional(),
