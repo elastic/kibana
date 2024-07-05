@@ -25,33 +25,27 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import {
-  InferenceAPIConfigResponse,
+  E5_MODEL_ID,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
   SUPPORTED_PYTORCH_TASKS,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ElasticsearchModelDefaultOptions,
-  ModelConfig,
-  Service,
-} from '@kbn/inference_integration_flyout/types';
+import { ModelConfig, Service } from '@kbn/inference_integration_flyout/types';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { UseField } from '../../../shared_imports';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
-import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
-import { InferenceToModelIdMap } from '../fields';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
-import { CustomInferenceEndpointConfig, DeploymentState } from '../../../types';
+import { CustomInferenceEndpointConfig } from '../../../types';
 import { useDispatch, useMappingsState } from '../../../mappings_state_context';
 
-const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
-  {
-    elser: ElasticsearchModelDefaultOptions.elser,
-    elasticsearch: ElasticsearchModelDefaultOptions.e5,
-  };
+const inferenceServiceTypeElasticsearchModelMap: Record<string, string> = {
+  elser: ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  elasticsearch: E5_MODEL_ID,
+};
 const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
   const checkedOption = options.find(({ checked }) => checked === 'on');
   if (checkedOption) {
@@ -128,7 +122,7 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
     const inferenceIdOptions =
-      endpoints?.map((model: InferenceAPIConfigResponse) => ({
+      endpoints?.map((model) => ({
         label: model.model_id,
         'data-test-subj': `custom-inference_${model.model_id}`,
       })) || [];
@@ -138,11 +132,11 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
 
   useEffect(() => {
     const mergedOptions = {
+      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
       ...inferenceIdOptionsFromModels.reduce(
         (acc, option) => ({ ...acc, [option.label]: option }),
         {}
       ),
-      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
     };
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
@@ -169,29 +163,35 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
         setOptions([...options, ...newOption]);
 
         const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-        const defaultEndpointId =
-          inferenceServiceTypeElasticsearchModelMap[modelConfig.service] || '';
-        const newModelId: InferenceToModelIdMap = {};
-        newModelId[inferenceId] = {
-          trainedModelId: defaultEndpointId,
+        const downloadStats = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
+        const trainedModelId =
+          modelConfig.service_settings.model_id ||
+          inferenceServiceTypeElasticsearchModelMap[modelConfig.service] ||
+          '';
+        const modelStats = trainedModelStats?.trained_model_stats.find(
+          (model) => model.model_id === trainedModelId
+        );
+        const inferenceModel = {
+          trainedModelId,
           isDeployable,
-          isDeployed:
-            getTrainedModelStats(trainedModelStats)[defaultEndpointId] === DeploymentState.DEPLOYED,
+          isDeployed: modelStats?.deployment_stats?.state === 'started',
+          isDownloading: Boolean(downloadStats?.[trainedModelId]),
+          modelStats,
         };
         const customInferenceEndpointConfig: CustomInferenceEndpointConfig = {
           taskType,
           modelConfig,
         };
+        setCustomInferenceEndpointConfig(customInferenceEndpointConfig);
         dispatch({
           type: 'inferenceToModelIdMap.update',
           value: {
             inferenceToModelIdMap: {
               ...inferenceToModelIdMap,
-              ...newModelId,
+              [inferenceId]: inferenceModel,
             },
           },
         });
-        setCustomInferenceEndpointConfig(customInferenceEndpointConfig);
       } catch (error) {
         showErrorToasts(error);
       }

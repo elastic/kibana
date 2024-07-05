@@ -10,6 +10,7 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWith
 import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { savedObjectsApiProvider } from './saved_objects';
 export function inferenceModelsApiProvider(httpService: HttpService) {
   return {
     /**
@@ -18,17 +19,19 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
      * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
      * @param modelConfig - Model configuration based on service type
      */
-    createInferenceEndpoint(
+    async createInferenceEndpoint(
       inferenceId: string,
       taskType: InferenceTaskType,
       modelConfig: ModelConfig
     ) {
-      return httpService.http<estypes.InferencePutModelResponse>({
+      const result = await httpService.http<estypes.InferencePutModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/${taskType}/${inferenceId}`,
         method: 'PUT',
         body: JSON.stringify(modelConfig),
         version: '1',
       });
+      await savedObjectsApiProvider(httpService).syncSavedObjects(false);
+      return result;
     },
   };
 }

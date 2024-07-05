@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ELSER_MODEL_ID = '.elser_model_2';
+export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
+export const E5_MODEL_ID = '.multilingual-e5-small';
+export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
+export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
+
 export const DEPLOYMENT_STATE = {
   STARTED: 'started',
   STARTING: 'starting',
@@ -178,23 +184,17 @@ export interface GetModelDownloadConfigOptions {
   version?: ElserVersion;
 }
 
+export interface LocalInferenceServiceSettings {
+  service: 'elser' | 'elasticsearch';
+  service_settings: {
+    num_allocations: number;
+    num_threads: number;
+    model_id: string;
+  };
+}
+
 export type InferenceServiceSettings =
-  | {
-      service: 'elser';
-      service_settings: {
-        num_allocations: number;
-        num_threads: number;
-        model_id: string;
-      };
-    }
-  | {
-      service: 'elasticsearch';
-      service_settings: {
-        num_allocations: number;
-        num_threads: number;
-        model_id: string;
-      };
-    }
+  | LocalInferenceServiceSettings
   | {
       service: 'openai';
       service_settings: {

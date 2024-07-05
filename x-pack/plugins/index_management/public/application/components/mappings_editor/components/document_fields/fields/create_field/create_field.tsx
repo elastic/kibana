@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
+import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
@@ -39,9 +39,11 @@ import { useSemanticText } from './semantic_text/use_semantic_text';
 const formWrapper = (props: any) => <form {...props} />;
 export interface InferenceToModelIdMap {
   [key: string]: {
-    trainedModelId: ElasticsearchModelDefaultOptions | string;
+    trainedModelId: string;
     isDeployed: boolean;
     isDeployable: boolean;
+    isDownloading: boolean;
+    modelStats?: TrainedModelStat; // third-party models don't have model stats
   };
 }
 

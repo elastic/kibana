@@ -9,8 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect } from 'react';
-import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ELSER_ID_V1,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  ELSER_MODEL_ID,
+} from '@kbn/ml-trained-models-utils';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, Field, SemanticTextField } from '../../../../../types';
@@ -66,7 +70,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
   const createInferenceEndpoint = useCallback(
     async (
-      trainedModelId: ElasticsearchModelDefaultOptions | string,
+      trainedModelId: string,
       data: SemanticTextField,
       customInferenceEndpointConfig?: CustomInferenceEndpointConfig
     ) => {
@@ -77,13 +81,12 @@ export function useSemanticText(props: UseSemanticTextProps) {
           })
         );
       }
+      const isElser = [ELSER_LINUX_OPTIMIZED_MODEL_ID, ELSER_ID_V1, ELSER_MODEL_ID].includes(
+        trainedModelId
+      );
       const defaultInferenceEndpointConfig: DefaultInferenceEndpointConfig = {
-        service:
-          trainedModelId === ElasticsearchModelDefaultOptions.elser ? 'elser' : 'elasticsearch',
-        taskType:
-          trainedModelId === ElasticsearchModelDefaultOptions.elser
-            ? 'sparse_embedding'
-            : 'text_embedding',
+        service: isElser ? 'elser' : 'elasticsearch',
+        taskType: isElser ? 'sparse_embedding' : 'text_embedding',
       };
 
       const modelConfig = customInferenceEndpointConfig
