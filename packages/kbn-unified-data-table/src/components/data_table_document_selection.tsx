@@ -227,7 +227,7 @@ export function DataTableDocumentToolbarBtn({
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
-      ...(usedSelectedDocs.length < rows.length && rows.length > 1
+      ...(!isFilterActive && usedSelectedDocs.length < rows.length && rows.length > 1
         ? [
             <EuiContextMenuItem
               data-test-subj="dscGridSelectAllDocs"

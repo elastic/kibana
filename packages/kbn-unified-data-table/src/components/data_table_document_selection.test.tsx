@@ -13,7 +13,7 @@ import {
   DataTableDocumentToolbarBtn,
   SelectButton,
 } from './data_table_document_selection';
-import { dataTableContextMock } from '../../__mocks__/table_context';
+import { buildSelectedDocsState, dataTableContextMock } from '../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { getDocId } from '@kbn/discover-utils';
 import { render, screen } from '@testing-library/react';
@@ -119,12 +119,7 @@ describe('document selection', () => {
     test('removing a selection', () => {
       const contextMock = {
         ...dataTableContextMock,
-        selectedDocsState: {
-          ...dataTableContextMock.selectedDocsState,
-          usedSelectedDocs: ['i::1::'],
-          isDocSelected: (docId: string) => docId === 'i::1::',
-          hasSelectedDocs: true,
-        },
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
       const component = mountWithIntl(
@@ -153,7 +148,7 @@ describe('document selection', () => {
         isPlainRecord: false,
         isFilterActive: false,
         rows: dataTableContextMock.rows,
-        selectedDocs: ['i::1::'],
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
         setIsFilterActive: jest.fn(),
         clearAllSelectedDocs: jest.fn(),
         setIsCompareActive: jest.fn(),
@@ -161,6 +156,7 @@ describe('document selection', () => {
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
       expect(button.length).toBe(1);
+      expect(button.text()).toBe('Selected2');
     });
   });
 
