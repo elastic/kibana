@@ -13,6 +13,7 @@ import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { LinksSerializedState } from '../types';
 
 const ADD_LINKS_PANEL_ACTION_ID = 'create_links_panel';
 
@@ -34,8 +35,10 @@ export const registerCreateLinksPanelAction = () => {
       });
       if (!runtimeState) return;
 
-      // We should not extract the references when passing initialState to addNewPanel
-      const initialState = serializeLinksAttributes(runtimeState, false);
+      const initialState: LinksSerializedState = runtimeState.savedObjectId
+        ? { savedObjectId: runtimeState.savedObjectId }
+        : // We should not extract the references when passing initialState to addNewPanel
+          serializeLinksAttributes(runtimeState, false);
 
       await embeddable.addNewPanel({
         panelType: CONTENT_ID,
