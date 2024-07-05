@@ -18,28 +18,29 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DefaultDataControlState } from './types';
+import { DataControlApi, DefaultDataControlState } from './types';
 
 export type DataControlEditorState = Omit<DefaultDataControlState, 'fieldName'> & {
   fieldName?: string;
 };
+export type DataControlEditorApi = Pick<DataControlApi, 'type' | 'uuid' | 'defaultPanelTitle'>;
 
 export const openDataControlEditor = async <
   State extends DataControlEditorState = DataControlEditorState
 >({
   initialState,
+  controlApi,
   controlGroupApi,
   services,
 }: {
-  initialState: State & { controlType?: string; controlId?: string };
+  initialState: State;
+  controlApi?: DataControlEditorApi;
   controlGroupApi: ControlGroupApi;
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
   };
 }): Promise<{ controlType: string; initialState: State }> => {
-  const { controlType, controlId, ...controlState } = initialState;
-
   return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
       if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
@@ -81,9 +82,9 @@ export const openDataControlEditor = async <
     const overlay = services.core.overlays.openFlyout(
       toMountPoint(
         <DataControlEditor<State>
-          controlId={controlId}
-          controlType={controlType}
+          controlApi={controlApi}
           parentApi={controlGroupApi}
+          initialState={initialState}
           onCancel={(state) => {
             onCancel(state, overlay);
           }}
@@ -91,7 +92,6 @@ export const openDataControlEditor = async <
             closeOverlay(overlay);
             resolve({ initialState: state, controlType: selectedControlType });
           }}
-          initialState={initialState}
           services={{ dataViews: services.dataViews }}
         />,
         {

@@ -50,16 +50,15 @@ import { getAllControlTypes, getControlFactory } from '../control_factory_regist
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { DataControlEditorState } from './open_data_control_editor';
+import { DataControlEditorApi, DataControlEditorState } from './open_data_control_editor';
 import { DataControlFactory, isDataControlFactory } from './types';
 
 export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
-  controlId?: string; // if provided, then editing existing control; otherwise, creating a new control
-  controlType?: string;
-  onCancel: (newState: State) => void;
-  onSave: (newState: State, type: string) => void;
   initialState: State;
   parentApi: ControlGroupApi; // controls must always have a parent API
+  controlApi?: DataControlEditorApi;
+  onCancel: (newState: State) => void;
+  onSave: (newState: State, type: string) => void;
   services: {
     dataViews: DataViewsPublicPluginStart;
   };
@@ -128,12 +127,11 @@ const CompatibleControlTypesComponent = ({
 };
 
 export const DataControlEditor = <State extends DataControlEditorState = DataControlEditorState>({
-  controlId,
-  controlType,
   initialState,
   onSave,
   onCancel,
   parentApi: controlGroup,
+  controlApi,
   /** TODO: These should not be props */
   services: { dataViews: dataViewService },
 }: ControlEditorProps<State>) => {
@@ -142,10 +140,14 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     controlGroup.width
   );
   const [editorState, setEditorState] = useState<State>(initialState);
-
-  const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(initialState.fieldName);
-  const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
-  const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
+    controlApi?.defaultPanelTitle?.getValue() ?? initialState.fieldName ?? ''
+  );
+  const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
+  const [selectedControlType, setSelectedControlType] = useState<string | undefined>(
+    controlApi?.type
+  );
+  const [controlEditorValid, setControlEditorValid] = useState<boolean>(false);
   /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
   // const editorConfig = controlGroup.getEditorConfig();
 
@@ -154,7 +156,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     loading: dataViewListLoading,
     value: dataViewListItems = [],
     error: dataViewListError,
-  } = useAsync(() => {
+  } = useAsync(async () => {
     return dataViewService.getIdsWithTitle();
   });
 
@@ -170,6 +172,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     if (!editorState.dataViewId) {
       return;
     }
+
     const dataView = await dataViewService.get(editorState.dataViewId);
     const registry = await getDataControlFieldRegistry(dataView);
     return {
@@ -221,7 +224,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {!controlType
+            {!controlApi
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
               : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
           </h2>
@@ -284,17 +287,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   selectedFieldName={editorState.fieldName}
                   dataView={selectedDataView}
                   onSelectField={(field) => {
-                    const newState = { fieldName: field.name } as Partial<State>;
+                    setEditorState({ ...editorState, fieldName: field.name });
                     setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
 
                     const newDefaultTitle = field.displayName ?? field.name;
-                    setSelectedFieldDisplayName(newDefaultTitle);
+                    setDefaultPanelTitle(newDefaultTitle);
                     const currentTitle = editorState.title;
-                    if (!currentTitle || currentTitle === selectedFieldDisplayName) {
-                      newState.title = newDefaultTitle;
+                    if (!currentTitle || currentTitle === newDefaultTitle) {
+                      setPanelTitle(newDefaultTitle);
                     }
-
-                    setEditorState({ ...editorState, ...newState });
                   }}
                   selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
                 />
@@ -326,9 +327,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             >
               <EuiFieldText
                 data-test-subj="control-editor-title-input"
-                placeholder={selectedFieldDisplayName ?? editorState.fieldName}
-                value={editorState.title}
-                onChange={(e) => setEditorState({ ...editorState, title: e.target.value })}
+                placeholder={defaultPanelTitle}
+                value={panelTitle}
+                onChange={(e) => {
+                  setPanelTitle(e.target.value ?? '');
+                  setEditorState({
+                    ...editorState,
+                    title: e.target.value === '' ? undefined : e.target.value,
+                  });
+                }}
               />
             </EuiFormRow>
             {/* {!editorConfig?.hideWidthSettings && ( */}
@@ -362,7 +369,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           </EuiDescribedFormGroup>
           {CustomSettingsComponent}
           {/* {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null} */}
-          {controlId && (
+          {controlApi?.uuid && (
             <>
               <EuiSpacer size="l" />
               <EuiButtonEmpty
@@ -372,7 +379,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 color="danger"
                 onClick={() => {
                   onCancel(initialState); // don't want to show "lost changes" warning
-                  controlGroup.removePanel(controlId);
+                  controlGroup.removePanel(controlApi.uuid);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}

@@ -128,7 +128,12 @@ export const initializeDataControl = <EditorState extends object = {}>(
       DefaultDataControlState & EditorState
     >({
       services,
-      initialState: { controlId, controlType, ...initialState },
+      initialState,
+      controlApi: {
+        type: controlType,
+        uuid: controlId,
+        defaultPanelTitle,
+      },
       controlGroupApi: controlGroup,
     });
 
