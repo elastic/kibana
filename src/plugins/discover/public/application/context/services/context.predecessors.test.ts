@@ -34,6 +34,7 @@ describe('context predecessors', function () {
   let dataPluginMock: DataPublicPluginStart;
   let fetchPredecessors: (
     timeValIso: string,
+    timeValNr: number,
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
@@ -41,20 +42,18 @@ describe('context predecessors', function () {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  let dataView: DataView;
+  const dataView = {
+    id: 'DATA_VIEW_ID',
+    timeFieldName: '@timestamp',
+    isTimeNanosBased: () => false,
+    popularizeField: () => {},
+    fields: {
+      getByName: jest.fn(),
+    },
+  } as unknown as DataView;
 
   describe('function fetchPredecessors', function () {
     beforeEach(() => {
-      dataView = {
-        id: 'DATA_VIEW_ID',
-        timeFieldName: '@timestamp',
-        isTimeNanosBased: () => false,
-        popularizeField: () => {},
-        fields: {
-          getByName: jest.fn(),
-        },
-      } as unknown as DataView;
-
       mockSearchSource = createContextSearchSourceStub('@timestamp');
       dataPluginMock = {
         search: {
@@ -64,14 +63,14 @@ describe('context predecessors', function () {
         },
       } as unknown as DataPublicPluginStart;
 
-      fetchPredecessors = (timeValIso, tieBreakerField, tieBreakerValue, size = 10) => {
+      fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = buildDataTableRecord(
           {
             _id: 'test',
             _source: {
               [dataView.timeFieldName!]: timeValIso,
             },
-            sort: [timeValIso, tieBreakerValue],
+            sort: [timeValNr, tieBreakerValue],
           } as EsHitRecord,
           dataView,
           true
@@ -101,15 +100,17 @@ describe('context predecessors', function () {
         mockSearchSource._createStubHit(MS_PER_DAY * 1000),
       ];
 
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3000, '_doc', 0, 3).then(({ rows }) => {
-        expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-        expect(rows).toEqual(
-          buildDataTableRecordList({
-            records: mockSearchSource._stubHits.slice(0, 3),
-            dataView,
-          })
-        );
-      });
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
+        ({ rows }) => {
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
+          expect(rows).toEqual(
+            buildDataTableRecordList({
+              records: mockSearchSource._stubHits.slice(0, 3),
+              dataView,
+            })
+          );
+        }
+      );
     });
 
     it('should perform multiple queries with the last being unrestricted when too few hits are returned', function () {
@@ -121,28 +122,30 @@ describe('context predecessors', function () {
         mockSearchSource._createStubHit(MS_PER_DAY * 2990),
       ];
 
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3000, '_doc', 0, 6).then(({ rows }) => {
-        const intervals: Timestamp[] = mockSearchSource.setField.args
-          .filter(([property]: string) => property === 'query')
-          .map(([, { query }]: [string, { query: Query }]) =>
-            get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
-          );
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 6).then(
+        ({ rows }) => {
+          const intervals: Timestamp[] = mockSearchSource.setField.args
+            .filter(([property]: string) => property === 'query')
+            .map(([, { query }]: [string, { query: Query }]) =>
+              get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
+            );
 
-        expect(
-          intervals.every(({ gte, lte }) => (gte && lte ? moment(gte).isBefore(lte) : true))
-        ).toBe(true);
-        // should have started at the given time
-        expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 3000).toISOString());
-        // should have ended with a half-open interval
-        expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
-        expect(intervals.length).toBeGreaterThan(1);
-        expect(rows).toEqual(
-          buildDataTableRecordList({
-            records: mockSearchSource._stubHits.slice(0, 3),
-            dataView,
-          })
-        );
-      });
+          expect(
+            intervals.every(({ gte, lte }) => (gte && lte ? moment(gte).isBefore(lte) : true))
+          ).toBe(true);
+          // should have started at the given time
+          expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 3000).toISOString());
+          // should have ended with a half-open interval
+          expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
+          expect(intervals.length).toBeGreaterThan(1);
+          expect(rows).toEqual(
+            buildDataTableRecordList({
+              records: mockSearchSource._stubHits.slice(0, 3),
+              dataView,
+            })
+          );
+        }
+      );
     });
 
     it('should perform multiple queries until the expected hit count is returned', function () {
@@ -153,38 +156,47 @@ describe('context predecessors', function () {
         mockSearchSource._createStubHit(MS_PER_DAY * 1000),
       ];
 
-      return fetchPredecessors(ANCHOR_TIMESTAMP_1000, '_doc', 0, 3).then(({ rows }) => {
-        expect(mockSearchSource.setField.args).toMatchSnapshot();
+      return fetchPredecessors(ANCHOR_TIMESTAMP_1000, MS_PER_DAY * 1000, '_doc', 0, 3).then(
+        ({ rows }) => {
+          const intervals: Timestamp[] = mockSearchSource.setField.args
+            .filter(([property]: string) => property === 'query')
+            .map(([, { query }]: [string, { query: Query }]) => {
+              return get(query, [
+                'bool',
+                'must',
+                'constant_score',
+                'filter',
+                'range',
+                '@timestamp',
+              ]);
+            });
 
-        const intervals: Timestamp[] = mockSearchSource.setField.args
-          .filter(([property]: string) => property === 'query')
-          .map(([, { query }]: [string, { query: Query }]) => {
-            return get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp']);
-          });
+          // should have started at the given time
+          expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 1000).toISOString());
+          // should have stopped before reaching MS_PER_DAY * 1700
+          expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
+          expect(intervals.length).toBeGreaterThan(1);
 
-        // should have started at the given time
-        expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 1000).toISOString());
-        // should have stopped before reaching MS_PER_DAY * 1700
-        expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
-        expect(intervals.length).toBeGreaterThan(1);
-
-        expect(rows).toEqual(
-          buildDataTableRecordList({
-            records: mockSearchSource._stubHits.slice(-3),
-            dataView,
-          })
-        );
-      });
+          expect(rows).toEqual(
+            buildDataTableRecordList({
+              records: mockSearchSource._stubHits.slice(-3),
+              dataView,
+            })
+          );
+        }
+      );
     });
 
     it('should return an empty array when no hits were found', function () {
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3, '_doc', 0, 3).then(({ rows }) => {
-        expect(rows).toEqual([]);
-      });
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then(
+        ({ rows }) => {
+          expect(rows).toEqual([]);
+        }
+      );
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3, '_doc', 0, 3).then(() => {
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then(() => {
         const setParentSpy = mockSearchSource.setParent;
         expect(setParentSpy.alwaysCalledWith(undefined)).toBe(true);
         expect(setParentSpy.called).toBe(true);
@@ -192,7 +204,7 @@ describe('context predecessors', function () {
     });
 
     it('should set the tiebreaker sort order to the opposite as the time field', function () {
-      return fetchPredecessors(ANCHOR_TIMESTAMP, '_doc', 0, 3).then(() => {
+      return fetchPredecessors(ANCHOR_TIMESTAMP, MS_PER_DAY, '_doc', 0, 3).then(() => {
         expect(
           mockSearchSource.setField.calledWith('sort', [
             { '@timestamp': { order: 'asc', format: 'strict_date_optional_time' } },
@@ -215,14 +227,14 @@ describe('context predecessors', function () {
         },
       } as unknown as DataPublicPluginStart;
 
-      fetchPredecessors = (timeValIso, tieBreakerField, tieBreakerValue, size = 10) => {
+      fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = buildDataTableRecord(
           {
             _id: 'test',
             _source: {
               [dataView.timeFieldName!]: timeValIso,
             },
-            sort: [timeValIso, tieBreakerValue],
+            sort: [timeValNr, tieBreakerValue],
           } as EsHitRecord,
           dataView,
           true
@@ -252,19 +264,21 @@ describe('context predecessors', function () {
         mockSearchSource._createStubHit(MS_PER_DAY * 1000),
       ];
 
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3000, '_doc', 0, 3).then(({ rows }) => {
-        const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
-        const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
-        expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-        expect(removeFieldsSpy.calledOnce).toBe(true);
-        expect(setFieldsSpy.calledOnce).toBe(true);
-        expect(rows).toEqual(
-          buildDataTableRecordList({
-            records: mockSearchSource._stubHits.slice(0, 3),
-            dataView,
-          })
-        );
-      });
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
+        ({ rows }) => {
+          const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
+          const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
+          expect(removeFieldsSpy.calledOnce).toBe(true);
+          expect(setFieldsSpy.calledOnce).toBe(true);
+          expect(rows).toEqual(
+            buildDataTableRecordList({
+              records: mockSearchSource._stubHits.slice(0, 3),
+              dataView,
+            })
+          );
+        }
+      );
     });
   });
 });
