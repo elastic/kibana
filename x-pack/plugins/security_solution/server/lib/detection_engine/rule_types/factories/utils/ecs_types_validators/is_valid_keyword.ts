@@ -24,10 +24,5 @@ export const isValidKeyword = (value: SearchTypes, ignoreAbove?: number): boolea
   if (typeof value !== 'string') {
     return false;
   }
-  // If `ignore_above` is specified we can safely save text of any size in the keyword field,
-  // thus we count passed value to be a keyword compliant
-  if (ignoreAbove != null) {
-    return true;
-  }
   return Buffer.byteLength(value, 'utf8') <= MAX_BYTE_LENGTH;
 };
