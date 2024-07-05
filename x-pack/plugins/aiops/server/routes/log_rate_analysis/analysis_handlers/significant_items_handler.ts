@@ -146,15 +146,17 @@ export const significantItemsHandlerFactory =
       } else if (isTextFieldCandidate(payload)) {
         const { textFieldCandidate } = payload;
 
-        const significantCategoriesForField = await fetchSignificantCategories(
+        const significantCategoriesForField = await fetchSignificantCategories({
           esClient,
-          requestBody,
-          [textFieldCandidate],
           logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        );
+          emitError: responseStream.pushError,
+          abortSignal,
+          arguments: {
+            ...requestBody,
+            fieldNames: [textFieldCandidate],
+            sampleProbability: stateHandler.sampleProbability(),
+          },
+        });
 
         if (significantCategoriesForField.length > 0) {
           significantCategories.push(...significantCategoriesForField);
