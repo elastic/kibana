@@ -27,24 +27,66 @@ export async function getDataStreamSettings({
   datasetQualityESClient: DatasetQualityESClient;
   dataStream: string;
 }): Promise<DataStreamSettingDetails> {
-  const wholeSettings = await datasetQualityESClient.settings({ index: dataStream });
-  const indexName = Object.keys(wholeSettings)[0];
+  try {
+    const wholeSettings = await datasetQualityESClient.settings({ index: dataStream });
+    const indexName = findLatestIndex(Object.keys(wholeSettings));
 
-  const totalFields = wholeSettings[indexName]?.settings?.index?.mapping?.total_fields;
-  // This TS error is expected because the `ignore_dynamic_beyond_limit` field is not defined in the type
-  // Remove this probably "after" 8.15 when this PR is merged: https://github.com/elastic/elasticsearch-specification/pull/2653
-  // @ts-expect-error
-  const ignoreDynamicBeyondLimit = totalFields?.ignore_dynamic_beyond_limit;
+    const totalFields = wholeSettings[indexName]?.settings?.index?.mapping?.total_fields;
+    // This TS error is expected because the `ignore_dynamic_beyond_limit` field is not defined in the type
+    // Remove this probably "after" 8.15 when this PR is merged: https://github.com/elastic/elasticsearch-specification/pull/2653
+    // @ts-expect-error
+    const ignoreDynamicBeyondLimit = totalFields?.ignore_dynamic_beyond_limit;
 
-  return {
-    totalFieldLimit: wholeSettings[indexName]?.settings?.index?.mapping?.total_fields?.limit,
-    ignoreDynamicBeyondLimit,
-    nestedFieldLimit: wholeSettings[indexName]?.settings?.index?.mapping?.nested_fields?.limit,
-    ignoreMalformed: wholeSettings[indexName]?.settings?.index?.mapping?.ignore_malformed,
-    mappingInsideIndexSettings: wholeSettings[indexName]?.settings?.index?.mapping,
-    pipelines: {
-      defaultPipeline: wholeSettings[indexName]?.settings?.index?.default_pipeline,
-      finalPipeline: wholeSettings[indexName]?.settings?.index?.final_pipeline,
-    },
-  };
+    return {
+      totalFieldLimit: wholeSettings[indexName]?.settings?.index?.mapping?.total_fields?.limit,
+      ignoreDynamicBeyondLimit,
+      nestedFieldLimit: wholeSettings[indexName]?.settings?.index?.mapping?.nested_fields?.limit,
+      ignoreMalformed: wholeSettings[indexName]?.settings?.index?.mapping?.ignore_malformed,
+      mappingInsideIndexSettings: wholeSettings[indexName]?.settings?.index?.mapping,
+      pipelines: {
+        defaultPipeline: wholeSettings[indexName]?.settings?.index?.default_pipeline,
+        finalPipeline: wholeSettings[indexName]?.settings?.index?.final_pipeline,
+      },
+    };
+  } catch (e) {
+    return {
+      totalFieldLimit: undefined,
+      ignoreDynamicBeyondLimit: undefined,
+      nestedFieldLimit: undefined,
+      ignoreMalformed: undefined,
+      mappingInsideIndexSettings: undefined,
+      pipelines: {
+        defaultPipeline: undefined,
+        finalPipeline: undefined,
+      },
+    };
+  }
+}
+
+function findLatestIndex(indices: string[]) {
+  let latestIndex = indices[0];
+  let latestDate = extractDateAndSuffix(latestIndex);
+
+  for (let i = 1; i < indices.length; i++) {
+    const currentIndex = indices[i];
+    const currentDate = extractDateAndSuffix(currentIndex);
+
+    if (currentDate && latestDate && currentDate > latestDate) {
+      latestDate = currentDate;
+      latestIndex = currentIndex;
+    }
+  }
+
+  return latestIndex;
+}
+
+function extractDateAndSuffix(indexName: string) {
+  const datePattern = /(\d{4}\.\d{2}\.\d{2})-(\d{6})/;
+  const match = indexName.match(datePattern);
+  if (match) {
+    const datePart = match[1].replace(/\./g, '-');
+    const suffixPart = match[2];
+    return new Date(datePart).getTime() + parseInt(suffixPart, 10);
+  }
+  return null;
 }
