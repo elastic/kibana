@@ -26,7 +26,9 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
     systemPromptSettings,
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
+    promptsBulkActions,
     defaultConnector,
+    setPromptsBulkActions,
   }) => {
     return (
       <>
@@ -48,6 +50,8 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
           conversationsSettingsBulkActions={conversationsSettingsBulkActions}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           defaultConnector={defaultConnector}
+          setPromptsBulkActions={setPromptsBulkActions}
+          promptsBulkActions={promptsBulkActions}
         />
       </>
     );
