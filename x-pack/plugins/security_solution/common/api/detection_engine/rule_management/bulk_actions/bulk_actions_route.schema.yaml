@@ -329,7 +329,6 @@ components:
         alerts_filter:
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionAlertsFilter'
       required:
-        - group
         - id
         - params
       additionalProperties: false

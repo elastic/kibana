@@ -6,12 +6,14 @@
  */
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
-import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
+import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 import type { BulkActionEditForRuleAttributes } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
+import { separateActionsAndSystemAction } from '../../utils/utils';
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -19,8 +21,13 @@ import { transformToActionFrequency } from '../../normalization/rule_actions';
  * @returns rulesClient BulkEditOperation
  */
 export const bulkEditActionToRulesClientOperation = (
+  actionsClient: ActionsClient,
   action: BulkActionEditForRuleAttributes
 ): BulkEditOperation[] => {
+  const [systemActions, actions] = separateActionsAndSystemAction(
+    actionsClient,
+    action.value.actions
+  );
   switch (action.type) {
     // tags actions
     case BulkActionEditTypeEnum.add_tags:
@@ -56,9 +63,12 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'add',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
-            transformNormalizedRuleToAlertAction
-          ),
+          value: [
+            ...(systemActions ?? []),
+            ...transformToActionFrequency(actions ?? [], action.value.throttle).map(
+              transformNormalizedRuleToAlertAction
+            ),
+          ],
         },
       ];
 
@@ -67,9 +77,12 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'set',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
-            transformNormalizedRuleToAlertAction
-          ),
+          value: [
+            ...(systemActions ?? []),
+            ...transformToActionFrequency(actions ?? [], action.value.throttle).map(
+              transformNormalizedRuleToAlertAction
+            ),
+          ],
         },
       ];
 

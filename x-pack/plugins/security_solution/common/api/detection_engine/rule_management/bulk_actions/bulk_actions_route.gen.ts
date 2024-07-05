@@ -219,7 +219,7 @@ export const BulkActionEditTypeEnum = BulkActionEditType.enum;
 export type NormalizedRuleAction = z.infer<typeof NormalizedRuleAction>;
 export const NormalizedRuleAction = z
   .object({
-    group: RuleActionGroup,
+    group: RuleActionGroup.optional(),
     id: RuleActionId,
     params: RuleActionParams,
     frequency: RuleActionFrequency.optional(),
