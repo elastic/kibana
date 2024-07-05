@@ -12,6 +12,7 @@ import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
@@ -670,55 +671,118 @@ describe('Handler', () => {
     `);
   });
 
-  it('returns 400 Bad request if request validation failed', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
+  describe('returns 400 Bad request if request validation failed', () => {
+    it('@kbn/config-schema', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
 
-    router.get(
-      {
-        path: '/',
-        validate: {
-          query: schema.object({
-            page: schema.number(),
-          }),
+      router.get(
+        {
+          path: '/',
+          validate: {
+            query: schema.object({
+              page: schema.number(),
+            }),
+          },
         },
-      },
-      (context, req, res) => res.noContent()
-    );
-    await server.start();
+        (context, req, res) => res.noContent()
+      );
+      await server.start();
 
-    const result = await supertest(innerServer.listener)
-      .get('/')
-      .query({ page: 'one' })
-      .expect(400);
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .query({ page: 'one' })
+        .expect(400);
 
-    expect(result.body).toEqual({
-      error: 'Bad Request',
-      message: '[request query.page]: expected value of type [number] but got [string]',
-      statusCode: 400,
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: '[request query.page]: expected value of type [number] but got [string]',
+        statusCode: 400,
+      });
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+              Array [
+                Array [
+                  "400 Bad Request",
+                  Object {
+                    "error": Object {
+                      "message": "[request query.page]: expected value of type [number] but got [string]",
+                    },
+                    "http": Object {
+                      "request": Object {
+                        "method": "get",
+                        "path": "/",
+                      },
+                      "response": Object {
+                        "status_code": 400,
+                      },
+                    },
+                  },
+                ],
+              ]
+          `);
     });
 
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "400 Bad Request",
-          Object {
-            "error": Object {
-              "message": "[request query.page]: expected value of type [number] but got [string]",
-            },
-            "http": Object {
-              "request": Object {
-                "method": "get",
-                "path": "/",
-              },
-              "response": Object {
-                "status_code": 400,
-              },
-            },
+    it('@kbn/zod', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        {
+          path: '/',
+          validate: {
+            query: z.object({
+              page: z.number(),
+            }),
           },
-        ],
-      ]
-    `);
+        },
+        (context, req, res) => res.noContent()
+      );
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .query({ page: 'one' })
+        .expect(400);
+
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: expect.stringMatching(/Expected number, received string/),
+        statusCode: 400,
+      });
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "400 Bad Request",
+            Object {
+              "error": Object {
+                "message": "[
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"number\\",
+            \\"received\\": \\"string\\",
+            \\"path\\": [
+              \\"page\\"
+            ],
+            \\"message\\": \\"Expected number, received string\\"
+          }
+        ]",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 400,
+                },
+              },
+            },
+          ],
+        ]
+      `);
+    });
   });
 
   it('accept to receive an array payload', async () => {
