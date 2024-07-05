@@ -7,6 +7,10 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
+  AddNoteFromExpandableFlyoutClickedParams,
+  OpenNoteInExpandableFlyoutClickedParams,
+} from './events/notes/types';
+import type {
   TelemetryClientStart,
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
@@ -195,4 +199,16 @@ export class TelemetryClient implements TelemetryClientStart {
   ): void {
     this.analytics.reportEvent(TelemetryEventTypes.EventLogShowSourceEventDateRange, params);
   }
+
+  public reportOpenNoteInExpandableFlyoutClicked = (
+    params: OpenNoteInExpandableFlyoutClickedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, params);
+  };
+
+  public reportAddNoteFromExpandableFlyoutClicked = (
+    params: AddNoteFromExpandableFlyoutClickedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AddNoteFromExpandableFlyoutClicked, params);
+  };
 }
