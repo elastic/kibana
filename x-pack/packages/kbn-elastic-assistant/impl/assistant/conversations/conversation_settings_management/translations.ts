@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CONVERSATIONS_TABLE_COLUMN_NAME = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSettings.column.name',
+export const CONVERSATIONS_TABLE_COLUMN_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.column.Title',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'Title',
   }
 );
 

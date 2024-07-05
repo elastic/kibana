@@ -6,70 +6,120 @@
  */
 
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
 import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonymization_list_update';
+import { useSettingsUpdater } from '../../../assistant/settings/use_settings_updater/use_settings_updater';
+import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
+import { useAssistantContext } from '../../../assistant_context';
+import { SETTINGS_UPDATED_TOAST_TITLE } from '../../../assistant/settings/translations';
 
 export interface Props {
   defaultPageSize?: number;
-  anonymizationFields: FindAnonymizationFieldsResponse;
-  anonymizationFieldsBulkActions: PerformBulkActionRequestBody;
-  setAnonymizationFieldsBulkActions: React.Dispatch<
-    React.SetStateAction<PerformBulkActionRequestBody>
-  >;
-  setUpdatedAnonymizationData: React.Dispatch<
-    React.SetStateAction<FindAnonymizationFieldsResponse>
-  >;
 }
 
-const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
-  defaultPageSize,
-  anonymizationFields,
-  anonymizationFieldsBulkActions,
-  setAnonymizationFieldsBulkActions,
-  setUpdatedAnonymizationData,
-}) => {
-  const onListUpdated = useAnonymizationListUpdate({
-    anonymizationFields,
+const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
+  const { toasts } = useAssistantContext();
+  const { data: anonymizationFields } = useFetchAnonymizationFields();
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+
+  const {
     anonymizationFieldsBulkActions,
     setAnonymizationFieldsBulkActions,
     setUpdatedAnonymizationData,
+    resetSettings,
+    saveSettings,
+  } = useSettingsUpdater(
+    {}, // Anonymization settings do not require conversations
+    false, // Anonymization settings do not require conversations
+    anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
+  );
+
+  const handleChange = useCallback(
+    (callback) => (value: unknown) => {
+      setHasPendingChanges(true);
+      callback(value);
+    },
+    []
+  );
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+    setHasPendingChanges(false);
+  }, [resetSettings]);
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      setHasPendingChanges(false);
+      param?.callback?.();
+    },
+    [saveSettings, toasts]
+  );
+
+  const onSaveButtonClicked = useCallback(() => {
+    handleSave();
+  }, [handleSave]);
+
+  const handleAnonymizationFieldsBulkActions = useCallback(() => {
+    handleChange(setAnonymizationFieldsBulkActions);
+  }, [handleChange, setAnonymizationFieldsBulkActions]);
+
+  const handleUpdatedAnonymizationData = useCallback(() => {
+    handleChange(setUpdatedAnonymizationData);
+  }, [handleChange, setUpdatedAnonymizationData]);
+
+  const onListUpdated = useAnonymizationListUpdate({
+    anonymizationFields,
+    anonymizationFieldsBulkActions,
+    setAnonymizationFieldsBulkActions: handleAnonymizationFieldsBulkActions,
+    setUpdatedAnonymizationData: handleUpdatedAnonymizationData,
   });
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-      <EuiTitle size={'xs'}>
-        <h2>{i18n.SETTINGS_TITLE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size={'xs'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
+    <>
+      <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+        <EuiTitle size={'xs'}>
+          <h2>{i18n.SETTINGS_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size={'xs'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
 
-      <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-      <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
-        <Stats
-          isDataAnonymizable={true}
-          anonymizationFields={anonymizationFields.data}
-          titleSize="m"
-          gap={euiThemeVars.euiSizeS}
+        <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
+          <Stats
+            isDataAnonymizable={true}
+            anonymizationFields={anonymizationFields.data}
+            titleSize="m"
+            gap={euiThemeVars.euiSizeS}
+          />
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        <ContextEditor
+          anonymizationFields={anonymizationFields}
+          compressed={false}
+          onListUpdated={onListUpdated}
+          rawData={null}
+          pageSize={defaultPageSize}
         />
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <ContextEditor
-        anonymizationFields={anonymizationFields}
-        compressed={false}
-        onListUpdated={onListUpdated}
-        rawData={null}
-        pageSize={defaultPageSize}
+      </EuiPanel>
+      <AssistantSettingsBottomBar
+        hasPendingChanges={hasPendingChanges}
+        onCancelClick={onCancelClick}
+        onSaveButtonClicked={onSaveButtonClicked}
       />
-    </EuiPanel>
+    </>
   );
 };
 

@@ -14,18 +14,25 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Conversation, ConversationsBulkActions, useAssistantContext } from '../../../../..';
+import {
+  Conversation,
+  mergeBaseWithPersistedConversations,
+  useAssistantContext,
+  useFetchCurrentUserConversations,
+} from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
+import { FetchConversationsResponse } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import {
   DEFAULT_TABLE_OPTIONS,
   useSessionPagination,
 } from '../../../common/components/assistant_settings_management/pagination/use_session_pagination';
-import { CANCEL, DELETE } from '../../../settings/translations';
+import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../../settings/translations';
+import { useSettingsUpdater } from '../../../settings/use_settings_updater/use_settings_updater';
 import { Prompt } from '../../../types';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
 import { SETTINGS_TITLE } from '../system_prompt_modal/translations';
@@ -35,38 +42,34 @@ import { useSystemPromptTable } from './use_system_prompt_table';
 
 interface Props {
   connectors: AIConnector[] | undefined;
-  conversationSettings: Record<string, Conversation>;
-  conversationsSettingsBulkActions: ConversationsBulkActions;
-  onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
-  selectedSystemPrompt: Prompt | undefined;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
-  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  systemPromptSettings: Prompt[];
-  setConversationsSettingsBulkActions: React.Dispatch<
-    React.SetStateAction<ConversationsBulkActions>
-  >;
   defaultConnector?: AIConnector;
-  handleSave: (shouldRefetchConversation?: boolean) => void;
-  onCancelClick: () => void;
-  resetSettings: () => void;
 }
 
-const SystemPromptSettingsManagementComponent = ({
-  connectors,
-  conversationSettings,
-  onSelectedSystemPromptChange,
-  setUpdatedSystemPromptSettings,
-  setConversationSettings,
-  selectedSystemPrompt,
-  systemPromptSettings,
-  conversationsSettingsBulkActions,
-  setConversationsSettingsBulkActions,
-  defaultConnector,
-  handleSave,
-  onCancelClick,
-  resetSettings,
-}: Props) => {
-  const { nameSpace } = useAssistantContext();
+const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector }: Props) => {
+  const {
+    nameSpace,
+    http,
+    assistantAvailability: { isAssistantEnabled },
+    baseConversations,
+    toasts,
+  } = useAssistantContext();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
+    [baseConversations]
+  );
+
+  const {
+    data: conversations,
+    isFetched: conversationsLoaded,
+    refetch: refetchConversations,
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled,
+  });
+
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -74,6 +77,51 @@ const SystemPromptSettingsManagementComponent = ({
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
   const [deletedPrompt, setDeletedPrompt] = useState<Prompt | null>();
+
+  const {
+    conversationSettings,
+    setConversationSettings,
+    systemPromptSettings,
+    setUpdatedSystemPromptSettings,
+    conversationsSettingsBulkActions,
+    setConversationsSettingsBulkActions,
+    resetSettings,
+    saveSettings,
+  } = useSettingsUpdater(conversations, conversationsLoaded, {
+    page: 0,
+    perPage: 0,
+    total: 0,
+    data: [],
+  });
+
+  // System Prompt Selection State
+  const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
+
+  const onSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+    setSelectedSystemPrompt(systemPrompt);
+  }, []);
+
+  useEffect(() => {
+    if (selectedSystemPrompt != null) {
+      setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
+    }
+  }, [selectedSystemPrompt, systemPromptSettings]);
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      param?.callback?.();
+    },
+    [saveSettings, toasts]
+  );
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+  }, [resetSettings]);
 
   const onCreate = useCallback(() => {
     onSelectedSystemPromptChange({
@@ -115,9 +163,9 @@ const SystemPromptSettingsManagementComponent = ({
 
   const onDeleteConfirmed = useCallback(() => {
     closeConfirmModal();
-    handleSave(true);
+    handleSave({ callback: refetchConversations });
     setConversationsSettingsBulkActions({});
-  }, [closeConfirmModal, handleSave, setConversationsSettingsBulkActions]);
+  }, [closeConfirmModal, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -126,9 +174,9 @@ const SystemPromptSettingsManagementComponent = ({
 
   const onSaveConfirmed = useCallback(() => {
     closeFlyout();
-    handleSave(true);
+    handleSave({ callback: refetchConversations });
     setConversationsSettingsBulkActions({});
-  }, [closeFlyout, handleSave, setConversationsSettingsBulkActions]);
+  }, [closeFlyout, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
 
   const confirmationTitle = useMemo(
     () =>

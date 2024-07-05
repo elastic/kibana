@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -19,7 +19,7 @@ import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
-import { CANCEL, DELETE } from '../../settings/translations';
+import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import {
@@ -28,27 +28,46 @@ import {
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useAssistantContext } from '../../../assistant_context';
+import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
 
-interface Props {
-  handleSave: (shouldRefetchConversation?: boolean) => void;
-  onCancelClick: () => void;
-  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
-  quickPromptSettings: QuickPrompt[];
-  resetSettings?: () => void;
-  selectedQuickPrompt: QuickPrompt | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
-}
+const QuickPromptSettingsManagementComponent = () => {
+  const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
-const QuickPromptSettingsManagementComponent = ({
-  handleSave,
-  onCancelClick,
-  onSelectedQuickPromptChange,
-  quickPromptSettings,
-  resetSettings,
-  selectedQuickPrompt,
-  setUpdatedQuickPromptSettings,
-}: Props) => {
-  const { nameSpace, basePromptContexts } = useAssistantContext();
+  const { saveSettings, quickPromptSettings, setUpdatedQuickPromptSettings, resetSettings } =
+    useSettingsUpdater(
+      {}, // Quick Prompt settings do not require conversations
+      false, // Quick Prompt settings do not require conversations
+      { page: 0, perPage: 0, total: 0, data: [] } // Quick Prompt settings do not require anonymizationFields
+    );
+
+  // Quick Prompt Selection State
+  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
+  const onSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+    setSelectedQuickPrompt(quickPrompt);
+  }, []);
+  useEffect(() => {
+    if (selectedQuickPrompt != null) {
+      setSelectedQuickPrompt(
+        quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
+      );
+    }
+  }, [quickPromptSettings, selectedQuickPrompt]);
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      param?.callback?.();
+    },
+    [saveSettings, toasts]
+  );
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+  }, [resetSettings]);
 
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<QuickPrompt | null>();

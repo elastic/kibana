@@ -45,7 +45,7 @@ export const useConversationsTable = () => {
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_NAME,
+          name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
           render: (conversation: ConversationTableItem) => (
             <EuiLink onClick={() => onEditActionClicked(conversation)}>
               {conversation.title}
