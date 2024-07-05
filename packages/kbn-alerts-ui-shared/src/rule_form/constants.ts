@@ -13,8 +13,8 @@ import {
   RuleCreationValidConsumer,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
-import { RuleFormData } from './types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
+import { RuleFormData } from './types';
 
 export const DEFAULT_RULE_INTERVAL = '1m';
 
