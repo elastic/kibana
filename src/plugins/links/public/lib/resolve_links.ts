@@ -60,7 +60,7 @@ export async function resolveLinkInfo(
       const {
         attributes: { title, description },
       } = await fetchDashboard(link.destination);
-      return { label: link.label || title, title, description };
+      return { label: link.label, title, description };
     } catch (error) {
       return {
         title: DashboardLinkStrings.getDashboardErrorLabel(),
