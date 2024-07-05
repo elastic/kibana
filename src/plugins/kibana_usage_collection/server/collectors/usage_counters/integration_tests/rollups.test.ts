@@ -137,6 +137,7 @@ describe('usage-counters', () => {
 
 async function createTestCounters(internalRepository: ISavedObjectsRepository) {
   await createCounters(internalRepository, OLD_ISO, [
+    // domainId, counterName, counterType, source, count, namespace?
     ['domain1', 'a', 'count', 'server', 28],
     ['domain1', 'b', 'count', 'server', 29, 'one'],
     ['domain1', 'b', 'count', 'server', 30, 'two'],
@@ -144,6 +145,7 @@ async function createTestCounters(internalRepository: ISavedObjectsRepository) {
   ]);
 
   await createCounters(internalRepository, RECENT_ISO, [
+    // domainId, counterName, counterType, source, count, namespace?
     ['domain1', 'a', 'count', 'server', 32],
     ['domain1', 'b', 'count', 'server', 33, 'one'],
     ['domain1', 'b', 'count', 'server', 34, 'two'],
@@ -191,7 +193,6 @@ function createCounter(
     type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     id,
     ...(namespace && { namespaces: [namespace] }),
-    // updated_at: date // illustrative purpose only, overriden by SOR
     attributes: {
       domainId,
       counterName,
