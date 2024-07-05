@@ -147,13 +147,15 @@ export const fetchLogRateAnalysis = async ({
     ...windowParameters,
   };
 
-  const indexInfo = await fetchIndexInfo(
+  const indexInfo = await fetchIndexInfo({
     esClient,
-    indexInfoParams,
-    ['message', 'error.message'],
     abortSignal,
-    includeFieldCandidates
-  );
+    arguments: {
+      ...indexInfoParams,
+      textFieldCandidatesOverrides: ['message', 'error.message'],
+      includeFieldCandidates,
+    },
+  });
 
   const baselineNumBuckets =
     (windowParameters.baselineMax - windowParameters.baselineMin) / intervalMs;
