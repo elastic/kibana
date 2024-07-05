@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { setup, indexes, integrations, getFunctionSignaturesByReturnType } from './helpers';
+import {
+  setup,
+  indexes,
+  integrations,
+  getFunctionSignaturesByReturnType,
+  getFieldNamesByType,
+} from './helpers';
 
 const visibleIndices = indexes
   .filter(({ hidden }) => !hidden)
@@ -105,110 +111,97 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('metrics a a=/', [...allAggFunctions, ...allEvaFunctions]);
       });
 
-      // test('on space after aggregate field', async () => {
-      //   const { assertSuggestions } = await setup();
+      test.skip('on space after aggregate field with comma', async () => {
+        const { assertSuggestions } = await setup();
 
-      //   await assertSuggestions('from a | stats a=min(b) /', ['by $0', ',', '|']);
-      // });
+        await assertSuggestions('METRICS a a=max(b), /', [
+          'var0 =',
+          ...allAggFunctions,
+          ...allEvaFunctions,
+        ]);
+      });
 
-      // test('on space after aggregate field with comma', async () => {
-      //   const { assertSuggestions } = await setup();
+      test.skip('on function left paren', async () => {
+        const { assertSuggestions } = await setup();
 
-      //   await assertSuggestions('from a | stats a=max(b), /', [
-      //     'var0 =',
-      //     ...allAggFunctions,
-      //     ...allEvaFunctions,
-      //   ]);
-      // });
+        await assertSuggestions('METRICS a round(/', [
+          ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+        await assertSuggestions('METRICS a round(round(/', [
+          ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+        await assertSuggestions('METRICS a avg(round(/', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+        await assertSuggestions('METRICS a avg(/', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+        ]);
+        await assertSuggestions('METRICS a round(avg(/', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+      });
 
-      // test('on function left paren', async () => {
-      //   const { assertSuggestions } = await setup();
+      test.skip('when typing inside function left paren', async () => {
+        const { assertSuggestions } = await setup();
+        const expected = [
+          ...getFieldNamesByType(['number', 'date']),
+          ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+            evalMath: true,
+          }),
+        ];
 
-      //   await assertSuggestions(
-      //     'from a | stats by bucket(/',
-      //     [
-      //       ...getFieldNamesByType(['number', 'date']),
-      //       ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
-      //     ].map((field) => `${field},`)
-      //   );
+        await assertSuggestions('METRICS a a=min(/)', expected);
+        await assertSuggestions('METRICS a a=min(/b), b=max()', expected);
+        await assertSuggestions('METRICS a a=min(b), b=max(/)', expected);
+      });
 
-      //   await assertSuggestions('from a | stats round(/', [
-      //     ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
-      //     ...getFieldNamesByType('number'),
-      //     ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
-      //       'round',
-      //     ]),
-      //   ]);
-      //   await assertSuggestions('from a | stats round(round(/', [
-      //     ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
-      //     ...getFieldNamesByType('number'),
-      //     ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
-      //       'round',
-      //     ]),
-      //   ]);
-      //   await assertSuggestions('from a | stats avg(round(/', [
-      //     ...getFieldNamesByType('number'),
-      //     ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
-      //       'round',
-      //     ]),
-      //   ]);
-      //   await assertSuggestions('from a | stats avg(/', [
-      //     ...getFieldNamesByType('number'),
-      //     ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
-      //   ]);
-      //   await assertSuggestions('from a | stats round(avg(/', [
-      //     ...getFieldNamesByType('number'),
-      //     ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
-      //       'round',
-      //     ]),
-      //   ]);
-      // });
+      test.skip('inside function argument list', async () => {
+        const { assertSuggestions } = await setup();
 
-      // test('when typing inside function left paren', async () => {
-      //   const { assertSuggestions } = await setup();
-      //   const expected = [
-      //     ...getFieldNamesByType(['number', 'date']),
-      //     ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
-      //       evalMath: true,
-      //     }),
-      //   ];
+        await assertSuggestions('METRICS a avg(b/) by stringField', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+        ]);
+      });
 
-      //   await assertSuggestions('from a | stats a=min(/)', expected);
-      //   await assertSuggestions('from a | stats a=min(/b), b=max()', expected);
-      //   await assertSuggestions('from a | stats a=min(b), b=max(/)', expected);
-      // });
+      test.skip('when typing right paren', async () => {
+        const { assertSuggestions } = await setup();
 
-      // test('inside function argument list', async () => {
-      //   const { assertSuggestions } = await setup();
+        await assertSuggestions('METRICS a a = min(b)/ | sort b', ['by $0', ',', '|']);
+      });
 
-      //   await assertSuggestions('from a | stats avg(b/) by stringField', [
-      //     ...getFieldNamesByType('number'),
-      //     ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
-      //   ]);
-      // });
+      test.skip('increments suggested variable name counter', async () => {
+        const { assertSuggestions } = await setup();
 
-      // test('when typing right paren', async () => {
-      //   const { assertSuggestions } = await setup();
+        await assertSuggestions('METRICS a var0=min(b),var1=c,/', [
+          'var2 =',
+          ...allAggFunctions,
+          ...allEvaFunctions,
+        ]);
+      });
+    });
 
-      //   await assertSuggestions('from a | stats a = min(b)/ | sort b', ['by $0', ',', '|']);
-      // });
+    describe('... [ BY <grouping> ]', () => {
+      test.skip('on space after aggregate field', async () => {
+        const { assertSuggestions } = await setup();
 
-      // test('increments suggested variable name counter', async () => {
-      //   const { assertSuggestions } = await setup();
-
-      //   await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
-      //     'var2 =',
-      //     ...allAggFunctions,
-      //     'var0',
-      //     'var1',
-      //     ...allEvaFunctions,
-      //   ]);
-      //   await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
-      //     'var2 =',
-      //     ...allAggFunctions,
-      //     ...allEvaFunctions,
-      //   ]);
-      // });
+        await assertSuggestions('METRICS a a=min(b) /', ['by $0', ',', '|']);
+      });
     });
   });
 });
