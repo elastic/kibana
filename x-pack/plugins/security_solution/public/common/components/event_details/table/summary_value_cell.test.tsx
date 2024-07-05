@@ -25,7 +25,6 @@ const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'];
 const hostIpFieldFromBrowserField: BrowserField = {
   aggregatable: true,
   format: '',
-  indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
   name: 'host.ip',
   readFromDocValues: false,
   searchable: true,
@@ -56,7 +55,6 @@ const enrichedAgentStatusData: AlertSummaryRow['description'] = {
     format: '',
     type: '',
     aggregatable: false,
-    indexes: [],
     name: AGENT_STATUS_FIELD_NAME,
     searchable: false,
     readFromDocValues: false,
