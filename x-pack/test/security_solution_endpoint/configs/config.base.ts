@@ -90,8 +90,10 @@ export const generateConfig = async ({
     layout: {
       fixedHeaderHeight: 200,
     },
-    mochaOpts: {
-      ...baseConfig.get('mochaOpts'),
+    suiteTags: {
+      ...baseConfig.get('suiteTags'),
+      include: [...baseConfig.get('suiteTags.include'), ...SUITE_TAGS[target].include],
+      exclude: [...baseConfig.get('suiteTags.exclude'), ...SUITE_TAGS[target].exclude],
     },
   };
 };
