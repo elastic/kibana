@@ -13,7 +13,7 @@ import type { DataControlInput } from '../types';
 import { OptionsListSearchTechnique } from './suggestions_searching';
 import type { OptionsListSortingType } from './suggestions_sorting';
 
-export const OPTIONS_LIST_CONTROL = 'optionsListControl';
+export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with OPTIONS_LIST_CONTROL_TYPE
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;
