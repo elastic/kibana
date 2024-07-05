@@ -39,6 +39,8 @@ describe('document selection', () => {
     });
   });
 
+  // TODO: add tests for SelectAllButton
+
   describe('SelectButton', () => {
     test('is not checked', () => {
       const contextMock = {
@@ -63,18 +65,13 @@ describe('document selection', () => {
       expect(checkBox.props().checked).toBeFalsy();
     });
 
-    test('is checked', () => {
+    test('is checked correctly', () => {
       const contextMock = {
         ...dataTableContextMock,
-        selectedDocsState: {
-          ...dataTableContextMock.selectedDocsState,
-          usedSelectedDocs: ['i::1::'],
-          isDocSelected: (docId: string) => docId === 'i::1::',
-          hasSelectedDocs: true,
-        },
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
-      const component = mountWithIntl(
+      const component1 = mountWithIntl(
         <UnifiedDataTableContext.Provider value={contextMock}>
           <SelectButton
             rowIndex={0}
@@ -88,8 +85,25 @@ describe('document selection', () => {
         </UnifiedDataTableContext.Provider>
       );
 
-      const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
-      expect(checkBox.props().checked).toBeTruthy();
+      const checkBox1 = findTestSubject(component1, 'dscGridSelectDoc-i::1::');
+      expect(checkBox1.props().checked).toBeTruthy();
+
+      const component2 = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <SelectButton
+            rowIndex={1}
+            colIndex={0}
+            setCellProps={jest.fn()}
+            columnId="test"
+            isExpanded={false}
+            isDetails={false}
+            isExpandable={false}
+          />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      const checkBox2 = findTestSubject(component2, 'dscGridSelectDoc-i::2::');
+      expect(checkBox2.props().checked).toBeFalsy();
     });
 
     test('adding a selection', () => {
@@ -158,6 +172,8 @@ describe('document selection', () => {
       expect(button.length).toBe(1);
       expect(button.text()).toBe('Selected2');
     });
+
+    // TODO: add a test for "Select all X rows" button
   });
 
   describe('DataTableCompareToolbarBtn', () => {
@@ -188,6 +204,14 @@ describe('document selection', () => {
       const { getButton } = renderCompareBtn({ setIsCompareActive });
       getButton()?.click();
       expect(setIsCompareActive).toHaveBeenCalledWith(true);
+    });
+
+    it('should disable the button if limit is reached', () => {
+      const selectedDocs = Array.from({ length: 500 }, (_, i) => i.toString());
+      const setIsCompareActive = jest.fn();
+      const { getButton } = renderCompareBtn({ selectedDocs, setIsCompareActive });
+      getButton()?.click();
+      expect(setIsCompareActive).not.toHaveBeenCalled();
     });
   });
 });

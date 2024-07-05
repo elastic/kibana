@@ -22,6 +22,8 @@ export interface UseSelectedDocsState {
   clearAllSelectedDocs: () => void;
 }
 
+// TODO: add unit tests
+
 export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelectedDocsState => {
   const [selectedDocsSet, setSelectedDocsSet] = useState<Set<string>>(new Set());
 
