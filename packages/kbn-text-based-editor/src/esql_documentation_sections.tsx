@@ -4469,13 +4469,14 @@ The following boolean operators are supported:
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator.markdown',
             {
               defaultMessage: `### CAST (\`::\`)
-The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
 
-Example:
+The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
+Example: 
 \`\`\`
-ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
+ROW ver = CONCAT((“0”::INT + 1)::STRING, “.2.3")::VERSION
 \`\`\`
               `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
