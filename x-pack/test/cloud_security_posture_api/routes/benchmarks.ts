@@ -17,18 +17,20 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 
 const chance = new Chance();
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
-
   const retry = getService('retry');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const cspSecurity = CspSecurityCommonProvider(providerContext);
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
@@ -144,8 +146,8 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/179815
-  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {
-    describe('Get Benchmark API', async () => {
+  describe('GET /internal/cloud_security_posture/benchmarks', () => {
+    describe.skip('Get Benchmark API', async () => {
       beforeEach(async () => {
         await index.removeFindings();
         await kibanaServer.savedObjects.clean({
@@ -259,6 +261,64 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         expect(scoreAfterMute.score.postureScore).to.equal(100);
+      });
+    });
+
+    describe('Get Benchmark API', async () => {
+      before(async () => {
+        await cspSecurity.createRoles();
+        await cspSecurity.createUsers();
+      });
+
+      beforeEach(async () => {
+        await index.removeFindings();
+        await kibanaServer.savedObjects.clean({
+          types: ['cloud-security-posture-settings'],
+        });
+        await waitForPluginInitialized();
+      });
+
+      it('Calling Benchmark API as User with no read access to Security', async () => {
+        const benchmark = 'cis_aws';
+        const benchmarkRules = await getCspBenchmarkRules(benchmark);
+
+        const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
+        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
+
+        await index.addFindings([cspmFinding1, cspmFinding2]);
+
+        const { body: benchmarksResult } = await supertestWithoutAuth
+          .get('/internal/cloud_security_posture/benchmarks')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            'role_security_none_user_benchmark',
+            cspSecurity.getPasswordForUser('role_security_none_user_benchmark')
+          );
+
+        expect(benchmarksResult.statusCode).to.equal(403);
+      });
+
+      it('Calling Benchmark API as User with read access to Security', async () => {
+        const benchmark = 'cis_aws';
+        const benchmarkRules = await getCspBenchmarkRules(benchmark);
+
+        const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
+        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
+
+        await index.addFindings([cspmFinding1, cspmFinding2]);
+
+        await supertestWithoutAuth
+          .get('/internal/cloud_security_posture/benchmarks')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            'role_security_read_user_benchmark',
+            cspSecurity.getPasswordForUser('role_security_read_user_benchmark')
+          )
+          .expect(200);
       });
     });
   });
