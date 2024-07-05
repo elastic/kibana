@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
+  EuiSkeletonTitle,
   EuiTitle,
   useEuiShadow,
   useEuiTheme,
@@ -22,15 +23,21 @@ import {
 } from '../../../common/translations';
 import { NavigationSource } from '../../services/telemetry';
 import { useRedirectLink } from '../../hooks';
-import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { IntegrationIcon } from '../common';
+import { BasicDataStream } from '../../../common/types';
 
-export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
-  const { integration, title } = dataStreamStat;
+export function Header({
+  titleAndLinkDetails,
+  loading,
+}: {
+  titleAndLinkDetails: BasicDataStream;
+  loading: boolean;
+}) {
+  const { integration, title } = titleAndLinkDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat,
+    dataStreamStat: titleAndLinkDetails,
     telemetry: {
       page: 'details',
       navigationSource: NavigationSource.Header,
@@ -39,47 +46,55 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
 
   return (
     <EuiFlyoutHeader hasBorder>
-      <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem grow>
-          <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
-            <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
-              <h3>{title}</h3>
-            </EuiTitle>
-            <div
+      {loading ? (
+        <EuiSkeletonTitle
+          size="s"
+          data-test-subj="datasetQualityFlyoutIntegrationLoading"
+          className="datasetQualityFlyoutIntegrationLoading"
+        />
+      ) : (
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow>
+            <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
+              <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
+                <h3>{title}</h3>
+              </EuiTitle>
+              <div
+                css={css`
+                  ${euiShadow};
+                  padding: ${euiTheme.size.xs};
+                  border-radius: ${euiTheme.size.xxs};
+                `}
+              >
+                <IntegrationIcon integration={integration} />
+              </div>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
               css={css`
-                ${euiShadow};
-                padding: ${euiTheme.size.xs};
-                border-radius: ${euiTheme.size.xxs};
+                margin-right: ${euiTheme.size.l};
               `}
+              gutterSize="s"
+              justifyContent="flexEnd"
+              alignItems="center"
             >
-              <IntegrationIcon integration={integration} />
-            </div>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            css={css`
-              margin-right: ${euiTheme.size.l};
-            `}
-            gutterSize="s"
-            justifyContent="flexEnd"
-            alignItems="center"
-          >
-            <EuiButton
-              data-test-subj="datasetQualityHeaderButton"
-              size="s"
-              {...redirectLinkProps.linkProps}
-              iconType={
-                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
-              }
-            >
-              {redirectLinkProps.isLogsExplorerAvailable
-                ? flyoutOpenInLogsExplorerText
-                : flyoutOpenInDiscoverText}
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              <EuiButton
+                data-test-subj="datasetQualityHeaderButton"
+                size="s"
+                {...redirectLinkProps.linkProps}
+                iconType={
+                  redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
+                }
+              >
+                {redirectLinkProps.isLogsExplorerAvailable
+                  ? flyoutOpenInLogsExplorerText
+                  : flyoutOpenInDiscoverText}
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiFlyoutHeader>
   );
 }
