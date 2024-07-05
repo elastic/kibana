@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
+import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
 import { generateLatestIndexName } from '../helpers/generate_component_id';
 
 function mapDestinationToPainless(destination: string, source: string) {
@@ -66,7 +67,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     {
       set: {
         field: 'entity.schemaVersion',
-        value: 'v1',
+        value: ENTITY_SCHEMA_VERSION_V1,
       },
     },
     ...(definition.staticFields != null

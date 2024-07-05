@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
+import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
 function createIdTemplate(definition: EntityDefinition) {
@@ -72,7 +73,7 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     {
       set: {
         field: 'entity.schemaVersion',
-        value: 'v1',
+        value: ENTITY_SCHEMA_VERSION_V1,
       },
     },
     {
