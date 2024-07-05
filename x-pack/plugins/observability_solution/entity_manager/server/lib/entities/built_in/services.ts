@@ -10,6 +10,7 @@ import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitionSchema.parse({
   id: `${BUILT_IN_ID_PREFIX}services`,
+  version: '1.0.0',
   name: 'Services from logs',
   type: 'service',
   managed: true,

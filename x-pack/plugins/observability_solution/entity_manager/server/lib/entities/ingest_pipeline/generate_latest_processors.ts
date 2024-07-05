@@ -57,6 +57,18 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: definition.id,
       },
     },
+    {
+      set: {
+        field: 'entity.definitionVersion',
+        value: definition.version,
+      },
+    },
+    {
+      set: {
+        field: 'entity.schemaVersion',
+        value: 'v1',
+      },
+    },
     ...(definition.staticFields != null
       ? Object.keys(definition.staticFields).map((field) => ({
           set: { field, value: definition.staticFields![field] },

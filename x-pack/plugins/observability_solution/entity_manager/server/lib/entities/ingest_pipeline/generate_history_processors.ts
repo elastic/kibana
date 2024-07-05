@@ -65,6 +65,18 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     },
     {
       set: {
+        field: 'entity.definitionVersion',
+        value: definition.version,
+      },
+    },
+    {
+      set: {
+        field: 'entity.schemaVersion',
+        value: 'v1',
+      },
+    },
+    {
+      set: {
         field: 'entity.displayName',
         value: createIdTemplate(definition),
       },
