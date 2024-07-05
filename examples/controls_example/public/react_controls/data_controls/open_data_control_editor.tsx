@@ -18,23 +18,23 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DataControlApi, DefaultDataControlState } from './types';
+import { DefaultDataControlState } from './types';
 
 export type DataControlEditorState = Omit<DefaultDataControlState, 'fieldName'> & {
   fieldName?: string;
+  controlType?: string;
+  controlId?: string;
+  defaultPanelTitle?: string;
 };
-export type DataControlEditorApi = Pick<DataControlApi, 'type' | 'uuid' | 'defaultPanelTitle'>;
 
 export const openDataControlEditor = async <
   State extends DataControlEditorState = DataControlEditorState
 >({
   initialState,
-  controlApi,
   controlGroupApi,
   services,
 }: {
   initialState: State;
-  controlApi?: DataControlEditorApi;
   controlGroupApi: ControlGroupApi;
   services: {
     core: CoreStart;
@@ -82,7 +82,6 @@ export const openDataControlEditor = async <
     const overlay = services.core.overlays.openFlyout(
       toMountPoint(
         <DataControlEditor<State>
-          controlApi={controlApi}
           parentApi={controlGroupApi}
           initialState={initialState}
           onCancel={(state) => {

@@ -50,13 +50,12 @@ import { getAllControlTypes, getControlFactory } from '../control_factory_regist
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { DataControlEditorApi, DataControlEditorState } from './open_data_control_editor';
+import { DataControlEditorState } from './open_data_control_editor';
 import { DataControlFactory, isDataControlFactory } from './types';
 
 export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: State;
   parentApi: ControlGroupApi; // controls must always have a parent API
-  controlApi?: DataControlEditorApi;
   onCancel: (newState: State) => void;
   onSave: (newState: State, type: string) => void;
   services: {
@@ -131,21 +130,21 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   onSave,
   onCancel,
   parentApi: controlGroup,
-  controlApi,
   /** TODO: These should not be props */
   services: { dataViews: dataViewService },
 }: ControlEditorProps<State>) => {
   const [defaultGrow, defaultWidth] = useBatchedPublishingSubjects(
     controlGroup.grow,
     controlGroup.width
+    // controlGroup.parentApi?.lastUsedDataViewId, // TODO: Make this work
   );
   const [editorState, setEditorState] = useState<State>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
-    controlApi?.defaultPanelTitle?.getValue() ?? initialState.fieldName ?? ''
+    initialState.defaultPanelTitle ?? initialState.fieldName ?? ''
   );
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(
-    controlApi?.type
+    initialState.controlType
   );
   const [controlEditorValid, setControlEditorValid] = useState<boolean>(false);
   /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
@@ -224,7 +223,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {!controlApi
+            {!initialState.controlId // if no ID, then we are creating a new control
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
               : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
           </h2>
@@ -369,7 +368,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           </EuiDescribedFormGroup>
           {CustomSettingsComponent}
           {/* {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null} */}
-          {controlApi?.uuid && (
+          {initialState.controlId && (
             <>
               <EuiSpacer size="l" />
               <EuiButtonEmpty
@@ -379,7 +378,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 color="danger"
                 onClick={() => {
                   onCancel(initialState); // don't want to show "lost changes" warning
-                  controlGroup.removePanel(controlApi.uuid);
+                  controlGroup.removePanel(initialState.controlId!);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
