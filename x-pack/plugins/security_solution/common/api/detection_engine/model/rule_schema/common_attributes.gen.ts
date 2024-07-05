@@ -432,6 +432,22 @@ export const RelatedIntegration = z.object({
 export type RelatedIntegrationArray = z.infer<typeof RelatedIntegrationArray>;
 export const RelatedIntegrationArray = z.array(RelatedIntegration);
 
+/**
+  * Schema for fields relating to investigation fields. These are user defined fields we use to highlight
+in various features in the UI such as alert details flyout and exceptions auto-population from alert.
+Added in PR #163235
+Right now we only have a single field but anticipate adding more related fields to store various
+configuration states such as `override` - where a user might say if they want only these fields to
+display, or if they want these fields + the fields we select. When expanding this field, it may look
+something like:
+```typescript
+const investigationFields = z.object({
+  field_names: NonEmptyArray(NonEmptyString),
+  override: z.boolean().optional(),
+});
+```
+
+  */
 export type InvestigationFields = z.infer<typeof InvestigationFields>;
 export const InvestigationFields = z.object({
   field_names: z.array(NonEmptyString).min(1),
