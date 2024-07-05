@@ -43,7 +43,7 @@ export const fetchSignificantCategories = async ({
   abortSignal?: AbortSignal;
   emitError: (m: string) => void;
   logger: Logger;
-  arguments: AiopsLogRateAnalysisSchema & { fieldNames: string[]; sampleProbability: number };
+  arguments: AiopsLogRateAnalysisSchema & { fieldNames: string[]; sampleProbability?: number };
 }) => {
   // The default value of 1 means no sampling will be used
   const { fieldNames, sampleProbability = 1, ...params } = args;
