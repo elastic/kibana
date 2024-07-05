@@ -13,11 +13,11 @@ import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
 import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
-import { Prompt } from '../../types';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
 import { useAssistantContext } from '../../../assistant_context';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
@@ -32,7 +32,7 @@ const mockConversations = {
   [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
 };
 
-const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
+const mockSystemPrompts: PromptResponse[] = [mockSystemPrompt];
 
 const mockUseAssistantContext = {
   conversations: mockConversations,
@@ -91,6 +91,7 @@ describe('SystemPrompt', () => {
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
           isFlyoutMode={false}
+          allSystemPrompts={mockSystemPrompts}
         />
       );
     });
@@ -117,11 +118,12 @@ describe('SystemPrompt', () => {
       render(
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
           isFlyoutMode={false}
+          allSystemPrompts={mockSystemPrompts}
         />
       );
     });
@@ -157,6 +159,7 @@ describe('SystemPrompt', () => {
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             isFlyoutMode={false}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -204,6 +207,7 @@ describe('SystemPrompt', () => {
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             isFlyoutMode={false}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -265,6 +269,7 @@ describe('SystemPrompt', () => {
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             isFlyoutMode={false}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -333,6 +338,7 @@ describe('SystemPrompt', () => {
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             isFlyoutMode={false}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -416,6 +422,7 @@ describe('SystemPrompt', () => {
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             isFlyoutMode={false}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -481,11 +488,12 @@ describe('SystemPrompt', () => {
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
           isFlyoutMode={false}
+          allSystemPrompts={mockSystemPrompts}
         />
       </TestProviders>
     );
@@ -500,11 +508,12 @@ describe('SystemPrompt', () => {
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
           isFlyoutMode={false}
+          allSystemPrompts={mockSystemPrompts}
         />
       </TestProviders>
     );
