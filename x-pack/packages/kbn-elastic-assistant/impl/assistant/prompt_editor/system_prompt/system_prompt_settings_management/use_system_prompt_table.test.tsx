@@ -7,26 +7,25 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useSystemPromptTable } from './use_system_prompt_table';
-import { Prompt } from '../../../types';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { customConvo, welcomeConvo } from '../../../../mock/conversation';
 import { mockConnectors } from '../../../../mock/connectors';
-import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 
 // Mock data for tests
-const mockSystemPrompts: Prompt[] = [
+const mockSystemPrompts: PromptResponse[] = [
   {
     id: 'prompt-1',
     content: 'Prompt 1',
     name: 'Prompt 1',
-    promptType: 'user',
+    promptType: 'quick',
   },
   {
     id: 'prompt-2',
     content: 'Prompt 2',
     name: 'Prompt 2',
-    promptType: 'user',
+    promptType: 'quick',
     isNewConversationDefault: true,
   },
 ];
