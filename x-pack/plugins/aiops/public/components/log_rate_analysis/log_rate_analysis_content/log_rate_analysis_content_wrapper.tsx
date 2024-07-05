@@ -27,6 +27,7 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
 import type { LogRateAnalysisResultsData } from '../log_rate_analysis_results';
 
+import { LogRateAnalysisDocumentCountChartData } from './log_rate_analysis_document_count_chart_data';
 import { LogRateAnalysisContent } from './log_rate_analysis_content';
 
 const localStorage = new Storage(window.localStorage);
@@ -93,8 +94,11 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
           <LogRateAnalysisReduxProvider initialAnalysisStart={initialAnalysisStart}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisContent
+                <LogRateAnalysisDocumentCountChartData
                   timeRange={timeRange}
+                  esSearchQuery={esSearchQuery}
+                />
+                <LogRateAnalysisContent
                   esSearchQuery={esSearchQuery}
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}

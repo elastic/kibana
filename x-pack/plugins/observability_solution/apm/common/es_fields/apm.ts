@@ -176,6 +176,7 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 // Metadata
 export const TIER = '_tier';
 export const INDEX = '_index';
+export const DATA_STEAM_TYPE = 'data_stream.type';
 
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';

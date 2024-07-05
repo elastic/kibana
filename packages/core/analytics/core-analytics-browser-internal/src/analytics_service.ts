@@ -7,8 +7,8 @@
  */
 
 import { of, Subscription } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/analytics-client';
-import { createAnalytics } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@kbn/ebt/client';
+import { createAnalytics } from '@kbn/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';

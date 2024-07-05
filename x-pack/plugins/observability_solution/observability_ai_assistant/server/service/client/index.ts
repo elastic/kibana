@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -60,7 +61,6 @@ import {
   KnowledgeBaseService,
   RecalledEntry,
 } from '../knowledge_base_service';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -93,7 +93,6 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
-      resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
       user?: {
         id?: string;
@@ -107,7 +106,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       query: {
         bool: {
           filter: [
@@ -153,7 +152,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
-      id: conversation._id,
+      id: conversation._id!,
       index: conversation._index,
       refresh: true,
     });
@@ -594,7 +593,7 @@ export class ObservabilityAIAssistantClient {
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -634,7 +633,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: persistedConversation._id,
+      id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
       refresh: true,
@@ -663,7 +662,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: document._id,
+      id: document._id!,
       index: document._index,
       doc: { conversation: { title } },
       refresh: true,
@@ -686,7 +685,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       document: createdConversation,
       refresh: true,
     });
@@ -706,7 +705,7 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       categories,
-      asCurrentUser: this.dependencies.esClient.asCurrentUser,
+      esClient: this.dependencies.esClient,
       uiSettingsClient: this.dependencies.uiSettingsClient,
     });
   };

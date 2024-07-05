@@ -31,52 +31,38 @@ export interface RuleFormHealthCheckErrorProps {
 export const RuleFormHealthCheckError = (props: RuleFormHealthCheckErrorProps) => {
   const { error, docLinks } = props;
 
-  const errorTitle = useMemo(() => {
+  const errorState = useMemo(() => {
     if (error === healthCheckErrors.ALERTS_ERROR) {
-      return HEALTH_CHECK_ALERTS_ERROR_TITLE;
+      return {
+        errorTitle: HEALTH_CHECK_ALERTS_ERROR_TITLE,
+        errorBodyText: HEALTH_CHECK_ALERTS_ERROR_TEXT,
+        errorDocLink: docLinks.links.alerting.generalSettings,
+      };
     }
     if (error === healthCheckErrors.ENCRYPTION_ERROR) {
-      return HEALTH_CHECK_ENCRYPTION_ERROR_TITLE;
+      return {
+        errorTitle: HEALTH_CHECK_ENCRYPTION_ERROR_TITLE,
+        errorBodyText: HEALTH_CHECK_ENCRYPTION_ERROR_TEXT,
+        errorDocLink: docLinks.links.alerting.generalSettings,
+      };
     }
     if (error === healthCheckErrors.API_KEYS_AND_ENCRYPTION_ERROR) {
-      return HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TITLE;
+      return {
+        errorTitle: HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TITLE,
+        errorBodyText: HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TEXT,
+        errorDocLink: docLinks.links.alerting.setupPrerequisites,
+      };
     }
     if (error === healthCheckErrors.API_KEYS_DISABLED_ERROR) {
-      return HEALTH_CHECK_API_KEY_DISABLED_ERROR_TITLE;
-    }
-  }, [error]);
-
-  const errorBodyText = useMemo(() => {
-    if (error === healthCheckErrors.ALERTS_ERROR) {
-      return HEALTH_CHECK_ALERTS_ERROR_TEXT;
-    }
-    if (error === healthCheckErrors.ENCRYPTION_ERROR) {
-      return HEALTH_CHECK_ENCRYPTION_ERROR_TEXT;
-    }
-    if (error === healthCheckErrors.API_KEYS_AND_ENCRYPTION_ERROR) {
-      return HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TEXT;
-    }
-    if (error === healthCheckErrors.API_KEYS_DISABLED_ERROR) {
-      return HEALTH_CHECK_API_KEY_DISABLED_ERROR_TEXT;
-    }
-  }, [error]);
-
-  const errorDocLink = useMemo(() => {
-    if (error === healthCheckErrors.ALERTS_ERROR) {
-      return docLinks.links.alerting.generalSettings;
-    }
-    if (error === healthCheckErrors.ENCRYPTION_ERROR) {
-      return docLinks.links.alerting.generalSettings;
-    }
-    if (error === healthCheckErrors.API_KEYS_AND_ENCRYPTION_ERROR) {
-      return docLinks.links.alerting.setupPrerequisites;
-    }
-    if (error === healthCheckErrors.API_KEYS_DISABLED_ERROR) {
-      return docLinks.links.security.elasticsearchEnableApiKeys;
+      return {
+        errorTitle: HEALTH_CHECK_API_KEY_DISABLED_ERROR_TITLE,
+        errorBodyText: HEALTH_CHECK_API_KEY_DISABLED_ERROR_TEXT,
+        errorDocLink: docLinks.links.security.elasticsearchEnableApiKeys,
+      };
     }
   }, [error, docLinks]);
 
-  if (!errorTitle || !errorBodyText || !errorDocLink) {
+  if (!errorState) {
     return null;
   }
 
@@ -87,17 +73,17 @@ export const RuleFormHealthCheckError = (props: RuleFormHealthCheckErrorProps) =
       titleSize="xs"
       title={
         <EuiText color="default">
-          <h2>{errorTitle}</h2>
+          <h2>{errorState.errorTitle}</h2>
         </EuiText>
       }
       body={
         <div>
           <p role="banner">
-            {errorBodyText}&nbsp;
+            {errorState.errorBodyText}&nbsp;
             <EuiLink
               data-test-subj="ruleFormHealthCheckErrorLink"
               external
-              href={errorDocLink}
+              href={errorState.errorDocLink}
               target="_blank"
             >
               {HEALTH_CHECK_ACTION_TEXT}

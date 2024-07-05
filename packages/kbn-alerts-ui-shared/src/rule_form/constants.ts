@@ -13,12 +13,18 @@ import {
   RuleCreationValidConsumer,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
-import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { RuleFormData } from './types';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 
 export const DEFAULT_RULE_INTERVAL = '1m';
 
 export const ALERTING_FEATURE_ID = 'alerts';
+
+export const DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.CHANGE,
+  throttle: null,
+  summary: false,
+};
 
 export const GET_DEFAULT_FORM_DATA = ({
   ruleTypeId,
@@ -58,9 +64,3 @@ export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 
 export const createRuleRoute = '/rule/create/:ruleTypeId' as const;
 export const editRuleRoute = '/rule/edit/:id' as const;
-
-export const DEFAULT_FREQUENCY = {
-  notifyWhen: RuleNotifyWhen.CHANGE,
-  throttle: null,
-  summary: false,
-};

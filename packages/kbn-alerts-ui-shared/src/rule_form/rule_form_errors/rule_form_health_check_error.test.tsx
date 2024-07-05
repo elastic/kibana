@@ -10,7 +10,7 @@ import React from 'react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { render, screen } from '@testing-library/react';
 import { RuleFormHealthCheckError } from './rule_form_health_check_error';
-import { healthCheckErrors } from '../../common/apis';
+import { HealthCheckErrors, healthCheckErrors } from '../../common/apis';
 import {
   HEALTH_CHECK_ALERTS_ERROR_TEXT,
   HEALTH_CHECK_ENCRYPTION_ERROR_TEXT,
@@ -101,5 +101,16 @@ describe('ruleFormHealthCheckError', () => {
       'href',
       'elasticsearchEnableApiKeys'
     );
+  });
+
+  test('should not render if unknown error is passed in', () => {
+    render(
+      <RuleFormHealthCheckError
+        error={'unknown error' as HealthCheckErrors}
+        docLinks={docLinksMock}
+      />
+    );
+
+    expect(screen.queryByTestId('ruleFormHealthCheckError')).not.toBeInTheDocument();
   });
 });

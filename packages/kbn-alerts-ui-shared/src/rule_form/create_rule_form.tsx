@@ -23,6 +23,7 @@ import {
 } from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
+  getInitialConsumer,
   getInitialMultiConsumer,
   getInitialSchedule,
   parseRuleCircuitBreakerErrorMessage,
@@ -37,7 +38,7 @@ export interface CreateRuleFormProps {
   hideInterval?: boolean;
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
-  useRuleProducer?: boolean;
+  shouldUseRuleProducer?: boolean;
   returnUrl: string;
 }
 
@@ -49,6 +50,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
+    shouldUseRuleProducer = false,
     returnUrl,
   } = props;
 
@@ -139,7 +141,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           formData: GET_DEFAULT_FORM_DATA({
             ruleTypeId,
             name: `${ruleType.name} rule`,
-            consumer,
+            consumer: getInitialConsumer({
+              consumer,
+              ruleType,
+              shouldUseRuleProducer,
+            }),
             schedule: getInitialSchedule({
               ruleType,
               minimumScheduleInterval: uiConfig?.minimumScheduleInterval,

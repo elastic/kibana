@@ -57,9 +57,9 @@ export const RuleDefinition = () => {
 
   const dispatch = useRuleFormDispatch();
 
-  const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
+  const { charts, data, dataViews, unifiedSearch, docLinks } = plugins;
 
-  const { params, schedule, notifyWhen, consumer } = formData;
+  const { params, schedule, notifyWhen } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
@@ -68,11 +68,10 @@ export const RuleDefinition = () => {
       return [];
     }
     return getAuthorizedConsumers({
-      consumer,
       ruleType: selectedRuleType,
       validConsumers,
     });
-  }, [consumer, selectedRuleType, validConsumers]);
+  }, [selectedRuleType, validConsumers]);
 
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {

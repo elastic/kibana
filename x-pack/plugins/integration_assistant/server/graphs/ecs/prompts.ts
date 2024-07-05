@@ -30,11 +30,12 @@ Go through each value step by step and modify it with the following process:
 3. If no relevant ECS field is found, the value should just be replaced with "null" rather than a new object.
 4. Only if a relevant ECS field is found replace the value with a new object that has the keys "target", "confidence", "date_format" and "type".
 5. The object key "target" should be set to be the full path of the ECS field name you think it matches. Set the object key "type" to be either "string", "boolean", "number" or "date" depending on what was detected as the example value.
-6. If the type "date" is used, then set date_format to be an array of one or more of the equivilant JAVA date formats that fits the example value. If the type is not date then date_format should be set to an empty array [].
-7. For each key that you set a target ECS field, also score the confidence you have in that the target field is correct, use a float between 0.0 and 1.0 and set the value in the nested "confidence" key.
-8. When you want to use an ECS field as a value for a target, but another field already has the same ECS field as its target, try to find another fitting ECS field. If none is found then the one you are least confident about should have the object replaced with null.
-9. If you are not confident for a specific field, you should always set the value to null.
-10. These {package_name} log samples are based on source and destination type data, prioritize these compared to other related ECS fields like host.* and observer.*.
+6. If the type "date" is used, then set date_format to be an array of one or more of the equivilant JAVA date formats that fits the example value, including those with nanosecond precision. If the type is not date then date_format should be set to an empty array [].
+7. Use a custom date pattern if the built-in date format patterns do not match the example value , including those with nanosecond precision.
+8. For each key that you set a target ECS field, also score the confidence you have in that the target field is correct, use a float between 0.0 and 1.0 and set the value in the nested "confidence" key.
+9. When you want to use an ECS field as a value for a target, but another field already has the same ECS field as its target, try to find another fitting ECS field. If none is found then the one you are least confident about should have the object replaced with null.
+10. If you are not confident for a specific field, you should always set the value to null.
+11. These {package_name} log samples are based on source and destination type data, prioritize these compared to other related ECS fields like host.* and observer.*.
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>

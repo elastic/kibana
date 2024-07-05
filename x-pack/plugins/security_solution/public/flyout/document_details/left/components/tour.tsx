@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { FlyoutTour } from '../../shared/components/flyout_tour';
 import { getLeftSectionTourSteps } from '../../shared/utils/tour_step_config';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
@@ -17,7 +17,7 @@ import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyo
  * Guided tour for the left panel in details flyout
  */
 export const LeftPanelTour = memo(() => {
-  const { getFieldsData, isPreview } = useLeftPanelContext();
+  const { getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const isAlert = eventKind === EventKind.signal;
   const isTimelineFlyoutOpen = useIsTimelineFlyoutOpen();

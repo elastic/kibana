@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EventTypeOpts } from '@kbn/analytics-client';
+import { type EventTypeOpts } from '@kbn/ebt/client';
 
 export const DATA_RECEIVED_TELEMETRY_EVENT: EventTypeOpts<{
   rowCount: number;

@@ -10,11 +10,9 @@ import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { RuleTypeWithDescription } from '../../common/types';
 
 export const getAuthorizedConsumers = ({
-  consumer,
   ruleType,
   validConsumers,
 }: {
-  consumer: string;
   ruleType: RuleTypeWithDescription;
   validConsumers: RuleCreationValidConsumer[];
 }) => {
