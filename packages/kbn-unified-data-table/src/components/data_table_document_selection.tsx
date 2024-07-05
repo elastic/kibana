@@ -42,6 +42,8 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       setCellProps({
         className: 'unifiedDataTable__cell--selected',
       });
+    } else {
+      setCellProps({ className: '' });
     }
   }, [expanded, doc, setCellProps, isDarkMode]);
 
