@@ -10,8 +10,10 @@ import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    id: `${BUILT_IN_ID_PREFIX}services_from_logs`,
-    name: 'Services from logs',
+    id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
+    name: 'Services from ECS data',
+    description:
+      'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
     filter: '@timestamp >= now-10m',
