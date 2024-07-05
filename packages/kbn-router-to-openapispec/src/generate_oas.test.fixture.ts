@@ -443,7 +443,7 @@ export function createSharedConfigSchema() {
   });
 }
 
-export function createZodSharedSchema() {
+export function createSharedZodSchema() {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),

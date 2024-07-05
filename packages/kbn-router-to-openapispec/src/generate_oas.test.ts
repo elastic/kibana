@@ -11,7 +11,7 @@ import { generateOpenApiDocument } from './generate_oas';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 import {
   sharedOas,
-  createZodSharedSchema,
+  createSharedZodSchema,
   createSharedConfigSchema,
 } from './generate_oas.test.fixture';
 
@@ -160,7 +160,7 @@ describe('generateOpenApiDocument', () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
-        bodySchema: createZodSharedSchema(),
+        bodySchema: createSharedZodSchema(),
       });
       expect(
         generateOpenApiDocument(
