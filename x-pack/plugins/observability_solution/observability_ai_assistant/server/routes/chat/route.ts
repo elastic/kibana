@@ -244,7 +244,7 @@ async function chatComplete(
       persist,
       screenContexts,
       responseLanguage,
-      instructions: requestInstructions,
+      instructions,
       disableFunctions,
     },
   } = params;
@@ -269,7 +269,7 @@ async function chatComplete(
     signal,
     functionClient,
     responseLanguage,
-    instructions: requestInstructions,
+    instructions,
     simulateFunctionCalling,
     disableFunctions,
   });
