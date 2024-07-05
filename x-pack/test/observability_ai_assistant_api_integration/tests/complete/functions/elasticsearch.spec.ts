@@ -12,7 +12,12 @@ import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
 import { LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createLLMProxyConnector, deleteLLMProxyConnector, getMessageAddedEvents } from './helpers';
+import {
+  createLLMProxyConnector,
+  deleteLLMProxyConnector,
+  getMessageAddedEvents,
+  invokeChatCompleteWithFunctionRequest,
+} from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -29,45 +34,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
       await generateApmData(apmSynthtraceEsClient);
 
-      const res = await observabilityAIAssistantAPIClient
-        .editorUser({
-          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-          params: {
+      const res = await invokeChatCompleteWithFunctionRequest({
+        connectorId,
+        observabilityAIAssistantAPIClient,
+        functionCall: {
+          name: ELASTICSEARCH_FUNCTION_NAME,
+          trigger: MessageRole.User,
+          arguments: JSON.stringify({
+            method: 'POST',
+            path: 'traces*/_search',
             body: {
-              messages: [
-                {
-                  '@timestamp': new Date().toISOString(),
-                  message: {
-                    role: MessageRole.Assistant,
-                    content: '',
-                    function_call: {
-                      name: ELASTICSEARCH_FUNCTION_NAME,
-                      trigger: MessageRole.User,
-                      arguments: JSON.stringify({
-                        method: 'POST',
-                        path: 'traces*/_search',
-                        body: {
-                          size: 0,
-                          aggs: {
-                            services: {
-                              terms: {
-                                field: 'service.name',
-                              },
-                            },
-                          },
-                        },
-                      }),
-                    },
+              size: 0,
+              aggs: {
+                services: {
+                  terms: {
+                    field: 'service.name',
                   },
                 },
-              ],
-              connectorId,
-              persist: false,
-              screenContexts: [],
+              },
             },
-          },
-        })
-        .expect(200);
+          }),
+        },
+      });
 
       await proxy.waitForAllInterceptorsSettled();
 
@@ -86,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(esFunctionResponse.message.message.name).to.be('elasticsearch');
       expect(parsedEsResponse.hits.total.value).to.be(15);
       expect(parsedEsResponse.aggregations.services.buckets).to.eql([
-        { key: 'foo', doc_count: 15 },
+        { key: 'java-backend', doc_count: 15 },
       ]);
       expect(events.length).to.be(2);
     });
@@ -95,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
 export async function generateApmData(apmSynthtraceEsClient: ApmSynthtraceEsClient) {
   const serviceA = apm
-    .service({ name: 'foo', environment: 'production', agentName: 'java' })
+    .service({ name: 'java-backend', environment: 'production', agentName: 'java' })
     .instance('a');
 
   const events = timerange('now-15m', 'now')

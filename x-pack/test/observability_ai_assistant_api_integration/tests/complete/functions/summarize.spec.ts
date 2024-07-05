@@ -9,7 +9,11 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createLLMProxyConnector, deleteLLMProxyConnector } from './helpers';
+import {
+  createLLMProxyConnector,
+  deleteLLMProxyConnector,
+  invokeChatCompleteWithFunctionRequest,
+} from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,38 +28,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
 
-      await observabilityAIAssistantAPIClient
-        .editorUser({
-          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-          params: {
-            body: {
-              messages: [
-                {
-                  '@timestamp': new Date().toISOString(),
-                  message: {
-                    role: MessageRole.Assistant,
-                    content: '',
-                    function_call: {
-                      name: 'summarize',
-                      trigger: MessageRole.User,
-                      arguments: JSON.stringify({
-                        id: 'my-id',
-                        text: 'Hello world',
-                        is_correction: false,
-                        confidence: 1,
-                        public: false,
-                      }),
-                    },
-                  },
-                },
-              ],
-              connectorId,
-              persist: false,
-              screenContexts: [],
-            },
-          },
-        })
-        .expect(200);
+      await invokeChatCompleteWithFunctionRequest({
+        connectorId,
+        observabilityAIAssistantAPIClient,
+        functionCall: {
+          name: 'summarize',
+          trigger: MessageRole.User,
+          arguments: JSON.stringify({
+            id: 'my-id',
+            text: 'Hello world',
+            is_correction: false,
+            confidence: 1,
+            public: false,
+          }),
+        },
+      });
 
       await proxy.waitForAllInterceptorsSettled();
     });

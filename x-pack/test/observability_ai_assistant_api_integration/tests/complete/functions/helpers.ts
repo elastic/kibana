@@ -6,6 +6,7 @@
  */
 
 import {
+  Message,
   MessageAddEvent,
   MessageRole,
   StreamingChatResponseEvent,
@@ -13,7 +14,6 @@ import {
 import { ToolingLog } from '@kbn/tooling-log';
 import { Agent } from 'supertest';
 import { Readable } from 'stream';
-import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
 import { CreateTest } from '../../../common/config';
 import { createLlmProxy, LlmProxy } from '../../../common/create_llm_proxy';
 
@@ -82,12 +82,17 @@ export async function deleteLLMProxyConnector({
   proxy.close();
 }
 
-export function foo(
-  connectorId: string,
+export function invokeChatCompleteWithFunctionRequest({
+  connectorId,
+  observabilityAIAssistantAPIClient,
+  functionCall,
+}: {
+  connectorId: string;
   observabilityAIAssistantAPIClient: Awaited<
     ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
-  >
-) {
+  >;
+  functionCall: Message['message']['function_call'];
+}) {
   return observabilityAIAssistantAPIClient
     .editorUser({
       endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -99,24 +104,7 @@ export function foo(
               message: {
                 role: MessageRole.Assistant,
                 content: '',
-                function_call: {
-                  name: ELASTICSEARCH_FUNCTION_NAME,
-                  trigger: MessageRole.User,
-                  arguments: JSON.stringify({
-                    method: 'POST',
-                    path: 'traces*/_search',
-                    body: {
-                      size: 0,
-                      aggs: {
-                        services: {
-                          terms: {
-                            field: 'service.name',
-                          },
-                        },
-                      },
-                    },
-                  }),
-                },
+                function_call: functionCall,
               },
             },
           ],
