@@ -67,9 +67,9 @@ async function createPackagePolicy(
         force: true,
         user: options.user,
       });
+
       throw error;
     });
-
   if (!newPackagePolicy) return;
 
   newPackagePolicy.policy_id = agentPolicy.id;
@@ -82,7 +82,7 @@ async function createPackagePolicy(
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
-    force: options.force,
+    force: options.force || agentPolicy.supports_agentless === true,
   });
 }
 
@@ -170,6 +170,5 @@ export async function createAgentPolicyWithPackages({
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
-
   return agentPolicy;
 }

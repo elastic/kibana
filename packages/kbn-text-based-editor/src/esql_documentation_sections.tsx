@@ -4458,6 +4458,33 @@ The following boolean operators are supported:
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator',
+        {
+          defaultMessage: 'Cast (::)',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator.markdown',
+            {
+              defaultMessage: `### CAST (\`::\`)
+The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
+
+Example:
+\`\`\`
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator',
         {
           defaultMessage: 'IN',
