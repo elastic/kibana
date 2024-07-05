@@ -105,7 +105,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.text"
-              defaultMessage="The custom template for {templateName} doesn't exist."
+              defaultMessage="The custom template {templateName} doesn't exist."
               values={{
                 templateName: <EuiCode>{decodedComponentTemplateName}</EuiCode>,
               }}
