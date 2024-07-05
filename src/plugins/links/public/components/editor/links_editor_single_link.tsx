@@ -53,8 +53,8 @@ export const LinksEditorSingleLink = ({
         </EuiFlexItem>
 
         <EuiFlexItem
-          className={classNames('linksPanelLinkText', {
-            'linksPanelLinkText--noLabel': !link.label,
+          className={classNames('linksPanelEditorLinkText', {
+            'linksPanelEditorLinkText--noLabel': !link.label,
           })}
         >
           <EuiText size="s" color={'default'} className="eui-textTruncate">
@@ -86,7 +86,7 @@ export const LinksEditorSingleLink = ({
       hasBorder
       hasShadow={false}
       color={link.error ? 'warning' : 'plain'}
-      className={`linksPanelLink ${link.error ? 'linkError' : ''}`}
+      className={`linksPanelEditorLink ${link.error ? 'linkError' : ''}`}
       data-test-subj={`panelEditorLink''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
@@ -101,7 +101,7 @@ export const LinksEditorSingleLink = ({
             <EuiIcon type="grab" />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem className="linksPanelLinkText">
+        <EuiFlexItem className="linksPanelEditorLinkText">
           <LinkLabel />
         </EuiFlexItem>
 
