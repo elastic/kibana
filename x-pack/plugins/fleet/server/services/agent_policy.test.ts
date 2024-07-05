@@ -224,14 +224,45 @@ describe('Agent policy', () => {
       ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet server host'));
     });
 
-    // it('should throw AgentlessAgentCreateError if agentless feature is enabled', async () => {
-    //   jest
-    //     .spyOn(appContextService, 'getExperimentalFeatures')
-    //     .mockReturnValue({ agentless: true } as any);
-    //   await expect(agentPolicyService.createAgentlessAgent('mocked')).rejects.toThrowError(
-    //     'Error creating agentless agent in Fleet'
-    //   );
-    // });
+    it('should throw AgentlessAgentCreateError if enrollment tokens are not found', async () => {
+      const soClient = getAgentPolicyCreateMock();
+      // ignore unrelated unique name constraint
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: {
+          api: {
+            url: 'http://api.agentless.com/api/v1/ess',
+            tls: {
+              certificate: '/path/to/cert',
+              key: '/path/to/key',
+            },
+          },
+        },
+      } as any);
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      mockedListFleetServerHosts.mockResolvedValue({
+        items: [
+          {
+            id: 'mocked',
+            host: 'http://fleetserver:8220',
+            active: true,
+            is_default: true,
+          },
+        ],
+      } as any);
+      mockedListEnrollmentApiKeys.mockResolvedValue({
+        items: [],
+      } as any);
+
+      await expect(
+        agentPolicyService.createAgentlessAgent(esClient, soClient, {
+          id: 'mocked',
+          name: 'agentless agent policy',
+          namespace: 'default',
+          supports_agentless: true,
+        } as AgentPolicy)
+      ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet enrollment token'));
+    });
   });
 
   describe('create', () => {
