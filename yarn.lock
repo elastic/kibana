@@ -10984,10 +10984,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.23":
-  version "4.1.23"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.23.tgz#05a2794927db661f075ab443d5504b679b32f7f7"
-  integrity sha512-PgreEfCfafYLyTwvJTZvOspCq3JABnS51e+NSFFL5yoiMO7h04lWgLfr10NA7nl/yZbz4m76rBfOOdDfleb7pQ==
+"@types/selenium-webdriver@^4.1.24":
+  version "4.1.24"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.24.tgz#f19f4c73fa176ef6076805cf433a0c991bab9cd7"
+  integrity sha512-oR5MVATv+P2dmhceZJPDm99MmOC9yAK8YpIgJbHEFQ/MbSPC1lA6Ohw441WNUcQ6B1fMAOMu0u59fRKKj9AGGg==
   dependencies:
     "@types/node" "*"
     "@types/ws" "*"
@@ -13949,7 +13949,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^126.0.3:
+chromedriver@^126.0.4:
   version "126.0.4"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-126.0.4.tgz#5c5e1f80c4269b55251c563cf47709154090135b"
   integrity sha512-mIdJqdocfN/y9fl5BymIzM9WQLy64x078i5tS1jGFzbFAwXwXrj3zmA86Wf3R/hywPYpWqwXxFGBJHgqZTuGCA==
