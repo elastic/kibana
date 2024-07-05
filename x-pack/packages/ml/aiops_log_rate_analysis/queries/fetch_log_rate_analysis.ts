@@ -200,17 +200,16 @@ export const fetchLogRateAnalysis = async ({
   const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
     if (isKeywordFieldCandidate(payload)) {
       const { keywordFieldCandidate } = payload;
-      let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>> = [];
 
-      pValues = await fetchSignificantTermPValues(
+      const pValues = await fetchSignificantTermPValues({
         esClient,
-        params,
-        [keywordFieldCandidate],
-        undefined,
-        sampleProbability,
-        undefined,
-        abortSignal
-      );
+        abortSignal,
+        arguments: {
+          ...params,
+          fieldNames: [keywordFieldCandidate],
+          sampleProbability,
+        },
+      });
 
       if (pValues.length > 0) {
         pValues.forEach((d) => {
