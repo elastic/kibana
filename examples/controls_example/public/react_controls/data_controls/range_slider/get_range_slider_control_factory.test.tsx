@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, first, of, skip } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
-import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ControlApiRegistration } from '../../types';
-import { RangesliderControlApi, RangesliderControlState } from './types';
+import { TimeRange } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { BehaviorSubject, first, of, skip } from 'rxjs';
+import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
+import { ControlApiRegistration } from '../../types';
+import { getRangesliderControlFactory } from './get_range_slider_control_factory';
+import { RangesliderControlApi, RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -205,6 +205,55 @@ describe('RangesliderControlApi', () => {
         const maxInput = await findByTestId('rangeSlider__upperBoundFieldNumber');
         expect(maxInput).toHaveAttribute('placeholder', String(DEFAULT_MAX));
       });
+    });
+  });
+
+  describe('custom options component', () => {
+    test('defaults to step size of 1', async () => {
+      const CustomSettings = factory.CustomOptionsComponent!;
+      const component = render(
+        <CustomSettings
+          initialState={{}}
+          updateState={jest.fn()}
+          setControlEditorValid={jest.fn()}
+        />
+      );
+      expect(
+        component.getByTestId('rangeSliderControl__stepAdditionalSetting').getAttribute('value')
+      ).toBe(1);
+    });
+
+    test('validates step setting is greater than 0', async () => {
+      const setControlEditorValid = jest.fn();
+      const CustomSettings = factory.CustomOptionsComponent!;
+      const component = render(
+        <CustomSettings
+          initialState={{}}
+          updateState={jest.fn()}
+          setControlEditorValid={setControlEditorValid}
+        />
+      );
+
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: -1 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: undefined },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 0 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 0.5 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(true);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 10 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(true);
     });
   });
 });
