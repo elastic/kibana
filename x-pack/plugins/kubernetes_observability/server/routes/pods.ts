@@ -332,6 +332,7 @@ export async function getPodStatus(client: any, podName: string, period: string,
         }
       }
     }
+    let ref = ctreateLogRef(time, podName) 
     pod = {
       time: time,
       message: message,
@@ -340,6 +341,7 @@ export async function getPodStatus(client: any, podName: string, period: string,
       namespace: podNamespace,
       node: nodeName,
       failingReason: failingReason,
+      logref: ref,
     }
 }
 
@@ -411,4 +413,9 @@ export async function getPodContainersStatus(client: any, podName: string, perio
 }
 
   return [state, containerName, time];
+}
+
+function ctreateLogRef(time: string, podName: string,): string{
+  const url = 'observability-logs-explorer/?pageState=(breakdownField:log.level,columns:!((fallbackFields:!(host.name,service.name),smartField:resource,type:smart-field,width:320),(fallbackFields:!(message),smartField:content,type:smart-field),(field:resource.attributes.k8s.pod.name,type:document-field)),controls:(data_stream.namespace:(mode:include,selection:(selectedOptions:!(),type:options))),dataSourceSelection:(selectionType:all),filters:!((meta:(alias:!n,disabled:!f,field:resource.attributes.k8s.pod.name,index:%27dataset-logs-*-*%27,key:resource.attributes.k8s.pod.name,negate:!f,params:(query:'+podName+'),type:phrase),query:(match_phrase:(resource.attributes.k8s.pod.name:'+podName+')))),query:(language:kuery,query:%27%27),refreshInterval:(pause:!t,value:60000),rowHeight:0,rowsPerPage:100,time:(from:now-15m,to:now),v:2)#/'
+  return url
 }

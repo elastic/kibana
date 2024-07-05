@@ -24,6 +24,7 @@ export type Pod = {
     name: string;
     node: string;
     failingReason: Event;
+    logref: string
 };
 
 export type Deployment = {

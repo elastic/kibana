@@ -26,6 +26,7 @@ import {
   EuiIcon,
   EuiBasicTableColumn,
   EuiInMemoryTable,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -456,8 +457,8 @@ const  KubernetesObservabilityComp = ({
         console.log("AAAAAAAAA DUE TO period change")
         setNodeMemTime(data.time);
         const nodesArray = data.nodes;
-        const keys = ['name', 'memory_utilization', 'message', 'alarm'];
-  
+        const keys = ['name', 'memory_utilization', 'message', 'alarm', 'logs'];
+        
         const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
         setNodesMem(nodes);
         if (nodes.length !== 0) {
@@ -517,7 +518,7 @@ const  KubernetesObservabilityComp = ({
       console.log(data);
       setDeploysStatusTime(data.time);
       const deployArray = data.deployments;
-      const keys = ['name', 'namespace', 'status', 'message', 'reason', 'events'];
+      const keys = ['name', 'namespace', 'status', 'message', 'reason', 'events', 'logs'];
       deployArray.map((deploy: any) => {
         const reason = deploy.reason;
         if (reason === '') {
@@ -917,7 +918,7 @@ const  KubernetesObservabilityComp = ({
         console.log(data);
         setPodsStatusTime(data.time);
         const podsArray = data.pods;
-        const keys = ['name', 'namespace', 'status', 'message', 'node', 'failingReason'];
+        const keys = ['name', 'namespace', 'status', 'message', 'node', 'failingReason', 'logref'];
         podsArray.map((pod: any) => {
           const reason = pod.failingReason;
           if (Object.keys(reason).length === 0) {
@@ -1040,6 +1041,11 @@ const  KubernetesObservabilityComp = ({
         );    
       },
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1124,6 +1130,11 @@ const  KubernetesObservabilityComp = ({
         );    
       },
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1131,17 +1142,17 @@ const  KubernetesObservabilityComp = ({
     {
       field: 'name',
       name: 'Name',
-      width: '80px',
+      width: '10%',
     },
     {
       field: 'namespace',
       name: 'Namespace',
-      width: '80px',
+      width: '10%',
     },
     {
       field: 'status',
       name: 'Notification',
-      width: '80px',
+      width: '10%',
       render: (value: any, item: any) => {
         if (value === 'OK') {
           return (
@@ -1181,17 +1192,22 @@ const  KubernetesObservabilityComp = ({
     {
       field: 'message',
       name: 'Message',
-      width: '80px',
+      width: '25%',
     },
     {
       field: 'reason',
       name: 'Reason',
-      width: '80px',
+      width: '10%',
     },
     {
       field: 'events',
       name: 'Pod Events',
-      width: '80px',
+      width: '10%',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1260,6 +1276,11 @@ const  KubernetesObservabilityComp = ({
       field: 'events',
       name: 'Pod Events',
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1357,6 +1378,11 @@ const  KubernetesObservabilityComp = ({
       field: 'reason',
       name: 'Status Reason',
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1454,6 +1480,11 @@ const  KubernetesObservabilityComp = ({
       field: 'reason',
       name: 'Status Reason',
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1551,6 +1582,11 @@ const  KubernetesObservabilityComp = ({
       field: 'reason',
       name: 'Status Reason',
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1648,6 +1684,11 @@ const  KubernetesObservabilityComp = ({
       field: 'reason',
       name: 'Status Reason',
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1742,6 +1783,11 @@ const  KubernetesObservabilityComp = ({
         );    
       },
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1836,6 +1882,11 @@ const  KubernetesObservabilityComp = ({
         );    
       },
       width: '80px',
+    },
+    {
+      field: 'logs',
+      name: 'Logs',
+      width: '5%',
     }
   ]
 
@@ -1904,6 +1955,18 @@ const  KubernetesObservabilityComp = ({
       field: 'failingReason',
       name: 'Failing Reason',
       width: '80px',
+    },
+    {
+      field: 'logref',
+      name: 'Logs',
+      width: '5%',
+      render: (value: any, item: any) => {
+        return (
+          <EuiLink href={value} target="_blank">
+            Explore Logs
+          </EuiLink>
+        );    
+      },
     }
   ]
 
