@@ -22,7 +22,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const overallHistogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     requestBody,
     logDebugMessage,
     logger,
@@ -43,7 +43,7 @@ export const overallHistogramHandlerFactory =
     try {
       overallTimeSeries = (
         (await fetchHistogramsForFields(
-          client,
+          esClient,
           requestBody.index,
           overallHistogramQuery,
           // fields

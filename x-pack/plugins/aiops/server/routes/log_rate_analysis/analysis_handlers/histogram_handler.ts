@@ -35,7 +35,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const histogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -91,7 +91,7 @@ export const histogramHandlerFactory =
           try {
             cpTimeSeries = (
               (await fetchHistogramsForFields(
-                client,
+                esClient,
                 requestBody.index,
                 histogramQuery,
                 // fields
@@ -184,7 +184,7 @@ export const histogramHandlerFactory =
         try {
           catTimeSeries = (
             (await fetchHistogramsForFields(
-              client,
+              esClient,
               requestBody.index,
               histogramQuery,
               // fields

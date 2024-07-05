@@ -46,7 +46,7 @@ type Candidate = FieldCandidate | TextFieldCandidate;
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -111,7 +111,7 @@ export const significantItemsHandlerFactory =
 
         try {
           pValues = await fetchSignificantTermPValues(
-            client,
+            esClient,
             requestBody,
             [fieldCandidate],
             logger,
@@ -145,7 +145,7 @@ export const significantItemsHandlerFactory =
         const { textFieldCandidate } = payload;
 
         const significantCategoriesForField = await fetchSignificantCategories(
-          client,
+          esClient,
           requestBody,
           [textFieldCandidate],
           logger,

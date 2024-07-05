@@ -40,7 +40,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const groupingHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     requestBody,
     responseStream,
     logDebugMessage,
@@ -82,7 +82,7 @@ export const groupingHandlerFactory =
 
     try {
       const { fields, itemSets } = await fetchFrequentItemSets(
-        client,
+        esClient,
         requestBody.index,
         JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
         significantTerms,
@@ -98,7 +98,7 @@ export const groupingHandlerFactory =
       if (significantCategories.length > 0 && significantTerms.length > 0) {
         const { fields: significantCategoriesFields, itemSets: significantCategoriesItemSets } =
           await fetchTerms2CategoriesCounts(
-            client,
+            esClient,
             requestBody,
             JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
             significantTerms,
@@ -162,7 +162,7 @@ export const groupingHandlerFactory =
             try {
               cpgTimeSeries = (
                 (await fetchHistogramsForFields(
-                  client,
+                  esClient,
                   requestBody.index,
                   histogramQuery,
                   // fields
