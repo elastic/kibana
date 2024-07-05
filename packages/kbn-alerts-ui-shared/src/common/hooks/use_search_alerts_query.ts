@@ -21,10 +21,11 @@ import type {
 } from '@kbn/rule-registry-plugin/common';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
+import type { UseQueryOptions } from '@tanstack/react-query/src/types';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
 import { Alert, EsQuerySnapshot, LegacyField } from '../types';
 
-export interface UseSearchAlertsQueryProps {
+export interface UseSearchAlertsQueryParams {
   // Dependencies
   /**
    * Kibana data plugin, used to perform the query
@@ -42,7 +43,7 @@ export interface UseSearchAlertsQueryProps {
   /**
    * The alert document fields to include in the response
    */
-  fields: QueryDslFieldAndFormat[];
+  fields?: QueryDslFieldAndFormat[];
   /**
    * Sort combinations to apply to the query
    */
@@ -59,10 +60,6 @@ export interface UseSearchAlertsQueryProps {
    * The page size to fetch
    */
   pageSize?: number;
-  /**
-   * Whether the query is enabled
-   */
-  enabled?: boolean;
 }
 
 export interface AlertsQueryData {
@@ -73,11 +70,15 @@ export interface AlertsQueryData {
   querySnapshot?: EsQuerySnapshot;
 }
 
+export const searchAlertsQueryPrefix = ['alerts', 'searchAlerts'] as const;
+
 /**
  * Query alerts
  */
-export const useSearchAlertsQuery = (props: UseSearchAlertsQueryProps) => {
-  const { data, ...params } = props;
+export const useSearchAlertsQuery = (
+  { data, ...params }: UseSearchAlertsQueryParams,
+  options?: UseQueryOptions
+) => {
   const {
     featureIds,
     fields,
@@ -92,10 +93,9 @@ export const useSearchAlertsQuery = (props: UseSearchAlertsQueryProps) => {
     runtimeMappings,
     pageIndex = 0,
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
-    enabled = true,
   } = params;
   return useQuery(
-    ['alertsUIShared', 'searchAlerts', JSON.stringify(params)],
+    [...searchAlertsQueryPrefix, JSON.stringify(params)],
     ({ signal }): Promise<AlertsQueryData> =>
       lastValueFrom(
         data.search
@@ -183,7 +183,8 @@ export const useSearchAlertsQuery = (props: UseSearchAlertsQueryProps) => {
     {
       // To avoid flash of loading state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
       keepPreviousData: true,
-      enabled,
+      refetchOnWindowFocus: false,
+      ...(options as object),
     }
   );
 };
