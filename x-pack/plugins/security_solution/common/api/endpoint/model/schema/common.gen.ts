@@ -144,6 +144,11 @@ export const BaseActionSchema = z.object({
   parameters: Parameters.optional(),
 });
 
+export type NoParametersActionSchema = z.infer<typeof NoParametersActionSchema>;
+export const NoParametersActionSchema = z.object({
+  body: BaseActionSchema,
+});
+
 export type ProcessActionSchemas = z.infer<typeof ProcessActionSchemas>;
 export const ProcessActionSchemas = BaseActionSchema.merge(
   z.object({
