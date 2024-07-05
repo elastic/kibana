@@ -220,7 +220,7 @@ describe('RangesliderControlApi', () => {
       );
       expect(
         component.getByTestId('rangeSliderControl__stepAdditionalSetting').getAttribute('value')
-      ).toBe(1);
+      ).toBe('1');
     });
 
     test('validates step setting is greater than 0', async () => {
@@ -239,7 +239,7 @@ describe('RangesliderControlApi', () => {
       });
       expect(setControlEditorValid).toBeCalledWith(false);
       fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
-        target: { valueAsNumber: undefined },
+        target: { value: '' },
       });
       expect(setControlEditorValid).toBeCalledWith(false);
       fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {

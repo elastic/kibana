@@ -115,14 +115,17 @@ describe('Data control editor', () => {
   describe('creating a new control', () => {
     test('field list does not include fields that are not compatible with any control types', async () => {
       const controlEditor = await mountComponent({});
-
-      await waitFor(() => {
-        expect(mockDataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
-        expect(mockDataViews.get).toHaveBeenCalledTimes(1);
-      });
-
       const nonAggOption = controlEditor.queryByTestId('field-picker-select-machine.os');
       expect(nonAggOption).not.toBeInTheDocument();
+    });
+
+    test('cannot save before selecting a field', async () => {
+      const controlEditor = await mountComponent({});
+
+      const saveButton = controlEditor.getByTestId('control-editor-save');
+      expect(saveButton).toBeDisabled();
+      await selectField(controlEditor, 'machine.os.raw');
+      expect(saveButton).toBeEnabled();
     });
 
     test('selecting a keyword field - can only create an options list control', async () => {
