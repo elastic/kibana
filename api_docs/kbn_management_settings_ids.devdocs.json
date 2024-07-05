@@ -1404,6 +1404,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
+        "description": [],
+        "signature": [
+          "\"observability:logSources\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
         "type": "string",
         "tags": [],
