@@ -390,11 +390,6 @@ data:
         insecure_skip_verify: true
         k8s_api_config:
           auth_type: serviceAccount
-        metric_groups:
-          - node
-          - pod
-          - node
-          - volume
         metrics:
           k8s.pod.cpu.node.utilization:
             enabled: true
