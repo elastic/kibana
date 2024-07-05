@@ -58,7 +58,7 @@ if (ctx.entity?.metadata?.host?.os?.name.data != null) {
   Object {
     "set": Object {
       "field": "_index",
-      "value": ".entities-observability.latest-v1.admin-console-services",
+      "value": ".entities.v1.latest.admin-console-services",
     },
   },
 ]

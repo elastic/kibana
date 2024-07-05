@@ -6,7 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateLatestIndexName } from '../helpers/generate_index_name';
+import { generateLatestIndexName } from '../helpers/generate_component_id';
 
 function mapDestinationToPainless(destination: string, source: string) {
   const fieldParts = destination.split('.');

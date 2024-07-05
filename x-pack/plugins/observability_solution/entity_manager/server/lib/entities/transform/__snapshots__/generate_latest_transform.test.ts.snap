@@ -7,8 +7,8 @@ Object {
   },
   "defer_validation": true,
   "dest": Object {
-    "index": ".entities-observability.latest-v1.admin-console-services",
-    "pipeline": ".entities-observability.latest-v1.admin-console-services",
+    "index": ".entities.v1.latest.noop",
+    "pipeline": "entities-v1-latest-admin-console-services",
   },
   "frequency": "30s",
   "pivot": Object {
@@ -149,7 +149,7 @@ Object {
     "unattended": true,
   },
   "source": Object {
-    "index": ".entities-observability.history-v1.admin-console-services.*",
+    "index": ".entities.v1.history.admin-console-services.*",
   },
   "sync": Object {
     "time": Object {
@@ -157,6 +157,6 @@ Object {
       "field": "event.ingested",
     },
   },
-  "transform_id": "entity-latest-v1-admin-console-services",
+  "transform_id": "entities-v1-latest-admin-console-services",
 }
 `;

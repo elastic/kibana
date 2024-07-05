@@ -7,8 +7,8 @@ Object {
   },
   "defer_validation": true,
   "dest": Object {
-    "index": ".entities-observability.history-v1.noop",
-    "pipeline": ".entities-observability.history-v1.admin-console-services",
+    "index": ".entities.v1.history.noop",
+    "pipeline": "entities-v1-history-admin-console-services",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -123,6 +123,6 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": "entity-history-v1-admin-console-services",
+  "transform_id": "entities-v1-history-admin-console-services",
 }
 `;
