@@ -24,7 +24,7 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -333,6 +333,74 @@ describe('CreateCaseForm', () => {
       expect(screen.queryByTestId('connector-fields-jira')).not.toBeInTheDocument();
 
       expect(await screen.findByText('No connector selected')).toBeInTheDocument();
+    });
+
+    it('selects the placeholder empty template correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockReturnValue({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            customFields: [
+              {
+                key: 'first_custom_field_key',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+                label: 'My test label 1',
+                defaultValue: 'custom field default value',
+              },
+            ],
+            templates: templatesConfigurationMock,
+            connector: {
+              id: 'servicenow-1',
+              name: 'My SN connector',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          },
+        ],
+      });
+
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+      const firstTemplate = templatesConfigurationMock[4];
+
+      appMockRenderer = createAppMockRenderer({ license });
+      appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+
+      userEvent.selectOptions(
+        await screen.findByTestId('create-case-template-select'),
+        firstTemplate.name
+      );
+
+      const title = within(await screen.findByTestId('caseTitle')).getByTestId('input');
+      const description = within(await screen.findByTestId('caseDescription')).getByRole('textbox');
+      const tags = within(await screen.findByTestId('caseTags')).getByTestId('comboBoxInput');
+      const category = within(await screen.findByTestId('caseCategory')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      const assignees = within(await screen.findByTestId('caseAssignees')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      const severity = await screen.findByTestId('case-severity-selection');
+      const customField = await screen.findByTestId(
+        'first_custom_field_key-text-create-custom-field'
+      );
+
+      userEvent.selectOptions(
+        await screen.findByTestId('create-case-template-select'),
+        'No template selected'
+      );
+
+      expect(title).not.toHaveValue();
+      expect(description).not.toHaveValue();
+      expect(tags).not.toHaveValue();
+      expect(category).not.toHaveValue();
+      expect(severity).toHaveTextContent('Low');
+      expect(assignees).not.toHaveValue();
+      expect(customField).toHaveValue('custom field default value');
+      expect(await screen.findByText('My SN connector')).toBeInTheDocument();
     });
   });
 });
