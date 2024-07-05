@@ -220,15 +220,15 @@ export const fetchLogRateAnalysis = async ({
     } else if (isTextFieldCandidate(payload)) {
       const { textFieldCandidate } = payload;
 
-      const significantCategoriesForField = await fetchSignificantCategories(
+      const significantCategoriesForField = await fetchSignificantCategories({
         esClient,
-        params,
-        [textFieldCandidate],
-        undefined,
-        sampleProbability,
-        undefined,
-        abortSignal
-      );
+        abortSignal,
+        arguments: {
+          ...params,
+          fieldNames: [textFieldCandidate],
+          sampleProbability,
+        },
+      });
 
       if (significantCategoriesForField.length > 0) {
         significantCategories.push(...significantCategoriesForField);
