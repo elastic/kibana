@@ -72,7 +72,6 @@ export const NoteManagementPage = () => {
   const notes = useSelector(selectAllNotes);
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
-  const totalItems = pagination.total ?? 0;
   const notesSearch = useSelector(selectNotesTableSearch);
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
   const isDeleteModalVisible = pendingDeleteIds.length > 0;
@@ -160,10 +159,10 @@ export const NoteManagementPage = () => {
     return {
       pageIndex: pagination.page - 1,
       pageSize: pagination.perPage,
-      totalItemCount: totalItems,
+      totalItemCount: pagination.total,
       pageSizeOptions,
     };
-  }, [pagination, totalItems]);
+  }, [pagination]);
 
   const selection = useMemo(() => {
     return {

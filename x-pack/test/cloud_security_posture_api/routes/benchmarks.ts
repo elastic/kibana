@@ -31,15 +31,20 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
-    const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
-      type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-    });
-    const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
-      (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
-    );
-    expect(requestedBenchmarkRules.length).greaterThan(0);
+    let cspBenchmarkRules: CspBenchmarkRule[] = [];
+    await retry.try(async () => {
+      const cspBenchmarkRulesSavedObjects = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+        type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+      });
 
-    return requestedBenchmarkRules.map((item) => item.attributes);
+      const requestedBenchmarkRules = cspBenchmarkRulesSavedObjects.saved_objects.filter(
+        (cspBenchmarkRule: any) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+      );
+
+      expect(requestedBenchmarkRules.length).greaterThan(0);
+      cspBenchmarkRules = requestedBenchmarkRules.map((item) => item.attributes);
+    });
+    return cspBenchmarkRules;
   };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
@@ -143,8 +148,7 @@ export default function (providerContext: FtrProviderContext) {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179815
-  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {
+  describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
         await index.removeFindings();
@@ -158,10 +162,9 @@ export default function (providerContext: FtrProviderContext) {
         const benchmark = 'cis_aws';
         const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
-        const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
-        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
+        const cspmFinding = getMockFinding(benchmarkRules[0], 'passed');
 
-        await index.addFindings([cspmFinding1, cspmFinding2]);
+        await index.addFindings([cspmFinding]);
 
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
@@ -174,7 +177,7 @@ export default function (providerContext: FtrProviderContext) {
           (item: { id: string }) => item.id === benchmark
         );
 
-        expect(scoreBeforeMute.score.postureScore).to.equal(50);
+        expect(scoreBeforeMute.score.postureScore).to.equal(100);
 
         await supertest
           .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -185,10 +188,10 @@ export default function (providerContext: FtrProviderContext) {
             action: 'mute',
             rules: [
               {
-                benchmark_id: cspmFinding2.rule.benchmark.id,
-                benchmark_version: cspmFinding2.rule.benchmark.version,
-                rule_number: cspmFinding2.rule.benchmark.rule_number || '',
-                rule_id: cspmFinding2.rule.id,
+                benchmark_id: cspmFinding.rule.benchmark.id,
+                benchmark_version: cspmFinding.rule.benchmark.version,
+                rule_number: cspmFinding.rule.benchmark.rule_number || '',
+                rule_id: cspmFinding.rule.id,
               },
             ],
           })
@@ -205,17 +208,16 @@ export default function (providerContext: FtrProviderContext) {
           (item: { id: string }) => item.id === benchmark
         );
 
-        expect(scoreAfterMute.score.postureScore).to.equal(100);
+        expect(scoreAfterMute.score.postureScore).to.equal(0);
       });
 
       it('Verify kspm benchmark score is updated when muting rules', async () => {
         const benchmark = 'cis_k8s';
         const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
-        const kspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
-        const kspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
+        const kspmFinding = getMockFinding(benchmarkRules[0], 'passed');
 
-        await index.addFindings([kspmFinding1, kspmFinding2]);
+        await index.addFindings([kspmFinding]);
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
           .set(ELASTIC_HTTP_VERSION_HEADER, '2')
@@ -227,7 +229,7 @@ export default function (providerContext: FtrProviderContext) {
           (item: { id: string }) => item.id === benchmark
         );
 
-        expect(scoreBeforeMute.score.postureScore).to.equal(50);
+        expect(scoreBeforeMute.score.postureScore).to.equal(100);
 
         await supertest
           .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -238,10 +240,10 @@ export default function (providerContext: FtrProviderContext) {
             action: 'mute',
             rules: [
               {
-                benchmark_id: kspmFinding2.rule.benchmark.id,
-                benchmark_version: kspmFinding2.rule.benchmark.version,
-                rule_number: kspmFinding2.rule.benchmark.rule_number || '',
-                rule_id: kspmFinding2.rule.id,
+                benchmark_id: kspmFinding.rule.benchmark.id,
+                benchmark_version: kspmFinding.rule.benchmark.version,
+                rule_number: kspmFinding.rule.benchmark.rule_number || '',
+                rule_id: kspmFinding.rule.id,
               },
             ],
           })
@@ -258,7 +260,7 @@ export default function (providerContext: FtrProviderContext) {
           (item: { id: string }) => item.id === benchmark
         );
 
-        expect(scoreAfterMute.score.postureScore).to.equal(100);
+        expect(scoreAfterMute.score.postureScore).to.equal(0);
       });
     });
   });
