@@ -8,10 +8,7 @@
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
-import {
-  getRegistryUrlAsArray,
-  createEndpointDockerConfig,
-} from '../../security_solution_endpoint_api_int/registry';
+import { getRegistryUrlAsArray, createEndpointDockerConfig } from '../../defend_workflows/registry';
 import type { TargetTags } from '../target_tags';
 
 export const SUITE_TAGS: Record<

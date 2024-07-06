@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+} from '../../../defend_workflows/apis/data_stream_helper';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { fleetIntegrations, trustedApps } = getPageObjects(['trustedApps', 'fleetIntegrations']);

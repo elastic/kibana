@@ -13,7 +13,7 @@ import {
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+} from '../../../defend_workflows/apis/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
