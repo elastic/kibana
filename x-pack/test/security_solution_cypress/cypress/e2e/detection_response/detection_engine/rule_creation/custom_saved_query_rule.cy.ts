@@ -135,7 +135,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
         // https://github.com/elastic/kibana/issues/187623
         it(
           'Allows to update saved_query rule with non-existent query',
-          [{ tags: '@skipInServerlessMKI' }],
+          { tags: ['@skipInServerlessMKI'] },
           () => {
             cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('exist');
 
