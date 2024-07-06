@@ -82,7 +82,7 @@ export async function deleteLLMProxyConnector({
   proxy.close();
 }
 
-export function invokeChatCompleteWithFunctionRequest({
+export async function invokeChatCompleteWithFunctionRequest({
   connectorId,
   observabilityAIAssistantAPIClient,
   functionCall,
@@ -93,7 +93,7 @@ export function invokeChatCompleteWithFunctionRequest({
   >;
   functionCall: Message['message']['function_call'];
 }) {
-  return observabilityAIAssistantAPIClient
+  const { body } = await observabilityAIAssistantAPIClient
     .editorUser({
       endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
       params: {
@@ -115,4 +115,6 @@ export function invokeChatCompleteWithFunctionRequest({
       },
     })
     .expect(200);
+
+  return body;
 }

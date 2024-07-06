@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
       await generateApmData(apmSynthtraceEsClient);
 
-      const res = await invokeChatCompleteWithFunctionRequest({
+      const responseBody = await invokeChatCompleteWithFunctionRequest({
         connectorId,
         observabilityAIAssistantAPIClient,
         functionCall: {
@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await proxy.waitForAllInterceptorsSettled();
 
-      events = getMessageAddedEvents(res.body);
+      events = getMessageAddedEvents(responseBody);
     });
 
     after(async () => {
