@@ -275,19 +275,18 @@ function safeBackticksRemoval(text: string | undefined) {
   return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
-function safeSingleQuoteRemoval(text: string | undefined) {
-  return text?.replace(/"/g, '') || '';
-}
-
-function safeTripleQuoteRemoval(text: string | undefined) {
-  return text?.replace(/"""/g, '') || '';
-}
-
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
+  const contextText = ctx.getText();
+  // If wrapped by triple quote, remove
+  if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
+    return contextText.replace(/\"\"\"/g, '');
+  }
+  // If wrapped by single quote, remove
+  if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
+    return contextText.slice(1, -1);
+  }
   const result =
     getUnquotedText(ctx)?.getText() ||
-    safeSingleQuoteRemoval(ctx.getText()) ||
-    safeTripleQuoteRemoval(ctx.getText()) ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
     safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
   // TODO - understand why <missing null> is now returned as the match text for the FROM command

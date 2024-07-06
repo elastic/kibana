@@ -20,7 +20,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
           ]);
           await expectErrors('from ', [
-            "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+            "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
           ]);
         });
 
@@ -30,6 +30,8 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
 
             await expectErrors('from index', []);
             await expectErrors('FROM index', []);
+            await expectErrors('FROM "index"', []);
+            await expectErrors('FROM """index"""', []);
             await expectErrors('FrOm index', []);
             await expectErrors('from index, other_index', []);
             await expectErrors('from index, other_index,.secret_index', []);
@@ -65,10 +67,10 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('from index,', [
-              "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
             ]);
             await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-              "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
             ]);
 
             await expectErrors(`from assignment = 1`, [
