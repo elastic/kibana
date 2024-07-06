@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
+// import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -37,6 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
   const dataViews = getService('dataViews');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -46,6 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let sourceDataViewId: string;
   let outputDataViewId: string;
   let connectorId: string;
+
+  let internalReqHeader: InternalRequestHeader;
+  let roleAuthc: RoleCredentials;
 
   const createSourceIndex = () =>
     es.index({
@@ -100,12 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     asyncForEach(alertIds, async (alertId: string) => {
       await supertest
         .delete(`/api/alerting/rule/${alertId}`)
-        // TODO: API requests in Serverless require internal request headers
-        .set({
-          'kbn-xsrf': 'some-xsrf-token',
-          'x-elastic-internal-origin': 'kibana',
-        })
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .expect(204, '');
     });
 
@@ -114,25 +116,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       body: { data: alerts },
     } = await supertest
       .get(`/api/alerting/rules/_find?search=${name}&search_fields=name`)
-      // TODO: API requests in Serverless require internal request headers
-      .set({
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-      })
+      .set(internalReqHeader)
+      .set(roleAuthc.apiKeyHeader)
       .expect(200);
 
     return alerts;
   };
 
   const createDataView = async (dataView: string) => {
-    log.debug(`create data view ${dataView}`);
     return await supertest
       .post(`/api/data_views/data_view`)
-      // TODO: API requests in Serverless require internal request headers
-      .set({
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-      })
+      .set(internalReqHeader)
+      .set(roleAuthc.apiKeyHeader)
       .send({ data_view: { title: dataView, timeFieldName: '@timestamp' } })
       .expect(200);
   };
@@ -140,11 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deleteDataView = async (dataViewId: string) => {
     return await supertest
       .delete(`/api/data_views/data_view/${dataViewId}`)
-      // TODO: API requests in Serverless require internal request headers
-      .set({
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-      })
+      .set(internalReqHeader)
+      .set(roleAuthc.apiKeyHeader)
       .expect(200);
   };
 
@@ -160,11 +152,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createConnector = async (): Promise<string> => {
     const { body: createdAction } = await supertest
       .post(`/api/actions/connector`)
-      // TODO: API requests in Serverless require internal request headers
-      .set({
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-      })
+      .set(internalReqHeader)
+      .set(roleAuthc.apiKeyHeader)
       .send({
         name: 'search-source-alert-test-connector',
         connector_type_id: ACTION_TYPE_ID,
@@ -179,11 +168,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deleteConnector = (id: string) =>
     supertest
       .delete(`/api/actions/connector/${id}`)
-      // TODO: API requests in Serverless require internal request headers
-      .set({
-        'kbn-xsrf': 'some-xsrf-token',
-        'x-elastic-internal-origin': 'kibana',
-      })
+      .set(internalReqHeader)
+      .set(roleAuthc.apiKeyHeader)
       .expect(204, '');
 
   const defineSearchSourceAlert = async (alertName: string) => {
@@ -356,11 +342,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search source Alert', function () {
     // fails on MKI, see https://github.com/elastic/kibana/issues/187069
-    this.tags(['failsOnMKI']);
 
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
+
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
 
       log.debug('create source indices');
       await createSourceIndex();
@@ -376,9 +364,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // TODO: fetching connectors fails server side in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]"
+      /*
+      I'm not sure why this is here
       if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
         await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
       }
+      */
     });
 
     after(async () => {
@@ -405,7 +396,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
       }
 
-      log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
       const outputDataViewResponse = await createDataView(OUTPUT_DATA_VIEW);
 
