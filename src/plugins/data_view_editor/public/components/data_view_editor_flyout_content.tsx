@@ -45,7 +45,7 @@ import {
   SubmittingType,
   AdvancedParamsContent,
   PreviewPanel,
-  RollupBetaWarning,
+  RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 import { DataViewEditorService } from '../data_view_editor_service';
@@ -84,7 +84,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   dataViewEditorService,
 }: Props) => {
   const {
-    services: { application, dataViews, uiSettings, overlays },
+    services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
@@ -219,7 +219,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       {type === INDEX_PATTERN_TYPE.ROLLUP ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <RollupBetaWarning />
+            <RollupDeprecatedWarning docLinksService={docLinks} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (

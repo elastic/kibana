@@ -80,9 +80,15 @@ export const Template: FunctionComponent<Props> = ({
             {logo}
             <div
               className="kbnWelcomeText"
-              data-error-message={i18n('core.ui.welcomeErrorMessage', {
+              data-error-message-title={i18n('core.ui.welcomeErrorMessageTitle', {
+                defaultMessage: 'Elastic did not load properly',
+              })}
+              data-error-message-text={i18n('core.ui.welcomeErrorMessageText', {
                 defaultMessage:
-                  'Elastic did not load properly. Check the server output for more information.',
+                  'Please reload this page. If the issue persists, check the browser console and server logs.',
+              })}
+              data-error-message-reload={i18n('core.ui.welcomeErrorReloadButton', {
+                defaultMessage: 'Reload',
               })}
             >
               {i18n('core.ui.welcomeMessage', {

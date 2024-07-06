@@ -29,6 +29,7 @@ import type {
 import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
+import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -76,7 +77,13 @@ export class HttpService
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
-    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
+      configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
+    ]).pipe(
+      map(
+        ([http, csp, externalUrl, permissionsPolicy]) =>
+          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
+      )
+    );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
     this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);

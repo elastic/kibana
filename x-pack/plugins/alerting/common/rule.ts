@@ -52,6 +52,7 @@ export {
   RuleLastRunOutcomeValues,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
+  HealthStatus,
 } from '@kbn/alerting-types';
 
 export type RuleTypeState = Record<string, unknown>;

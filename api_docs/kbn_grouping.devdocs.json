@@ -244,7 +244,7 @@
         "signature": [
           "{ isLoading: boolean; data?: ",
           "ParsedGroupingAggregation",
-          "<T> | undefined; activePage: number; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; itemsPerPage: number; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
+          "<T> | undefined; activePage: number; selectedGroup: string; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; itemsPerPage: number; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -252,7 +252,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onGroupClose: () => void; selectedGroup: string; takeActionItems: (groupFilters: ",
+          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onGroupClose: () => void; takeActionItems: (groupFilters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
