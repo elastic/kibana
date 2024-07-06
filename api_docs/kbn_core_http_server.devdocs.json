@@ -4200,6 +4200,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
               },
               {
@@ -4729,6 +4733,18 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/ping.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/check.ts"
               },
               {
                 "plugin": "profiling",
@@ -6470,6 +6486,10 @@
               },
               {
                 "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/routes/get_alerts_group_aggregations.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/update_alert_by_id.ts"
               },
               {
@@ -6787,6 +6807,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -7211,6 +7235,14 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/create.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/reset.ts"
               },
               {
                 "plugin": "profiling",
@@ -8711,6 +8743,10 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9629,6 +9665,14 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/delete.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",
@@ -14768,6 +14812,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/security_integrations/cribl/routes/index.ts"
               },
               {
@@ -14785,6 +14833,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/list.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14973,6 +15025,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "canvas",
@@ -15316,6 +15372,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "canvas",
@@ -15878,15 +15938,19 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/prompts/bulk_actions_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/anonymization_fields/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/chat/chat_complete_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16202,7 +16266,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/calculation.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/entity_calculation.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16381,6 +16445,10 @@
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
               {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.test.ts"
               },
@@ -16526,6 +16594,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
               }
             ],
             "returnComment": [],
@@ -16789,6 +16861,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "canvas",

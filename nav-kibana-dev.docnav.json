@@ -136,6 +136,9 @@
           "label": "Versioning interfaces"
         },
         {
+          "id": "kibDevTutorialGeneratingOASForHTTPAPIs"
+        },
+        {
           "id": "kibDevTutorialSubmitPullRequest"
         },
         {

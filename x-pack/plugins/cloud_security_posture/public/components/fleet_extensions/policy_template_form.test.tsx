@@ -16,7 +16,6 @@ import {
 } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
-  getMockAgentlessAgentPolicy,
   getMockPackageInfo,
   getMockPackageInfoCspmAWS,
   getMockPackageInfoCspmAzure,
@@ -30,12 +29,7 @@ import {
   getMockPolicyVulnMgmtAWS,
   getPackageInfoMock,
 } from './mocks';
-import type {
-  AgentPolicy,
-  NewPackagePolicy,
-  PackageInfo,
-  PackagePolicy,
-} from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { getPosturePolicy } from './utils';
 import {
   CLOUDBEAT_AWS,
@@ -122,16 +116,14 @@ describe('<CspPolicyTemplateForm />', () => {
   const WrappedComponent = ({
     newPolicy,
     edit = false,
-    agentPolicy,
     packageInfo = {} as PackageInfo,
-    agentlessPolicy,
+    isAgentlessEnabled,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
-    agentPolicy?: AgentPolicy;
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
-    agentlessPolicy?: AgentPolicy;
+    isAgentlessEnabled?: boolean;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -144,8 +136,7 @@ describe('<CspPolicyTemplateForm />', () => {
               onChange={onChange}
               packageInfo={packageInfo}
               isEditPage={true}
-              agentPolicy={agentPolicy}
-              agentlessPolicy={agentlessPolicy}
+              isAgentlessEnabled={isAgentlessEnabled}
             />
           )}
           {!edit && (
@@ -154,8 +145,7 @@ describe('<CspPolicyTemplateForm />', () => {
               onChange={onChange}
               packageInfo={packageInfo}
               isEditPage={false}
-              agentPolicy={agentPolicy}
-              agentlessPolicy={agentlessPolicy}
+              isAgentlessEnabled={isAgentlessEnabled}
             />
           )}
         </TestProvider>
@@ -1466,12 +1456,23 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Agentless', () => {
+    it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      const { queryByTestId } = render(
+        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={false} />
+      );
+
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      // default state
+      expect(setupTechnologySelector).not.toBeInTheDocument();
+    });
+
     it('should render setup technology selector for AWS and allow to select agent-based', async () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyAWS();
 
       const { getByTestId, getByRole } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
+        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
       const setupTechnologySelectorAccordion = getByTestId(
@@ -1507,14 +1508,13 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should render setup technology selector for GCP for organisation account type', async () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyGCP();
 
       const { getByTestId, queryByTestId, getByRole } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
-          agentlessPolicy={agentlessPolicy}
-          packageInfo={getPackageInfoMock() as PackageInfo}
+          isAgentlessEnabled={true}
+          packageInfo={{ version: '1.6.0' } as PackageInfo}
         />
       );
       // navigate to GCP
@@ -1558,7 +1558,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should render setup technology selector for GCP for single-account', async () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
       });
@@ -1566,8 +1565,8 @@ describe('<CspPolicyTemplateForm />', () => {
       const { getByTestId, queryByTestId } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
-          agentlessPolicy={agentlessPolicy}
-          packageInfo={getPackageInfoMock() as PackageInfo}
+          isAgentlessEnabled={true}
+          packageInfo={{ version: '1.6.0' } as PackageInfo}
         />
       );
 
@@ -1603,13 +1602,12 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it.skip('should render setup technology selector for Azure for Organisation type', async () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyAzure();
 
       const { getByTestId, queryByTestId, getByRole } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
-          agentlessPolicy={agentlessPolicy}
+          isAgentlessEnabled={true}
           packageInfo={getPackageInfoMock() as PackageInfo}
         />
       );
@@ -1650,7 +1648,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it.skip('should render setup technology selector for Azure for Single Subscription type', async () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyAzure({
         'azure.account_type': { value: 'single-account', type: 'text' },
       });
@@ -1658,7 +1655,7 @@ describe('<CspPolicyTemplateForm />', () => {
       const { getByTestId, queryByTestId } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
-          agentlessPolicy={agentlessPolicy}
+          isAgentlessEnabled={true}
           packageInfo={getPackageInfoMock() as PackageInfo}
         />
       );
@@ -1689,11 +1686,10 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should not render setup technology selector for KSPM', () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyEKS();
 
       const { queryByTestId } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
+        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
       const setupTechnologySelectorAccordion = queryByTestId(
@@ -1704,11 +1700,10 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should not render setup technology selector for CNVM', () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyVulnMgmtAWS();
 
       const { queryByTestId } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
+        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
       const setupTechnologySelectorAccordion = queryByTestId(

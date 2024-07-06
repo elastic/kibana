@@ -51,6 +51,10 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            events: [],
+            pinnedEventIds: {},
+            eventIdToNoteIds: {},
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -70,6 +74,10 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            events: [],
+            pinnedEventIds: {},
+            eventIdToNoteIds: {},
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -90,6 +98,10 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            events: [],
+            pinnedEventIds: {},
+            eventIdToNoteIds: {},
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,

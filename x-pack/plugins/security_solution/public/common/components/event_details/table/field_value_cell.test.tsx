@@ -20,12 +20,8 @@ const eventId = 'TUWyf3wBFCFU0qRJTauW';
 const hostIpData: EventFieldsData = {
   aggregatable: true,
   ariaRowindex: 35,
-  description: 'Host ip addresses.',
-  example: '127.0.0.1',
   field: 'host.ip',
-  fields: {},
   format: '',
-  indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
   isObjectArray: false,
   name: 'host.ip',
   originalValue: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
@@ -88,13 +84,8 @@ describe('FieldValueCell', () => {
     const messageData: EventFieldsData = {
       aggregatable: false,
       ariaRowindex: 50,
-      description:
-        'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
-      example: 'Hello World',
       field: 'message',
-      fields: {},
       format: '',
-      indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       isObjectArray: false,
       name: 'message',
       originalValue: ['Endpoint network event'],
@@ -107,12 +98,7 @@ describe('FieldValueCell', () => {
 
     const messageFieldFromBrowserField: BrowserField = {
       aggregatable: false,
-      description:
-        'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
-      example: 'Hello World',
-      fields: {},
       format: '',
-      indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'message',
       readFromDocValues: false,
       searchable: true,
@@ -147,11 +133,7 @@ describe('FieldValueCell', () => {
   describe('when `BrowserField` metadata IS available', () => {
     const hostIpFieldFromBrowserField: BrowserField = {
       aggregatable: true,
-      description: 'Host ip addresses.',
-      example: '127.0.0.1',
-      fields: {},
       format: '',
-      indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'host.ip',
       readFromDocValues: false,
       searchable: true,
