@@ -39,6 +39,7 @@ const defaultProps: Props = {
   selectedPromptContexts: {},
   setIsSettingsModalVisible: jest.fn(),
   setSelectedPromptContexts: jest.fn(),
+  allSystemPrompts: [],
 };
 
 describe('PromptEditorComponent', () => {

@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../..';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';
@@ -30,6 +31,7 @@ export interface Props {
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
+  allSystemPrompts: PromptResponse[];
 }
 
 const PreviewText = styled(EuiText)`
@@ -47,12 +49,14 @@ const PromptEditorComponent: React.FC<Props> = ({
   selectedPromptContexts,
   setIsSettingsModalVisible,
   setSelectedPromptContexts,
+  allSystemPrompts,
 }) => {
   const commentBody = useMemo(
     () => (
       <>
         {isNewConversation && (
           <SystemPrompt
+            allSystemPrompts={allSystemPrompts}
             conversation={conversation}
             editingSystemPromptId={editingSystemPromptId}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
@@ -74,16 +78,17 @@ const PromptEditorComponent: React.FC<Props> = ({
       </>
     ),
     [
+      isNewConversation,
+      allSystemPrompts,
       conversation,
       editingSystemPromptId,
-      isNewConversation,
-      isSettingsModalVisible,
       onSystemPromptSelectionChange,
-      promptContexts,
-      promptTextPreview,
-      selectedPromptContexts,
+      isSettingsModalVisible,
       setIsSettingsModalVisible,
+      promptContexts,
+      selectedPromptContexts,
       setSelectedPromptContexts,
+      promptTextPreview,
     ]
   );
 

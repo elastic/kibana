@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-
-import { useAssistantContext } from '../../../assistant_context';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../..';
 import { SelectSystemPrompt } from './select_system_prompt';
 
@@ -17,6 +16,7 @@ interface Props {
   isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  allSystemPrompts: PromptResponse[];
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
@@ -25,17 +25,13 @@ const SystemPromptComponent: React.FC<Props> = ({
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
+  allSystemPrompts,
 }) => {
-  const { allSystemPrompts } = useAssistantContext();
-
   const selectedPrompt = useMemo(() => {
     if (editingSystemPromptId !== undefined) {
-      return (
-        allSystemPrompts?.find((p) => p.id === editingSystemPromptId) ??
-        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId)
-      );
+      return allSystemPrompts.find((p) => p.id === editingSystemPromptId);
     } else {
-      return undefined;
+      return allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId);
     }
   }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
 
@@ -47,10 +43,11 @@ const SystemPromptComponent: React.FC<Props> = ({
 
   return (
     <SelectSystemPrompt
-      allSystemPrompts={allSystemPrompts}
+      allPrompts={allSystemPrompts}
       clearSelectedSystemPrompt={handleClearSystemPrompt}
       conversation={conversation}
       data-test-subj="systemPrompt"
+      isClearable={true}
       isSettingsModalVisible={isSettingsModalVisible}
       onSystemPromptSelectionChange={onSystemPromptSelectionChange}
       selectedPrompt={selectedPrompt}

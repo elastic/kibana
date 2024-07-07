@@ -13,11 +13,11 @@ import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
 import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
-import { Prompt } from '../../types';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
 import { useAssistantContext } from '../../../assistant_context';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
@@ -32,7 +32,7 @@ const mockConversations = {
   [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
 };
 
-const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
+const mockSystemPrompts: PromptResponse[] = [mockSystemPrompt];
 
 const mockUseAssistantContext = {
   conversations: mockConversations,
@@ -90,6 +90,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          allSystemPrompts={mockSystemPrompts}
         />
       );
     });
@@ -107,6 +108,37 @@ describe('SystemPrompt', () => {
     });
   });
 
+  describe('when conversation is NOT null', () => {
+    beforeEach(() => {
+      render(
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={mockSystemPrompt.id}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+          allSystemPrompts={mockSystemPrompts}
+        />
+      );
+    });
+
+    it('does NOT render the system prompt select', () => {
+      expect(screen.queryByTestId('selectSystemPrompt')).not.toBeInTheDocument();
+    });
+
+    it('renders the system prompt text', () => {
+      expect(screen.getByTestId('systemPromptText')).toHaveTextContent(mockSystemPrompt.content);
+    });
+
+    it('renders the edit button', () => {
+      expect(screen.getByTestId('edit')).toBeInTheDocument();
+    });
+
+    it('renders the clear button', () => {
+      expect(screen.getByTestId('clear')).toBeInTheDocument();
+    });
+  });
+
   // TODO: To be implemented as part of the global settings tests instead of within the SystemPrompt component
   describe.skip('when a new prompt is saved', () => {
     it('should save new prompt correctly', async () => {
@@ -120,6 +152,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -166,6 +199,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -226,6 +260,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -293,6 +328,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -375,6 +411,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            allSystemPrompts={mockSystemPrompts}
           />
         </TestProviders>
       );
@@ -435,15 +472,35 @@ describe('SystemPrompt', () => {
     });
   });
 
+  it('shows the system prompt select when the edit button is clicked', () => {
+    render(
+      <TestProviders>
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={mockSystemPrompt.id}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+          allSystemPrompts={mockSystemPrompts}
+        />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('edit'));
+
+    expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
+  });
+
   it('shows the system prompt select when system prompt text is clicked', () => {
     render(
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          allSystemPrompts={mockSystemPrompts}
         />
       </TestProviders>
     );

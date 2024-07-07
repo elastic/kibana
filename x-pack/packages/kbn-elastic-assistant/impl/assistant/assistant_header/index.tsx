@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -30,6 +32,7 @@ import { AIConnector } from '../../connectorland/connector_selector';
 interface OwnProps {
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
+  docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
   onToggleShowAnonymizedValues: () => void;
@@ -45,6 +48,9 @@ interface OwnProps {
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 type Props = OwnProps;
@@ -56,6 +62,7 @@ type Props = OwnProps;
 export const AssistantHeader: React.FC<Props> = ({
   selectedConversation,
   defaultConnector,
+  docLinks,
   isDisabled,
   isSettingsModalVisible,
   onToggleShowAnonymizedValues,
@@ -71,6 +78,7 @@ export const AssistantHeader: React.FC<Props> = ({
   refetchConversationsState,
   onConversationCreate,
   isAssistantEnabled,
+  refetchPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -160,14 +168,14 @@ export const AssistantHeader: React.FC<Props> = ({
               conversations={conversations}
               conversationsLoaded={conversationsLoaded}
               refetchConversationsState={refetchConversationsState}
+              refetchPrompts={refetchPrompts}
             />
           </EuiFlexItem>
 
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label="euiFlyoutCloseButton"
-                data-test-subj="euiFlyoutCloseButton"
+                aria-label="xxx"
                 iconType="cross"
                 color="text"
                 size="xs"

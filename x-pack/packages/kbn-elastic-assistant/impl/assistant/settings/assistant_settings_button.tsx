@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings } from './assistant_settings';
@@ -25,6 +26,9 @@ interface Props {
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 /**
@@ -41,6 +45,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     conversations,
     conversationsLoaded,
     refetchConversationsState,
+    refetchPrompts,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -57,6 +62,9 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       async (success: boolean) => {
         cleanupAndCloseModal();
         await refetchConversationsState();
+        if (refetchPrompts) {
+          await refetchPrompts();
+        }
         if (success) {
           toasts?.addSuccess({
             iconType: 'check',
@@ -64,7 +72,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
           });
         }
       },
-      [cleanupAndCloseModal, refetchConversationsState, toasts]
+      [cleanupAndCloseModal, refetchConversationsState, refetchPrompts, toasts]
     );
 
     const handleShowConversationSettings = useCallback(() => {

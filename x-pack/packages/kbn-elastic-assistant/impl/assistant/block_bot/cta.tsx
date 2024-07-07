@@ -13,8 +13,10 @@ import { ENTERPRISE } from '../../content/prompts/welcome/translations';
 import { UpgradeButtons } from '../../upgrade/upgrade_buttons';
 
 interface OwnProps {
+  connectorPrompt: React.ReactElement;
   http: HttpSetup;
   isAssistantEnabled: boolean;
+  isWelcomeSetup: boolean;
 }
 
 type Props = OwnProps;
@@ -23,7 +25,12 @@ type Props = OwnProps;
  * Provides a call-to-action for users to upgrade their subscription or set up a connector
  * depending on the isAssistantEnabled and isWelcomeSetup props.
  */
-export const BlockBotCallToAction: React.FC<Props> = ({ http, isAssistantEnabled }) => {
+export const BlockBotCallToAction: React.FC<Props> = ({
+  connectorPrompt,
+  http,
+  isAssistantEnabled,
+  isWelcomeSetup,
+}) => {
   const basePath = http.basePath.get();
   return !isAssistantEnabled ? (
     <EuiFlexGroup
@@ -46,6 +53,14 @@ export const BlockBotCallToAction: React.FC<Props> = ({ http, isAssistantEnabled
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{<UpgradeButtons basePath={basePath} />}</EuiFlexItem>
+    </EuiFlexGroup>
+  ) : isWelcomeSetup ? (
+    <EuiFlexGroup
+      css={css`
+        width: 100%;
+      `}
+    >
+      <EuiFlexItem data-test-subj="connector-prompt">{connectorPrompt}</EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
 };

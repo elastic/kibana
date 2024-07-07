@@ -37,6 +37,9 @@ const testProps = {
   conversations: mockConversations,
   refetchConversationsState: jest.fn(),
   isAssistantEnabled: true,
+  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
+  allPrompts: [],
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({

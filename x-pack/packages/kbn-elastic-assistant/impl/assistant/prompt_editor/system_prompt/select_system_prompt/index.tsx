@@ -18,10 +18,13 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
-import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
 import { TEST_IDS } from '../../../constants';
@@ -29,11 +32,12 @@ import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_co
 import { SYSTEM_PROMPTS_TAB } from '../../../settings/const';
 
 export interface Props {
-  allSystemPrompts: Prompt[];
+  allPrompts: PromptResponse[];
   compressed?: boolean;
   conversation?: Conversation;
-  selectedPrompt: Prompt | undefined;
+  selectedPrompt: PromptResponse | undefined;
   clearSelectedSystemPrompt?: () => void;
+  isClearable?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
@@ -45,11 +49,12 @@ export interface Props {
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
 const SelectSystemPromptComponent: React.FC<Props> = ({
-  allSystemPrompts,
+  allPrompts,
   compressed = false,
   conversation,
   selectedPrompt,
   clearSelectedSystemPrompt,
+  isClearable = false,
   isDisabled = false,
   isOpen = false,
   isSettingsModalVisible,
@@ -60,21 +65,24 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
-  const [valueOfSelected, setValueOfSelected] = useState<string | undefined>(
-    selectedPrompt?.id ?? allSystemPrompts?.[0]?.id
+  const allSystemPrompts = useMemo(
+    () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
+    [allPrompts]
   );
+
+  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
+  const valueOfSelected = useMemo(() => selectedPrompt?.id, [selectedPrompt?.id]);
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (prompt: Prompt | undefined) => {
+    (promptId?: string) => {
       if (conversation && conversation.apiConfig) {
         setApiConfig({
           conversation,
           apiConfig: {
             ...conversation.apiConfig,
-            defaultSystemPromptId: prompt?.id,
+            defaultSystemPromptId: promptId,
           },
         });
       }
@@ -118,13 +126,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       // Note: if callback is provided, this component does not persist. Extract to separate component
       if (onSystemPromptSelectionChange != null) {
         onSystemPromptSelectionChange(selectedSystemPromptId);
-      } else {
-        setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
       }
-      setValueOfSelected(selectedSystemPromptId);
+      setSelectedSystemPrompt(selectedSystemPromptId);
     },
     [
-      allSystemPrompts,
       onSystemPromptSelectionChange,
       setIsSettingsModalVisible,
       setSelectedSettingsTab,
@@ -135,7 +140,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const clearSystemPrompt = useCallback(() => {
     setSelectedSystemPrompt(undefined);
     clearSelectedSystemPrompt?.();
-    setValueOfSelected(undefined);
   }, [clearSelectedSystemPrompt, setSelectedSystemPrompt]);
 
   return (
@@ -181,46 +185,44 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         </EuiFormRow>
       </EuiFlexItem>
 
-      {selectedPrompt && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            position: absolute;
-            right: 36px;
-          `}
-        >
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          position: absolute;
+          right: 36px;
+        `}
+      >
+        {isClearable && selectedPrompt && (
           <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"
               iconType="cross"
               onClick={clearSystemPrompt}
-              css={
-                // mimic EuiComboBox clear button
-                css`
-                  inline-size: 16px;
-                  block-size: 16px;
-                  border-radius: 16px;
+              // mimic EuiComboBox clear button
+              css={css`
+                inline-size: 16px;
+                block-size: 16px;
+                border-radius: 16px;
+                background: ${euiThemeVars.euiColorMediumShade};
+
+                :hover:not(:disabled) {
                   background: ${euiThemeVars.euiColorMediumShade};
+                  transform: none;
+                }
 
-                  :hover:not(:disabled) {
-                    background: ${euiThemeVars.euiColorMediumShade};
-                    transform: none;
-                  }
-
-                  > svg {
-                    width: 8px;
-                    height: 8px;
-                    stroke-width: 2px;
-                    fill: #fff;
-                    stroke: #fff;
-                  }
-                `
-              }
+                > svg {
+                  width: 8px;
+                  height: 8px;
+                  stroke-width: 2px;
+                  fill: #fff;
+                  stroke: #fff;
+                }
+              `}
             />
           </EuiToolTip>
-        </EuiFlexItem>
-      )}
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

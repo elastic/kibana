@@ -11,7 +11,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Prompt } from '../../types';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
@@ -22,7 +22,10 @@ export const getOptionFromPrompt = ({
   content,
   id,
   name,
-}: Prompt & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
+  showTitles = false,
+}: PromptResponse & {
+  showTitles?: boolean;
+}): EuiSuperSelectOption<string> => ({
   value: id,
   inputDisplay: <span data-test-subj="systemPromptText">{name}</span>,
   dropdownDisplay: (
@@ -40,7 +43,7 @@ export const getOptionFromPrompt = ({
 });
 
 interface GetOptionsProps {
-  prompts: Prompt[] | undefined;
+  prompts: PromptResponse[] | undefined;
   showTitles?: boolean;
 }
 export const getOptions = ({

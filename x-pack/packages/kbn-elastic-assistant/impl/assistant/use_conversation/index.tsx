@@ -18,6 +18,7 @@ import {
   updateConversation,
 } from '../api/conversations';
 import { WELCOME_CONVERSATION } from './sample_conversations';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: '',
@@ -62,7 +63,10 @@ interface UseConversation {
 }
 
 export const useConversation = (): UseConversation => {
-  const { allSystemPrompts, http, toasts } = useAssistantContext();
+  const { http, toasts } = useAssistantContext();
+  const {
+    data: { data: allPrompts },
+  } = useFetchPrompts();
 
   const getConversation = useCallback(
     async (conversationId: string, silent?: boolean) => {
@@ -100,7 +104,7 @@ export const useConversation = (): UseConversation => {
     async (conversation: Conversation) => {
       if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
-          allSystemPrompts,
+          allSystemPrompts: allPrompts,
           conversation,
         })?.id;
 
@@ -114,7 +118,7 @@ export const useConversation = (): UseConversation => {
         });
       }
     },
-    [allSystemPrompts, http, toasts]
+    [allPrompts, http, toasts]
   );
 
   /**
