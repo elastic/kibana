@@ -14,7 +14,8 @@
       "licensing",
       "management",
       "features",
-      "share"
+      "share",
+      "airdrop"
     ],
     "optionalPlugins": [
       "cloud",

@@ -7,7 +7,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "index_management"],
-    "requiredPlugins": ["home", "management", "features", "share"],
+    "requiredPlugins": ["home", "management", "features", "share",  "airdrop"],
     "optionalPlugins": ["security", "usageCollection", "fleet", "cloud", "ml", "console","licensing"],
     "requiredBundles": ["kibanaReact", "esUiShared", "runtimeFields"]
   }

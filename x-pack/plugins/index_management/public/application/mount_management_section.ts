@@ -84,6 +84,7 @@ export function getIndexManagementDependencies({
       console: startDependencies.console,
       ml: startDependencies.ml,
       licensing: startDependencies.licensing,
+      airdrop: startDependencies.airdrop,
     },
     services: {
       httpService,

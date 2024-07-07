@@ -21,9 +21,10 @@ import {
   EuiButton,
   EuiLink,
 } from '@elastic/eui';
+import { AirdropPopover, useOnDrop } from '@kbn/airdrops';
 
-import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
-import { TemplateListItem } from '../../../../../common';
+import { API_BASE_PATH, UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
+import { TemplateDeserialized, TemplateListItem } from '../../../../../common';
 import {
   APP_WRAPPER_CLASS,
   PageLoading,
@@ -75,10 +76,12 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   location,
   history,
 }) => {
-  const { uiMetricService } = useServices();
+  const { uiMetricService, notificationService } = useServices();
   const {
-    core: { executionContext },
+    core: { executionContext, http },
   } = useAppContext();
+  const [selection, setSelection] = useState<TemplateListItem[]>([]);
+  const templatesAirdrop = useOnDrop<TemplateDeserialized[]>({ id: 'saveTemplates' });
 
   const { error, isLoading, data: allTemplates, resendRequest: reload } = useLoadIndexTemplates();
 
@@ -184,6 +187,29 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           />
         </EuiText>
       </EuiFlexItem>
+      {selection.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <AirdropPopover
+            description="Share the selected templates with another Kibana instance."
+            size="m"
+            iconSize="m"
+            display="base"
+            content={{
+              id: 'saveTemplates',
+              getAsync: async () => {
+                // Load selected templates
+                return Promise.all(
+                  selection.map((template) => {
+                    return http.get(
+                      `${API_BASE_PATH}/index_templates/${encodeURIComponent(template.name)}`
+                    );
+                  })
+                );
+              },
+            }}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <FilterListButton<FilterName> filters={filters} onChange={setFilters} />
       </EuiFlexItem>
@@ -214,6 +240,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           editTemplate={editTemplate}
           cloneTemplate={cloneTemplate}
           history={history as ScopedHistory}
+          onSelectionChange={setSelection}
         />
       </>
     );
@@ -251,6 +278,23 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   useEffect(() => {
     uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
+
+  useEffect(() => {
+    if (templatesAirdrop) {
+      const templates = templatesAirdrop.content;
+
+      Promise.all(
+        templates.map((template) =>
+          http.post(`${API_BASE_PATH}/index_templates`, {
+            body: JSON.stringify(template),
+          })
+        )
+      ).then(() => {
+        notificationService.showSuccessToast('Templates imported successfully!');
+        reload();
+      });
+    }
+  }, [templatesAirdrop, http, reload, notificationService]);
 
   let content;
 

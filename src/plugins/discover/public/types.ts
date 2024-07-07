@@ -39,6 +39,7 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import { AirdropPluginStart } from '@kbn/airdrop-plugin/public';
 import { DiscoverAppLocator } from '../common';
 import { DiscoverCustomizationContext } from './customizations';
 import { type DiscoverContainerProps } from './components/discover_container';
@@ -141,6 +142,7 @@ export interface DiscoverSetupPlugins {
  */
 export interface DiscoverStartPlugins {
   aiops?: AiopsPluginStart;
+  airdrop: AirdropPluginStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;

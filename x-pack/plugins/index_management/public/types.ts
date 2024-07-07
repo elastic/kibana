@@ -18,6 +18,7 @@ import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { AirdropPluginStart } from '@kbn/airdrop-plugin/public';
 
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -41,6 +42,7 @@ export interface StartDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  airdrop: AirdropPluginStart;
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
 }

@@ -28,6 +28,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { EuiBreadcrumb } from '@elastic/eui';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { AirdropPluginStart } from '@kbn/airdrop-plugin/public';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -48,6 +49,7 @@ export interface AppDependencies {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
     share: SharePluginStart;
+    airdrop: AirdropPluginStart;
     cloud?: CloudSetup;
     console?: ConsolePluginStart;
     licensing?: LicensingPluginStart;

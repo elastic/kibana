@@ -1,0 +1,6 @@
+# airdrop
+
+A Kibana plugin
+
+---
+

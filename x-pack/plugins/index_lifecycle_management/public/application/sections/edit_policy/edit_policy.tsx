@@ -25,7 +25,9 @@ import {
   EuiPageHeader,
   EuiTimeline,
 } from '@elastic/eui';
+import { AirdropPopover, useOnDrop } from '@kbn/airdrops';
 
+import type { SerializedPolicy } from '../../../../common/types';
 import {
   TextField,
   useForm,
@@ -58,6 +60,7 @@ import { useEditPolicyContext } from './edit_policy_context';
 import { FormInternal } from './types';
 
 const policyNamePath = 'name';
+const DROP_ID = 'edit_policy';
 
 export const EditPolicy: React.FunctionComponent = () => {
   useEffect(() => {
@@ -76,6 +79,7 @@ export const EditPolicy: React.FunctionComponent = () => {
   const {
     services: { cloud, docLinks, history, navigateToUrl, overlays, http },
   } = useKibana();
+  const airdropForm = useOnDrop<SerializedPolicy>({ id: DROP_ID });
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
   const [hasSubmittedForm, setHasSubmittedForm] = useState<boolean>(false);
@@ -160,6 +164,19 @@ export const EditPolicy: React.FunctionComponent = () => {
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
 
+  const { reset } = form;
+
+  useEffect(() => {
+    if (airdropForm) {
+      reset({
+        resetValues: true,
+        defaultValue: airdropForm.content,
+      });
+
+      toasts.addSuccess('Form data has been successfully loaded.');
+    }
+  }, [airdropForm, reset]);
+
   useUnsavedChangesPrompt({
     titleText: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.unsavedPrompt.title', {
       defaultMessage: 'Exit without saving changes?',
@@ -192,6 +209,19 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
+          <AirdropPopover<SerializedPolicy>
+            description="Share this form values with another Kibana instance."
+            content={{
+              id: DROP_ID,
+              get: () => {
+                return {
+                  ...form.getFormData(),
+                  name: getPolicyName(),
+                };
+              },
+            }}
+            cssPopover={{ marginTop: '8px' }}
+          />,
           <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"

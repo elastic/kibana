@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/airdrops",
+    "@kbn/core-application-browser",
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

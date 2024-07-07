@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/airdrops",
+  "owner": "@elastic/appex-sharedux"
+}

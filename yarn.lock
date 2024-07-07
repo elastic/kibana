@@ -3277,6 +3277,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/airdrop-plugin@link:src/plugins/airdrop":
+  version "0.0.0"
+  uid ""
+
+"@kbn/airdrops@link:packages/airdrops":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-api-integration-helpers@link:x-pack/test/alerting_api_integration/packages/helpers":
   version "0.0.0"
   uid ""

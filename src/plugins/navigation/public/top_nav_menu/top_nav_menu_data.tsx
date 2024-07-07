@@ -8,6 +8,7 @@
 
 import { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
+import React from 'react';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
@@ -28,6 +29,7 @@ export interface TopNavMenuData {
   target?: string;
   href?: string;
   intl?: InjectedIntl;
+  renderItem?: (arg: { key: string }) => React.ReactNode;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

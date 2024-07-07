@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/airdrop-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "airdrop",
+    "server": true,
+    "browser": true,
+    "optionalPlugins": [],
+    "requiredPlugins": [],
+    "requiredBundles": []
+  }
+}

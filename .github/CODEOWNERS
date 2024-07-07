@@ -19,6 +19,8 @@ x-pack/packages/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/packages/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/packages/ml/aiops_test_utils @elastic/ml-ui
+src/plugins/airdrop @elastic/appex-sharedux
+packages/airdrops @elastic/appex-sharedux
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops

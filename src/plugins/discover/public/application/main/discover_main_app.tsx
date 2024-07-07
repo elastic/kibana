@@ -8,6 +8,8 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useAirdrop, useOnDrop } from '@kbn/airdrops/src';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './state_management/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -33,7 +35,19 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history } = services;
+  const { chrome, docLinks, data, spaces, history, filterManager, notifications } = services;
+  const { registerAirdropContent } = useAirdrop();
+
+  const searchBarAirdrop = useOnDrop<{
+    filters?: Filter[];
+    query?: Query | AggregateQuery;
+    columns?: string[];
+  }>({ group: 'searchBar' });
+
+  const { query } = data;
+  const {
+    appState: { get: getAppState, update: updateAppState },
+  } = stateContainer;
 
   useUrlTracking(stateContainer.savedSearchState);
 
@@ -87,6 +101,53 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       data.search.session.clear();
     };
   }, [data.search.session]);
+
+  useEffect(() => {
+    const unregister = registerAirdropContent({
+      id: 'searchBar.filters',
+      label: 'Filters',
+      get: () => filterManager.getFilters(),
+    });
+
+    return unregister;
+  }, [registerAirdropContent, filterManager]);
+
+  useEffect(() => {
+    const unregister = registerAirdropContent({
+      id: 'searchBar.query',
+      label: 'Query',
+      get: () => query.queryString.getQuery(),
+    });
+
+    return unregister;
+  }, [registerAirdropContent, query]);
+
+  useEffect(() => {
+    const unregister = registerAirdropContent({
+      id: 'searchBar.columns',
+      label: 'Selected fields',
+      get: () => getAppState().columns,
+    });
+
+    return unregister;
+  }, [registerAirdropContent, getAppState]);
+
+  useEffect(() => {
+    if (searchBarAirdrop) {
+      const { filters, query: _query, columns } = searchBarAirdrop.content;
+      if (filters) {
+        filterManager.setAppFilters(filters);
+      }
+      if (_query) {
+        query.queryString.setQuery(_query);
+      }
+      if (columns) {
+        updateAppState({ columns });
+      }
+
+      notifications.toasts.addSuccess('Search bar content has been applied');
+    }
+  }, [searchBarAirdrop, filterManager, query, updateAppState, notifications]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
