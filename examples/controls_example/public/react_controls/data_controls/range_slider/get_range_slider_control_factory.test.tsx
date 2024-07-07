@@ -210,7 +210,7 @@ describe('RangesliderControlApi', () => {
   });
 
   describe('step state', () => {
-    test('default value provided when state.step is undefined', async () => {
+    test('default value provided when state.step is undefined', () => {
       const { api } = factory.buildControl(
         {
           dataViewId: 'myDataViewId',
@@ -220,12 +220,11 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const serializedState =
-        (await api.serializeState()) as SerializedPanelState<RangesliderControlState>;
+      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
       expect(serializedState.rawState.step).toBe(1);
     });
 
-    test('retains value from initial state', async () => {
+    test('retains value from initial state', () => {
       const { api } = factory.buildControl(
         {
           dataViewId: 'myDataViewId',
@@ -236,8 +235,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const serializedState =
-        (await api.serializeState()) as SerializedPanelState<RangesliderControlState>;
+      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
       expect(serializedState.rawState.step).toBe(1024);
     });
   });
