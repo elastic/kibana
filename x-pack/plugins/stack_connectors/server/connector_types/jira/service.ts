@@ -16,7 +16,7 @@ import {
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import {
   CreateCommentParams,
   CreateIncidentParams,
@@ -49,7 +49,7 @@ export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
@@ -191,7 +191,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${id}`,
         logger,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -245,7 +245,7 @@ export const createExternalService = (
           fields,
         },
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -292,7 +292,7 @@ export const createExternalService = (
         logger,
         data: { fields },
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -331,7 +331,7 @@ export const createExternalService = (
         logger,
         data: { body: comment.comment },
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -364,7 +364,7 @@ export const createExternalService = (
         url: capabilitiesUrl,
         logger,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -396,7 +396,7 @@ export const createExternalService = (
           url: getIssueTypesOldAPIURL,
           logger,
           configurationUtilities,
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
 
         throwIfResponseIsNotValid({
@@ -412,7 +412,7 @@ export const createExternalService = (
           url: getIssueTypesUrl,
           logger,
           configurationUtilities,
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
 
         throwIfResponseIsNotValid({
@@ -445,7 +445,7 @@ export const createExternalService = (
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
           logger,
           configurationUtilities,
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
 
         throwIfResponseIsNotValid({
@@ -525,7 +525,7 @@ export const createExternalService = (
         url: query,
         logger,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -554,7 +554,7 @@ export const createExternalService = (
         url: getIssueUrl,
         logger,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwIfResponseIsNotValid({

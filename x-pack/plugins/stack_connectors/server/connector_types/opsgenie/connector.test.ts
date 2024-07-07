@@ -15,7 +15,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { OpsgenieConnectorTypeId } from '../../../common';
 import { OpsgenieConnector } from './connector';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 jest.mock('axios');
 
@@ -37,7 +37,7 @@ describe('OpsgenieConnector', () => {
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
-  let connectorMetricsService: ConnectorMetricsService;
+  let connectorMetricsCollector: ConnectorMetricsCollector;
 
   const defaultCreateAlertExpect = {
     method: 'post',
@@ -77,40 +77,40 @@ describe('OpsgenieConnector', () => {
       logger,
       services,
     });
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
   });
 
   it('calls request with the correct arguments for creating an alert', async () => {
-    await connector.createAlert({ message: 'hello' }, connectorMetricsService);
+    await connector.createAlert({ message: 'hello' }, connectorMetricsCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       data: { message: 'hello' },
       ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
   });
 
   it('calls request without modifying the alias when it is less than 512 characters when creating an alert', async () => {
-    await connector.createAlert({ message: 'hello', alias: '111' }, connectorMetricsService);
+    await connector.createAlert({ message: 'hello', alias: '111' }, connectorMetricsCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
       data: { message: 'hello', alias: '111' },
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
   });
 
   it('calls request without modifying the alias when it is equal to 512 characters when creating an alert', async () => {
     const alias = 'a'.repeat(512);
-    await connector.createAlert({ message: 'hello', alias }, connectorMetricsService);
+    await connector.createAlert({ message: 'hello', alias }, connectorMetricsCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
       data: { message: 'hello', alias },
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
   });
 
@@ -120,13 +120,13 @@ describe('OpsgenieConnector', () => {
     const hasher = crypto.createHash('sha256');
     const sha256Hash = hasher.update(alias);
 
-    await connector.createAlert({ message: 'hello', alias }, connectorMetricsService);
+    await connector.createAlert({ message: 'hello', alias }, connectorMetricsCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
       data: { message: 'hello', alias: `sha-${sha256Hash.digest('hex')}` },
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
   });
 
@@ -136,24 +136,24 @@ describe('OpsgenieConnector', () => {
     const hasher = crypto.createHash('sha256');
     const sha256Hash = hasher.update(alias);
 
-    await connector.closeAlert({ alias }, connectorMetricsService);
+    await connector.closeAlert({ alias }, connectorMetricsCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...createCloseAlertExpect(`sha-${sha256Hash.digest('hex')}`),
       data: {},
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
   });
 
   it('calls request with the correct arguments for closing an alert', async () => {
-    await connector.closeAlert({ user: 'sam', alias: '111' }, connectorMetricsService);
+    await connector.closeAlert({ user: 'sam', alias: '111' }, connectorMetricsCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...createCloseAlertExpect('111'),
       data: { user: 'sam' },
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
   });
 

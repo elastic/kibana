@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorMetricsService, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -41,12 +41,12 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: WebhookConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsService = new ConnectorMetricsService();
+  connectorMetricsCollector = new ConnectorMetricsCollector();
 });
 
 describe('connectorType', () => {
@@ -341,14 +341,14 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsService": ConnectorMetricsService {
+        "connectorMetricsCollector": ConnectorMetricsCollector {
           "metrics": Object {
             "requestBodyBytes": 0,
           },
@@ -408,7 +408,7 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
@@ -416,7 +416,7 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsService": ConnectorMetricsService {
+        "connectorMetricsCollector": ConnectorMetricsCollector {
           "metrics": Object {
             "requestBodyBytes": 0,
           },
@@ -602,7 +602,7 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
     expect(mockedLogger.error).toBeCalledWith(
       'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
@@ -633,14 +633,14 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsService": ConnectorMetricsService {
+        "connectorMetricsCollector": ConnectorMetricsCollector {
           "metrics": Object {
             "requestBodyBytes": 0,
           },

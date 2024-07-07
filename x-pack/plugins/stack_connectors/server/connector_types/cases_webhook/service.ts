@@ -13,7 +13,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
   combineHeadersWithBasicAuthHeader,
-  ConnectorMetricsService,
+  ConnectorMetricsCollector,
 } from '@kbn/actions-plugin/server/lib';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
@@ -42,7 +42,7 @@ export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): ExternalService => {
   const {
     createCommentJson,
@@ -121,7 +121,7 @@ export const createExternalService = (
         logger,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -167,7 +167,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       const { status, statusText, data } = res;
@@ -252,7 +252,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -326,7 +326,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

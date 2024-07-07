@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { ConnectorMetricsService, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
 import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from '.';
@@ -34,12 +34,12 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: TeamsConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsService = new ConnectorMetricsService();
+  connectorMetricsCollector = new ConnectorMetricsCollector();
 });
 
 describe('connector registration', () => {
@@ -169,13 +169,13 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsService": ConnectorMetricsService {
+        "connectorMetricsCollector": ConnectorMetricsCollector {
           "metrics": Object {
             "requestBodyBytes": 0,
           },
@@ -231,13 +231,13 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "connectorMetricsService": ConnectorMetricsService {
+        "connectorMetricsCollector": ConnectorMetricsCollector {
           "metrics": Object {
             "requestBodyBytes": 0,
           },

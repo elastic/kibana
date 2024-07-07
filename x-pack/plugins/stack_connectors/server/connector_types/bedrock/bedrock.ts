@@ -11,7 +11,7 @@ import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -186,17 +186,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 
   private async runApiDeprecated(
     params: SubActionRequestParams<RunActionResponse>, // : SubActionRequestParams<RunApiLatestResponseSchema>
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse> {
-    const response = await this.request(params, connectorMetricsService);
+    const response = await this.request(params, connectorMetricsCollector);
     return response.data;
   }
 
   private async runApiLatest(
     params: SubActionRequestParams<RunApiLatestResponse>, // : SubActionRequestParams<RunApiLatestResponseSchema>
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse> {
-    const response = await this.request(params, connectorMetricsService);
+    const response = await this.request(params, connectorMetricsCollector);
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
     return {
@@ -213,7 +213,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    */
   public async runApi(
     { body, model: reqModel, signal, timeout }: RunActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
@@ -232,12 +232,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     if (usesDeprecatedArguments(body)) {
       return this.runApiDeprecated(
         { ...requestArgs, responseSchema: RunActionResponseSchema },
-        connectorMetricsService
+        connectorMetricsCollector
       );
     }
     return this.runApiLatest(
       { ...requestArgs, responseSchema: RunApiLatestResponseSchema },
-      connectorMetricsService
+      connectorMetricsCollector
     );
   }
 
@@ -251,7 +251,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    */
   private async streamApi(
     { body, model: reqModel, signal, timeout }: RunActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<StreamingResponse> {
     // set model on per request basis
     const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
@@ -268,7 +268,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         signal,
         timeout,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
 
     return response.data.pipe(new PassThrough());
@@ -284,7 +284,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    */
   public async invokeStream(
     { messages, model, stopSequences, system, temperature, signal, timeout }: InvokeAIActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<IncomingMessage> {
     const res = (await this.streamApi(
       {
@@ -293,7 +293,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         signal,
         timeout,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     )) as unknown as IncomingMessage;
     return res;
   }
@@ -317,7 +317,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
     }: InvokeAIActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<InvokeAIActionResponse> {
     const res = await this.runApi(
       {
@@ -328,7 +328,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         signal,
         timeout,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     return { message: res.completion.trim() };
   }

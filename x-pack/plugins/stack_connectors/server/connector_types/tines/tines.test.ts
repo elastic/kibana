@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TinesConnector } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { API_MAX_RESULTS, TINES_CONNECTOR_ID } from '../../../common/tines/constants';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 jest.mock('axios');
 (axios as jest.Mocked<typeof axios>).create.mockImplementation(
@@ -79,7 +79,7 @@ const storiesGetRequestExpected = {
     'Content-Type': 'application/json',
   },
   params: { per_page: API_MAX_RESULTS },
-  connectorMetricsService: expect.any(ConnectorMetricsService),
+  connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
 };
 
 const agentsGetRequestExpected = {
@@ -93,10 +93,10 @@ const agentsGetRequestExpected = {
     'Content-Type': 'application/json',
   },
   params: { story_id: story.id, per_page: API_MAX_RESULTS },
-  connectorMetricsService: expect.any(ConnectorMetricsService),
+  connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
 };
 
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 describe('TinesConnector', () => {
   const connector = new TinesConnector({
@@ -110,7 +110,7 @@ describe('TinesConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
   });
 
   describe('getStories', () => {
@@ -119,13 +119,13 @@ describe('TinesConnector', () => {
     });
 
     it('should request Tines stories', async () => {
-      await connector.getStories(undefined, connectorMetricsService);
+      await connector.getStories(undefined, connectorMetricsCollector);
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(storiesGetRequestExpected);
     });
 
     it('should return the Tines stories reduced array', async () => {
-      const { stories } = await connector.getStories(undefined, connectorMetricsService);
+      const { stories } = await connector.getStories(undefined, connectorMetricsCollector);
       expect(stories).toEqual([storyResult]);
     });
 
@@ -133,7 +133,7 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { stories: [story], meta: { pages: 1 } },
       });
-      const response = await connector.getStories(undefined, connectorMetricsService);
+      const response = await connector.getStories(undefined, connectorMetricsCollector);
       expect(response.incompleteResponse).toEqual(false);
     });
 
@@ -141,7 +141,7 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { stories: [story], meta: { pages: 2 } },
       });
-      const response = await connector.getStories(undefined, connectorMetricsService);
+      const response = await connector.getStories(undefined, connectorMetricsCollector);
       expect(response.incompleteResponse).toEqual(true);
     });
   });
@@ -152,7 +152,7 @@ describe('TinesConnector', () => {
     });
 
     it('should request Tines webhook actions', async () => {
-      await connector.getWebhooks({ storyId: story.id }, connectorMetricsService);
+      await connector.getWebhooks({ storyId: story.id }, connectorMetricsCollector);
 
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(agentsGetRequestExpected);
@@ -161,7 +161,7 @@ describe('TinesConnector', () => {
     it('should return the Tines webhooks reduced array', async () => {
       const { webhooks } = await connector.getWebhooks(
         { storyId: story.id },
-        connectorMetricsService
+        connectorMetricsCollector
       );
       expect(webhooks).toEqual([webhookResult]);
     });
@@ -170,7 +170,10 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { agents: [webhookAgent], meta: { pages: 1 } },
       });
-      const response = await connector.getWebhooks({ storyId: story.id }, connectorMetricsService);
+      const response = await connector.getWebhooks(
+        { storyId: story.id },
+        connectorMetricsCollector
+      );
       expect(response.incompleteResponse).toEqual(false);
     });
 
@@ -178,7 +181,10 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { agents: [webhookAgent], meta: { pages: 2 } },
       });
-      const response = await connector.getWebhooks({ storyId: story.id }, connectorMetricsService);
+      const response = await connector.getWebhooks(
+        { storyId: story.id },
+        connectorMetricsCollector
+      );
       expect(response.incompleteResponse).toEqual(true);
     });
   });
@@ -194,7 +200,7 @@ describe('TinesConnector', () => {
           webhook: webhookResult,
           body: '[]',
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       expect(mockRequest).toBeCalledTimes(1);
@@ -206,7 +212,7 @@ describe('TinesConnector', () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -216,7 +222,7 @@ describe('TinesConnector', () => {
           webhookUrl,
           body: '[]',
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       expect(mockRequest).toBeCalledTimes(1);
@@ -228,7 +234,7 @@ describe('TinesConnector', () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
   });

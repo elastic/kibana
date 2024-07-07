@@ -8,7 +8,7 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import {
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,
@@ -110,14 +110,14 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   private async tinesApiRequest<R extends TinesBaseApiResponse, T>(
     req: SubActionRequestParams<R>,
     reducer: (response: R) => T,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<T & { incompleteResponse: boolean }> {
     const response = await this.request<R>(
       {
         ...req,
         params: { ...req.params, per_page: API_MAX_RESULTS },
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     return {
       ...reducer(response.data),
@@ -137,7 +137,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
 
   public async getStories(
     params: unknown,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<TinesStoriesActionResponse> {
     return this.tinesApiRequest(
       {
@@ -146,13 +146,13 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
         responseSchema: TinesStoriesApiResponseSchema,
       },
       storiesReducer,
-      connectorMetricsService
+      connectorMetricsCollector
     );
   }
 
   public async getWebhooks(
     { storyId }: TinesWebhooksActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<TinesWebhooksActionResponse> {
     return this.tinesApiRequest(
       {
@@ -162,13 +162,13 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
         responseSchema: TinesWebhooksApiResponseSchema,
       },
       webhooksReducer,
-      connectorMetricsService
+      connectorMetricsCollector
     );
   }
 
   public async runWebhook(
     { webhook, webhookUrl, body }: TinesRunActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<TinesRunActionResponse> {
     if (!webhook && !webhookUrl) {
       throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
@@ -180,7 +180,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
         responseSchema: TinesRunApiResponseSchema,
         data: body,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     return response.data;
   }

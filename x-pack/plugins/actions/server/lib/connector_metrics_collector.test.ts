@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ConnectorMetricsService } from '../types';
+import { ConnectorMetricsCollector } from '../types';
 import { AxiosHeaders, AxiosResponse } from 'axios';
 
-describe('ConnectorMetricsService', () => {
+describe('ConnectorMetricsCollector', () => {
   test('it collects requestBodyBytes from response.request.headers', async () => {
-    const connectorMetricsService = new ConnectorMetricsService();
+    const connectorMetricsCollector = new ConnectorMetricsCollector();
     const data = { test: 'foo' };
     const contentLength = Buffer.byteLength(JSON.stringify(data), 'utf8');
 
@@ -25,16 +25,16 @@ describe('ConnectorMetricsService', () => {
       },
     };
 
-    connectorMetricsService.addRequestBodyBytes(axiosResponse, data);
+    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsService.getRequestBodyByte()).toBe(contentLength);
+    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength);
 
-    connectorMetricsService.addRequestBodyBytes(axiosResponse, data);
+    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsService.getRequestBodyByte()).toBe(contentLength + contentLength);
+    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
   });
   test('it collects requestBodyBytes from data when response.request.headers is missing', async () => {
-    const connectorMetricsService = new ConnectorMetricsService();
+    const connectorMetricsCollector = new ConnectorMetricsCollector();
     const data = { test: 'foo' };
     const contentLength = Buffer.byteLength(JSON.stringify(data), 'utf8');
 
@@ -46,12 +46,12 @@ describe('ConnectorMetricsService', () => {
       config: { headers: new AxiosHeaders() },
     };
 
-    connectorMetricsService.addRequestBodyBytes(axiosResponse, data);
+    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsService.getRequestBodyByte()).toBe(contentLength);
+    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength);
 
-    connectorMetricsService.addRequestBodyBytes(axiosResponse, data);
+    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
 
-    expect(connectorMetricsService.getRequestBodyByte()).toBe(contentLength + contentLength);
+    expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
   });
 });

@@ -13,7 +13,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/types';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
   PostMessageSubActionParams,
@@ -113,7 +113,7 @@ export const createExternalService = (
   },
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): SlackApiService => {
   const { token } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
@@ -141,7 +141,7 @@ export const createExternalService = (
           method: 'get',
           headers,
           url: `${SLACK_URL}conversations.info?channel=${channelId}`,
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
       };
       if (channelId.length === 0) {
@@ -210,7 +210,7 @@ export const createExternalService = (
         data: { channel: channelToUse, text },
         headers,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
@@ -236,7 +236,7 @@ export const createExternalService = (
         data: { channel: channelToUse, blocks: blockJson.blocks },
         headers,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });

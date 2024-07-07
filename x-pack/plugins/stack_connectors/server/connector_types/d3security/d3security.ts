@@ -7,7 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import { addSeverityAndEventTypeInBody } from './helpers';
 import {
   D3SecurityRunActionParamsSchema,
@@ -60,7 +60,7 @@ export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3
 
   public async runApi(
     { body, severity, eventType }: D3SecurityRunActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<D3SecurityRunActionResponse> {
     const response = await this.request(
       {
@@ -74,7 +74,7 @@ export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3
         ),
         headers: { d3key: this.token || '' },
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     return response.data;
   }

@@ -12,6 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { snExternalServiceConfig } from './config';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const connectorTokenClient = connectorTokenClientMock.create();
@@ -19,10 +20,12 @@ const configurationUtilities = actionsConfigMock.create();
 
 jest.mock('axios');
 axios.create = jest.fn(() => axios);
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 describe('createServiceWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
   });
 
   test('creates axios instance with apiUrl', () => {
@@ -45,6 +48,7 @@ describe('createServiceWrapper', () => {
       serviceConfig,
       connectorTokenClient,
       createServiceFn,
+      connectorMetricsCollector,
     });
 
     expect(createServiceFn).toHaveBeenCalledWith({
@@ -53,6 +57,7 @@ describe('createServiceWrapper', () => {
       configurationUtilities,
       serviceConfig,
       axiosInstance: axios,
+      connectorMetricsCollector,
     });
   });
 
@@ -76,6 +81,7 @@ describe('createServiceWrapper', () => {
       serviceConfig,
       connectorTokenClient,
       createServiceFn,
+      connectorMetricsCollector,
     });
 
     expect(createServiceFn).toHaveBeenCalledWith({
@@ -84,6 +90,7 @@ describe('createServiceWrapper', () => {
       configurationUtilities,
       serviceConfig,
       axiosInstance: axios,
+      connectorMetricsCollector,
     });
   });
 });

@@ -15,7 +15,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
-  ConnectorMetricsService,
+  ConnectorMetricsCollector,
   validateConfig,
   validateConnector,
   validateParams,
@@ -515,7 +515,7 @@ describe('execute()', () => {
       text: 'Go to Elastic',
     },
   };
-  const connectorMetricsService = new ConnectorMetricsService();
+  const connectorMetricsCollector = new ConnectorMetricsCollector();
 
   const actionId = 'some-id';
   const executorOptions: EmailConnectorTypeExecutorOptions = {
@@ -526,7 +526,7 @@ describe('execute()', () => {
     services,
     configurationUtilities: actionsConfigMock.create(),
     logger: mockedLogger,
-    connectorMetricsService,
+    connectorMetricsCollector,
   };
 
   beforeEach(() => {

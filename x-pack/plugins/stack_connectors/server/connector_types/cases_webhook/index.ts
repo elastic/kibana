@@ -70,7 +70,8 @@ export async function executor(
     CasesWebhookActionParamsType
   >
 ): Promise<ConnectorTypeExecutorResult<CasesWebhookExecutorResultData>> {
-  const { actionId, configurationUtilities, params, logger, connectorMetricsService } = execOptions;
+  const { actionId, configurationUtilities, params, logger, connectorMetricsCollector } =
+    execOptions;
   const { subAction, subActionParams } = params;
   let data: CasesWebhookExecutorResultData | undefined;
 
@@ -82,7 +83,7 @@ export async function executor(
     },
     logger,
     configurationUtilities,
-    connectorMetricsService
+    connectorMetricsCollector
   );
 
   if (!api[subAction]) {

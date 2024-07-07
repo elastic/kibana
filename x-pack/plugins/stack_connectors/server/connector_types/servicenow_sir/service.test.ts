@@ -15,7 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { observables } from '../lib/servicenow/mocks';
 import { snExternalServiceConfig } from '../lib/servicenow/config';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -32,7 +32,7 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 const mockApplicationVersion = () =>
   requestMock.mockImplementationOnce(() => ({
@@ -72,7 +72,7 @@ const expectAddObservables = (single: boolean) => {
     configurationUtilities,
     url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
     method: 'get',
-    connectorMetricsService: expect.any(ConnectorMetricsService),
+    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
   });
 
   const url = single
@@ -88,7 +88,7 @@ const expectAddObservables = (single: boolean) => {
     url,
     method: 'post',
     data,
-    connectorMetricsService: expect.any(ConnectorMetricsService),
+    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
   });
 };
 
@@ -96,7 +96,7 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceSIR;
 
   beforeEach(() => {
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
     service = createExternalService({
       credentials: {
         config: { apiUrl: 'https://example.com/', isOAuth: false },
@@ -106,7 +106,7 @@ describe('ServiceNow SIR service', () => {
       configurationUtilities,
       serviceConfig: snExternalServiceConfig['.servicenow-sir'],
       axiosInstance: axios,
-      connectorMetricsService,
+      connectorMetricsCollector,
     }) as ExternalServiceSIR;
   });
 

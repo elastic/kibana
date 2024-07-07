@@ -16,7 +16,7 @@ import {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -160,7 +160,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   public async runApi(
     { body, signal, timeout }: RunActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
@@ -184,7 +184,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           ...axiosOptions.headers,
         },
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     return response.data;
   }
@@ -199,7 +199,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    */
   public async streamApi(
     { body, stream, signal, timeout }: StreamActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse> {
     const executeBody = getRequestWithStreamOption(
       this.provider,
@@ -225,7 +225,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         },
         timeout,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     return stream ? pipeStreamingResponse(response) : response.data;
   }
@@ -275,7 +275,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    */
   public async invokeStream(
     body: InvokeAIActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<PassThrough> {
     const { signal, timeout, ...rest } = body;
 
@@ -286,7 +286,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         signal,
         timeout, // do not default if not provided
       },
-      connectorMetricsService
+      connectorMetricsCollector
     )) as unknown as IncomingMessage;
 
     return res.pipe(new PassThrough());
@@ -303,7 +303,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    */
   public async invokeAsyncIterator(
     body: InvokeAIActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<{
     consumerStream: Stream<ChatCompletionChunk>;
     tokenCountStream: Stream<ChatCompletionChunk>;
@@ -320,7 +320,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
       };
 
-      connectorMetricsService.addRequestBodyBytes(undefined, requestBody);
+      connectorMetricsCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
         timeout, // do not default if not provided
@@ -345,12 +345,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    */
   public async invokeAI(
     body: InvokeAIActionParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<InvokeAIActionResponse> {
     const { signal, timeout, ...rest } = body;
     const res = await this.runApi(
       { body: JSON.stringify(rest), signal, timeout },
-      connectorMetricsService
+      connectorMetricsCollector
     );
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {

@@ -11,7 +11,7 @@ import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorMetricsService, ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchemaITSM,
   ExecutorSubActionCommonFieldsParamsSchema,
@@ -305,7 +305,7 @@ interface ServiceFactoryOpts {
   configurationUtilities: ActionsConfigurationUtilities;
   serviceConfig: SNProductsConfigValue;
   axiosInstance: AxiosInstance;
-  connectorMetricsService: ConnectorMetricsService;
+  connectorMetricsCollector: ConnectorMetricsCollector;
 }
 
 export type ServiceFactory<T = ExternalService> = ({
@@ -314,7 +314,7 @@ export type ServiceFactory<T = ExternalService> = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
-  connectorMetricsService,
+  connectorMetricsCollector,
 }: ServiceFactoryOpts) => T;
 
 /**

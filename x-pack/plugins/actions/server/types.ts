@@ -40,8 +40,8 @@ export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
-import type { ActionExecutionSource, ConnectorMetricsService } from './lib';
-export { ActionExecutionSourceType, ConnectorMetricsService } from './lib';
+import type { ActionExecutionSource, ConnectorMetricsCollector } from './lib';
+export { ActionExecutionSourceType, ConnectorMetricsCollector } from './lib';
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
@@ -86,7 +86,7 @@ export interface ActionTypeExecutorOptions<
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
   request?: KibanaRequest;
-  connectorMetricsService: ConnectorMetricsService;
+  connectorMetricsCollector: ConnectorMetricsCollector;
 }
 
 export type ActionResult = Connector;

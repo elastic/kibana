@@ -102,7 +102,7 @@ const slackApiExecutor = async ({
   secrets,
   configurationUtilities,
   logger,
-  connectorMetricsService,
+  connectorMetricsCollector,
 }: SlackApiExecutorOptions): Promise<ActionTypeExecutorResult<unknown>> => {
   const subAction = params.subAction;
 
@@ -125,7 +125,7 @@ const slackApiExecutor = async ({
     },
     logger,
     configurationUtilities,
-    connectorMetricsService
+    connectorMetricsCollector
   );
 
   if (subAction === 'validChannelId') {

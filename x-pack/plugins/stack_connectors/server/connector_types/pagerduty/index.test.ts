@@ -10,7 +10,7 @@ import moment from 'moment';
 jest.mock('./post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
-import { ConnectorMetricsService, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
 import { postPagerduty } from './post_pagerduty';
 import { Logger } from '@kbn/core/server';
@@ -31,12 +31,12 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: PagerDutyConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsService = new ConnectorMetricsService();
+  connectorMetricsCollector = new ConnectorMetricsCollector();
 });
 
 describe('get()', () => {
@@ -271,7 +271,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -353,7 +353,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -462,7 +462,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -540,7 +540,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -584,7 +584,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -615,7 +615,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -646,7 +646,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -677,7 +677,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -718,7 +718,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -782,7 +782,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -849,7 +849,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -915,7 +915,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];

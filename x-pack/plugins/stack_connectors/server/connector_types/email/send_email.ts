@@ -18,7 +18,7 @@ import {
   getSSLSettingsFromConfig,
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
 import {
-  ConnectorMetricsService,
+  ConnectorMetricsCollector,
   ConnectorTokenClientContract,
   ProxySettings,
 } from '@kbn/actions-plugin/server/types';
@@ -71,7 +71,7 @@ export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
   connectorTokenClient: ConnectorTokenClientContract,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message, messageHTML } = content;
@@ -84,10 +84,15 @@ export async function sendEmail(
       options,
       renderedMessage,
       connectorTokenClient,
-      connectorMetricsService
+      connectorMetricsCollector
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorMetricsService);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorMetricsCollector
+    );
   }
 }
 
@@ -97,7 +102,7 @@ export async function sendEmailWithExchange(
   options: SendEmailOptions,
   messageHTML: string,
   connectorTokenClient: ConnectorTokenClientContract,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -167,7 +172,7 @@ export async function sendEmailWithExchange(
     },
     logger,
     configurationUtilities,
-    connectorMetricsService,
+    connectorMetricsCollector,
     axiosInstance
   );
 }
@@ -177,7 +182,7 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -200,7 +205,7 @@ async function sendEmailWithNodemailer(
   // some deep properties, so need to use any here.
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
-  connectorMetricsService.addRequestBodyBytes(undefined, email);
+  connectorMetricsCollector.addRequestBodyBytes(undefined, email);
   const result = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {

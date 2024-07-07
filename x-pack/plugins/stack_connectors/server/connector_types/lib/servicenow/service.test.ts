@@ -15,6 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { snExternalServiceConfig } from './config';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios', () => ({
@@ -178,6 +179,7 @@ const expectImportedIncident = (update: boolean) => {
     configurationUtilities,
     url: 'https://example.com/api/x_elas2_inc_int/elastic_api/health',
     method: 'get',
+    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
   });
 
   expect(requestMock).toHaveBeenNthCalledWith(2, {
@@ -191,6 +193,7 @@ const expectImportedIncident = (update: boolean) => {
       u_description: 'desc',
       ...(update ? { elastic_incident_id: '1' } : {}),
     },
+    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
   });
 
   expect(requestMock).toHaveBeenNthCalledWith(3, {
@@ -199,14 +202,18 @@ const expectImportedIncident = (update: boolean) => {
     configurationUtilities,
     url: 'https://example.com/api/now/v2/table/incident/1',
     method: 'get',
+    connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
   });
 };
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
+  let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
+
     service = createExternalService({
       credentials: {
         // The trailing slash at the end of the url is intended.
@@ -218,6 +225,7 @@ describe('ServiceNow service', () => {
       configurationUtilities,
       serviceConfig: snExternalServiceConfig['.servicenow'],
       axiosInstance: axios,
+      connectorMetricsCollector,
     });
   });
 
@@ -233,6 +241,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: snExternalServiceConfig['.servicenow'],
           axiosInstance: axios,
+          connectorMetricsCollector,
         })
       ).toThrow();
     });
@@ -273,6 +282,7 @@ describe('ServiceNow service', () => {
             configurationUtilities,
             serviceConfig: snExternalServiceConfig['.servicenow'],
             axiosInstance: axios,
+            connectorMetricsCollector,
           })
         ).toThrow();
       });
@@ -437,6 +447,7 @@ describe('ServiceNow service', () => {
             configurationUtilities,
             serviceConfig: snExternalServiceConfig['.servicenow'],
             axiosInstance: axios,
+            connectorMetricsCollector,
           })
         ).toThrow();
       });
@@ -464,6 +475,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         url: 'https://example.com/api/now/v2/table/incident/1',
         method: 'get',
+        connectorMetricsCollector,
       });
     });
 
@@ -477,6 +489,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
         axiosInstance: axios,
+        connectorMetricsCollector,
       });
 
       requestMock.mockImplementation(() => ({
@@ -490,6 +503,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
         method: 'get',
+        connectorMetricsCollector,
       });
     });
 
@@ -535,6 +549,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         url: 'https://example.com/api/now/v2/table/incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id',
         method: 'get',
+        connectorMetricsCollector,
       });
     });
 
@@ -559,6 +574,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
         axiosInstance: axios,
+        connectorMetricsCollector,
       });
 
       requestMock.mockImplementation(() => ({
@@ -572,6 +588,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         url: 'https://example.com/api/now/v2/table/sn_si_incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id',
         method: 'get',
+        connectorMetricsCollector,
       });
     });
 
@@ -625,6 +642,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: snExternalServiceConfig['.servicenow-sir'],
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
 
         const res = await createIncident(service);
@@ -635,6 +653,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(2, {
@@ -644,6 +663,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
           method: 'post',
           data: { u_short_description: 'title', u_description: 'desc' },
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(3, {
@@ -652,6 +672,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
@@ -707,6 +728,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/import/x_elas2_inc_int_elastic_incident',
           method: 'post',
           data: { u_short_description: 'title', u_description: 'desc', foo: 'test' },
+          connectorMetricsCollector,
         });
       });
     });
@@ -723,6 +745,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
       });
 
@@ -749,6 +772,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/v2/table/incident',
           method: 'post',
           data: { short_description: 'title', description: 'desc' },
+          connectorMetricsCollector,
         });
       });
 
@@ -762,6 +786,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
 
         mockIncidentResponse(false);
@@ -778,6 +803,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/v2/table/sn_si_incident',
           method: 'post',
           data: { short_description: 'title', description: 'desc' },
+          connectorMetricsCollector,
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
@@ -826,6 +852,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: snExternalServiceConfig['.servicenow-sir'],
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
 
         const res = await updateIncident(service);
@@ -835,6 +862,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/x_elas2_sir_int/elastic_api/health',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(2, {
@@ -844,6 +872,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
           method: 'post',
           data: { u_short_description: 'title', u_description: 'desc', elastic_incident_id: '1' },
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(3, {
@@ -852,6 +881,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
@@ -915,6 +945,7 @@ describe('ServiceNow service', () => {
             elastic_incident_id: '1',
             foo: 'test',
           },
+          connectorMetricsCollector,
         });
       });
     });
@@ -931,6 +962,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
       });
 
@@ -958,6 +990,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/v2/table/incident/1',
           method: 'patch',
           data: { short_description: 'title', description: 'desc' },
+          connectorMetricsCollector,
         });
       });
 
@@ -971,6 +1004,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
 
         mockIncidentResponse(false);
@@ -988,6 +1022,7 @@ describe('ServiceNow service', () => {
           url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'patch',
           data: { short_description: 'title', description: 'desc' },
+          connectorMetricsCollector,
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
@@ -1032,6 +1067,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(2, {
@@ -1040,6 +1076,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/x_elas2_inc_int/elastic_api/health',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(3, {
@@ -1054,6 +1091,7 @@ describe('ServiceNow service', () => {
             u_state: '7',
             u_close_notes: 'Closed by Caller',
           },
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(4, {
@@ -1062,6 +1100,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(res?.url).toEqual('https://example.com/nav_to.do?uri=incident.do?sys_id=1');
@@ -1097,6 +1136,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/incident?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=custom_correlation_id',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(2, {
@@ -1105,6 +1145,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/x_elas2_inc_int/elastic_api/health',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(3, {
@@ -1119,6 +1160,7 @@ describe('ServiceNow service', () => {
             u_state: '7',
             u_close_notes: 'Closed by Caller',
           },
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(4, {
@@ -1127,6 +1169,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(res?.url).toEqual('https://example.com/nav_to.do?uri=incident.do?sys_id=1');
@@ -1237,6 +1280,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
       });
 
@@ -1268,6 +1312,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
 
         mockIncidentResponse(false);
@@ -1285,6 +1330,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(2, {
@@ -1298,6 +1344,7 @@ describe('ServiceNow service', () => {
             state: '7',
             close_notes: 'Closed by Caller',
           },
+          connectorMetricsCollector,
         });
 
         expect(requestMock).toHaveBeenNthCalledWith(3, {
@@ -1306,6 +1353,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           url: 'https://example.com/api/now/v2/table/sn_si_incident/1',
           method: 'get',
+          connectorMetricsCollector,
         });
 
         expect(res?.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
@@ -1325,6 +1373,7 @@ describe('ServiceNow service', () => {
         logger,
         configurationUtilities,
         url: 'https://example.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        connectorMetricsCollector,
       });
     });
 
@@ -1346,6 +1395,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
         axiosInstance: axios,
+        connectorMetricsCollector,
       });
 
       requestMock.mockImplementation(() => ({
@@ -1358,6 +1408,7 @@ describe('ServiceNow service', () => {
         logger,
         configurationUtilities,
         url: 'https://example.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        connectorMetricsCollector,
       });
     });
 
@@ -1394,6 +1445,7 @@ describe('ServiceNow service', () => {
         logger,
         configurationUtilities,
         url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element',
+        connectorMetricsCollector,
       });
     });
 
@@ -1415,6 +1467,7 @@ describe('ServiceNow service', () => {
         configurationUtilities,
         serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
         axiosInstance: axios,
+        connectorMetricsCollector,
       });
 
       requestMock.mockImplementation(() => ({
@@ -1428,6 +1481,7 @@ describe('ServiceNow service', () => {
         logger,
         configurationUtilities,
         url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element',
+        connectorMetricsCollector,
       });
     });
 
@@ -1520,6 +1574,7 @@ describe('ServiceNow service', () => {
           configurationUtilities,
           serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
           axiosInstance: axios,
+          connectorMetricsCollector,
         });
         await service.checkIfApplicationIsInstalled();
         expect(requestMock).not.toHaveBeenCalled();

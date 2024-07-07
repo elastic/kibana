@@ -25,7 +25,7 @@ import {
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { AxiosError } from 'axios';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore
@@ -58,7 +58,7 @@ describe('BedrockConnector', () => {
     headers: {},
     data: claude3Response,
   };
-  let connectorMetricsService: ConnectorMetricsService;
+  let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,7 +66,7 @@ describe('BedrockConnector', () => {
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
     });
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
   });
 
   const connector = new BedrockConnector({
@@ -89,7 +89,7 @@ describe('BedrockConnector', () => {
 
     describe('runApi', () => {
       it('the aws signature has non-streaming headers', async () => {
-        await connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsService());
+        await connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsCollector());
         expect(mockSigner).toHaveBeenCalledWith(
           {
             body: DEFAULT_BODY,
@@ -105,7 +105,7 @@ describe('BedrockConnector', () => {
         );
       });
       it('the Bedrock API call is successful with Claude 3 parameters; returns the response formatted for Claude 2 along with usage object', async () => {
-        const response = await connector.runApi({ body: DEFAULT_BODY }, connectorMetricsService);
+        const response = await connector.runApi({ body: DEFAULT_BODY }, connectorMetricsCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -116,7 +116,7 @@ describe('BedrockConnector', () => {
             responseSchema: RunApiLatestResponseSchema,
             data: DEFAULT_BODY,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(response).toEqual({
           ...claude2Response,
@@ -135,7 +135,7 @@ describe('BedrockConnector', () => {
         });
         // @ts-ignore
         connector.request = mockRequest;
-        const response = await connector.runApi({ body: v2Body }, connectorMetricsService);
+        const response = await connector.runApi({ body: v2Body }, connectorMetricsCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -146,7 +146,7 @@ describe('BedrockConnector', () => {
             responseSchema: RunActionResponseSchema,
             data: v2Body,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(response).toEqual(claude2Response);
       });
@@ -156,7 +156,7 @@ describe('BedrockConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsService())
+          connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsCollector())
         ).rejects.toThrow('API Error');
       });
     });
@@ -182,7 +182,7 @@ describe('BedrockConnector', () => {
       };
 
       it('the aws signature has streaming headers', async () => {
-        await connector.invokeStream(aiAssistantBody, connectorMetricsService);
+        await connector.invokeStream(aiAssistantBody, connectorMetricsCollector);
 
         expect(mockSigner).toHaveBeenCalledWith(
           {
@@ -201,7 +201,7 @@ describe('BedrockConnector', () => {
       });
 
       it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeStream(aiAssistantBody, connectorMetricsService);
+        await connector.invokeStream(aiAssistantBody, connectorMetricsCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -212,7 +212,7 @@ describe('BedrockConnector', () => {
             responseType: 'stream',
             data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
@@ -221,7 +221,7 @@ describe('BedrockConnector', () => {
         const timeout = 180000;
         await connector.invokeStream(
           { ...aiAssistantBody, timeout, signal },
-          connectorMetricsService
+          connectorMetricsCollector
         );
 
         expect(mockRequest).toHaveBeenCalledWith(
@@ -235,7 +235,7 @@ describe('BedrockConnector', () => {
             timeout,
             signal,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
@@ -261,7 +261,7 @@ describe('BedrockConnector', () => {
               },
             ],
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -282,7 +282,7 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
@@ -316,7 +316,7 @@ describe('BedrockConnector', () => {
               },
             ],
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -336,7 +336,7 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
@@ -365,7 +365,7 @@ describe('BedrockConnector', () => {
             ],
             model: modelOverride,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -386,12 +386,12 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
       it('responds with a readable stream', async () => {
-        const response = await connector.invokeStream(aiAssistantBody, connectorMetricsService);
+        const response = await connector.invokeStream(aiAssistantBody, connectorMetricsCollector);
         expect(response instanceof PassThrough).toEqual(true);
       });
 
@@ -400,7 +400,7 @@ describe('BedrockConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.invokeStream(aiAssistantBody, connectorMetricsService)
+          connector.invokeStream(aiAssistantBody, connectorMetricsCollector)
         ).rejects.toThrow('API Error');
       });
     });
@@ -417,7 +417,7 @@ describe('BedrockConnector', () => {
       };
 
       it('the API call is successful with correct parameters', async () => {
-        const response = await connector.invokeAI(aiAssistantBody, connectorMetricsService);
+        const response = await connector.invokeAI(aiAssistantBody, connectorMetricsCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -433,7 +433,7 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(response.message).toEqual(mockResponseString);
       });
@@ -460,7 +460,7 @@ describe('BedrockConnector', () => {
               },
             ],
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -482,7 +482,7 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(response.message).toEqual(mockResponseString);
       });
@@ -506,7 +506,7 @@ describe('BedrockConnector', () => {
             ],
             system: 'This is a system message',
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -528,7 +528,7 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(response.message).toEqual(mockResponseString);
       });
@@ -556,7 +556,7 @@ describe('BedrockConnector', () => {
             ],
             system: 'This is a system message',
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -578,14 +578,17 @@ describe('BedrockConnector', () => {
               temperature: 0,
             }),
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(response.message).toEqual(mockResponseString);
       });
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
         const timeout = 180000;
-        await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorMetricsService);
+        await connector.invokeAI(
+          { ...aiAssistantBody, timeout, signal },
+          connectorMetricsCollector
+        );
 
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -602,16 +605,16 @@ describe('BedrockConnector', () => {
             timeout,
             signal,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
       it('errors during API calls are properly handled', async () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.invokeAI(aiAssistantBody, connectorMetricsService)).rejects.toThrow(
-          'API Error'
-        );
+        await expect(
+          connector.invokeAI(aiAssistantBody, connectorMetricsCollector)
+        ).rejects.toThrow('API Error');
       });
     });
     describe('getResponseErrorMessage', () => {

@@ -14,7 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -136,10 +136,10 @@ const mockOldAPI = () =>
 
 describe('Jira service', () => {
   let service: ExternalService;
-  let connectorMetricsService: ConnectorMetricsService;
+  let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeAll(() => {
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
     service = createExternalService(
       {
         // The trailing slash at the end of the url is intended.
@@ -149,7 +149,7 @@ describe('Jira service', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsService
+      connectorMetricsCollector
     );
   });
 
@@ -167,7 +167,7 @@ describe('Jira service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).toThrow();
     });
@@ -181,7 +181,7 @@ describe('Jira service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).toThrow();
     });
@@ -195,7 +195,7 @@ describe('Jira service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).toThrow();
     });
@@ -209,7 +209,7 @@ describe('Jira service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).toThrow();
     });
@@ -222,7 +222,7 @@ describe('Jira service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       expect(axios.create).toHaveBeenCalledWith({
@@ -267,7 +267,7 @@ describe('Jira service', () => {
         url: 'https://coolsite.net/rest/api/2/issue/1',
         logger,
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -411,7 +411,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
           },
         },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -470,7 +470,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
           },
         },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -504,7 +504,7 @@ describe('Jira service', () => {
             parent: { key: 'RJ-107' },
           },
         },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -574,7 +574,7 @@ describe('Jira service', () => {
               ...otherFields,
             },
           },
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
       });
     });
@@ -645,7 +645,7 @@ describe('Jira service', () => {
             parent: { key: 'RJ-107' },
           },
         },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -708,7 +708,7 @@ describe('Jira service', () => {
               ...otherFields,
             },
           },
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
       });
     });
@@ -762,7 +762,7 @@ describe('Jira service', () => {
         configurationUtilities,
         url: 'https://coolsite.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -819,7 +819,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: 'https://coolsite.net/rest/capabilities',
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -901,7 +901,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
       });
 
@@ -976,7 +976,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
       });
 
@@ -1052,7 +1052,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
-          connectorMetricsService,
+          connectorMetricsCollector,
         });
       });
 
@@ -1261,7 +1261,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -1288,7 +1288,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22`,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 
@@ -1367,7 +1367,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/issue/RJ-107`,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
     });
 

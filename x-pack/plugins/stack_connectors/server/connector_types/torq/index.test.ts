@@ -12,7 +12,7 @@ import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
-  ConnectorMetricsService,
+  ConnectorMetricsCollector,
   validateConfig,
   validateParams,
   validateSecrets,
@@ -42,12 +42,12 @@ const services: Services = actionsMock.createServices();
 let actionType: TorqActionType;
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 beforeAll(() => {
   actionType = getActionType();
   configurationUtilities = actionsConfigMock.create();
-  connectorMetricsService = new ConnectorMetricsService();
+  connectorMetricsCollector = new ConnectorMetricsCollector();
 });
 
 describe('actionType', () => {
@@ -178,14 +178,14 @@ describe('execute Torq action', () => {
       params: { body: '{"msg": "some data"}' },
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsService,
+      connectorMetricsCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": [MockFunction],
-        "connectorMetricsService": ConnectorMetricsService {
+        "connectorMetricsCollector": ConnectorMetricsCollector {
           "metrics": Object {
             "requestBodyBytes": 0,
           },

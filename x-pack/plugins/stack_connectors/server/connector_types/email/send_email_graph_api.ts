@@ -11,14 +11,14 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import { SendEmailOptions } from './send_email';
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsService: ConnectorMetricsService,
+  connectorMetricsCollector: ConnectorMetricsCollector,
   axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
   const { options, headers, messageHTML } = sendEmailOptions;
@@ -38,7 +38,7 @@ export async function sendEmailGraphApi(
     headers,
     configurationUtilities,
     validateStatus: () => true,
-    connectorMetricsService,
+    connectorMetricsCollector,
   });
   if (res.status === 202) {
     return res.data;

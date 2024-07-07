@@ -10,7 +10,7 @@ import { omitBy, isNil } from 'lodash/fp';
 import { CaseConnector, getBasicAuthHeader, ServiceParams } from '@kbn/actions-plugin/server';
 import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import {
   CreateIncidentData,
   ExternalServiceIncidentResponse,
@@ -120,7 +120,7 @@ export class ResilientConnector extends CaseConnector<
 
   public async createIncident(
     incident: Incident,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<ExternalServiceIncidentResponse> {
     try {
       let data: CreateIncidentData = {
@@ -168,7 +168,7 @@ export class ResilientConnector extends CaseConnector<
             { unknowns: 'allow' }
           ),
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       const { id, create_date: createDate } = res.data;
@@ -188,10 +188,10 @@ export class ResilientConnector extends CaseConnector<
 
   public async updateIncident(
     { incidentId, incident }: UpdateIncidentParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<ExternalServiceIncidentResponse> {
     try {
-      const latestIncident = await this.getIncident({ id: incidentId }, connectorMetricsService);
+      const latestIncident = await this.getIncident({ id: incidentId }, connectorMetricsCollector);
 
       // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
       const newIncident = omitBy(isNil, incident);
@@ -205,14 +205,14 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       if (!res.data.success) {
         throw new Error('Error while updating incident');
       }
 
-      const updatedIncident = await this.getIncident({ id: incidentId }, connectorMetricsService);
+      const updatedIncident = await this.getIncident({ id: incidentId }, connectorMetricsCollector);
 
       return {
         title: `${updatedIncident.id}`,
@@ -232,7 +232,7 @@ export class ResilientConnector extends CaseConnector<
 
   public async addComment(
     { incidentId, comment }: { incidentId: string; comment: string },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) {
     try {
       await this.request(
@@ -243,7 +243,7 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: schema.object({}, { unknowns: 'allow' }),
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
     } catch (error) {
       throw new Error(
@@ -257,7 +257,7 @@ export class ResilientConnector extends CaseConnector<
 
   public async getIncident(
     { id }: { id: string },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<GetIncidentResponse> {
     try {
       const res = await this.request(
@@ -270,7 +270,7 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: GetIncidentResponseSchema,
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       return res.data;
@@ -283,7 +283,7 @@ export class ResilientConnector extends CaseConnector<
 
   public async getIncidentTypes(
     params: unknown,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<GetIncidentTypesResponse> {
     try {
       const res = await this.request(
@@ -293,7 +293,7 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: GetIncidentTypesResponseSchema,
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       const incidentTypes = res.data?.values ?? [];
@@ -311,7 +311,7 @@ export class ResilientConnector extends CaseConnector<
 
   public async getSeverity(
     params: unknown,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<GetSeverityResponse> {
     try {
       const res = await this.request(
@@ -321,7 +321,7 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: GetSeverityResponseSchema,
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       const severities = res.data?.values ?? [];
@@ -336,7 +336,7 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async getFields(params: unknown, connectorMetricsService: ConnectorMetricsService) {
+  public async getFields(params: unknown, connectorMetricsCollector: ConnectorMetricsCollector) {
     try {
       const res = await this.request(
         {
@@ -345,7 +345,7 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: GetCommonFieldsResponseSchema,
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       const fields = res.data.map((field) => {

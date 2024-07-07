@@ -7,7 +7,7 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
-import { ConnectorMetricsService, Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsCollector, Services } from '@kbn/actions-plugin/server/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 
@@ -23,7 +23,7 @@ export async function postPagerduty(
   options: PostPagerdutyOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  connectorMetricsService: ConnectorMetricsService
+  connectorMetricsCollector: ConnectorMetricsCollector
 ): Promise<AxiosResponse> {
   const { apiUrl, data, headers } = options;
   const axiosInstance = axios.create();
@@ -37,6 +37,6 @@ export async function postPagerduty(
     headers,
     configurationUtilities,
     validateStatus: () => true,
-    connectorMetricsService,
+    connectorMetricsCollector,
   });
 }

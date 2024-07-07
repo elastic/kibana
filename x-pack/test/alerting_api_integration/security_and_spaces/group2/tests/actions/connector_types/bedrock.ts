@@ -20,8 +20,9 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.bedrock';
 const name = 'A bedrock action';
@@ -456,9 +457,29 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 responseBuffer.push(chunk);
               });
 
-              passThrough.on('end', () => {
+              passThrough.on('end', async () => {
                 const parsed = parseBedrockBuffer(responseBuffer);
                 expect(parsed).to.eql('Hello world, what a unique string!');
+
+                const events: IValidatedEvent[] = await retry.try(async () => {
+                  return await getEventLog({
+                    getService,
+                    spaceId: 'default',
+                    type: 'action',
+                    id: bedrockActionId,
+                    provider: 'actions',
+                    actions: new Map([
+                      ['execute-start', { equal: 1 }],
+                      ['execute', { equal: 1 }],
+                    ]),
+                  });
+                });
+
+                const executeEvent = events[1];
+                expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(
+                  110
+                );
+
                 resolve();
               });
             });

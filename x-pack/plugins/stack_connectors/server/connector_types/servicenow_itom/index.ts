@@ -109,7 +109,7 @@ async function executorITOM(
     secrets,
     configurationUtilities,
     logger,
-    connectorMetricsService,
+    connectorMetricsCollector,
   } = execOptions;
   const { subAction, subActionParams } = params;
   const connectorTokenClient = execOptions.services.connectorTokenClient;
@@ -127,7 +127,7 @@ async function executorITOM(
     serviceConfig: externalServiceConfig,
     connectorTokenClient,
     createServiceFn: createService,
-    connectorMetricsService,
+    connectorMetricsCollector,
   });
 
   const apiAsRecord = api as unknown as Record<string, unknown>;

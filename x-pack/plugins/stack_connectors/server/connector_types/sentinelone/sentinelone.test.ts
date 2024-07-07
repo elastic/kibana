@@ -13,15 +13,15 @@ import {
 } from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
 import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 describe('SentinelOne Connector', () => {
   let connectorInstance: ReturnType<typeof sentinelOneConnectorMocks.create>;
-  let connectorMetricsService: ConnectorMetricsService;
+  let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeEach(() => {
     connectorInstance = sentinelOneConnectorMocks.create();
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
   });
 
   describe('#fetchAgentFiles()', () => {
@@ -39,7 +39,7 @@ describe('SentinelOne Connector', () => {
       connectorInstance.mockResponses.getAgentsApiResponse.data.length = 0;
 
       await expect(
-        connectorInstance.fetchAgentFiles(fetchAgentFilesParams, connectorMetricsService)
+        connectorInstance.fetchAgentFiles(fetchAgentFilesParams, connectorMetricsCollector)
       ).rejects.toHaveProperty('message', 'No agent found in SentinelOne for UUID [uuid-1]');
     });
 
@@ -47,7 +47,7 @@ describe('SentinelOne Connector', () => {
       const fetchFilesUrl = `${connectorInstance.constructorParams.config.url}${API_PATH}/agents/1913920934584665209/actions/fetch-files`;
       const response = await connectorInstance.fetchAgentFiles(
         fetchAgentFilesParams,
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       expect(response).toEqual({ data: { success: true }, errors: null });
@@ -82,13 +82,13 @@ describe('SentinelOne Connector', () => {
       connectorInstance.mockResponses.getAgentsApiResponse.data.length = 0;
 
       await expect(
-        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorMetricsService)
+        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorMetricsCollector)
       ).rejects.toHaveProperty('message', 'No agent found in SentinelOne for UUID [uuid-1]');
     });
 
     it('should call SentinelOne api with expected url', async () => {
       await expect(
-        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorMetricsService)
+        connectorInstance.downloadAgentFile(downloadAgentFileParams, connectorMetricsCollector)
       ).resolves.toEqual(connectorInstance.mockResponses.downloadAgentFileApiResponse);
     });
   });

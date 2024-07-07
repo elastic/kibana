@@ -15,7 +15,7 @@ import { RunApiResponseSchema, StreamingResponseSchema } from '../../../common/g
 import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
 import { AxiosError } from 'axios';
 import { Transform } from 'stream';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => ({
@@ -88,13 +88,13 @@ describe('GeminiConnector', () => {
     logger: loggingSystemMock.createLogger(),
     services: actionsMock.createServices(),
   });
-  let connectorMetricsService: ConnectorMetricsService;
+  let connectorMetricsCollector: ConnectorMetricsCollector;
 
   describe('Gemini', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      connectorMetricsService = new ConnectorMetricsService();
+      connectorMetricsCollector = new ConnectorMetricsCollector();
     });
 
     describe('runApi', () => {
@@ -104,7 +104,7 @@ describe('GeminiConnector', () => {
           model: DEFAULT_GEMINI_MODEL,
         };
 
-        const response = await connector.runApi(runActionParams, connectorMetricsService);
+        const response = await connector.runApi(runActionParams, connectorMetricsCollector);
 
         // Assertions
         expect(mockRequest).toBeCalledTimes(1);
@@ -132,7 +132,7 @@ describe('GeminiConnector', () => {
             responseSchema: RunApiResponseSchema,
             signal: undefined,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
 
         expect(response).toEqual(connectorResponse);
@@ -150,7 +150,7 @@ describe('GeminiConnector', () => {
       };
 
       it('the API call is successful with correct parameters', async () => {
-        await connector.invokeAI(aiAssistantBody, connectorMetricsService);
+        await connector.invokeAI(aiAssistantBody, connectorMetricsCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -176,14 +176,17 @@ describe('GeminiConnector', () => {
             signal: undefined,
             timeout: 60000,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
         const timeout = 60000;
-        await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorMetricsService);
+        await connector.invokeAI(
+          { ...aiAssistantBody, timeout, signal },
+          connectorMetricsCollector
+        );
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
@@ -208,7 +211,7 @@ describe('GeminiConnector', () => {
             signal,
             timeout: 60000,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
     });
@@ -232,7 +235,7 @@ describe('GeminiConnector', () => {
       };
 
       it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeStream(aiAssistantBody, connectorMetricsService);
+        await connector.invokeStream(aiAssistantBody, connectorMetricsCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -259,7 +262,7 @@ describe('GeminiConnector', () => {
             signal: undefined,
             timeout: 60000,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
 
@@ -268,7 +271,7 @@ describe('GeminiConnector', () => {
         const timeout = 60000;
         await connector.invokeStream(
           { ...aiAssistantBody, timeout, signal },
-          connectorMetricsService
+          connectorMetricsCollector
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -295,7 +298,7 @@ describe('GeminiConnector', () => {
             signal,
             timeout: 60000,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
       });
     });

@@ -9,7 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
@@ -99,7 +99,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
   public async executeHostActions(
     { alertIds, ...payload }: CrowdstrikeHostActionsParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) {
     return this.crowdstrikeApiRequest(
       {
@@ -124,13 +124,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
         paramsSerializer,
         responseSchema: CrowdstrikeHostActionsResponseSchema,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
   }
 
   public async getAgentDetails(
     payload: CrowdstrikeGetAgentsParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<CrowdstrikeGetAgentsResponse> {
     return this.crowdstrikeApiRequest(
       {
@@ -142,13 +142,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
         paramsSerializer,
         responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     ) as Promise<CrowdstrikeGetAgentsResponse>;
   }
 
   public async getAgentOnlineStatus(
     payload: CrowdstrikeGetAgentsParams,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
     return this.crowdstrikeApiRequest(
       {
@@ -160,11 +160,11 @@ export class CrowdstrikeConnector extends SubActionConnector<
         paramsSerializer,
         responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     ) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
-  private async getTokenRequest(connectorMetricsService: ConnectorMetricsService) {
+  private async getTokenRequest(connectorMetricsCollector: ConnectorMetricsCollector) {
     const response = await this.request<CrowdstrikeGetTokenResponse>(
       {
         url: this.urls.getToken,
@@ -176,7 +176,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
         },
         responseSchema: CrowdstrikeGetTokenResponseSchema,
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
     const token = response.data?.access_token;
     if (token) {
@@ -193,13 +193,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
   private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
-    connectorMetricsService: ConnectorMetricsService,
+    connectorMetricsCollector: ConnectorMetricsCollector,
     retried?: boolean
   ): Promise<R> {
     try {
       if (!CrowdstrikeConnector.token) {
         CrowdstrikeConnector.token = (await this.getTokenRequest(
-          connectorMetricsService
+          connectorMetricsCollector
         )) as string;
       }
 
@@ -211,14 +211,14 @@ export class CrowdstrikeConnector extends SubActionConnector<
             Authorization: `Bearer ${CrowdstrikeConnector.token}`,
           },
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       return response.data;
     } catch (error) {
       if (error.code === 401 && !retried) {
         CrowdstrikeConnector.token = null;
-        return this.crowdstrikeApiRequest(req, connectorMetricsService, true);
+        return this.crowdstrikeApiRequest(req, connectorMetricsCollector, true);
       }
       throw new CrowdstrikeError(error.message);
     }

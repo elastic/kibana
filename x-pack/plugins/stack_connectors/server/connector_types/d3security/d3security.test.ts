@@ -11,7 +11,7 @@ import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { D3SecurityRunActionResponseSchema } from '../../../common/d3security/schema';
-import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 
 describe('D3SecurityConnector', () => {
   const sampleBody = JSON.stringify({
@@ -39,16 +39,16 @@ describe('D3SecurityConnector', () => {
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
-    let connectorMetricsService: ConnectorMetricsService;
+    let connectorMetricsCollector: ConnectorMetricsCollector;
 
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
-      connectorMetricsService = new ConnectorMetricsService();
+      connectorMetricsCollector = new ConnectorMetricsCollector();
     });
     it('the D3 Security API call is successful with correct parameters', async () => {
-      const response = await connector.runApi({ body: sampleBody }, connectorMetricsService);
+      const response = await connector.runApi({ body: sampleBody }, connectorMetricsCollector);
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
@@ -60,7 +60,7 @@ describe('D3SecurityConnector', () => {
             d3key: '123',
           },
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
       expect(response).toEqual({ result: 'success' });
     });
@@ -69,9 +69,9 @@ describe('D3SecurityConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.runApi({ body: sampleBody }, connectorMetricsService)).rejects.toThrow(
-        'API Error'
-      );
+      await expect(
+        connector.runApi({ body: sampleBody }, connectorMetricsCollector)
+      ).rejects.toThrow('API Error');
     });
   });
 });

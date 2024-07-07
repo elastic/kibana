@@ -9,16 +9,16 @@ import { schema, Type } from '@kbn/config-schema';
 import { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { SubActionConnector } from './sub_action_connector';
 import { ServiceParams } from './types';
-import { ConnectorMetricsService } from '../lib';
+import { ConnectorMetricsCollector } from '../lib';
 
 export interface CaseConnectorInterface<Incident, GetIncidentResponse> {
   addComment: (
     { incidentId, comment }: { incidentId: string; comment: string },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) => Promise<void>;
   createIncident: (
     incident: Incident,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (
     {
@@ -28,18 +28,18 @@ export interface CaseConnectorInterface<Incident, GetIncidentResponse> {
       incidentId: string;
       incident: Incident;
     },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) => Promise<ExternalServiceIncidentResponse>;
   getIncident: (
     { id }: { id: string },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) => Promise<GetIncidentResponse>;
   pushToService: (
     params: {
       incident: { externalId: string | null } & Incident;
       comments: Array<{ commentId: string; comment: string }>;
     },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) => Promise<PushToServiceResponse>;
 }
 
@@ -80,12 +80,12 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
       incidentId: string;
       comment: string;
     },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<void>;
 
   public abstract createIncident(
     incident: Incident,
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<ExternalServiceIncidentResponse>;
   public abstract updateIncident(
     {
@@ -95,11 +95,11 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
       incidentId: string;
       incident: Incident;
     },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<ExternalServiceIncidentResponse>;
   public abstract getIncident(
     { id }: { id: string },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<GetIncidentResponse>;
 
   public async pushToService(
@@ -107,7 +107,7 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
       incident: { externalId: string | null } & Incident;
       comments: Array<{ commentId: string; comment: string }>;
     },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) {
     const { incident, comments } = params;
     const { externalId, ...rest } = incident;
@@ -120,10 +120,10 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
           incidentId: externalId,
           incident: rest as Incident,
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
     } else {
-      res = await this.createIncident(rest as Incident, connectorMetricsService);
+      res = await this.createIncident(rest as Incident, connectorMetricsCollector);
     }
 
     if (comments && Array.isArray(comments) && comments.length > 0) {
@@ -135,7 +135,7 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
             incidentId: res.id,
             comment: currentComment.comment,
           },
-          connectorMetricsService
+          connectorMetricsCollector
         );
 
         res.comments = [

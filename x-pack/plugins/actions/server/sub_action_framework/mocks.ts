@@ -8,7 +8,7 @@
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
-import { ConnectorMetricsService } from '../lib';
+import { ConnectorMetricsCollector } from '../lib';
 import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
 import { ExternalServiceIncidentResponse, ServiceParams } from './types';
@@ -60,7 +60,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
 
   public async testUrl(
     { url, data = {} }: { url: string; data?: Record<string, unknown> | null },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) {
     const res = await this.request(
       {
@@ -69,7 +69,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
         headers: { 'X-Test-Header': 'test' },
         responseSchema: schema.object({ status: schema.string() }),
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
 
     return res;
@@ -77,7 +77,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
 
   public async testData(
     { data }: { data: Record<string, unknown> },
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) {
     const res = await this.request(
       {
@@ -86,7 +86,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
         headers: { 'X-Test-Header': 'test' },
         responseSchema: schema.object({ status: schema.string() }),
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
 
     return res;
@@ -94,7 +94,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
 
   public async testAuth(
     { headers }: { headers?: Record<string, unknown> } = {},
-    connectorMetricsService: ConnectorMetricsService
+    connectorMetricsCollector: ConnectorMetricsCollector
   ) {
     const res = await this.request(
       {
@@ -104,7 +104,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
         headers: { 'X-Test-Header': 'test', ...headers },
         responseSchema: schema.object({ status: schema.string() }),
       },
-      connectorMetricsService
+      connectorMetricsCollector
     );
 
     return res;

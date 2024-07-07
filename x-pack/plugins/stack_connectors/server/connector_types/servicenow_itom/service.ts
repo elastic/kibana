@@ -23,7 +23,7 @@ export const createExternalService: ServiceFactory<ExternalServiceITOM> = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
-  connectorMetricsService,
+  connectorMetricsCollector,
 }): ExternalServiceITOM => {
   const snService = createExternalServiceCommon({
     credentials,
@@ -31,7 +31,7 @@ export const createExternalService: ServiceFactory<ExternalServiceITOM> = ({
     configurationUtilities,
     serviceConfig,
     axiosInstance,
-    connectorMetricsService,
+    connectorMetricsCollector,
   });
 
   const addEvent = async (params: ExecutorSubActionAddEventParams) => {
@@ -43,7 +43,7 @@ export const createExternalService: ServiceFactory<ExternalServiceITOM> = ({
         method: 'post',
         data: { records: [params] },
         configurationUtilities,
-        connectorMetricsService,
+        connectorMetricsCollector,
       });
 
       snService.checkInstance(res);

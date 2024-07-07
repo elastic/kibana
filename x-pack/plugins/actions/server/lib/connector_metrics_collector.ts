@@ -11,7 +11,7 @@ interface ConnectorMetrics {
   requestBodyBytes: number;
 }
 
-export class ConnectorMetricsService {
+export class ConnectorMetricsCollector {
   private metrics: ConnectorMetrics = {
     requestBodyBytes: 0,
   };

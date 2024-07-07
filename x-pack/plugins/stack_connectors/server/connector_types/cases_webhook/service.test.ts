@@ -13,7 +13,7 @@ import { CasesWebhookPublicConfigurationType, ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ConnectorMetricsService, getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { ConnectorMetricsCollector, getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { AuthType, WebhookMethods, SSLCertType } from '../../../common/auth/constants';
 import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
 
@@ -69,14 +69,14 @@ const sslConfig: CasesWebhookPublicConfigurationType = {
   hasAuth: true,
 };
 const sslSecrets = { crt: CRT_FILE, key: KEY_FILE, password: 'foobar', user: null, pfx: null };
-let connectorMetricsService: ConnectorMetricsService;
+let connectorMetricsCollector: ConnectorMetricsCollector;
 
 describe('Cases webhook service', () => {
   let service: ExternalService;
   let sslService: ExternalService;
 
   beforeAll(() => {
-    connectorMetricsService = new ConnectorMetricsService();
+    connectorMetricsCollector = new ConnectorMetricsCollector();
     service = createExternalService(
       actionId,
       {
@@ -85,7 +85,7 @@ describe('Cases webhook service', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsService
+      connectorMetricsCollector
     );
 
     sslService = createExternalService(
@@ -96,7 +96,7 @@ describe('Cases webhook service', () => {
       },
       logger,
       configurationUtilities,
-      connectorMetricsService
+      connectorMetricsCollector
     );
     jest.useFakeTimers();
     jest.setSystemTime(mockTime);
@@ -126,7 +126,7 @@ describe('Cases webhook service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).toThrow();
     });
@@ -141,7 +141,7 @@ describe('Cases webhook service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).toThrow();
     });
@@ -156,7 +156,7 @@ describe('Cases webhook service', () => {
           },
           logger,
           configurationUtilities,
-          connectorMetricsService
+          connectorMetricsCollector
         )
       ).not.toThrow();
     });
@@ -170,7 +170,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       expect(axios.create).toHaveBeenCalledWith({
@@ -191,7 +191,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
 
       expect(axios.create).toHaveBeenCalledWith({
@@ -234,7 +234,7 @@ describe('Cases webhook service', () => {
         logger,
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
-        connectorMetricsService: expect.any(ConnectorMetricsService),
+        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
       });
     });
 
@@ -248,7 +248,7 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "axios": [Function],
-          "connectorMetricsService": ConnectorMetricsService {
+          "connectorMetricsCollector": ConnectorMetricsCollector {
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -496,7 +496,7 @@ describe('Cases webhook service', () => {
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         data: `{"fields":{"title":"title","description":"desc","tags":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
-        connectorMetricsService: expect.any(ConnectorMetricsService),
+        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
       });
     });
 
@@ -526,7 +526,7 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "axios": [Function],
-          "connectorMetricsService": ConnectorMetricsService {
+          "connectorMetricsCollector": ConnectorMetricsCollector {
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -777,7 +777,7 @@ describe('Cases webhook service', () => {
             issuetype: { id: '10024' },
           },
         }),
-        connectorMetricsService: expect.any(ConnectorMetricsService),
+        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
       });
     });
 
@@ -798,7 +798,7 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "axios": [Function],
-          "connectorMetricsService": ConnectorMetricsService {
+          "connectorMetricsCollector": ConnectorMetricsCollector {
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -1011,7 +1011,7 @@ describe('Cases webhook service', () => {
         sslOverrides: defaultSSLOverrides,
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment"}`,
-        connectorMetricsService: expect.any(ConnectorMetricsService),
+        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
       });
     });
 
@@ -1032,7 +1032,7 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "axios": [Function],
-          "connectorMetricsService": ConnectorMetricsService {
+          "connectorMetricsCollector": ConnectorMetricsCollector {
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -1210,7 +1210,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
       const res = await service.createComment(commentReq);
       expect(requestMock).not.toHaveBeenCalled();
@@ -1226,7 +1226,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
       const res = await service.createComment(commentReq);
       expect(requestMock).not.toHaveBeenCalled();
@@ -1253,7 +1253,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
       await service.createComment(commentReq);
       expect(requestMock).toHaveBeenCalledWith({
@@ -1264,7 +1264,7 @@ describe('Cases webhook service', () => {
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment","id":"1"}`,
         sslOverrides: defaultSSLOverrides,
-        connectorMetricsService: expect.any(ConnectorMetricsService),
+        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
       });
     });
 
@@ -1295,7 +1295,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
       await service.createComment(commentReq2);
       expect(requestMock).toHaveBeenCalledWith({
@@ -1306,7 +1306,7 @@ describe('Cases webhook service', () => {
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment","id":1}`,
         sslOverrides: defaultSSLOverrides,
-        connectorMetricsService: expect.any(ConnectorMetricsService),
+        connectorMetricsCollector: expect.any(ConnectorMetricsCollector),
       });
     });
   });
@@ -1326,7 +1326,7 @@ describe('Cases webhook service', () => {
             throw new Error('Uri not allowed');
           }),
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
     });
 
@@ -1401,7 +1401,7 @@ describe('Cases webhook service', () => {
         },
         logger,
         configurationUtilities,
-        connectorMetricsService
+        connectorMetricsCollector
       );
     });
 
@@ -1472,7 +1472,7 @@ describe('Cases webhook service', () => {
         {
           ...configurationUtilities,
         },
-        connectorMetricsService
+        connectorMetricsCollector
       );
       requestMock.mockImplementation(() =>
         createAxiosResponse({

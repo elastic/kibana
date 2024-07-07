@@ -23,7 +23,7 @@ import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/se
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
-import { ConnectorMetricsService } from './connector_metrics_service';
+import { ConnectorMetricsCollector } from './connector_metrics_collector';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -294,6 +294,7 @@ export class ActionExecutor {
       actionExecutionId,
       isInMemory: this.actionInfo.isInMemory,
       ...(source ? { source } : {}),
+      actionTypeId: this.actionInfo.actionTypeId,
     });
 
     eventLogger.logEvent(event);
@@ -390,7 +391,7 @@ export class ActionExecutor {
       },
       async (span) => {
         const { actionTypeRegistry, analyticsService, eventLogger } = this.actionExecutorContext!;
-        const connectorMetricsService = new ConnectorMetricsService();
+        const connectorMetricsCollector = new ConnectorMetricsCollector();
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
@@ -479,6 +480,7 @@ export class ActionExecutor {
           actionExecutionId,
           isInMemory: this.actionInfo.isInMemory,
           ...(source ? { source } : {}),
+          actionTypeId,
         });
 
         eventLogger.startTiming(event);
@@ -512,7 +514,7 @@ export class ActionExecutor {
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
-            connectorMetricsService,
+            connectorMetricsCollector,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -541,8 +543,6 @@ export class ActionExecutor {
           status: 'ok',
         };
 
-        // console.log('body bytes ==> ', connectorMetricsService.getRequestBodyByte());
-
         event.event = event.event || {};
 
         const { error, ...resultWithoutError } = result;
@@ -553,6 +553,11 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
+          set(
+            event,
+            'kibana.action.execution.metrics.request_body_bytes',
+            connectorMetricsCollector.getRequestBodyByte()
+          );
 
           if (result.status === 'ok') {
             span?.setOutcome('success');
