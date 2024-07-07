@@ -90,8 +90,13 @@ export const permissionsPolicyViolationReportSchema = schema.object(
       {
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
+         * Spec mentions featureId, however the report that is sent from Chrome has policyId. This is to handle both cases.
          */
-        featureId: schema.string(),
+        policyId: schema.maybe(schema.string()),
+        /**
+         * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
+         */
+        featureId: schema.maybe(schema.string()),
         /**
          * If known, the file where the violation occured, or null otherwise.
          */
@@ -140,6 +145,7 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
             schema.oneOf([cspViolationReportSchema, permissionsPolicyViolationReportSchema])
           ),
           cspViolationReportSchema,
+          permissionsPolicyViolationReportSchema,
         ]),
       },
       options: {
