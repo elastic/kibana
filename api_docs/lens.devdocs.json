@@ -1297,7 +1297,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -5545,7 +5545,7 @@
             "label": "changeType",
             "description": [],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"extended\" | \"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5836,7 +5836,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"extended\" | \"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -10687,7 +10687,7 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"full\" | \"custom\" | \"dataBounds\""
+          "\"custom\" | \"full\" | \"dataBounds\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -12000,7 +12000,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
+          "\"log\" | \"sqrt\" | \"time\" | \"linear\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

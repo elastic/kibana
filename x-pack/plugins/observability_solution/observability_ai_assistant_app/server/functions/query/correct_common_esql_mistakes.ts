@@ -191,7 +191,7 @@ function escapeExpressionsInSort(sortCommand: string) {
 
       if (sortOrder) sortOrder = ` ${sortOrder}`;
 
-      if (!column.match(/^`?[a-zA-Z0-9_\.@]+`?$/)) {
+      if (!column.match(/^`.*?`$/) && !column.match(/^[a-zA-Z0-9_\.@]+$/)) {
         column = `\`${column}\``;
       }
 
@@ -234,15 +234,13 @@ export function correctCommonEsqlMistakes(query: string): {
 
   const formattedCommands: string[] = commands.map(({ name, command }, index) => {
     let formattedCommand = command;
-
     switch (name) {
-      case 'FROM':
-        formattedCommand = formattedCommand
-          .replaceAll(/FROM "(.*)"/g, 'FROM $1')
-          .replaceAll(/FROM '(.*)'/g, 'FROM $1')
-          .replaceAll(/FROM `(.*)`/g, 'FROM $1');
+      case 'FROM': {
+        formattedCommand = split(formattedCommand, ',')
+          .map((singlePattern) => singlePattern.replaceAll(/`/g, '"').replaceAll(/'/g, '"'))
+          .join(',');
         break;
-
+      }
       case 'WHERE':
         formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = ensureEqualityOperators(formattedCommand);

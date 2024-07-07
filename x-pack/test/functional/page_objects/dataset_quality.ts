@@ -96,6 +96,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
     datasetQualityFlyoutFieldsListIntegrationDetails:
       'datasetQualityFlyoutFieldsList-integration_details',
+    datasetQualityFlyoutIntegrationLoading: 'datasetQualityFlyoutIntegrationLoading',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
     datasetQualityFlyoutIntegrationAction: (action: string) =>
       `datasetQualityFlyoutIntegrationAction${action}`,
@@ -163,6 +164,13 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiBasicTable-loading', 20 * 1000);
     },
 
+    async waitUntilIntegrationsInFlyoutLoaded() {
+      await find.waitForDeletedByCssSelector(
+        '.euiSkeletonTitle .datasetQualityFlyoutIntegrationLoading',
+        10 * 1000
+      );
+    },
+
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       if (isStateful) {
@@ -220,7 +228,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async refreshTable() {
       const filtersContainer = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFiltersContainer
+        testSubjectSelectors.datasetQualityFiltersContainer,
+        20 * 1000
       );
       const refreshButton = await filtersContainer.findByTestSubject(
         testSubjectSelectors.superDatePickerApplyTimeButton
@@ -320,6 +329,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       if (isCollapsed) {
         await datasetExpandButton.click();
       }
+
+      await this.waitUntilIntegrationsInFlyoutLoaded();
     },
 
     async closeFlyout() {

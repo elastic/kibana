@@ -98,7 +98,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     },
 
     /*
-     * This function is only used in the API tests, funtional tests we have to click the download link in the UI
+     * This function is only used in the API tests, functional tests we have to click the download link in the UI
      */
     async getCompletedJobOutput(
       downloadReportPath: string,
