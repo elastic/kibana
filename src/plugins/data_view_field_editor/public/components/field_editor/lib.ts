@@ -43,7 +43,7 @@ const createNameNotAllowedValidator =
           }
         ),
       };
-    } else if (runtimeComposites.includes(value)) {
+    } else if (value !== fieldName && runtimeComposites.includes(value)) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existCompositeNamesValidationErrorMessage',

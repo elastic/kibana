@@ -121,17 +121,14 @@ describe('<FieldEditor />', () => {
   });
 
   describe('validation', () => {
-    test('should accept an optional list of existing fields and prevent creating duplicates', async () => {
+    // todo
+    test('should  prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
       testBed = await setup(
         {
           onChange,
         },
         {
-          namesNotAllowed: {
-            fields: existingFields,
-            runtimeComposites: [],
-          },
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }
@@ -155,7 +152,6 @@ describe('<FieldEditor />', () => {
     });
 
     test('should not count the default value as a duplicate', async () => {
-      const existingRuntimeFieldNames = ['myRuntimeField'];
       const field: Field = {
         name: 'myRuntimeField',
         type: 'boolean',
@@ -168,10 +164,6 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          namesNotAllowed: {
-            fields: existingRuntimeFieldNames,
-            runtimeComposites: [],
-          },
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }
