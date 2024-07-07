@@ -39,15 +39,6 @@ export interface Context {
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   /**
-   * An array of field names not allowed.
-   * e.g we probably don't want a user to give a name of an existing
-   * runtime field (for that the user should edit the existing runtime field).
-   */
-  namesNotAllowed: {
-    fields: string[];
-    runtimeComposites: string[];
-  };
-  /**
    * An array of existing concrete fields. If the user gives a name to the runtime
    * field that matches one of the concrete fields, a callout will be displayed
    * to indicate that this runtime field will shadow the concrete field.
@@ -68,7 +59,6 @@ export const FieldEditorProvider: FunctionComponent<PropsWithChildren<Context>> 
   fieldTypeToProcess,
   fieldFormats,
   fieldFormatEditors,
-  namesNotAllowed,
   existingConcreteFields,
   children,
   fieldName$,
@@ -83,7 +73,6 @@ export const FieldEditorProvider: FunctionComponent<PropsWithChildren<Context>> 
       services,
       fieldFormats,
       fieldFormatEditors,
-      namesNotAllowed,
       existingConcreteFields,
       fieldName$,
       subfields$,
@@ -96,7 +85,6 @@ export const FieldEditorProvider: FunctionComponent<PropsWithChildren<Context>> 
       uiSettings,
       fieldFormats,
       fieldFormatEditors,
-      namesNotAllowed,
       existingConcreteFields,
       fieldName$,
       subfields$,

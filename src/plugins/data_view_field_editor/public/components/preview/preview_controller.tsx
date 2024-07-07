@@ -120,11 +120,6 @@ export class PreviewController {
 
   private previewCount = 0;
 
-  private namesNotAllowed?: {
-    fields: string[];
-    runtimeComposites: string[];
-  };
-
   private updateState = (newState: Partial<PreviewState>) => {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
   };
@@ -137,21 +132,6 @@ export class PreviewController {
     type: null,
     script: undefined,
     documentId: undefined,
-  };
-
-  getNamesNotAllowed = () => {
-    if (!this.namesNotAllowed) {
-      const fieldNames = this.dataView.fields.map((fld) => fld.name);
-      const runtimeCompositeNames = Object.entries(this.dataView.getAllRuntimeFields())
-        .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
-        .map(([_runtimeFieldName]) => _runtimeFieldName);
-      this.namesNotAllowed = {
-        fields: fieldNames,
-        runtimeComposites: runtimeCompositeNames,
-      };
-    }
-
-    return this.namesNotAllowed;
   };
 
   getExistingConcreteFields = () => {

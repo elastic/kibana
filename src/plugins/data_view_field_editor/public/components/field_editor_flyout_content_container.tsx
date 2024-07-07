@@ -116,7 +116,6 @@ export const FieldEditorFlyoutContentContainer = ({
       services={services}
       fieldFormatEditors={fieldFormatEditors}
       fieldFormats={fieldFormats}
-      namesNotAllowed={controller.getNamesNotAllowed()}
       existingConcreteFields={controller.getExistingConcreteFields()}
       fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
       subfields$={new BehaviorSubject(fieldToEdit?.fields)}
