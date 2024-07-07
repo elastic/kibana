@@ -121,8 +121,7 @@ describe('<FieldEditor />', () => {
   });
 
   describe('validation', () => {
-    // todo
-    test('should  prevent creating duplicates', async () => {
+    test('should prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
       testBed = await setup(
         {
@@ -131,6 +130,14 @@ describe('<FieldEditor />', () => {
         {
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
+        },
+        // getByName returns a value, which means that the field already exists
+        () => {
+          return {
+            name: 'myRuntimeField',
+            type: 'boolean',
+            script: { source: 'emit("hello")' },
+          };
         }
       );
 

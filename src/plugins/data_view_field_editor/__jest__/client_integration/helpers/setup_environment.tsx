@@ -32,7 +32,7 @@ const { search } = dataStart;
 
 export const spySearchQuery = jest.fn();
 export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
-export const spyIndexPatternGetAllFields = jest.fn().mockImplementation(() => []);
+export const spyIndexPatternGetByName = jest.fn().mockImplementation(() => {});
 
 let searchResponseDelay = 0;
 
@@ -91,7 +91,8 @@ export const indexPatternNameForTest = 'testIndexPattern';
 export const WithFieldEditorDependencies =
   <T extends object = { [key: string]: unknown }>(
     Comp: FunctionComponent<T>,
-    overridingDependencies?: Partial<Context>
+    overridingDependencies?: Partial<Context>,
+    getByNameOverride?: () => any
   ) =>
   (props: T) => {
     // Setup mocks
@@ -125,7 +126,9 @@ export const WithFieldEditorDependencies =
       },
     });
 
-    jest.spyOn(dataView.fields, 'getAll').mockImplementation(spyIndexPatternGetAllFields);
+    jest
+      .spyOn(dataView.fields, 'getByName')
+      .mockImplementation(getByNameOverride || spyIndexPatternGetByName);
 
     const dependencies: Context = {
       dataView,
