@@ -86,6 +86,10 @@ import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
+import {
+  getColorIndicatorControlColumn,
+  type ColorIndicatorControlColumnParams,
+} from './custom_control_columns';
 
 export type SortOrder = [string, string];
 
@@ -387,6 +391,11 @@ export interface UnifiedDataTableProps {
    *
    */
   renderCellPopover?: EuiDataGridProps['renderCellPopover'];
+  /**
+   * When specified, this function will be called to determine the color of the row indicator.
+   * @param row
+   */
+  getRowIndicatorColor?: ColorIndicatorControlColumnParams['getRowIndicatorColor'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -457,6 +466,7 @@ export const UnifiedDataTable = ({
   enableComparisonMode,
   cellContext,
   renderCellPopover,
+  getRowIndicatorColor,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -845,10 +855,19 @@ export const UnifiedDataTable = ({
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
-    return externalControlColumns
+    const leadingColumns = externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
-  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
+
+    if (getRowIndicatorColor) {
+      const colorIndicatorControlColumn = getColorIndicatorControlColumn({
+        getRowIndicatorColor,
+      });
+      leadingColumns.unshift(colorIndicatorControlColumn);
+    }
+
+    return leadingColumns;
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicatorColor]);
 
   const controlColumnsConfig = customControlColumnsConfiguration?.({
     controlColumns: getAllControlColumns(),
@@ -1065,6 +1084,15 @@ export const UnifiedDataTable = ({
           ) : (
             <EuiDataGridMemoized
               id={dataGridId}
+              css={
+                getRowIndicatorColor
+                  ? {
+                      '.euiDataGridRowCell--firstColumn .euiDataGridRowCell__content': {
+                        borderBottomWidth: '0 !important',
+                      },
+                    }
+                  : undefined
+              }
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
               columns={euiGridColumns}

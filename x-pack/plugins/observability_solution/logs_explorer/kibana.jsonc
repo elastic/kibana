@@ -19,6 +19,8 @@
       "navigation",
       "share",
       "unifiedSearch",
+      "logsShared",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [],
     "requiredBundles": ["controls","embeddable","fleet", "kibanaReact", "kibanaUtils"],

@@ -103,6 +103,10 @@ export class Walker {
         this.walkFunction(node as ESQLFunction);
         break;
       }
+      case 'option': {
+        this.walkAstItem(node.args);
+        break;
+      }
       case 'column': {
         options.visitColumn?.(node);
         break;

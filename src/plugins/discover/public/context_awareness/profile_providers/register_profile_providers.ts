@@ -7,18 +7,34 @@
  */
 
 import { uniq } from 'lodash';
+import {
+  githubSummaryDataSourceProfileProvider,
+  githubSummaryDocumentProfileProvider,
+} from './github_document_profile';
+import {
+  githubDocumentProfileProvider,
+  githubDataSourceProfileProvider,
+} from './github_document_profile/profile';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
+  RootProfileProvider,
   RootProfileService,
 } from '../profiles';
 import type { BaseProfileProvider, BaseProfileService } from '../profile_service';
 import { exampleDataSourceProfileProvider } from './example_data_source_profile';
 import { exampleDocumentProfileProvider } from './example_document_profile';
 import { exampleRootProfileProvider } from './example_root_pofile';
-import { createLogsDataSourceProfileProvider } from './logs_data_source_profile';
+import { createLogsDataSourceProfileProviders } from './logs_data_source_profile';
 import { createLogDocumentProfileProvider } from './log_document_profile';
-import { createProfileProviderServices } from './profile_provider_services';
+import {
+  createProfileProviderServices,
+  ProfileProviderServices,
+} from './profile_provider_services';
+import {
+  githubApiSummaryDataSourceProfileProvider,
+  githubApiSummaryDocumentProfileProvider,
+} from './github_document_profile/profile_summary_api';
 
 export const registerProfileProviders = ({
   rootProfileService,
@@ -32,35 +48,49 @@ export const registerProfileProviders = ({
   experimentalProfileIds: string[];
 }) => {
   const providerServices = createProfileProviderServices();
-  const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
-  const logsDocumentProfileProvider = createLogDocumentProfileProvider(providerServices);
-  const rootProfileProviders = [exampleRootProfileProvider];
-  const dataSourceProfileProviders = [
-    exampleDataSourceProfileProvider,
-    logsDataSourceProfileProvider,
-  ];
-  const documentProfileProviders = [exampleDocumentProfileProvider, logsDocumentProfileProvider];
+  const rootProfileProviders = createRootProfileProviders(providerServices);
+  const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
+  const documentProfileProviders = createDocumentProfileProviders(providerServices);
   const enabledProfileIds = uniq([
-    logsDataSourceProfileProvider.profileId,
-    logsDocumentProfileProvider.profileId,
+    githubDocumentProfileProvider.profileId,
+    githubDataSourceProfileProvider.profileId,
+    githubSummaryDocumentProfileProvider.profileId,
+    githubSummaryDataSourceProfileProvider.profileId,
+    githubApiSummaryDocumentProfileProvider.profileId,
+    githubApiSummaryDataSourceProfileProvider.profileId,
+    ...extractProfileIds(rootProfileProviders),
+    ...extractProfileIds(dataSourceProfileProviders),
+    ...extractProfileIds(documentProfileProviders),
     ...experimentalProfileIds,
   ]);
 
   registerEnabledProfileProviders({
     profileService: rootProfileService,
-    availableProviders: rootProfileProviders,
+    availableProviders: [exampleRootProfileProvider, ...rootProfileProviders],
     enabledProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
-    availableProviders: dataSourceProfileProviders,
+    availableProviders: [
+      exampleDataSourceProfileProvider,
+      githubDataSourceProfileProvider,
+      githubSummaryDataSourceProfileProvider,
+      githubApiSummaryDataSourceProfileProvider,
+      ...dataSourceProfileProviders,
+    ],
     enabledProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
-    availableProviders: documentProfileProviders,
+    availableProviders: [
+      githubDocumentProfileProvider,
+      githubSummaryDocumentProfileProvider,
+      githubApiSummaryDocumentProfileProvider,
+      exampleDocumentProfileProvider,
+      ...documentProfileProviders,
+    ],
     enabledProfileIds,
   });
 };
@@ -83,3 +113,16 @@ export const registerEnabledProfileProviders = <
     }
   }
 };
+const extractProfileIds = (providers: Array<BaseProfileProvider<{}>>) =>
+  providers.map(({ profileId }) => profileId);
+
+const createRootProfileProviders = (_providerServices: ProfileProviderServices) =>
+  [] as RootProfileProvider[];
+
+const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  ...createLogsDataSourceProfileProviders(providerServices),
+];
+
+const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
+  createLogDocumentProfileProvider(providerServices),
+];

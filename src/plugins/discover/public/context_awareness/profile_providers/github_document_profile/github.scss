@@ -1,0 +1,121 @@
+.githubMarkDown img {
+  max-width: 100%;
+}
+
+.shooter_btm {
+  max-width: 100%;
+  width: 300px;
+  height: 5px;
+  background-color: #fff;
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  animation: bottom_shooter 3.5s ease-in-out infinite alternate
+}
+
+.shooter_btm:after {
+  content: "";
+  z-index: -1;
+  height: 15px;
+  width: 5px;
+  background-color: #000;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  animation: move_bullet 3.5s ease-in-out infinite;
+  animation-delay: .75s;
+  opacity: 0
+}
+
+@keyframes bottom_shooter {
+  0% {
+    left: -50px
+  }
+
+  to {
+    left: calc(50px)
+  }
+}
+
+@keyframes move_bullet {
+  0% {
+    bottom: 0;
+    opacity: 0
+  }
+
+  50% {
+    opacity: 1
+  }
+
+  to {
+    bottom: 400px
+  }
+}
+
+.invaders_box {
+  text-align: center;
+  font-size: 46px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  position: relative;
+  height: 230px
+}
+
+.invader_team {
+  width: 100%;
+  text-align: center
+}
+
+.invaders {
+  position: relative;
+  width: 300px;
+  margin-bottom: 100px;
+}
+
+.invader {
+  display: block;
+  animation: move-invaders 2s 1;
+  animation-fill-mode: forwards;
+  margin-left: -300px
+}
+
+@keyframes move-invaders {
+  0% {
+    transform: translateY(0)
+  }
+
+  20% {
+    transform: translateX(150px)
+  }
+
+  50% {
+    transform: translateY(20px)
+  }
+
+  to {
+    transform: translateX(150px)
+  }
+}
+
+.invaders {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.invader {
+  animation: moveInvaders 2s linear infinite alternate;
+}
+
+@keyframes moveInvaders {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(200px); /* Adjust the 200px based on your .invader width */
+  }
+}
+

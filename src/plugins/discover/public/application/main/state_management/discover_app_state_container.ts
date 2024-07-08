@@ -38,6 +38,8 @@ import {
   DiscoverDataSource,
   isDataSourceType,
 } from '../../../../common/data_sources';
+import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
@@ -57,7 +59,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * Initializes the state by the given saved search and starts syncing the state with the URL
    * @param currentSavedSearch
    */
-  initAndSync: (currentSavedSearch: SavedSearch) => () => void;
+  initAndSync: () => () => void;
   /**
    * Replaces the current state in URL with the given state
    * @param newState
@@ -82,11 +84,10 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
-
   /*
    * Get updated AppState when given a saved search
    *
-   * */
+   */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
@@ -157,6 +158,17 @@ export interface DiscoverAppState {
   breakdownField?: string;
 }
 
+export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
+  /**
+   * Legacy data view ID prop
+   */
+  index?: string;
+}
+
 export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
   createStateContainerReactHelpers<ReduxLikeStateContainer<DiscoverAppState>>();
 
@@ -168,14 +180,20 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  */
 export const getDiscoverAppStateContainer = ({
   stateStorage,
-  savedSearch,
+  internalStateContainer,
+  savedSearchContainer,
   services,
 }: {
   stateStorage: IKbnUrlStateStorage;
-  savedSearch: SavedSearch;
+  internalStateContainer: DiscoverInternalStateContainer;
+  savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
-  let initialState = getInitialState(stateStorage, savedSearch, services);
+  const initialUrlState = cleanupUrlState(
+    stateStorage?.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
+    services.uiSettings
+  );
+  let initialState = getInitialState(initialUrlState, savedSearchContainer.getState(), services);
   let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
@@ -234,8 +252,17 @@ export const getDiscoverAppStateContainer = ({
     });
   };
 
-  const initializeAndSync = (currentSavedSearch: SavedSearch) => {
+  const initializeAndSync = () => {
+    const currentSavedSearch = savedSearchContainer.getState();
+
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
+
+    if (!currentSavedSearch.id) {
+      internalStateContainer.transitions.setResetDefaultProfileState({
+        columns: initialUrlState.columns === undefined,
+        rowHeight: initialUrlState.rowHeight === undefined,
+      });
+    }
 
     const { data } = services;
     const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
@@ -314,34 +341,17 @@ export const getDiscoverAppStateContainer = ({
   };
 };
 
-export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
-  /**
-   * Necessary to take care of legacy links [fieldName,direction]
-   */
-  sort?: string[][] | [string, string];
-  /**
-   * Legacy data view ID prop
-   */
-  index?: string;
-}
-
 export function getInitialState(
-  stateStorage: IKbnUrlStateStorage | undefined,
+  initialUrlState: DiscoverAppState | undefined,
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
-  const appStateFromUrl = stateStorage?.get<AppStateUrl>(APP_STATE_URL_KEY);
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
   });
   return handleSourceColumnState(
-    appStateFromUrl == null
-      ? defaultAppState
-      : {
-          ...defaultAppState,
-          ...cleanupUrlState(appStateFromUrl, services.uiSettings),
-        },
+    initialUrlState === undefined ? defaultAppState : { ...defaultAppState, ...initialUrlState },
     services.uiSettings
   );
 }
