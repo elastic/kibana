@@ -11,6 +11,14 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { lastValueFrom } from 'rxjs';
+import { compact, filter, map } from 'lodash';
+import type { EndpointAutomatedActionListRequestQuery } from '../../../../common/endpoint/schema/automated_actions';
+import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
+import { useGetEndpointActionList } from '../../../management/hooks';
 import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
 import type { SearchHit } from '../../../../common/search_strategy';
 import type {
@@ -19,11 +27,20 @@ import type {
 } from '../../../../common/types/response_actions';
 import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { DEFAULT_POLL_INTERVAL } from '../../../management/common/constants';
+import type {
+  ActionRequestOptions,
+  ActionRequestStrategyResponse,
+} from '../../../../common/search_strategy/endpoint/response_actions';
+import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
+import { useKibana } from '../../lib/kibana';
+import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { SortOrder } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { ENDPOINT_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -81,19 +98,27 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
-
   const alertId = rawEventData?._id ?? '';
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !alertId;
+
   const [isLive, setIsLive] = useState(false);
 
-  const { data: automatedList, isFetched } = useGetAutomatedActionList(
+  const { data: alertResponseActions, isFetched } = useGetEndpointActionList(
+    { alertIds: [alertId] },
+    { enabled: !shouldEarlyReturn, refetchInterval: isLive ? DEFAULT_POLL_INTERVAL : false }
+  );
+
+  const { data: automatedList } = useFetchOsQueryAutomatedActions(
     {
       alertIds: [alertId],
     },
     { enabled: !shouldEarlyReturn, isLive }
   );
 
-  // calculating whether or not our useGetAutomatedActionList (react-query) should try to refetch data
+  const actionList: Array<ActionDetails | LogsOsqueryAction> = useMemo(() => {
+    return [...(alertResponseActions?.data ?? []), ...(automatedList?.items ?? [])];
+  }, [alertResponseActions?.data, automatedList?.items]);
+
   useEffect(() => {
     setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
   }, [automatedList, responseActions?.length]);
@@ -119,11 +144,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
           <EuiSpacer size="s" />
           <TabContentWrapper data-test-subj="responseActionsViewWrapper">
             {isFetched && !!automatedListItems.length ? (
-              <ResponseActionsResults
-                actions={automatedListItems}
-                ruleName={ruleName}
-                ecsData={ecsData}
-              />
+              <ResponseActionsResults actions={actionList} ruleName={ruleName} ecsData={ecsData} />
             ) : (
               <EmptyResponseActions />
             )}
@@ -132,4 +153,60 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
       ),
     };
   }
+};
+
+interface UseFetchOsQueryAutomatedActionsProps {
+  enabled: boolean;
+  isLive: boolean;
+}
+
+// Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
+const ACTIONS_QUERY_KEY = 'actions';
+
+const useFetchOsQueryAutomatedActions = (
+  query: EndpointAutomatedActionListRequestQuery,
+  { enabled, isLive }: UseFetchOsQueryAutomatedActionsProps
+): UseQueryResult<ActionRequestStrategyResponse & { items: LogsEndpointActionWithHosts[] }> => {
+  const { data } = useKibana().services;
+  const { alertIds } = query;
+  return useQuery({
+    queryKey: [ACTIONS_QUERY_KEY, { alertId: alertIds[0] }],
+    queryFn: async () => {
+      const responseData = await lastValueFrom(
+        data.search.search<ActionRequestOptions, ActionRequestStrategyResponse>(
+          {
+            alertIds,
+            sort: {
+              order: SortOrder.desc,
+              field: '@timestamp',
+            },
+            factoryQueryType: ResponseActionsQueries.actions,
+          },
+          {
+            strategy: ENDPOINT_SEARCH_STRATEGY,
+          }
+        )
+      );
+
+      // fields have to firstly be expanded from dotted object to kind of normal nested object
+      const items = map(
+        filter(responseData.edges, 'fields'),
+        (
+          edge: ResponseActionsSearchHit & {
+            fields: object;
+          }
+        ) => {
+          return expandDottedObject(edge.fields, true);
+        }
+      );
+
+      return {
+        ...responseData,
+        items: compact(items),
+      };
+    },
+    enabled,
+    refetchInterval: isLive ? 5000 : false,
+    keepPreviousData: true,
+  });
 };

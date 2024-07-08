@@ -146,6 +146,7 @@ export interface LogsEndpointAction<
   meta?: TMeta;
 }
 
+// FIXME:PT delete this
 export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
   EndpointActions: EndpointActionFields &
     ActionRequestFields & {

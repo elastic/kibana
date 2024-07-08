@@ -10,14 +10,11 @@ import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 import { EndpointResponseActionResults } from './endpoint_action_results';
-import type {
-  LogsEndpointAction,
-  LogsEndpointActionWithHosts,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useKibana } from '../../lib/kibana';
 
 interface ResponseActionsResultsProps {
-  actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
+  actions: Array<ActionDetails | LogsOsqueryAction>;
   ruleName?: string;
   ecsData?: Ecs | null;
 }
@@ -30,14 +27,13 @@ export const ResponseActionsResults = React.memo(
     const { OsqueryResult } = osquery;
 
     const getAction = useCallback(
-      (action: LogsEndpointActionWithHosts | LogsOsqueryAction) => {
+      (action: ActionDetails | LogsOsqueryAction) => {
         if (isOsquery(action)) {
           const actionId = action.action_id;
           const startDate = action['@timestamp'];
 
           return (
             <OsqueryResult
-              key={actionId}
               actionId={actionId}
               startDate={startDate}
               ruleName={ruleName}
@@ -46,13 +42,7 @@ export const ResponseActionsResults = React.memo(
           );
         }
         if (isEndpoint(action)) {
-          return (
-            <EndpointResponseActionResults
-              action={action}
-              ruleName={ruleName}
-              key={action.EndpointActions.action_id}
-            />
-          );
+          return <EndpointResponseActionResults action={action} ruleName={ruleName} />;
         }
         return null;
       },
@@ -62,12 +52,14 @@ export const ResponseActionsResults = React.memo(
     return (
       <>
         {actions.map((action) => {
+          const key = isEndpoint(action) ? action.id : action.action_id;
+
           return (
-            <>
+            <React.Fragment key={key}>
               <EuiSpacer size="s" />
               {getAction(action)}
               <EuiSpacer size="s" />
-            </>
+            </React.Fragment>
           );
         })}
       </>
@@ -77,9 +69,9 @@ export const ResponseActionsResults = React.memo(
 
 ResponseActionsResults.displayName = 'ResponseActionsResults';
 
-const isOsquery = (item: LogsEndpointAction | LogsOsqueryAction): item is LogsOsqueryAction => {
+const isOsquery = (item: ActionDetails | LogsOsqueryAction): item is LogsOsqueryAction => {
   return !!(item && 'input_type' in item && item?.input_type === 'osquery');
 };
-const isEndpoint = (item: LogsEndpointAction | LogsOsqueryAction): item is LogsEndpointAction => {
-  return !!(item && 'EndpointActions' in item && item?.EndpointActions?.input_type === 'endpoint');
+const isEndpoint = (item: ActionDetails | LogsOsqueryAction): item is ActionDetails => {
+  return 'agentType' in item && 'command' in item && 'agents' in item;
 };
