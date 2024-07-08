@@ -89,7 +89,7 @@ export const openDataControlEditor = async <
           }}
           onSave={(state, selectedControlType) => {
             closeOverlay(overlay);
-            resolve({ state, controlType: selectedControlType });
+            resolve({ type: selectedControlType, state });
           }}
           services={{ dataViews: services.dataViews }}
         />,
