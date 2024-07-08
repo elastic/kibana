@@ -35,6 +35,8 @@ const ruleFieldsDiffMock: PartialRuleDiff = {
     },
   },
   has_conflict: false,
+  number_fields_with_updates: 1,
+  number_fields_with_conflicts: 0,
 };
 
 const renderPerFieldRuleDiffTab = (ruleDiff: PartialRuleDiff) => {
