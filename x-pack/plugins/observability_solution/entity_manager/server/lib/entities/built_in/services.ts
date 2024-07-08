@@ -66,7 +66,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
             name: 'A',
             aggregation: 'doc_count',
             filter:
-              'processor.event: "metric" AND metricset.name: "transaction" AND data_stream.dataset: "apm.transaction.1m"',
+              'processor.event: "metric" AND metricset.name: "service_transaction" AND metricset.interval: "1m"',
           },
         ],
       },
