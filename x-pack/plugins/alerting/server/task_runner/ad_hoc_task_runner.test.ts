@@ -67,6 +67,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -365,6 +366,7 @@ describe('Ad Hoc Task Runner', () => {
       triggeredActionsStatus: 'complete',
     });
     (RuleRunMetricsStore as jest.Mock).mockImplementation(() => ruleRunMetricsStore);
+    logger.isLevelEnabled.mockReturnValue(true);
     logger.get.mockImplementation(() => logger);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
@@ -483,6 +485,7 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_FLAPPING]: false,
           [ALERT_FLAPPING_HISTORY]: [true],
           [ALERT_INSTANCE_ID]: '1',
+          [ALERT_SEVERITY_IMPROVING]: false,
           [ALERT_MAINTENANCE_WINDOW_IDS]: [],
           [ALERT_CONSECUTIVE_MATCHES]: 1,
           [ALERT_RULE_CATEGORY]: 'My test rule',

@@ -220,9 +220,17 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       type: 'machine_learning',
       anomaly_threshold: 65,
       machine_learning_job_id: ['auth_high_count_logon_events', 'auth_high_count_logon_fails'],
+      alert_suppression: {
+        group_by: ['host.name'],
+        duration: { unit: 'm', value: 5 },
+        missing_fields_strategy: 'suppress',
+      },
     }),
     ['security-rule.query', 'security-rule.language']
-  ) as typeof CUSTOM_QUERY_INDEX_PATTERN_RULE;
+  ) as Omit<
+    ReturnType<typeof createRuleAssetSavedObject>,
+    'security-rule.query' | 'security-rule.language'
+  >;
 
   const THRESHOLD_RULE_INDEX_PATTERN = createRuleAssetSavedObject({
     name: 'Threshold index pattern rule',
@@ -500,24 +508,30 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         });
 
         it('Machine learning rule properties', function () {
-          clickAddElasticRulesButton();
-
-          openRuleInstallPreview(MACHINE_LEARNING_RULE['security-rule'].name);
-
-          assertCommonPropertiesShown(commonProperties);
-
           const {
+            name,
+            alert_suppression: alertSuppression,
             anomaly_threshold: anomalyThreshold,
             machine_learning_job_id: machineLearningJobIds,
           } = MACHINE_LEARNING_RULE['security-rule'] as {
+            name: string;
             anomaly_threshold: number;
             machine_learning_job_id: string[];
+            alert_suppression: AlertSuppression;
           };
+
+          clickAddElasticRulesButton();
+          openRuleInstallPreview(name);
+
+          assertCommonPropertiesShown(commonProperties);
+
           assertMachineLearningPropertiesShown(
             anomalyThreshold,
             machineLearningJobIds,
             this.mlModules
           );
+
+          assertAlertSuppressionPropertiesShown(alertSuppression);
         });
 
         it('Threshold rule properties', () => {
@@ -1143,111 +1157,96 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
     });
 
-    describe(
-      'Viewing rule changes in per-field diff view',
-      {
-        tags: TEST_ENV_TAGS,
-        env: {
-          ftrConfig: {
-            kbnServerArgs: [
-              `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-                'perFieldPrebuiltRulesDiffingEnabled',
-              ])}`,
-            ],
-          },
-        },
-      },
-      () => {
-        it('User can see changes in a side-by-side per-field diff view', () => {
-          clickRuleUpdatesTab();
+    describe('Viewing rule changes in per-field diff view', { tags: TEST_ENV_TAGS }, () => {
+      it('User can see changes in a side-by-side per-field diff view', () => {
+        clickRuleUpdatesTab();
 
-          openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+        assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
 
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
 
-          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 2);
+        cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 2);
 
-          /* Version should be the first field in the order */
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+        /* Version should be the first field in the order */
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
 
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
+      });
+
+      it('User can switch between rules upgrades without closing flyout', () => {
+        clickRuleUpdatesTab();
+
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+        assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
+
+        /* Version should be the first field in the order */
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
+
+        /* Select another rule without closing the preview for the current rule */
+        openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
+
+        /* Make sure the per-field diff is displayed for the newly selected rule */
+        cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 2').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 2').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 1').should('not.exist');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 1').should('not.exist');
+
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+      });
+
+      it('User can see changes when updated rule is a different rule type', () => {
+        const OUTDATED_RULE_WITH_QUERY_TYPE = createRuleAssetSavedObject({
+          name: 'Query rule',
+          rule_id: 'rule_id',
+          version: 1,
+          type: 'query',
+          language: 'kuery',
         });
-
-        it('User can switch between rules upgrades without closing flyout', () => {
-          clickRuleUpdatesTab();
-
-          openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
-
-          /* Version should be the first field in the order */
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
-
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
-
-          /* Select another rule without closing the preview for the current rule */
-          openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
-
-          /* Make sure the per-field diff is displayed for the newly selected rule */
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 2').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 2').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 1').should('not.exist');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 1').should('not.exist');
-
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+        const UPDATED_RULE_WITH_EQL_TYPE = createRuleAssetSavedObject({
+          language: 'eql',
+          name: 'EQL rule',
+          rule_id: 'rule_id',
+          version: 2,
+          type: 'eql',
         });
+        /* Create a new rule and install it */
+        createAndInstallMockedPrebuiltRules([OUTDATED_RULE_WITH_QUERY_TYPE]);
+        /* Create a second version of the rule, making it available for update */
+        installPrebuiltRuleAssets([UPDATED_RULE_WITH_EQL_TYPE]);
 
-        it('User can see changes when updated rule is a different rule type', () => {
-          const OUTDATED_RULE_WITH_QUERY_TYPE = createRuleAssetSavedObject({
-            name: 'Query rule',
-            rule_id: 'rule_id',
-            version: 1,
-            type: 'query',
-            language: 'kuery',
-          });
-          const UPDATED_RULE_WITH_EQL_TYPE = createRuleAssetSavedObject({
-            language: 'eql',
-            name: 'EQL rule',
-            rule_id: 'rule_id',
-            version: 2,
-            type: 'eql',
-          });
-          /* Create a new rule and install it */
-          createAndInstallMockedPrebuiltRules([OUTDATED_RULE_WITH_QUERY_TYPE]);
-          /* Create a second version of the rule, making it available for update */
-          installPrebuiltRuleAssets([UPDATED_RULE_WITH_EQL_TYPE]);
+        cy.reload();
+        clickRuleUpdatesTab();
 
-          cy.reload();
-          clickRuleUpdatesTab();
+        openRuleUpdatePreview(OUTDATED_RULE_WITH_QUERY_TYPE['security-rule'].name);
+        assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
 
-          openRuleUpdatePreview(OUTDATED_RULE_WITH_QUERY_TYPE['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
 
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
+        cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 5);
 
-          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 5);
+        cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('Type').should('be.visible');
+        cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('query').should('be.visible');
+        cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('eql').should('be.visible');
 
-          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('Type').should('be.visible');
-          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('query').should('be.visible');
-          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('eql').should('be.visible');
-
-          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('KQL query').should('exist');
-          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('EQL query').should('exist');
-        });
-      }
-    );
+        cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('KQL query').should('exist');
+        cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('EQL query').should('exist');
+      });
+    });
   });
 });

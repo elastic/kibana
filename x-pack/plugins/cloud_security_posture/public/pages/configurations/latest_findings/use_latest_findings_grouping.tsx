@@ -8,7 +8,7 @@ import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
@@ -130,13 +130,13 @@ export const isFindingsRootGroupingAggregation = (
  */
 export const useLatestFindingsGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
+  getGroupStats?: GetGroupStats<FindingsGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -165,7 +165,7 @@ export const useLatestFindingsGrouping = ({
     getDefaultQuery,
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
     groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
