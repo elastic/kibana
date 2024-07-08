@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
-import type { Space, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { Space } from '@kbn/spaces-plugin/server';
 
 import { DEFAULT_ROUTE_UI_SETTING_ID } from '../common/constants';
 import { NavigationServerStartDependencies } from './types';
