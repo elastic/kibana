@@ -168,18 +168,19 @@ And <field_name> field is updated by Elastic in this upgrade (target version != 
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
 Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
 And arrays should be deduplicated before comparison
-And arrays should be compared insensitive of case
+And arrays should be compared sensitive of case
 And arrays should be compared agnostic of order
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm        | field_name | base_version            | current_version         | target_version            | merged_version                 |
-| array of scalars | tags       | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "five"]    | ["one", "two", "four", "five"] |
-| array of scalars | tags       | ["one", "two", "three"] | ["two", "one"]          | ["one", "four"]           | ["one", "four"]                |
-| array of scalars | tags       | ["one", "two", "three"] | []                      | ["one", "two", "five"]    | ["five"]                       |
-| array of scalars | tags       | ["one", "two", "two"]   | ["two", "one", "three"] | ["three", "three", "one"] | ["one", "three"]               |
-| array of scalars | tags       | ["ONE", "one", "TWO"]   | ["one", "ONE"]          | ["ONE", "THREE"]          | ["ONE", "THREE"]               |
+| algorithm        | field_name | base_version                          | current_version         | target_version                   | merged_version                   |
+| array of scalars | tags       | ["one", "two", "three"]               | ["one", "two", "four"]  | ["one", "two", "five"]           | ["one", "two", "four", "five"]   |
+| array of scalars | tags       | ["one", "two", "three"]               | ["two", "one"]          | ["one", "four"]                  | ["one", "four"]                  |
+| array of scalars | tags       | ["one", "two", "three"]               | []                      | ["one", "two", "five"]           | ["five"]                         |
+| array of scalars | tags       | ["one", "two", "two"]                 | ["two", "one", "three"] | ["three", "three", "one"]        | ["one", "three"]                 |
+| array of scalars | index      | ["logs-*", "endgame-*", "endpoint-*"] | ["Logs-*", "endgame-*"] | ["logs-*", "endgame-*", "new-*"] | ["Logs-*", "endgame-*", "new-*"] |
+| array of scalars | index      | ["logs-*"]                            | ["logs-*", "Logs-*"]    | ["logs-*", "new-*"]              | ["logs-*", "Logs-*", "new-*"]    |
 ```
 
 ### Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`
@@ -233,7 +234,7 @@ And <field_name> field is updated by Elastic in this upgrade (target version != 
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
 Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
 And arrays should be deduplicated before comparison
-And arrays should be compared insensitive of case
+And arrays should be compared sensitive of case
 And arrays should be compared agnostic of order
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
