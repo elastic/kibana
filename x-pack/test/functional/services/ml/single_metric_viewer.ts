@@ -82,6 +82,13 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail('mlAnomaliesListRowActionsMenu');
     },
 
+    async assertAnomalyActionDiscoverButtonExists() {
+      await testSubjects.existOrFail('mlAnomaliesListRowAction_viewInDiscoverButton');
+    },
+    async assertAnomalyActionJobRulesButtonExists() {
+      await testSubjects.existOrFail('mlAnomaliesListRowActionConfigureRulesButton');
+    },
+
     async assertAnnotationsExists(state: string) {
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
         timeout: 30 * 1000,
