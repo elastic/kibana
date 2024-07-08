@@ -8,21 +8,28 @@
 
 import './editor_menu.scss';
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { type IconType } from '@elastic/eui';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { type Action, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { type Subscription, AsyncSubject, from, defer, map, forkJoin } from 'rxjs';
+import type { IconType } from '@elastic/eui';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from '../../services/plugin_services';
+
 import {
   getAddPanelActionMenuItemsGroup,
   type PanelSelectionMenuItem,
   type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
-import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
+import {
+  DashboardPanelSelectionListFlyout,
+  type DashboardPanelSelectionListFlyoutProps,
+} from './dashboard_panel_selection_flyout';
+import { pluginServices } from '../../services/plugin_services';
 import type { DashboardServices } from '../../services/types';
 import { useDashboardAPI } from '../dashboard_app';
 
@@ -40,6 +47,23 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
+
+interface UseGetDashboardPanelsArgs {
+  embeddableAPI: PresentationContainer;
+  dashboardAPI: ReturnType<typeof useDashboardAPI>;
+  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
+}
+
+interface OpenDashboardPanelSelectionFlyoutArgs {
+  getDashboardPanels: ReturnType<typeof useGetDashboardPanels>;
+  flyoutPanelPaddingSize?: DashboardPanelSelectionListFlyoutProps['paddingSize'];
+}
+
+interface EditorMenuProps {
+  api: PresentationContainer;
+  isDisabled?: boolean;
+  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
+}
 
 export const getEmbeddableFactoryMenuItemProvider =
   (api: PresentationContainer, closePopover: () => void) =>
@@ -110,56 +134,19 @@ export const mergeGroupedItemsProvider =
     return panelGroups;
   };
 
-interface EditorMenuProps {
-  api: PresentationContainer;
-  isDisabled?: boolean;
-  /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-}
-
-export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
-  const isMounted = useRef(false);
-  const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
-  const dashboard = useDashboardAPI();
-
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-      flyoutRef.current?.close();
-    };
-  }, []);
+const useGetDashboardPanels = ({
+  dashboardAPI,
+  embeddableAPI,
+  createNewVisType,
+}: UseGetDashboardPanelsArgs) => {
+  const panelsComputeResultCache = useRef(new AsyncSubject<GroupedAddPanelActions[]>());
+  const panelComputeSubscription = useRef<Subscription>();
 
   const {
+    uiActions,
     embeddable,
     visualizations: { getAliases: getVisTypeAliases, getByGroup: getVisTypesByGroup },
-    uiActions,
   } = pluginServices.getServices();
-
-  const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
-    UnwrappedEmbeddableFactory[]
-  >([]);
-
-  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>> | undefined>(
-    undefined
-  );
-
-  const embeddableFactories = useMemo(
-    () => Array.from(embeddable.getEmbeddableFactories()),
-    [embeddable]
-  );
-
-  useEffect(() => {
-    Promise.all(
-      embeddableFactories.map<Promise<UnwrappedEmbeddableFactory>>(async (factory) => ({
-        factory,
-        isEditable: await factory.isEditable(),
-      }))
-    ).then((factories) => {
-      setUnwrappedEmbeddableFactories(factories);
-    });
-  }, [embeddableFactories]);
 
   const getSortedVisTypesByGroup = (group: VisGroups) =>
     getVisTypesByGroup(group)
@@ -186,176 +173,283 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
     )
     .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
-  const factories = unwrappedEmbeddableFactories.filter(
-    ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
-      isEditable && !isContainerType && canCreateNew() && type !== 'visualization'
+  const augmentedCreateNewVisType = useCallback(
+    (visType: Parameters<typeof createNewVisType>[0], cb: () => void) => {
+      const visClickHandler = createNewVisType(visType);
+      return () => {
+        visClickHandler();
+        cb();
+      };
+    },
+    [createNewVisType]
   );
 
-  const factoryGroupMap: Record<string, FactoryGroup> = {};
+  const getVisTypeMenuItem = useCallback(
+    (onClickCb: () => void, visType: BaseVisType): PanelSelectionMenuItem => {
+      const {
+        name,
+        title,
+        titleInWizard,
+        description,
+        icon = 'empty',
+        isDeprecated,
+        order,
+      } = visType;
+      return {
+        id: name,
+        name: titleInWizard || title,
+        isDeprecated,
+        icon,
+        onClick: augmentedCreateNewVisType(visType, onClickCb),
+        'data-test-subj': `visType-${name}`,
+        description,
+        order,
+      };
+    },
+    [augmentedCreateNewVisType]
+  );
 
-  // Retrieve ADD_PANEL_TRIGGER actions
+  const getVisTypeAliasMenuItem = useCallback(
+    (onClickCb: () => void, visTypeAlias: VisTypeAlias): PanelSelectionMenuItem => {
+      const { name, title, description, icon = 'empty', order } = visTypeAlias;
+
+      return {
+        id: name,
+        name: title,
+        icon,
+        onClick: augmentedCreateNewVisType(visTypeAlias, onClickCb),
+        'data-test-subj': `visType-${name}`,
+        description,
+        order: order ?? 0,
+      };
+    },
+    [augmentedCreateNewVisType]
+  );
+
+  const groupUnwrappedEmbeddableFactoriesMap$ = useMemo(
+    () =>
+      defer(() => {
+        return from(
+          Promise.all(
+            Array.from(embeddable.getEmbeddableFactories()).map<
+              Promise<UnwrappedEmbeddableFactory>
+            >(async (factory) => ({
+              factory,
+              isEditable: await factory.isEditable(),
+            }))
+          )
+        ).pipe(
+          map((result) =>
+            result.filter(
+              ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
+                isEditable && !isContainerType && canCreateNew() && type !== 'visualization'
+            )
+          ),
+          map((factories) => {
+            const _factoryGroupMap: Record<string, FactoryGroup> = {};
+
+            factories.forEach(({ factory }) => {
+              const { grouping } = factory;
+
+              if (grouping) {
+                grouping.forEach((group) => {
+                  if (_factoryGroupMap[group.id]) {
+                    _factoryGroupMap[group.id].factories.push(factory);
+                  } else {
+                    _factoryGroupMap[group.id] = {
+                      id: group.id,
+                      appName: group.getDisplayName
+                        ? group.getDisplayName({ embeddable: dashboardAPI })
+                        : group.id,
+                      icon: group.getIconType?.({ embeddable: dashboardAPI }),
+                      factories: [factory],
+                      order: group.order ?? 0,
+                    };
+                  }
+                });
+              } else {
+                const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
+
+                if (!_factoryGroupMap[fallbackGroup.id]) {
+                  _factoryGroupMap[fallbackGroup.id] = {
+                    id: fallbackGroup.id,
+                    appName: fallbackGroup.getDisplayName
+                      ? fallbackGroup.getDisplayName({ embeddable: dashboardAPI })
+                      : fallbackGroup.id,
+                    icon: fallbackGroup.getIconType?.({ embeddable: dashboardAPI }) || 'empty',
+                    factories: [],
+                    order: fallbackGroup.order ?? 0,
+                  };
+                }
+
+                _factoryGroupMap[fallbackGroup.id].factories.push(factory);
+              }
+            });
+
+            return _factoryGroupMap;
+          })
+        );
+      }),
+    [dashboardAPI, embeddable]
+  );
+
+  const groupedAddPanelAction$ = useMemo(
+    () =>
+      defer(() => {
+        return from(
+          uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
+            embeddable: embeddableAPI,
+          }) ?? []
+        ).pipe(
+          map((addPanelActions) =>
+            getAddPanelActionMenuItemsGroup(embeddableAPI, addPanelActions, close)
+          )
+        );
+      }),
+    [embeddableAPI, uiActions]
+  );
+
+  const computeAvailablePanels = useCallback(
+    (close: () => void) => {
+      if (!panelComputeSubscription.current) {
+        panelComputeSubscription.current = forkJoin([
+          groupUnwrappedEmbeddableFactoriesMap$,
+          groupedAddPanelAction$,
+        ])
+          .pipe(
+            map(([factoryGroupMap, groupedAddPanelAction]) => {
+              const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(
+                embeddableAPI,
+                close
+              );
+
+              return mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
+                factoryGroupMap,
+                groupedAddPanelAction
+              );
+            }),
+            map((mergedPanelGroups) => {
+              return sortGroupPanelsByOrder<GroupedAddPanelActions>(mergedPanelGroups).map(
+                (panelGroup) => {
+                  switch (panelGroup.id) {
+                    case 'visualizations': {
+                      return {
+                        ...panelGroup,
+                        items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
+                          (panelGroup.items ?? []).concat(
+                            // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
+                            visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, close)),
+                            promotedVisTypes.map(getVisTypeMenuItem.bind(null, close))
+                          )
+                        ),
+                      };
+                    }
+                    case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
+                      return {
+                        ...panelGroup,
+                        items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
+                          (panelGroup.items ?? []).concat(
+                            legacyVisTypes.map(getVisTypeMenuItem.bind(null, close))
+                          )
+                        ),
+                      };
+                    }
+                    case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
+                      return {
+                        ...panelGroup,
+                        items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
+                          (panelGroup.items ?? []).concat(
+                            toolVisTypes.map(getVisTypeMenuItem.bind(null, close))
+                          )
+                        ),
+                      };
+                    }
+                    default: {
+                      return {
+                        ...panelGroup,
+                        items: sortGroupPanelsByOrder(panelGroup.items),
+                      };
+                    }
+                  }
+                }
+              );
+            })
+          )
+          .subscribe(panelsComputeResultCache.current);
+      }
+
+      return panelsComputeResultCache.current.asObservable();
+    },
+    [
+      embeddableAPI,
+      groupedAddPanelAction$,
+      groupUnwrappedEmbeddableFactoriesMap$,
+      getVisTypeMenuItem,
+      getVisTypeAliasMenuItem,
+      toolVisTypes,
+      legacyVisTypes,
+      promotedVisTypes,
+      visTypeAliases,
+    ]
+  );
+
+  return computeAvailablePanels;
+};
+
+export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
+  const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
+  const dashboardAPI = useDashboardAPI();
+
   useEffect(() => {
-    async function loadPanelActions() {
-      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
-        embeddable: api,
-      });
+    // ensure opened dashboard is closed if a navigation event happens;
+    return () => {
+      flyoutRef.current?.close();
+    };
+  }, []);
 
-      if (isMounted.current) {
-        setAddPanelActions(registeredActions);
-      }
-    }
-    loadPanelActions();
-  }, [uiActions, api]);
+  const {
+    overlays,
+    analytics,
+    settings: { i18n: i18nStart, theme },
+  } = pluginServices.getServices();
 
-  factories.forEach(({ factory }) => {
-    const { grouping } = factory;
-
-    if (grouping) {
-      grouping.forEach((group) => {
-        if (factoryGroupMap[group.id]) {
-          factoryGroupMap[group.id].factories.push(factory);
-        } else {
-          factoryGroupMap[group.id] = {
-            id: group.id,
-            appName: group.getDisplayName
-              ? group.getDisplayName({ embeddable: dashboard })
-              : group.id,
-            icon: group.getIconType?.({ embeddable: dashboard }),
-            factories: [factory],
-            order: group.order ?? 0,
-          };
-        }
-      });
-    } else {
-      const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
-
-      if (!factoryGroupMap[fallbackGroup.id]) {
-        factoryGroupMap[fallbackGroup.id] = {
-          id: fallbackGroup.id,
-          appName: fallbackGroup.getDisplayName
-            ? fallbackGroup.getDisplayName({ embeddable: dashboard })
-            : fallbackGroup.id,
-          icon: fallbackGroup.getIconType?.({ embeddable: dashboard }) || 'empty',
-          factories: [],
-          order: fallbackGroup.order ?? 0,
-        };
-      }
-
-      factoryGroupMap[fallbackGroup.id].factories.push(factory);
-    }
+  const _getDashboardPanels = useGetDashboardPanels({
+    dashboardAPI,
+    createNewVisType,
+    embeddableAPI: api,
   });
 
-  const augmentedCreateNewVisType = (
-    visType: Parameters<EditorMenuProps['createNewVisType']>[0],
-    cb: () => void
-  ) => {
-    const visClickHandler = createNewVisType(visType);
-    return () => {
-      visClickHandler();
-      cb();
-    };
-  };
+  const openDashboardPanelSelectionFlyout = useCallback(
+    function openDashboardPanelSelectionFlyout({
+      getDashboardPanels,
+      flyoutPanelPaddingSize = 'l',
+    }: OpenDashboardPanelSelectionFlyoutArgs) {
+      const mount = toMountPoint(
+        React.createElement(function () {
+          const closeFlyout = () => flyoutRef.current?.close();
+          return (
+            <DashboardPanelSelectionListFlyout
+              close={closeFlyout}
+              {...{
+                paddingSize: flyoutPanelPaddingSize!,
+                getDashboardPanels,
+              }}
+            />
+          );
+        }),
+        { analytics, theme, i18n: i18nStart }
+      );
 
-  const getVisTypeMenuItem = (
-    onClickCb: () => void,
-    visType: BaseVisType
-  ): PanelSelectionMenuItem => {
-    const {
-      name,
-      title,
-      titleInWizard,
-      description,
-      icon = 'empty',
-      isDeprecated,
-      order,
-    } = visType;
-    return {
-      id: name,
-      name: titleInWizard || title,
-      isDeprecated,
-      icon,
-      onClick: augmentedCreateNewVisType(visType, onClickCb),
-      'data-test-subj': `visType-${name}`,
-      description,
-      order,
-    };
-  };
-
-  const getVisTypeAliasMenuItem = (
-    onClickCb: () => void,
-    visTypeAlias: VisTypeAlias
-  ): PanelSelectionMenuItem => {
-    const { name, title, description, icon = 'empty', order } = visTypeAlias;
-
-    return {
-      id: name,
-      name: title,
-      icon,
-      onClick: augmentedCreateNewVisType(visTypeAlias, onClickCb),
-      'data-test-subj': `visType-${name}`,
-      description,
-      order: order ?? 0,
-    };
-  };
-
-  const getEditorMenuPanels = (closeFlyout: () => void): GroupedAddPanelActions[] => {
-    const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(api, closeFlyout);
-
-    const groupedAddPanelAction = getAddPanelActionMenuItemsGroup(
-      api,
-      addPanelActions,
-      closeFlyout
-    );
-
-    const initialPanelGroups = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
-      factoryGroupMap,
-      groupedAddPanelAction
-    );
-
-    // enhance panel groups
-    return sortGroupPanelsByOrder<GroupedAddPanelActions>(initialPanelGroups).map((panelGroup) => {
-      switch (panelGroup.id) {
-        case 'visualizations': {
-          return {
-            ...panelGroup,
-            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-              (panelGroup.items ?? []).concat(
-                // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
-                visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout)),
-                promotedVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-              )
-            ),
-          };
-        }
-        case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
-          return {
-            ...panelGroup,
-            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-              (panelGroup.items ?? []).concat(
-                legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-              )
-            ),
-          };
-        }
-        case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
-          return {
-            ...panelGroup,
-            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-              (panelGroup.items ?? []).concat(
-                toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-              )
-            ),
-          };
-        }
-        default: {
-          return {
-            ...panelGroup,
-            items: sortGroupPanelsByOrder(panelGroup.items),
-          };
-        }
-      }
-    });
-  };
+      flyoutRef.current = overlays.openFlyout(mount, {
+        size: 'm',
+        maxWidth: 500,
+        paddingSize: flyoutPanelPaddingSize,
+        'aria-labelledby': 'addPanelsFlyout',
+        'data-test-subj': 'dashboardPanelSelectionFlyout',
+      });
+    },
+    [analytics, theme, i18nStart, overlays]
+  );
 
   return (
     <ToolbarButton
@@ -365,11 +459,11 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
-      onClick={() => {
-        flyoutRef.current = openDashboardPanelSelectionFlyout({
-          getPanels: getEditorMenuPanels,
-        });
-      }}
+      onClick={() =>
+        openDashboardPanelSelectionFlyout({
+          getDashboardPanels: _getDashboardPanels,
+        })
+      }
       size="s"
     />
   );
