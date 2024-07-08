@@ -1103,6 +1103,40 @@ export default ({ getService }: FtrProviderContext) => {
             'random non-ecs field'
           );
         });
+
+        it('creates alert if `event.action` ECS field has non-ECS sub-field', async () => {
+          // The issue was found by customer and reported in
+          // https://github.com/elastic/sdh-security-team/issues/1015
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const doc1 = {
+            'event.action': 'process',
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_non_compliant metadata _id ${internalIdPipe(id)}`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocumentsToNonEcs({
+            documents: [doc1],
+            interval,
+            id,
+          });
+
+          const { logs } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          expect(logs[0].errors.length).toEqual(0);
+        });
       });
     });
   });
