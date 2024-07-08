@@ -85,9 +85,14 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const byValueVisInstance = useMemo(() => {
     if (!getVis || !serializeStateFn) return;
+    const { savedVis, managed, sharingSavedObjectProps } = serializeStateFn().rawState;
     return {
-      vis: getVis?.(),
-      savedVis: serializeStateFn?.().rawState.savedVis,
+      vis: getVis(),
+      savedVis,
+      savedObjectProperties: {
+        managed,
+        sharingSavedObjectProps,
+      },
     };
   }, [getVis, serializeStateFn]);
 

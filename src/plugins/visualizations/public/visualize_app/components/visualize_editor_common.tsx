@@ -51,7 +51,6 @@ interface VisualizeEditorCommonProps {
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
-  visualizationIdFromUrl?: string;
   embeddableId?: string;
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
@@ -71,7 +70,6 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   originatingApp,
   originatingPath,
   setOriginatingApp,
-  visualizationIdFromUrl,
   embeddableId,
   eventEmitter,
   openInspectorFn,
@@ -84,7 +82,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
 
   useEffect(() => {
     async function aliasMatchRedirect() {
-      const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
+      const sharingSavedObjectProps = visInstance?.savedObjectProperties?.sharingSavedObjectProps;
       if (services.spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
@@ -104,12 +102,16 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
     }
 
     aliasMatchRedirect();
-  }, [visInstance?.savedVis.sharingSavedObjectProps, visInstance?.vis?.type.title, services]);
+  }, [
+    visInstance?.savedObjectProperties?.sharingSavedObjectProps,
+    visInstance?.vis?.type.title,
+    services,
+  ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     const currentObjectId = visInstance?.savedVis.id;
-    const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
+    const sharingSavedObjectProps = visInstance?.savedObjectProperties?.sharingSavedObjectProps;
     if (services.spaces && sharingSavedObjectProps?.outcome === 'conflict' && currentObjectId) {
       // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
@@ -128,7 +130,13 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
       });
     }
     return null;
-  }, [visInstance?.savedVis, services, visInstance?.vis?.type.title]);
+  }, [
+    visInstance?.savedVis.id,
+    visInstance?.savedObjectProperties?.sharingSavedObjectProps,
+    visInstance?.vis?.type.title,
+    services.spaces,
+    services.history.location.search,
+  ]);
   // Adds a notification for split chart on the new implementation as it is not supported yet
   const chartName = visInstance?.vis.type.name;
   const isSplitChart = isSplitChartFn(chartName, visInstance?.vis?.data?.aggs);
@@ -158,7 +166,6 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           setOriginatingApp={setOriginatingApp}
           visInstance={visInstance}
           stateContainer={appState}
-          visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           eventEmitter={eventEmitter}

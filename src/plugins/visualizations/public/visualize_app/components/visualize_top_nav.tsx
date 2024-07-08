@@ -44,7 +44,6 @@ interface VisualizeTopNavProps {
   visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
-  visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
   eventEmitter?: EventEmitter;
@@ -65,7 +64,6 @@ const TopNav = ({
   originatingPath,
   visInstance,
   stateContainer,
-  visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
   eventEmitter,
@@ -76,10 +74,8 @@ const TopNav = ({
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
-  const {
-    vis,
-    savedVis: { managed },
-  } = visInstance;
+  const { vis } = visInstance;
+  const { managed } = visInstance.savedObjectProperties ?? { managed: false };
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
   const displayEditInLensItem = !!navigateToLensFn;

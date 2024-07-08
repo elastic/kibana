@@ -49,6 +49,7 @@ import type { Vis, PersistedState, VisParams } from '..';
 import type { ListingViewRegistry, SavedVisState, SerializedVis } from '../types';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
+import { ExtraSavedObjectProperties } from '../react_embeddable/types';
 
 export interface VisualizeAppState {
   dataView?: string;
@@ -120,6 +121,7 @@ export interface VisualizeServices extends CoreStart {
 export interface VisInstance {
   vis: Vis;
   savedVis: SerializedVis;
+  savedObjectProperties?: Partial<ExtraSavedObjectProperties>;
   references?: Reference[];
   savedSearch?: SavedSearch;
   panelTitle?: string;

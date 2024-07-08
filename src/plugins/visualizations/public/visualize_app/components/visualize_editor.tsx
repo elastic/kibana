@@ -76,10 +76,14 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const savedVisInstance = useMemo(() => {
     if (!getVis || !serializeStateFn) return;
+    const { savedVis, managed, sharingSavedObjectProps } = serializeStateFn().rawState;
     return {
-      vis: getVis?.(),
-      savedVis: serializeStateFn?.().rawState.savedVis,
-      references: serializeStateFn?.().references,
+      vis: getVis(),
+      savedVis,
+      savedObjectProperties: {
+        managed,
+        sharingSavedObjectProps,
+      },
     };
   }, [getVis, serializeStateFn]);
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
@@ -135,7 +139,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
-      visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       onAppLeave={onAppLeave}
       embeddableId={embeddableIdValue}

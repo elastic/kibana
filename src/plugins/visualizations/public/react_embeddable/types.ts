@@ -17,7 +17,12 @@ import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_
 
 export type ExtraSavedObjectProperties = Pick<
   VisSavedObject,
-  'lastSavedTitle' | 'displayName' | 'getDisplayName' | 'getEsType' | 'managed'
+  | 'lastSavedTitle'
+  | 'displayName'
+  | 'getDisplayName'
+  | 'getEsType'
+  | 'managed'
+  | 'sharingSavedObjectProps'
 >;
 
 export type VisualizeRuntimeState = SerializedTitles & {
