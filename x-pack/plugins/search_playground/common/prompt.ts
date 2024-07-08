@@ -45,7 +45,6 @@ const AnthropicPrompt = (systemInstructions: string) => {
   `;
 };
 
-// guessing
 const GeminiPrompt = (systemInstructions: string) => {
   return `
   Instructions:

@@ -33,8 +33,8 @@ export const MODELS: ModelProvider[] = [
     provider: LLMs.bedrock,
   },
   {
-    name: 'Anthropic Claude 3 Sonnet',
-    model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+    name: 'Anthropic Claude 3.5 Sonnet',
+    model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
     promptTokenLimit: 200000,
     provider: LLMs.bedrock,
   },

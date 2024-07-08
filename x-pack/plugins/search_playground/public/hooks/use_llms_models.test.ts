@@ -100,10 +100,10 @@ describe('useLLMsModels Hook', () => {
         connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
-        id: 'connectorId2Anthropic Claude 3 Sonnet',
-        name: 'Anthropic Claude 3 Sonnet',
+        id: 'connectorId2Anthropic Claude 3.5 Sonnet',
+        name: 'Anthropic Claude 3.5 Sonnet',
         showConnectorName: false,
-        value: 'anthropic.claude-3-sonnet-20240229-v1:0',
+        value: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
         promptTokenLimit: 200000,
       },
     ]);
