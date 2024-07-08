@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { BehaviorSubject, first, of, skip } from 'rxjs';
+
 import { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -13,8 +16,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { TimeRange } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
-import { BehaviorSubject, first, of, skip } from 'rxjs';
+
 import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
 import { ControlApiRegistration } from '../../types';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
@@ -205,6 +207,37 @@ describe('RangesliderControlApi', () => {
         const maxInput = await findByTestId('rangeSlider__upperBoundFieldNumber');
         expect(maxInput).toHaveAttribute('placeholder', String(DEFAULT_MAX));
       });
+    });
+  });
+
+  describe('step state', () => {
+    test('default value provided when state.step is undefined', () => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
+      expect(serializedState.rawState.step).toBe(1);
+    });
+
+    test('retains value from initial state', () => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          step: 1024,
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
+      expect(serializedState.rawState.step).toBe(1024);
     });
   });
 
