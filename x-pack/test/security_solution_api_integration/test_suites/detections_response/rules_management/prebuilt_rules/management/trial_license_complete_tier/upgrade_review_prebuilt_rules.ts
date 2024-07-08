@@ -712,7 +712,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe.only(`scalar array fields`, () => {
+    describe(`scalar array fields`, () => {
       const getRuleAssetSavedObjects = () => [
         createRuleAssetSavedObject({
           rule_id: 'rule-1',
