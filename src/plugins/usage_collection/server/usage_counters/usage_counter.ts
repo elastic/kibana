@@ -12,6 +12,7 @@ import type { UsageCounters } from '../../common';
 export interface UsageCounterParams {
   domainId: string;
   counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
+  retentionPeriodDays?: number;
 }
 
 /**
@@ -20,6 +21,12 @@ export interface UsageCounterParams {
  * API whenever the event happens.
  */
 export interface IUsageCounter {
+  /**
+   * Defines custom retention period for the counters under this domain.
+   * This is the number of days worth of counters that must be kept in the system indices.
+   * Defaults to 5
+   */
+  retentionPeriodDays?: number;
   /**
    * Notifies the counter about a new event happening so it can increase the count internally.
    * @param params {@link IncrementCounterParams}
@@ -30,10 +37,12 @@ export interface IUsageCounter {
 export class UsageCounter implements IUsageCounter {
   private domainId: string;
   private counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
+  public readonly retentionPeriodDays?: number | undefined;
 
-  constructor({ domainId, counter$ }: UsageCounterParams) {
+  constructor({ domainId, counter$, retentionPeriodDays }: UsageCounterParams) {
     this.domainId = domainId;
     this.counter$ = counter$;
+    this.retentionPeriodDays = retentionPeriodDays;
   }
 
   public incrementCounter = (params: UsageCounters.v1.IncrementCounterParams) => {

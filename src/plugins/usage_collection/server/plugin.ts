@@ -26,12 +26,16 @@ import type { UsageCounter } from './usage_counters';
 import type { UsageCountersSearch } from './usage_counters/types';
 import { registerUsageCountersSavedObjectTypes } from './usage_counters/saved_objects';
 
+export interface CreateUsageCounterParams {
+  retentionPeriodDays?: number;
+}
+
 /** Server's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {
   /**
    * Creates and registers a usage counter to collect daily aggregated plugin counter events
    */
-  createUsageCounter: (type: string) => UsageCounter;
+  createUsageCounter: (type: string, params?: CreateUsageCounterParams) => UsageCounter;
   /**
    * Returns a usage counter by type
    */

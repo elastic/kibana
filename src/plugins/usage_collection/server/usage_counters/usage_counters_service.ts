@@ -33,6 +33,7 @@ import type {
   UsageCountersSearchParams,
   UsageCountersSearchResult,
 } from './types';
+import type { CreateUsageCounterParams } from '../plugin';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -156,12 +157,19 @@ export class UsageCountersService implements UsageCountersSearch {
     );
   }
 
-  private createUsageCounter = (domainId: string): IUsageCounter => {
+  private createUsageCounter = (
+    domainId: string,
+    params: CreateUsageCounterParams = {}
+  ): IUsageCounter => {
     if (this.counterSets.get(domainId)) {
       throw new Error(`Usage counter set "${domainId}" already exists.`);
     }
 
-    const counterSet = new UsageCounter({ domainId, counter$: this.source$ });
+    const counterSet = new UsageCounter({
+      domainId,
+      counter$: this.source$,
+      retentionPeriodDays: params.retentionPeriodDays,
+    });
     this.counterSets.set(domainId, counterSet);
     return counterSet;
   };

@@ -128,11 +128,12 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     registerUiCountersUsageCollector(usageCollection, this.logger);
 
-    registerUsageCountersRollups(
-      this.logger.get('usage-counters-rollup'),
+    registerUsageCountersRollups({
+      logger: this.logger.get('usage-counters-rollup'),
+      usageCollection,
       getSavedObjectsClient,
-      pluginStop$
-    );
+      pluginStop$,
+    });
     registerUsageCountersUsageCollector(usageCollection, this.logger);
 
     registerOpsStatsCollector(usageCollection, metric$);

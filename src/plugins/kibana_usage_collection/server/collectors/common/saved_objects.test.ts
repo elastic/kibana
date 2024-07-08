@@ -18,6 +18,7 @@ import { isSavedObjectOlderThan } from './saved_objects';
 export const createMockSavedObjectDoc = (
   updatedAt: moment.Moment,
   id: string,
+  domainId: string,
   namespace?: string
 ) =>
   ({
@@ -26,9 +27,9 @@ export const createMockSavedObjectDoc = (
     ...(namespace && { namespaces: [namespace] }),
     attributes: {
       count: 3,
+      domainId,
       counterName: 'testName',
       counterType: 'count',
-      domainId: 'testDomain',
       source: 'server',
     },
     references: [],
@@ -41,7 +42,7 @@ describe('isSavedObjectOlderThan', () => {
   it(`returns true if doc is older than x days`, () => {
     const numberOfDays = 1;
     const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(2, 'days'), 'some-id');
+    const doc = createMockSavedObjectDoc(moment().subtract(2, 'days'), 'some-id', 'testDomain');
     const result = isSavedObjectOlderThan({
       numberOfDays,
       startDate,
@@ -53,7 +54,7 @@ describe('isSavedObjectOlderThan', () => {
   it(`returns false if doc is exactly x days old`, () => {
     const numberOfDays = 1;
     const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id');
+    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id', 'testDomain');
     const result = isSavedObjectOlderThan({
       numberOfDays,
       startDate,
@@ -65,7 +66,7 @@ describe('isSavedObjectOlderThan', () => {
   it(`returns false if doc is younger than x days`, () => {
     const numberOfDays = 2;
     const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id');
+    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id', 'testDomain');
     const result = isSavedObjectOlderThan({
       numberOfDays,
       startDate,

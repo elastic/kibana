@@ -39,7 +39,7 @@ import {
   type UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
-import { rollUsageCountersIndices } from '../rollups/rollups';
+import { type GetUsageCounter, rollUsageCountersIndices } from '../rollups/rollups';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from '../rollups/constants';
 import { isSavedObjectOlderThan } from '../../common/saved_objects';
 
@@ -47,6 +47,8 @@ const getCurrentTimeMock = getCurrentTime as jest.MockedFunction<typeof getCurre
 const isSavedObjectOlderThanMock = isSavedObjectOlderThan as jest.MockedFunction<
   typeof isSavedObjectOlderThan
 >;
+
+const CUSTOM_RETENTION_PERIOD_DAYS = 90;
 
 const NOW = '2024-06-30T10:00:00.000Z';
 const OLD = moment(NOW).subtract(USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS + 1, 'days');
@@ -56,7 +58,16 @@ const RECENT_YMD = RECENT.format('YYYYMMDD');
 const OLD_ISO = OLD.toISOString();
 const RECENT_ISO = RECENT.toISOString();
 
+const CUSTOM_OLD = moment(NOW).subtract(CUSTOM_RETENTION_PERIOD_DAYS + 1, 'days');
+const CUSTOM_RECENT = moment(NOW).subtract(USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1, 'days');
+const CUSTOM_OLD_YMD = CUSTOM_OLD.format('YYYYMMDD');
+const CUSTOM_RECENT_YMD = CUSTOM_RECENT.format('YYYYMMDD');
+const CUSTOM_OLD_ISO = CUSTOM_OLD.toISOString();
+const CUSTOM_RECENT_ISO = CUSTOM_RECENT.toISOString();
+
 const ALL_COUNTERS = [
+  `customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}:a:count:server:${CUSTOM_OLD_YMD}:default`,
+  `customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}:a:count:server:${CUSTOM_RECENT_YMD}:default`,
   `domain1:a:count:server:${OLD_YMD}:default`,
   `domain1:a:count:server:${RECENT_YMD}:default`,
   `domain1:b:count:server:${OLD_YMD}:one`,
@@ -68,11 +79,14 @@ const ALL_COUNTERS = [
   `domain2:c:count:server:${RECENT_YMD}:default`,
 ];
 
-const RECENT_COUNTERS = ALL_COUNTERS.filter((key) => key.includes(RECENT_YMD));
+const RECENT_COUNTERS = ALL_COUNTERS.filter(
+  (key) => key.includes(RECENT_YMD) || key.includes(CUSTOM_RECENT_YMD)
+);
 
 describe('usage-counters', () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
+  let usageCollection: GetUsageCounter;
   let internalRepository: ISavedObjectsRepository;
   let logger: Logger;
 
@@ -83,6 +97,21 @@ describe('usage-counters', () => {
 
     esServer = await startES();
     root = createRootWithCorePlugins();
+
+    usageCollection = {
+      getUsageCounterByDomainId: jest.fn().mockImplementation((domainId: string) => {
+        let retentionPeriodDays = USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS;
+        if (domainId.startsWith('customRetention_')) {
+          const daysString = domainId.split('_').pop();
+          retentionPeriodDays = Number(daysString!);
+        }
+
+        return {
+          retentionPeriodDays,
+          incrementCounter: jest.fn(),
+        };
+      }),
+    };
 
     await root.preboot();
     await root.setup();
@@ -111,9 +140,16 @@ describe('usage-counters', () => {
         .sort()
     ).toEqual(ALL_COUNTERS);
 
-    // run the rollup logic
-    isSavedObjectOlderThanMock.mockImplementation(({ doc }) => doc.updated_at === OLD_ISO);
-    await rollUsageCountersIndices(logger, internalRepository);
+    isSavedObjectOlderThanMock.mockImplementation(({ doc, numberOfDays }) => {
+      // here we ensure we have been called with the custom retention period
+      if (numberOfDays === CUSTOM_RETENTION_PERIOD_DAYS) {
+        return doc.updated_at === CUSTOM_OLD_ISO;
+      } else {
+        return doc.updated_at === OLD_ISO;
+      }
+    });
+
+    await rollUsageCountersIndices({ logger, usageCollection, internalRepository });
 
     // check only recent counters are present
     const afterRollup = await internalRepository.find<UsageCountersSavedObjectAttributes>({
@@ -136,6 +172,16 @@ describe('usage-counters', () => {
 });
 
 async function createTestCounters(internalRepository: ISavedObjectsRepository) {
+  await createCounters(internalRepository, CUSTOM_OLD_ISO, [
+    // domainId, counterName, counterType, source, count, namespace?
+    [`customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}`, 'a', 'count', 'server', 198],
+  ]);
+
+  await createCounters(internalRepository, CUSTOM_RECENT_ISO, [
+    // domainId, counterName, counterType, source, count, namespace?
+    [`customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}`, 'a', 'count', 'server', 199],
+  ]);
+
   await createCounters(internalRepository, OLD_ISO, [
     // domainId, counterName, counterType, source, count, namespace?
     ['domain1', 'a', 'count', 'server', 28],

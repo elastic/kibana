@@ -9,26 +9,47 @@
 import moment from 'moment';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
-import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 import { createMockSavedObjectDoc } from '../../common/saved_objects.test';
-import { rollUsageCountersIndices } from './rollups';
+import { GetUsageCounter, rollUsageCountersIndices } from './rollups';
+import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 describe('rollUsageCountersIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let internalRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  const usageCollection: GetUsageCounter = {
+    getUsageCounterByDomainId: jest.fn().mockImplementation((domainId: string): IUsageCounter => {
+      let retentionPeriodDays = USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS;
+      if (domainId.startsWith('customRetention_')) {
+        const daysString = domainId.split('_').pop();
+        retentionPeriodDays = Number(daysString!);
+      }
+
+      return {
+        retentionPeriodDays,
+        incrementCounter: jest.fn(),
+      };
+    }),
+  };
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    savedObjectClient = savedObjectsRepositoryMock.create();
+    internalRepository = savedObjectsRepositoryMock.create();
   });
 
   it('returns undefined if no savedObjectsClient initialised yet', async () => {
-    await expect(rollUsageCountersIndices(logger, undefined)).resolves.toBe(undefined);
+    await expect(
+      rollUsageCountersIndices({
+        logger,
+        usageCollection,
+        internalRepository: undefined,
+      })
+    ).resolves.toBe(undefined);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
   it('does not delete any documents on empty saved objects', async () => {
-    savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
+    internalRepository.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
         case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: [], total: 0, page, per_page: perPage };
@@ -36,21 +57,24 @@ describe('rollUsageCountersIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toEqual([]);
-    expect(savedObjectClient.find).toBeCalled();
-    expect(savedObjectClient.delete).not.toBeCalled();
+    await expect(
+      rollUsageCountersIndices({ logger, usageCollection, internalRepository })
+    ).resolves.toEqual([]);
+    expect(internalRepository.find).toBeCalled();
+    expect(internalRepository.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
-  it(`deletes documents older than ${USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
+  it(`deletes documents older than the retention period`, async () => {
     const mockSavedObjects = [
-      createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1'),
-      createMockSavedObjectDoc(moment().subtract(9, 'days'), 'doc-id-1'),
-      createMockSavedObjectDoc(moment().subtract(1, 'days'), 'doc-id-2'),
-      createMockSavedObjectDoc(moment().subtract(6, 'days'), 'doc-id-3', 'secondary'),
+      createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1', 'testDomain'),
+      createMockSavedObjectDoc(moment().subtract(9, 'days'), 'doc-id-1', 'testDomain'),
+      createMockSavedObjectDoc(moment().subtract(2, 'days'), 'doc-id-2', 'customRetention_3'),
+      createMockSavedObjectDoc(moment().subtract(4, 'days'), 'doc-id-2', 'customRetention_3'),
+      createMockSavedObjectDoc(moment().subtract(6, 'days'), 'doc-id-3', 'testDomain', 'secondary'),
     ];
 
-    savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
+    internalRepository.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
         case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: mockSavedObjects, total: 0, page, per_page: perPage };
@@ -58,16 +82,23 @@ describe('rollUsageCountersIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toHaveLength(2);
-    expect(savedObjectClient.find).toBeCalled();
-    expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
-    expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
+    await expect(
+      rollUsageCountersIndices({ logger, usageCollection, internalRepository })
+    ).resolves.toHaveLength(3);
+    expect(internalRepository.find).toBeCalled();
+    expect(internalRepository.delete).toHaveBeenCalledTimes(3);
+    expect(internalRepository.delete).toHaveBeenNthCalledWith(
       1,
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-1'
     );
-    expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
+    expect(internalRepository.delete).toHaveBeenNthCalledWith(
       2,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+      'doc-id-2'
+    );
+    expect(internalRepository.delete).toHaveBeenNthCalledWith(
+      3,
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-3',
       { namespace: 'secondary' }
@@ -76,19 +107,23 @@ describe('rollUsageCountersIndices', () => {
   });
 
   it(`logs warnings on savedObject.find failure`, async () => {
-    savedObjectClient.find.mockImplementation(async () => {
+    internalRepository.find.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
-    expect(savedObjectClient.find).toBeCalled();
-    expect(savedObjectClient.delete).not.toBeCalled();
+    await expect(
+      rollUsageCountersIndices({ logger, usageCollection, internalRepository })
+    ).resolves.toEqual(undefined);
+    expect(internalRepository.find).toBeCalled();
+    expect(internalRepository.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(2);
   });
 
   it(`logs warnings on savedObject.delete failure`, async () => {
-    const mockSavedObjects = [createMockSavedObjectDoc(moment().subtract(7, 'days'), 'doc-id-1')];
+    const mockSavedObjects = [
+      createMockSavedObjectDoc(moment().subtract(7, 'days'), 'doc-id-1', 'testDomain'),
+    ];
 
-    savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
+    internalRepository.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
         case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: mockSavedObjects, total: 0, page, per_page: perPage };
@@ -96,13 +131,15 @@ describe('rollUsageCountersIndices', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    savedObjectClient.delete.mockImplementation(async () => {
+    internalRepository.delete.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
-    expect(savedObjectClient.find).toBeCalled();
-    expect(savedObjectClient.delete).toHaveBeenCalledTimes(1);
-    expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
+    await expect(
+      rollUsageCountersIndices({ logger, usageCollection, internalRepository })
+    ).resolves.toEqual(undefined);
+    expect(internalRepository.find).toBeCalled();
+    expect(internalRepository.delete).toHaveBeenCalledTimes(1);
+    expect(internalRepository.delete).toHaveBeenNthCalledWith(
       1,
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-1'
