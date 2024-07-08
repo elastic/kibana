@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
-import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
@@ -753,7 +753,7 @@ export const useFetchDataComparisonResult = (
 
         setProgressMessage(
           i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedFields', {
-            defaultMessage: `Loaded fields from index '{referenceIndex}' to analyze.`,
+            defaultMessage: `Loaded fields from index ''{referenceIndex}'' to analyze.`,
             values: { referenceIndex },
           })
         );

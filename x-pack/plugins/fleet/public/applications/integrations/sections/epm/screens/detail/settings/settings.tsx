@@ -45,6 +45,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
@@ -81,20 +82,21 @@ const UpdatesAvailableMsg = ({
       defaultMessage: 'New version available',
     })}
   >
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-          defaultMessage="Upgrade to version {latestVersion} to get the latest features."
-          values={{ latestVersion }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <p>
-          <EuiLink onClick={toggleChangelogModal}>{'View changelog.'}</EuiLink>
-        </p>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <FormattedMessage
+      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+      defaultMessage="Upgrade to version {latestVersion} to get the latest features. {changelogLink}"
+      values={{
+        latestVersion,
+        changelogLink: (
+          <EuiLink onClick={toggleChangelogModal}>
+            <FormattedMessage
+              id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
+              defaultMessage="View changelog."
+            />
+          </EuiLink>
+        ),
+      }}
+    />
   </EuiCallOut>
 );
 
@@ -140,7 +142,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
   );
 
   const agentPolicyIds = useMemo(
-    () => packagePoliciesData?.items.map(({ policy_id: agentPolicyId }) => agentPolicyId) ?? [],
+    () => packagePoliciesData?.items.flatMap((packagePolicy) => packagePolicy.policy_ids) ?? [],
     [packagePoliciesData]
   );
 
@@ -254,8 +256,8 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={6}>
+        <SideBarColumn grow={1} />
+        <EuiFlexItem grow={7}>
           <EuiText>
             <EuiTitle>
               <h3>

@@ -44,6 +44,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'dashboard',
     'timeToVisualize',
     'unifiedSearch',
+    'share',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -119,10 +120,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async selectOptionFromComboBox(testTargetId: string, name: string) {
+    async selectOptionFromComboBox(testTargetId: string, name: string | string[]) {
       const target = await testSubjects.find(testTargetId, 1000);
       await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, name);
+      const names = Array.isArray(name) ? name : [name];
+      for (const option of names) {
+        await comboBox.setElement(target, option);
+      }
     },
 
     async configureQueryAnnotation(opts: {
@@ -313,6 +317,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async waitForField(field: string) {
       await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+    },
+
+    async waitForMissingField(field: string) {
+      await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
     },
 
     async waitForMissingDataViewWarning() {
@@ -746,7 +754,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
@@ -754,6 +763,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
         saveToLibrary,
+        description,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -774,7 +784,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
@@ -785,7 +796,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         saveToLibrary,
         addToDashboard,
-        dashboardId
+        dashboardId,
+        description
       );
     },
 
@@ -1349,17 +1361,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricDatum(tile: WebElementWrapper) {
+      // using getAttribute('innerText') because getVisibleText() fails when the text overflows the metric panel.
+      // The reported "visible" text is somewhat inaccurate and just report the full innerText of just the visible DOM elements.
+      // In the case of Metric, suffixes that are on a sub-element are not considered visible.
       return {
-        title: await (await this.getMetricElementIfExists('h2', tile))?.getVisibleText(),
+        title: await (await this.getMetricElementIfExists('h2', tile))?.getAttribute('innerText'),
         subtitle: await (
           await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         extraText: await (
           await this.getMetricElementIfExists('.echMetricText__extra', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         value: await (
           await this.getMetricElementIfExists('.echMetricText__value', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
@@ -1831,20 +1846,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('link');
     },
 
-    async closeShareModal() {
-      if (await testSubjects.exists('shareContextModal')) {
-        await find.clickByCssSelector(
-          '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
-        );
-      }
+    closeShareModal() {
+      return PageObjects.share.closeShareModal();
     },
 
     async getUrl() {
-      const copyButton = await testSubjects.find('copyShareUrlButton');
-      const url = await copyButton.getAttribute('data-share-url');
+      await this.ensureShareMenuIsOpen('link');
+      const url = await PageObjects.share.getSharedUrl();
+
       if (!url) {
         throw Error('No data-share-url attribute found');
       }
+
+      // close share modal after url is copied
+      await this.closeShareModal();
       return url;
     },
 

@@ -101,13 +101,17 @@ const registeredPanels = [
 ];
 
 export const Right: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: undefined,
+        preview: undefined,
+      },
     },
-    left: {},
-    preview: [],
-  } as unknown as State;
+  };
 
   return (
     <TestProvider state={state}>
@@ -117,15 +121,19 @@ export const Right: Story<void> = () => {
 };
 
 export const Left: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: undefined,
+      },
     },
-    left: {
-      id: 'left',
-    },
-    preview: [],
-  } as unknown as State;
+  };
 
   return (
     <TestProvider state={state}>
@@ -135,19 +143,23 @@ export const Left: Story<void> = () => {
 };
 
 export const Preview: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
-    },
-    left: {
-      id: 'left',
-    },
-    preview: [
-      {
-        id: 'preview1',
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: [
+          {
+            id: 'preview1',
+          },
+        ],
       },
-    ],
-  } as unknown as State;
+    },
+  };
 
   return (
     <TestProvider state={state}>
@@ -157,22 +169,26 @@ export const Preview: Story<void> = () => {
 };
 
 export const MultiplePreviews: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
-    },
-    left: {
-      id: 'left',
-    },
-    preview: [
-      {
-        id: 'preview1',
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: [
+          {
+            id: 'preview1',
+          },
+          {
+            id: 'preview2',
+          },
+        ],
       },
-      {
-        id: 'preview2',
-      },
-    ],
-  } as unknown as State;
+    },
+  };
 
   return (
     <TestProvider state={state}>

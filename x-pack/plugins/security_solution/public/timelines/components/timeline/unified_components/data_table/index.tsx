@@ -31,20 +31,25 @@ import type {
 } from '../../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
-import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
+import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
-import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
+import {
+  StyledTimelineUnifiedDataTable,
+  StyledEuiProgress,
+  UnifiedTimelineGlobalStyles,
+} from '../styles';
 import { timelineActions } from '../../../../store';
 import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
+import type { UnifiedTimelineDataGridCellContext } from '../../types';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -69,8 +74,6 @@ type CommonDataTableProps = {
   updatedAt: number;
   isTextBasedQuery?: boolean;
   leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
-  cellContext?: EuiDataGridProps['cellContext'];
-  eventIdToNoteIds?: Record<string, string[]>;
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -113,8 +116,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSort,
     onFilter,
     leadingControlColumns,
-    cellContext,
-    eventIdToNoteIds,
   }) {
     const dispatch = useDispatch();
 
@@ -133,6 +134,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         storage,
         dataViewFieldEditor,
         notifications: { toasts: toastsService },
+        telemetry,
         theme,
         data: dataPluginContract,
       },
@@ -145,10 +147,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       setExpandedDoc((prev) => (!prev ? prev : undefined));
     }, []);
 
-    const { openFlyout, closeFlyout, isTimelineExpandableFlyoutEnabled } =
-      useUnifiedTableExpandableFlyout({
+    const { openFlyout, closeFlyout, isExpandableFlyoutDisabled } = useUnifiedTableExpandableFlyout(
+      {
         onClose: onCloseExpandableFlyout,
-      });
+      }
+    );
 
     const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
 
@@ -174,7 +177,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           },
         };
 
-        if (isTimelineExpandableFlyoutEnabled) {
+        if (!isExpandableFlyoutDisabled) {
           openFlyout({
             right: {
               id: DocumentDetailsRightPanelKey,
@@ -184,6 +187,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 scopeId: timelineId,
               },
             },
+          });
+          telemetry.reportDetailsFlyoutOpened({
+            location: timelineId,
+            panel: 'right',
           });
         } else {
           dispatch(
@@ -197,7 +204,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
         activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
       },
-      [activeTab, dispatch, refetch, timelineId, isTimelineExpandableFlyoutEnabled, openFlyout]
+      [refetch, isExpandableFlyoutDisabled, openFlyout, timelineId, telemetry, dispatch, activeTab]
     );
 
     const onTimelineLegacyFlyoutClose = useCallback(() => {
@@ -221,7 +228,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             handleOnEventDetailPanelOpened(timelineDoc);
           }
         } else {
-          if (isTimelineExpandableFlyoutEnabled) {
+          if (!isExpandableFlyoutDisabled) {
             closeFlyout();
             return;
           }
@@ -233,7 +240,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         handleOnEventDetailPanelOpened,
         onTimelineLegacyFlyoutClose,
         closeFlyout,
-        isTimelineExpandableFlyoutEnabled,
+        isExpandableFlyoutDisabled,
       ]
     );
 
@@ -384,25 +391,27 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
-          eventIdToNoteIds={eventIdToNoteIds}
           setCustomGridBodyProps={setCustomGridBodyProps}
-          events={events}
           enabledRowRenderers={enabledRowRenderers}
-          eventIdsAddingNotes={cellContext?.eventIdsAddingNotes}
-          onToggleShowNotes={cellContext?.onToggleShowNotes}
           refetch={refetch}
         />
       ),
-      [
-        tableRows,
-        enabledRowRenderers,
-        events,
-        eventIdToNoteIds,
-        cellContext?.eventIdsAddingNotes,
-        cellContext?.onToggleShowNotes,
-        refetch,
-      ]
+      [tableRows, enabledRowRenderers, refetch]
     );
+
+    const cellContext: UnifiedTimelineDataGridCellContext = useMemo(() => {
+      return {
+        expandedEventId: expandedDoc?.id,
+      };
+    }, [expandedDoc]);
+
+    const finalRenderCustomBodyCallback = useMemo(() => {
+      return enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined;
+    }, [enabledRowRenderers.length, renderCustomBodyCallback]);
+
+    const finalTrailControlColumns = useMemo(() => {
+      return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
+    }, [enabledRowRenderers.length, trailingControlColumns]);
 
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
@@ -411,6 +420,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             dataLoadingState === DataLoadingState.loadingMore) && (
             <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
           )}
+          <UnifiedTimelineGlobalStyles />
           <DataGridMemoized
             ariaLabelledBy="timelineDocumentsAriaLabel"
             className={'udtTimeline'}
@@ -452,12 +462,12 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomBodyCallback}
-            trailingControlColumns={trailingControlColumns}
+            renderCustomGridBody={finalRenderCustomBodyCallback}
+            trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
           />
-          {showExpandedDetails && !isTimelineExpandableFlyoutEnabled && (
+          {showExpandedDetails && isExpandableFlyoutDisabled && (
             <DetailsPanel
               browserFields={browserFields}
               handleOnPanelClosed={onTimelineLegacyFlyoutClose}

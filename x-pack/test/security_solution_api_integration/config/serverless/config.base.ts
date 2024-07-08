@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
+import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from '../../../../test_serverless/api_integration/services';
-import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {

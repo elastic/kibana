@@ -14,7 +14,6 @@ import type { IlmExplainPhaseCounts, IlmPhase } from '../../types';
 
 const PhaseCountsFlexGroup = styled(EuiFlexGroup)`
   display: inline-flex;
-  gap: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 export const phases: IlmPhase[] = ['hot', 'unmanaged', 'warm', 'cold', 'frozen'];
@@ -25,7 +24,7 @@ interface Props {
 }
 
 const IlmPhaseCountsComponent: React.FC<Props> = ({ ilmExplainPhaseCounts, pattern }) => (
-  <PhaseCountsFlexGroup data-test-subj="ilmPhaseCounts" gutterSize="none">
+  <PhaseCountsFlexGroup data-test-subj="ilmPhaseCounts" gutterSize="s">
     {phases.map((phase) =>
       ilmExplainPhaseCounts[phase] != null && ilmExplainPhaseCounts[phase] > 0 ? (
         <EuiFlexItem key={phase} grow={false}>

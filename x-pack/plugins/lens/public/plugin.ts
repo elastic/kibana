@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { take } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -47,6 +46,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
+  ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -63,7 +63,6 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
@@ -387,6 +386,21 @@ export class LensPlugin {
         'lens',
         new EmbeddableFactory(getStartServicesForEmbeddable)
       );
+
+      embeddable.registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+        CONTENT_ID,
+        (savedObject) => {
+          if (!savedObject.managed) {
+            return { savedObjectId: savedObject.id };
+          }
+
+          const panel = {
+            attributes: savedObjectToEmbeddableAttributes(savedObject),
+          };
+
+          return panel;
+        }
+      );
     }
 
     if (share) {
@@ -399,7 +413,7 @@ export class LensPlugin {
           atLeastGold: () => {
             let isGold = false;
             startServices()
-              .plugins.licensing?.license$.pipe(take(1))
+              .plugins.licensing?.license$.pipe()
               .subscribe((license) => {
                 isGold = license.hasAtLeast('gold');
               });
@@ -439,21 +453,6 @@ export class LensPlugin {
         return getTimeZone(core.uiSettings);
       },
       () => startServices().plugins.data.nowProvider.get()
-    );
-
-    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        if (!savedObject.managed) {
-          return { savedObjectId: savedObject.id };
-        }
-
-        const panel = {
-          attributes: savedObjectToEmbeddableAttributes(savedObject),
-        };
-
-        return panel;
-      }
     );
 
     const getPresentationUtilContext = () =>
@@ -650,7 +649,7 @@ export class LensPlugin {
 
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
-    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
+    startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {

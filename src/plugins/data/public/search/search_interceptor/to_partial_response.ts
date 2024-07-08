@@ -11,7 +11,7 @@ import {
   ClusterStatistics,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IEsSearchResponse } from '../../../common';
+import { IEsSearchResponse } from '@kbn/search-types';
 
 /**
  * When we hit the advanced setting `search:timeout`, we cancel in-progress search requests. This method takes the

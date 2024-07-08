@@ -10,7 +10,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/i18n",
@@ -35,8 +35,15 @@
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-theme",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

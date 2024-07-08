@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const ATTACK_CHAIN_TOOLTIP = (tacticsCount: number) =>
   i18n.translate('xpack.securitySolution.attackDiscovery.miniAttackChain.attackChainTooltip', {
     defaultMessage:
-      '{tacticsCount} {tacticsCount, plural, one {tactic was} other {tactics were}} identified in the analysis, providing insight into the nature of the detected violations:',
+      '{tacticsCount} {tacticsCount, plural, one {tactic was} other {tactics were}} identified in the attack:',
     values: { tacticsCount },
   });

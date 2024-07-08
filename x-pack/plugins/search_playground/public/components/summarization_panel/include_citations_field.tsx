@@ -23,7 +23,7 @@ export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
   const usageTracker = useUsageTracker();
   const handleChange = (value: boolean) => {
     onChange(value);
-    usageTracker.click(`${AnalyticsEvents.includeCitations}_${String(value)}`);
+    usageTracker?.click(`${AnalyticsEvents.includeCitations}_${String(value)}`);
   };
 
   return (

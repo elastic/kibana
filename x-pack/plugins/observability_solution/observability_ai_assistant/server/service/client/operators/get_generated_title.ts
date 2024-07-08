@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, last, map, Observable, of, tap } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { hideTokenCountEvents } from './hide_token_count_events';
 import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
+import { LangTracer } from '../instrumentation/lang_tracer';
 
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
@@ -26,11 +27,13 @@ export function getGeneratedTitle({
   messages,
   chat,
   logger,
+  tracer,
 }: {
   responseLanguage?: string;
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
-  logger: Logger;
+  logger: Pick<Logger, 'debug' | 'error'>;
+  tracer: LangTracer;
 }): Observable<string | TokenCountEvent> {
   return hideTokenCountEvents((hide) =>
     chat('generate_title', {
@@ -46,9 +49,11 @@ export function getGeneratedTitle({
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
-            content: messages.slice(1).reduce((acc, curr) => {
-              return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
+            content: messages
+              .filter((msg) => msg.message.role !== MessageRole.System)
+              .reduce((acc, curr) => {
+                return `${acc} ${curr.message.role}: ${curr.message.content}`;
+              }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
           },
         },
       ],
@@ -69,24 +74,25 @@ export function getGeneratedTitle({
         },
       ],
       functionCall: 'title_conversation',
+      tracer,
     }).pipe(
       hide(),
       concatenateChatCompletionChunks(),
+      last(),
       map((concatenatedMessage) => {
-        const input =
+        const title: string =
           (concatenatedMessage.message.function_call.name
             ? JSON.parse(concatenatedMessage.message.function_call.arguments).title
             : concatenatedMessage.message?.content) || '';
 
-        // This regular expression captures a string enclosed in single or double quotes.
+        // This captures a string enclosed in single or double quotes.
         // It extracts the string content without the quotes.
         // Example matches:
         // - "Hello, World!" => Captures: Hello, World!
         // - 'Another Example' => Captures: Another Example
         // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-        const match = input.match(/^["']?([^"']+)["']?$/);
-        const title = match ? match[1] : input;
-        return title;
+
+        return title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
       }),
       tap((event) => {
         if (typeof event === 'string') {

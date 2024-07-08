@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { sendMessageEvent, SendMessageEventData } from './analytics/events';
@@ -14,6 +13,7 @@ import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
+import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
@@ -22,6 +22,7 @@ import {
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
+import { MODELS } from '../common/models';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -109,10 +110,18 @@ export function defineRoutes({
 
       try {
         sourceFields = JSON.parse(data.source_fields);
+        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
+          // @ts-ignore
+          acc[key] = sourceFields[key][0];
+          return acc;
+        }, {});
       } catch (e) {
         logger.error('Failed to parse the source fields', e);
         throw Error(e);
       }
+
+      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const modelPromptLimit = model?.promptTokenLimit;
 
       const chain = ConversationalChain({
         model: chatModel,
@@ -121,6 +130,7 @@ export function defineRoutes({
           retriever: createRetriever(data.elasticsearch_query),
           content_field: sourceFields,
           size: Number(data.doc_size),
+          inputTokensLimit: modelPromptLimit,
         },
         prompt: chatPrompt,
       });
@@ -129,6 +139,16 @@ export function defineRoutes({
 
       try {
         stream = await chain.stream(aiClient, messages);
+
+        analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+          connectorType:
+            connector.actionTypeId +
+            (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+          model: data.summarization_model ?? '',
+          isCitationsEnabled: data.citations,
+        });
+
+        return handleStreamResponse({ logger, stream, response, request });
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
@@ -142,37 +162,6 @@ export function defineRoutes({
 
         throw e;
       }
-
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
-
-      const reader = (stream as ReadableStream).getReader();
-      const textDecoder = new TextDecoder();
-
-      function pushStreamUpdate() {
-        reader
-          .read()
-          .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-            if (done) {
-              end();
-              return;
-            }
-            push(textDecoder.decode(value));
-            pushStreamUpdate();
-          })
-          .catch(() => {});
-      }
-
-      pushStreamUpdate();
-
-      analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
-        connectorType:
-          connector.actionTypeId +
-          (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
-        model: data.summarization_model ?? '',
-        isCitationsEnabled: data.citations,
-      });
-
-      return response.ok(responseWithHeaders);
     })
   );
 

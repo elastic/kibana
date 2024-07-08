@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { DataViewBase } from '@kbn/es-query';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -24,7 +23,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
   }>;
-  indexPattern: DataViewBase;
+  dataView?: DataView;
 }
 
 interface WithKueryAutocompletionLifecycleState {
@@ -62,7 +61,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     maxSuggestions?: number,
     transformSuggestions?: (s: QuerySuggestion[]) => QuerySuggestion[]
   ) => {
-    const { indexPattern } = this.props;
+    const { dataView } = this.props;
     const language = 'kuery';
     const hasQuerySuggestions =
       this.props.kibana.services.unifiedSearch.autocomplete.hasQuerySuggestions(language);
@@ -79,15 +78,16 @@ class WithKueryAutocompletionComponent extends React.Component<
       suggestions: [],
     });
 
-    const suggestions =
-      (await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
-        language,
-        query: expression,
-        selectionStart: cursorPosition,
-        selectionEnd: cursorPosition,
-        indexPatterns: [indexPattern as DataView],
-        boolFilter: [],
-      })) || [];
+    const suggestions = dataView
+      ? (await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
+          language,
+          query: expression,
+          selectionStart: cursorPosition,
+          selectionEnd: cursorPosition,
+          indexPatterns: [dataView],
+          boolFilter: [],
+        })) ?? []
+      : [];
 
     const transformedSuggestions = transformSuggestions
       ? transformSuggestions(suggestions)

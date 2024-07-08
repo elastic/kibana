@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
-  AssetCriticalityCsvUploadResponse,
+  AssetCriticalityBulkUploadResponse,
   AssetCriticalityUpsert,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -74,18 +75,45 @@ export class AssetCriticalityDataClient {
    */
   public async search({
     query,
-    size,
+    size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
+    from,
+    sort,
   }: {
     query: ESFilter;
     size?: number;
+    from?: number;
+    sort?: SearchRequest['sort'];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
-      body: { query },
-      size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
+      query,
+      size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
+      from,
+      sort,
     });
     return response;
+  }
+
+  public async searchByKuery({
+    kuery,
+    size,
+    from,
+    sort,
+  }: {
+    kuery?: string;
+    size?: number;
+    from?: number;
+    sort?: SearchRequest['sort'];
+  }) {
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
+    return this.search({
+      query,
+      size,
+      from,
+      sort,
+    });
   }
 
   private getIndex() {
@@ -141,7 +169,10 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
+  public async upsert(
+    record: AssetCriticalityUpsert,
+    refresh = 'wait_for' as const
+  ): Promise<AssetCriticalityRecord> {
     const id = createId(record);
     const doc = {
       id_field: record.idField,
@@ -153,6 +184,7 @@ export class AssetCriticalityDataClient {
     await this.options.esClient.update({
       id,
       index: this.getIndex(),
+      refresh: refresh ?? false,
       body: {
         doc,
         doc_as_upsert: true,
@@ -179,9 +211,9 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
-  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityCsvUploadResponse> => {
-    const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
-    const stats: AssetCriticalityCsvUploadResponse['stats'] = {
+  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityBulkUploadResponse> => {
+    const errors: AssetCriticalityBulkUploadResponse['errors'] = [];
+    const stats: AssetCriticalityBulkUploadResponse['stats'] = {
       successful: 0,
       failed: 0,
       total: 0,
@@ -240,10 +272,27 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts) {
+  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
     await this.options.esClient.delete({
       id: createId(idParts),
       index: this.getIndex(),
+      refresh: refresh ?? false,
     });
+  }
+
+  public formatSearchResponse(response: SearchResponse<AssetCriticalityRecord>): {
+    records: AssetCriticalityRecord[];
+    total: number;
+  } {
+    const records = response.hits.hits.map((hit) => hit._source as AssetCriticalityRecord);
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    return {
+      records,
+      total,
+    };
   }
 }

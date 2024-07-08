@@ -33,7 +33,9 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless Alert User Assignment - Serverless', () => {
+  // See https://github.com/elastic/kibana/issues/182878 for
+  // background on @skipInSrverlessMKI - action needed
+  describe('@serverless @skipInServerlessMKI Alert User Assignment - Serverless', () => {
     before(async () => {
       await esArchiver.load(path);
     });
@@ -61,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         // Try to set all of the alerts to the state of closed.
         // This should not be possible with the given user.

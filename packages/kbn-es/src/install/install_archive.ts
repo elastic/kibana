@@ -40,6 +40,7 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
     esArgs = [],
+    disableEsTmpDir = process.env.FTR_DISABLE_ES_TMPDIR?.toLowerCase() === 'true',
   } = options || {};
 
   let dest = archive;
@@ -62,9 +63,16 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
   });
   log.info('extracted to %s', chalk.bold(installPath));
 
-  const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
-  fs.mkdirSync(tmpdir, { recursive: true });
-  log.info('created %s', chalk.bold(tmpdir));
+  /**
+   * If we're running inside a Vagrant VM, and this is running in a synced folder,
+   * ES will fail to start due to ML being unable to write a pipe in the synced folder.
+   * Disabling allows ES to write to the OS's /tmp directory.
+   */
+  if (!disableEsTmpDir) {
+    const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
+    fs.mkdirSync(tmpdir, { recursive: true });
+    log.info('created %s', chalk.bold(tmpdir));
+  }
 
   // starting in 6.3, security is disabled by default. Since we bootstrap
   // the keystore, we can enable security ourselves.
@@ -76,7 +84,7 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
   ]);
 
-  return { installPath };
+  return { installPath, disableEsTmpDir };
 }
 
 /**

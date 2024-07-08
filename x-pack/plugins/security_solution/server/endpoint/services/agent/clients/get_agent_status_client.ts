@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CrowdstrikeAgentStatusClient } from './crowdstrike/crowdstrike_agent_status_client';
 import { SentinelOneAgentStatusClient } from './sentinel_one/sentinel_one_agent_status_client';
 import type { AgentStatusClientInterface } from './lib/types';
 import type { AgentStatusClientOptions } from './lib/base_agent_status_client';
@@ -27,8 +28,8 @@ export const getAgentStatusClient = (
       return new EndpointAgentStatusClient(constructorOptions);
     case 'sentinel_one':
       return new SentinelOneAgentStatusClient(constructorOptions);
-    // case 'crowdstrike':
-    //   // TODO TC: Currently we do not support CrowdStrike agent status - will be done in a follow up PR
+    case 'crowdstrike':
+      return new CrowdstrikeAgentStatusClient(constructorOptions);
     default:
       throw new UnsupportedAgentTypeError(
         `Agent type [${agentType}] does not support agent status`

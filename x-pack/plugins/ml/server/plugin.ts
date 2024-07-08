@@ -27,7 +27,6 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
-import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -45,7 +44,6 @@ import { dataRecognizer } from './routes/modules';
 import { dataVisualizerRoutes } from './routes/data_visualizer';
 import { fieldsService } from './routes/fields_service';
 import { filtersRoutes } from './routes/filters';
-import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
 import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
@@ -267,7 +265,6 @@ export class MlServerPlugin
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    indicesRoutes(routeInit);
     managementRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
@@ -279,7 +276,6 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     notificationsRoutes(routeInit);
-    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });

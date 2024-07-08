@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
@@ -12,10 +12,14 @@ import {
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
-} from '@kbn/securitysolution-grouping/src';
+} from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
-import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
+import {
+  LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
+  VULNERABILITY_GROUPING_OPTIONS,
+  VULNERABILITY_FIELDS,
+} from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
   LATEST_VULNERABILITIES_RETENTION_POLICY,
@@ -26,12 +30,7 @@ import {
   VulnerabilitiesRootGroupingAggregation,
   useGroupedVulnerabilities,
 } from './use_grouped_vulnerabilities';
-import {
-  defaultGroupingOptions,
-  getDefaultQuery,
-  GROUPING_OPTIONS,
-  VULNERABILITY_FIELDS,
-} from '../constants';
+import { defaultGroupingOptions, getDefaultQuery } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
 
@@ -82,14 +81,14 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case GROUPING_OPTIONS.RESOURCE_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
       return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
       ];
-    case GROUPING_OPTIONS.CVE:
+    case VULNERABILITY_GROUPING_OPTIONS.CVE:
       return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
@@ -130,6 +129,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -195,6 +195,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

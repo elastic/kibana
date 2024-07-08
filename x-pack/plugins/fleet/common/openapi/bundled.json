@@ -34,14 +34,16 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "name": {
-                      "type": "string"
-                    },
                     "status": {
                       "type": "string"
                     },
+                    "id": {
+                      "type": "string",
+                      "description": "Fleet Server host id"
+                    },
                     "host": {
-                      "type": "string"
+                      "type": "string",
+                      "deprecated": true
                     }
                   }
                 }
@@ -65,10 +67,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "host": {
+                  "id": {
                     "type": "string"
+                  },
+                  "host": {
+                    "type": "string",
+                    "deprecated": true
                   }
-                }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
@@ -605,6 +614,9 @@
             }
           },
           "400": {
+            "$ref": "#/components/responses/error"
+          },
+          "429": {
             "$ref": "#/components/responses/error"
           }
         },
@@ -1622,6 +1634,14 @@
           "name": "prerelease",
           "description": "Specify if version is prerelease",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ]
     },
@@ -2503,7 +2523,7 @@
         ]
       }
     },
-    "/agents/files@{fileId}@{fileName}": {
+    "/agents/files/{fileId}/{fileName}": {
       "parameters": [
         {
           "schema": {
@@ -2557,6 +2577,53 @@
           }
         },
         "operationId": "get-agent-upload-file"
+      }
+    },
+    "/agents/files/{fileId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "fileId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Delete file uploaded by agent",
+        "tags": [
+          "Agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "deleted": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "delete-agent-upload-file"
       }
     },
     "/agents/{agentId}/reassign": {
@@ -3767,6 +3834,10 @@
                 "properties": {
                   "agentPolicyId": {
                     "type": "string"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "bypass validation checks that can prevent agent policy deletion"
                   }
                 },
                 "required": [
@@ -7294,6 +7365,7 @@
                 "properties": {
                   "log_level": {
                     "type": "string",
+                    "nullable": true,
                     "enum": [
                       "debug",
                       "info",
@@ -7398,6 +7470,9 @@
               },
               "title": {
                 "type": "string"
+              },
+              "requires_root": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -7447,7 +7522,14 @@
             }
           },
           "policy_id": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true
+          },
+          "policy_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "name": {
             "type": "string"
@@ -7571,6 +7653,9 @@
           "agents": {
             "type": "number"
           },
+          "unprivileged_agents": {
+            "type": "number"
+          },
           "agent_features": {
             "type": "array",
             "items": {
@@ -7602,6 +7687,27 @@
             "type": "object",
             "description": "Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs",
             "nullable": true
+          },
+          "supports_agentless": {
+            "type": "boolean",
+            "description": "Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment."
+          },
+          "global_data_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
+            }
           }
         },
         "required": [
@@ -7683,6 +7789,23 @@
           "force": {
             "type": "boolean",
             "description": "Force agent policy creation even if packages are not verified."
+          },
+          "global_data_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
+            }
           }
         },
         "required": [
@@ -8088,7 +8211,18 @@
           "policy_id": {
             "type": "string",
             "description": "Agent policy ID where that package policy will be added",
-            "example": "agent-policy-id"
+            "example": "agent-policy-id",
+            "deprecated": true
+          },
+          "policy_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Agent policy IDs where that package policy will be added",
+            "example": [
+              "agent-policy-id"
+            ]
           },
           "package": {
             "type": "object",
@@ -8184,7 +8318,6 @@
         },
         "required": [
           "name",
-          "policy_id",
           "package"
         ]
       },

@@ -1,0 +1,159 @@
+{
+  "id": "dataQuality",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dataQuality",
+      "id": "def-public.DataQualityPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataQualityPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/data_quality/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dataQuality",
+      "id": "def-public.DataQualityPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataQualityPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/data_quality/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "dataQuality",
+        "id": "def-common.DataQualityLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataQualityLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dataQuality",
+            "scope": "common",
+            "docId": "kibDataQualityPluginApi",
+            "section": "def-common.DataQualityLocatorParams",
+            "text": "DataQualityLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/data_quality/common/locators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataQuality",
+            "id": "def-common.DataQualityLocatorParams.filters",
+            "type": "Object",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "Filters | undefined"
+            ],
+            "path": "x-pack/plugins/data_quality/common/locators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "dataQuality",
+        "id": "def-common.DATA_QUALITY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_QUALITY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"DATA_QUALITY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/data_quality/common/locators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataQuality",
+        "id": "def-common.DATA_QUALITY_URL_STATE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_QUALITY_URL_STATE_KEY",
+        "description": [],
+        "signature": [
+          "\"pageState\""
+        ],
+        "path": "x-pack/plugins/data_quality/common/url_schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataQuality",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"data_quality\""
+        ],
+        "path": "x-pack/plugins/data_quality/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataQuality",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "path": "x-pack/plugins/data_quality/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

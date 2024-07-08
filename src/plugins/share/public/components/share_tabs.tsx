@@ -28,7 +28,7 @@ export const ShareMenuTabs = () => {
     return null;
   }
 
-  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems } = shareContext;
+  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 
   const tabs = [];
 
@@ -49,6 +49,7 @@ export const ShareMenuTabs = () => {
       onClose={onClose}
       modalTitle={objectTypeMeta.title}
       defaultSelectedTabId="link"
+      anchorElement={anchorElement}
     />
   );
 };

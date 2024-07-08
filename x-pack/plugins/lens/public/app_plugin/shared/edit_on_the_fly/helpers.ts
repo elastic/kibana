@@ -4,37 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLAdHocDataview,
+  getESQLQueryColumns,
+} from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-
-export const getQueryColumns = async (
-  query: AggregateQuery,
-  deps: LensPluginStartDependencies,
-  abortController?: AbortController
-) => {
-  // Fetching only columns for ES|QL for performance reasons with limit 0
-  // Important note: ES doesnt return the warnings for 0 limit,
-  // I am skipping them in favor of performance now
-  // but we should think another way to get them (from Lens embeddable or store)
-  const performantQuery = { ...query };
-  if ('esql' in performantQuery && performantQuery.esql) {
-    performantQuery.esql = `${performantQuery.esql} | limit 0`;
-  }
-  const table = await fetchFieldsFromESQL(
-    performantQuery,
-    deps.expressions,
-    undefined,
-    abortController
-  );
-  return table?.columns;
-};
 
 export const getSuggestions = async (
   query: AggregateQuery,
@@ -55,12 +36,13 @@ export const getSuggestions = async (
       ? await deps.dataViews.create(dataViewSpec)
       : await getESQLAdHocDataview(indexPattern, deps.dataViews);
 
-    if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
-      dataView.timeFieldName = '@timestamp';
-    }
-    const columns = await getQueryColumns(query, deps, abortController);
+    const columns = await getESQLQueryColumns({
+      esqlQuery: 'esql' in query ? query.esql : '',
+      search: deps.data.search.search,
+      signal: abortController?.signal,
+    });
     const context = {
-      dataViewSpec: dataView?.toSpec(),
+      dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
       textBasedColumns: columns,
       query,

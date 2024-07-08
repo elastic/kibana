@@ -35,11 +35,17 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
+  alertIndex?: string;
   alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
 }
 
-export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActionsProps) {
+export function HeaderActions({
+  alert,
+  alertIndex,
+  alertStatus,
+  onUntrackAlert,
+}: HeaderActionsProps) {
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
@@ -78,7 +84,7 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
       ? [
           {
             alertId: alert?.fields[ALERT_UUID] || '',
-            index: '.internal.alerts-observability.metrics.alerts-*',
+            index: alertIndex || '',
             rule: {
               id: rule.id,
               name: rule.name,

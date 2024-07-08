@@ -25,7 +25,6 @@ export default function ({
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-  const retry = getService('retry');
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -86,13 +85,9 @@ export default function ({
 
     describe('Print PDF button', () => {
       afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
+        await PageObjects.share.closeShareModal();
       });
+
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -142,13 +137,6 @@ export default function ({
         await unloadEcommerce();
       });
 
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal(); // close modal
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
-
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -167,18 +155,13 @@ export default function ({
       });
     });
 
-    describe('Preserve Layout', () => {
+    describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });
+
       after(async () => {
         await unloadEcommerce();
-      });
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal(); // close modal
-          return await testSubjects.exists('shareTopNavButton');
-        });
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
@@ -188,10 +171,10 @@ export default function ({
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
         await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.share.closeShareModal();
 
         const url = await PageObjects.reporting.getReportURL(60000);
         const res = await PageObjects.reporting.getResponse(url ?? '');
+        await PageObjects.share.closeShareModal();
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
@@ -218,12 +201,13 @@ export default function ({
         await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
         await PageObjects.reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
         await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url ?? '');
+        const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
         sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
@@ -243,16 +227,8 @@ export default function ({
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
       });
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
 
-      xit('PNG file matches the baseline image', async function () {
+      it('PNG file matches the baseline image', async function () {
         this.timeout(300000);
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,

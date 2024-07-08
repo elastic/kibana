@@ -123,6 +123,8 @@ export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
   'observability:enableInfrastructureHostsView';
+export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID =
+  'observability:enableInfrastructureContainerAssetView';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
   'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
@@ -139,6 +141,8 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
+export const OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL = 'observability:apmEnableMultiSignal';
+export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -171,9 +175,6 @@ export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableC
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
-/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
-export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
-  'securitySolution:enableExpandableFlyout' as const;
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;

@@ -243,7 +243,6 @@ describe('Legacy Alerts Client', () => {
       ruleRunMetricsStore,
       shouldLogAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      notifyOnActionGroupChange: true,
       maintenanceWindowIds: ['window-id1', 'window-id2'],
       alertDelay: 5,
     });
@@ -274,7 +273,6 @@ describe('Legacy Alerts Client', () => {
         lookBackWindow: 20,
         statusChangeThreshold: 4,
       },
-      true,
       'default',
       5,
       {},

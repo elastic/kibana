@@ -156,7 +156,7 @@ export const downloadCsvShareProvider = ({
                 />
               ),
               generateExportButton: (
-                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate export" />
+                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Export file" />
               ),
               renderLayoutOptionSwitch: false,
               getJobParams: undefined,

@@ -9,10 +9,14 @@ import type { CoreStart } from '@kbn/core/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { getESQLAdHocDataview, getIndexForESQLQuery, ENABLE_ESQL } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getIndexForESQLQuery,
+  ENABLE_ESQL,
+  getESQLQueryColumns,
+} from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
@@ -59,28 +63,24 @@ export async function executeCreateAction({
   const defaultIndex = dataView.getIndexPattern();
 
   const defaultEsqlQuery = {
-    esql: `from ${defaultIndex} | limit 10`,
+    esql: `FROM ${defaultIndex} | LIMIT 10`,
   };
 
   // For the suggestions api we need only the columns
   // so we are requesting them with limit 0
   // this is much more performant than requesting
   // all the table
-  const performantQuery = {
-    esql: `from ${defaultIndex} | limit 0`,
-  };
-
-  const table = await fetchDataFromAggregateQuery(
-    performantQuery,
-    dataView,
-    deps.data,
-    deps.expressions
-  );
+  const abortController = new AbortController();
+  const columns = await getESQLQueryColumns({
+    esqlQuery: `from ${defaultIndex}`,
+    search: deps.data.search.search,
+    signal: abortController.signal,
+  });
 
   const context = {
-    dataViewSpec: dataView.toSpec(),
+    dataViewSpec: dataView.toSpec(false),
     fieldName: '',
-    textBasedColumns: table?.columns,
+    textBasedColumns: columns,
     query: defaultEsqlQuery,
   };
 

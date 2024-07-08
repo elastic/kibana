@@ -33,10 +33,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
@@ -63,13 +63,13 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should create a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleCreateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -77,10 +77,22 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
         });
 
+        const expectedRule = {
+          ...ruleCreateProperties,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
+
         const { body: createdRulesBulkResponse } = await securitySolutionApi
-          .bulkCreateRules({ body: [expectedRule] })
+          .bulkCreateRules({ body: [ruleCreateProperties] })
           .expect(200);
 
         expect(createdRulesBulkResponse[0]).toMatchObject(expectedRule);
@@ -102,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).toEqual(expectedRule);

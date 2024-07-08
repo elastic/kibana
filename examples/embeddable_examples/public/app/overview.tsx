@@ -7,16 +7,19 @@
  */
 
 import React from 'react';
-
-import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiMarkdownFormat } from '@elastic/eui';
+// @ts-ignore
+import overviewMarkdown from '!!raw-loader!@kbn/embeddable-plugin/README.md';
 
 export const Overview = () => {
   return (
-    <EuiText>
-      <p>
-        Embeddables are React components that manage their own state, can be serialized and
-        deserialized, and return an API that can be used to interact with them imperatively.
-      </p>
-    </EuiText>
+    <EuiMarkdownFormat
+      css={css`
+        width: 75%;
+      `}
+    >
+      {overviewMarkdown}
+    </EuiMarkdownFormat>
   );
 };

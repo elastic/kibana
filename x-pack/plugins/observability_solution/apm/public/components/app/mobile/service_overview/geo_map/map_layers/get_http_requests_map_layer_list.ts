@@ -41,13 +41,11 @@ const label = i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests
   defaultMessage: 'HTTP requests',
 });
 
-export async function getHttpRequestsLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
+export function getHttpRequestsLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
   const whereQuery = {
     language: 'kuery',
     query: `${PROCESSOR_EVENT}:${ProcessorEvent.span} and ${SPAN_SUBTYPE}:${MobileSpanSubtype.Http} and ${SPAN_TYPE}:${MobileSpanType.External}`,
   };
-
-  const basemapLayerDescriptor = await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
 
   const httpRequestsByCountryLayer: VectorLayerDescriptor = {
     joins: [
@@ -127,9 +125,5 @@ export async function getHttpRequestsLayerList(maps: MapsStartApi | undefined, d
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return [
-    ...(basemapLayerDescriptor ? [basemapLayerDescriptor] : []),
-    httpRequestsByRegionLayer,
-    httpRequestsByCountryLayer,
-  ] as BaseLayerDescriptor[];
+  return [httpRequestsByRegionLayer, httpRequestsByCountryLayer] as BaseLayerDescriptor[];
 }

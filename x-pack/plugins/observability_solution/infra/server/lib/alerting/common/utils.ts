@@ -28,6 +28,7 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
+import { Group } from '../../../../common/alerting/types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
@@ -195,7 +196,7 @@ export const doFieldsExist = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
-    fields: '*',
+    fields,
   });
 
   const fieldsExisted: Record<string, boolean> = {};
@@ -309,6 +310,25 @@ export const getGroupByObject = (
             }, {})
           : { [groupBy]: groupSet }
       );
+    });
+  }
+  return groupByKeysObjectMapping;
+};
+
+export const getFormattedGroupBy = (
+  groupBy: string | string[] | undefined,
+  groupSet: Set<string>
+): Record<string, Group[]> => {
+  const groupByKeysObjectMapping: Record<string, Group[]> = {};
+  if (groupBy) {
+    groupSet.forEach((group) => {
+      const groupSetKeys = group.split(',');
+      groupByKeysObjectMapping[group] = Array.isArray(groupBy)
+        ? groupBy.reduce((result: Group[], groupByItem, index) => {
+            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+            return result;
+          }, [])
+        : [{ field: groupBy, value: group }];
     });
   }
   return groupByKeysObjectMapping;

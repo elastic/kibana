@@ -264,7 +264,7 @@ export const EmbedContent = ({
               >
                 <FormattedMessage
                   id="share.link.copyEmbedCodeButton"
-                  defaultMessage="Copy Embed code"
+                  defaultMessage="Copy embed code"
                 />
               </EuiButton>
             )}

@@ -623,9 +623,12 @@ export const LensTopNavMenu = ({
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: true, // default is short url
-              shareableUrl: shareableUrl || '',
-              shareableUrlForSavedObject: savedObjectURL.href,
+              allowShortUrl: false,
+              delegatedShareUrlHandler: () => {
+                return isCurrentStateDirty || !currentDoc?.savedObjectId
+                  ? shareableUrl!
+                  : savedObjectURL.href;
+              },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
               objectTypeMeta: {
@@ -634,7 +637,8 @@ export const LensTopNavMenu = ({
                 }),
               },
               sharingData,
-              isDirty: isCurrentStateDirty,
+              // only want to know about changes when savedObjectURL.href
+              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
@@ -909,7 +913,7 @@ export const LensTopNavMenu = ({
         ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
                 },

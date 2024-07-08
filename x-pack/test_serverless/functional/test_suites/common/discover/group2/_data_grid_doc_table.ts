@@ -33,8 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/182125
-  describe.skip('discover data grid doc table', function describeIndexTests() {
+  describe('discover data grid doc table', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
@@ -165,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
           const detailsEl = await dataGrid.getDetailsRows();
-          const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+          const defaultMessageEl = await detailsEl[0].findByTestSubject('docViewerRowDetailsTitle');
           expect(defaultMessageEl).to.be.ok();
           await dataGrid.closeFlyout();
         });
@@ -187,9 +186,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
-          await testSubjects.exists(`dscDocNavigationPage0`);
+          await testSubjects.exists(`docViewerFlyoutNavigationPage0`);
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
-          await testSubjects.exists(`dscDocNavigationPage1`);
+          await testSubjects.exists(`docViewerFlyoutNavigationPage1`);
           await dataGrid.closeFlyout();
         });
       });
@@ -222,7 +221,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('add and remove columns', function () {
       const extraColumns = ['phpmemory', 'ip'];
-
+      const expectedFieldLength: Record<string, number> = {
+        phpmemory: 1,
+        ip: 4,
+      };
       afterEach(async function () {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
@@ -234,6 +236,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
+            expectedFieldLength[column]
+          );
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test the header now
@@ -246,6 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
+            expectedFieldLength[column]
+          );
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
         }

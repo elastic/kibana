@@ -34,11 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dataSourceSelection initialization and update', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     describe('when no dataSourceSelection is given', () => {

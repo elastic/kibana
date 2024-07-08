@@ -7,15 +7,16 @@
  */
 
 import { of, Subscription } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/analytics-client';
-import { createAnalytics } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@kbn/ebt/client';
+import { createAnalytics } from '@kbn/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { trackPerformanceMeasureEntries } from './track_performance_measure_entries';
 import { trackClicks } from './track_clicks';
+
 import { getSessionId } from './get_session_id';
-import { createLogger } from './logger';
 import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
@@ -30,7 +31,7 @@ export class AnalyticsService {
   constructor(core: CoreContext) {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: createLogger(core.env.mode.dev),
+      logger: core.logger.get('analytics'),
       // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
       //  For now, we are relying on whether it's a distributable or running from source.
       sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
@@ -44,6 +45,9 @@ export class AnalyticsService {
     this.registerSessionIdContext();
     this.registerBrowserInfoAnalyticsContext();
     this.subscriptionsHandler.add(trackClicks(this.analyticsClient, core.env.mode.dev));
+    this.subscriptionsHandler.add(
+      trackPerformanceMeasureEntries(this.analyticsClient, core.env.mode.dev)
+    );
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
 
     // Register a flush method in the browser so CI can explicitly call it before closing the browser.

@@ -47,7 +47,8 @@
     "@kbn/spaces-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

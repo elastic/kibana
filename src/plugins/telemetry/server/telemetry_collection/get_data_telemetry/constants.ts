@@ -39,11 +39,16 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
 
   // Observability - Elastic
   { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: '*filebeat*', patternName: 'generic-filebeat' },
   { pattern: 'metricbeat-*', patternName: 'metricbeat', shipper: 'metricbeat' },
+  { pattern: '*metricbeat*', patternName: 'generic-metricbeat' },
   { pattern: 'apm-*', patternName: 'apm', shipper: 'apm' },
   { pattern: 'functionbeat-*', patternName: 'functionbeat', shipper: 'functionbeat' },
+  { pattern: '*functionbeat*', patternName: 'generic-functionbeat' },
   { pattern: 'heartbeat-*', patternName: 'heartbeat', shipper: 'heartbeat' },
+  { pattern: '*heartbeat*', patternName: 'generic-heartbeat' },
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
+  { pattern: '*logstash*', patternName: 'generic-logstash' },
   // Observability - 3rd party
   { pattern: 'fluentd*', patternName: 'fluentd' },
   { pattern: 'telegraf*', patternName: 'telegraf' },
@@ -51,7 +56,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
-  // { pattern: '*logs*', patternName: 'third-party-logs' }, Disabled for now
+  { pattern: '*logs*', patternName: 'generic-logs' },
 
   // Security - Elastic
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },

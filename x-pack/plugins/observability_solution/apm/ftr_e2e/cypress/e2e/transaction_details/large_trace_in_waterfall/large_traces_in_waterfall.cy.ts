@@ -42,7 +42,9 @@ describe('Large Trace in waterfall', () => {
     });
 
     it('renders waterfall items', () => {
-      cy.getByTestSubj('waterfallItem').should('have.length.greaterThan', 200);
+      // it renders a virtual list, so the number of items rendered is not the same as the number of items in the trace
+      cy.getByTestSubj('waterfallItem').should('have.length.at.least', 39);
+      cy.getByTestSubj('waterfall').should('have.css', 'height').and('eq', '10011px');
     });
 
     it('shows warning about trace size', () => {
@@ -70,7 +72,9 @@ describe('Large Trace in waterfall', () => {
     });
 
     it('renders waterfall items', () => {
-      cy.getByTestSubj('waterfallItem').should('have.length.greaterThan', 400);
+      // it renders a virtual list, so the number of items rendered is not the same as the number of items in the trace
+      cy.getByTestSubj('waterfallItem').should('have.length.at.least', 39);
+      cy.getByTestSubj('waterfall').should('have.css', 'height').and('eq', '10011px');
     });
 
     it('does not show the warning about trace size', () => {

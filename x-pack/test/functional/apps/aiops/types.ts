@@ -44,9 +44,10 @@ interface TestDataExpectedWithoutSampleProbability {
     fieldName: string;
     fieldValue: string;
     logRate: string;
-    pValue: string;
+    pValue?: string;
     impact: string;
   }>;
+  columnSelectorPopover: string[];
   fieldSelectorPopover: string[];
   prompt: 'empty' | 'change-point';
 }
@@ -63,6 +64,7 @@ export interface TestData {
   brushDeviationTargetTimestamp?: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
+  columnSelectorSearch: string;
   fieldSelectorSearch: string;
   fieldSelectorApplyAvailable: boolean;
   query?: string;

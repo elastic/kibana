@@ -51,7 +51,7 @@ export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
     >
       {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
 
-      <EuiText className="mlHelpPopover__content" size="s">
+      <EuiText className="mlHelpPopover__content eui-scrollBar" size="s" tabIndex={0}>
         {children}
       </EuiText>
     </EuiPopover>

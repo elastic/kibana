@@ -10,7 +10,7 @@ import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
@@ -30,6 +30,10 @@ const getDeps = () =>
   } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('resolves with returned documents', async () => {
     const hits = [
       { _id: '1', foo: 'bar' },
@@ -38,10 +42,17 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    const resolveDocumentProfileSpy = jest.spyOn(
+      discoverServiceMock.profilesManager,
+      'resolveDocumentProfile'
+    );
     expect(await fetchDocuments(savedSearchMock.searchSource, getDeps())).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
+    expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
+    expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: documents[0] });
+    expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: documents[1] });
   });
 
   test('rejects on query failure', async () => {

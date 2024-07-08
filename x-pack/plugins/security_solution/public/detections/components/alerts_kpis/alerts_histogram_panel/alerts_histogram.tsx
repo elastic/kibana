@@ -7,7 +7,15 @@
 
 import type { ChartSizeArray } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Axis, Chart, HistogramBarSeries, Position, Settings, ScaleType } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  HistogramBarSeries,
+  Position,
+  Settings,
+  ScaleType,
+  LegendValue,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
@@ -77,9 +85,9 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
               <Settings
                 legendPosition={legendPosition}
                 onBrushEnd={updateDateRange}
-                // showLegend controls the default legend coming from Elastic chart, we show them when our customised legend items doesn't exist (but we still want to show legend).
+                // showLegend controls the default legend coming from @elastic/charts, we show them when our customized legend items don't exist (but we still want to show legend).
                 showLegend={showLegend && legendItems.length === 0}
-                showLegendExtra={showLegend}
+                legendValues={showLegend ? [LegendValue.CurrentAndLastValue] : []}
                 theme={theme}
                 baseTheme={baseTheme}
                 locale={i18n.getLocale()}

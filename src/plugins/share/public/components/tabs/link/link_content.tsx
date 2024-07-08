@@ -9,6 +9,7 @@
 import {
   copyToClipboard,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -18,8 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
-import { format as formatUrl, parse as parseUrl } from 'url';
+import React, { useCallback, useMemo, useState } from 'react';
 import { IShareContext } from '../../context';
 
 type LinkProps = Pick<
@@ -29,7 +29,7 @@ type LinkProps = Pick<
   | 'isDirty'
   | 'urlService'
   | 'shareableUrl'
-  | 'shareableUrlForSavedObject'
+  | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
 >;
@@ -44,90 +44,42 @@ export const LinkContent = ({
   objectType,
   isDirty,
   shareableUrl,
-  shareableUrlForSavedObject,
   urlService,
   shareableUrlLocatorParams,
   allowShortUrl,
+  delegatedShareUrlHandler,
 }: LinkProps) => {
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
-  const [, setShortUrlCache] = useState<string | undefined>(undefined);
+  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
-  const getUrlParamExtensions = useCallback(
+  const getUrlWithUpdatedParams = useCallback(
     (tempUrl: string): string => {
-      if (!urlParams) return tempUrl;
+      const urlWithUpdatedParams = urlParams
+        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+            const urlParam = urlParams[key];
+            return urlParam
+              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                  const isQueryParamEnabled = urlParam[queryParam];
+                  return isQueryParamEnabled
+                    ? queryAccumulator + `&${queryParam}=true`
+                    : queryAccumulator;
+                }, urlAccumulator)
+              : urlAccumulator;
+          }, tempUrl)
+        : tempUrl;
 
-      return Object.keys(urlParams).reduce((urlAccumulator, key) => {
-        const urlParam = urlParams[key];
-        return urlParam
-          ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-              const isQueryParamEnabled = urlParam[queryParam];
-              return isQueryParamEnabled
-                ? queryAccumulator + `&${queryParam}=true`
-                : queryAccumulator;
-            }, urlAccumulator)
-          : urlAccumulator;
-      }, tempUrl);
+      // persist updated url to state
+      setUrl(urlWithUpdatedParams);
+      return urlWithUpdatedParams;
     },
     [urlParams]
   );
 
-  const updateUrlParams = useCallback(
-    (tempUrl: string) => {
-      tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
-      setUrl(tempUrl);
-      return tempUrl;
-    },
-    [getUrlParamExtensions, urlParams]
-  );
-
-  const getSnapshotUrl = useCallback(
-    (forSavedObject?: boolean) => {
-      let tempUrl = '';
-      if (forSavedObject && shareableUrlForSavedObject) {
-        tempUrl = shareableUrlForSavedObject;
-      }
-      if (!tempUrl) {
-        tempUrl = shareableUrl || window.location.href;
-      }
-
-      return updateUrlParams(tempUrl);
-    },
-    [shareableUrl, shareableUrlForSavedObject, updateUrlParams]
-  );
-
-  const getSavedObjectUrl = useCallback(() => {
-    if (isDirty) {
-      return;
-    }
-
-    const tempUrl = getSnapshotUrl(true);
-
-    const parsedUrl = parseUrl(tempUrl);
-    if (!parsedUrl || !parsedUrl.hash) {
-      return;
-    }
-
-    // Get the application route, after the hash, and remove the #.
-    const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
-
-    const formattedUrl = formatUrl({
-      protocol: parsedUrl.protocol,
-      auth: parsedUrl.auth,
-      host: parsedUrl.host,
-      pathname: parsedUrl.pathname,
-      hash: formatUrl({
-        pathname: parsedAppUrl.pathname,
-        query: {
-          // Add global state to the URL so that the iframe doesn't just show the time range
-          // default.
-          _g: parsedAppUrl.query._g,
-        },
-      }),
-    });
-    return updateUrlParams(formattedUrl);
-  }, [getSnapshotUrl, isDirty, updateUrlParams]);
+  const getSnapshotUrl = useCallback(() => {
+    return getUrlWithUpdatedParams(shareableUrl || window.location.href);
+  }, [getUrlWithUpdatedParams, shareableUrl]);
 
   const createShortUrl = useCallback(async () => {
     if (shareableUrlLocatorParams) {
@@ -140,30 +92,33 @@ export const LinkContent = ({
       const snapshotUrl = getSnapshotUrl();
       const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
       setShortUrlCache(shortUrl.url);
+
       return shortUrl.url;
     }
   }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
 
   const copyUrlHelper = useCallback(async () => {
     let urlToCopy = url;
-    if (!urlToCopy) {
-      let tempUrl = '';
 
-      if (objectType === 'dashboard' || objectType === 'search') {
-        tempUrl = getSnapshotUrl();
-      } else if (objectType === 'lens') {
-        tempUrl = getSavedObjectUrl() as string;
-      }
-
-      urlToCopy = allowShortUrl ? await createShortUrl() : tempUrl;
-      setUrl(urlToCopy);
+    if (!urlToCopy || delegatedShareUrlHandler) {
+      urlToCopy = delegatedShareUrlHandler
+        ? delegatedShareUrlHandler?.()
+        : allowShortUrl
+        ? await createShortUrl()
+        : getSnapshotUrl();
     }
 
     copyToClipboard(urlToCopy);
     setUrl(urlToCopy);
     setTextCopied(true);
-  }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl, url]);
+    return urlToCopy;
+  }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl, getSnapshotUrl]);
 
+  const handleTestUrl = useMemo(() => {
+    if (objectType !== 'search' || !allowShortUrl) return getSnapshotUrl();
+    else if (objectType === 'search' && allowShortUrl) return shortUrlCache;
+    return copyUrlHelper();
+  }, [objectType, getSnapshotUrl, allowShortUrl, shortUrlCache, copyUrlHelper]);
   return (
     <>
       <EuiForm>
@@ -175,21 +130,29 @@ export const LinkContent = ({
             values={{ objectType }}
           />
         </EuiText>
+        {isDirty && objectType === 'lens' && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              color="warning"
+              title={
+                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+              }
+            >
+              <FormattedMessage
+                id="share.link.warning.lens"
+                defaultMessage="Copy the link to get a temporary link. Save the lens visualization to create a permanent link."
+              />
+            </EuiCallOut>
+          </>
+        )}
         <EuiSpacer size="l" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={
-              isDirty && objectType === 'lens'
-                ? i18n.translate('share.link.unsaved', {
-                    defaultMessage:
-                      'There are unsaved changes. Before you generate a link, save the {objectType}.',
-                    values: {
-                      objectType,
-                    },
-                  })
-                : isTextCopied
+              isTextCopied
                 ? i18n.translate('share.link.copied', { defaultMessage: 'Text copied' })
                 : null
             }
@@ -197,10 +160,10 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              data-share-url={url}
+              data-share-url={handleTestUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
-              disabled={objectType === 'lens' && isDirty}
+              color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>

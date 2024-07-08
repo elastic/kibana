@@ -33,6 +33,7 @@ export {
   asSavedObjectExecutionSource,
   asHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  getBasicAuthHeader,
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 

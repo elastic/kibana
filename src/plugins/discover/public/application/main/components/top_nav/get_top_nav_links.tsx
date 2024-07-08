@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { omit } from 'lodash';
 import { copyToClipboard } from '@elastic/eui';
 import { useState } from 'react';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
@@ -29,7 +30,7 @@ export const useTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isTextBased,
+  isEsqlMode,
   adHocDataViews,
   topNavCustomization,
 }: {
@@ -37,7 +38,7 @@ export const useTopNavLinks = ({
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isTextBased: boolean;
+  isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
@@ -56,7 +57,7 @@ export const useTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord: isTextBased,
+        isEsqlMode,
       });
     },
     testId: 'discoverAlertsButton',
@@ -102,7 +103,7 @@ export const useTopNavLinks = ({
       savedSearch.searchSource,
       state.appState.getState(),
       services,
-      isTextBased
+      isEsqlMode
     );
 
     const { locator } = services;
@@ -114,7 +115,7 @@ export const useTopNavLinks = ({
 
     // Share -> Get links -> Snapshot
     const params: DiscoverAppLocatorParams = {
-      ...appState,
+      ...omit(appState, 'dataSource'),
       ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
@@ -204,7 +205,7 @@ export const useTopNavLinks = ({
           }),
         },
         sharingData: {
-          isTextBased,
+          isTextBased: isEsqlMode,
           locatorParams: [{ id: locator.id, params }],
           ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title
@@ -344,8 +345,10 @@ export const useTopNavLinks = ({
   if (!defaultMenu?.inspectItem?.disabled) {
     entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 500 });
   }
+  console.log('test1234');
 
   if (!defaultMenu?.shareItem?.disabled) {
+    console.log('test1234');
     entries.push({ data: shareSearchBtn, order: defaultMenu?.shareItem?.order ?? 550 });
   }
 

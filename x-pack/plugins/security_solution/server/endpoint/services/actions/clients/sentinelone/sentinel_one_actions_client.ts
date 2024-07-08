@@ -12,17 +12,19 @@ import {
 import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
-  SentinelOneGetAgentsParams,
-  SentinelOneGetAgentsResponse,
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
+  SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
+  SentinelOneDownloadAgentFileParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
+import type { Readable } from 'stream';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
@@ -31,14 +33,15 @@ import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
-} from '../../..';
+} from '../lib/types';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
-import { ResponseActionsClientError } from '../errors';
+import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
@@ -48,10 +51,13 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   SentinelOneActionRequestCommonMeta,
+  SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
   SentinelOneGetFileRequestMeta,
+  SentinelOneGetFileResponseMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -61,8 +67,10 @@ import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientPendingAction,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -393,7 +401,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           await this.sendAction(SUB_ACTION.FETCH_AGENT_FILES, {
             agentUUID: actionRequest.endpoint_ids[0],
             files: [actionRequest.parameters.path],
-            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+            zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
           });
         } catch (err) {
           error = err;
@@ -460,6 +468,95 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     ).actionDetails;
   }
 
+  async getFileInfo(actionId: string, agentId: string): Promise<UploadedFileInfo> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+    await this.ensureValidActionId(actionId);
+
+    const fileInfo: UploadedFileInfo = {
+      actionId,
+      agentId,
+      id: agentId,
+      agentType: this.agentType,
+      status: 'AWAITING_UPLOAD',
+      created: '',
+      name: '',
+      size: 0,
+      mimeType: '',
+    };
+
+    try {
+      const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+
+      // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
+      // calling the download API, which would return the following error:
+      // {  "errors":[ {
+      //      "code":4100010,
+      //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
+      //      "title":"Resource not found"
+      // } ] }
+      fileInfo.status = 'READY';
+      fileInfo.created = agentResponse.meta?.createdAt ?? '';
+      fileInfo.name = agentResponse.meta?.filename ?? '';
+      fileInfo.mimeType = 'application/octet-stream';
+    } catch (e) {
+      // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
+      if (!(e instanceof ResponseActionAgentResponseEsDocNotFound)) {
+        throw e;
+      }
+    }
+
+    return fileInfo;
+  }
+
+  async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    await this.ensureValidActionId(actionId);
+
+    const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+
+    if (!agentResponse.meta?.activityLogEntryId) {
+      throw new ResponseActionsClientError(
+        `Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]`
+      );
+    }
+
+    const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
+      agentUUID: agentId,
+      activityId: agentResponse.meta?.activityLogEntryId,
+    };
+    const { data } = await this.sendAction<Readable>(
+      SUB_ACTION.DOWNLOAD_AGENT_FILE,
+      downloadAgentFileMethodOptions
+    );
+
+    if (!data) {
+      throw new ResponseActionsClientError(
+        `Unable to establish a readable stream for file with SentinelOne`
+      );
+    }
+
+    return {
+      stream: data,
+      fileName: agentResponse.meta.filename,
+      mimeType: undefined,
+    };
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,
@@ -473,7 +570,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         return;
       }
 
-      const pendingActionsByType = groupBy(pendingActions, 'EndpointActions.data.command');
+      const pendingActionsByType = groupBy(pendingActions, 'action.EndpointActions.data.command');
 
       for (const [actionType, typePendingActions] of Object.entries(pendingActionsByType)) {
         if (abortSignal.aborted) {
@@ -486,7 +583,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             {
               const isolationResponseDocs = await this.checkPendingIsolateOrReleaseActions(
                 typePendingActions as Array<
-                  LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+                  ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
                 >,
                 actionType as 'isolate' | 'unisolate'
               );
@@ -495,9 +592,56 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               }
             }
             break;
+
+          case 'get-file':
+            {
+              const responseDocsForGetFile = await this.checkPendingGetFileActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    ResponseActionGetFileParameters,
+                    ResponseActionGetFileOutputContent,
+                    SentinelOneGetFileRequestMeta
+                  >
+                >
+              );
+              if (responseDocsForGetFile.length) {
+                addToQueue(...responseDocsForGetFile);
+              }
+            }
+            break;
         }
       }
     }
+  }
+
+  private async fetchGetFileResponseEsDocForAgentId(
+    actionId: string,
+    agentId: string
+  ): Promise<
+    LogsEndpointActionResponse<ResponseActionGetFileOutputContent, SentinelOneGetFileResponseMeta>
+  > {
+    const agentResponse = (
+      await this.fetchActionResponseEsDocs<
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileResponseMeta
+      >(actionId, [agentId])
+    )[agentId];
+
+    if (!agentResponse) {
+      throw new ResponseActionAgentResponseEsDocNotFound(
+        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        404
+      );
+    }
+
+    if (agentResponse.EndpointActions.data.command !== 'get-file') {
+      throw new ResponseActionsClientError(
+        `Invalid action ID [${actionId}] - Not a get-file action: [${agentResponse.EndpointActions.data.command}]`,
+        400
+      );
+    }
+
+    return agentResponse;
   }
 
   /**
@@ -508,7 +652,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * @private
    */
   private async checkPendingIsolateOrReleaseActions(
-    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>,
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
+    >,
     command: ResponseActionsApiCommandNames & ('isolate' | 'unisolate')
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
@@ -521,44 +667,48 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // Create the `OR` clause that filters for each agent id and an updated date of greater than the date when
     // the isolate request was created
-    const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce((acc, action) => {
-      const s1AgentId = action.meta?.agentId;
+    const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce(
+      (acc, pendingActionData) => {
+        const action = pendingActionData.action;
+        const s1AgentId = action.meta?.agentId;
 
-      if (s1AgentId) {
-        if (!actionsByAgentId[s1AgentId]) {
-          actionsByAgentId[s1AgentId] = [];
+        if (s1AgentId) {
+          if (!actionsByAgentId[s1AgentId]) {
+            actionsByAgentId[s1AgentId] = [];
+          }
+
+          actionsByAgentId[s1AgentId].push(action);
+
+          acc.push({
+            bool: {
+              filter: [
+                { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+                { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
+              ],
+            },
+          });
+        } else {
+          // This is an edge case and should never happen. But just in case :-)
+          warnings.push(
+            `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
+          );
+
+          completedResponses.push(
+            this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
+              actionId: action.EndpointActions.action_id,
+              agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+              data: { command },
+              error: {
+                message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
+              },
+            })
+          );
         }
 
-        actionsByAgentId[s1AgentId].push(action);
-
-        acc.push({
-          bool: {
-            filter: [
-              { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
-              { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
-            ],
-          },
-        });
-      } else {
-        // This is an edge case and should never happen. But just in case :-)
-        warnings.push(
-          `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
-        );
-
-        completedResponses.push(
-          this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
-            actionId: action.EndpointActions.action_id,
-            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
-            data: { command },
-            error: {
-              message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
-            },
-          })
-        );
-      }
-
-      return acc;
-    }, [] as QueryDslQueryContainer[]);
+        return acc;
+      },
+      [] as QueryDslQueryContainer[]
+    );
 
     if (agentListQuery.length > 0) {
       const query: QueryDslQueryContainer = {
@@ -617,7 +767,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         // due to use of `collapse
         _source: false,
         sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
-        size: 1000,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
       };
 
       this.log.debug(
@@ -642,7 +792,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
           const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
 
-          const elasticDocId = isolateActivityResponseDoc._id;
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const elasticDocId = isolateActivityResponseDoc._id!;
           const s1AgentId = s1ActivityData.agent.id;
           const activityLogEntryId = s1ActivityData.id;
           const activityLogEntryType = s1ActivityData.type;
@@ -681,6 +832,183 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(
       `${completedResponses.length} ${command} action responses generated:\n${stringify(
+        completedResponses
+      )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  private async checkPendingGetFileActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+    const actionsByAgentAndBatchId: {
+      [agentIdAndCommandBatchUuid: string]: LogsEndpointAction<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >;
+    } = {};
+    // Utility to create the key to lookup items in the `actionByAgentAndBatchId` grouping above
+    const getLookupKey = (agentId: string, commandBatchUuid: string): string =>
+      `${agentId}:${commandBatchUuid}`;
+    const searchRequestOptions: SearchRequest = {
+      index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
+      size: ACTIONS_SEARCH_PAGE_SIZE,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
+                // {
+                //   "action": "Agent Uploaded Fetched Files",
+                //   "descriptionTemplate": "Agent {{ computer_name }} ({{ external_ip }}) successfully uploaded {{ filename }}.",
+                //   "id": 80
+                // },
+                'sentinel_one.activity.type': 80,
+              },
+            },
+          ],
+          should: actionRequests.reduce((acc, { action }) => {
+            const s1AgentId = action.meta?.agentId;
+            const s1CommandBatchUUID = action.meta?.commandBatchUuid;
+
+            if (s1AgentId && s1CommandBatchUUID) {
+              actionsByAgentAndBatchId[getLookupKey(s1AgentId, s1CommandBatchUUID)] = action;
+
+              acc.push({
+                bool: {
+                  filter: [
+                    { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+                    {
+                      term: {
+                        'sentinel_one.activity.data.flattened.commandBatchUuid': s1CommandBatchUUID,
+                      },
+                    },
+                  ],
+                },
+              });
+            } else {
+              // This is an edge case and should never happen. But just in case :-)
+              warnings.push(
+                `get-file response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID or commandBatchUuid value(s). Unable to check on it's status - forcing it to complete as a failure.`
+              );
+
+              completedResponses.push(
+                this.buildActionResponseEsDoc<{}, {}>({
+                  actionId: action.EndpointActions.action_id,
+                  agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+                  data: { command: 'get-file' },
+                  error: {
+                    message: `Unable to very if action completed. SentinelOne agent id or commandBatchUuid missing on action request document!`,
+                  },
+                })
+              );
+            }
+
+            return acc;
+          }, [] as QueryDslQueryContainer[]),
+          minimum_should_match: 1,
+        },
+      },
+    };
+
+    if (Object.keys(actionsByAgentAndBatchId).length) {
+      this.log.debug(
+        `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
+          searchRequestOptions,
+          15
+        )}`
+      );
+
+      const searchResults = await this.options.esClient
+        .search<SentinelOneActivityEsDoc<SentinelOneActivityDataForType80>>(searchRequestOptions)
+        .catch(catchAndWrapError);
+
+      this.log.debug(
+        `Search results for SentinelOne get-file activity documents:\n${stringify(searchResults)}`
+      );
+
+      for (const s1Hit of searchResults.hits.hits) {
+        const s1ActivityDoc = s1Hit._source;
+        const s1AgentId = s1ActivityDoc?.sentinel_one.activity.agent.id;
+        const s1CommandBatchUuid =
+          s1ActivityDoc?.sentinel_one.activity.data.flattened.commandBatchUuid ?? '';
+        const activityLogEntryId = s1ActivityDoc?.sentinel_one.activity.id ?? '';
+
+        if (s1AgentId && s1CommandBatchUuid) {
+          const actionRequest =
+            actionsByAgentAndBatchId[getLookupKey(s1AgentId, s1CommandBatchUuid)];
+
+          if (actionRequest) {
+            const downloadUrl = s1ActivityDoc?.sentinel_one.activity.data.downloaded.url ?? '';
+            const error = !downloadUrl
+              ? {
+                  message: `File retrieval failed (No download URL defined in SentinelOne activity log id [${activityLogEntryId}])`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                ResponseActionGetFileOutputContent,
+                SentinelOneGetFileResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'get-file',
+                  comment: s1ActivityDoc?.sentinel_one.activity.description.primary ?? '',
+                  output: {
+                    type: 'json',
+                    content: {
+                      // code applies only to Endpoint agents
+                      code: '',
+                      // We don't know the file size for S1 retrieved files
+                      zip_size: 0,
+                      // We don't have the contents of the zip file for S1
+                      contents: [],
+                    },
+                  },
+                },
+                error,
+                meta: {
+                  activityLogEntryId,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  elasticDocId: s1Hit._id!,
+                  downloadUrl,
+                  createdAt: s1ActivityDoc?.sentinel_one.activity.updated_at ?? '',
+                  filename: s1ActivityDoc?.sentinel_one.activity.data.flattened.filename ?? '',
+                },
+              })
+            );
+          } else {
+            warnings.push(
+              `Activity log entry ${s1Hit._id} was a matched, but no action request for it (should not happen)`
+            );
+          }
+        }
+      }
+    } else {
+      this.log.debug(`Nothing to search for. No pending get-file actions`);
+    }
+
+    this.log.debug(
+      `${completedResponses.length} get-file action responses generated:\n${stringify(
         completedResponses
       )}`
     );

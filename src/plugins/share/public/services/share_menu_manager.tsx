@@ -52,6 +52,7 @@ export class ShareMenuManager {
           overlays: core.overlays,
           i18n: core.i18n,
           toasts: core.notifications.toasts,
+          publicAPIEnabled: !disableEmbed,
         });
       },
     };
@@ -72,7 +73,6 @@ export class ShareMenuManager {
     sharingData,
     menuItems,
     shareableUrl,
-    shareableUrlForSavedObject,
     shareableUrlLocatorParams,
     embedUrlParamExtensions,
     theme,
@@ -86,6 +86,8 @@ export class ShareMenuManager {
     i18n,
     isDirty,
     toasts,
+    delegatedShareUrlHandler,
+    publicAPIEnabled,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -105,11 +107,14 @@ export class ShareMenuManager {
 
     this.isOpen = true;
     document.body.appendChild(this.container);
+
     const openModal = () => {
       const session = overlays.openModal(
         toMountPoint(
           <ShareMenu
             shareContext={{
+              publicAPIEnabled,
+              anchorElement,
               allowEmbed,
               allowShortUrl,
               objectId,
@@ -117,8 +122,8 @@ export class ShareMenuManager {
               objectTypeMeta,
               sharingData,
               shareableUrl,
-              shareableUrlForSavedObject,
               shareableUrlLocatorParams,
+              delegatedShareUrlHandler,
               embedUrlParamExtensions,
               anonymousAccess,
               showPublicUrlSwitch,

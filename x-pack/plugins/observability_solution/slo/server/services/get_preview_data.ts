@@ -21,6 +21,7 @@ import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
 import { buildParamValues } from './transform_generators/synthetics_availability';
@@ -46,7 +47,23 @@ interface Options {
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
-  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private spaceId: string,
+    private dataViewService: DataViewsService
+  ) {}
+
+  public async buildRuntimeMappings({ dataViewId }: { dataViewId?: string }) {
+    let dataView: DataView | undefined;
+    if (dataViewId) {
+      try {
+        dataView = await this.dataViewService.get(dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
+    }
+    return dataView?.getRuntimeMappings?.() ?? {};
+  }
 
   private async getAPMTransactionDurationPreviewData(
     indicator: APMTransactionDurationIndicator,
@@ -81,6 +98,9 @@ export class GetPreviewData {
 
     const result = await typedSearch(this.esClient, {
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -177,6 +197,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -256,6 +279,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -321,6 +347,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -389,6 +418,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -440,6 +472,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -523,6 +558,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -592,20 +630,19 @@ export class GetPreviewData {
       // Timeslice metric so that the chart is as close to the evaluation as possible.
       // Otherwise due to how the statistics work, the values might not look like
       // they've breached the threshold.
+      const rangeDuration = moment(params.range.to).diff(params.range.from, 'ms');
       const bucketSize =
         params.indicator.type === 'sli.metric.timeslice' &&
-        params.range.end - params.range.start <= 86_400_000 &&
+        rangeDuration <= 86_400_000 &&
         params.objective?.timesliceWindow
           ? params.objective.timesliceWindow.asMinutes()
           : Math.max(
-              calculateAuto
-                .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
-                ?.asMinutes() ?? 0,
+              calculateAuto.near(100, moment.duration(rangeDuration, 'ms'))?.asMinutes() ?? 0,
               1
             );
       const options: Options = {
         instanceId: params.instanceId,
-        range: params.range,
+        range: { start: params.range.from.getTime(), end: params.range.to.getTime() },
         groupBy: params.groupBy,
         remoteName: params.remoteName,
         groupings: params.groupings,

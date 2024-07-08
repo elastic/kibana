@@ -578,7 +578,8 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
     });
   });
 
-  describe('Investigation fields actions', () => {
+  // https://github.com/elastic/kibana/issues/182834
+  describe('Investigation fields actions', { tags: ['@skipInServerlessMKI'] }, () => {
     it('Add investigation fields to custom rules', () => {
       getRulesManagementTableRows().then((rows) => {
         const fieldsToBeAdded = ['source.ip', 'destination.ip'];
@@ -610,7 +611,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
 
         cy.get(RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING).should(
           'have.text',
-          `You’re about to overwrite custom highlighted fields for ${rows.length} selected rules, press Save to apply changes.`
+          `You’re about to overwrite custom highlighted fields for the ${rows.length} rules you selected. To apply and save the changes, click Save.`
         );
 
         typeInvestigationFields(fieldsToOverwrite);

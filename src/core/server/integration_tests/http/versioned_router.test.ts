@@ -29,7 +29,7 @@ interface AdditionalOptions {
 
 describe('Routing versioned requests', () => {
   let router: IRouter;
-  let supertest: Supertest.SuperTest<Supertest.Test>;
+  let supertest: Supertest.Agent;
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();

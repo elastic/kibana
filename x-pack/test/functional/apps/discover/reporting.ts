@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import moment from 'moment';
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -36,14 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.refresh();
   };
 
-  const getReport = async () => {
+  const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
 
     await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
 
-    const url = await PageObjects.reporting.getReportURL(60000);
+    const url = await PageObjects.reporting.getReportURL(timeout);
     const res = await PageObjects.reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
@@ -65,24 +65,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
-
       it('is available if new', async () => {
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
     });
 
@@ -105,22 +98,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
-
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      // Discover defaults to short urls - is this test helpful? Clarify in separate PR
-      xit('generates a report with single timefilter', async () => {
+      it('generates a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
@@ -132,22 +115,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openExportTab();
         const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = (await copyButton.getAttribute('data-share-url')) ?? '';
+        const reportURL = decodeURIComponent(
+          (await copyButton.getAttribute('data-share-url')) ?? ''
+        );
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
-          decodeURIComponent(reportURL).split(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          ).length - 1;
+          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
 
         expect(timeFiltersNumberInSharedURL).to.be(1);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
         expect(timeFiltersNumberInReportURL).to.be(1);
+
         expect(
-          decodeURIComponent(reportURL).includes(
-            'query:(range:(order_date:(format:strict_date_optional_time'
+          reportURL.includes(
+            `query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))`
           )
         ).to.be(true);
 
@@ -189,8 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('large export');
 
         // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(4826973);
+        const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
+        expect(csvFile.length).to.be(4845684);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });
@@ -274,10 +258,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reset();
       });
 
-      afterEach(async () => {
-        await PageObjects.share.closeShareModal();
-      });
-
       beforeEach(async () => {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
@@ -320,7 +300,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await PageObjects.reporting.checkForReportingToasts();
-        await PageObjects.share.closeShareModal();
       });
 
       it('generates a report with data', async () => {

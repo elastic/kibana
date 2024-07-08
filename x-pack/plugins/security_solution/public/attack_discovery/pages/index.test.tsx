@@ -50,7 +50,6 @@ jest.mock(
 jest.mock('../../common/links', () => ({
   useLinkInfo: jest.fn().mockReturnValue({
     capabilities: ['siem.show'],
-    experimentalKey: 'attackDiscoveryEnabled',
     globalNavPosition: 4,
     globalSearchKeywords: ['Attack discovery'],
     id: 'attack_discovery',
@@ -64,9 +63,12 @@ jest.mock('../use_attack_discovery', () => ({
     approximateFutureTime: null,
     attackDiscoveries: [],
     cachedAttackDiscoveries: {},
+    didInitialFetch: true,
     fetchAttackDiscoveries: jest.fn(),
+    failureReason: null,
     generationIntervals: undefined,
     isLoading: false,
+    isLoadingPost: false,
     lastUpdated: null,
     replacements: {},
   }),

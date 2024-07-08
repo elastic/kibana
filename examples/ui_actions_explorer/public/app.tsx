@@ -18,6 +18,7 @@ import {
   EuiPageHeader,
 } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { TriggerContextExample } from './trigger_context_example';
 import { ContextMenuExamples } from './context_menu_examples';
@@ -31,30 +32,35 @@ interface Props {
 
 const ActionsExplorer = ({ uiActionsStartService, core }: Props) => {
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageSection>
-          <EuiPageHeader pageTitle="Actions and Triggers" />
-        </EuiPageSection>
-        <EuiPageTemplate.Section>
+    <KibanaRenderContextProvider {...core}>
+      <EuiPage>
+        <EuiPageBody>
           <EuiPageSection>
-            <Overview />
-
-            <EuiSpacer />
-
-            <HelloWorldExample uiActionsStartService={uiActionsStartService} startServices={core} />
-
-            <EuiSpacer />
-
-            <TriggerContextExample uiActionsApi={uiActionsStartService} />
-
-            <EuiSpacer />
-
-            <ContextMenuExamples />
+            <EuiPageHeader pageTitle="Actions and Triggers" />
           </EuiPageSection>
-        </EuiPageTemplate.Section>
-      </EuiPageBody>
-    </EuiPage>
+          <EuiPageTemplate.Section>
+            <EuiPageSection>
+              <Overview />
+
+              <EuiSpacer />
+
+              <HelloWorldExample
+                uiActionsStartService={uiActionsStartService}
+                startServices={core}
+              />
+
+              <EuiSpacer />
+
+              <TriggerContextExample uiActionsApi={uiActionsStartService} />
+
+              <EuiSpacer />
+
+              <ContextMenuExamples />
+            </EuiPageSection>
+          </EuiPageTemplate.Section>
+        </EuiPageBody>
+      </EuiPage>
+    </KibanaRenderContextProvider>
   );
 };
 

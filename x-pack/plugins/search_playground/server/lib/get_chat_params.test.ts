@@ -6,10 +6,7 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
+import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/langchain/server';
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
@@ -18,10 +15,14 @@ import { Prompt } from '../../common/prompt';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
-jest.mock('@kbn/elastic-assistant-common/impl/language_models', () => ({
-  ActionsClientChatOpenAI: jest.fn(),
-  ActionsClientLlm: jest.fn(),
-}));
+jest.mock('@kbn/langchain/server', () => {
+  const original = jest.requireActual('@kbn/langchain/server');
+  return {
+    ...original,
+    ActionsClientChatOpenAI: jest.fn(),
+    ActionsClientLlm: jest.fn(),
+  };
+});
 
 jest.mock('../../common/prompt', () => ({
   Prompt: jest.fn((instructions) => instructions),
@@ -38,6 +39,7 @@ describe('getChatParams', () => {
   const actions = {
     getActionsClientWithRequest: jest.fn(() => Promise.resolve(mockActionsClient)),
   } as unknown as ActionsPluginStartContract;
+
   const logger = jest.fn() as unknown as Logger;
   const request = jest.fn() as unknown as KibanaRequest;
 
@@ -84,7 +86,15 @@ describe('getChatParams', () => {
       context: true,
       type: 'anthropic',
     });
-    expect(ActionsClientLlm).toHaveBeenCalledWith(expect.anything());
+    expect(ActionsClientLlm).toHaveBeenCalledWith({
+      temperature: 0,
+      llmType: 'bedrock',
+      traceId: 'test-uuid',
+      logger: expect.anything(),
+      model: 'custom-model',
+      connectorId: '2',
+      actionsClient: expect.anything(),
+    });
     expect(result.chatPrompt).toContain('How does it work?');
   });
 

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { MouseEventHandler, useCallback, useState } from 'react';
+import React, { AriaRole, MouseEventHandler, useCallback, useState } from 'react';
 
 export function WaterfallLegendItem<T = string>({
   id,
@@ -37,7 +37,8 @@ export function WaterfallLegendItem<T = string>({
   const ariaLabel = `${label}${isClickable ? ` - ${title}` : ''}`;
 
   return (
-    <EuiFlexGroupLegendItem
+    <EuiFlexGroup
+      component={StyledLegendItem}
       role={isClickable ? 'checkbox' : 'listitem'}
       title={title}
       aria-label={ariaLabel}
@@ -54,11 +55,11 @@ export function WaterfallLegendItem<T = string>({
       <EuiIcon color={color} size="m" type={isBoxFilled ? 'stopFilled' : 'stopSlash'} />
 
       <EuiText size="xs">{label}</EuiText>
-    </EuiFlexGroupLegendItem>
+    </EuiFlexGroup>
   );
 }
 
-const EuiFlexGroupLegendItem = euiStyled(EuiFlexGroup)`
+const StyledLegendItem = euiStyled.div<{ role: AriaRole }>`
   flex-grow: 0;
   flex-shrink: 0;
   &:active {

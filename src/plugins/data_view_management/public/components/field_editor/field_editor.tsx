@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
 import type {
   FieldFormat,
@@ -655,7 +655,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return this.state.showDeleteModal ? (
       <EuiConfirmModal
         title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
-          defaultMessage: "Delete field '{fieldName}'",
+          defaultMessage: "Delete field ''{fieldName}''",
           values: { fieldName: spec.name },
         })}
         onCancel={this.hideDeleteModal}
@@ -788,7 +788,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     indexPattern.removeScriptedField(spec.name);
     indexPatternService.updateSavedObject(indexPattern).then(() => {
       const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
-        defaultMessage: "Deleted '{fieldName}'",
+        defaultMessage: "Deleted ''{fieldName}''",
         values: { fieldName: spec.name },
       });
       this.context.services.notifications.toasts.addSuccess(message);
@@ -842,7 +842,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       .updateSavedObject(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
-          defaultMessage: "Saved '{fieldName}'",
+          defaultMessage: "Saved ''{fieldName}''",
           values: { fieldName: field.name },
         });
         this.context.services.notifications.toasts.addSuccess(message);
@@ -877,7 +877,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { isReady, isCreating, spec } = this.state;
 
     return isReady ? (
-      <div>
+      <I18nProvider>
         <EuiText>
           <h3>
             {isCreating ? (
@@ -909,7 +909,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           {this.renderDeleteModal()}
         </EuiForm>
         <EuiSpacer size="l" />
-      </div>
+      </I18nProvider>
     ) : null;
   }
 }

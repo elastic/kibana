@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { getCommonRequestHeader } from '../../../../../functional/services/ml/common_api';
 
 export const executeSetupModuleRequest = async ({
@@ -15,14 +16,14 @@ export const executeSetupModuleRequest = async ({
 }: {
   module: string;
   rspCode: number;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
 }) => {
   const { body } = await supertest
     .post(`/internal/ml/modules/setup/${module}`)
     .set(getCommonRequestHeader('1'))
     .send({
       prefix: '',
-      groups: ['auditbeat'],
+      groups: [ML_GROUP_ID],
       indexPatternName: 'auditbeat-*',
       startDatafeed: false,
       useDedicatedIndex: true,
@@ -40,7 +41,7 @@ export const forceStartDatafeeds = async ({
 }: {
   jobId: string;
   rspCode: number;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
 }) => {
   const { body } = await supertest
     .post(`/internal/ml/jobs/force_start_datafeeds`)

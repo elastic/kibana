@@ -97,7 +97,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
 }: Props<T>) {
-  const { getTagList } = useServices();
+  const { getTagList, isTaggingEnabled } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -181,7 +181,9 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
 
-  const tagFilterPanel = useMemo<SearchFilterConfig>(() => {
+  const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+    if (!isTaggingEnabled()) return null;
+
     return {
       type: 'custom_component',
       component: () => {
@@ -202,6 +204,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [
     isPopoverOpen,
     isInUse,
+    isTaggingEnabled,
     closePopover,
     options,
     totalActiveFilters,
@@ -251,6 +254,7 @@ export function Table<T extends UserContentCommonSchema>({
     if (tableFilter?.createdBy?.length > 0) {
       return items.filter((item) => {
         if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
+        else if (item.managed) return false;
         else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
       });
     }
@@ -264,8 +268,10 @@ export function Table<T extends UserContentCommonSchema>({
     let _showNoUserOption = false;
     const users = new Set<string>();
     items.forEach((item) => {
-      if (item.createdBy) users.add(item.createdBy);
-      else {
+      if (item.createdBy) {
+        users.add(item.createdBy);
+      } else if (!item.managed) {
+        // show no user option only if there is an item without createdBy that is not a "managed" item
         _showNoUserOption = true;
       }
     });

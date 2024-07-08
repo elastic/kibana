@@ -105,6 +105,7 @@ export type {
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
   LazyValidator,
+  RouteAccess,
 } from './src/router';
 export {
   validBodyOutput,
@@ -112,6 +113,7 @@ export {
   getRequestValidation,
   getResponseValidation,
   isFullValidatorContainer,
+  isKibanaResponse,
 } from './src/router';
 
 export type { ICspConfig } from './src/csp';
@@ -140,6 +142,7 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpProtocol,
 } from './src/http_contract';
 
 export type {

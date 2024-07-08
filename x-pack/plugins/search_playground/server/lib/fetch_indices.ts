@@ -42,9 +42,24 @@ export const fetchIndices = async (
       !isHidden(allIndexMatches[indexName]) &&
       !isClosed(allIndexMatches[indexName])
   );
+
+  const allAliases = allIndexNames.reduce<string[]>((acc, indexName) => {
+    const aliases = allIndexMatches[indexName].aliases;
+    if (aliases) {
+      Object.keys(aliases).forEach((alias) => {
+        if (!acc.includes(alias)) {
+          acc.push(alias);
+        }
+      });
+    }
+    return acc;
+  }, []);
+
+  const allOptions = [...allIndexNames, ...allAliases];
+
   const indexNames = searchQuery
-    ? allIndexNames.filter((indexName) => indexName.includes(searchQuery.toLowerCase()))
-    : allIndexNames;
+    ? allOptions.filter((indexName) => indexName.includes(searchQuery.toLowerCase()))
+    : allOptions;
 
   return {
     indexNames,

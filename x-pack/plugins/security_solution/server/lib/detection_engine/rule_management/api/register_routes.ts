@@ -34,16 +34,16 @@ export const registerRuleManagementRoutes = (
   logger: Logger
 ) => {
   // Rules CRUD
-  createRuleRoute(router, ml);
+  createRuleRoute(router);
   readRuleRoute(router, logger);
-  updateRuleRoute(router, ml);
-  patchRuleRoute(router, ml);
+  updateRuleRoute(router);
+  patchRuleRoute(router);
   deleteRuleRoute(router);
 
   // Rules bulk CRUD
-  bulkCreateRulesRoute(router, ml, logger);
-  bulkUpdateRulesRoute(router, ml, logger);
-  bulkPatchRulesRoute(router, ml, logger);
+  bulkCreateRulesRoute(router, logger);
+  bulkUpdateRulesRoute(router, logger);
+  bulkPatchRulesRoute(router, logger);
   bulkDeleteRulesRoute(router, logger);
 
   // Rules bulk actions
@@ -51,7 +51,7 @@ export const registerRuleManagementRoutes = (
 
   // Rules export/import
   exportRulesRoute(router, config, logger);
-  importRulesRoute(router, config, ml);
+  importRulesRoute(router, config);
 
   // Rules search
   findRulesRoute(router, logger);

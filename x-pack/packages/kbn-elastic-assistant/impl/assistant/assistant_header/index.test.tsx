@@ -19,6 +19,7 @@ const mockConversations = {
   [welcomeConvo.title]: welcomeConvo,
 };
 const testProps = {
+  conversationsLoaded: true,
   currentConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {
@@ -37,6 +38,7 @@ const testProps = {
   refetchConversationsState: jest.fn(),
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   refetchAnonymizationFieldsResults: jest.fn(),
+  allPrompts: [],
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({

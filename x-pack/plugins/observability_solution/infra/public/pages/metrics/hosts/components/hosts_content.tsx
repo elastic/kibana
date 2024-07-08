@@ -27,21 +27,21 @@ export const HostsContent = () => {
       ) : (
         <HostsViewProvider>
           <HostsTableProvider>
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <HostCountProvider>
+            <HostCountProvider>
+              <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexItem grow={false}>
                   <KPIGrid />
-                </HostCountProvider>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <HostsTable />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AlertsQueryProvider>
-                  <Tabs />
-                </AlertsQueryProvider>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <HostsTable />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <AlertsQueryProvider>
+                    <Tabs />
+                  </AlertsQueryProvider>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </HostCountProvider>
           </HostsTableProvider>
         </HostsViewProvider>
       )}

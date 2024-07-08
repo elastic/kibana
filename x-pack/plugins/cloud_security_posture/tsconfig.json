@@ -59,10 +59,12 @@
     "@kbn/core-http-server-mocks",
     "@kbn/field-formats-plugin",
     "@kbn/data-view-field-editor-plugin",
-    "@kbn/securitysolution-grouping",
+    "@kbn/grouping",
     "@kbn/alerting-plugin",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/search-types",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": ["target/**/*"]
 }

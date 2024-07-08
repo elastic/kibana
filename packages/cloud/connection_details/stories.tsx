@@ -17,6 +17,7 @@ const defaultOpts: ConnectionDetailsOpts = {
   endpoints: {
     url: 'https://f67d6bf1a3cf40888e8863f6cb2cdc4c.us-east-1.aws.staging.foundit.no:443',
     id: 'my-cluster-id:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm8kZjY3ZDZiZjFhM2NmNDA4ODhlODg2M2Y2Y2IyY2RjNGMkOWViYzEzYjRkOTU0NDI2NDljMzcwZTNlZjMyZWYzOGI=',
+    cloudIdLearMoreLink: 'https://www.elastic.co/guide/en/cloud/current/ec-cloud-id.html',
   },
   apiKeys: {
     manageKeysLink: 'https://www.elastic.co/MANAGE_API_KEYS',
@@ -40,8 +41,15 @@ const defaultOpts: ConnectionDetailsOpts = {
   },
 };
 
-export const StoriesProvider: React.FC = ({ children }) => {
-  return <ConnectionDetailsOptsProvider {...defaultOpts}>{children}</ConnectionDetailsOptsProvider>;
+export const StoriesProvider: React.FC<Partial<ConnectionDetailsOpts>> = ({
+  children,
+  ...rest
+}) => {
+  return (
+    <ConnectionDetailsOptsProvider {...{ ...defaultOpts, ...rest }}>
+      {children}
+    </ConnectionDetailsOptsProvider>
+  );
 };
 
 export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {

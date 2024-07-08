@@ -8,9 +8,9 @@
 import { RiskSeverity } from '../../../../../common/search_strategy/security_solution';
 
 export const mockSeverityCount = {
-  [RiskSeverity.unknown]: 1,
-  [RiskSeverity.low]: 2,
-  [RiskSeverity.moderate]: 3,
-  [RiskSeverity.high]: 4,
-  [RiskSeverity.critical]: 5,
+  [RiskSeverity.Unknown]: 1,
+  [RiskSeverity.Low]: 2,
+  [RiskSeverity.Moderate]: 3,
+  [RiskSeverity.High]: 4,
+  [RiskSeverity.Critical]: 5,
 };

@@ -10,10 +10,12 @@ import {
   ApmFields,
   generateLongId,
   generateShortId,
+  infra,
   Instance,
   log,
   Serializable,
 } from '@kbn/apm-synthtrace-client';
+import { random } from 'lodash';
 import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
@@ -23,27 +25,48 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 3 } = runOptions.scenarioOpts || {};
+  const { numServices = 3, numHosts = 10 } = runOptions.scenarioOpts || {};
 
   return {
-    generate: ({ range, clients: { apmEsClient, assetsEsClient, logsEsClient } }) => {
+    generate: ({
+      range,
+      clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient },
+    }) => {
       const transactionName = '240rpm/75% 1000ms';
 
       const successfulTimestamps = range.interval('1m').rate(1);
       const failedTimestamps = range.interval('1m').rate(1);
-      const serviceNames = [...Array(numServices).keys()].map((index) => `synth-node-${index}`);
+      const serviceNames = [...Array(numServices).keys()].map((index) => `apm-only-${index}`);
+      serviceNames.push('multi-signal-service');
+      const HOSTS = Array(numHosts)
+        .fill(0)
+        .map((_, idx) => infra.host(`my-host-${idx}`));
+
+      const hosts = range
+        .interval('30s')
+        .rate(1)
+        .generator((timestamp) =>
+          HOSTS.flatMap((host) => [
+            host.cpu().timestamp(timestamp),
+            host.memory().timestamp(timestamp),
+            host.network().timestamp(timestamp),
+            host.load().timestamp(timestamp),
+            host.filesystem().timestamp(timestamp),
+            host.diskio().timestamp(timestamp),
+          ])
+        );
 
       const instances = serviceNames.map((serviceName) =>
         apm
           .service({ name: serviceName, environment: ENVIRONMENT, agentName: 'nodejs' })
           .instance('instance')
       );
-      const instanceSpans = (instance: Instance) => {
+      const instanceSpans = (instance: Instance, index: number) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(1000)
+            .duration(random(100, (index % 4) * 1000, false))
             .success()
             .children(
               instance
@@ -68,7 +91,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(1000)
+            .duration(600)
             .failure()
             .errors(
               instance
@@ -97,6 +120,12 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         return [...successfulTraceEvents, ...failedTraceEvents, ...metricsets];
       };
 
+      const MESSAGE_LOG_LEVELS = [
+        { message: 'A simple log with something random <random> in the middle', level: 'info' },
+        { message: 'Yet another debug log', level: 'debug' },
+        { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+      ];
+
       const logsWithTraces = range
         .interval('1m')
         .rate(1)
@@ -104,10 +133,8 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           return Array(3)
             .fill(0)
             .map(() => {
-              const { message, level } = {
-                message: 'A simple log with something random <random> in the middle',
-                level: 'info',
-              };
+              const index = Math.floor(Math.random() * 3);
+              const { message, level } = MESSAGE_LOG_LEVELS[index];
               const CLUSTER = {
                 clusterId: generateShortId(),
                 clusterName: 'synth-cluster-2',
@@ -118,7 +145,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(serviceNames[0])
+                .service('multi-signal-service')
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
@@ -130,6 +157,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
                   'cloud.availability_zone': 'eu-central-1a',
+                  'log.level': 'error',
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
                   'log.file.path': `/logs/${generateLongId()}/error.txt`,
@@ -145,10 +173,8 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           return Array(3)
             .fill(0)
             .map(() => {
-              const { message, level } = {
-                message: 'A simple log with something random <random> in the middle',
-                level: 'info',
-              };
+              const index = Math.floor(Math.random() * 3);
+              const { message, level } = MESSAGE_LOG_LEVELS[index];
               const CLUSTER = {
                 clusterId: generateShortId(),
                 clusterName: 'synth-cluster-2',
@@ -159,14 +185,14 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service('synth-java')
+                .service('logs-only-services')
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER.clusterName,
                   'orchestrator.cluster.id': CLUSTER.clusterId,
                   'orchestrator.namespace': CLUSTER.namespace,
-                  'container.name': `synth-java-${generateShortId()}`,
+                  'container.name': `logs-only-${generateShortId()}`,
                   'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
@@ -174,6 +200,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
                   'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                  'log.level': 'error',
                 })
                 .timestamp(timestamp);
             });
@@ -187,7 +214,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       const logsGen = createGeneratorFromArray(logsValuesArray);
       const logsGenAssets = createGeneratorFromArray(logsValuesArray);
 
-      const traces = instances.flatMap((instance) => instanceSpans(instance));
+      const traces = instances.flatMap((instance, index) => instanceSpans(instance, index));
       const tracesGen = createGeneratorFromArray(traces);
       const tracesGenAssets = createGeneratorFromArray(traces);
 
@@ -205,6 +232,10 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         withClient(
           apmEsClient,
           logger.perf('generating_apm_events', () => tracesGen)
+        ),
+        withClient(
+          infraEsClient,
+          logger.perf('generating_infra_hosts', () => hosts)
         ),
       ];
     },

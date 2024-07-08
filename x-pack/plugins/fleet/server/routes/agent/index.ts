@@ -34,6 +34,7 @@ import {
   ListAgentUploadsRequestSchema,
   GetAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
+  DeleteAgentUploadFileRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -57,6 +58,7 @@ import {
   getActionStatusHandler,
   getAgentUploadsHandler,
   getAgentUploadFileHandler,
+  deleteAgentUploadFileHandler,
   postAgentsReassignHandler,
   postRetrieveAgentsByActionsHandler,
 } from './handlers';
@@ -330,6 +332,21 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         validate: { request: GetAgentUploadFileRequestSchema },
       },
       getAgentUploadFileHandler
+    );
+
+  router.versioned
+    .delete({
+      path: AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN,
+      fleetAuthz: {
+        fleet: { readAgents: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeleteAgentUploadFileRequestSchema },
+      },
+      deleteAgentUploadFileHandler
     );
 
   // Get agent status for policy

@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -105,7 +109,6 @@
     "@kbn/react-field",
     "@kbn/field-types",
     "@kbn/securitysolution-rules",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/cases-components",
     "@kbn/event-log-plugin",
     "@kbn/task-manager-plugin",
@@ -143,10 +146,9 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
-    "@kbn/securitysolution-grouping",
+    "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
@@ -154,7 +156,6 @@
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/alerts-ui-shared",
-    "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
@@ -200,6 +201,14 @@
     "@kbn/management-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/deeplinks-security",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types",
+    "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/integration-assistant-plugin",
   ]
 }

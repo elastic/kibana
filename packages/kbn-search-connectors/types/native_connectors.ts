@@ -631,13 +631,33 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '*',
       },
+      index_labels: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate('searchConnectors.nativeConnectors.confluence.indexLabelsLabel', {
+          defaultMessage: 'Enable indexing labels',
+        }),
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.confluence.indexLabelsTooltip', {
+          defaultMessage:
+            'Enabling this will increase the amount of network calls to the source, and may decrease performance',
+        }),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       ssl_enabled: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -657,7 +677,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 11,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -672,7 +692,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 12,
+        order: 13,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -687,7 +707,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -712,7 +732,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 14,
+        order: 15,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -731,7 +751,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 15,
+        order: 16,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -866,8 +886,56 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.dropbox.tooltipName', {
+            defaultMessage: 'Dropbox',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      include_inherited_users_and_groups: {
+        default_value: null,
+        depends_on: [{ field: 'use_document_level_security', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.dropbox.includeInheritedUsersAndGroups.label',
+          {
+            defaultMessage: 'Include groups and inherited users',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.dropbox.includeInheritedUsersAndGroups.tooltip',
+          {
+            defaultMessage:
+              'Include groups and inherited users when indexing permissions. Enabling this configurable field will cause a significant performance degradation.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
@@ -1793,14 +1861,20 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.jira.cloudServiceAccountLabel', {
-          defaultMessage: 'Jira Cloud service account id',
+          defaultMessage: 'Jira Cloud email address',
         }),
         options: [],
         order: 6,
         placeholder: 'me@example.com',
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.jira.cloudServiceAccountTooltip',
+          {
+            defaultMessage:
+              'Email address associated with Jira Cloud account. E.g. jane.doe@gmail.com',
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -2605,7 +2679,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       ssl_enabled: {
         default_value: false,
@@ -2808,84 +2882,89 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   notion: {
     configuration: {
-      tenant_id: {
+      notion_secret_key: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.notion.tenantIdLabel', {
-          defaultMessage: 'Tenant ID',
+        label: i18n.translate('searchConnectors.nativeConnectors.notion.notionSecretKeyLabel', {
+          defaultMessage: 'Notion Secret Key',
         }),
         options: [],
         order: 1,
         required: true,
-        sensitive: false,
+        sensitive: true,
         tooltip: null,
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
         value: '',
       },
-      client_id: {
-        default_value: null,
+      databases: {
+        default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.notion.clientIdLabel', {
-          defaultMessage: 'Client ID',
+        label: i18n.translate('searchConnectors.nativeConnectors.notion.databasesLabel', {
+          defaultMessage: 'List of Databases',
         }),
         options: [],
         order: 2,
         required: true,
         sensitive: false,
-        tooltip: null,
-        type: FieldType.STRING,
+        tooltip: '',
+        type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
         value: '',
       },
-      secret_value: {
-        default_value: null,
+      pages: {
+        default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.notion.secretValueLabel', {
-          defaultMessage: 'Secret value',
+        label: i18n.translate('searchConnectors.nativeConnectors.notion.pagesLabel', {
+          defaultMessage: 'List of Pages',
         }),
         options: [],
         order: 3,
         required: true,
-        sensitive: true,
-        tooltip: null,
-        type: FieldType.STRING,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
         value: '',
       },
-      username: {
+      index_comments: {
         default_value: null,
         depends_on: [],
-        display: DisplayType.TEXTBOX,
-        label: USERNAME_LABEL,
+        display: DisplayType.TOGGLE,
+        label: i18n.translate('searchConnectors.nativeConnectors.notion.indexCommentsLabel', {
+          defaultMessage: 'Enable indexing comments',
+        }),
         options: [],
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: null,
-        type: FieldType.STRING,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.notion.indexCommentsTooltip', {
+          defaultMessage:
+            'Enabling this will increase the amount of network calls to the source, and may decrease performance',
+        }),
+        type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: false,
       },
-      password: {
-        default_value: null,
+      concurrent_downloads: {
+        default_value: 30,
         depends_on: [],
-        display: DisplayType.TEXTBOX,
-        label: PASSWORD_LABEL,
+        display: DisplayType.NUMERIC,
+        label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
         order: 5,
-        required: true,
-        sensitive: true,
+        required: false,
+        sensitive: false,
         tooltip: null,
-        type: FieldType.STRING,
-        ui_restrictions: [],
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
         validations: [],
         value: '',
       },
@@ -3142,7 +3221,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       fetch_size: {
         default_value: 50,
@@ -3558,11 +3637,33 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.outlookTooltip.name', {
+            defaultMessage: 'Outlook',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: false },
         basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
       },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
@@ -3998,13 +4099,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.salesforce.name', {
+            defaultMessage: 'Salesforce',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4279,7 +4399,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: '*',
       },
       use_text_extraction_service: {
         default_value: false,

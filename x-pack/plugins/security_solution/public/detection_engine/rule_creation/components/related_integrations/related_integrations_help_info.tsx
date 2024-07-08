@@ -40,7 +40,7 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
           defaultMessage="Choose the {integrationsDocLink} this rule depends on, and correct if necessary each integration’s version constraint in {semverLink} format. Only tilde, caret, and plain versions are supported, such as ~1.2.3, ^1.2.3, or 1.2.3."
           values={{
             integrationsDocLink: (
-              <EuiLink href={docLinks.links.securitySolution.ruleUiAdvancedParams} target="_blank">
+              <EuiLink href={docLinks.links.securitySolution.createDetectionRules} target="_blank">
                 <FormattedMessage
                   id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.integrationsLink"
                   defaultMessage="integrations"

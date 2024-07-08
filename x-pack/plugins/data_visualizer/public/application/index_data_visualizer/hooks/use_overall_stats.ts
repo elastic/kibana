@@ -10,13 +10,12 @@ import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/search-types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -52,6 +51,7 @@ import {
   fetchDataWithTimeout,
   rateLimitingForkJoin,
 } from '../search_strategy/requests/fetch_utils';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 
 const getPopulatedFieldsInIndex = (
   populatedFieldsInIndexWithoutRuntimeFields: Set<string> | undefined | null,
@@ -119,12 +119,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           return;
         }
 
-        const filterCriteria = buildBaseFilterCriteria(
-          timeFieldName,
-          earliest,
-          latest,
-          searchQuery
-        );
+        const filterCriteria = buildFilterCriteria(timeFieldName, earliest, latest, searchQuery);
 
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
@@ -161,7 +156,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       searchStrategyParams?.timeFieldName,
       searchStrategyParams?.earliest,
       searchStrategyParams?.latest,
-      searchStrategyParams?.searchQuery,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({ query: searchStrategyParams?.searchQuery }),
       searchStrategyParams?.index,
     ]
   );

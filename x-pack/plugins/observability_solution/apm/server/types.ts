@@ -53,6 +53,10 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import {
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
+} from '@kbn/logs-data-access-plugin/server';
 import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
@@ -88,6 +92,7 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  logsDataAccess: LogsDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -114,4 +119,5 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }

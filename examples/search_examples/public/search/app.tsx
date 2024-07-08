@@ -26,11 +26,8 @@ import {
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
-import {
-  DataPublicPluginStart,
-  IKibanaSearchResponse,
-  isRunningResponse,
-} from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';

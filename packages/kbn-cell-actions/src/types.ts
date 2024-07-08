@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { Serializable } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
+
+export * from './actions/types';
 
 export type CellActionsProviderProps = PropsWithChildren<{
   /**
@@ -132,21 +134,4 @@ export type GetActions = (context: CellActionCompatibilityContext) => Promise<Ce
 export interface PartitionedActions {
   extraActions: CellAction[];
   visibleActions: CellAction[];
-}
-
-/**
- * Cell action factory template with optional `id`.
- * The id override is required when using the action factory so it
- * can be omitted in the original action creator
- */
-export type CellActionTemplate<C extends CellAction = CellAction> = Omit<C, 'id'>;
-/**
- * Action factory extend parameter type,
- */
-export type CellActionExtend<C extends CellAction = CellAction> = Partial<C> & { id: string };
-export interface CellActionFactory<C extends CellAction = CellAction> {
-  <A extends C = C>(extend: CellActionExtend<A>): A;
-  combine: <A extends C = C>(
-    partialActionTemplate: Partial<CellActionTemplate<A>>
-  ) => CellActionFactory<A>;
 }

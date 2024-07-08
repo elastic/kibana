@@ -43,7 +43,18 @@ describe('<PipelinesList />', () => {
     const pipeline3 = {
       name: 'test_pipeline3',
       description: 'test_pipeline3 description',
-      processors: [],
+      processors: [
+        {
+          script: {
+            lang: 'painless',
+            source: `String[] envSplit = ctx['env'].splitOnToken(params['delimiter']);\nArrayList tags = new ArrayList();\ntags.add(envSplit[params['position']].trim());\nctx['tags'] = tags;`,
+            params: {
+              delimiter: '-',
+              position: 1,
+            },
+          },
+        },
+      ],
       deprecated: true,
     };
 
@@ -92,7 +103,7 @@ describe('<PipelinesList />', () => {
       expect(tableCellsValues.length).toEqual(pipelinesWithoutDeprecated.length);
 
       // Enable filtering by deprecated pipelines
-      const searchInput = component.find('.euiFieldSearch').first();
+      const searchInput = component.find('input.euiFieldSearch').first();
       (searchInput.instance() as unknown as HTMLInputElement).value = 'is:deprecated';
       searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
       component.update();
@@ -121,6 +132,14 @@ describe('<PipelinesList />', () => {
       expect(exists('pipelinesTable')).toBe(true);
       expect(exists('pipelineDetails')).toBe(true);
       expect(find('pipelineDetails.title').text()).toBe(pipeline1.name);
+    });
+
+    test('Replaces newline characters for spaces in flyout for json blocks', async () => {
+      const { find, actions } = testBed;
+
+      await actions.clickPipelineAt(1);
+
+      expect(find('jsonCodeBlock').text()).not.toContain(`\n`);
     });
 
     test('should delete a pipeline', async () => {

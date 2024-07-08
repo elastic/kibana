@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'discover',
     'unifiedFieldList',
+    'share',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');

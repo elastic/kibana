@@ -10,3 +10,5 @@ export const aiAssistantLogsIndexPattern = 'observability:aiAssistantLogsIndexPa
 export const aiAssistantResponseLanguage = 'observability:aiAssistantResponseLanguage';
 export const aiAssistantSimulatedFunctionCalling =
   'observability:aiAssistantSimulatedFunctionCalling';
+export const aiAssistantSearchConnectorIndexPattern =
+  'observability:aiAssistantSearchConnectorIndexPattern';

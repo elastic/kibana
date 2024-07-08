@@ -143,11 +143,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('text based columns', function () {
-      before(async () => {
-        const TEST_START_TIME = 'Sep 23, 2015 @ 06:31:44.000';
-        const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
-        await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
+    describe('ES|QL columns', function () {
+      beforeEach(async () => {
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -169,6 +167,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '42 sample values'
         );
+
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('bytes', '0');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`bytes\`==0`
+        );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
@@ -183,6 +188,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '500 sample values'
         );
+
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('extension.raw', 'css');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension.raw\`=="css"`
+        );
+
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
@@ -197,6 +210,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '32 sample values'
         );
+
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('clientip', '216.126.255.31');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`clientip\`::string=="216.126.255.31"`
+        );
+
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
@@ -214,8 +235,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
-      it('should not have stats for a date field yet', async () => {
+      it('should not have stats for a date field yet but create an is not null filter', async () => {
         await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+        await PageObjects.unifiedFieldList.clickFieldListExistsFilter('@timestamp');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
+        );
         await testSubjects.missingOrFail('dscFieldStats-statsFooter');
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -245,6 +272,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '100 sample records'
         );
+
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('extension', 'css');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension\`=="css"`
+        );
+
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
@@ -277,6 +312,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '3 sample values'
         );
+
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('avg(bytes)', '5453');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 50 | stats avg(bytes) by geo.dest | limit 3\n| WHERE \`avg(bytes)\`==5453`
+        );
+
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
@@ -298,6 +341,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '1 sample value'
         );
+
+        await PageObjects.unifiedFieldList.clickFieldListMinusFilter('enabled', 'true');
+        await testSubjects.click('TextBasedLangEditor-expand');
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(`row enabled = true\n| WHERE \`enabled\`!=true`);
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
     });

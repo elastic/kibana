@@ -127,7 +127,7 @@
             "label": "memory",
             "description": [],
             "signature": [
-              "{ heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
+              "{ arrayBuffersBytes: number; residentSetSizeBytes: number; externalBytes: number; heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
             "deprecated": false,

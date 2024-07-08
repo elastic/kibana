@@ -7,6 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { RiskScoreAuditActions } from '../../risk_score/audit';
@@ -31,7 +32,7 @@ export const riskEnginePrivilegesRoute = (
       const [_, { security }] = await getStartServices();
       const securitySolution = await context.securitySolution;
 
-      const body = await getUserRiskEnginePrivileges(request, security);
+      const body: EntityAnalyticsPrivileges = await getUserRiskEnginePrivileges(request, security);
 
       securitySolution.getAuditLogger()?.log({
         message: 'User checked if they have the required privileges to configure the risk engine',

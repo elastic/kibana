@@ -17,6 +17,7 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'security']);
+  const retry = getService('retry');
 
   const scenario = {
     async setup() {
@@ -109,9 +110,27 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
     },
 
     async waitForPluginToDetectLicenseUpdate() {
+      const {
+        body: { license: esLicense },
+      } = await esSupertestWithoutAuth
+        .get('/_license')
+        .auth('license_manager_user', 'license_manager_user-password')
+        .expect(200);
       // > --xpack.licensing.api_polling_frequency set in test config
       // to wait for Kibana server to re-fetch the license from Elasticsearch
-      await delay(500);
+      const pollingFrequency = 500;
+
+      await retry.waitForWithTimeout(
+        'waiting for the license.uid to match ES',
+        4 * pollingFrequency,
+        async () => {
+          const {
+            body: { license: kbLicense },
+          } = await supertest.get('/api/licensing/info').expect(200);
+          return kbLicense?.uid === esLicense?.uid;
+        },
+        () => delay(pollingFrequency)
+      );
     },
   };
   return scenario;

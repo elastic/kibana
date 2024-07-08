@@ -38,7 +38,17 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
   core,
   dependencies,
 }) => {
-  const { docLinks, notifications, application, executionContext, overlays, theme } = core;
+  const {
+    docLinks,
+    notifications,
+    application,
+    executionContext,
+    overlays,
+    analytics,
+    i18n,
+    theme,
+  } = core;
+  const startServices = { analytics, i18n, overlays, theme };
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
@@ -63,13 +73,14 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
     executionContext,
+    startServices,
   };
 
   return (
     <KibanaRenderContextProvider {...core}>
       <KibanaReactContextProvider>
         <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={dependencies}>
+          <AppContextProvider value={{ ...dependencies, overlays }}>
             <MappingsEditorProvider>
               <ComponentTemplatesProvider value={componentTemplateProviderValues}>
                 <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>

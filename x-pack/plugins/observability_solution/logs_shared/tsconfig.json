@@ -36,6 +36,10 @@
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/discover-shared-plugin"
+    "@kbn/search-types",
+    "@kbn/discover-shared-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/router-utils",
   ]
 }

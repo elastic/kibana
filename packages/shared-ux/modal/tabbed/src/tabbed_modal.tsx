@@ -25,6 +25,7 @@ import {
   EuiTab,
   type EuiTabProps,
   type CommonProps,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   ModalContextProvider,
@@ -58,13 +59,20 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
 export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
+  anchorElement?: HTMLElement;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({
+  onClose,
+  modalTitle,
+  modalWidth,
+  anchorElement,
+}) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
-
   const selectedTabId = state.meta.selectedTabId;
+  const shareModalHeadingId = useGeneratedHtmlId();
+
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
     [selectedTabId, state]
@@ -101,13 +109,17 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
 
   return (
     <EuiModal
-      onClose={onClose}
+      onClose={() => {
+        onClose();
+        setTimeout(() => anchorElement?.focus(), 1);
+      }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
       data-test-subj="shareContextModal"
+      aria-labelledby={shareModalHeadingId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={shareModalHeadingId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>

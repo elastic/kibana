@@ -12,5 +12,8 @@
   ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/logging",
   ]
 }

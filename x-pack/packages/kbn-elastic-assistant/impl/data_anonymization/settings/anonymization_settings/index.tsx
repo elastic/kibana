@@ -6,14 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
-import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 import * as i18n from './translations';
+import { useAnonymizationListUpdate } from './use_anonymization_list_update';
 
 export interface Props {
   defaultPageSize?: number;
@@ -34,39 +34,12 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
   setAnonymizationFieldsBulkActions,
   setUpdatedAnonymizationData,
 }) => {
-  const onListUpdated = useCallback(
-    async (updates: BatchUpdateListItem[]) => {
-      const updatedFieldsKeys = updates.map((u) => u.field);
-
-      const updatedFields = updates.map((u) => ({
-        ...(anonymizationFields.data.find((f) => f.field === u.field) ?? { id: '', field: '' }),
-        ...(u.update === 'allow' || u.update === 'defaultAllow'
-          ? { allowed: u.operation === 'add' }
-          : {}),
-        ...(u.update === 'allowReplacement' || u.update === 'defaultAllowReplacement'
-          ? { anonymized: u.operation === 'add' }
-          : {}),
-      }));
-      setAnonymizationFieldsBulkActions({
-        ...anonymizationFieldsBulkActions,
-        // Only update makes sense now, as long as we don't have an add new field design/UX
-        update: [...(anonymizationFieldsBulkActions?.update ?? []), ...updatedFields],
-      });
-      setUpdatedAnonymizationData({
-        ...anonymizationFields,
-        data: [
-          ...anonymizationFields.data.filter((f) => !updatedFieldsKeys.includes(f.field)),
-          ...updatedFields,
-        ],
-      });
-    },
-    [
-      anonymizationFields,
-      anonymizationFieldsBulkActions,
-      setAnonymizationFieldsBulkActions,
-      setUpdatedAnonymizationData,
-    ]
-  );
+  const onListUpdated = useAnonymizationListUpdate({
+    anonymizationFields,
+    anonymizationFieldsBulkActions,
+    setAnonymizationFieldsBulkActions,
+    setUpdatedAnonymizationData,
+  });
   return (
     <>
       <EuiTitle size={'s'}>
@@ -88,6 +61,7 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
         onListUpdated={onListUpdated}
         rawData={null}
         pageSize={defaultPageSize}
+        compressed={true}
       />
     </>
   );

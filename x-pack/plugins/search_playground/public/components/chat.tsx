@@ -68,13 +68,13 @@ export const Chat = () => {
         data: buildFormData(data),
       }
     );
-    usageTracker.click(AnalyticsEvents.chatQuestionSent);
+    usageTracker?.click(AnalyticsEvents.chatQuestionSent);
 
     resetField(ChatFormFields.question);
   };
   const handleStopRequest = () => {
     stopRequest();
-    usageTracker.click(AnalyticsEvents.chatRequestStopped);
+    usageTracker?.click(AnalyticsEvents.chatRequestStopped);
   };
   const chatMessages = useMemo(
     () => [
@@ -101,15 +101,15 @@ export const Chat = () => {
     });
     setIsRegenerating(false);
 
-    usageTracker.click(AnalyticsEvents.chatRegenerateMessages);
+    usageTracker?.click(AnalyticsEvents.chatRegenerateMessages);
   };
   const handleClearChat = () => {
     setMessages([]);
-    usageTracker.click(AnalyticsEvents.chatCleared);
+    usageTracker?.click(AnalyticsEvents.chatCleared);
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.chatPageLoaded);
+    usageTracker?.load(AnalyticsEvents.chatPageLoaded);
   }, [usageTracker]);
 
   return (
@@ -117,6 +117,7 @@ export const Chat = () => {
       component="form"
       css={{ display: 'flex', flexGrow: 1 }}
       onSubmit={handleSubmit(onSubmit)}
+      data-test-subj="chatPage"
     >
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem
@@ -156,6 +157,7 @@ export const Chat = () => {
                     iconType="sparkles"
                     disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
+                    data-test-subj="regenerateActionButton"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.regenerateBtn"
@@ -168,6 +170,7 @@ export const Chat = () => {
                     iconType="refresh"
                     disabled={isToolBarActionsDisabled}
                     onClick={handleClearChat}
+                    data-test-subj="clearChatActionButton"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.clearChatBtn"
@@ -220,6 +223,7 @@ export const Chat = () => {
                           isLoading={isSubmitting}
                           isDisabled={!isValid}
                           iconType={TelegramIcon}
+                          data-test-subj="sendQuestionButton"
                         />
                       )
                     }

@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('LOG_STREAM_EMBEDDABLE');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Log stream');
       await dashboardAddPanel.expectEditorMenuClosed();
     });
 

@@ -12,6 +12,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,14 +33,15 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
   layoutOption?: 'print';
   aggregateReportTypes: ShareMenuItemV2[];
   intl: InjectedIntl;
+  publicAPIEnabled: boolean;
 };
 
 const ExportContentUi = ({
   isDirty,
-  objectType,
   aggregateReportTypes,
   intl,
   onClose,
+  publicAPIEnabled,
 }: ExportProps) => {
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
@@ -87,7 +89,7 @@ const ExportContentUi = ({
   const renderLayoutOptionsSwitch = useCallback(() => {
     if (renderLayoutOptionSwitch) {
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={
@@ -121,9 +123,9 @@ const ExportContentUi = ({
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton)
+    if (renderCopyURLButton && publicAPIEnabled)
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ flexGrow: 0 }}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={absoluteUrl ?? ''}>
               {(copy) => (
@@ -131,7 +133,7 @@ const ExportContentUi = ({
                   iconType="copyClipboard"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
-                  flush="both"
+                  data-share-url={absoluteUrl}
                 >
                   <FormattedMessage
                     id="share.modalContent.copyUrlButtonLabel"
@@ -149,15 +151,6 @@ const ExportContentUi = ({
                     id="share.postURLWatcherMessage"
                     defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
                   />
-                  {isDirty && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <FormattedMessage
-                        id="share.postURLWatcherMessage.unsavedChanges"
-                        defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
-                      />
-                    </>
-                  )}
                 </EuiText>
               }
             >
@@ -166,13 +159,13 @@ const ExportContentUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, isDirty, renderCopyURLButton]);
+  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        color="primary"
+        color={isDirty ? 'warning' : 'primary'}
         onClick={getReport}
         data-test-subj="generateReportButton"
         isLoading={isCreatingExport}
@@ -180,7 +173,7 @@ const ExportContentUi = ({
         {generateExportButton}
       </EuiButton>
     );
-  }, [generateExportButton, getReport, isCreatingExport]);
+  }, [generateExportButton, getReport, isCreatingExport, isDirty]);
 
   const renderRadioOptions = () => {
     if (radioOptions.length > 1) {
@@ -200,6 +193,28 @@ const ExportContentUi = ({
     }
   };
 
+  const renderHelpText = () => {
+    const showHelpText = publicAPIEnabled && isDirty;
+    return (
+      showHelpText && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            color="warning"
+            title={
+              <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+            }
+          >
+            <FormattedMessage
+              id="share.postURLWatcherMessage.unsavedChanges"
+              defaultMessage="URL may change if you upgrade Kibana."
+            />
+          </EuiCallOut>
+        </>
+      )
+    );
+  };
+
   return (
     <>
       <EuiForm>
@@ -207,6 +222,7 @@ const ExportContentUi = ({
         <>{helpText}</>
         <EuiSpacer size="m" />
         <>{renderRadioOptions()}</>
+        {renderHelpText()}
         <EuiSpacer size="xl" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">

@@ -19,6 +19,7 @@ import {
   timer,
 } from 'rxjs';
 import { type Duration } from 'moment';
+import type { Logger } from '@kbn/logging';
 
 export interface MetadataServiceStartContract {
   hasDataFetcher: () => Promise<{ hasData: boolean }>;
@@ -43,7 +44,7 @@ export class MetadataService {
   private readonly _userMetadata$ = new BehaviorSubject<UserMetadata | undefined>(undefined);
   private readonly stop$ = new Subject<void>();
 
-  constructor(private readonly config: MetadataServiceConfig) {}
+  constructor(private readonly config: MetadataServiceConfig, private readonly logger: Logger) {}
 
   public setup(initialUserMetadata: UserMetadata) {
     this._userMetadata$.next(initialUserMetadata);
@@ -99,10 +100,14 @@ export class MetadataService {
       .pipe(
         takeUntil(this.stop$),
         exhaustMap(async () => {
-          this._userMetadata$.next({
-            ...this._userMetadata$.value!, // We are running the schedules after the initial user metadata is set
-            ...(await fn()),
-          });
+          try {
+            this._userMetadata$.next({
+              ...this._userMetadata$.value!, // We are running the schedules after the initial user metadata is set
+              ...(await fn()),
+            });
+          } catch (err) {
+            this.logger.warn(`Failed to update metadata because ${err}`);
+          }
         }),
         takeWhile(() => {
           return !untilFn(this._userMetadata$.value!);

@@ -13,6 +13,10 @@ import { responseActionsClientMock } from '../mocks';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import type { ResponseActionRequestBody } from '../../../../../../common/endpoint/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
+import { Readable } from 'stream';
 
 describe('EndpointActionsClient', () => {
   let classConstructorOptions: ResponseActionsClientOptions;
@@ -23,7 +27,7 @@ describe('EndpointActionsClient', () => {
     'endpoint_ids' | 'case_ids'
   > => {
     return {
-      endpoint_ids: ['1-2-3', 'invalid-id'],
+      endpoint_ids: ['1-2-3', 'invalid-id', '1-2-3'],
       case_ids: ['case-a'],
     };
   };
@@ -38,8 +42,8 @@ describe('EndpointActionsClient', () => {
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
 
-    expect(classConstructorOptions.endpointService.createLogger().debug).toHaveBeenCalledWith(
-      'The following agent ids are not valid: ["invalid-id"]'
+    expect(classConstructorOptions.endpointService.createLogger().warn).toHaveBeenCalledWith(
+      'The following agent ids are not valid: ["invalid-id"] and will not be included in action request'
     );
   });
 
@@ -81,9 +85,85 @@ describe('EndpointActionsClient', () => {
     });
   });
 
-  it('should write action request document', async () => {
+  it('should write action request document to endpoint action request index with given set of valid/invalid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      {
+        index: ENDPOINT_ACTIONS_INDEX,
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment:
+                'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+              parameters: undefined,
+            },
+            expiration: expect.any(String),
+            input_type: 'endpoint',
+            type: 'INPUT_ACTION',
+          },
+          agent: {
+            id: ['1-2-3'],
+          },
+          user: {
+            id: 'foo',
+          },
+        },
+        refresh: 'wait_for',
+      },
+      expect.anything()
+    );
+  });
+
+  it('should write correct comment when invalid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions({
+        ...getCommonResponseActionOptions(),
+        comment: '',
+      })
+    );
+
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      {
+        index: ENDPOINT_ACTIONS_INDEX,
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment:
+                '(WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+              parameters: undefined,
+            },
+            expiration: expect.any(String),
+            input_type: 'endpoint',
+            type: 'INPUT_ACTION',
+          },
+          agent: {
+            id: ['1-2-3'],
+          },
+          user: {
+            id: 'foo',
+          },
+        },
+        refresh: 'wait_for',
+      },
+      expect.anything()
+    );
+  });
+
+  it('should write action request document to endpoint action request index with given valid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions({
+        endpoint_ids: ['1-2-3'],
+        case_ids: ['case-a'],
+      })
     );
 
     expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
@@ -103,7 +183,7 @@ describe('EndpointActionsClient', () => {
             type: 'INPUT_ACTION',
           },
           agent: {
-            id: ['1-2-3', 'invalid-id'],
+            id: ['1-2-3'],
           },
           user: {
             id: 'foo',
@@ -115,9 +195,12 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should update cases', async () => {
+  it('should update cases for valid agent ids', async () => {
     await endpointActionsClient.isolate(
-      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      responseActionsClientMock.createIsolateOptions({
+        endpoint_ids: ['1-2-3'],
+        case_ids: ['case-a'],
+      })
     );
 
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
@@ -134,10 +217,38 @@ describe('EndpointActionsClient', () => {
                 endpointId: '1-2-3',
                 hostname: 'Host-ku5jy6j0pw',
               },
+            ],
+          },
+          externalReferenceStorage: {
+            type: 'elasticSearchDoc',
+          },
+          owner: 'securitySolution',
+          type: 'externalReference',
+        },
+      ],
+      caseId: 'case-a',
+    });
+  });
+
+  it('should update cases for valid/invalid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
+      attachments: [
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: expect.any(String),
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+            targets: [
               {
                 agentType: 'endpoint',
-                endpointId: 'invalid-id',
-                hostname: '',
+                endpointId: '1-2-3',
+                hostname: 'Host-ku5jy6j0pw',
               },
             ],
           },
@@ -171,6 +282,7 @@ describe('EndpointActionsClient', () => {
       { meta: true }
     );
   });
+
   it('should create an action with error when agents are invalid', async () => {
     // @ts-expect-error mocking this for testing purposes
     endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
@@ -229,7 +341,10 @@ describe('EndpointActionsClient', () => {
     ]);
   });
 
-  type ResponseActionsMethodsOnly = keyof Omit<ResponseActionsClient, 'processPendingActions'>;
+  type ResponseActionsMethodsOnly = keyof Omit<
+    ResponseActionsClient,
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo'
+  >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const responseActionMethods: Record<ResponseActionsMethodsOnly, any> = {
@@ -254,10 +369,12 @@ describe('EndpointActionsClient', () => {
     execute: responseActionsClientMock.createExecuteOptions(getCommonResponseActionOptions()),
 
     upload: responseActionsClientMock.createUploadOptions(getCommonResponseActionOptions()),
+
+    scan: responseActionsClientMock.createScanOptions(getCommonResponseActionOptions()),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
-    'should handle call to %s() method',
+    'should dispatch a fleet action request calling %s() method',
     async (methodName) => {
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
@@ -295,4 +412,68 @@ describe('EndpointActionsClient', () => {
       );
     }
   );
+
+  describe('#getFileDownload()', () => {
+    it('should throw error if agent type for the action id is not endpoint', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: BaseDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(endpointActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Action id [abc] not found with an agent type of [endpoint]'
+      );
+    });
+
+    it('should throw error if file id not associated with action id', async () => {
+      await expect(endpointActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Invalid file id [123] for action [abc]'
+      );
+    });
+
+    it('should return expected response', async () => {
+      await expect(
+        endpointActionsClient.getFileDownload('321-654', '123-456-789')
+      ).resolves.toEqual({
+        stream: expect.any(Readable),
+        fileName: expect.any(String),
+        mimeType: expect.any(String),
+      });
+    });
+  });
+
+  describe('#getFileInfo()', () => {
+    it('should throw error if agent type for the action id is not endpoint', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: BaseDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(endpointActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
+        'Action id [abc] not found with an agent type of [endpoint]'
+      );
+    });
+
+    it('should throw error if file id not associated with action id', async () => {
+      await expect(endpointActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
+        'Invalid file ID. File [123] not associated with action ID [abc]'
+      );
+    });
+
+    it('should return expected response', async () => {
+      await expect(endpointActionsClient.getFileInfo('321-654', '123-456-789')).resolves.toEqual({
+        actionId: '321-654',
+        agentId: '111-222',
+        agentType: 'endpoint',
+        created: '2023-05-12T19:47:33.702Z',
+        id: '123-456-789',
+        mimeType: 'text/plain',
+        name: 'foo.txt',
+        size: 45632,
+        status: 'READY',
+      });
+    });
+  });
 });

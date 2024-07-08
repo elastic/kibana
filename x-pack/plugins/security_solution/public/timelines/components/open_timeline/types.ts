@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import type { IconType } from '@elastic/eui';
 import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
@@ -39,11 +40,11 @@ export interface TimelineActionsOverflowColumns {
   width: string;
   actions: Array<{
     name: string;
-    icon?: string;
+    icon: IconType;
     onClick?: (timeline: OpenTimelineResult) => void;
     description: string;
     render?: (timeline: OpenTimelineResult) => JSX.Element;
-  } | null>;
+  }>;
 }
 
 /** The results of the query run by the OpenTimeline component */
@@ -117,11 +118,11 @@ export type OnToggleShowNotes = (itemIdToExpandedNotesRowMap: Record<string, JSX
 
 /** Parameters to the OnTableChange callback  */
 export interface OnTableChangeParams {
-  page: {
+  page?: {
     index: number;
     size: number;
   };
-  sort: {
+  sort?: {
     field: string;
     direction: 'asc' | 'desc';
   };
@@ -207,6 +208,7 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */
   hideActions?: ActionTimelineToShow[];
+  tabName?: string;
 }
 
 export interface ResolveTimelineConfig {

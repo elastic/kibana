@@ -53,6 +53,7 @@
       "notifications",
       "savedSearch",
       "unifiedDocViewer",
+      "charts"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -69,7 +70,8 @@
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding"
+      "guidedOnboarding",
+      "integrationAssistant"
     ],
     "requiredBundles": [
       "esUiShared",

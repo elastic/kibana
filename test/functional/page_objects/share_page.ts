@@ -14,6 +14,9 @@ export class SharePageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
 
+  /**
+   * @description attempt to close the share modal, if it's open
+   */
   async closeShareModal() {
     if (await this.isShareModalOpen()) {
       await this.find.clickByCssSelector(
@@ -41,7 +44,7 @@ export class SharePageObject extends FtrService {
     return this.testSubjects.click('shareTopNavButton');
   }
 
-  async openShareModalItem(itemTitle: string) {
+  async openShareModalItem(itemTitle: 'link' | 'export' | 'embed') {
     this.log.debug(`openShareModalItem title: ${itemTitle}`);
     const isShareModalOpen = await this.isShareModalOpen();
     if (!isShareModalOpen) {

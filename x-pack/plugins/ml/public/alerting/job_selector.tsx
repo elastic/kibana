@@ -29,7 +29,7 @@ export interface JobSelectorControlProps {
   /**
    * Validation is handled by alerting framework
    */
-  errors: string[];
+  errors?: string[];
   /** Enables multiple selection of jobs and groups */
   multiSelect?: boolean;
   label?: ReactNode;
@@ -202,6 +202,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
 
   return (
     <EuiFormRow
+      data-test-subj="mlAnomalyJobSelectionControls"
       fullWidth
       label={
         label ?? (

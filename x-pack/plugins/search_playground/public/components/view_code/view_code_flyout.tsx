@@ -37,15 +37,15 @@ export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
   if (cloud) {
     return `
 es_client = Elasticsearch(
-  "${cloud.elasticsearchUrl}",
-  api_key=os.environ["ES_API_KEY"]
+    "${cloud.elasticsearchUrl}",
+    api_key=os.environ["ES_API_KEY"]
 )
       `;
   }
 
   return `
 es_client = Elasticsearch(
-  "<your-elasticsearch-url>"
+    "<your-elasticsearch-url>"
 )
   `;
 };
@@ -70,15 +70,15 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.viewCodeFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.viewCodeFlyoutOpened);
   }, [usageTracker]);
 
   useEffect(() => {
-    usageTracker.click(`${AnalyticsEvents.viewCodeLanguageChange}_${selectedLanguage}`);
+    usageTracker?.click(`${AnalyticsEvents.viewCodeLanguageChange}_${selectedLanguage}`);
   }, [usageTracker, selectedLanguage]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose}>
+    <EuiFlyout ownFocus onClose={onClose} data-test-subj="viewCodeFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>

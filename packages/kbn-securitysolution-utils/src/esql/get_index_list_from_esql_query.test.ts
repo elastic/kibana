@@ -33,4 +33,9 @@ describe('getIndexListFromEsqlQuery', () => {
     getIndexPatternFromESQLQueryMock.mockReturnValue('test-1 , test-2 ');
     expect(getIndexListFromEsqlQuery('From  test-1, test-2 ')).toEqual(['test-1', 'test-2']);
   });
+
+  it('should return empty array when getIndexPatternFromESQLQuery throws error', () => {
+    getIndexPatternFromESQLQueryMock.mockReturnValue(new Error('Fail to parse'));
+    expect(getIndexListFromEsqlQuery('From  test-1 []')).toEqual([]);
+  });
 });

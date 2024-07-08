@@ -15,7 +15,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
@@ -30,7 +30,7 @@ const timelineId = 'timeline-1';
  */
 export const SessionPreviewContainer: FC = () => {
   const { dataAsNestedObject, getFieldsData, isPreview, dataFormattedForFieldBrowser } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
 
   // decide whether to show the session view or not
   const sessionViewConfig = useSessionPreview({ getFieldsData, dataFormattedForFieldBrowser });
@@ -44,9 +44,9 @@ export const SessionPreviewContainer: FC = () => {
     ecsRowData: dataAsNestedObject,
   });
 
-  const goToSessionViewTab = useCallback(() => {
+  const goToSessionViewTab = useCallback(async () => {
     // open timeline
-    investigateInTimelineAlertClick();
+    await investigateInTimelineAlertClick();
 
     // open session view tab
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
