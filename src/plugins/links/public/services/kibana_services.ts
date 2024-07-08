@@ -14,6 +14,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
+import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { CONTENT_ID } from '../../common';
 import { LinksStartDependencies } from '../plugin';
 
@@ -22,6 +23,7 @@ export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
 export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
+export let uiActions: UiActionsPublicStart;
 export let trackUiMetric: (
   type: string,
   eventNames: string | string[],
@@ -48,6 +50,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   embeddableService = deps.embeddable;
   presentationUtil = deps.presentationUtil;
   contentManagement = deps.contentManagement;
+  uiActions = deps.uiActions;
   if (deps.usageCollection)
     trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
 

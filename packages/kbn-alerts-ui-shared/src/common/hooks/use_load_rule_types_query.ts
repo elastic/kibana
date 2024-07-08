@@ -108,7 +108,7 @@ export const useLoadRuleTypesQuery = ({
 
   return {
     ruleTypesState: {
-      initialLoad: isLoading || isInitialLoading,
+      isInitialLoad: isInitialLoading,
       isLoading: isLoading || isFetching,
       data: filteredIndex,
       error,
