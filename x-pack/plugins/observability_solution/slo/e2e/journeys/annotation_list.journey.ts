@@ -54,7 +54,7 @@ journey(`AnnotationsList`, async ({ page, params }) => {
     await expect(await page.locator('.euiTableRow')).toHaveCount(1);
 
     await page.locator('.echAnnotation__marker').first().hover();
-    await page.waitForSelector('text="Test annotation message"');
+    await page.waitForSelector('text="Test annotation description"');
   });
 
   step('Go to slos', async () => {

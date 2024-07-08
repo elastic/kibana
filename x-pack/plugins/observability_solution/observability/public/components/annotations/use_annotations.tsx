@@ -105,7 +105,7 @@ export const useAnnotations = ({
   ]);
 
   return {
-    annotations: data,
+    annotations: data?.items ?? [],
     onAnnotationClick: (annotations: {
       rects: RectAnnotationEvent[];
       lines: LineAnnotationEvent[];
