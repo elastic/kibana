@@ -37,6 +37,7 @@
     "@kbn/core-doc-links-browser",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
+    "@kbn/search-types",
     "@kbn/utility-types",
     "@kbn/core-application-browser",
     "@kbn/react-kibana-mount",
