@@ -21,8 +21,9 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
 
-  // see details: https://github.com/elastic/kibana/issues/187372
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
+    // see details: https://github.com/elastic/kibana/issues/187372
+    this.tags(['skipSvlSec']);
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
