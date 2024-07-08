@@ -292,7 +292,7 @@ export const ReactControlExample = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={async () => {
-                const { controlType, initialState } = await openDataControlEditor({
+                const { type: controlType, state: initialState } = await openDataControlEditor({
                   initialState: {
                     grow: DEFAULT_CONTROL_GROW,
                     width: DEFAULT_CONTROL_WIDTH,

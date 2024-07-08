@@ -40,7 +40,7 @@ export const openDataControlEditor = async <
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
   };
-}): Promise<{ controlType: string; initialState: State }> => {
+}): Promise<{ type: string; state: State }> => {
   return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
       if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
@@ -89,7 +89,7 @@ export const openDataControlEditor = async <
           }}
           onSave={(state, selectedControlType) => {
             closeOverlay(overlay);
-            resolve({ initialState: state, controlType: selectedControlType });
+            resolve({ state, controlType: selectedControlType });
           }}
           services={{ dataViews: services.dataViews }}
         />,

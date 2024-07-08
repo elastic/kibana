@@ -124,7 +124,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     }, {} as DefaultDataControlState & EditorState);
 
     // open the editor to get the new state
-    const { initialState: newState, controlType: newType } = await openDataControlEditor<
+    const { type: newType, state: newState } = await openDataControlEditor<
       DefaultDataControlState & EditorState
     >({
       services,
