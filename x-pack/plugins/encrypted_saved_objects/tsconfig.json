@@ -13,6 +13,7 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-security-common",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",
