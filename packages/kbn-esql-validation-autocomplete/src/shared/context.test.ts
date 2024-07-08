@@ -129,6 +129,18 @@ describe('context', () => {
           });
         });
 
+        test('returns "grouping" position on space after "BY" with agg function', async () => {
+          const { context } = await getContext('METRICS a a=max(b) by ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'grouping',
+          });
+        });
+
         test('returns "grouping" position on space after comma', async () => {
           const { context } = await getContext('METRICS index aggregate BY grp1, ');
 

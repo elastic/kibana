@@ -140,7 +140,7 @@ export const fixupQuery = (query: string, caretPosition: number, context: Editor
   //   2. or, a forced trigger by a function argument suggestion to make the
   //      expression still valid: `fn(x, <here>)`;
   //   3. or, a space that separates <sources> from <aggregates> in the METRICS
-  //      command: `METRICS index1, index2 <here>`;
+  //      command or after BY keyword, e.g: `METRICS index1, index2 <here>`;
   //   4. or, a space that separates <aggregates> from <grouping> in the METRICS
   //      command: `METRICS index1, index2 agg1, agg2 <here>`.
   let insertion = '';
@@ -160,13 +160,16 @@ export const fixupQuery = (query: string, caretPosition: number, context: Editor
       (triggerCharacter === ' ' &&
         (isMathFunction(leftOfCaret, caretPosition) ||
           isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])));
-    const isMetricsCommandTransitionIntoAggregates =
-      triggerCharacter === ' ' && /^metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s+$/i.test(leftOfCaret);
+    const isMetricsCommandTransitionIntoAggregatesOrAfterBy =
+      triggerCharacter === ' ' &&
+      /^metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*(\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s*by)?\s+$/i.test(
+        leftOfCaret
+      );
 
     if (
       triggeredByUserChar ||
       triggeredByFunctionArgSuggestion ||
-      isMetricsCommandTransitionIntoAggregates
+      isMetricsCommandTransitionIntoAggregatesOrAfterBy
     ) {
       insertion = EDITOR_MARKER;
     }
