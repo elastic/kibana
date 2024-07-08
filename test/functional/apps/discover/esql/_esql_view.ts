@@ -85,7 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
-        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
+        // we don't sort for the Document view
+        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
@@ -303,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 10';
+          return item[1] === 'FROM logstash-* | LIMIT 10';
         });
 
         expect(queryAdded).to.be(true);
@@ -564,7 +565,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
         );
 
         // negate
@@ -575,7 +576,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const newValue = await monacoEditor.getCodeEditorValue();
         expect(newValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`!="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`!="BT"`
         );
       });
 
@@ -597,7 +598,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nand \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
         );
       });
     });

@@ -13,7 +13,7 @@ paths:
   /api/note:
     delete:
       operationId: deleteNote
-      description: Deletes a note from a timeline.
+      summary: Deletes a note from a timeline.
       tags:
         - access:securitySolution
       requestBody:
@@ -36,5 +36,12 @@ paths:
                     type: string
                     nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the note was successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
