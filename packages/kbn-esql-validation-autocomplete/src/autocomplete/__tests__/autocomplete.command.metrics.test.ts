@@ -196,7 +196,7 @@ describe('autocomplete.suggest', () => {
       test('when typing right paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('METRICS a a = min(b)/ | sort b', [',', '|']);
+        await assertSuggestions('METRICS a a = min(b)/ | sort b', ['BY $0', ',', '|']);
       });
 
       test('increments suggested variable name counter', async () => {
@@ -211,10 +211,10 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... BY <grouping>', () => {
-      test.skip('on space after aggregate field', async () => {
+      test('on space after aggregate fields', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('METRICS a a=min(b) /', ['by $0', ',', '|']);
+        await assertSuggestions('METRICS a a=min(b) /', ['BY $0', ',', '|']);
       });
 
       test.skip('on space after "BY" keyword', async () => {

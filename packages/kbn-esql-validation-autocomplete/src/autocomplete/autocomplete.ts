@@ -148,8 +148,8 @@ export async function suggest(
   const innerText = fullText.substring(0, offset);
   const fixedQuery = fixupQuery(fullText, offset, context);
   const { ast } = await astProvider(fixedQuery);
-
   const astContext = getAstContext(innerText, ast, offset);
+
   // build the correct query to fetch the list of fields
   const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, fixedQuery), ast);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
@@ -176,36 +176,58 @@ export async function suggest(
 
     if (astContext.command.name === 'metrics') {
       const metrics = astContext.command as ESQLAstMetricsCommand;
-      if (astContext.commandPosition === 'aggregates') {
-        const { nodeArg } = extractArgMeta(astContext.command, astContext.node);
-        const fieldsMap: Map<string, ESQLRealField> = await new Map();
-        const anyVariables = collectVariables(ast, fieldsMap, innerText);
-        const field = metrics.aggregates?.find((f) => {
-          return f.location.min <= offset && offset <= f.location.max;
-        });
-        const hasAssignmentExpression = field ? Walker.hasFunction(field, '=') : false;
+      switch (astContext.commandPosition) {
+        case 'aggregates': {
+          const { nodeArg } = extractArgMeta(metrics, astContext.node);
+          const fieldsMap: Map<string, ESQLRealField> = await new Map();
+          const anyVariables = collectVariables(ast, fieldsMap, innerText);
+          const field = metrics.aggregates?.find((f) => {
+            return f.location.min <= offset && offset <= f.location.max;
+          });
+          const hasAssignmentExpression = field ? Walker.hasFunction(field, '=') : false;
 
-        const suggestions = [
-          // varX =
-          ...(hasAssignmentExpression
-            ? []
-            : [buildNewVarDefinition(findNewVariable(anyVariables))]),
+          const suggestions = [
+            // varX =
+            ...(hasAssignmentExpression
+              ? []
+              : [buildNewVarDefinition(findNewVariable(anyVariables))]),
 
-          // functions
-          ...(await getFieldsOrFunctionsSuggestions(
-            ['any'],
-            astContext.command.name,
-            '',
-            getFieldsByType,
-            {
-              functions: true,
-              fields: false,
-              variables: nodeArg ? undefined : anyVariables,
-            }
-          )),
-        ];
+            // functions
+            ...(await getFieldsOrFunctionsSuggestions(
+              ['any'],
+              astContext.command.name,
+              '',
+              getFieldsByType,
+              {
+                functions: true,
+                fields: false,
+                variables: nodeArg ? undefined : anyVariables,
+              }
+            )),
+          ];
 
-        return suggestions;
+          return suggestions;
+        }
+        case 'grouping': {
+          const definition = getCommandDefinition(metrics.name);
+          const suggestions: SuggestionRawDefinition[] = [];
+          const theByKeywordAlreadyInText = /^\s*metrics\s+.+BY\s*/i.test(innerText);
+
+          if (!theByKeywordAlreadyInText && (!metrics.grouping || !metrics.grouping.length)) {
+            suggestions.push(buildOptionDefinition(definition.options[0], false));
+          }
+
+          const caretAtEndOfGroupingBlock =
+            !metrics.grouping ||
+            !metrics.grouping.length ||
+            offset >= metrics.grouping[metrics.grouping.length - 1].location.max;
+
+          if (caretAtEndOfGroupingBlock) {
+            suggestions.push(...getFinalSuggestions());
+          }
+
+          return suggestions;
+        }
       }
     }
 
