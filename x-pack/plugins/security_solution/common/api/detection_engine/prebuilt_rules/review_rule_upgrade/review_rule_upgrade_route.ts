@@ -6,7 +6,7 @@
  */
 
 import type { RuleObjectId, RuleSignatureId, RuleTagArray } from '../../model';
-import type { FullRuleDiff } from '../model';
+import type { PartialRuleDiff } from '../model';
 import type { RuleResponse } from '../../model/rule_schema';
 
 export interface ReviewRuleUpgradeResponseBody {
@@ -30,6 +30,6 @@ export interface RuleUpgradeInfoForReview {
   rule_id: RuleSignatureId;
   current_rule: RuleResponse;
   target_rule: RuleResponse;
-  diff: FullRuleDiff;
+  diff: PartialRuleDiff;
   revision: number;
 }

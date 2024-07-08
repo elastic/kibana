@@ -127,6 +127,8 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
           (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
         ),
         has_conflict: ruleDiff.has_conflict,
+        number_fields_with_conflicts: ruleDiff.number_fields_with_conflicts,
+        number_fields_with_updates: ruleDiff.number_fields_with_updates,
       },
     };
   });
