@@ -48,6 +48,7 @@ const props: Props = {
   ],
   conversation: undefined,
   isSettingsModalVisible: false,
+  isClearable: true,
   selectedPrompt: { id: 'default-system-prompt', content: '', name: '', promptType: 'system' },
   setIsSettingsModalVisible: jest.fn(),
 };
@@ -90,7 +91,7 @@ jest.mock('../../../../assistant_context', () => {
 describe('SelectSystemPrompt', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('renders the prompt super select when isEditing is true', () => {
+  it('renders the prompt super select', () => {
     const { getByTestId } = render(<SelectSystemPrompt {...props} />);
 
     expect(getByTestId(TEST_IDS.PROMPT_SUPERSELECT)).toBeInTheDocument();
