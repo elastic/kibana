@@ -18,7 +18,9 @@ export const getConnectorsRoute = createCasesRoute({
   routerOptions: {
     tags: ['access:casesGetConnectorsConfigure'],
     access: 'public',
-    summary: `Get case connectors`,
+    summary: 'Get case connectors',
+    description:
+      'Retrieves information about connectors that are supported for use in cases. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
   },
   handler: async ({ context, response }) => {
     try {
