@@ -11,6 +11,9 @@ import {
   LogsDataAccessPluginSetup,
   LogsDataAccessPluginStart,
 } from './plugin';
+
+export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
+
 import { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
 
 export const plugin: PluginInitializer<

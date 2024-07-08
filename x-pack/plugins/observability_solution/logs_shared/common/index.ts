@@ -17,12 +17,14 @@ export {
   logViewReferenceRT,
   persistedLogViewReferenceRT,
   defaultLogViewAttributes,
+  logSourcesKibanaAdvancedSettingRT,
 } from './log_views';
 
 // LogView types
 export type {
   LogDataViewReference,
   LogIndexNameReference,
+  LogSourcesKibanaAdvancedSettingReference,
   LogIndexReference,
   LogView,
   LogViewAttributes,

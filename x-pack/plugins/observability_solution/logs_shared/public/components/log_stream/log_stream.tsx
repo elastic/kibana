@@ -13,6 +13,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { noop } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
@@ -26,6 +27,7 @@ import { useLogEntryFlyout } from '../logging/log_entry_flyout';
 
 interface LogStreamPluginDeps {
   data: DataPublicPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }
 
 const PAGE_THRESHOLD = 2;
@@ -109,9 +111,9 @@ export const LogStreamContent = ({
   );
 
   const {
-    services: { http, data },
+    services: { http, data, logsDataAccess },
   } = useKibana<LogStreamPluginDeps>();
-  if (http == null || data == null) {
+  if (http == null || data == null || logsDataAccess == null) {
     throw new Error(
       `<LogStream /> cannot access kibana core services.
 
@@ -126,8 +128,15 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   const kibanaQuerySettings = useKibanaQuerySettings();
 
   const logViews = useMemo(
-    () => new LogViewsClient(data.dataViews, http, data.search.search, defaultLogViewsStaticConfig),
-    [data.dataViews, data.search.search, http]
+    () =>
+      new LogViewsClient(
+        data.dataViews,
+        logsDataAccess.services.logSourcesService,
+        http,
+        data.search.search,
+        defaultLogViewsStaticConfig
+      ),
+    [data.dataViews, data.search.search, http, logsDataAccess.services.logSourcesService]
   );
 
   const {

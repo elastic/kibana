@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export * from './services/log_sources_service/types';
+export interface LogSource {
+  indexPattern: string;
+}
+
+export interface LogSourcesService {
+  getLogSources: () => Promise<LogSource[]>;
+  setLogSources: (sources: LogSource[]) => Promise<void>;
+}

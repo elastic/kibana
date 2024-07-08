@@ -49,6 +49,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -95,6 +96,7 @@ export interface InfraClientStartDeps {
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
+  logsDataAccess: LogsDataAccessPluginStart;
   ml?: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;

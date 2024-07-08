@@ -38,7 +38,20 @@ export const logIndexNameReferenceRT = rt.type({
 });
 export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 
-export const logIndexReferenceRT = rt.union([logDataViewReferenceRT, logIndexNameReferenceRT]);
+// Kibana advanced setting
+export const logSourcesKibanaAdvancedSettingRT = rt.type({
+  type: rt.literal('kibana_advanced_setting'),
+});
+
+export type LogSourcesKibanaAdvancedSettingReference = rt.TypeOf<
+  typeof logSourcesKibanaAdvancedSettingRT
+>;
+
+export const logIndexReferenceRT = rt.union([
+  logDataViewReferenceRT,
+  logIndexNameReferenceRT,
+  logSourcesKibanaAdvancedSettingRT,
+]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
 
 const logViewCommonColumnConfigurationRT = rt.strict({

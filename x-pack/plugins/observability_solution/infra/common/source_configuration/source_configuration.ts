@@ -80,7 +80,16 @@ export const logIndexNameReferenceRT = rt.type({
 });
 export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 
-export const logIndexReferenceRT = rt.union([logIndexPatternReferenceRT, logIndexNameReferenceRT]);
+// Kibana advanced setting
+export const logSourcesKibanaAdvancedSettingRT = rt.type({
+  type: rt.literal('kibana_advanced_setting'),
+});
+
+export const logIndexReferenceRT = rt.union([
+  logIndexPatternReferenceRT,
+  logIndexNameReferenceRT,
+  logSourcesKibanaAdvancedSettingRT,
+]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
 
 export const SourceConfigurationRT = rt.type({
