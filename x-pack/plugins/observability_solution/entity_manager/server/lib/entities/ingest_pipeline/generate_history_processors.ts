@@ -6,7 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryIndexName } from '../helpers/generate_index_name';
+import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
 function createIdTemplate(definition: EntityDefinition) {
   return definition.identityFields.reduce((template, id) => {
