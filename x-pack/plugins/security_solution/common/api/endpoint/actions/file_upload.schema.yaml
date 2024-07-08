@@ -8,6 +8,9 @@ paths:
       summary: Upload Action
       operationId: EndpointUploadAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
