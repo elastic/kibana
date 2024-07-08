@@ -116,7 +116,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings, timelineDataService } = useKibana().services;
+  const { uiSettings, telemetry, timelineDataService } = useKibana().services;
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
@@ -256,6 +256,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+          location: timelineId,
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'left',
+        });
       } else {
         if (eventId) {
           setNotesEventId(eventId);
@@ -268,6 +275,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
+      telemetry,
       timelineId,
       showNotesFlyout,
       setNotesEventId,
