@@ -55,7 +55,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/search-types",
     "@kbn/safer-lodash-set",
-    "@kbn/esql-utils",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

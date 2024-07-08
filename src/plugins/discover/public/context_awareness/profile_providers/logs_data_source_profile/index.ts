@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { createLogsDataSourceProfileProvider } from './profile';
+export { createLogsDataSourceProfileProviders } from './create_profile_providers';

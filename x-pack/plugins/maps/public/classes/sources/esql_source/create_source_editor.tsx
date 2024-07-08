@@ -56,7 +56,10 @@ export function CreateSourceEditor(props: Props) {
     getDataView()
       .then(async (dataView) => {
         const adhocDataView = dataView
-          ? await getESQLAdHocDataview(dataView.getIndexPattern(), getIndexPatternService())
+          ? await getESQLAdHocDataview(
+              `from ${dataView.getIndexPattern()}`,
+              getIndexPatternService()
+            )
           : undefined;
         if (ignore) {
           return;
