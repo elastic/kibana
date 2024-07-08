@@ -32,7 +32,7 @@ export function chaining$(
             apiPublishesFilters(chainedControlApi) ? chainedControlApi.filters$ : new BehaviorSubject(undefined),
             apiPublishesTimeslice(chainedControlApi) ? chainedControlApi.timeslice$ : new BehaviorSubject(undefined),
           ]).pipe(
-            map((filters, timeslice) => {
+            map(([filters, timeslice]) => {
               return {
                 filters,
                 timeslice
