@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounce, call, takeLeading, put, select } from 'redux-saga/effects';
+import { debounce, call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
 import { selectOverviewTrends } from './selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
@@ -29,9 +29,24 @@ export function* fetchMonitorOverviewEffect() {
 }
 
 export function* fetchOverviewTrendStats() {
-  yield takeLeading(
+  yield takeEvery(
     trendStatsBatch.get,
-    fetchEffectFactory(trendsApi, trendStatsBatch.success, trendStatsBatch.fail)
+    function* (
+      action: ReturnType<typeof trendStatsBatch.get>
+    ): Generator<unknown, void, Record<string, any>> {
+      try {
+        const chunkSize = 40;
+        for (let i = action.payload.length; i > 0; i -= chunkSize) {
+          const chunk = action.payload.slice(Math.max(i - chunkSize, 0), i);
+          if (chunk.length > 0) {
+            const res = yield call(trendsApi, chunk);
+            yield put(trendStatsBatch.success(res));
+          }
+        }
+      } catch (e: any) {
+        yield put(trendStatsBatch.fail(e));
+      }
+    }
   );
 }
 

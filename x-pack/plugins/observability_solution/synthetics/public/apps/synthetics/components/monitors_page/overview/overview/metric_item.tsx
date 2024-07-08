@@ -59,6 +59,7 @@ export const MetricItem = ({
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];
+  console.log('trend data for monitor', monitor.name, trendData, monitor.configId);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
@@ -102,87 +103,86 @@ export const MetricItem = ({
         `}
         title={moment(timestamp).format('LLL')}
       >
-        {!trendData && <div>{monitor.name}</div>}
-        {!!trendData && (
-          <Chart>
-            <Settings
-              onElementClick={() => {
-                if (testInProgress) {
-                  dispatch(toggleTestNowFlyoutAction(monitor.configId));
-                  dispatch(toggleErrorPopoverOpen(null));
-                } else {
-                  dispatch(hideTestNowFlyoutAction());
-                  dispatch(toggleErrorPopoverOpen(null));
-                }
-                if (!testInProgress && locationName) {
-                  onClick({
-                    configId: monitor.configId,
-                    id: monitor.id,
-                    location: locationName,
-                    locationId: monitor.location.id,
-                  });
-                }
-              }}
-              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-              baseTheme={DARK_THEME}
-              locale={i18n.getLocale()}
-            />
-            <Metric
-              id={`${monitor.configId}-${monitor.location?.id}`}
-              data={[
-                [
-                  {
-                    title: monitor.name,
-                    subtitle: locationName,
-                    value: trendData.median,
-                    trendShape: MetricTrendShape.Area,
-                    trend: trendData.data,
-                    extra: (
-                      <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="xs"
-                        justifyContent="flexEnd"
-                        // empty title to prevent default title from showing
-                        title=""
-                        component="span"
-                      >
-                        <EuiFlexItem grow={false} component="span">
-                          {i18n.translate('xpack.synthetics.overview.duration.label', {
-                            defaultMessage: 'Duration',
+        {/* {!trendData && <div>{monitor.name}</div>} */}
+        {/* {!!trendData && ( */}
+        <Chart>
+          <Settings
+            onElementClick={() => {
+              if (testInProgress) {
+                dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                dispatch(toggleErrorPopoverOpen(null));
+              } else {
+                dispatch(hideTestNowFlyoutAction());
+                dispatch(toggleErrorPopoverOpen(null));
+              }
+              if (!testInProgress && locationName) {
+                onClick({
+                  configId: monitor.configId,
+                  id: monitor.id,
+                  location: locationName,
+                  locationId: monitor.location.id,
+                });
+              }
+            }}
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={DARK_THEME}
+            locale={i18n.getLocale()}
+          />
+          <Metric
+            id={`${monitor.configId}-${monitor.location?.id}`}
+            data={[
+              [
+                {
+                  title: monitor.name,
+                  subtitle: locationName,
+                  value: trendData?.median ?? 0,
+                  trendShape: MetricTrendShape.Area,
+                  trend: trendData?.data ?? [],
+                  extra: trendData ? (
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      justifyContent="flexEnd"
+                      // empty title to prevent default title from showing
+                      title=""
+                      component="span"
+                    >
+                      <EuiFlexItem grow={false} component="span">
+                        {i18n.translate('xpack.synthetics.overview.duration.label', {
+                          defaultMessage: 'Duration',
+                        })}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} component="span">
+                        <EuiIconTip
+                          title={i18n.translate('xpack.synthetics.overview.duration.description', {
+                            defaultMessage: 'Median duration of last 50 checks',
                           })}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} component="span">
-                          <EuiIconTip
-                            title={i18n.translate(
-                              'xpack.synthetics.overview.duration.description',
-                              {
-                                defaultMessage: 'Median duration of last 50 checks',
-                              }
-                            )}
-                            content={i18n.translate(
-                              'xpack.synthetics.overview.duration.description.values',
-                              {
-                                defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
-                                values: {
-                                  avg: formatDuration(trendData.avg, { noSpace: true }),
-                                  min: formatDuration(trendData.min, { noSpace: true }),
-                                  max: formatDuration(trendData.max, { noSpace: true }),
-                                },
-                              }
-                            )}
-                            position="top"
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    ),
-                    valueFormatter: (x: number) => formatDuration(x),
-                    color: getColor(theme, monitor.isEnabled, status),
-                  },
-                ],
-              ]}
-            />
-          </Chart>
-        )}
+                          content={i18n.translate(
+                            'xpack.synthetics.overview.duration.description.values',
+                            {
+                              defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
+                              values: {
+                                avg: formatDuration(trendData.avg, { noSpace: true }),
+                                min: formatDuration(trendData.min, { noSpace: true }),
+                                max: formatDuration(trendData.max, { noSpace: true }),
+                              },
+                            }
+                          )}
+                          position="top"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <div>Loading metrics</div>
+                  ),
+                  valueFormatter: (x: number) => formatDuration(x),
+                  color: getColor(theme, monitor.isEnabled, status),
+                },
+              ],
+            ]}
+          />
+        </Chart>
+        {/* )} */}
         <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
           <ActionsPopover
             monitor={monitor}

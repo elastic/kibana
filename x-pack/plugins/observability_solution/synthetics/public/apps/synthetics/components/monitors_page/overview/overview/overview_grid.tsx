@@ -25,6 +25,7 @@ import {
   quietFetchOverviewAction,
   refreshOverviewTrends,
   selectOverviewState,
+  selectOverviewTrends,
   setFlyoutConfig,
   trendStatsBatch,
 } from '../../../../state/overview';
@@ -58,6 +59,7 @@ export const OverviewGrid = memo(
     console.log('vpage', vpage);
     console.log('load data up to row', maxItem);
 
+    const trendData = useSelector(selectOverviewTrends);
     // offload the fetching of trend data to a new effect and the list will work better
 
     const dispatch = useDispatch();
@@ -74,19 +76,26 @@ export const OverviewGrid = memo(
       [dispatch, pageState]
     );
 
+    useEffect(() => {
+      if (monitorsSortedByStatus.length && maxItem) {
+        const batch = [];
+        const slice = monitorsSortedByStatus.slice(0, (maxItem + 1) * 4);
+        for (const item of slice) {
+          if (trendData[item.configId + item.location.id] === undefined) {
+            batch.push({ configId: item.configId, locationId: item.location.id });
+          }
+        }
+        console.log('dispatching for batch', maxItem, batch);
+        if (batch.length) dispatch(trendStatsBatch.get(batch));
+      }
+    }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
+
     const listHeight = Math.min(ITEM_HEIGHT * (monitorsSortedByStatus.length / 4), 800);
     console.log('list height', listHeight);
-    let items = []; /*
-    // feasible technical way to match entities with rules, for rule types we have
-    // - today, there are many ways to configure alerts and are tied to data streams
-    // - APM, on the other hand, can be entity-based, like a namespace or service, and we can               have a strucured association between the entity and the alert
-       - when we get to a point that a user is looking through alist of entities, they will eventually be devfining alerts based on the entity
-       - when we're at that point we can see the alerts defined for a given entity. At that point we can allow people to define how well the alert is working to send information about prbolemsn with the given entity and allow them to configure their alerts properly
-    // enabling ml/alerts/slo by default, create poc that integrates these with an onboarding flow
-    // nginx, apache, problem child, lmd, dga
-    */
+    let items = [];
     const listItems: any = [];
     let ind = 0;
+    console.log('page state', pageState, monitorsSortedByStatus);
     do {
       items = monitorsSortedByStatus.slice(ind, ind + 4);
       ind += 4;
@@ -134,14 +143,19 @@ export const OverviewGrid = memo(
                   <InfiniteLoader
                     ref={infiniteLoaderRef}
                     isItemLoaded={(idx: number) => {
-                      return true;
                       console.log('isitemloaded', idx);
-                      return vpage[idx] !== undefined;
+                      const row = listItems[idx];
+                      for (const monitor of row) {
+                        if (!trendData[monitor.configId + monitor.location.id]) {
+                          return false;
+                        }
+                      }
+                      return true;
                     }}
                     itemCount={listItems.length}
                     loadMoreItems={(_start: number, stop: number) => {
-                      setMaxItem(stop);
-                      // console.log('load more items', start, stop);
+                      setMaxItem(Math.max(maxItem, stop));
+                      console.log('load more items', stop);
                       // const newRows = [];
                       // const slice = listItems.slice(start, stop);
                       // console.log('slice for', start, stop, slice, monitorsSortedByStatus);
@@ -156,8 +170,8 @@ export const OverviewGrid = memo(
                       // dispatch(trendStatsBatch.get(mapped));
                       // setvpage([...vpage, ...slice]);
                     }}
-                    minimumBatchSize={8}
-                    threshold={8}
+                    minimumBatchSize={20}
+                    threshold={12}
                   >
                     {({ onItemsRendered, ref }) => (
                       <FixedSizeList
