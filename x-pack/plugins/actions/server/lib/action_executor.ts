@@ -7,6 +7,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
+  type AuthenticatedUser,
+  type SecurityServiceStart,
   AnalyticsServiceStart,
   KibanaRequest,
   Logger,
@@ -18,7 +20,6 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
@@ -59,7 +60,7 @@ const Millis2Nanos = 1000 * 1000;
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
-  security?: SecurityPluginStart;
+  security: SecurityServiceStart;
   getServices: GetServicesFunction;
   getUnsecuredServices: GetUnsecuredServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;

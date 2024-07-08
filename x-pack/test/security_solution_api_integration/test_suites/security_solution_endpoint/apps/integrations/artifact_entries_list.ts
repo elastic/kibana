@@ -52,7 +52,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  describe('@ess @serverless For each artifact list under management', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/187314
+  // Failing: See https://github.com/elastic/kibana/issues/187383
+  describe.skip('@ess @serverless For each artifact list under management', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 

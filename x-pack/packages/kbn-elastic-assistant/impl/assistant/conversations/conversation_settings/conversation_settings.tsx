@@ -18,7 +18,8 @@ import React, { useMemo } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { Conversation, Prompt } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 
 import { AIConnector } from '../../../connectorland/connector_selector';
@@ -33,7 +34,7 @@ import { getConversationApiConfig } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   connectors?: AIConnector[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;

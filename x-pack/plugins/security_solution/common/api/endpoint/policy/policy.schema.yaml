@@ -8,6 +8,9 @@ paths:
       summary: Get Agent Policy Summary schema
       operationId: GetAgentPolicySummary
       x-codegen-enabled: true
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - name: query
           in: query
@@ -34,6 +37,9 @@ paths:
       summary: Get Policy Response schema
       operationId: GetPolicyResponse
       x-codegen-enabled: true
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - name: query
           in: query

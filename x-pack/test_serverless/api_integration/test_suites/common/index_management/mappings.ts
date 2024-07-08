@@ -8,16 +8,18 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const indexManagementService = getService('indexManagement');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  const svlMappingsApi = getService('svlMappingsApi');
+  const svlIndicesHelpers = getService('svlIndicesHelpers');
 
   describe('mappings', () => {
     let indexName: string;
-    let getMapping: typeof indexManagementService['mappings']['api']['getMapping'];
-    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
-    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
 
     const mappings = {
       properties: {
@@ -28,18 +30,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      ({
-        indices: {
-          helpers: { createIndex, deleteAllIndices },
-        },
-        mappings: {
-          api: { getMapping },
-        },
-      } = indexManagementService);
-
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       log.debug('Creating index');
       try {
-        indexName = await createIndex(undefined, mappings);
+        indexName = await svlIndicesHelpers.createIndex(undefined, mappings);
       } catch (err) {
         log.debug('[Setup error] Error creating index');
         throw err;
@@ -48,15 +42,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       try {
-        await deleteAllIndices();
+        await svlIndicesHelpers.deleteAllIndices();
       } catch (err) {
         log.debug('[Cleanup error] Error deleting index');
         throw err;
       }
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should get the index mappings', async () => {
-      const { body } = await getMapping(indexName).expect(200);
+      const { body, status } = await svlMappingsApi.getMapping(indexName, roleAuthc);
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       expect(body.mappings).to.eql(mappings);
     });
