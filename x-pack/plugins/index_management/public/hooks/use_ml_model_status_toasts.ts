@@ -35,7 +35,7 @@ export function useMLModelNotificationToasts() {
           defaultMessage: 'Model deployment started',
         }
       ),
-      text: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeploymentNotification', {
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeployedNotification', {
         defaultMessage: 'Model {modelName} has been deployed on your machine learning node.',
         values: {
           modelName,
