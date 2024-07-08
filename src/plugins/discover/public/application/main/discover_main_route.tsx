@@ -377,7 +377,7 @@ function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
       ? {
           // reset to a default ES|QL query
           query: {
-            esql: getInitialESQLQuery(prevDataView.getIndexPattern(), prevDataView.timeFieldName),
+            esql: getInitialESQLQuery(prevDataView),
           },
         }
       : undefined;

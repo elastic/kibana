@@ -354,14 +354,13 @@ export function ChangeDataView({
             color="success"
             size="s"
             fullWidth
-            onClick={() =>
-              onTextBasedSubmit({
-                esql: getInitialESQLQuery(
-                  trigger.title!,
-                  selectedDataView?.timeFieldName === '@timestamp' ? '@timestamp' : undefined
-                ),
-              })
-            }
+            onClick={() => {
+              if (selectedDataView) {
+                onTextBasedSubmit({
+                  esql: getInitialESQLQuery(selectedDataView),
+                });
+              }
+            }}
             data-test-subj="select-text-based-language-panel"
             contentProps={{
               css: {

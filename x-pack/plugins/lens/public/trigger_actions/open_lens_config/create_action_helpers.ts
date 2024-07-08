@@ -63,7 +63,7 @@ export async function executeCreateAction({
   const datasourceMap = getDatasourceMap();
   const defaultIndex = dataView.getIndexPattern();
 
-  const esqlQuery = getInitialESQLQuery(defaultIndex, dataView?.timeFieldName);
+  const esqlQuery = getInitialESQLQuery(dataView);
 
   const defaultEsqlQuery = {
     esql: esqlQuery,

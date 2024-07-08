@@ -61,7 +61,6 @@ const strings = {
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
-  timeFieldName?: string;
 }
 
 export interface DataViewsListProps {
