@@ -147,8 +147,19 @@ export class RenderingService {
       globalSettingsUserValues = userValues[1];
     }
 
+    const defaultSettings = uiSettings.client?.getRegistered() ?? {};
+
+    // Load async settings values
+    await Promise.all(
+      Object.entries(defaultSettings)
+        .filter(([_, definition]) => typeof definition.getValue === 'function')
+        .map(async ([key, definition]) => {
+          defaultSettings[key].value = await definition.getValue!({ request });
+        })
+    );
+
     const settings = {
-      defaults: uiSettings.client?.getRegistered() ?? {},
+      defaults: defaultSettings,
       user: settingsUserValues,
     };
     const globalSettings = {

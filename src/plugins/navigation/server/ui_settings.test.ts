@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { getNavigationSettings } from './navigation';
+import { getUiSettings } from './ui_settings';
 
-describe('navigation settings', () => {
-  const navigationSettings = getNavigationSettings();
+describe('ui settings', () => {
+  const core = coreMock.createSetup();
+  const uiSettings = getUiSettings(core);
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
 
   describe('defaultRoute', () => {
-    const validate = getValidationFn(navigationSettings.defaultRoute);
+    const validate = getValidationFn(uiSettings.defaultRoute);
 
     it('should only accept relative urls', () => {
       expect(() => validate('/some-url')).not.toThrow();

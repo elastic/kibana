@@ -113,7 +113,7 @@ export class CoreAppsService {
       { path: '/', validate: false, options: { access: 'public' } },
       async (context, req, res) => {
         const { uiSettings } = await context.core;
-        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request: req });
         const basePath = httpSetup.basePath.get(req);
         const url = `${basePath}${defaultRoute}`;
 

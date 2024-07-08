@@ -13,6 +13,7 @@ import type {
   NavigationServerStart,
   NavigationServerStartDependencies,
 } from './types';
+import { getUiSettings } from './ui_settings';
 
 export class NavigationServerPlugin
   implements
@@ -29,6 +30,8 @@ export class NavigationServerPlugin
     core: CoreSetup<NavigationServerStartDependencies>,
     plugins: NavigationServerSetupDependencies
   ) {
+    core.uiSettings.register(getUiSettings(core));
+
     return {};
   }
 

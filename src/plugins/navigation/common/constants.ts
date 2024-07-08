@@ -7,3 +7,5 @@
  */
 
 export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';
+
+export const DEFAULT_ROUTE_UI_SETTING_ID = 'defaultRoute';
