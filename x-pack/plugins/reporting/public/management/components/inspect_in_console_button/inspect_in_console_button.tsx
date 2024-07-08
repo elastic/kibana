@@ -39,6 +39,7 @@ const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
       throw new Error(`The search must have a reference to an index pattern!`);
     }
     const indexPatternTitle = index.getIndexPattern();
+    // todo broken due to now async code
     const queryUri = compressToEncodedURIComponent(
       pagingStrategy === 'scroll'
         ? getScrollApiTextForConsole(jobTitle, indexPatternTitle, searchSource, csvConfig)

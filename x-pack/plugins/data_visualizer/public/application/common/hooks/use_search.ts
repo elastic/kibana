@@ -14,7 +14,8 @@ import type { BasicAppState } from '../../data_drift/types';
 import { getEsQueryFromSavedSearch } from '../../index_data_visualizer/utils/saved_search_utils';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
-export const useSearch = (
+// todo making this async probably breaks something
+export const useSearch = async (
   { dataView, savedSearch }: { dataView: DataView; savedSearch: SavedSearch | null | undefined },
   appState: BasicAppState,
   readOnly: boolean = false
@@ -40,7 +41,7 @@ export const useSearch = (
     [filterManager]
   );
 
-  const searchData = getEsQueryFromSavedSearch({
+  const searchData = await getEsQueryFromSavedSearch({
     dataView,
     uiSettings,
     savedSearch,

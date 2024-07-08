@@ -85,7 +85,7 @@ export class SearchCursorScroll extends SearchCursor {
 
     let response: IEsSearchResponse | undefined;
 
-    const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
+    const searchBody: estypes.SearchRequest = await searchSource.getSearchRequestBody();
     if (searchBody == null) {
       throw new Error('Could not retrieve the search body!');
     }

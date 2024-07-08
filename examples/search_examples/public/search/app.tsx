@@ -291,7 +291,7 @@ export const SearchExamplesApp = ({
         const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
         searchSource.setField('aggs', ac);
       }
-      setRequest(searchSource.getSearchRequestBody());
+      setRequest(await searchSource.getSearchRequestBody());
       setRawResponse({});
       setWarningContents([]);
       const abortController = new AbortController();

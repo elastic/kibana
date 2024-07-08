@@ -36,7 +36,7 @@ export async function getCount(
     searchSource.setField('query', query);
   }
   // eslint-disable-next-line no-console
-  console.log('ES request', searchSource.getSearchRequestBody());
+  console.log('ES request', await searchSource.getSearchRequestBody());
 
   const { rawResponse: resp } = await lastValueFrom(
     searchSource.fetch$({

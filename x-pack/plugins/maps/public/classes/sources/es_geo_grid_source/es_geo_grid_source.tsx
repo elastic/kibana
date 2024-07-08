@@ -570,7 +570,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       gridPrecision: this._getGeoGridPrecisionResolutionDelta(),
       hasLabels,
       buffer,
-      requestBody: _.pick(searchSource.getSearchRequestBody(), [
+      requestBody: _.pick(await searchSource.getSearchRequestBody(), [
         'aggs',
         'query',
         'runtime_mappings',
