@@ -65,6 +65,7 @@ export default function (providerContext: FtrProviderContext) {
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
@@ -96,6 +97,7 @@ export default function (providerContext: FtrProviderContext) {
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
@@ -126,6 +128,7 @@ export default function (providerContext: FtrProviderContext) {
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);

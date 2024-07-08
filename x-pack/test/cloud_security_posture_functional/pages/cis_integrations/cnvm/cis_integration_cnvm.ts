@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
@@ -50,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
