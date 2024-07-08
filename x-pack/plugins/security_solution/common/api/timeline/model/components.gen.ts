@@ -17,6 +17,21 @@
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
 
+export type ColumnHeaderResult = z.infer<typeof ColumnHeaderResult>;
+export const ColumnHeaderResult = z.object({
+  aggregatable: z.boolean().optional(),
+  category: z.string().optional(),
+  columnHeaderType: z.string().optional(),
+  description: z.string().optional(),
+  example: z.union([z.string(), z.number()]).optional(),
+  indexes: z.array(z.string()).optional(),
+  id: z.string().optional(),
+  name: z.string().optional(),
+  placeholder: z.string().optional(),
+  searchable: z.boolean().optional(),
+  type: z.string().optional(),
+});
+
 export type PinnedEvent = z.infer<typeof PinnedEvent>;
 export const PinnedEvent = z.object({
   columns: ColumnHeaderResult.optional(),
@@ -133,8 +148,8 @@ export interface DataProviderResultInput {
   enabled?: boolean;
   excluded?: boolean;
   kqlQuery?: string;
-  queryMatch?: QueryMatchResultInput;
-  type?: DataProviderTypeInput;
+  queryMatch?: QueryMatchResult;
+  type?: DataProviderType;
   and?: DataProviderResultInput[];
 }
 export const DataProviderResult: z.ZodType<
@@ -206,21 +221,6 @@ export type SortFieldTimeline = z.infer<typeof SortFieldTimeline>;
 export const SortFieldTimeline = z.enum(['title', 'description', 'updated', 'created']);
 export type SortFieldTimelineEnum = typeof SortFieldTimeline.enum;
 export const SortFieldTimelineEnum = SortFieldTimeline.enum;
-
-export type ColumnHeaderResult = z.infer<typeof ColumnHeaderResult>;
-export const ColumnHeaderResult = z.object({
-  aggregatable: z.boolean().optional(),
-  category: z.string().optional(),
-  columnHeaderType: z.string().optional(),
-  description: z.string().optional(),
-  example: z.union([z.string(), z.number()]).optional(),
-  indexes: z.array(z.string()).optional(),
-  id: z.string().optional(),
-  name: z.string().optional(),
-  placeholder: z.string().optional(),
-  searchable: z.boolean().optional(),
-  type: z.string().optional(),
-});
 
 /**
  * The type of timeline to create. Valid values are `default` and `template`.
