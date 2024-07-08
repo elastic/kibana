@@ -43,14 +43,14 @@ export const useEditorUpdates = (
       });
 
       const handleLinkedSearch = (linked: boolean) => {
-        if (linked && savedVis && !savedVis.savedSearchId && savedSearch) {
-          savedVis.savedSearchId = savedSearch.id;
+        if (linked && savedVis && !savedVis.data.savedSearchId && savedSearch) {
+          savedVis.data.savedSearchId = savedSearch.id;
           vis.data.savedSearchId = savedSearch.id;
           if (vis.data.searchSource) {
             vis.data.searchSource.setParent(savedSearch.searchSource);
           }
-        } else if (!linked && savedVis && savedVis.savedSearchId) {
-          delete savedVis.savedSearchId;
+        } else if (!linked && savedVis && savedVis.data.savedSearchId) {
+          delete savedVis.data.savedSearchId;
           delete vis.data.savedSearchId;
         } else if (!linked && !savedVis) {
           // delete link when it's not a saved vis
