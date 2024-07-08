@@ -23,6 +23,8 @@ import { setupRoutes } from './routes';
 
 import { UsageCountersService } from './usage_counters';
 import type { UsageCounter } from './usage_counters';
+import type { UsageCountersSearch } from './usage_counters/types';
+import { registerUsageCountersSavedObjectTypes } from './usage_counters/saved_objects';
 
 /** Server's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {
@@ -87,7 +89,10 @@ export interface UsageCollectionSetup {
   ) => Collector<TFetchReturn, ExtraOptions>;
 }
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+/** Server's start APIs exposed by the UsageCollection Service **/
+export type UsageCollectionStart = UsageCountersSearch;
+
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   private usageCountersService?: UsageCountersService;
@@ -106,13 +111,15 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
+    registerUsageCountersSavedObjectTypes(core.savedObjects);
+
     this.usageCountersService = new UsageCountersService({
       logger: this.logger.get('usage-collection', 'usage-counters-service'),
       retryCount: config.usageCounters.retryCount,
       bufferDurationMs: config.usageCounters.bufferDuration.asMilliseconds(),
     });
 
-    const usageCountersServiceSetup = this.usageCountersService.setup(core);
+    const usageCountersServiceSetup = this.usageCountersService.setup();
     const { createUsageCounter, getUsageCounterByDomainId } = usageCountersServiceSetup;
 
     const router = core.http.createRouter();
@@ -145,7 +152,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     };
   }
 
-  public start({ savedObjects }: CoreStart) {
+  public start({ savedObjects }: CoreStart): UsageCollectionStart {
     this.logger.debug('Starting plugin');
     const config = this.initializerContext.config.get<ConfigType>();
     if (!this.usageCountersService) {
@@ -159,6 +166,9 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       // call stop() to complete observers.
       this.usageCountersService.stop();
     }
+    return {
+      search: this.usageCountersService.search,
+    };
   }
 
   public stop() {

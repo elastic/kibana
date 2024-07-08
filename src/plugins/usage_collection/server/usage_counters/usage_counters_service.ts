@@ -10,8 +10,9 @@ import * as Rx from 'rxjs';
 import * as rxOp from 'rxjs';
 import moment from 'moment';
 import type {
+  ISavedObjectsRepository,
+  SavedObjectsFindOptions,
   SavedObjectsRepository,
-  SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { Logger, LogMeta } from '@kbn/core/server';
@@ -19,10 +20,19 @@ import type { Logger, LogMeta } from '@kbn/core/server';
 import { type IUsageCounter, UsageCounter } from './usage_counter';
 import type { UsageCounters } from '../../common';
 import {
-  registerUsageCountersSavedObjectTypes,
   storeCounter,
   serializeCounterKey,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  type UsageCountersSavedObjectAttributes,
 } from './saved_objects';
+import { usageCountersSearchParamsToKueryFilter } from './usage_counters_service_utils';
+import type {
+  UsageCounterSnapshot,
+  UsageCountersSearch,
+  UsageCountersSearchOptions,
+  UsageCountersSearchParams,
+  UsageCountersSearchResult,
+} from './types';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -40,16 +50,11 @@ export interface UsageCountersServiceSetup {
 }
 
 /* internal */
-export interface UsageCountersServiceSetupDeps {
-  savedObjects: SavedObjectsServiceSetup;
-}
-
-/* internal */
 export interface UsageCountersServiceStartDeps {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export class UsageCountersService {
+export class UsageCountersService implements UsageCountersSearch {
   private readonly stop$ = new Rx.Subject<void>();
   private readonly retryCount: number;
   private readonly bufferDurationMs: number;
@@ -58,8 +63,9 @@ export class UsageCountersService {
   private readonly source$ = new Rx.Subject<UsageCounters.v1.CounterMetric>();
   private readonly counter$ = this.source$.pipe(rxOp.multicast(new Rx.Subject()), rxOp.refCount());
   private readonly flushCache$ = new Rx.Subject<void>();
-
   private readonly stopCaching$ = new Rx.Subject<void>();
+
+  private repository?: ISavedObjectsRepository;
 
   private readonly logger: Logger;
 
@@ -69,7 +75,7 @@ export class UsageCountersService {
     this.bufferDurationMs = bufferDurationMs;
   }
 
-  public setup = (core: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
+  public setup = (): UsageCountersServiceSetup => {
     const cache$ = new Rx.ReplaySubject<UsageCounters.v1.CounterMetric>();
     const storingCache$ = new Rx.BehaviorSubject<boolean>(false);
     // flush cache data from cache -> source
@@ -95,8 +101,6 @@ export class UsageCountersService {
         storingCache$.next(false);
       });
 
-    registerUsageCountersSavedObjectTypes(core.savedObjects);
-
     return {
       createUsageCounter: this.createUsageCounter,
       getUsageCounterByDomainId: this.getUsageCounterByDomainId,
@@ -105,7 +109,7 @@ export class UsageCountersService {
 
   public start = ({ savedObjects }: UsageCountersServiceStartDeps): void => {
     this.stopCaching$.next();
-    const internalRepository = savedObjects.createInternalRepository();
+    this.repository = savedObjects.createInternalRepository();
     this.counter$
       .pipe(
         /* buffer source events every ${bufferDurationMs} */
@@ -118,7 +122,7 @@ export class UsageCountersService {
         rxOp.filter((counters) => Array.isArray(counters) && counters.length > 0),
         rxOp.map((counters) => Object.values(this.mergeCounters(counters))),
         rxOp.takeUntil(this.stop$),
-        rxOp.concatMap((counters) => this.storeDate$(counters, internalRepository))
+        rxOp.concatMap((counters) => this.storeDate$(counters, this.repository!))
       )
       .subscribe((results) => {
         this.logger.debug<UsageCountersLogMeta>('Store counters into savedObjects', {
@@ -192,5 +196,70 @@ export class UsageCountersService {
       };
       return acc;
     }, {} as Record<string, UsageCounters.v1.CounterMetric>);
+  };
+
+  public search = async (
+    params: UsageCountersSearchParams,
+    options: UsageCountersSearchOptions = {}
+  ): Promise<UsageCountersSearchResult> => {
+    if (!this.repository) {
+      throw new Error('Cannot search before this service is started. Please call start() first.');
+    }
+
+    const { namespace: filterNamespace } = params;
+    const { perPage = 100, page = 1 } = options;
+
+    const filter = usageCountersSearchParamsToKueryFilter(params);
+
+    const findParams: SavedObjectsFindOptions = {
+      aggs: {
+        totalCount: { sum: { field: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.count` } },
+      },
+      ...(filterNamespace && { namespaces: [filterNamespace] }),
+      type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+      sortField: 'updated_at',
+      sortOrder: 'desc',
+      filter,
+      searchFields: [USAGE_COUNTERS_SAVED_OBJECT_TYPE],
+      perPage,
+      page,
+    };
+    const res = await this.repository.find<UsageCountersSavedObjectAttributes>(findParams);
+
+    const countersMap = new Map<string, UsageCounterSnapshot>();
+
+    res.saved_objects.forEach(({ attributes, updated_at: updatedAt, namespaces }) => {
+      const namespace = namespaces?.[0];
+      const key = serializeCounterKey({ ...attributes, namespace });
+
+      let counterSnapshot = countersMap.get(key);
+
+      if (!counterSnapshot) {
+        counterSnapshot = {
+          domainId: attributes.domainId,
+          counterName: attributes.counterName,
+          counterType: attributes.counterType,
+          source: attributes.source,
+          ...(namespace && namespaces?.[0] && { namespace: namespaces[0] }),
+          records: [
+            {
+              updatedAt: updatedAt!,
+              count: attributes.count,
+            },
+          ],
+        };
+
+        countersMap.set(key, counterSnapshot!);
+      } else {
+        counterSnapshot.records.push({
+          updatedAt: updatedAt!,
+          count: attributes.count,
+        });
+      }
+    });
+
+    return {
+      counters: Array.from(countersMap.values()),
+    };
   };
 }
