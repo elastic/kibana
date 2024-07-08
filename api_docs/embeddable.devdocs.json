@@ -14495,10 +14495,6 @@
             {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "links",
-              "path": "src/plugins/links/public/plugin.ts"
             }
           ],
           "children": [

@@ -9,16 +9,15 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useDebouncedValue } from './debounced_value';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
-
 describe('useDebouncedValue', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('should update upstream value changes', () => {
     const onChangeMock = jest.fn();
     const { result } = renderHook(() => useDebouncedValue({ value: 'a', onChange: onChangeMock }));
@@ -26,6 +25,8 @@ describe('useDebouncedValue', () => {
     act(() => {
       result.current.handleInputChange('b');
     });
+    expect(onChangeMock).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(256);
 
     expect(onChangeMock).toHaveBeenCalledWith('b');
   });
@@ -37,7 +38,8 @@ describe('useDebouncedValue', () => {
     act(() => {
       result.current.handleInputChange('');
     });
-
+    expect(onChangeMock).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(256);
     expect(onChangeMock).toHaveBeenCalledWith('a');
   });
 
@@ -50,7 +52,23 @@ describe('useDebouncedValue', () => {
     act(() => {
       result.current.handleInputChange('');
     });
-
+    expect(onChangeMock).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(256);
     expect(onChangeMock).toHaveBeenCalledWith('');
+  });
+  it('custom wait time is respected', () => {
+    const onChangeMock = jest.fn();
+    const { result } = renderHook(() =>
+      useDebouncedValue({ value: 'a', onChange: onChangeMock }, { wait: 500 })
+    );
+
+    act(() => {
+      result.current.handleInputChange('b');
+    });
+    expect(onChangeMock).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(256);
+    expect(onChangeMock).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(244); // sums to 500
+    expect(onChangeMock).toHaveBeenCalledWith('b');
   });
 });
