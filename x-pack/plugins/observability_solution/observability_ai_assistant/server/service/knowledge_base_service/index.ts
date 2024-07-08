@@ -14,16 +14,18 @@ import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
-import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
+import {
+  INDEX_QUEUED_DOCUMENTS_TASK_ID,
+  INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
+  resourceNames,
+} from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import { recallFromConnectors } from './recall_from_connectors';
 
 interface Dependencies {
   esClient: { asInternalUser: ElasticsearchClient };
-  resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
   getModelId: () => Promise<string>;
@@ -105,7 +107,7 @@ export class KnowledgeBaseService {
       });
 
       this.dependencies.logger.debug(
-        'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
+        () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
       );
 
       return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
@@ -158,7 +160,7 @@ export class KnowledgeBaseService {
       }
 
       this.dependencies.logger.debug('Model is not allocated yet');
-      this.dependencies.logger.debug(JSON.stringify(response));
+      this.dependencies.logger.debug(() => JSON.stringify(response));
 
       throw gatewayTimeout();
     }, retryOptions);
@@ -194,7 +196,7 @@ export class KnowledgeBaseService {
   private async processOperation(operation: KnowledgeBaseEntryOperation) {
     if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
       await this.dependencies.esClient.asInternalUser.deleteByQuery({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         query: {
           bool: {
             filter: [
@@ -333,7 +335,7 @@ export class KnowledgeBaseService {
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
-      index: [this.dependencies.resources.aliases.kb],
+      index: [resourceNames.aliases.kb],
       query: esQuery,
       size: 20,
       _source: {
@@ -366,7 +368,7 @@ export class KnowledgeBaseService {
     entries: RecalledEntry[];
   }> => {
     this.dependencies.logger.debug(
-      `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
+      () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
     const modelId = await this.dependencies.getModelId();
 
@@ -431,7 +433,7 @@ export class KnowledgeBaseService {
   ): Promise<UserInstruction[]> => {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         query: {
           bool: {
             must: [
@@ -475,7 +477,7 @@ export class KnowledgeBaseService {
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         ...(query
           ? {
               query: {
@@ -537,7 +539,7 @@ export class KnowledgeBaseService {
   }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.index({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         id,
         document: {
           '@timestamp': new Date().toISOString(),
@@ -545,7 +547,7 @@ export class KnowledgeBaseService {
           user,
           namespace,
         },
-        pipeline: this.dependencies.resources.pipelines.kb,
+        pipeline: resourceNames.pipelines.kb,
         refresh: 'wait_for',
       });
     } catch (error) {
@@ -579,7 +581,7 @@ export class KnowledgeBaseService {
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.delete({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         id,
         refresh: 'wait_for',
       });

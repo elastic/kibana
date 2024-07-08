@@ -17,7 +17,7 @@ import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, DefaultInferenceModels, Field } from '../../../../../types';
 import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_ml_model_status_toasts';
 
-import { getInferenceModels } from '../../../../../../../services/api';
+import { getInferenceEndpoints } from '../../../../../../../services/api';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -83,7 +83,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (data.inferenceId === undefined) {
         throw new Error(
           i18n.translate('xpack.idxMgmt.mappingsEditor.createField.undefinedInferenceIdError', {
-            defaultMessage: 'InferenceId is undefined while creating the inference endpoint.',
+            defaultMessage: 'Inference ID is undefined',
           })
         );
       }
@@ -138,18 +138,17 @@ export function useSemanticText(props: UseSemanticTextProps) {
     dispatch({ type: 'field.addSemanticText', value: data });
 
     try {
-      // if model exists already, do not create inference endpoint
-      const inferenceModels = await getInferenceModels();
+      // if inference endpoint exists already, do not create inference endpoint
+      const inferenceModels = await getInferenceEndpoints();
       const inferenceModel: InferenceAPIConfigResponse[] = inferenceModels.data.some(
         (e: InferenceAPIConfigResponse) => e.model_id === inferenceValue
       );
       if (inferenceModel) {
         return;
       }
-
-      if (trainedModelId) {
-        // show toasts only if it's elastic models
-        showSuccessToasts();
+      // Only show toast if it's an internal Elastic model that hasn't been deployed yet
+      if (trainedModelId && inferenceData.isDeployable && !inferenceData.isDeployed) {
+        showSuccessToasts(trainedModelId);
       }
 
       await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);

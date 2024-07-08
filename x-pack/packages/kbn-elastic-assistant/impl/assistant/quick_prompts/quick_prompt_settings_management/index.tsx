@@ -14,7 +14,10 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { QuickPrompt } from '../types';
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -28,27 +31,46 @@ import {
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useAssistantContext } from '../../../assistant_context';
-import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
+import {
+  DEFAULT_CONVERSATIONS,
+  useSettingsUpdater,
+} from '../../settings/use_settings_updater/use_settings_updater';
+import { useFetchPrompts } from '../../api';
 
 const QuickPromptSettingsManagementComponent = () => {
   const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
-  const { saveSettings, quickPromptSettings, setUpdatedQuickPromptSettings, resetSettings } =
-    useSettingsUpdater(
-      {}, // Quick Prompt settings do not require conversations
-      false // Quick Prompt settings do not require conversations
-    );
+  const { data: allPrompts } = useFetchPrompts();
+
+  const {
+    promptsBulkActions,
+    quickPromptSettings,
+    resetSettings,
+    saveSettings,
+    setPromptsBulkActions,
+    setUpdatedQuickPromptSettings,
+  } = useSettingsUpdater(
+    DEFAULT_CONVERSATIONS, // Quick Prompt settings do not require conversations
+    allPrompts,
+    false // Quick Prompt settings do not require conversations
+  );
+
+  const quickPrompts = useMemo(
+    () =>
+      quickPromptSettings.length === 0
+        ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+        : quickPromptSettings,
+    [allPrompts.data, quickPromptSettings]
+  );
 
   // Quick Prompt Selection State
-  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
-  const onSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+  const onSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
     setSelectedQuickPrompt(quickPrompt);
   }, []);
   useEffect(() => {
     if (selectedQuickPrompt != null) {
-      setSelectedQuickPrompt(
-        quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
-      );
+      setSelectedQuickPrompt(quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name));
     }
   }, [quickPromptSettings, selectedQuickPrompt]);
 
@@ -69,7 +91,7 @@ const QuickPromptSettingsManagementComponent = () => {
   }, [resetSettings]);
 
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
-  const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<QuickPrompt | null>();
+  const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<PromptResponse | null>();
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
     openFlyout: openConfirmModal,
@@ -79,10 +101,12 @@ const QuickPromptSettingsManagementComponent = () => {
   const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
     onSelectedQuickPromptChange,
     setUpdatedQuickPromptSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   const onEditActionClicked = useCallback(
-    (prompt: QuickPrompt) => {
+    (prompt: PromptResponse) => {
       onQuickPromptSelectionChange(prompt);
       openFlyout();
     },
@@ -90,9 +114,9 @@ const QuickPromptSettingsManagementComponent = () => {
   );
 
   const onDeleteActionClicked = useCallback(
-    (prompt: QuickPrompt) => {
+    (prompt: PromptResponse) => {
       setDeletedQuickPrompt(prompt);
-      onQuickPromptDeleted(prompt.title);
+      onQuickPromptDeleted(prompt.id);
       openConfirmModal();
     },
     [onQuickPromptDeleted, openConfirmModal]
@@ -141,10 +165,10 @@ const QuickPromptSettingsManagementComponent = () => {
 
   const confirmationTitle = useMemo(
     () =>
-      deletedQuickPrompt?.title
-        ? i18n.DELETE_QUICK_PROMPT_MODAL_TITLE(deletedQuickPrompt.title)
+      deletedQuickPrompt?.name
+        ? i18n.DELETE_QUICK_PROMPT_MODAL_TITLE(deletedQuickPrompt.name)
         : i18n.DELETE_QUICK_PROMPT_MODAL_DEFAULT_TITLE,
-    [deletedQuickPrompt?.title]
+    [deletedQuickPrompt?.name]
   );
 
   return (
@@ -160,7 +184,7 @@ const QuickPromptSettingsManagementComponent = () => {
         <EuiSpacer size="s" />
         <EuiInMemoryTable
           columns={columns}
-          items={quickPromptSettings}
+          items={quickPrompts}
           onTableChange={onTableChange}
           pagination={pagination}
           sorting={sorting}
@@ -175,10 +199,12 @@ const QuickPromptSettingsManagementComponent = () => {
       >
         <QuickPromptSettingsEditor
           onSelectedQuickPromptChange={onSelectedQuickPromptChange}
-          quickPromptSettings={quickPromptSettings}
+          quickPromptSettings={quickPrompts}
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
           setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+          promptsBulkActions={promptsBulkActions}
+          setPromptsBulkActions={setPromptsBulkActions}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedQuickPrompt && (

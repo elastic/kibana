@@ -11,10 +11,10 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
-import { Prompt } from '../../../..';
 import {
   getConversationApiConfig,
   getInitialDefaultSystemPrompt,
@@ -25,7 +25,7 @@ import { RowActions } from '../../common/components/assistant_settings_managemen
 const emptyConversations = {};
 
 export interface GetConversationsListParams {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   actionTypeRegistry: ActionTypeRegistryContract;
   connectors: AIConnector[] | undefined;
   conversations: Record<string, Conversation>;
@@ -126,7 +126,7 @@ export const useConversationsTable = () => {
         );
         const connectorTypeTitle = getConnectorTypeTitle(connector, actionTypeRegistry);
 
-        const systemPrompt: Prompt | undefined = allSystemPrompts.find(
+        const systemPrompt: PromptResponse | undefined = allSystemPrompts.find(
           ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
         );
         const defaultSystemPrompt = getInitialDefaultSystemPrompt({
@@ -135,10 +135,10 @@ export const useConversationsTable = () => {
         });
 
         const systemPromptTitle =
-          systemPrompt?.label ||
           systemPrompt?.name ||
-          defaultSystemPrompt?.label ||
-          defaultSystemPrompt?.name;
+          systemPrompt?.id ||
+          defaultSystemPrompt?.name ||
+          defaultSystemPrompt?.id;
 
         return {
           ...conversation,

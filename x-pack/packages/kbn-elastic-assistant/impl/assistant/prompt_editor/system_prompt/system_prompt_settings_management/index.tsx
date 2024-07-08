@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import {
   Conversation,
   mergeBaseWithPersistedConversations,
@@ -24,7 +25,7 @@ import {
 } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
-import { FetchConversationsResponse } from '../../../api';
+import { FetchConversationsResponse, useFetchPrompts } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import {
@@ -33,7 +34,6 @@ import {
 } from '../../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../../settings/translations';
 import { useSettingsUpdater } from '../../../settings/use_settings_updater/use_settings_updater';
-import { Prompt } from '../../../types';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
 import { SETTINGS_TITLE } from '../system_prompt_modal/translations';
 import { useSystemPromptEditor } from '../system_prompt_modal/use_system_prompt_editor';
@@ -60,6 +60,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     [baseConversations]
   );
 
+  const { data: allPrompts } = useFetchPrompts();
+
   const {
     data: conversations,
     isFetched: conversationsLoaded,
@@ -76,7 +78,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     openFlyout: openConfirmModal,
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
-  const [deletedPrompt, setDeletedPrompt] = useState<Prompt | null>();
+  const [deletedPrompt, setDeletedPrompt] = useState<PromptResponse | null>();
 
   const {
     conversationSettings,
@@ -87,12 +89,22 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     setConversationsSettingsBulkActions,
     resetSettings,
     saveSettings,
-  } = useSettingsUpdater(conversations, conversationsLoaded);
+    promptsBulkActions,
+    setPromptsBulkActions,
+  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded);
+
+  const systemPrompts = useMemo(
+    () =>
+      systemPromptSettings.length === 0
+        ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+        : systemPromptSettings,
+    [allPrompts.data, systemPromptSettings]
+  );
 
   // System Prompt Selection State
-  const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
+  const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
 
-  const onSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+  const onSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
     setSelectedSystemPrompt(systemPrompt);
   }, []);
 
@@ -131,10 +143,12 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   const { onSystemPromptSelectionChange, onSystemPromptDeleted } = useSystemPromptEditor({
     setUpdatedSystemPromptSettings,
     onSelectedSystemPromptChange,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   const onEditActionClicked = useCallback(
-    (prompt: Prompt) => {
+    (prompt: PromptResponse) => {
       onSystemPromptSelectionChange(prompt);
       openFlyout();
     },
@@ -142,7 +156,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   );
 
   const onDeleteActionClicked = useCallback(
-    (prompt: Prompt) => {
+    (prompt: PromptResponse) => {
       setDeletedPrompt(prompt);
       onSystemPromptDeleted(prompt.id);
       openConfirmModal();
@@ -199,9 +213,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
         connectors,
         conversationSettings,
         defaultConnector,
-        systemPromptSettings,
+        systemPromptSettings: systemPrompts,
       }),
-    [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPromptSettings]
+    [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPrompts]
   );
 
   return (
@@ -238,11 +252,13 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
           selectedSystemPrompt={selectedSystemPrompt}
           setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
           setConversationSettings={setConversationSettings}
-          systemPromptSettings={systemPromptSettings}
+          systemPromptSettings={systemPrompts}
           conversationsSettingsBulkActions={conversationsSettingsBulkActions}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           defaultConnector={defaultConnector}
           resetSettings={resetSettings}
+          promptsBulkActions={promptsBulkActions}
+          setPromptsBulkActions={setPromptsBulkActions}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedPrompt?.name && (

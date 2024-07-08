@@ -177,7 +177,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "(_: ",
+              "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "common",
@@ -203,7 +203,7 @@
                 "id": "def-public.Plugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "_",
+                "label": "core",
                 "description": [],
                 "signature": [
                   {
@@ -2399,8 +2399,8 @@
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "common",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.RuleFormErrors",
-                "text": "RuleFormErrors"
+                "section": "def-common.RuleFormParamsErrors",
+                "text": "RuleFormParamsErrors"
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",

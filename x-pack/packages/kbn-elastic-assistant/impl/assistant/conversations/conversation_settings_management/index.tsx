@@ -14,7 +14,11 @@ import { ConversationStreamingSwitch } from '../conversation_settings/conversati
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../../api';
+import {
+  FetchConversationsResponse,
+  useFetchCurrentUserConversations,
+  useFetchPrompts,
+} from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useConversationDeleted } from '../conversation_settings/use_conversation_deleted';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -63,6 +67,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [baseConversations]
   );
 
+  const { data: allPrompts } = useFetchPrompts();
+
   const {
     data: conversations,
     isFetched: conversationsLoaded,
@@ -83,7 +89,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     setConversationSettings,
     setConversationsSettingsBulkActions,
     setUpdatedAssistantStreamingEnabled,
-  } = useSettingsUpdater(conversations, conversationsLoaded);
+  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 

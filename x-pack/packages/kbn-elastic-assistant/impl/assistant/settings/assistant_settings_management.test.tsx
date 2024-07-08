@@ -24,6 +24,7 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
+import { mockSystemPrompts } from '../../mock/system_prompt';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -34,6 +35,8 @@ const saveSettings = jest.fn();
 const mockValues = {
   conversationSettings: mockConversations,
   saveSettings,
+  systemPromptSettings: mockSystemPrompts,
+  quickPromptSettings: [],
 };
 
 const setSelectedSettingsTab = jest.fn();
