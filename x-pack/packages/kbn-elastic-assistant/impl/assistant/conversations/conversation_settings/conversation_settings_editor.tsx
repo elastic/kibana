@@ -273,7 +273,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
-            showTitles={true}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
           />

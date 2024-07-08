@@ -22,10 +22,7 @@ export const getOptionFromPrompt = ({
   content,
   id,
   name,
-  showTitles = false,
-}: PromptResponse & {
-  showTitles?: boolean;
-}): EuiSuperSelectOption<string> => ({
+}: PromptResponse): EuiSuperSelectOption<string> => ({
   value: id,
   inputDisplay: <span data-test-subj="systemPromptText">{name}</span>,
   dropdownDisplay: (
@@ -44,10 +41,6 @@ export const getOptionFromPrompt = ({
 
 interface GetOptionsProps {
   prompts: PromptResponse[] | undefined;
-  showTitles?: boolean;
 }
-export const getOptions = ({
-  prompts,
-  showTitles = false,
-}: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles })) ?? [];
+export const getOptions = ({ prompts }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
+  prompts?.map(getOptionFromPrompt) ?? [];

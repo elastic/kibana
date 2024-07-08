@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
@@ -231,7 +231,7 @@ describe('Assistant', () => {
       });
     });
     it('should refetchConversationsState after clear chat history button click', async () => {
-      renderAssistant({ isFlyoutMode: true });
+      renderAssistant();
       fireEvent.click(screen.getByTestId('chat-context-menu'));
       fireEvent.click(screen.getByTestId('clear-chat'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));

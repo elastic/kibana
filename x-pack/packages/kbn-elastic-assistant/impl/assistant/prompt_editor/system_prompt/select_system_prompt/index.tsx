@@ -42,7 +42,6 @@ export interface Props {
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  showTitles?: boolean;
   onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
 }
 
@@ -60,7 +59,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
-  showTitles = false,
 }) => {
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
@@ -111,10 +109,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   }, []);
 
   // SuperSelect State/Actions
-  const options = useMemo(
-    () => getOptions({ prompts: allSystemPrompts, showTitles }),
-    [allSystemPrompts, showTitles]
-  );
+  const options = useMemo(() => getOptions({ prompts: allSystemPrompts }), [allSystemPrompts]);
 
   const onChange = useCallback(
     (selectedSystemPromptId) => {

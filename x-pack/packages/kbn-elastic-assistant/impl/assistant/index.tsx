@@ -115,7 +115,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    docLinks,
     getComments,
     http,
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
@@ -502,14 +501,6 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedAnonymizationFields,
   ]);
 
-  useEffect(() => {}, [
-    areConnectorsFetched,
-    connectors,
-    conversationsLoaded,
-    currentConversation,
-    isLoading,
-  ]);
-
   const createCodeBlockPortals = useCallback(
     () =>
       messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
@@ -858,7 +849,6 @@ const AssistantComponent: React.FC<Props> = ({
                 <AssistantHeader
                   selectedConversation={currentConversation}
                   defaultConnector={defaultConnector}
-                  docLinks={docLinks}
                   isDisabled={isDisabled || isLoadingChatSend}
                   isSettingsModalVisible={isSettingsModalVisible}
                   onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
