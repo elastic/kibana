@@ -146,16 +146,6 @@ export interface LogsEndpointAction<
   meta?: TMeta;
 }
 
-// FIXME:PT delete this
-export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
-  EndpointActions: EndpointActionFields &
-    ActionRequestFields & {
-      data: EndpointActionData & {
-        hosts: Record<string, { name: string }>;
-      };
-    };
-}
-
 /**
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16

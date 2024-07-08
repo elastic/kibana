@@ -17,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { compact, filter, map } from 'lodash';
 import type { EndpointAutomatedActionListRequestQuery } from '../../../../common/endpoint/schema/automated_actions';
-import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetEndpointActionList } from '../../../management/hooks';
 import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
 import type { SearchHit } from '../../../../common/search_strategy';
@@ -179,7 +179,7 @@ const ACTIONS_QUERY_KEY = 'actions';
 const useFetchOsQueryAutomatedActions = (
   query: EndpointAutomatedActionListRequestQuery,
   { enabled, isLive }: UseFetchOsQueryAutomatedActionsProps
-): UseQueryResult<ActionRequestStrategyResponse & { items: LogsEndpointActionWithHosts[] }> => {
+): UseQueryResult<ActionRequestStrategyResponse & { items: LogsOsqueryAction[] }> => {
   const { data } = useKibana().services;
   const { alertIds } = query;
   return useQuery({
