@@ -388,14 +388,26 @@ export class SpacesGridPage extends Component<Props, State> {
           'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
         },
         {
+          isPrimary: true,
           name: i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionName', {
             defaultMessage: 'Switch',
           }),
           description: (rowRecord) =>
-            i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionDescription', {
-              defaultMessage: 'Switch to {spaceName} space',
-              values: { spaceName: rowRecord.name },
-            }),
+            this.state.activeSpace?.name !== rowRecord.name
+              ? i18n.translate(
+                  'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
+                  {
+                    defaultMessage: 'Switch to {spaceName}',
+                    values: { spaceName: rowRecord.name },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.spaces.management.spacesGridPage.switchSpaceActionDisabledDescription',
+                  {
+                    defaultMessage: '{spaceName} is the current space',
+                    values: { spaceName: rowRecord.name },
+                  }
+                ),
           type: 'icon',
           icon: 'merge',
           color: 'primary',
@@ -405,7 +417,7 @@ export class SpacesGridPage extends Component<Props, State> {
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
-          available: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
+          enabled: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
           'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
         },
         {
@@ -413,15 +425,23 @@ export class SpacesGridPage extends Component<Props, State> {
             defaultMessage: `Delete`,
           }),
           description: (rowRecord) =>
-            i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionDescription', {
-              defaultMessage: `Delete {spaceName}.`,
-              values: { spaceName: rowRecord.name },
-            }),
+            isReservedSpace(rowRecord)
+              ? i18n.translate(
+                  'xpack.spaces.management.spacesGridPage.deleteActionDisabledDescription',
+                  {
+                    defaultMessage: `{spaceName} is reserved`,
+                    values: { spaceName: rowRecord.name },
+                  }
+                )
+              : i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionDescription', {
+                  defaultMessage: `Delete {spaceName}`,
+                  values: { spaceName: rowRecord.name },
+                }),
           type: 'icon',
           icon: 'trash',
           color: 'danger',
           onClick: (rowRecord) => this.onDeleteSpaceClick(rowRecord),
-          available: (rowRecord: Space) => !isReservedSpace(rowRecord),
+          enabled: (rowRecord: Space) => !isReservedSpace(rowRecord),
           'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
         },
       ],
