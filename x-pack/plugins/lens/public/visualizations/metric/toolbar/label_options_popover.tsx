@@ -10,7 +10,7 @@ import React, { FC, useCallback } from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { ToolbarPopover } from '../../../shared_components';
 import { MetricVisualizationState } from '../types';

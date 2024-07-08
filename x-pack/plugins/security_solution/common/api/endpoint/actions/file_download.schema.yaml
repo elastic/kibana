@@ -8,6 +8,9 @@ paths:
       summary: File Download schema
       operationId: EndpointFileDownload
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - name: query
           in: path
