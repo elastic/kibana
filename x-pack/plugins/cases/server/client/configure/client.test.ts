@@ -795,6 +795,156 @@ describe('client', () => {
           });
         });
 
+        it('updates default value of existing custom fields in the configuration correctly', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'custom field 1 default value 1',
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'updated default value!!',
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                owner: 'cases',
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                    defaultValue: 'custom field 1 default value 1',
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field 1 default value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'updated default value!!',
+                },
+              ],
+              templates: [
+                {
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                  description: 'this is test description',
+                  key: 'template_1',
+                  name: 'template 1',
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
+
         it('removes custom field from template when there are no customFields in the request', async () => {
           clientArgs.services.caseConfigureService.get.mockResolvedValue({
             // @ts-ignore: these are all the attributes needed for the test

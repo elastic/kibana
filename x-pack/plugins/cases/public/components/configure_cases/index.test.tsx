@@ -724,7 +724,7 @@ describe('ConfigureCases', () => {
       });
     });
 
-    it('deletes a custom field from template while deleting custom field', async () => {
+    it('deletes a custom field from template while deleting custom field from configuration', async () => {
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         data: {

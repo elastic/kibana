@@ -337,36 +337,34 @@ export const ConfigureCases: React.FC = React.memo(() => {
       const updatedCustomFields = addOrReplaceField(customFields, data);
 
       // add the new custom field to each template as well
-      const updatedTemplates = updatedCustomFields.length
-        ? templates.map((template) => {
-            const templateCustomFields = template.caseFields?.customFields ?? [];
+      const updatedTemplates = templates.map((template) => {
+        const templateCustomFields = template.caseFields?.customFields ?? [];
 
-            updatedCustomFields.forEach((field) => {
-              if (
-                !templateCustomFields.length ||
-                !templateCustomFields.find(
-                  (templateCustomField) => templateCustomField.key === field.key
-                )
-              ) {
-                const value = field.type === CustomFieldTypes.TOGGLE ? false : null;
+        updatedCustomFields.forEach((field) => {
+          if (
+            !templateCustomFields.length ||
+            !templateCustomFields.find(
+              (templateCustomField) => templateCustomField.key === field.key
+            )
+          ) {
+            const value = field.type === CustomFieldTypes.TOGGLE ? false : null;
 
-                templateCustomFields.push({
-                  key: field.key,
-                  type: field.type as CustomFieldTypes,
-                  value: field.defaultValue ?? value,
-                } as CaseUI['customFields'][number]);
-              }
-            });
+            templateCustomFields.push({
+              key: field.key,
+              type: field.type as CustomFieldTypes,
+              value: field.defaultValue ?? value,
+            } as CaseUI['customFields'][number]);
+          }
+        });
 
-            return {
-              ...template,
-              caseFields: {
-                ...template.caseFields,
-                customFields: [...templateCustomFields],
-              },
-            };
-          })
-        : templates;
+        return {
+          ...template,
+          caseFields: {
+            ...template.caseFields,
+            customFields: [...templateCustomFields],
+          },
+        };
+      });
 
       persistCaseConfigure({
         connector,
