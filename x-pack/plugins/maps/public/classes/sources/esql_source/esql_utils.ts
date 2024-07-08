@@ -54,6 +54,7 @@ export async function getESQLMeta(esql: string) {
     columns: await getESQLQueryColumnsRaw({
       esqlQuery: esql,
       search: getData().search.search,
+      timeRange: getData().query.timefilter.timefilter.getAbsoluteTime(),
     }),
     adhocDataViewId: adhocDataView.id!,
     ...getFields(adhocDataView),

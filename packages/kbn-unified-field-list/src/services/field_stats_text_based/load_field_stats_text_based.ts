@@ -67,6 +67,7 @@ export const loadFieldStatsTextBased: LoadFieldStatsTextBasedHandler = async ({
         filter,
         search: data.search.search,
         signal: abortController?.signal,
+        timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
       });
       return result.response;
     };

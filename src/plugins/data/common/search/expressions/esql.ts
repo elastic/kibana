@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { getEarliestLatestParams } from '@kbn/esql-utils';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
@@ -20,7 +21,6 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
-import { getEarliestLatestParams } from './utils/get_earliest_latest_params';
 import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
 import { UiSettingsCommon } from '../..';

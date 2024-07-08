@@ -40,6 +40,7 @@ export const getSuggestions = async (
       esqlQuery: 'esql' in query ? query.esql : '',
       search: deps.data.search.search,
       signal: abortController?.signal,
+      timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
     });
     const context = {
       dataViewSpec: dataView?.toSpec(false),

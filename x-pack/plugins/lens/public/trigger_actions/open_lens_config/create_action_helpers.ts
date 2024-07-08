@@ -75,6 +75,7 @@ export async function executeCreateAction({
     esqlQuery: `from ${defaultIndex}`,
     search: deps.data.search.search,
     signal: abortController.signal,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
   });
 
   const context = {
