@@ -14,7 +14,7 @@ import { registerDeleteRoute } from './register_delete_route';
 import { registerPrivilegesRoute } from './register_privileges_route';
 import {
   registerGetDatastreams,
-  registerReferencedComponentTemplateMeta,
+  registerReferencedIndexTemplateMeta,
 } from './register_datastream_route';
 
 export function registerComponentTemplateRoutes(dependencies: RouteDependencies) {
@@ -22,7 +22,7 @@ export function registerComponentTemplateRoutes(dependencies: RouteDependencies)
   registerCreateRoute(dependencies);
   registerUpdateRoute(dependencies);
   registerGetDatastreams(dependencies);
-  registerReferencedComponentTemplateMeta(dependencies);
+  registerReferencedIndexTemplateMeta(dependencies);
   registerDeleteRoute(dependencies);
   registerPrivilegesRoute(dependencies);
 }

@@ -110,11 +110,11 @@ export const getApi = (
     });
   }
 
-  function useLoadReferencedComponentTemplateMeta(name: string) {
+  function useLoadReferencedIndexTemplateMeta(name: string) {
     return useRequest<ComponentTemplateMeta>({
       path: `${apiBasePath}/component_templates/${encodeURIComponent(
         name
-      )}/referenced_component_template_meta`,
+      )}/referenced_index_template_meta`,
       method: 'get',
     });
   }
@@ -125,7 +125,7 @@ export const getApi = (
     useLoadComponentTemplate,
     createComponentTemplate,
     updateComponentTemplate,
-    useLoadReferencedComponentTemplateMeta,
+    useLoadReferencedIndexTemplateMeta,
     useLoadComponentTemplatesDatastream,
     getComponentTemplateDatastreams,
     postDataStreamRollover,

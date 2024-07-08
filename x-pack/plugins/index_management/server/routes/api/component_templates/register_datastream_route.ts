@@ -78,13 +78,13 @@ export const registerGetDatastreams = ({
   );
 };
 
-export const registerReferencedComponentTemplateMeta = ({
+export const registerReferencedIndexTemplateMeta = ({
   router,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.get(
     {
-      path: addBasePath('/component_templates/{name}/referenced_component_template_meta'),
+      path: addBasePath('/component_templates/{name}/referenced_index_template_meta'),
       validate: {
         params: paramsSchema,
       },

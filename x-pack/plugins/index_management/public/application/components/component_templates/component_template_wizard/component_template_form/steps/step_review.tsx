@@ -71,7 +71,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       version: serializedVersion,
     } = serializedComponentTemplate;
 
-    const isFleetDatastreamsVisible =
+    const areDatastreamsVisible =
       Boolean(dataStreams?.length) &&
       (componentTemplate._meta?.managed_by === MANAGED_BY_FLEET || canRollover);
 
@@ -140,8 +140,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
-          {isFleetDatastreamsVisible && dataStreams && (
-            <EuiFlexItem>
+          {areDatastreamsVisible && dataStreams && (
+            <EuiFlexItem data-test-subj="affectedMappingsList">
               {/* Datastream mappings */}
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.datastreamsLabel"
@@ -209,7 +209,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
             {request}
           </EuiCodeBlock>
 
-          {isFleetDatastreamsVisible && (
+          {areDatastreamsVisible && (
             <>
               <EuiSpacer size="m" />
               <EuiText>
