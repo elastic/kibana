@@ -15,11 +15,6 @@ export enum ResponseActionsQueries {
   actions = 'responseActions',
 }
 
-export type {
-  ActionResponsesRequestOptions,
-  ActionResponsesRequestStrategyResponse,
-} from './response';
-
 export type EndpointFactoryQueryTypes = ResponseActionsQueries;
 
 export type EndpointStrategyResponseType<T extends EndpointFactoryQueryTypes> =

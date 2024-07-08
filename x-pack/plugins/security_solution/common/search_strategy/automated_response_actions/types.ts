@@ -20,9 +20,3 @@ export interface RequestBasicOptions extends IEsSearchRequest {
 }
 
 export type ResponseActionsSearchHit = estypes.SearchHit<LogsOsqueryAction>;
-
-export interface Inspect {
-  dsl: string[];
-}
-
-export type Maybe<T> = T | null;
