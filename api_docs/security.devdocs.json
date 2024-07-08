@@ -5325,10 +5325,6 @@
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
             {
-              "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
-            },
-            {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
@@ -5347,10 +5343,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
-            },
-            {
-              "plugin": "cloudChat",
-              "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.ts"
             },
             {
               "plugin": "securitySolution",
