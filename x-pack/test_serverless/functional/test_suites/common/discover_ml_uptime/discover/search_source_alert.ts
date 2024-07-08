@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
   const dataViews = getService('dataViews');
+  const browser = getService('browser');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -280,17 +281,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    // TODO: Navigation to Rule Management is different in Serverless
+    // Navigation to Rule Management is different in Serverless
     await PageObjects.common.navigateToApp('triggersActions');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const rulesList = await testSubjects.find('rulesList');
-    const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
-    await alertRule.click();
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    let retries = 0;
+
+    await retry.try(async () => {
+      retries = retries + 1;
+      if (retries > 1) {
+        // It might take time for a rule to get created. Waiting for it.
+        await browser.refresh();
+      }
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      await alertRule.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    });
   };
 
   const clickViewInApp = async (ruleName: string) => {
@@ -355,9 +362,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
-    // fails on MKI, see https://github.com/elastic/kibana/issues/187069
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
