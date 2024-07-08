@@ -145,7 +145,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
         }
       );
     } else {
-      // replae the control with a new one of the updated type
+      // replace the control with a new one of the updated type
       controlGroup.replacePanel(controlId, { panelType: newType, initialState });
     }
   };
