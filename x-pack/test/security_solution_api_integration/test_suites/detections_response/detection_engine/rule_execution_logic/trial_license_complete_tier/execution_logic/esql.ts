@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-
+import moment from 'moment';
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
@@ -22,6 +22,9 @@ import {
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
   patchRule,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import {
   deleteAllRules,
@@ -1137,6 +1140,145 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(logs[0].errors.length).toEqual(0);
         });
+      });
+    });
+
+    describe('manual rule run', () => {
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('should run rule in the past and generate alert, without duplicates', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.toISOString(),
+          agent: {
+            name: 'test-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': moment().subtract(1, 'm').toISOString(),
+          agent: {
+            name: 'test-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+      });
+
+      it("should run rule in the past and don't generate duplicate alert", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment();
+
+        const firstDocument = {
+          id,
+          '@timestamp': moment(firstTimestamp).subtract(1, 'm').toISOString(),
+          agent: {
+            name: 'test-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument]);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant METADATA  _id, _index, _version ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(1);
+      });
+
+      it("should run rule in the past and can generate duplicate alert if it's non de-duplicative esql query", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment();
+
+        const firstDocument = {
+          id,
+          '@timestamp': moment(firstTimestamp).subtract(1, 'm').toISOString(),
+          agent: {
+            name: 'test-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument]);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
       });
     });
   });
