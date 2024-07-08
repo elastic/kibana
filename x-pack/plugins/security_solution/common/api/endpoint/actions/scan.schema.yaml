@@ -8,6 +8,9 @@ paths:
       summary: Scan Action
       operationId: EndpointScanAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
