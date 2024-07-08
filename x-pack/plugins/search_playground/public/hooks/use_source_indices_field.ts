@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useController, useFormContext } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
+import { merge } from 'lodash';
 import { useIndicesFields } from './use_indices_fields';
 import { ChatForm, ChatFormFields } from '../types';
 import {
@@ -35,7 +36,6 @@ export const getIndicesWithNoSourceFields = (
 export const useSourceIndicesFields = () => {
   const usageTracker = useUsageTracker();
   const [loading, setLoading] = useState<boolean>(false);
-  const { resetField } = useFormContext<ChatForm>();
 
   const {
     field: { value: selectedIndices, onChange: onIndicesChange },
@@ -51,7 +51,7 @@ export const useSourceIndicesFields = () => {
   });
 
   const {
-    field: { onChange: onQueryFieldsOnChange },
+    field: { onChange: onQueryFieldsOnChange, value: queryFields },
   } = useController<ChatForm, ChatFormFields.queryFields>({
     name: ChatFormFields.queryFields,
   });
@@ -65,22 +65,13 @@ export const useSourceIndicesFields = () => {
 
   useEffect(() => {
     if (fields && !isFieldsLoading) {
-      resetField(ChatFormFields.queryFields);
-
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
 
       onElasticsearchQueryChange(createQuery(defaultFields, defaultSourceFields, fields));
-      onQueryFieldsOnChange(defaultFields);
+      onQueryFieldsOnChange(merge(defaultFields, queryFields));
 
-      const mergedSettledAndDefaultFields = Object.entries(defaultSourceFields).reduce(
-        (result, [index, defaultSourceField]) => {
-          return { ...result, [index]: sourceFields[index] || defaultSourceField };
-        },
-        {}
-      );
-
-      onSourceFieldsChange(mergedSettledAndDefaultFields);
+      onSourceFieldsChange(merge(defaultSourceFields, sourceFields));
       usageTracker?.count(
         AnalyticsEvents.sourceFieldsLoaded,
         Object.values(fields)?.flat()?.length
