@@ -15,7 +15,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
-import { getTopNavLinks } from './get_top_nav_links';
+import { useTopNavLinks } from './get_top_nav_links';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -48,27 +48,15 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        dataView,
-        services,
-        state: stateContainer,
-        onOpenInspector,
-        isEsqlMode,
-        adHocDataViews,
-        topNavCustomization,
-      }),
-    [
-      adHocDataViews,
-      dataView,
-      isEsqlMode,
-      onOpenInspector,
-      services,
-      stateContainer,
-      topNavCustomization,
-    ]
-  );
+  const topNavMenu = useTopNavLinks({
+    dataView,
+    services,
+    state: stateContainer,
+    onOpenInspector,
+    isEsqlMode,
+    adHocDataViews,
+    topNavCustomization,
+  });
 
   return {
     topNavMenu,

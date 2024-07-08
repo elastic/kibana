@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // here Lens suggests a XY so it is rendered
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('xyVisChart');
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        let cell = await dataGrid.getCellElement(0, 2);
+        let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        cell = await dataGrid.getCellElement(0, 2);
+        cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 

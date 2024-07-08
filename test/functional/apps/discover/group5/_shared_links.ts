@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
+  // defaults to short urls
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
