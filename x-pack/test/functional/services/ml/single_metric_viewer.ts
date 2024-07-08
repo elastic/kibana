@@ -16,6 +16,7 @@ export function MachineLearningSingleMetricViewerProvider(
 ) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertSingleMetricViewerEmptyListMessageExsist() {
@@ -85,8 +86,16 @@ export function MachineLearningSingleMetricViewerProvider(
     async assertAnomalyActionDiscoverButtonExists() {
       await testSubjects.existOrFail('mlAnomaliesListRowAction_viewInDiscoverButton');
     },
+
     async assertAnomalyActionJobRulesButtonExists() {
       await testSubjects.existOrFail('mlAnomaliesListRowActionConfigureRulesButton');
+    },
+
+    async ensureAnomalyActionDiscoverButtonClicked() {
+      await retry.tryForTime(3 * 1000, async () => {
+        await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer');
+      });
     },
 
     async assertAnnotationsExists(state: string) {

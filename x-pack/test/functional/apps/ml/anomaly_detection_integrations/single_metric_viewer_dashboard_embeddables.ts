@@ -88,11 +88,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
           await ml.singleMetricViewer.assertChartExist();
+          await PageObjects.dashboard.saveDashboard(testData.dashboardTitle);
+        });
+
+        it('should have anomaly click action menu', async () => {
+          await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
           await ml.singleMetricViewer.assertAnomalyMarkerExist();
           await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
           await ml.singleMetricViewer.assertAnomalyActionDiscoverButtonExists();
           await ml.singleMetricViewer.assertAnomalyActionJobRulesButtonExists();
-          await PageObjects.dashboard.saveDashboard(testData.dashboardTitle);
         });
       });
     }
