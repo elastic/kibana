@@ -28,6 +28,7 @@ export function buildKubectlCommand({
       | sed -e 's/JUFQSV9LRVkl/${encodedApiKey}/g'
             -e "s/%ES_HOST%/${escapedElasticsearchUrl}/g"
             -e "s/%ONBOARDING_ID%/${onboardingId}/g"
+            -e "s/\\(docker.elastic.co\\/beats\\/elastic-agent\:\\).*$/\\1${elasticAgentVersion}/g"
       |  kubectl apply -f-
   `
     .trim()
