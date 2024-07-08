@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 import supertestLib from 'supertest';
 import url from 'url';
 import expect from '@kbn/expect';
@@ -42,6 +43,9 @@ import {
   getPreviewAlerts,
   previewRule,
   dataGeneratorFactory,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import {
   createRule,
@@ -921,6 +925,146 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
         expect(previewAlerts).to.have.length(3);
+      });
+    });
+
+    describe('manual rule run', () => {
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('should run rule in the past and generate alert, without duplicates', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+          client: {
+            ip: ['127.0.0.1', '127.0.0.2'],
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': firstTimestamp.subtract(1, 'm').toISOString(),
+          agent: {
+            name: 'agent-2',
+          },
+          client: {
+            ip: ['127.0.0.1', '127.0.0.3'],
+          },
+        };
+        const thirdDocument = {
+          id,
+          '@timestamp': moment(new Date()).subtract(1, 'm').toISOString(),
+          agent: {
+            name: 'agent-3',
+          },
+          client: {
+            ip: ['127.0.0.1', '127.0.0.4'],
+          },
+        };
+        const fourthDocument = {
+          id,
+          '@timestamp': moment(new Date()).toISOString(),
+          agent: {
+            name: 'agent-4',
+          },
+          client: {
+            ip: ['127.0.0.1', '127.0.0.5'],
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument, thirdDocument, fourthDocument]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: `sequence [any where id == "${id}" ] [any where true]`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(3);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(6);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).equal(6);
+      });
+
+      it("should run rule in the past and don't generate duplicate alert", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date());
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.subtract(1, 'm').toISOString(),
+          agent: {
+            name: 'agent-3',
+          },
+          client: {
+            ip: ['127.0.0.1', '127.0.0.4'],
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': firstTimestamp.subtract(2, 'm').toISOString(),
+          agent: {
+            name: 'agent-4',
+          },
+          client: {
+            ip: ['127.0.0.1', '127.0.0.5'],
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: `sequence [any where id == "${id}" ] [any where true]`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(3);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(3);
       });
     });
   });
