@@ -13,7 +13,7 @@ import type {
   EndpointStrategyResponseType,
   EndpointFactoryQueryTypes,
 } from '../../../common/search_strategy/endpoint';
-import type { EndpointFactory } from './factory/types';
+import type { AutomatedActionsSearchStrategyFactory } from './factory/types';
 
 import { endpointFactory } from './factory';
 
@@ -31,7 +31,8 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
         throw new Error('factoryQueryType is required');
       }
 
-      const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
+      const queryFactory: AutomatedActionsSearchStrategyFactory<T> =
+        endpointFactory[request.factoryQueryType];
       const strictRequest = {
         factoryQueryType: request.factoryQueryType,
         sort: request.sort,

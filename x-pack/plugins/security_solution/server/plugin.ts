@@ -24,7 +24,7 @@ import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_act
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
-import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
+import { endpointSearchStrategyProvider } from './search_strategy/automated_response_actions';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import {
   siemGuideId,

@@ -12,7 +12,7 @@ import type {
   EndpointStrategyResponseType,
 } from '../../../../common/search_strategy/endpoint';
 
-export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
+export interface AutomatedActionsSearchStrategyFactory<T extends EndpointFactoryQueryTypes> {
   buildDsl: (options: EndpointStrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: EndpointStrategyRequestType<T>,
