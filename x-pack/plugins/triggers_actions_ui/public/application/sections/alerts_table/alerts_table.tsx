@@ -339,7 +339,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
 
   const bulkActionArgs = useMemo(() => {
     return {
-      alertsCount,
+      alertsCount: alerts.length,
       casesConfig: alertsTableConfiguration.cases,
       query,
       useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
@@ -348,7 +348,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
     };
   }, [
-    alertsCount,
+    alerts.length,
     alertsTableConfiguration.cases,
     alertsTableConfiguration.useBulkActions,
     alertsTableConfiguration.hideBulkActions,
