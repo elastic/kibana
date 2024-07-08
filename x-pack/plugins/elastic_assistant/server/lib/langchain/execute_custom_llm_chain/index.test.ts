@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
-import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
+import { AgentExecutorParams } from '../executors/types';
+import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
-jest.mock('@kbn/elastic-assistant-common/impl/llm', () => ({
-  ActionsClientChatOpenAI: jest.fn(),
-  ActionsClientLlm: jest.fn(),
-}));
+jest.mock('@kbn/langchain/server', () => {
+  const original = jest.requireActual('@kbn/langchain/server');
+  return {
+    ...original,
+    ActionsClientChatOpenAI: jest.fn(),
+    ActionsClientSimpleChatModel: jest.fn(),
+  };
+});
 
 const mockConversationChain = {
   call: jest.fn(),
@@ -78,35 +85,43 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = { body: {} } as K
   any // eslint-disable-line @typescript-eslint/no-explicit-any
 >;
 
-const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
+const actionsClient = actionsClientMock.create();
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-const defaultProps = {
-  actions: mockActions,
+const esStoreMock = new ElasticsearchStore(
+  esClientMock,
+  KNOWLEDGE_BASE_INDEX_PATTERN,
+  mockLogger,
+  mockTelemetry
+);
+const defaultProps: AgentExecutorParams<true> = {
+  actionsClient,
   isEnabledKnowledgeBase: true,
   connectorId: mockConnectorId,
   esClient: esClientMock,
+  esStore: esStoreMock,
   llmType: 'openai',
   langChainMessages,
   logger: mockLogger,
   onNewReplacements: jest.fn(),
   request: mockRequest,
-  kbResource: ESQL_RESOURCE,
-  telemetry: mockTelemetry,
   replacements: {},
 };
+const bedrockProps = {
+  ...defaultProps,
+  llmType: 'bedrock',
+};
+const executorMock = initializeAgentExecutorWithOptions as jest.Mock;
 describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (initializeAgentExecutorWithOptions as jest.Mock).mockImplementation(
-      (_a, _b, { agentType }) => ({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        invoke: (props: any, more: any) => mockInvoke({ ...props, agentType }, more),
-      })
-    );
+    executorMock.mockImplementation((_a, _b, { agentType }) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      invoke: (props: any, more: any) => mockInvoke({ ...props, agentType }, more),
+    }));
   });
 
   describe('callAgentExecutor', () => {
@@ -130,67 +145,137 @@ describe('callAgentExecutor', () => {
       expect(mockCall.mock.calls[0][0].input).toEqual('What is my name?');
     });
   });
-  describe('when the agent is not streaming', () => {
-    it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
-      await callAgentExecutor(defaultProps);
 
-      expect(ActionsClientLlm).toHaveBeenCalledWith({
-        actions: mockActions,
-        connectorId: mockConnectorId,
-        logger: mockLogger,
-        maxRetries: 0,
-        request: mockRequest,
-        streaming: false,
-        llmType: 'openai',
+  describe('OpenAI', () => {
+    describe('when the agent is not streaming', () => {
+      it('creates an instance of ActionsClientChatOpenAI with the expected context from the request', async () => {
+        await callAgentExecutor(defaultProps);
+
+        expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
+          actionsClient,
+          connectorId: mockConnectorId,
+          logger: mockLogger,
+          maxRetries: 0,
+          streaming: false,
+          temperature: 0.2,
+          llmType: 'openai',
+        });
+      });
+
+      it('uses the openai-functions agent type', async () => {
+        await callAgentExecutor(defaultProps);
+        expect(mockCall.mock.calls[0][0].agentType).toEqual('openai-functions');
+      });
+
+      it('returns the expected response', async () => {
+        const result = await callAgentExecutor(defaultProps);
+
+        expect(result).toEqual({
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+            replacements: {},
+            trace_data: undefined,
+          },
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
       });
     });
+    describe('when the agent is streaming', () => {
+      it('creates an instance of ActionsClientChatOpenAI with the expected context from the request', async () => {
+        await callAgentExecutor({ ...defaultProps, isStream: true });
 
-    it('uses the chat-conversational-react-description agent type', async () => {
-      await callAgentExecutor(defaultProps);
+        expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
+          actionsClient,
+          connectorId: mockConnectorId,
+          logger: mockLogger,
+          maxRetries: 0,
+          streaming: true,
+          temperature: 0.2,
+          llmType: 'openai',
+        });
+      });
 
-      expect(mockCall.mock.calls[0][0].agentType).toEqual('chat-conversational-react-description');
-    });
-
-    it('returns the expected response', async () => {
-      const result = await callAgentExecutor(defaultProps);
-
-      expect(result).toEqual({
-        body: {
-          connector_id: 'mock-connector-id',
-          data: mockActionResponse,
-          status: 'ok',
-          replacements: {},
-          trace_data: undefined,
-        },
-        headers: {
-          'content-type': 'application/json',
-        },
+      it('uses the openai-functions agent type', async () => {
+        await callAgentExecutor({ ...defaultProps, isStream: true });
+        expect(mockInvoke.mock.calls[0][0].agentType).toEqual('openai-functions');
       });
     });
   });
-  describe('when the agent is streaming', () => {
-    it('creates an instance of ActionsClientChatOpenAI with the expected context from the request', async () => {
-      await callAgentExecutor({ ...defaultProps, isStream: true });
 
-      expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-        actions: mockActions,
-        connectorId: mockConnectorId,
-        logger: mockLogger,
-        maxRetries: 0,
-        request: mockRequest,
-        streaming: true,
-        llmType: 'openai',
+  describe('Bedrock', () => {
+    describe('when the agent is not streaming', () => {
+      it('creates an instance of ActionsClientSimpleChatModel with the expected context from the request', async () => {
+        await callAgentExecutor(bedrockProps);
+
+        expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
+          actionsClient,
+          connectorId: mockConnectorId,
+          logger: mockLogger,
+          maxRetries: 0,
+          streaming: false,
+          temperature: 0,
+          llmType: 'bedrock',
+        });
+      });
+
+      it('uses the structured-chat-zero-shot-react-description agent type', async () => {
+        await callAgentExecutor(bedrockProps);
+        expect(mockCall.mock.calls[0][0].agentType).toEqual(
+          'structured-chat-zero-shot-react-description'
+        );
+      });
+
+      it('returns the expected response', async () => {
+        const result = await callAgentExecutor(bedrockProps);
+
+        expect(result).toEqual({
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+            replacements: {},
+            trace_data: undefined,
+          },
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
       });
     });
+    describe('when the agent is streaming', () => {
+      it('creates an instance of ActionsClientSimpleChatModel with the expected context from the request', async () => {
+        await callAgentExecutor({ ...bedrockProps, isStream: true });
 
-    it('uses the openai-functions agent type', async () => {
-      await callAgentExecutor({ ...defaultProps, isStream: true });
+        expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
+          actionsClient,
+          connectorId: mockConnectorId,
+          logger: mockLogger,
+          maxRetries: 0,
+          streaming: true,
+          temperature: 0,
+          llmType: 'bedrock',
+        });
+      });
 
-      expect(mockInvoke.mock.calls[0][0].agentType).toEqual('openai-functions');
+      it('uses the structured-chat-zero-shot-react-description agent type', async () => {
+        await callAgentExecutor({ ...bedrockProps, isStream: true });
+        expect(mockInvoke.mock.calls[0][0].agentType).toEqual(
+          'structured-chat-zero-shot-react-description'
+        );
+      });
     });
+  });
 
+  describe.each([
+    ['OpenAI', defaultProps],
+    ['Bedrock', bedrockProps],
+  ])('Common streaming tests - %s', (_, theProps) => {
     it('returns the expected response', async () => {
-      const result = await callAgentExecutor({ ...defaultProps, isStream: true });
+      const result = await callAgentExecutor({ ...theProps, isStream: true });
       expect(result.body).toBeInstanceOf(Stream.PassThrough);
       expect(result.headers).toEqual({
         'Cache-Control': 'no-cache',
@@ -216,8 +301,8 @@ describe('callAgentExecutor', () => {
             mockInvokeWithChainCallback({ ...props, agentType }, more),
         })
       );
-      const onLlmResponse = jest.fn();
-      await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
+      const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
+      await callAgentExecutor({ ...theProps, onLlmResponse, isStream: true });
 
       expect(onLlmResponse).toHaveBeenCalledWith(
         'hello',
@@ -245,8 +330,8 @@ describe('callAgentExecutor', () => {
             mockInvokeWithChainCallback({ ...props, agentType }, more),
         })
       );
-      const onLlmResponse = jest.fn();
-      await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
+      const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
+      await callAgentExecutor({ ...theProps, onLlmResponse, isStream: true });
 
       expect(mockPush).toHaveBeenCalledWith({ payload: 'hi', type: 'content' });
       expect(mockPush).not.toHaveBeenCalledWith({ payload: 'hey', type: 'content' });
@@ -271,7 +356,7 @@ describe('callAgentExecutor', () => {
         })
       );
       const onLlmResponse = jest.fn();
-      await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
+      await callAgentExecutor({ ...theProps, onLlmResponse, isStream: true });
 
       expect(mockPush).toHaveBeenCalledWith({ payload: 'hi', type: 'content' });
       expect(mockPush).toHaveBeenCalledWith({ payload: 'hey', type: 'content' });

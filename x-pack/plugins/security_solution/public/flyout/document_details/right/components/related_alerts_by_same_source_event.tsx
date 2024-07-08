@@ -31,7 +31,7 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
   originalEventId,
   scopeId,
 }) => {
-  const { loading, error, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
+  const { loading, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
     scopeId,
   });
@@ -46,7 +46,6 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
   return (
     <InsightsSummaryRow
       loading={loading}
-      error={error}
       icon={ICON}
       value={dataCount}
       text={text}

@@ -18,6 +18,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 
 export function createCoreSetupMock({
@@ -46,6 +47,7 @@ export function createCoreSetupMock({
     deprecations: deprecationsServiceMock.createSetupContract(),
     theme: themeServiceMock.createSetupContract(),
     security: securityServiceMock.createSetup(),
+    userProfile: userProfileServiceMock.createSetup(),
     plugins: {
       onSetup: jest.fn(),
       onStart: jest.fn(),

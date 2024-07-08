@@ -143,6 +143,7 @@ export const getArtificialLogDataViewTestData = ({
     brushDeviationTargetTimestamp: getBrushDeviationTargetTimestamp(),
     brushIntervalFactor: zeroDocsFallback ? 1 : 10,
     chartClickCoordinates: [-200, 30],
+    columnSelectorSearch: 'p-value',
     fieldSelectorSearch: 'user',
     fieldSelectorApplyAvailable: true,
     expected: {
@@ -150,6 +151,16 @@ export const getArtificialLogDataViewTestData = ({
       analysisGroupsTable: getAnalysisGroupsTable(),
       filteredAnalysisGroupsTable: getFilteredAnalysisGroupsTable(),
       analysisTable: getAnalysisTable(),
+      columnSelectorPopover: [
+        'Log rate',
+        'Doc count',
+        'p-value',
+        'Impact',
+        'Baseline rate',
+        'Deviation rate',
+        'Log rate change',
+        'Actions',
+      ],
       fieldSelectorPopover: getFieldSelectorPopover(),
       globalState: {
         refreshInterval: { pause: true, value: 60000 },

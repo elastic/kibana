@@ -11,8 +11,6 @@ import type { State } from './table_list_view_table';
 import type { Action } from './actions';
 
 export function getReducer<T extends UserContentCommonSchema>() {
-  let sortColumnChanged = false;
-
   return (state: State<T>, action: Action<T>): State<T> => {
     switch (action.type) {
       case 'onFetchItems': {
@@ -25,15 +23,17 @@ export function getReducer<T extends UserContentCommonSchema>() {
         const items = action.data.response.hits;
         let tableSort;
         let hasUpdatedAtMetadata = state.hasUpdatedAtMetadata;
+        let hasCreatedByMetadata = state.hasCreatedByMetadata;
 
         if (!state.hasInitialFetchReturned) {
           // We only get the state on the initial fetch of items
           // After that we don't want to reset the columns or change the sort after fetching
           hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
+          hasCreatedByMetadata = Boolean(items.find((item) => Boolean(item.createdBy)));
 
           // Only change the table sort if it hasn't been changed already.
           // For example if its state comes from the URL, we don't want to override it here.
-          if (hasUpdatedAtMetadata && !sortColumnChanged) {
+          if (hasUpdatedAtMetadata && !state.sortColumnChanged) {
             tableSort = {
               field: 'updatedAt' as const,
               direction: 'desc' as const,
@@ -58,6 +58,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           hasNoItems,
           totalItems: action.data.response.total,
           hasUpdatedAtMetadata,
+          hasCreatedByMetadata,
           tableSort: tableSort ?? state.tableSort,
           pagination: {
             ...state.pagination,
@@ -86,13 +87,12 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onTableChange': {
-        if (action.data.sort) {
-          sortColumnChanged = true;
-        }
-
         const tableSort = action.data.sort ?? state.tableSort;
         const pageIndex = action.data.page?.pageIndex ?? state.pagination.pageIndex;
         const pageSize = action.data.page?.pageSize ?? state.pagination.pageSize;
+        const tableFilter = action.data.filter
+          ? { ...state.tableFilter, ...action.data.filter }
+          : state.tableFilter;
 
         return {
           ...state,
@@ -102,6 +102,8 @@ export function getReducer<T extends UserContentCommonSchema>() {
             pageSize,
           },
           tableSort,
+          tableFilter,
+          sortColumnChanged: state.sortColumnChanged || Boolean(action.data.sort),
         };
       }
       case 'showConfirmDeleteItemsModal': {

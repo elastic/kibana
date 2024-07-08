@@ -108,6 +108,8 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem>
                     <EuiButton
+                      data-test-subj="entSearchContent-connectors-newConnectorButton"
+                      data-telemetry-id="entSearchContent-connectors-newConnectorButton"
                       key="newConnector"
                       color="primary"
                       iconType="plusInCircle"
@@ -128,6 +130,8 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                       closePopover={() => setShowMoreOptionsPopover(false)}
                       button={
                         <EuiButtonIcon
+                          data-test-subj="entSearchContent-connectors-newConnector-moreOptionsButton"
+                          data-telemetry-id="entSearchContent-connectors-newConnector-moreOptionsButton"
                           color="primary"
                           display="fill"
                           size="m"
@@ -199,6 +203,8 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
               ]
             : [
                 <EuiButton
+                  data-test-subj="entSearchContent-crawlers-newCrawlerButton"
+                  data-telemetry-id="entSearchContent-crawlers-newCrawlerButton"
                   disabled={Boolean(errorConnectingMessage)}
                   key="newCrawler"
                   color="primary"
@@ -216,7 +222,8 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                   ? [
                       <EuiButton
                         color="primary"
-                        data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                        data-test-subj="entSearchContent-connectors-defaultSettingsPopover"
+                        data-telemetry-id="entSearchContent-connectors-defaultSettingsPopover"
                         onClick={() => setShowDefaultSettingsFlyout(true)}
                       >
                         {i18n.translate(

@@ -8,18 +8,18 @@
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import { PromptResponse, Replacements } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Prompt, useAssistantContext } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   currentConversation?: Conversation;
   editingSystemPromptId: string | undefined;
   http: HttpSetup;
@@ -35,8 +35,7 @@ export interface UseChatSendProps {
 
 export interface UseChatSend {
   abortStream: () => void;
-  handleButtonSendMessage: (m: string) => void;
-  handleOnChatCleared: () => void;
+  handleOnChatCleared: () => Promise<void>;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
   handleRegenerateResponse: () => void;
@@ -209,14 +208,6 @@ export const useChatSend = ({
     });
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
-  const handleButtonSendMessage = useCallback(
-    (message: string) => {
-      handleSendMessage(message);
-      setUserPrompt('');
-    },
-    [handleSendMessage, setUserPrompt]
-  );
-
   const handleOnChatCleared = useCallback(async () => {
     const defaultSystemPromptId = getDefaultSystemPrompt({
       allSystemPrompts,
@@ -246,7 +237,6 @@ export const useChatSend = ({
 
   return {
     abortStream,
-    handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,

@@ -504,9 +504,9 @@
               },
               ", options?: ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
@@ -546,9 +546,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "@kbn/search-types",
                     "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
+                    "docId": "kibKbnSearchTypesPluginApi",
                     "section": "def-common.ISearchOptions",
                     "text": "ISearchOptions"
                   },
@@ -2208,17 +2208,17 @@
             "signature": [
               "(response: ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchResponse",
                 "text": "IEsSearchResponse"
               },
               "<any>) => ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchResponse",
                 "text": "IEsSearchResponse"
               },
@@ -2237,9 +2237,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "@kbn/search-types",
                     "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
+                    "docId": "kibKbnSearchTypesPluginApi",
                     "section": "def-common.IEsSearchResponse",
                     "text": "IEsSearchResponse"
                   },
@@ -2385,9 +2385,9 @@
               },
               ", options?: ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
@@ -2427,9 +2427,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "@kbn/search-types",
                     "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
+                    "docId": "kibKbnSearchTypesPluginApi",
                     "section": "def-common.ISearchOptions",
                     "text": "ISearchOptions"
                   },
@@ -3374,58 +3374,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.SearchSource.setFields",
-            "type": "Function",
-            "tags": [
-              "private"
-            ],
-            "label": "setFields",
-            "description": [
-              "\nInternal, do not use. Overrides all search source fields with the new field array.\n"
-            ],
-            "signature": [
-              "(newFields: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ") => this"
-            ],
-            "path": "src/plugins/data/common/search/search_source/search_source.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchSource.setFields.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "newFields",
-                "description": [
-                  "New field array."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceFields",
-                    "text": "SearchSourceFields"
-                  }
-                ],
-                "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.SearchSource.getId",
             "type": "Function",
             "tags": [],
@@ -3837,9 +3785,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
@@ -4101,6 +4049,60 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSource.loadDataViewFields",
+            "type": "Function",
+            "tags": [],
+            "label": "loadDataViewFields",
+            "description": [],
+            "signature": [
+              "(dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SearchSource.loadDataViewFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewLazy",
+                    "text": "DataViewLazy"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -4598,9 +4600,9 @@
           },
           "; }) => ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           }
@@ -4954,9 +4956,9 @@
         "signature": [
           "(response?: ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
@@ -4975,9 +4977,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
@@ -7169,7 +7171,9 @@
             "label": "createFiltersFromRangeSelectAction",
             "description": [],
             "signature": [
-              "(event: RangeSelectDataContext) => Promise<",
+              "(event: ",
+              "RangeSelectDataContext",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7567,487 +7571,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.IEsSearchRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IEsSearchRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
-          },
-          "<T> extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IEsSearchRequest.indexType",
-            "type": "string",
-            "tags": [],
-            "label": "indexType",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IKibanaSearchRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IKibanaSearchRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<Params>"
-        ],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchRequest.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nAn id can be used to uniquely identify this request."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchRequest.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "Params | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IKibanaSearchResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "IKibanaSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<RawResponse>"
-        ],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nSome responses may contain a unique id to identify the request this response came from."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.total",
-            "type": "number",
-            "tags": [],
-            "label": "total",
-            "description": [
-              "\nIf relevant to the search strategy, return a total number\nthat represents how progress is indicated."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.loaded",
-            "type": "number",
-            "tags": [],
-            "label": "loaded",
-            "description": [
-              "\nIf relevant to the search strategy, return a loaded number\nthat represents how progress is indicated."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isRunning",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRunning",
-            "description": [
-              "\nIndicates whether search is still in flight"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isPartial",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isPartial",
-            "description": [
-              "\nIndicates whether the results returned are complete or partial"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isRestored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRestored",
-            "description": [
-              "\nIndicates whether the results returned are from the async-search index"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isStored",
-            "description": [
-              "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.warning",
-            "type": "string",
-            "tags": [],
-            "label": "warning",
-            "description": [
-              "\nOptional warnings returned from Elasticsearch (for example, deprecation warnings)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.rawResponse",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "rawResponse",
-            "description": [
-              "\nThe raw response returned by the internal search method (usually the raw ES response)"
-            ],
-            "signature": [
-              "RawResponse"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.requestParams",
-            "type": "Object",
-            "tags": [],
-            "label": "requestParams",
-            "description": [
-              "\nHTTP request parameters from elasticsearch transport client t"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SanitizedConnectionRequestParams",
-                "text": "SanitizedConnectionRequestParams"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.ISearchOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ISearchOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.abortSignal",
-            "type": "Object",
-            "tags": [],
-            "label": "abortSignal",
-            "description": [
-              "\nAn `AbortSignal` that allows the caller of `search` to abort a search request."
-            ],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.strategy",
-            "type": "string",
-            "tags": [],
-            "label": "strategy",
-            "description": [
-              "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.legacyHitsTotal",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "legacyHitsTotal",
-            "description": [
-              "\nRequest the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to\nsomething other than `true`, this should be set to `false`."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.sessionId",
-            "type": "string",
-            "tags": [],
-            "label": "sessionId",
-            "description": [
-              "\nA session ID, grouping multiple search requests into a single session."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.isStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isStored",
-            "description": [
-              "\nWhether the session is already saved (i.e. sent to background)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.isSearchStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isSearchStored",
-            "description": [
-              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.isRestore",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRestore",
-            "description": [
-              "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [
-              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [
-              "\nIndex pattern reference is used for better error messages"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.transport",
-            "type": "Object",
-            "tags": [],
-            "label": "transport",
-            "description": [
-              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
-            ],
-            "signature": [
-              "Omit<",
-              "TransportRequestOptions",
-              ", \"signal\"> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.ISearchStartSearchSource",
         "type": "Interface",
         "tags": [],
@@ -8120,6 +7643,61 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.ISearchStartSearchSource.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SerializedSearchSourceFields",
+                    "text": "SerializedSearchSourceFields"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/data/common/search/search_source/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchStartSearchSource.createLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createLazy",
+            "description": [],
+            "signature": [
+              "(fields?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStartSearchSource.createLazy.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fields",
@@ -8371,6 +7949,22 @@
             "label": "updated_at",
             "description": [
               "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
             ],
             "signature": [
               "string | undefined"
@@ -9912,32 +9506,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.IEsSearchResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "IEsSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<",
-          "SearchResponse",
-          "<Source, Record<string, ",
-          "AggregationsAggregate",
-          ">>>"
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.IFieldParamType",
         "type": "Type",
         "tags": [],
@@ -10027,109 +9595,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.ISearchGeneric",
-        "type": "Type",
-        "tags": [],
-        "label": "ISearchGeneric",
-        "description": [],
-        "signature": [
-          "<SearchStrategyRequest extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<any> = ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
-          },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchRequestParams",
-            "text": "ISearchRequestParams"
-          },
-          ">, SearchStrategyResponse extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> = ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchResponse",
-            "text": "IEsSearchResponse"
-          },
-          "<any>>(request: SearchStrategyRequest, options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
-          },
-          " | undefined) => ",
-          "Observable",
-          "<SearchStrategyResponse>"
-        ],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchGeneric.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "SearchStrategyRequest"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchGeneric.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.ISearchSource",
         "type": "Type",
         "tags": [],
@@ -10148,19 +9613,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "[]; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; setField: <K extends keyof ",
+          "[]; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10193,22 +9646,6 @@
             "text": "SearchSourceFields"
           },
           ">(field: K) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSource",
-            "text": "SearchSource"
-          },
-          "; setFields: (newFields: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceFields",
-            "text": "SearchSourceFields"
-          },
-          ") => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10316,9 +9753,9 @@
           "Observable",
           "<",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
@@ -10326,7 +9763,19 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10342,7 +9791,23 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ") => Promise<Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">>; getSerializedFields: (recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12356,6 +11821,14 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
             },
             {
@@ -12553,7 +12026,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats, security }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -12610,7 +12083,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, usageCollection, fieldFormats, security }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"
@@ -12647,25 +12120,25 @@
               "ISearchStart",
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchRequest",
                 "text": "IEsSearchRequest"
               },
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.ISearchRequestParams",
                 "text": "ISearchRequestParams"
               },
               ">, ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchResponse",
                 "text": "IEsSearchResponse"
               },
@@ -12767,7 +12240,13 @@
             "text": "DataView"
           },
           " extends ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           " implements ",
           {
             "pluginId": "@kbn/es-query",
@@ -13193,12 +12672,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -15264,7 +14743,13 @@
             ],
             "signature": [
               "(dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -15281,7 +14766,13 @@
                   "data view instance"
                 ],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -15317,7 +14808,13 @@
             ],
             "signature": [
               "(indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -15332,7 +14829,13 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -16333,39 +15836,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+                  "{ create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -16471,7 +15942,39 @@
                   "WriteResponseBase",
                   ">; }; helpers: ",
                   "default",
-                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -17800,242 +17303,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.IEsSearchRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IEsSearchRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
-          },
-          "<T> extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.IEsSearchRequest.indexType",
-            "type": "string",
-            "tags": [],
-            "label": "indexType",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.ISearchOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ISearchOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.abortSignal",
-            "type": "Object",
-            "tags": [],
-            "label": "abortSignal",
-            "description": [
-              "\nAn `AbortSignal` that allows the caller of `search` to abort a search request."
-            ],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.strategy",
-            "type": "string",
-            "tags": [],
-            "label": "strategy",
-            "description": [
-              "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.legacyHitsTotal",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "legacyHitsTotal",
-            "description": [
-              "\nRequest the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to\nsomething other than `true`, this should be set to `false`."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.sessionId",
-            "type": "string",
-            "tags": [],
-            "label": "sessionId",
-            "description": [
-              "\nA session ID, grouping multiple search requests into a single session."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.isStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isStored",
-            "description": [
-              "\nWhether the session is already saved (i.e. sent to background)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.isSearchStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isSearchStored",
-            "description": [
-              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.isRestore",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRestore",
-            "description": [
-              "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [
-              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [
-              "\nIndex pattern reference is used for better error messages"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.transport",
-            "type": "Object",
-            "tags": [],
-            "label": "transport",
-            "description": [
-              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
-            ],
-            "signature": [
-              "Omit<",
-              "TransportRequestOptions",
-              ", \"signal\"> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -18101,32 +17368,6 @@
         "description": [],
         "signature": [
           "\"es\""
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.IEsSearchResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "IEsSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<",
-          "SearchResponse",
-          "<Source, Record<string, ",
-          "AggregationsAggregate",
-          ">>>"
         ],
         "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
         "deprecated": false,
@@ -18524,25 +17765,25 @@
             "ISearchStart",
             "<",
             {
-              "pluginId": "data",
+              "pluginId": "@kbn/search-types",
               "scope": "common",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibKbnSearchTypesPluginApi",
               "section": "def-common.IEsSearchRequest",
               "text": "IEsSearchRequest"
             },
             "<",
             {
-              "pluginId": "data",
+              "pluginId": "@kbn/search-types",
               "scope": "common",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibKbnSearchTypesPluginApi",
               "section": "def-common.ISearchRequestParams",
               "text": "ISearchRequestParams"
             },
             ">, ",
             {
-              "pluginId": "data",
+              "pluginId": "@kbn/search-types",
               "scope": "common",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibKbnSearchTypesPluginApi",
               "section": "def-common.IEsSearchResponse",
               "text": "IEsSearchResponse"
             },
@@ -19415,7 +18656,13 @@
             "text": "DataView"
           },
           " extends ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           " implements ",
           {
             "pluginId": "@kbn/es-query",
@@ -19841,12 +19088,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -22842,7 +22089,13 @@
             ],
             "signature": [
               "(dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22859,7 +22112,13 @@
                   "data view instance"
                 ],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -22895,7 +22154,13 @@
             ],
             "signature": [
               "(indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22910,7 +22175,13 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -25041,6 +24312,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SavedObject.error",
             "type": "Object",
             "tags": [],
@@ -25928,9 +25215,21 @@
             "text": "DataView"
           },
           ">; createSavedObject: (dataView: ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
           {
             "pluginId": "dataViews",

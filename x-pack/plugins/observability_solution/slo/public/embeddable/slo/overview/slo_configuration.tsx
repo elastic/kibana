@@ -25,9 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
 
 import type {
-  SingleSloProps,
-  GroupSloProps,
-  SloEmbeddableInput,
+  SingleSloCustomInput,
+  GroupSloCustomInput,
   GroupFilters,
   OverviewMode,
 } from './types';
@@ -35,26 +34,26 @@ import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
-  initialInput?: Partial<SloEmbeddableInput> | undefined;
-  onCreate: (props: SingleSloProps | GroupSloProps) => void;
+  initialInput?: GroupSloCustomInput;
+  onCreate: (props: SingleSloCustomInput | GroupSloCustomInput) => void;
   onCancel: () => void;
 }
 
 interface SingleConfigurationProps {
-  onCreate: (props: SingleSloProps) => void;
+  onCreate: (props: SingleSloCustomInput) => void;
   onCancel: () => void;
   overviewMode: OverviewMode;
 }
 
 interface GroupConfigurationProps {
-  onCreate: (props: GroupSloProps) => void;
+  onCreate: (props: GroupSloCustomInput) => void;
   onCancel: () => void;
   overviewMode: OverviewMode;
-  initialInput?: GroupSloProps;
+  initialInput?: GroupSloCustomInput;
 }
 
 function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<SingleSloProps>();
+  const [selectedSlo, setSelectedSlo] = useState<SingleSloCustomInput>();
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
   const [hasError, setHasError] = useState(false);
   const hasGroupBy = selectedSlo && selectedSlo.sloInstanceId !== ALL_VALUE;
@@ -74,7 +73,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem grow>
+              <EuiFlexItem data-test-subj="singleSloSelector" grow>
                 <SloSelector
                   singleSelection={true}
                   hasError={hasError}
@@ -144,10 +143,10 @@ function GroupSloConfiguration({
   initialInput,
 }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: initialInput?.groupFilters.groupBy ?? 'status',
-    filters: initialInput?.groupFilters.filters ?? [],
-    kqlQuery: initialInput?.groupFilters.kqlQuery ?? '',
-    groups: initialInput?.groupFilters.groups ?? [],
+    groupBy: initialInput?.groupFilters?.groupBy ?? 'status',
+    filters: initialInput?.groupFilters?.filters ?? [],
+    kqlQuery: initialInput?.groupFilters?.kqlQuery ?? '',
+    groups: initialInput?.groupFilters?.groups ?? [],
   });
 
   const onConfirmClick = () =>
@@ -158,7 +157,7 @@ function GroupSloConfiguration({
 
   return (
     <>
-      <EuiFlyoutBody className="sloOverviewEmbeddable">
+      <EuiFlyoutBody data-test-subj="sloGroupOverviewConfiguration">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -201,14 +200,14 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   );
 
   return (
-    <EuiFlyout onClose={onCancel}>
+    <EuiFlyout data-test-subj="sloSingleOverviewConfiguration" onClose={onCancel}>
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <EuiTitle>
               <h2>
-                {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-                  defaultMessage: 'SLO configuration',
+                {i18n.translate('xpack.slo.overviewEmbeddable.config.sloSelector.headerTitle', {
+                  defaultMessage: 'Overview configuration',
                 })}
               </h2>
             </EuiTitle>
@@ -226,7 +225,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       </EuiFlyoutHeader>
       {overviewMode === 'groups' ? (
         <GroupSloConfiguration
-          initialInput={initialInput as GroupSloProps}
+          initialInput={initialInput as GroupSloCustomInput}
           overviewMode={overviewMode}
           onCreate={onCreate}
           onCancel={onCancel}

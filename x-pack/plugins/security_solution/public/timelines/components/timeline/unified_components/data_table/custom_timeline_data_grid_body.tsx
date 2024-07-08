@@ -15,11 +15,17 @@ import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
+  rowHeight?: number;
+  refetch?: () => void;
 };
+
+// THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
+const DEFAULT_UDT_ROW_HEIGHT = 40;
 
 /**
  *
@@ -36,7 +42,8 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
  * */
 export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
   function CustomTimelineDataGridBody(props) {
-    const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
+    const { Cell, visibleColumns, visibleRowData, rows, rowHeight, enabledRowRenderers, refetch } =
+      props;
 
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -45,16 +52,20 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
 
     return (
       <>
-        {visibleRows.map((row, rowIndex) => (
-          <CustomDataGridSingleRow
-            rowData={row}
-            rowIndex={rowIndex}
-            key={rowIndex}
-            visibleColumns={visibleColumns}
-            Cell={Cell}
-            enabledRowRenderers={enabledRowRenderers}
-          />
-        ))}
+        {visibleRows.map((row, rowIndex) => {
+          return (
+            <CustomDataGridSingleRow
+              rowData={row}
+              rowIndex={rowIndex}
+              key={rowIndex}
+              visibleColumns={visibleColumns}
+              rowHeight={rowHeight}
+              Cell={Cell}
+              enabledRowRenderers={enabledRowRenderers}
+              refetch={refetch}
+            />
+          );
+        })}
       </>
     );
   }
@@ -73,20 +84,76 @@ const CustomGridRow = styled.div.attrs<{
 }))`
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
+  . euiDataGridRowCell--controlColumn {
+    height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
+    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
+  }
+  .udt--customRow {
+    border-radius: 0;
+    padding: ${(props) => (props.theme as EuiTheme).eui.euiDataGridCellPaddingM};
+    max-width: ${(props) => (props.theme as EuiTheme).eui.euiPageDefaultMaxWidth};
+    width: 85vw;
+  }
+
+  .euiCommentEvent__body {
+    background-color: ${(props) => (props.theme as EuiTheme).eui.euiColorEmptyShade};
+  }
+
+   &:has(.unifiedDataTable__cell--expanded) {
+      .euiDataGridRowCell--firstColumn,
+      .euiDataGridRowCell--lastColumn,
+      .euiDataGridRowCell--controlColumn,
+      .udt--customRow {
+        ${({ theme }) => `background-color: ${theme.eui.euiColorHighlight};`}
+      }
+    }
+  }
 `;
 
-/**
- *
- * A Simple Wrapper component for displaying a custom data grid `cell`
- */
-const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper', role: 'row' })`
+/* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
+const CustomGridRowCellWrapper = styled.div.attrs<{
+  className?: string;
+}>((props) => ({
+  className: `rowCellWrapper ${props.className ?? ''}`,
+  role: 'row',
+}))`
   display: flex;
+  align-items: center;
+  height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
+  .euiDataGridRowCell,
+  .euiDataGridRowCell__content {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
+    .unifiedDataTable__rowControl {
+      margin-top: 0;
+    }
+  }
+  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
+    padding: 0;
+  }
 `;
 
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
-} & Pick<CustomTimelineDataGridBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
+} & Pick<
+  CustomTimelineDataGridBodyProps,
+  'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
+>;
+
+const calculateRowHeightInPixels = (lineHeightMultiple: number): string => {
+  // The line height multiple can be negative to indicate "auto" in the unified data table
+  if (lineHeightMultiple < 0) return 'auto';
+  // The base line-height in pixels is 16px. This would be calculated default by the datagird and we could use
+  // the `configRowHeight` prop, but since we own control of our rows via `customGridBody` we have to calculate it ourselves.
+  const baseRowLineHeightInPx = 16;
+  const rowHeightInPixels = DEFAULT_UDT_ROW_HEIGHT + baseRowLineHeightInPx * lineHeightMultiple;
+  return `${rowHeightInPixels}px`;
+};
 
 /**
  *
@@ -96,13 +163,20 @@ type CustomTimelineDataGridSingleRowProps = {
 const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   props: CustomTimelineDataGridSingleRowProps
 ) {
-  const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
-
+  const {
+    rowIndex,
+    rowData,
+    enabledRowRenderers,
+    visibleColumns,
+    Cell,
+    rowHeight: rowHeightMultiple = 0,
+  } = props;
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
 
+  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple);
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -117,13 +191,15 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         : {},
     [canShowRowRenderer]
   );
+  const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
 
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      $cssRowHeight={cssRowHeight}
       key={rowIndex}
     >
-      <CustomGridRowCellWrapper>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {
           // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
@@ -139,6 +215,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
+
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell

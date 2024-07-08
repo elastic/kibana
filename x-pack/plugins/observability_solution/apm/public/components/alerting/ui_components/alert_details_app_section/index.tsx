@@ -12,13 +12,10 @@ import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_INSTANCE_ID,
   ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import moment from 'moment';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { EuiCallOut } from '@elastic/eui';
@@ -34,7 +31,6 @@ import { TimeRangeMetadataContextProvider } from '../../../../context/time_range
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import FailedTransactionChart from './failed_transaction_chart';
 import { getAggsTypeFromRule } from './helpers';
-import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
@@ -78,37 +74,6 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationThreshold),
       },
-      {
-        label: (
-          <FormattedMessage
-            id="xpack.apm.pages.alertDetails.alertSummary.serviceEnv"
-            defaultMessage="Service environment"
-          />
-        ),
-        value: environment,
-      },
-      {
-        label: (
-          <FormattedMessage
-            id="xpack.apm.pages.alertDetails.alertSummary.serviceName"
-            defaultMessage="Service name"
-          />
-        ),
-        value: serviceName,
-      },
-      ...(transactionName
-        ? [
-            {
-              label: (
-                <FormattedMessage
-                  id="xpack.apm.pages.alertDetails.alertSummary.transactionName"
-                  defaultMessage="Transaction name"
-                />
-              ),
-              value: transactionName,
-            },
-          ]
-        : []),
     ];
     setAlertSummaryFields(alertSummaryFields);
   }, [
@@ -125,12 +90,6 @@ export function AlertDetailsAppSection({
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
-  const historicalRange = useMemo(() => {
-    return {
-      start: moment().subtract(30, 'days').toISOString(),
-      end: moment().toISOString(),
-    };
-  }, []);
 
   const { from, to } = timeRange;
   if (!from || !to) {
@@ -205,20 +164,6 @@ export function AlertDetailsAppSection({
                 timeZone={timeZone}
               />
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LatencyAlertsHistoryChart
-              ruleId={alert.fields[ALERT_RULE_UUID]}
-              alertInstanceId={alert.fields[ALERT_INSTANCE_ID]}
-              serviceName={serviceName}
-              start={historicalRange.start}
-              end={historicalRange.end}
-              transactionType={transactionType}
-              transactionName={transactionName}
-              latencyAggregationType={latencyAggregationType}
-              environment={environment}
-              timeZone={timeZone}
-            />
           </EuiFlexItem>
         </ChartPointerEventContextProvider>
       </TimeRangeMetadataContextProvider>

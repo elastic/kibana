@@ -53,17 +53,17 @@ export type AssetType =
 */
 export enum KibanaAssetType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
-  lens = 'lens',
+  mlModule = 'ml_module',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  mlModule = 'ml_module',
-  tag = 'tag',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
+  tag = 'tag',
 }
 
 /*
@@ -71,27 +71,27 @@ export enum KibanaAssetType {
 */
 export enum KibanaSavedObjectType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
-  lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  tag = 'tag',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
+  tag = 'tag',
 }
 
 export enum ElasticsearchAssetType {
   index = 'index',
+  indexTemplate = 'index_template',
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
-  indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
-  transform = 'transform',
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
+  transform = 'transform',
   mlModel = 'ml_model',
 }
 export type FleetElasticsearchAssetType = Exclude<
@@ -99,12 +99,7 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType.index
 >;
 
-export type AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization,
-  ElasticsearchAssetType.transform
-];
+export type DisplayedAssetTypes = Array<`${KibanaSavedObjectType | ElasticsearchAssetType}`>;
 
 // Defined as part of the removing public references to saved object schemas
 export interface SimpleSOAssetType {
@@ -112,6 +107,7 @@ export interface SimpleSOAssetType {
   type: ElasticsearchAssetType | KibanaSavedObjectType;
   updatedAt?: string;
   attributes: {
+    service?: string;
     title?: string;
     description?: string;
   };
@@ -182,6 +178,14 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
+export interface DeploymentsModesEnablement {
+  enabled: boolean;
+}
+export interface DeploymentsModes {
+  agentless: DeploymentsModesEnablement;
+  default?: DeploymentsModesEnablement;
+}
+
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
@@ -197,6 +201,7 @@ export enum RegistryPolicyTemplateKeys {
   description = 'description',
   icons = 'icons',
   screenshots = 'screenshots',
+  deployment_modes = 'deployment_modes',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -205,6 +210,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
+  [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -428,6 +434,7 @@ export enum RegistryVarsEntryKeys {
   default = 'default',
   os = 'os',
   secret = 'secret',
+  hide_in_deployment_modes = 'hide_in_deployment_modes',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -449,6 +456,7 @@ export interface RegistryVarsEntry {
       default: string | string[];
     };
   };
+  [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -581,6 +589,7 @@ export interface StateContext<T> {
 
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
+  additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
@@ -641,6 +650,7 @@ export type AssetReference = KibanaAssetReference | EsAssetReference;
 
 export interface KibanaAssetReference {
   id: string;
+  originId?: string;
   type: KibanaSavedObjectType;
 }
 export interface EsAssetReference {

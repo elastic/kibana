@@ -7,9 +7,10 @@
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { ContextDefinition, FunctionDefinition } from '../../../common/functions/types';
+import { FunctionDefinition } from '../../../common/functions/types';
 import { KnowledgeBaseEntryRole } from '../../../common/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
+import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
@@ -21,7 +22,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     resources
   ): Promise<{
     functionDefinitions: FunctionDefinition[];
-    contextDefinitions: ContextDefinition[];
+    systemMessage: string;
   }> => {
     const { service, request } = resources;
 
@@ -32,16 +33,29 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    const functionClient = await service.getFunctionClient({
-      signal: controller.signal,
-      resources,
-      client,
-      screenContexts: [],
-    });
+    const [functionClient, userInstructions] = await Promise.all([
+      service.getFunctionClient({
+        signal: controller.signal,
+        resources,
+        client,
+        screenContexts: [],
+      }),
+      // error is caught in client
+      client.fetchUserInstructions(),
+    ]);
+
+    const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
+
+    const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
     return {
       functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
-      contextDefinitions: functionClient.getContexts(),
+      systemMessage: getSystemMessageFromInstructions({
+        registeredInstructions: functionClient.getInstructions(),
+        userInstructions,
+        requestInstructions: [],
+        availableFunctionNames,
+      }),
     };
   },
 });
@@ -51,7 +65,16 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
-        queries: t.array(nonEmptyStringRt),
+        queries: t.array(
+          t.intersection([
+            t.type({
+              text: t.string,
+            }),
+            t.partial({
+              boost: t.number,
+            }),
+          ])
+        ),
       }),
       t.partial({
         categories: t.array(t.string),

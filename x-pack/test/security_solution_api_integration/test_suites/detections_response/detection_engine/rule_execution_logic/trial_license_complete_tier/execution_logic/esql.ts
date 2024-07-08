@@ -37,6 +37,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
+  const utils = getService('securitySolutionUtils');
+
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
       es,
@@ -49,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('@ess ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -63,10 +65,11 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should generate 1 alert with during actual rule execution', async () => {
       const id = uuidv4();
+      const username = await utils.getUsername();
       const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
       const doc1 = { agent: { name: 'test-1' } };
       const doc2 = { agent: { name: 'test-2' } };
-      const ruleQuery = `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(
+      const ruleQuery = `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(
         id
       )} | where agent.name=="test-1"`;
       const rule: EsqlRuleCreateProps = {
@@ -104,6 +107,9 @@ export default ({ getService }: FtrProviderContext) => {
           version: 1,
           exceptions_list: [],
           immutable: false,
+          rule_source: {
+            type: 'internal',
+          },
           related_integrations: [],
           required_fields: [],
           setup: '',
@@ -134,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': 'elastic',
+        'kibana.alert.rule.created_by': username,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -151,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'esql',
-        'kibana.alert.rule.updated_by': 'elastic',
+        'kibana.alert.rule.updated_by': username,
         'kibana.alert.rule.version': 1,
         'kibana.alert.workflow_tags': [],
         'kibana.alert.workflow_assignee_ids': [],
@@ -243,7 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           // only _id and agent.name is projected at the end of query pipeline
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | keep _id, agent.name`,
           from: 'now-1h',
           interval: '1h',
         };
@@ -278,6 +284,44 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
+      it('should support deprecated [metadata _id] syntax', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = {
+          agent: { name: 'test-1', version: '2', type: 'auditbeat' },
+          host: { name: 'my-host' },
+          client: { ip: '127.0.0.1' },
+        };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          // only _id and agent.name is projected at the end of query pipeline
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1],
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+      });
+
       it('should deduplicate alerts correctly based on source document _id', async () => {
         const id = uuidv4();
         // document will fall into 2 rule execution windows
@@ -290,7 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           // only _id and agent.name is projected at the end of query pipeline
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | keep _id, agent.name`,
           from: 'now-45m',
           interval: '30m',
         };
@@ -725,7 +769,7 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
             id
           )} | keep _id, agent.name | sort agent.name`,
           from: '2020-10-28T05:15:00.000Z',
@@ -913,7 +957,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
             id
           )} | where agent.name=="test-1"`,
           from: 'now-1h',
@@ -956,7 +1000,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
             id
           )} | where agent.name=="test-1"`,
           from: 'now-1h',
@@ -1021,7 +1065,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const rule: EsqlRuleCreateProps = {
             ...getCreateEsqlRulesSchemaMock('rule-1', true),
-            query: `from ecs_non_compliant [metadata _id] ${internalIdPipe(id)}`,
+            query: `from ecs_non_compliant metadata _id ${internalIdPipe(id)}`,
             from: 'now-1h',
             interval: '1h',
           };
@@ -1058,6 +1102,40 @@ export default ({ getService }: FtrProviderContext) => {
             ['random.entry_leader.name.caseless'],
             'random non-ecs field'
           );
+        });
+
+        it('creates alert if `event.action` ECS field has non-ECS sub-field', async () => {
+          // The issue was found by customer and reported in
+          // https://github.com/elastic/sdh-security-team/issues/1015
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const doc1 = {
+            'event.action': 'process',
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_non_compliant metadata _id ${internalIdPipe(id)}`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocumentsToNonEcs({
+            documents: [doc1],
+            interval,
+            id,
+          });
+
+          const { logs } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          expect(logs[0].errors.length).toEqual(0);
         });
       });
     });

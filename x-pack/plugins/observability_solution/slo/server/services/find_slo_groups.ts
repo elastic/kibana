@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
-import { Logger } from '@kbn/core/server';
-import { getListOfSummaryIndices } from './slo_settings';
-import { typedSearch } from '../utils/queries';
-import { IllegalArgumentError } from '../errors';
+import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  FindSLOGroupsParams,
+  FindSLOGroupsResponse,
+  findSLOGroupsResponseSchema,
+  Pagination,
+  sloGroupWithSummaryResponseSchema,
+} from '@kbn/slo-schema';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
-import { Status } from '../domain/models';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { IllegalArgumentError } from '../errors';
+import { typedSearch } from '../utils/queries';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -32,12 +36,6 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
   };
 }
 
-interface SliDocument {
-  sliValue: number;
-  status: Status;
-  'slo.id': string;
-}
-
 export class FindSLOGroups {
   constructor(
     private esClient: ElasticsearchClient,
@@ -52,14 +50,10 @@ export class FindSLOGroups {
     const groupsFilter = [params.groupsFilter ?? []].flat();
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
-    let parsedFilters: any = {};
-    try {
-      parsedFilters = JSON.parse(filters);
-    } catch (e) {
-      this.logger.error(`Failed to parse filters: ${e.message}`);
-    }
+    const parsedFilters = parseStringFilters(filters, this.logger);
 
-    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const settings = await getSloSettings(this.soClient);
+    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
@@ -73,6 +67,7 @@ export class FindSLOGroups {
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
+          must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
       body: {
@@ -92,7 +87,14 @@ export class FindSLOGroups {
                     },
                   },
                   _source: {
-                    includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
+                    includes: [
+                      'sliValue',
+                      'status',
+                      'slo.id',
+                      'slo.instanceId',
+                      'slo.name',
+                      'slo.groupings',
+                    ],
                   },
                   size: 1,
                 },
@@ -150,28 +152,38 @@ export class FindSLOGroups {
     });
 
     const total = response.aggregations?.distinct_items?.value ?? 0;
-    const results =
-      response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
-        const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
-        if (String(bucket.key).endsWith('.temp') && groupBy === '_index') {
-          return acc;
+    const results = response.aggregations?.groupBy?.buckets
+      .map((bucket) => {
+        const sourceSummaryDoc = bucket.worst?.hits?.hits[0]?._source as EsSummaryDocument;
+        const groupKey = String(bucket.key);
+        if (groupKey.endsWith('.temp') && groupBy === '_index') {
+          return undefined;
         }
-        return [
-          ...acc,
-          {
-            group: bucket.key,
-            groupBy,
-            summary: {
-              total: bucket.doc_count ?? 0,
-              worst: sliDocument,
-              violated: bucket.violated?.doc_count,
-              healthy: bucket.healthy?.doc_count,
-              degrading: bucket.degrading?.doc_count,
-              noData: bucket.noData?.doc_count,
+
+        return sloGroupWithSummaryResponseSchema.encode({
+          group: groupKey,
+          groupBy: groupBy!,
+          summary: {
+            total: bucket.doc_count ?? 0,
+            worst: {
+              sliValue: sourceSummaryDoc.sliValue,
+              status: sourceSummaryDoc.status,
+              slo: {
+                id: sourceSummaryDoc.slo.id,
+                instanceId: sourceSummaryDoc.slo.instanceId,
+                name: sourceSummaryDoc.slo.name,
+                groupings: sourceSummaryDoc.slo.groupings,
+              },
             },
+            violated: bucket.violated?.doc_count,
+            healthy: bucket.healthy?.doc_count,
+            degrading: bucket.degrading?.doc_count,
+            noData: bucket.noData?.doc_count,
           },
-        ];
-      }, [] as Array<Record<'group' | 'groupBy' | 'summary', any>>) ?? [];
+        });
+      })
+      .filter((result) => result !== undefined) as unknown as FindSLOGroupsResponse['results'];
+
     return findSLOGroupsResponseSchema.encode({
       page: pagination.page,
       perPage: pagination.perPage,

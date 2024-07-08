@@ -8,6 +8,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { integrateLocaleFiles, I18nConfig } from '..';
+import { I18nCheckTaskContext } from '../types';
 
 export interface I18nFlags {
   fix: boolean;
@@ -20,7 +21,7 @@ export interface I18nFlags {
 export function checkCompatibility(config: I18nConfig, flags: I18nFlags, log: ToolingLog) {
   const { fix, ignoreIncompatible, ignoreUnused, ignoreMalformed, ignoreMissing } = flags;
   return config.translations.map((translationsPath) => ({
-    task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
+    task: async ({ messages }: I18nCheckTaskContext) => {
       // If `fix` is set we should try apply all possible fixes and override translations file.
       await integrateLocaleFiles(messages, {
         dryRun: !fix,

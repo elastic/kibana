@@ -18,14 +18,20 @@ export const AwsInputVarFields = ({
   onChange,
   packageInfo,
 }: {
-  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
+  fields: Array<
+    AwsOptions[keyof AwsOptions]['fields'][number] & {
+      value: string;
+      id: string;
+      dataTestSubj: string;
+    }
+  >;
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
 }) => {
   return (
     <div>
-      {fields.map((field) => (
-        <>
+      {fields.map((field, index) => (
+        <div key={index}>
           {field.type === 'password' && field.isSecret === true && (
             <>
               <EuiSpacer size="m" />
@@ -55,6 +61,7 @@ export const AwsInputVarFields = ({
                     errors={[]}
                     forceShowErrors={false}
                     isEditPage={true}
+                    data-test-subj={field.dataTestSubj}
                   />
                 </Suspense>
               </div>
@@ -74,10 +81,11 @@ export const AwsInputVarFields = ({
                 fullWidth
                 value={field.value || ''}
                 onChange={(event) => onChange(field.id, event.target.value)}
+                data-test-subj={field.dataTestSubj}
               />
             </EuiFormRow>
           )}
-        </>
+        </div>
       ))}
     </div>
   );

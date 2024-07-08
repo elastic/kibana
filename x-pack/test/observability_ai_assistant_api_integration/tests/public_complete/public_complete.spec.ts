@@ -44,12 +44,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let proxy: LlmProxy;
     let connectorId: string;
 
-    async function getEvents(
-      params: {
-        actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-        instructions?: string[];
-      },
-      cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
+    interface RequestOptions {
+      actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
+      instructions?: string[];
+      format?: 'openai';
+    }
+
+    type ConversationSimulatorCallback = (
+      conversationSimulator: LlmResponseSimulator
+    ) => Promise<void>;
+
+    async function getResponseBody(
+      { actions, instructions, format }: RequestOptions,
+      conversationSimulatorCallback: ConversationSimulatorCallback
     ) {
       const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
 
@@ -61,25 +68,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const responsePromise = new Promise<Response>((resolve, reject) => {
         supertest
           .post(PUBLIC_COMPLETE_API_URL)
+          .query({
+            format,
+          })
           .set('kbn-xsrf', 'foo')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             messages,
             connectorId,
             persist: true,
-            actions: params.actions,
-            instructions: params.instructions,
+            actions,
+            instructions,
           })
           .end((err, response) => {
             if (err) {
               return reject(err);
             }
+            if (response.status !== 200) {
+              return reject(new Error(`${response.status}: ${JSON.stringify(response.body)}`));
+            }
             return resolve(response);
           });
       });
 
-      const [conversationSimulator, titleSimulator] = await Promise.all([
-        conversationInterceptor.waitForIntercept(),
-        titleInterceptor.waitForIntercept(),
+      const [conversationSimulator, titleSimulator] = await Promise.race([
+        Promise.all([
+          conversationInterceptor.waitForIntercept(),
+          titleInterceptor.waitForIntercept(),
+        ]),
+        // make sure any request failures (like 400s) are properly propagated
+        responsePromise.then(() => []),
       ]);
 
       await titleSimulator.status(200);
@@ -87,16 +105,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
-      await cb(conversationSimulator);
+      if (conversationSimulatorCallback) {
+        await conversationSimulatorCallback(conversationSimulator);
+      }
 
       const response = await responsePromise;
 
-      return String(response.body)
+      return String(response.body);
+    }
+
+    async function getEvents(
+      options: RequestOptions,
+      conversationSimulatorCallback: ConversationSimulatorCallback
+    ) {
+      const responseBody = await getResponseBody(options, conversationSimulatorCallback);
+
+      return responseBody
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean)
         .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
         .slice(2); // ignore context request/response, we're testing this elsewhere
+    }
+
+    async function getOpenAIResponse(conversationSimulatorCallback: ConversationSimulatorCallback) {
+      const responseBody = await getResponseBody(
+        {
+          format: 'openai',
+        },
+        conversationSimulatorCallback
+      );
+
+      return responseBody;
     }
 
     before(async () => {
@@ -207,6 +247,72 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const request = JSON.parse(body) as OpenAI.ChatCompletionCreateParams;
 
         expect(request.messages[0].content).to.contain('This is a random instruction');
+      });
+    });
+
+    describe('with openai format', async () => {
+      let responseBody: string;
+
+      before(async () => {
+        responseBody = await getOpenAIResponse(async (conversationSimulator) => {
+          await conversationSimulator.next('Hello');
+          await conversationSimulator.complete();
+        });
+      });
+
+      function extractDataParts(lines: string[]) {
+        return lines.map((line) => {
+          // .replace is easier, but we want to verify here whether
+          // it matches the SSE syntax (`data: ...`)
+          const [, dataPart] = line.match(/^data: (.*)$/) || ['', ''];
+          return dataPart.trim();
+        });
+      }
+
+      function getLines() {
+        return responseBody.split('\n\n').filter(Boolean);
+      }
+
+      it('outputs each line an SSE-compatible format (data: ...)', () => {
+        const lines = getLines();
+
+        lines.forEach((line) => {
+          expect(line.match(/^data: /));
+        });
+      });
+
+      it('ouputs one chunk, and one [DONE] event', () => {
+        const dataParts = extractDataParts(getLines());
+
+        expect(dataParts[0]).not.to.be.empty();
+        expect(dataParts[1]).to.be('[DONE]');
+      });
+
+      it('outuputs an OpenAI-compatible chunk', () => {
+        const [dataLine] = extractDataParts(getLines());
+
+        expect(() => {
+          JSON.parse(dataLine);
+        }).not.to.throwException();
+
+        const parsedChunk = JSON.parse(dataLine);
+
+        expect(parsedChunk).to.eql({
+          model: 'unknown',
+          choices: [
+            {
+              delta: {
+                content: 'Hello',
+              },
+              finish_reason: null,
+              index: 0,
+            },
+          ],
+          object: 'chat.completion.chunk',
+          // just test that these are a string and a number
+          id: String(parsedChunk.id),
+          created: Number(parsedChunk.created),
+        });
       });
     });
   });

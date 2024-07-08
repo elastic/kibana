@@ -8,7 +8,7 @@
 import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
-import { distinctUntilChanged, EMPTY, from, map, shareReplay } from 'rxjs';
+import { distinctUntilChanged, from, map, shareReplay, Subject } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetsService } from '../services/datasets';
 import { createLogsExplorerControllerStateMachine } from '../state_machines/logs_explorer_controller';
@@ -21,9 +21,10 @@ import {
   createMemoryUrlStateStorage,
 } from './custom_url_state_storage';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
-import {
+import type {
   LogsExplorerController,
   LogsExplorerDiscoverServices,
+  LogsExplorerPublicEvent,
   LogsExplorerPublicStateUpdate,
 } from './types';
 
@@ -67,6 +68,7 @@ export const createLogsExplorerControllerFactory =
     };
 
     const initialContext = getContextFromPublicState(initialState ?? {});
+    const publicEvents$ = new Subject<LogsExplorerPublicEvent>();
 
     const machine = createLogsExplorerControllerStateMachine({
       datasetsClient,
@@ -76,6 +78,7 @@ export const createLogsExplorerControllerFactory =
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,
       uiSettings: customUiSettings,
+      publicEvents$,
     });
 
     const service = interpret(machine, {
@@ -93,7 +96,7 @@ export const createLogsExplorerControllerFactory =
       customizations,
       datasetsClient,
       discoverServices,
-      event$: EMPTY,
+      event$: publicEvents$,
       service,
       state$: logsExplorerState$,
       stateMachine: machine,

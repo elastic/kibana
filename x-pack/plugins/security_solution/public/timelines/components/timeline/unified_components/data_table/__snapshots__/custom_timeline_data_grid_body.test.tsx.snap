@@ -8,11 +8,69 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   border-bottom: 1px solid 1px solid #343741;
 }
 
+.c0 . euiDataGridRowCell--controlColumn {
+  height: 40px;
+  min-height: 40px;
+}
+
+.c0 .udt--customRow {
+  border-radius: 0;
+  padding: 6px;
+  max-width: 1200px;
+  width: 85vw;
+}
+
+.c0 .euiCommentEvent__body {
+  background-color: #1d1e24;
+}
+
+.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--firstColumn,
+.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--lastColumn,
+.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--controlColumn,
+.c0:has(.unifiedDataTable__cell--expanded) .udt--customRow {
+  background-color: #2e2d25;
+}
+
 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 40px;
+}
+
+.c1 .euiDataGridRowCell,
+.c1 .euiDataGridRowCell__content {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 40px;
+}
+
+.c1 .euiDataGridRowCell .unifiedDataTable__rowControl,
+.c1 .euiDataGridRowCell__content .unifiedDataTable__rowControl {
+  margin-top: 0;
+}
+
+.c1 .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
+  padding: 0;
 }
 
 <div>
@@ -21,7 +79,7 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
     role="row"
   >
     <div
-      class="c1 rowCellWrapper"
+      class="c1 rawEvent rowCellWrapper rawEvent"
       role="row"
     >
       <div>
@@ -43,7 +101,7 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
     role="row"
   >
     <div
-      class="c1 rowCellWrapper"
+      class="c1 rawEvent rowCellWrapper rawEvent"
       role="row"
     >
       <div>

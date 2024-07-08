@@ -230,9 +230,6 @@ function showModal(
     hasData: workspace.nodes.length > 0 || workspace.blocklistedNodes.length > 0,
     workspace: savedWorkspace,
     saveWorkspace: saveWorkspaceHandler,
-    services: {
-      contentClient: deps.contentClient,
-      overlays: deps.overlays,
-    },
+    services: deps,
   });
 }

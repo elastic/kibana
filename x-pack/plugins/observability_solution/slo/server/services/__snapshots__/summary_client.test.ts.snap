@@ -6,13 +6,16 @@ Object {
   "meta": Object {},
   "summary": Object {
     "errorBudget": Object {
-      "consumed": 0,
+      "consumed": 0.19842,
       "initial": 0.05,
       "isEstimated": false,
-      "remaining": 1,
+      "remaining": 0.80158,
     },
-    "sliValue": -1,
-    "status": "NO_DATA",
+    "fiveMinuteBurnRate": 0.5,
+    "oneDayBurnRate": 0.7,
+    "oneHourBurnRate": 0.6,
+    "sliValue": 0.990079,
+    "status": "HEALTHY",
   },
 }
 `;
@@ -23,13 +26,16 @@ Object {
   "meta": Object {},
   "summary": Object {
     "errorBudget": Object {
-      "consumed": 0,
+      "consumed": 100,
       "initial": 0.001,
       "isEstimated": false,
-      "remaining": 1,
+      "remaining": -99,
     },
-    "sliValue": -1,
-    "status": "NO_DATA",
+    "fiveMinuteBurnRate": 0.5,
+    "oneDayBurnRate": 0.7,
+    "oneHourBurnRate": 0.6,
+    "sliValue": 0.9,
+    "status": "VIOLATED",
   },
 }
 `;
@@ -40,13 +46,16 @@ Object {
   "meta": Object {},
   "summary": Object {
     "errorBudget": Object {
-      "consumed": 0,
+      "consumed": 0.19842,
       "initial": 0.05,
       "isEstimated": false,
-      "remaining": 1,
+      "remaining": 0.80158,
     },
-    "sliValue": -1,
-    "status": "NO_DATA",
+    "fiveMinuteBurnRate": 0.5,
+    "oneDayBurnRate": 0.7,
+    "oneHourBurnRate": 0.6,
+    "sliValue": 0.990079,
+    "status": "HEALTHY",
   },
 }
 `;

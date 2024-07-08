@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
+  showContextualInsights: boolean;
   showNodeInfo: boolean;
   showMLNavMenu: boolean;
   showLicenseInfo: boolean;
@@ -18,13 +19,15 @@ export interface EnabledFeatures {
   isNLPEnabled: boolean;
   showRuleFormV2: boolean;
 }
-export const EnabledFeaturesContext = createContext({
+export const EnabledFeaturesContext = createContext<EnabledFeatures>({
+  showContextualInsights: true,
   showNodeInfo: true,
   showMLNavMenu: true,
   showLicenseInfo: true,
   isADEnabled: true,
   isDFAEnabled: true,
   isNLPEnabled: true,
+  showRuleFormV2: true,
 });
 
 interface Props {
@@ -34,7 +37,7 @@ interface Props {
   experimentalFeatures?: ExperimentalFeatures;
 }
 
-export const EnabledFeaturesContextProvider: FC<Props> = ({
+export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   children,
   isServerless,
   showMLNavMenu = true,
@@ -42,6 +45,7 @@ export const EnabledFeaturesContextProvider: FC<Props> = ({
   experimentalFeatures,
 }) => {
   const features: EnabledFeatures = {
+    showContextualInsights: isServerless,
     showNodeInfo: !isServerless,
     showMLNavMenu,
     showLicenseInfo: !isServerless,

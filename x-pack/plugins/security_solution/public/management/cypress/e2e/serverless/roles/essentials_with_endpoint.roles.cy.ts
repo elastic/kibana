@@ -27,7 +27,7 @@ import {
 describe.skip(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

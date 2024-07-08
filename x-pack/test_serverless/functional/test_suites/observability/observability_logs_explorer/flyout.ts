@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         NAMESPACE
       );
       await PageObjects.observabilityLogsExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     beforeEach(async () => {
@@ -61,38 +61,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after('clean up archives', async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       if (cleanupDataStreamSetup) {
         cleanupDataStreamSetup();
       }
     });
 
-    it('should mount the flyout customization content', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 4 });
-      await testSubjects.existOrFail('logsExplorerFlyoutDetail');
-    });
-
-    it('should display a timestamp badge', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 4 });
-      await testSubjects.existOrFail('logsExplorerFlyoutLogTimestamp');
-    });
-
-    it('should display a log level badge when available', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 4 });
-      await testSubjects.existOrFail('logsExplorerFlyoutLogLevel');
-      await dataGrid.closeFlyout();
-
-      await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
-      await testSubjects.missingOrFail('logsExplorerFlyoutLogLevel');
-    });
-
-    it('should display a message code block when available', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 4 });
-      await testSubjects.existOrFail('logsExplorerFlyoutLogMessage');
-      await dataGrid.closeFlyout();
-
-      await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
-      await testSubjects.missingOrFail('logsExplorerFlyoutLogMessage');
+    it('should display the logs overview tab', async () => {
+      await dataGrid.clickRowToggle({ columnIndex: 1 });
+      await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
     });
   });
 }

@@ -6,7 +6,6 @@
  */
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
-import { TLS } from '../../../../common/constants/uptime_alerts';
 import { CertResult } from '../../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
@@ -60,6 +59,7 @@ const mockCertResult: CertResult = {
 
 const mockRecoveredAlerts = [
   {
+    id: 'recovered-1',
     alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     commonName: mockCertResult.certs[0].common_name ?? '',
     issuer: mockCertResult.certs[0].issuer ?? '',
@@ -67,6 +67,7 @@ const mockRecoveredAlerts = [
     status: 'expired',
   },
   {
+    id: 'recovered-2',
     alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     commonName: mockCertResult.certs[1].common_name ?? '',
     issuer: mockCertResult.certs[1].issuer ?? '',
@@ -75,11 +76,32 @@ const mockRecoveredAlerts = [
   },
 ];
 
-const mockOptions = (state = {}): any => {
+const mockOptions = (state = {}, recoveredAlerts: typeof mockRecoveredAlerts = []): any => {
   const { services, setContext } = createRuleTypeMocks(mockRecoveredAlerts);
   const params = {
     timerange: { from: 'now-15m', to: 'now' },
   };
+
+  services.alertsClient.report.mockImplementation((param: any) => {
+    return {
+      uuid: `uuid-${param.id}`,
+      start: new Date().toISOString(),
+      alertDoc: {},
+    };
+  });
+
+  services.alertsClient.getRecoveredAlerts.mockImplementation((param: any) => {
+    return recoveredAlerts.map((alert) => ({
+      alert: {
+        getId: () => alert.id,
+        getUuid: () => 'mock-uuid',
+        getState: () => alert,
+        getStart: () => new Date().toISOString(),
+        setContext,
+        context: {},
+      },
+    }));
+  });
 
   return {
     params,
@@ -115,23 +137,40 @@ describe('tls alert', () => {
       const alert = tlsAlertFactory(server, libs, plugins);
       const options = mockOptions();
       const {
-        services: { alertWithLifecycle },
+        services: { alertsClient },
       } = options;
       await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toHaveBeenCalledTimes(4);
+      expect(alertsClient.report).toHaveBeenCalledTimes(4);
       mockCertResult.certs.forEach((cert) => {
-        expect(alertWithLifecycle).toBeCalledWith({
-          fields: expect.objectContaining({
+        const context = {
+          commonName: cert.common_name,
+          issuer: cert.issuer,
+          status: 'expired',
+        };
+
+        expect(alertsClient.report).toBeCalledWith({
+          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
+          actionGroup: 'xpack.uptime.alerts.actionGroups.tlsCertificate',
+          state: expect.objectContaining(context),
+        });
+
+        expect(alertsClient.setAlertData).toBeCalledWith({
+          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
+          context: expect.objectContaining(context),
+          payload: expect.objectContaining({
             'tls.server.x509.subject.common_name': cert.common_name,
             'tls.server.x509.issuer.common_name': cert.issuer,
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
           }),
-          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
         });
       });
+
+      expect(alertsClient.report).toHaveBeenCalledTimes(4);
+      expect(alertsClient.setAlertData).toHaveBeenCalledTimes(4);
+
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
           pageIndex: 0,
@@ -142,21 +181,6 @@ describe('tls alert', () => {
           direction: 'desc',
         })
       );
-      const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
-      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(4);
-      mockCertResult.certs.forEach((cert) => {
-        const context = {
-          commonName: cert.common_name,
-          issuer: cert.issuer,
-          status: 'expired',
-        };
-        expect(alertInstanceMock.replaceState).toBeCalledWith(expect.objectContaining(context));
-        expect(alertInstanceMock.scheduleActions).toBeCalledWith(
-          TLS.id,
-          expect.objectContaining(context)
-        );
-      });
-      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(4);
     });
 
     it('does not trigger when cert is not considered aging or expiring', async () => {
@@ -204,11 +228,11 @@ describe('tls alert', () => {
       const alert = tlsAlertFactory(server, libs, plugins);
       const options = mockOptions();
       const {
-        services: { alertWithLifecycle },
+        services: { alertsClient },
       } = options;
       await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toHaveBeenCalledTimes(0);
+      expect(alertsClient.report).toHaveBeenCalledTimes(0);
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
           pageIndex: 0,
@@ -253,12 +277,18 @@ describe('tls alert', () => {
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
       const alert = tlsAlertFactory(server, libs, plugins);
-      const options = mockOptions();
+      const options = mockOptions(undefined, mockRecoveredAlerts);
       // @ts-ignore the executor can return `void`, but ours never does
-      const state: Record<string, any> = await alert.executor(options);
-      expect(options.setContext).toHaveBeenCalledTimes(2);
-      mockRecoveredAlerts.forEach((alertState) => {
-        expect(options.setContext).toHaveBeenCalledWith(alertState);
+      const {
+        services: { alertsClient },
+      } = options;
+      await alert.executor(options);
+      expect(alertsClient.setAlertData).toHaveBeenCalledTimes(6);
+      mockRecoveredAlerts.forEach((recoveredAlert) => {
+        expect(alertsClient.setAlertData).toHaveBeenCalledWith({
+          id: recoveredAlert.id,
+          context: recoveredAlert,
+        });
       });
     });
   });

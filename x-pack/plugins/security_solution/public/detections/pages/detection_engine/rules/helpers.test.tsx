@@ -146,6 +146,7 @@ describe('rule helpers', () => {
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
         investigationFields: [],
+        maxSignals: 100,
         setup: '# this is some setup documentation',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };

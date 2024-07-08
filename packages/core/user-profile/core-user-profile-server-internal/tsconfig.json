@@ -1,0 +1,25 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-user-profile-server",
+    "@kbn/core-http-server",
+    "@kbn/core-user-profile-common",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
+  ]
+}

@@ -124,7 +124,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       .should('exist');
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Pack is a required field');
-      cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+      cy.getBySel('comboBoxInput').click();
+      cy.getBySel('comboBoxInput').type(`${packName}`);
+      cy.contains(`doesn't match any options`).should('not.exist');
+      cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
     });
 
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
@@ -135,7 +138,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         inputQuery('select * from uptime');
         cy.contains('Query is a required field').should('not.exist');
         cy.contains('Advanced').click();
-        typeInECSFieldInput('{downArrow}{enter}');
+        typeInECSFieldInput('label{downArrow}{enter}');
         cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       })
       .clickOutside();

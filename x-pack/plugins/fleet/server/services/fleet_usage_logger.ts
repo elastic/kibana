@@ -17,7 +17,7 @@ import { appContextService } from './app_context';
 const TASK_ID = 'Fleet-Usage-Logger-Task';
 const TASK_TYPE = 'Fleet-Usage-Logger';
 
-export async function registerFleetUsageLogger(
+export function registerFleetUsageLogger(
   taskManager: TaskManagerSetupContract,
   fetchUsage: () => ReturnType<typeof fetchAgentsUsage>
 ) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import { fetchRuleManagementFilters } from '../apis';
 import { ENABLED_FIELD } from '../../../../../../common/detection_engine/rule_management/rule_fields';
@@ -15,7 +14,7 @@ export const autoCheckPrebuildRuleStepCompleted = async ({
   kibanaServicesHttp,
   onError,
 }: {
-  abortSignal: MutableRefObject<AbortController>;
+  abortSignal: AbortController;
   kibanaServicesHttp: HttpSetup;
   onError?: (e: Error) => void;
 }) => {
@@ -23,7 +22,7 @@ export const autoCheckPrebuildRuleStepCompleted = async ({
   try {
     const data = await fetchRuleManagementFilters({
       http: kibanaServicesHttp,
-      signal: abortSignal.current.signal,
+      signal: abortSignal.signal,
       query: {
         page: 1,
         per_page: 20,
@@ -34,7 +33,7 @@ export const autoCheckPrebuildRuleStepCompleted = async ({
     });
     return data?.total > 0;
   } catch (e) {
-    if (!abortSignal.current.signal.aborted) {
+    if (!abortSignal.signal.aborted) {
       onError?.(e);
     }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
 // FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
@@ -25,7 +25,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: TriggersAndActionsUiServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: FC<PropsWithChildren<unknown>>;
 }
 
 export const createAppMockRenderer = (
@@ -51,7 +51,7 @@ export const createAppMockRenderer = (
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
       <KibanaRenderContextProvider {...core}>
         <KibanaContextProvider services={services}>

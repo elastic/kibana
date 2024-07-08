@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 
 import type {
   Logger,
+  LogMeta,
   CoreStart,
   IScopedClusterClient,
   ElasticsearchClient,
@@ -53,8 +54,8 @@ import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
-  tlog,
   setClusterInfo,
+  newTelemetryLogger,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -85,6 +86,7 @@ import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
+import type { TelemetryLogger } from './telemetry_logger';
 
 export interface ITelemetryReceiver {
   start(
@@ -216,7 +218,8 @@ export interface ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse;
 
   fetchTimelineEvents(
@@ -230,11 +233,12 @@ export interface ITelemetryReceiver {
   getExperimentalFeatures(): ExperimentalFeatures | undefined;
 
   setMaxPageSizeBytes(bytes: number): void;
+
   setNumDocsToSample(n: number): void;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
-  private readonly logger: Logger;
+  private readonly logger: TelemetryLogger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private _esClient?: ElasticsearchClient;
@@ -254,7 +258,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private numDocsToSample: number = 10;
 
   constructor(logger: Logger) {
-    this.logger = logger.get('telemetry_events.receiver');
+    this.logger = newTelemetryLogger(logger.get('telemetry_events.receiver'));
   }
 
   public async start(
@@ -416,9 +420,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               latest_metrics: {
                 top_hits: {
                   size: 1,
-                  _source: {
-                    excludes: ['*'],
-                  },
+                  _source: false,
                   sort: [
                     {
                       '@timestamp': {
@@ -520,6 +522,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         const buckets = endpointMetadataResponse?.aggregations?.endpoint_metadata?.buckets ?? [];
 
         return buckets.reduce((cache, endpointAgentId) => {
+          // const id = endpointAgentId.latest_metadata.hits.hits[0]._id;
           const doc = endpointAgentId.latest_metadata.hits.hits[0]._source;
           cache.set(endpointAgentId.key, doc);
           return cache;
@@ -528,7 +531,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    tlog(this.logger, `Searching diagnostic alerts from ${executeFrom} to ${executeTo}`);
+    this.logger.debug('Searching diagnostic alerts', {
+      from: executeFrom,
+      to: executeTo,
+    } as LogMeta);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
@@ -569,10 +575,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        tlog(this.logger, `Diagnostic alerts to return: ${numOfHits}`);
+        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
       } catch (e) {
-        tlog(this.logger, e);
+        this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
         fetchMore = false;
       }
 
@@ -592,7 +598,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       yield alerts;
     }
 
-    this.closePointInTime(pitId);
+    await this.closePointInTime(pitId);
   }
 
   public async fetchPolicyConfigs(id: string) {
@@ -741,7 +747,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
-    tlog(this.logger, `Searching prebuilt rule alerts from ${executeFrom} to ${executeTo}`);
+    this.logger.debug('Searching prebuilt rule alerts from', {
+      executeFrom,
+      executeTo,
+    } as LogMeta);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
@@ -876,14 +885,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        tlog(this.logger, `Prebuilt rule alerts to return: ${alerts.length}`);
+        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }
     } catch (e) {
       // to keep backward compatibility with the previous implementation, silent return
       // once we start using `paginate` this error should be managed downstream
-      tlog(this.logger, e);
+      this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
       return;
     } finally {
       await this.closePointInTime(pitId);
@@ -907,7 +916,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      tlog(this.logger, `Error trying to close point in time: "${pitId}". Error is: "${error}"`);
+      this.logger.l('Error trying to close point in time', {
+        pit: pitId,
+        error: JSON.stringify(error),
+      });
     }
   }
 
@@ -993,7 +1005,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         fetchMore = numOfHits > 0;
       } catch (e) {
-        tlog(this.logger, e);
+        this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
         fetchMore = false;
       }
 
@@ -1008,13 +1020,15 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      tlog(
-        this.logger,
-        `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
-      );
+      this.logger.l('Error trying to close point in time', {
+        pit: pitId,
+        error: JSON.stringify(error),
+        keepAlive,
+      });
     }
 
-    tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
+    this.logger.l('Timeline alerts to return', { alerts: alertsToReturn.length });
+
     return alertsToReturn || [];
   }
 
@@ -1022,7 +1036,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
@@ -1041,6 +1056,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       nodes: [entityId],
       indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
       descendantLevels: 20,
+      agentId,
     };
 
     return this.processTreeFetcher.tree(request, true);
@@ -1202,7 +1218,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
       return ret.license;
     } catch (err) {
-      tlog(this.logger, `failed retrieving license: ${err}`);
+      this.logger.l('failed retrieving license', { error: JSON.stringify(err) });
       return undefined;
     }
   }
@@ -1240,14 +1256,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const pit = {
       id: await this.openPointInTime(index),
     };
-    const esQuery = {
+    const esQuery: ESSearchRequest = {
       ...cloneDeep(query),
       pit,
       size: Math.min(size, 10_000),
     };
     try {
       do {
-        const response = await this.esClient().search(esQuery);
+        const response = await this.nextPage(esQuery);
         const hits = response?.hits.hits.length ?? 0;
 
         if (hits === 0) {
@@ -1263,11 +1279,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         yield data;
       } while (esQuery.search_after !== undefined);
     } catch (e) {
-      tlog(this.logger, `Error running paginated query: ${e}`);
+      this.logger.l('Error running paginated query', { error: JSON.stringify(e) });
       throw e;
     } finally {
       await this.closePointInTime(pit.id);
     }
+  }
+
+  private async nextPage(
+    esQuery: ESSearchRequest
+  ): Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>> {
+    return this.esClient().search(esQuery);
   }
 
   public setMaxPageSizeBytes(bytes: number) {

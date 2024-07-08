@@ -13,18 +13,16 @@ import type { RenderResult } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../mock';
 import type { AgentPolicy } from '../../../common';
-import { useGetFleetServerHosts, sendGetOneAgentPolicy } from '../../hooks/use_request';
-import {
-  sendGetAllFleetServerAgents,
-  useAgentEnrollmentFlyoutData,
-  useFleetServerStandalone,
-} from '../../hooks';
+import { sendGetOneAgentPolicy } from '../../hooks/use_request';
+import { useAgentEnrollmentFlyoutData, useAuthz, useFleetServerStandalone } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
 import type { FlyOutProps } from './types';
 import { AgentEnrollmentFlyout } from '.';
+
+jest.mock('../../hooks/use_authz');
 
 const render = (props?: Partial<FlyOutProps>) => {
   cleanup();
@@ -51,16 +49,11 @@ describe('<AgentEnrollmentFlyout />', () => {
   let results: RenderResult;
 
   beforeEach(async () => {
-    (useGetFleetServerHosts as jest.Mock).mockReturnValue({
-      data: {
-        items: [
-          {
-            is_default: true,
-            host_urls: ['http://test.fr'],
-          },
-        ],
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        readAgentPolicies: true,
       },
-    });
+    } as any);
     jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
     (useFleetServerUnhealthy as jest.Mock).mockReturnValue({
@@ -90,10 +83,6 @@ describe('<AgentEnrollmentFlyout />', () => {
       },
       deploymentMode: 'quickstart',
       setDeploymentMode: jest.fn(),
-    });
-
-    (sendGetAllFleetServerAgents as jest.Mock).mockResolvedValue({
-      fleetServerAgentsCount: 1,
     });
 
     (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({

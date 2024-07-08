@@ -12,7 +12,7 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays } from './services';
+import { setIndexPatterns, setTheme, setOverlays, setAnalytics, setI18n } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -52,7 +52,7 @@ export class UnifiedSearchPublicPlugin
     uiActions.registerTrigger(updateFilterReferencesTrigger);
 
     uiActions.registerAction(
-      createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
+      createFilterAction(query.filterManager, query.timefilter.timefilter, core)
     );
 
     uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));
@@ -70,6 +70,8 @@ export class UnifiedSearchPublicPlugin
     core: CoreStart,
     { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
+    setAnalytics(core.analytics);
+    setI18n(core.i18n);
     setTheme(core.theme);
     setOverlays(core.overlays);
     setIndexPatterns(dataViews);

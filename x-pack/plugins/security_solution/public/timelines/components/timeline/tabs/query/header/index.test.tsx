@@ -17,7 +17,7 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import { QueryTabHeader } from '.';
 import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
 import { waitFor } from '@testing-library/react';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -32,6 +32,9 @@ describe('Header', () => {
     return wrapper;
   };
   const props = {
+    activeTab: TimelineTabs.query,
+    showEventsCountBadge: true,
+    totalCount: 1,
     browserFields: {},
     dataProviders: mockDataProviders,
     filterManager: new FilterManager(mockUiSettingsForFilterManager),

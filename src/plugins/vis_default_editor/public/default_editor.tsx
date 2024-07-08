@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   Vis,
   VisualizeEmbeddableContract,
@@ -82,7 +83,7 @@ function DefaultEditor({
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
-    <core.i18n.Context>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         services={{
           appName: 'vis_default_editor',
@@ -139,7 +140,7 @@ function DefaultEditor({
           )}
         </EuiResizableContainer>
       </KibanaContextProvider>
-    </core.i18n.Context>
+    </KibanaRenderContextProvider>
   );
 }
 

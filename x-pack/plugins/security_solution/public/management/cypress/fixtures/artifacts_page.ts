@@ -21,6 +21,7 @@ interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
   tabId: string;
+  nextTabId: string;
   artifactName: string;
   privilegePrefix: string;
   urlPath: string;
@@ -46,6 +47,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
     tabId: 'trustedApps',
+    nextTabId: 'eventFilters',
     artifactName: 'Trusted application name',
     privilegePrefix: 'trusted_applications_',
     create: {
@@ -142,7 +144,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'trusted_apps',
     emptyState: 'trustedAppsListPage-emptyState',
-
     createRequestBody: {
       list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       entries: [
@@ -172,6 +173,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Event Filters',
     pagePrefix: 'EventFiltersListPage',
     tabId: 'eventFilters',
+    nextTabId: 'blocklists',
     artifactName: 'Event filter name',
     privilegePrefix: 'event_filters_',
     create: {
@@ -191,8 +193,9 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'click',
-          customSelector: 'button[title="@timestamp"]',
+          type: 'input',
+          customSelector: '[data-test-subj="fieldAutocompleteComboBox"] input',
+          value: '@timestamp{downArrow}{enter}',
         },
         {
           type: 'click',
@@ -274,7 +277,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'event_filters',
     emptyState: 'EventFiltersListPage-emptyState',
-
     createRequestBody: {
       list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       entries: [
@@ -292,6 +294,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Blocklist',
     pagePrefix: 'blocklistPage',
     tabId: 'blocklists',
+    nextTabId: 'hostIsolationExceptions',
     artifactName: 'Blocklist name',
     privilegePrefix: 'blocklist_',
     create: {
@@ -397,7 +400,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'blocklist',
     emptyState: 'blocklistPage-emptyState',
-
     createRequestBody: {
       list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       entries: [
@@ -421,6 +423,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Host isolation exceptions',
     pagePrefix: 'hostIsolationExceptionsListPage',
     tabId: 'hostIsolationExceptions',
+    nextTabId: 'trustedApps',
     artifactName: 'Host Isolation exception name',
     privilegePrefix: 'host_isolation_exceptions_',
     create: {
@@ -499,7 +502,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'host_isolation_exceptions',
     emptyState: 'hostIsolationExceptionsListPage-emptyState',
-
     createRequestBody: {
       list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       entries: [

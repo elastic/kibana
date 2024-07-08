@@ -8,7 +8,6 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import '../../../common/mock/match_media';
 import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
 import type { State } from '../../../common/store';
 import { DetailsPanel } from '.';

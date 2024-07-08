@@ -8,7 +8,8 @@
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { CustomCard, FeaturedCard } from '../packages_list/types';
+import { ObservabilityOnboardingAppServices } from '../..';
+import { CustomCard, FeaturedCard, VirtualCard } from '../packages_list/types';
 import { Category } from './types';
 
 function toFeaturedCard(name: string): FeaturedCard {
@@ -21,17 +22,45 @@ export function useCustomCardsForCategory(
 ): CustomCard[] | undefined {
   const history = useHistory();
   const location = useLocation();
-  const getUrlForApp = useKibana()?.services.application?.getUrlForApp;
+  const {
+    services: {
+      application,
+      http,
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+  const getUrlForApp = application?.getUrlForApp;
 
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
+  const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
+
+  const otelCard: VirtualCard = {
+    id: 'otel-logs',
+    type: 'virtual',
+    release: 'preview',
+    title: 'OpenTelemetry',
+    description:
+      'Collect Logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
+    name: 'custom-logs-virtual',
+    categories: ['observability'],
+    icons: [
+      {
+        type: 'svg',
+        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+      },
+    ],
+    url: otelLogsUrl,
+    version: '',
+    integration: '',
+  };
 
   switch (category) {
     case 'apm':
       return [
         {
-          id: 'apm-generated',
-          type: 'generated',
+          id: 'apm-virtual',
+          type: 'virtual',
           title: 'Elastic APM',
           description: 'Collect distributed traces from your applications with Elastic APM',
           name: 'apm',
@@ -42,13 +71,30 @@ export function useCustomCardsForCategory(
               src: 'apmApp',
             },
           ],
-          url: getUrlForApp?.('apm') ?? '',
+          url: `${getUrlForApp?.('apm')}/onboarding` ?? '',
           version: '',
           integration: '',
         },
         {
-          id: 'synthetics-generated',
-          type: 'generated',
+          id: 'otel-virtual',
+          type: 'virtual',
+          title: 'OpenTelemetry',
+          description: 'Collect distributed traces with OpenTelemetry',
+          name: 'otel',
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+            },
+          ],
+          url: `${getUrlForApp?.('apm')}/onboarding?agent=openTelemetry` ?? '',
+          version: '',
+          integration: '',
+        },
+        {
+          id: 'synthetics-virtual',
+          type: 'virtual',
           title: 'Synthetic monitor',
           description: 'Monitor endpoints, pages, and user journeys',
           name: 'synthetics',
@@ -67,11 +113,11 @@ export function useCustomCardsForCategory(
     case 'infra':
       return [
         toFeaturedCard('kubernetes'),
-        toFeaturedCard('prometheus'),
         toFeaturedCard('docker'),
+        isServerless ? toFeaturedCard('prometheus') : otelCard,
         {
-          id: 'azure-generated',
-          type: 'generated',
+          id: 'azure-virtual',
+          type: 'virtual',
           title: 'Azure',
           description: 'Collect logs and metrics from Microsoft Azure',
           name: 'azure',
@@ -84,8 +130,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('azure'),
         },
         {
-          id: 'aws-generated',
-          type: 'generated',
+          id: 'aws-virtual',
+          type: 'virtual',
           title: 'AWS',
           description: 'Collect logs and metrics from Amazon Web Services (AWS)',
           name: 'aws',
@@ -98,8 +144,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('aws'),
         },
         {
-          id: 'gcp-generated',
-          type: 'generated',
+          id: 'gcp-virtual',
+          type: 'virtual',
           title: 'Google Cloud Platform',
           description: 'Collect logs and metrics from Google Cloud Platform',
           name: 'gcp',
@@ -116,15 +162,15 @@ export function useCustomCardsForCategory(
       return [
         {
           id: 'system-logs',
-          type: 'generated',
+          type: 'virtual',
           title: 'Stream host system logs',
-          description: 'The quickest path to onboard log data from your own machine or server',
-          name: 'system-logs-generated',
+          description: 'Collect system logs from your machine or server',
+          name: 'system-logs-virtual',
           categories: ['observability'],
           icons: [
             {
               type: 'svg',
-              src: '/XXXXXXXXXXXX/plugins/home/assets/logos/system.svg',
+              src: http?.staticAssets.getPluginAssetHref('system.svg') ?? '',
             },
           ],
           url: systemLogsUrl,
@@ -132,11 +178,11 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         {
-          id: 'logs-logs',
-          type: 'generated',
+          id: 'custom-logs',
+          type: 'virtual',
           title: 'Stream log files',
           description: 'Stream any logs into Elastic in a simple way and explore their data',
-          name: 'logs-logs-generated',
+          name: 'custom-logs-virtual',
           categories: ['observability'],
           icons: [
             {
@@ -148,10 +194,10 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        toFeaturedCard('nginx'),
+        isServerless ? toFeaturedCard('nginx') : otelCard,
         {
-          id: 'azure-logs-generated',
-          type: 'generated',
+          id: 'azure-logs-virtual',
+          type: 'virtual',
           title: 'Azure',
           description: 'Collect logs from Microsoft Azure',
           name: 'azure',
@@ -164,8 +210,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('azure'),
         },
         {
-          id: 'aws-logs-generated',
-          type: 'generated',
+          id: 'aws-logs-virtual',
+          type: 'virtual',
           title: 'AWS',
           description: 'Collect logs from Amazon Web Services (AWS)',
           name: 'aws',
@@ -178,8 +224,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('aws'),
         },
         {
-          id: 'gcp-logs-generated',
-          type: 'generated',
+          id: 'gcp-logs-virtual',
+          type: 'virtual',
           title: 'Google Cloud Platform',
           description: 'Collect logs from Google Cloud Platform',
           name: 'gcp',

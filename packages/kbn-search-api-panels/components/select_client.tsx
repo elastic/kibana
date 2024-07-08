@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   EuiCallOut,
@@ -22,9 +22,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 import { OverviewPanel } from './overview_panel';
 import './select_client.scss';
-import { TryInConsoleButton } from './try_in_console_button';
 
 export interface SelectClientPanelProps {
   docLinks: { elasticsearchClients: string; kibanaRunApiInConsole: string };
@@ -34,9 +34,10 @@ export interface SelectClientPanelProps {
   application?: ApplicationStart;
   consolePlugin?: ConsolePluginStart;
   sharePlugin: SharePluginStart;
+  children: React.ReactNode;
 }
 
-export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
+export const SelectClientPanel: FC<PropsWithChildren<SelectClientPanelProps>> = ({
   docLinks,
   children,
   isPanelLeft = true,

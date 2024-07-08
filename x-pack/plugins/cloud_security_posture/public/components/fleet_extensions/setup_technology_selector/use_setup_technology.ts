@@ -6,20 +6,18 @@
  */
 import { useEffect, useState } from 'react';
 
-import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE } from '../../../../common/constants';
 
 export const useSetupTechnology = ({
   input,
-  agentPolicy,
-  agentlessPolicy,
+  isAgentlessEnabled,
   handleSetupTechnologyChange,
   isEditPage,
 }: {
   input: NewPackagePolicyInput;
-  agentPolicy?: AgentPolicy;
-  agentlessPolicy?: AgentPolicy;
+  isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
   isEditPage: boolean;
 }) => {
@@ -27,38 +25,37 @@ export const useSetupTechnology = ({
   const isCspmGcp = input.type === CLOUDBEAT_GCP;
   const isCspmAzure = input.type === CLOUDBEAT_AZURE;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
-  const isAgentlessAvailable = Boolean(isAgentlessSupportedForCloudProvider && agentlessPolicy);
-  const agentPolicyId = agentPolicy?.id;
-  const agentlessPolicyId = agentlessPolicy?.id;
+  const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {
-    if (isEditPage && agentPolicyId === SetupTechnology.AGENTLESS) {
+    if (isEditPage && isAgentlessAvailable) {
       return SetupTechnology.AGENTLESS;
     }
 
     return SetupTechnology.AGENT_BASED;
   });
 
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+
+  const updateSetupTechnology = (value: SetupTechnology) => {
+    setSetupTechnology(value);
+    setIsDirty(true);
+  };
+
   useEffect(() => {
-    if (isEditPage) {
+    if (isEditPage || isDirty) {
       return;
     }
 
-    if (agentPolicyId && agentPolicyId !== agentlessPolicyId) {
-      /*
-        handle case when agent policy is coming from outside,
-        e.g. from the get param or when coming to integration from a specific agent policy
-      */
+    if (!isAgentlessAvailable) {
       setSetupTechnology(SetupTechnology.AGENT_BASED);
-    } else if (isAgentlessAvailable) {
+    } else {
       /*
         preselecting agentless when available
         and resetting to agent-based when switching to another integration type, which doesn't support agentless
       */
       setSetupTechnology(SetupTechnology.AGENTLESS);
-    } else {
-      setSetupTechnology(SetupTechnology.AGENT_BASED);
     }
-  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isEditPage]);
+  }, [isAgentlessAvailable, isDirty, isEditPage]);
 
   useEffect(() => {
     if (isEditPage) {
@@ -74,5 +71,6 @@ export const useSetupTechnology = ({
     isAgentlessAvailable,
     setupTechnology,
     setSetupTechnology,
+    updateSetupTechnology,
   };
 };

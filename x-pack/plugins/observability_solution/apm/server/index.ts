@@ -26,6 +26,7 @@ const configSchema = schema.object({
   serviceMapFingerprintGlobalBucketSize: schema.number({
     defaultValue: 1000,
   }),
+  serviceMapMaxAllowableBytes: schema.number({ defaultValue: 2_576_980_377 }), // 2.4GB
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
@@ -50,7 +51,8 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  forceSyntheticSource: schema.boolean({ defaultValue: false }),
+
+  forceSyntheticSource: schema.boolean({ defaultValue: false }), // deprecated
   latestAgentVersionsUrl: schema.string({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
@@ -101,6 +103,9 @@ export const config: PluginConfigDescriptor<APMConfig> = {
       level: 'warning',
     }),
     renameFromRoot('xpack.apm.maxServiceSelection', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
+    unused('forceSyntheticSource', {
       level: 'warning',
     }),
   ],

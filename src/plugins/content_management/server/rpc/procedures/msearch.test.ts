@@ -245,9 +245,9 @@ describe('RPC -> mSearch()', () => {
     });
 
     describe('validation', () => {
-      test('should validate that content type definition exist', () => {
+      test('should validate that content type definition exist', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypes: [{ contentTypeId: 'unknown', version: 1 }],
             query: { text: 'Hello' },
@@ -255,9 +255,9 @@ describe('RPC -> mSearch()', () => {
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
-      test('should throw if the request version is higher than the registered version', () => {
+      test('should throw if the request version is higher than the registered version', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypes: [{ contentTypeId: 'foo', version: 7 }],
             query: { text: 'Hello' },

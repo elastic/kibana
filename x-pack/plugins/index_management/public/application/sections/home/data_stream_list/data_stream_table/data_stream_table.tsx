@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
@@ -115,18 +116,16 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             }),
     });
 
-    if (config.enableDataStreamsStorageColumn) {
-      columns.push({
-        field: 'storageSizeBytes',
-        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
-          defaultMessage: 'Storage size',
-        }),
-        truncateText: true,
-        sortable: true,
-        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
-          dataStream.storageSize,
-      });
-    }
+    columns.push({
+      field: 'storageSizeBytes',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+        defaultMessage: 'Storage size',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
+    });
   }
 
   columns.push({
@@ -151,7 +150,13 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     name: (
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
-          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.`,
+          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
+          values: {
+            // ILM is not applicable on serverless, so when the user isnt able to
+            // disable data retention (which is only for serverless) we want to
+            // tweak the copy of the tooltip to hide any references to it.
+            canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
+          },
         })}
       >
         <span>
@@ -169,7 +174,33 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         condition={dataStream.isDataStreamFullyManagedByILM}
         wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
       >
-        <>{getLifecycleValue(lifecycle, INFINITE_AS_ICON)}</>
+        <>
+          {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}
+
+          {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
+            <>
+              {' '}
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                  {
+                    defaultMessage: `This data stream is using the maximum allowed data retention: [{effectiveRetention}].`,
+                    values: {
+                      effectiveRetention: lifecycle?.effective_retention,
+                    },
+                  }
+                )}
+              >
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="iInCircle"
+                  data-test-subj="usingMaxRetention"
+                />
+              </EuiToolTip>
+            </>
+          )}
+        </>
       </ConditionalWrap>
     ),
   });

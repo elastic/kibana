@@ -20,7 +20,6 @@
     "@kbn/ml-response-stream",
     "@kbn/security-plugin",
     "@kbn/user-profile-components",
-    "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/navigation-plugin",
@@ -33,8 +32,14 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/cases-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/elastic-assistant-common",
-    "@kbn/logging"
+    "@kbn/langchain",
+    "@kbn/logging",
+    "@kbn/react-kibana-context-render",
+    "@kbn/doc-links",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/console-plugin"
   ],
   "exclude": [
     "target/**/*",

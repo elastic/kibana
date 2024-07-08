@@ -241,6 +241,9 @@ export class UptimePlugin
 function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
   async function getUptimeSections() {
     if (coreStart.application.capabilities.uptime?.show) {
+      const { UptimeOverviewLocatorDefinition } = await import('./locators/overview');
+      plugins.share.url.locators.create(new UptimeOverviewLocatorDefinition());
+
       return [
         {
           label: 'Uptime',

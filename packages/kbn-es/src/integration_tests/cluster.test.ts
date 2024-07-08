@@ -179,13 +179,13 @@ describe('#downloadSnapshot()', () => {
 });
 
 describe('#installSource()', () => {
-  test('awaits installSource() promise and returns { installPath }', async () => {
+  test('awaits installSource() promise and returns { installPath, disableEsTmpDir }', async () => {
     let resolveInstallSource: Function;
     installSourceMock.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInstallSource = () => {
-            resolve({ installPath: 'foo' });
+            resolve({ installPath: 'foo', disableEsTmpDir: false });
           };
         })
     );
@@ -196,11 +196,12 @@ describe('#installSource()', () => {
     resolveInstallSource!();
     await expect(ensureResolve(promise, 'installSource()')).resolves.toEqual({
       installPath: 'foo',
+      disableEsTmpDir: false,
     });
   });
 
   test('passes through all options+log to installSource()', async () => {
-    installSourceMock.mockResolvedValue({ installPath: 'foo' });
+    installSourceMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
     const options: InstallSourceOptions = {
       sourcePath: 'bar',
       license: 'trial',
@@ -228,13 +229,13 @@ describe('#installSource()', () => {
 });
 
 describe('#installSnapshot()', () => {
-  test('awaits installSnapshot() promise and returns { installPath }', async () => {
+  test('awaits installSnapshot() promise and returns { installPath, disableEsTmpDir }', async () => {
     let resolveInstallSnapshot: Function;
     installSnapshotMock.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInstallSnapshot = () => {
-            resolve({ installPath: 'foo' });
+            resolve({ installPath: 'foo', disableEsTmpDir: false });
           };
         })
     );
@@ -245,11 +246,12 @@ describe('#installSnapshot()', () => {
     resolveInstallSnapshot!();
     await expect(ensureResolve(promise, 'installSnapshot()')).resolves.toEqual({
       installPath: 'foo',
+      disableEsTmpDir: false,
     });
   });
 
   test('passes through all options+log to installSnapshot()', async () => {
-    installSnapshotMock.mockResolvedValue({ installPath: 'foo' });
+    installSnapshotMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
     const options: InstallSnapshotOptions = {
       version: '8.10.0',
       license: 'trial',
@@ -278,13 +280,13 @@ describe('#installSnapshot()', () => {
 });
 
 describe('#installArchive()', () => {
-  test('awaits installArchive() promise and returns { installPath }', async () => {
+  test('awaits installArchive() promise and returns { installPath, disableEsTmpDir }', async () => {
     let resolveInstallArchive: Function;
     installArchiveMock.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInstallArchive = () => {
-            resolve({ installPath: 'foo' });
+            resolve({ installPath: 'foo', disableEsTmpDir: false });
           };
         })
     );
@@ -295,11 +297,12 @@ describe('#installArchive()', () => {
     resolveInstallArchive!();
     await expect(ensureResolve(promise, 'installArchive()')).resolves.toEqual({
       installPath: 'foo',
+      disableEsTmpDir: false,
     });
   });
 
   test('passes through all options+log to installArchive()', async () => {
-    installArchiveMock.mockResolvedValue({ installPath: 'foo' });
+    installArchiveMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: true });
     const options: InstallArchiveOptions = {
       license: 'trial',
       password: 'changeme',
@@ -307,6 +310,7 @@ describe('#installArchive()', () => {
       installPath: 'someInstallPath',
       esArgs: ['foo=true'],
       log,
+      disableEsTmpDir: true,
     };
     const cluster = new Cluster({ log });
     await cluster.installArchive('bar', options);

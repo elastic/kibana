@@ -10,7 +10,10 @@ import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
-import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
+import {
+  EQL_QUERY_VALIDATION_LABEL,
+  EQL_QUERY_VALIDATION_SPINNER,
+} from '../screens/create_new_rule';
 
 import {
   ADD_FILTER,
@@ -86,12 +89,14 @@ import {
   BOTTOM_BAR_TIMELINE_PLUS_ICON,
   BOTTOM_BAR_CREATE_NEW_TIMELINE,
   BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
+  TIMELINE_FLYOUT,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
 import { drag, drop, waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
+import { TIMELINE_CONTEXT_MENU_BTN } from '../screens/alerts';
 
 const hostExistsQuery = 'host.name: *';
 
@@ -188,6 +193,7 @@ export const clearEqlInTimeline = () => {
   cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
   cy.get(TIMELINE_CORRELATION_INPUT).clear();
   cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(EQL_QUERY_VALIDATION_LABEL).should('not.exist');
 };
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -500,4 +506,24 @@ export const selectKqlSearchMode = () => {
   showDataProviderQueryBuilder();
   cy.get(TIMELINE_SEARCH_OR_FILTER).click();
   cy.get(TIMELINE_KQLMODE_SEARCH).click();
+};
+
+export const openTimelineEventContextMenu = (rowIndex: number = 0) => {
+  cy.get(TIMELINE_FLYOUT).within(() => {
+    const togglePopover = () => {
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(rowIndex).should('be.visible');
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(rowIndex).click();
+      cy.get(TIMELINE_CONTEXT_MENU_BTN)
+        .first()
+        .should('be.visible')
+        .then(($btnEl) => {
+          if ($btnEl.attr('data-popover-open') !== 'true') {
+            cy.log(`${TIMELINE_CONTEXT_MENU_BTN} was flaky, attempting to re-open popover`);
+            togglePopover();
+          }
+        });
+    };
+
+    togglePopover();
+  });
 };

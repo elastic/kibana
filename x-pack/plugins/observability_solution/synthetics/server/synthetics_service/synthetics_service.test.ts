@@ -140,6 +140,7 @@ describe('SyntheticsService', () => {
 
     service.apiClient.locations = locations;
     service.locations = locations;
+    service.isAllowed = true;
 
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
@@ -154,9 +155,12 @@ describe('SyntheticsService', () => {
 
   it('setup properly', async () => {
     const service = new SyntheticsService(serverMock);
-    service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(false);
+
+    await service.setup(taskManagerSetup);
+
+    expect(service.isAllowed).toEqual(true);
     expect(service.locations).toEqual([]);
     expect(service.signupUrl).toEqual(null);
   });

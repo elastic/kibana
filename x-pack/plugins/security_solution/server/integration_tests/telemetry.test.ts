@@ -32,6 +32,7 @@ import {
   initEndpointIndices,
   dropEndpointIndices,
   mockEndpointData,
+  getTelemetryReceiver,
 } from './lib/telemetry_helpers';
 
 import {
@@ -47,6 +48,9 @@ import type { SecurityTelemetryTask } from '../lib/telemetry/task';
 import { TelemetryChannel } from '../lib/telemetry/types';
 import type { AsyncTelemetryEventsSender } from '../lib/telemetry/async_sender';
 import endpointMetaTelemetryRequest from './__mocks__/endpoint-meta-telemetry-request.json';
+import type { ITelemetryReceiver, TelemetryReceiver } from '../lib/telemetry/receiver';
+import type { TaskMetric } from '../lib/telemetry/task_metrics.types';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 jest.mock('axios');
 
@@ -57,6 +61,10 @@ const securitySolutionStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 's
 const mockedAxiosGet = jest.spyOn(axios, 'get');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
 
+const securitySolutionPlugin = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
+
+type Defer = () => void;
+
 describe('telemetry tasks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -66,6 +74,8 @@ describe('telemetry tasks', () => {
   let exceptionsList: ExceptionListSchema[] = [];
   let exceptionsListItem: ExceptionListItemSchema[] = [];
   let esClient: ElasticsearchClient;
+  let telemetryReceiver: ITelemetryReceiver;
+  let deferred: Defer[] = [];
 
   beforeAll(async () => {
     await removeFile(logFilePath);
@@ -90,6 +100,9 @@ describe('telemetry tasks', () => {
     });
 
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
+
+    expect(securitySolutionPlugin).toHaveBeenCalledTimes(1);
+    telemetryReceiver = getTelemetryReceiver(securitySolutionPlugin);
   });
 
   afterAll(async () => {
@@ -104,6 +117,7 @@ describe('telemetry tasks', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockAxiosGet();
+    deferred = [];
   });
 
   afterEach(async () => {
@@ -120,6 +134,13 @@ describe('telemetry tasks', () => {
       exceptionsListItem = [];
     });
     await cleanupMockedEndpointAlerts(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
+    deferred.forEach((d) => {
+      try {
+        d();
+      } catch (e) {
+        // ignore errors
+      }
+    });
   });
 
   describe('detection-rules', () => {
@@ -143,14 +164,13 @@ describe('telemetry tasks', () => {
 
     it('should send task metrics', async () => {
       const task = await mockAndScheduleDetectionRulesTask();
+      const started = performance.now();
 
-      const requests = await getTaskMetricsRequests(task);
+      const requests = await getTaskMetricsRequests(task, started);
 
       expect(requests.length).toBeGreaterThan(0);
-      requests.forEach(({ body }) => {
-        const asJson = JSON.parse(body);
-        expect(asJson).not.toBeFalsy();
-        expect(asJson.passed).toEqual(true);
+      requests.forEach((t) => {
+        expect(t.taskMetric.passed).toEqual(true);
       });
     });
   });
@@ -159,13 +179,14 @@ describe('telemetry tasks', () => {
     it('should use legacy sender by default', async () => {
       // launch a random task and verify it uses the new configuration
       const task = await mockAndScheduleDetectionRulesTask();
+      const started = performance.now();
 
-      const requests = await getTaskMetricsRequests(task);
+      const requests = await getTaskMetricsRequests(task, started);
       expect(requests.length).toBeGreaterThan(0);
-      requests.forEach(({ config }) => {
-        expect(config).not.toBeFalsy();
-        if (config && config.headers) {
-          expect(config.headers['X-Telemetry-Sender']).not.toEqual('async');
+      requests.forEach((r) => {
+        expect(r.requestConfig).not.toBeFalsy();
+        if (r.requestConfig && r.requestConfig.headers) {
+          expect(r.requestConfig.headers['X-Telemetry-Sender']).not.toEqual('async');
         }
       });
     });
@@ -188,13 +209,14 @@ describe('telemetry tasks', () => {
       });
 
       const task = await mockAndScheduleDetectionRulesTask();
+      const started = performance.now();
 
-      const requests = await getTaskMetricsRequests(task);
+      const requests = await getTaskMetricsRequests(task, started);
       expect(requests.length).toBeGreaterThan(0);
-      requests.forEach(({ config }) => {
-        expect(config).not.toBeFalsy();
-        if (config && config.headers) {
-          expect(config.headers['X-Telemetry-Sender']).toEqual('async');
+      requests.forEach((r) => {
+        expect(r.requestConfig).not.toBeFalsy();
+        if (r.requestConfig && r.requestConfig.headers) {
+          expect(r.requestConfig.headers['X-Telemetry-Sender']).toEqual('async');
         }
       });
     });
@@ -260,22 +282,404 @@ describe('telemetry tasks', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleEndpointTask();
 
-      const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
-          return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
-        });
+      const endpointMetaRequests = await getEndpointMetaRequests();
 
-        expect(found).not.toBeFalsy();
+      expect(endpointMetaRequests.length).toBe(2);
 
-        return JSON.parse((found ? found[1] : '{}') as string);
-      });
+      const body = endpointMetaRequests[0];
 
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
       expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
       expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
     });
+
+    it('should manage runtime errors searching endpoint metrics', async () => {
+      const fetchEndpointMetricsAbstract = telemetryReceiver.fetchEndpointMetricsAbstract;
+      deferred.push(() => {
+        telemetryReceiver.fetchEndpointMetricsAbstract = fetchEndpointMetricsAbstract;
+      });
+
+      const errorMessage = 'Something went wront';
+
+      telemetryReceiver.fetchEndpointMetricsAbstract = jest.fn((_) =>
+        Promise.reject(Error(errorMessage))
+      );
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(false);
+      expect(metric.taskMetric.error_message).toBe(errorMessage);
+    });
+
+    it('should manage runtime errors searching fleet agents', async () => {
+      const receiver: TelemetryReceiver = telemetryReceiver as TelemetryReceiver;
+      const agentClient = receiver['agentClient']!;
+      const listAgents = agentClient.listAgents;
+      deferred.push(() => {
+        agentClient.listAgents = listAgents;
+      });
+
+      const errorMessage = 'Error searching for fleet agents';
+
+      agentClient.listAgents = jest.fn((_) => Promise.reject(Error(errorMessage)));
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual({});
+      expect(body.policy_response).toStrictEqual({});
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should work without fleet agents', async () => {
+      const receiver: TelemetryReceiver = telemetryReceiver as TelemetryReceiver;
+      const agentClient = receiver['agentClient']!;
+      const listAgents = agentClient.listAgents;
+      deferred.push(() => {
+        agentClient.listAgents = listAgents;
+      });
+
+      agentClient.listAgents = jest.fn((_) =>
+        Promise.resolve({
+          agents: [],
+          total: 0,
+          page: 0,
+          perPage: 0,
+        })
+      );
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual({});
+      expect(body.policy_response).toStrictEqual({});
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+      // expect(metric.error_message).toBe(errorMessage);
+    });
+
+    it('should manage runtime errors policy configs', async () => {
+      const errorMessage = 'Error getting policy configs';
+      const fetchPolicyConfigs = telemetryReceiver.fetchPolicyConfigs;
+      deferred.push(() => {
+        telemetryReceiver.fetchPolicyConfigs = fetchPolicyConfigs;
+      });
+
+      telemetryReceiver.fetchPolicyConfigs = jest.fn((_) => Promise.reject(Error(errorMessage)));
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual({});
+      expect(body.policy_response).toStrictEqual({});
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should manage unexpected errors dealing with policy configs', async () => {
+      const fetchPolicyConfigs = telemetryReceiver.fetchPolicyConfigs;
+      deferred.push(() => {
+        telemetryReceiver.fetchPolicyConfigs = fetchPolicyConfigs;
+      });
+
+      telemetryReceiver.fetchPolicyConfigs = jest.fn((_) => {
+        return Promise.resolve({
+          package_policies: [
+            {
+              invalid: 'value',
+              inputs: [
+                {
+                  unexpected: 'boom!',
+                },
+              ],
+            },
+          ],
+        } as unknown as AgentPolicy);
+      });
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual({});
+      expect(body.policy_response).toStrictEqual({});
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should manage runtime errors fetching policy responses', async () => {
+      const errorMessage = 'Error getting policy responses';
+      const fetchEndpointPolicyResponses = telemetryReceiver.fetchEndpointPolicyResponses;
+      deferred.push(() => {
+        telemetryReceiver.fetchEndpointPolicyResponses = fetchEndpointPolicyResponses;
+      });
+
+      telemetryReceiver.fetchEndpointPolicyResponses = jest.fn((_from, _to) => {
+        return Promise.reject(Error(errorMessage));
+      });
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual({});
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should manage work with no policy responses', async () => {
+      const fetchEndpointPolicyResponses = telemetryReceiver.fetchEndpointPolicyResponses;
+      deferred.push(() => {
+        telemetryReceiver.fetchEndpointPolicyResponses = fetchEndpointPolicyResponses;
+      });
+
+      telemetryReceiver.fetchEndpointPolicyResponses = jest.fn((_from, _to) => {
+        return Promise.resolve(new Map());
+      });
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual({});
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should manage runtime errors fetching endpoint metadata', async () => {
+      const errorMessage = 'Error getting policy responses';
+      const fetchEndpointMetadata = telemetryReceiver.fetchEndpointMetadata;
+      deferred.push(() => {
+        telemetryReceiver.fetchEndpointMetadata = fetchEndpointMetadata;
+      });
+
+      telemetryReceiver.fetchEndpointMetadata = jest.fn((_from, _to) => {
+        return Promise.reject(Error(errorMessage));
+      });
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual({
+        ...endpointMetaTelemetryRequest.endpoint_meta,
+        capabilities: [],
+      });
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should work with no endpoint metadata', async () => {
+      const fetchEndpointMetadata = telemetryReceiver.fetchEndpointMetadata;
+      deferred.push(() => {
+        telemetryReceiver.fetchEndpointMetadata = fetchEndpointMetadata;
+      });
+
+      telemetryReceiver.fetchEndpointMetadata = jest.fn((_from, _to) => {
+        return Promise.resolve(new Map());
+      });
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      expect(endpointMetaRequests.length).toBe(2);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual({
+        ...endpointMetaTelemetryRequest.endpoint_meta,
+        capabilities: [],
+      });
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
+
+    it('should manage runtime errors fetching paginating endpoint metrics documents', async () => {
+      const receiver: TelemetryReceiver = telemetryReceiver as TelemetryReceiver;
+      const docsPerPage = receiver['docsPerPage']!;
+      const nextPage = receiver['nextPage']!;
+      deferred.push(() => {
+        receiver['docsPerPage'] = docsPerPage;
+        receiver['nextPage'] = nextPage;
+      });
+
+      // force to pull one doc at a time
+      receiver['docsPerPage'] = jest.fn((_index, _query) => {
+        return Promise.resolve(1);
+      });
+      let pagesServed = 0;
+      receiver['nextPage'] = jest.fn(async (query) => {
+        // fail requesting the second doc
+        if (pagesServed++ >= 1) {
+          return Promise.reject(Error('Boom!'));
+        }
+        return esClient.search(query);
+      });
+
+      const task = await mockAndScheduleEndpointTask();
+      const started = performance.now();
+
+      const endpointMetaRequests = await getEndpointMetaRequests();
+
+      // only one doc processed
+      expect(endpointMetaRequests.length).toBe(1);
+      const body = endpointMetaRequests[0];
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(true);
+    });
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function getEndpointMetaRequests(atLeast: number = 1): Promise<any[]> {
+    return eventually(async () => {
+      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+        return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
+      });
+
+      expect(found).not.toBeFalsy();
+      expect(found.length).toBeGreaterThanOrEqual(atLeast);
+
+      return (found ?? []).flatMap((req) => {
+        const ndjson = req[1] as string;
+        return ndjson
+          .split('\n')
+          .filter((l) => l.trim().length > 0)
+          .map((l) => {
+            return JSON.parse(l);
+          });
+      });
+    });
+  }
 
   async function mockAndScheduleDetectionRulesTask(): Promise<SecurityTelemetryTask> {
     const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
@@ -327,6 +731,12 @@ describe('telemetry tasks', () => {
   }
 
   function mockAxiosGet(bufferConfig: unknown = fakeBufferAndSizesConfigAsyncDisabled) {
+    mockedAxiosPost.mockImplementation(
+      async (_url: string, _data?: unknown, _config?: AxiosRequestConfig<unknown> | undefined) => {
+        return { status: 200 };
+      }
+    );
+
     mockedAxiosGet.mockImplementation(async (url: string) => {
       if (url.startsWith(ENDPOINT_STAGING) && url.endsWith('ping')) {
         return { status: 200 };
@@ -345,11 +755,13 @@ describe('telemetry tasks', () => {
     });
   }
 
-  async function getTaskMetricsRequests(task: SecurityTelemetryTask): Promise<
+  async function getTaskMetricsRequests(
+    task: SecurityTelemetryTask,
+    olderThan: number
+  ): Promise<
     Array<{
-      url: string;
-      body: string;
-      config: AxiosRequestConfig<unknown> | undefined;
+      taskMetric: TaskMetric;
+      requestConfig: AxiosRequestConfig<unknown> | undefined;
     }>
   > {
     return eventually(async () => {
@@ -367,7 +779,14 @@ describe('telemetry tasks', () => {
         );
       });
       expect(requests.length).toBeGreaterThan(0);
-      return requests;
+      return requests
+        .map((r) => {
+          return {
+            taskMetric: JSON.parse(r.body) as TaskMetric,
+            requestConfig: r.config,
+          };
+        })
+        .filter((t) => t.taskMetric.start_time >= olderThan);
     });
   }
 });

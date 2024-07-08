@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment/moment';
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -138,7 +138,7 @@ export const mockedServices = {
   },
 };
 
-export const TestProvidersComponent: FC = ({ children }) => (
+export const TestProvidersComponent: FC<PropsWithChildren<any>> = ({ children }) => (
   <MemoryRouter>
     <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
       <QueryClientProvider client={new QueryClient()}>

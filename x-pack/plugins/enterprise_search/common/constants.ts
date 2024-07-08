@@ -8,6 +8,7 @@
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
+  ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
@@ -153,7 +154,7 @@ export const APPLICATIONS_PLUGIN = {
     defaultMessage: 'Applications',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
-    defaultMessage: 'Search Applications',
+    defaultMessage: 'Build',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/applications',
@@ -176,6 +177,22 @@ export const VECTOR_SEARCH_PLUGIN = {
   URL: '/app/enterprise_search/vector_search',
 };
 
+export const INFERENCE_ENDPOINTS_PLUGIN = {
+  ID: ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
+  NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
+    defaultMessage: 'Inference Endpoints',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.navTitle', {
+    defaultMessage: 'Relevance',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
+    defaultMessage: 'View for managing inference endpoints.',
+  }),
+  URL: '/app/enterprise_search/relevance',
+  LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {
@@ -196,6 +213,8 @@ export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
+
+export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
@@ -243,3 +262,6 @@ export const PLUGIN_ID = 'enterpriseSearch';
 
 export const CONNECTOR_NATIVE_TYPE = 'native';
 export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';
+
+// TODO remove this once the connector service types are no longer in "example" state
+export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];

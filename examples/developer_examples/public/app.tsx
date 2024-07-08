@@ -22,16 +22,29 @@ import {
   EuiLink,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
+import {
+  AnalyticsServiceStart,
+  AppMountParameters,
+  I18nStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExampleDefinition } from './types';
 
+interface StartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
 interface Props {
+  startServices: StartServices;
   examples: ExampleDefinition[];
   navigateToApp: (appId: string) => void;
   getUrlForApp: (appId: string) => string;
 }
 
-function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
+function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForApp }: Props) {
   const [search, setSearch] = useState<string>('');
 
   const lcSearch = search.toLowerCase();
@@ -44,7 +57,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
       });
 
   return (
-    <>
+    <KibanaRenderContextProvider {...startServices}>
       <EuiPageTemplate.Header>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
@@ -103,7 +116,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
           ))}
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
-    </>
+    </KibanaRenderContextProvider>
   );
 }
 

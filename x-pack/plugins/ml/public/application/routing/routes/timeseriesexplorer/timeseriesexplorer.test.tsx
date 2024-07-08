@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -24,7 +25,7 @@ jest.mock('../../../timeseriesexplorer', () => ({
 }));
 
 jest.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => ({
-  TimeSeriesExplorerPage: jest.fn(({ children }) => {
+  TimeSeriesExplorerPage: jest.fn(({ children }: PropsWithChildren<unknown>) => {
     return <>{children}</>;
   }),
 }));

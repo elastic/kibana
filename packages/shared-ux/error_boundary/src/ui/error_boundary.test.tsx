@@ -7,7 +7,7 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
@@ -22,7 +22,7 @@ describe('<KibanaErrorBoundary>', () => {
     services = getServicesMock();
   });
 
-  const Template: FC = ({ children }) => {
+  const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>

@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -58,6 +58,9 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -72,7 +75,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
-import type { AiInsights } from './ai_insights';
+import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
@@ -129,6 +132,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
   uiActions: UiActionsStart;
+  maps: MapsStartApi;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -147,7 +151,9 @@ export interface StartPlugins {
   dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  alerting: PluginStartContract;
   core: CoreStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -183,8 +189,18 @@ export type StartServices = CoreStart &
     telemetry: TelemetryClientStart;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
-    timelineFilterManager: FilterManager;
+    timelineDataService: DataPublicPluginStart;
   };
+
+export type StartRenderServices = Pick<
+  CoreStart,
+  // Used extensively in rendering Security Solution UI
+  | 'notifications'
+  // Needed for rendering Shared React modules
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
@@ -207,8 +223,8 @@ export const CASES_SUB_PLUGIN_KEY = 'cases';
 
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  aiInsights: AiInsights;
   alerts: Detections;
+  attackDiscovery: AttackDiscovery;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
@@ -229,8 +245,8 @@ export interface SubPlugins {
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  aiInsights: ReturnType<AiInsights['start']>;
   alerts: ReturnType<Detections['start']>;
+  attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;

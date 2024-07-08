@@ -113,6 +113,7 @@ export const collectConnectorStats = async (
     const connectorStats: ConnectorStats = {
       id: connectorId,
       isDeleted: true,
+      serviceType: orphanedSyncJobs[0].connector.service_type,
       syncJobs: syncJobsStats(orphanedSyncJobs),
     };
     connectorStatsArray.push(connectorStats);

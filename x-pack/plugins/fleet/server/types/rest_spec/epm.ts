@@ -241,6 +241,26 @@ export const DeletePackageRequestSchema = {
   ),
 };
 
+export const InstallKibanaAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  // body is deprecated on delete request
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(schema.boolean()),
+    })
+  ),
+};
+
+export const DeleteKibanaAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+};
+
 export const DeletePackageRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
@@ -262,5 +282,6 @@ export const GetInputsRequestSchema = {
       defaultValue: 'json',
     }),
     prerelease: schema.maybe(schema.boolean()),
+    ignoreUnverified: schema.maybe(schema.boolean()),
   }),
 };

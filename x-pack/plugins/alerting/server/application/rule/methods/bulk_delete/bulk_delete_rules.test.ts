@@ -41,6 +41,7 @@ import {
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -66,6 +67,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const backfillClient = backfillClientMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -94,6 +96,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
@@ -204,6 +207,12 @@ describe('bulkDelete', () => {
 
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id2'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
@@ -240,6 +249,12 @@ describe('bulkDelete', () => {
 
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id3']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id3'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -304,6 +319,12 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -362,6 +383,12 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(2);
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id2'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },

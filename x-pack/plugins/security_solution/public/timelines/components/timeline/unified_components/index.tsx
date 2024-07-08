@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiDataGridProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -97,6 +98,7 @@ export const HIDE_FOR_SIZES = ['xs', 's'];
 
 interface Props {
   columns: ColumnHeaderOptions[];
+  isSortEnabled?: boolean;
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
@@ -114,10 +116,13 @@ interface Props {
   updatedAt: number;
   isTextBasedQuery?: boolean;
   dataView: DataView;
+  trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
+  leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
+  isSortEnabled,
   activeTab,
   timelineId,
   itemsPerPage,
@@ -135,6 +140,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   updatedAt,
   isTextBasedQuery,
   dataView,
+  trailingControlColumns,
+  leadingControlColumns,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -146,21 +153,23 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       dataViews,
       dataViewFieldEditor,
       application: { capabilities },
-      data: dataPluginContract,
       uiActions,
       charts,
       docLinks,
       analytics,
-      timelineFilterManager,
+      timelineDataService,
     },
   } = useKibana();
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
 
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      data: dataPluginContract,
+      data: timelineDataService,
       uiActions,
       charts,
       core: {
@@ -173,7 +182,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      dataPluginContract,
+      timelineDataService,
       uiActions,
       charts,
       uiSettings,
@@ -397,6 +406,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
+                      isSortEnabled={isSortEnabled}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
                       sort={sortingColumns}
@@ -415,6 +425,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       updatedAt={updatedAt}
                       isTextBasedQuery={isTextBasedQuery}
                       onFilter={onAddFilter as DocViewFilterFn}
+                      trailingControlColumns={trailingControlColumns}
+                      leadingControlColumns={leadingControlColumns}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

@@ -5,49 +5,46 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { useIsMutating } from '@tanstack/react-query';
 import { EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { IBasePath } from '@kbn/core-http-browser';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
-import {
-  ALERTS_TAB_ID,
-  OVERVIEW_TAB_ID,
-  SloDetails,
-  TAB_ID_URL_PARAM,
-  SloTabId,
-} from './components/slo_details';
-import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../../common/locators/paths';
-import type { SloDetailsPathParams } from './types';
-import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
+import { HeaderTitle } from './components/header_title';
+import { SloDetails } from './components/slo_details';
 import { useGetQueryParams } from './hooks/use_get_query_params';
-import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { useSelectedTab } from './hooks/use_selected_tab';
+import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
+import type { SloDetailsPathParams } from './types';
 
 export function SloDetailsPage() {
+  const { onPageReady } = usePerformanceContext();
   const {
     application: { navigateToUrl },
     http: { basePath },
     observabilityAIAssistant,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { search } = useLocation();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { data: permissions } = usePermissions();
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
@@ -61,22 +58,13 @@ export function SloDetailsPage() {
   });
   const isDeleting = Boolean(useIsMutating(['deleteSlo']));
 
-  const [selectedTabId, setSelectedTabId] = useState(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(TAB_ID_URL_PARAM);
-    return urlTabId && [OVERVIEW_TAB_ID, ALERTS_TAB_ID].includes(urlTabId)
-      ? (urlTabId as SloTabId)
-      : OVERVIEW_TAB_ID;
-  });
+  const { selectedTabId } = useSelectedTab();
 
   const { tabs } = useSloDetailsTabs({
     slo,
     isAutoRefreshing,
     selectedTabId,
-    setSelectedTabId,
   });
-
-  useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   useEffect(() => {
     if (!slo || !observabilityAIAssistant) {
@@ -92,6 +80,7 @@ export function SloDetailsPage() {
         Instance Id: ${slo.instanceId}
         Description: ${slo.description}
         Observed value: ${slo.summary.sliValue}
+        Error budget remaining: ${slo.summary.errorBudget.remaining}
         Status: ${slo.summary.status}
       `),
       data: [
@@ -104,13 +93,23 @@ export function SloDetailsPage() {
     });
   }, [observabilityAIAssistant, slo]);
 
+  useEffect(() => {
+    if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [hasRightLicense, permissions, navigateToUrl, basePath]);
+
+  useEffect(() => {
+    if (!isLoading && slo !== undefined) {
+      onPageReady();
+    }
+  }, [onPageReady, slo, isLoading]);
+
+  useBreadcrumbs(getBreadcrumbs(basePath, slo));
+
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {
     return <PageNotFound />;
-  }
-
-  if (hasRightLicense === false) {
-    navigateToUrl(basePath.prepend(paths.slos));
   }
 
   const isPerformingAction = isLoading || isDeleting;

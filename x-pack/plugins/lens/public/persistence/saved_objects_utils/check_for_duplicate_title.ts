@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { OverlayStart } from '@kbn/core/public';
 import { DOC_TYPE } from '../../../common/constants';
+import type { StartServices } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
@@ -21,9 +21,9 @@ import { SavedObjectIndexStore } from '..';
 export async function checkForDuplicateTitle(
   savedObjectMeta: ConfirmModalSavedObjectMeta,
   onTitleDuplicate: (() => void) | undefined,
-  services: { client: SavedObjectIndexStore; overlays: OverlayStart }
+  services: StartServices & { client: SavedObjectIndexStore }
 ): Promise<boolean> {
-  const { client, overlays } = services;
+  const { client, ...startServices } = services;
   const { id, title, isTitleDuplicateConfirmed, lastSavedTitle, copyOnSave } = savedObjectMeta;
 
   // Don't check for duplicates if user has already confirmed save with duplicate title
@@ -50,5 +50,5 @@ export async function checkForDuplicateTitle(
 
   // TODO: make onTitleDuplicate a required prop and remove UI components from this class
   // Need to leave here until all users pass onTitleDuplicate.
-  return displayDuplicateTitleConfirmModal(savedObjectMeta, overlays);
+  return displayDuplicateTitleConfirmModal(savedObjectMeta, startServices);
 }

@@ -12,7 +12,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import '../../common/mock/match_media';
 import type { AppMockRenderer } from '../../common/mock';
 import {
   createAppMockRenderer,
@@ -817,7 +816,8 @@ describe('AllCasesListGeneric', () => {
       });
     });
 
-    describe('Row actions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/148095
+    describe.skip('Row actions', () => {
       const statusTests = [
         [CaseStatuses.open],
         [CaseStatuses['in-progress']],

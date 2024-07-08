@@ -11,9 +11,9 @@ import { Logger } from '@kbn/logging';
 import { concatenateChatCompletionChunks } from '../../../../../common/utils/concatenate_chat_completion_chunks';
 import { processBedrockStream } from './process_bedrock_stream';
 import { MessageRole } from '../../../../../common';
-import { rejectTokenCountEvents } from '../../../util/reject_token_count_events';
 import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/constants';
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
+import { withoutTokenCountEvents } from '../../../../../common/utils/without_token_count_events';
 
 describe('processBedrockStream', () => {
   const encodeChunk = (body: unknown) => {
@@ -69,7 +69,7 @@ describe('processBedrockStream', () => {
           parseInlineFunctionCalls({
             logger: getLoggerMock(),
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -101,7 +101,7 @@ describe('processBedrockStream', () => {
           parseInlineFunctionCalls({
             logger: getLoggerMock(),
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -135,7 +135,7 @@ describe('processBedrockStream', () => {
           parseInlineFunctionCalls({
             logger: getLoggerMock(),
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -167,13 +167,15 @@ describe('processBedrockStream', () => {
           parseInlineFunctionCalls({
             logger: getLoggerMock(),
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       );
     }
 
-    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(`"no elements in sequence"`);
+    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unexpected token 'i', \\"invalid json\\" is not valid JSON"`
+    );
   });
 
   it('successfully invokes a function without parameters', async () => {
@@ -191,7 +193,7 @@ describe('processBedrockStream', () => {
           parseInlineFunctionCalls({
             logger: getLoggerMock(),
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )

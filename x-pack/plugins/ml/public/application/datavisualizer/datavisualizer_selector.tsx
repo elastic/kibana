@@ -18,14 +18,12 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiBetaBadge,
   EuiTextAlign,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { isFullLicense } from '../license';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -174,25 +172,6 @@ export const DatavisualizerSelector: FC = () => {
                       <FormattedMessage
                         id="xpack.ml.datavisualizer.selector.selectESQLTitle"
                         defaultMessage="Visualize data using ES|QL"
-                      />{' '}
-                      <EuiBetaBadge
-                        label=""
-                        iconType="beaker"
-                        size="m"
-                        color="hollow"
-                        tooltipContent={
-                          <FormattedMessage
-                            id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg"
-                            defaultMessage="ES|QL is in technical preview."
-                          />
-                        }
-                        tooltipPosition={'right'}
-                        aria-label={i18n.translate(
-                          'xpack.ml.datavisualizer.selector.technicalPreviewBadge.ariaLabel',
-                          {
-                            defaultMessage: 'ES|QL is in technical preview.',
-                          }
-                        )}
                       />
                     </>
                   </EuiTextAlign>

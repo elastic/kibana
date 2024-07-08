@@ -8,17 +8,11 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DataViewsPublicPluginStart,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-} from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -31,7 +25,12 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import { FieldListApi, FieldListSerializedStateState } from './types';
+import {
+  FieldListApi,
+  Services,
+  FieldListSerializedStateState,
+  FieldListRuntimeState,
+} from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
@@ -48,25 +47,16 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
 
 export const getFieldListFactory = (
   core: CoreStart,
-  {
-    dataViews,
-    data,
-    charts,
-    fieldFormats,
-  }: {
-    dataViews: DataViewsPublicPluginStart;
-    data: DataPublicPluginStart;
-    charts: ChartsPluginStart;
-    fieldFormats: FieldFormatsStart;
-  }
+  { dataViews, data, charts, fieldFormats }: Services
 ) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
     FieldListSerializedStateState,
+    FieldListRuntimeState,
     FieldListApi
   > = {
     type: FIELD_LIST_ID,
     deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState) as FieldListSerializedStateState;
+      const serializedState = cloneDeep(state.rawState);
       // inject the reference
       const dataViewIdRef = state.references?.find(
         (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
@@ -97,6 +87,9 @@ export const getFieldListFactory = (
       const initialDataView = await dataViews.get(initialDataViewId);
       const selectedDataViewId$ = new BehaviorSubject<string | undefined>(initialDataViewId);
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([initialDataView]);
+      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
+        initialState.selectedFieldNames
+      );
 
       subscriptions.add(
         selectedDataViewId$
@@ -106,17 +99,15 @@ export const getFieldListFactory = (
           )
           .subscribe((nextSelectedDataView) => {
             dataViews$.next([nextSelectedDataView]);
+            selectedFieldNames$.next([]);
           })
-      );
-
-      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
-        initialState.selectedFieldNames
       );
 
       const api = buildApi(
         {
           ...titlesApi,
           dataViews: dataViews$,
+          selectedFields: selectedFieldNames$,
           serializeState: () => {
             const dataViewId = selectedDataViewId$.getValue();
             const references: Reference[] = dataViewId

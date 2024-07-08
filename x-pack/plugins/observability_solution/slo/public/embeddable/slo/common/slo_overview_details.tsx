@@ -79,9 +79,9 @@ export function SloOverviewDetails({
           {tabs.map((tab, index) => (
             <EuiTab
               key={index}
-              onClick={tab.onClick}
+              onClick={'onClick' in tab ? tab.onClick : undefined}
               isSelected={tab.id === selectedTabId}
-              append={tab.append}
+              append={'append' in tab ? tab.append : null}
             >
               {tab.label}
             </EuiTab>

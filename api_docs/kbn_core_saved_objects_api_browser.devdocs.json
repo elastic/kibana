@@ -139,19 +139,19 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "canvas",
@@ -1139,10 +1139,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
               },
@@ -1656,10 +1652,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               },
@@ -1746,10 +1738,6 @@
               {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1978,7 +1966,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
+                "path": "src/plugins/discover/public/application/main/state_management/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -3020,20 +3008,20 @@
             "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
           },
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/kibana.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -3366,6 +3354,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SimpleSavedObject.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [
+              "The user that last updated this object"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.createdAt",
             "type": "string",
             "tags": [],
@@ -3645,9 +3649,9 @@
           "\nBrowser options for finding saved objects\n"
         ],
         "signature": [
-          "{ type: string | string[]; search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -3663,7 +3667,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; sortField?: string | undefined; preference?: string | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",

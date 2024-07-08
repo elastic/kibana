@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('allows translation bundles to be cached', async () => {
       await supertest
         .get('/translations/en.json')
-        .expect('Cache-Control', 'must-revalidate')
+        .expect('Cache-Control', 'public, max-age=31536000, immutable')
         .expect(200);
     });
 

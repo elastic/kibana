@@ -21,8 +21,9 @@ import {
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
 } from './test_ids';
-import { useLeftPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '..';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '..';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
 import {
   THREAT_INTELLIGENCE_TAB_ID,
@@ -83,9 +84,9 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
 /**
  * Insights view displayed in the document details expandable flyout left section
  */
-export const InsightsTab: React.FC = memo(() => {
+export const InsightsTab = memo(() => {
   const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, getFieldsData } = useDocumentDetailsContext();
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();

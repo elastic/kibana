@@ -25,7 +25,14 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/field-utils",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/custom-icons",
+    "@kbn/react-field",
+    "@kbn/ui-theme",
+    "@kbn/discover-shared-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/core-notifications-browser"
   ],
   "exclude": [
     "target/**/*",

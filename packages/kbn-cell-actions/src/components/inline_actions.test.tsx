@@ -10,7 +10,7 @@ import { act, render } from '@testing-library/react';
 import React from 'react';
 import { makeAction } from '../mocks/helpers';
 import { InlineActions } from './inline_actions';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { CellActionsProvider } from '../context';
 
 const defaultProps = {

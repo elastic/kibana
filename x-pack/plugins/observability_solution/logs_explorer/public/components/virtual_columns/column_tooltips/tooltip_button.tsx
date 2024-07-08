@@ -5,18 +5,74 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import React from 'react';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 
-export const TooltipButtonComponent = ({
+import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+
+export const TooltipButton = ({
+  children,
+  popoverTitle,
   displayText,
   headerRowHeight,
+  iconType = 'questionInCircle',
 }: {
+  children: React.ReactChild;
+  popoverTitle: string;
   displayText?: string;
   headerRowHeight?: number;
-}) => (
-  <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-    {displayText} <EuiIcon type="questionInCircle" />
-  </ColumnHeaderTruncateContainer>
-);
+  iconType?: string;
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const leaveTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const clearTimer = useMemo(
+    () => () => {
+      if (leaveTimer.current) {
+        clearTimeout(leaveTimer.current);
+      }
+    },
+    []
+  );
+
+  const onMouseEnter = useCallback(() => {
+    clearTimer();
+    setIsPopoverOpen(true);
+  }, [clearTimer]);
+
+  const onMouseLeave = useCallback(() => {
+    leaveTimer.current = setTimeout(() => setIsPopoverOpen(false), 100);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearTimer();
+    };
+  }, [clearTimer]);
+
+  return (
+    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+      {displayText}{' '}
+      <EuiPopover
+        button={
+          <EuiIcon
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onFocus={onMouseEnter}
+            onBlur={onMouseLeave}
+            type={iconType}
+            tabIndex={0}
+          />
+        }
+        isOpen={isPopoverOpen}
+        anchorPosition="upCenter"
+        panelPaddingSize="s"
+        ownFocus={false}
+      >
+        <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
+        {children}
+      </EuiPopover>
+    </ColumnHeaderTruncateContainer>
+  );
+};

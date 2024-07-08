@@ -9,8 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  IncompatibleActionError,
+  UiActionsStart,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
+import { MarkdownEditorSerializedState } from './types';
 
 // -----------------------------------------------------------------------------
 // Create and register an action which allows this embeddable to be created from
@@ -19,13 +25,14 @@ import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_EUI_MARKDOWN_ACTION_ID,
+    grouping: [embeddableExamplesGrouping],
     getIconType: () => 'editorCodeBlock',
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel(
+      embeddable.addNewPanel<MarkdownEditorSerializedState>(
         {
           panelType: EUI_MARKDOWN_ID,
           initialState: { content: '# hello world!' },
@@ -38,7 +45,7 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
         defaultMessage: 'EUI Markdown',
       }),
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_EUI_MARKDOWN_ACTION_ID);
   if (uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
     // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
     // the create action if the Canvas-specific trigger does indeed exist.

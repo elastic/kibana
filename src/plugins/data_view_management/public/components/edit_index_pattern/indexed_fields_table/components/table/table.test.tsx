@@ -11,9 +11,9 @@ import { shallow } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
-import { overlayServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 
-const theme = themeServiceMock.createStartContract();
+const coreStart = coreMock.createStart();
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -91,7 +91,7 @@ const renderTable = (
       editField={editField}
       deleteField={() => {}}
       openModal={overlayServiceMock.createStartContract().openModal}
-      theme={theme}
+      startServices={coreStart}
     />
   );
 

@@ -30,14 +30,15 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
     {
       id: useGeneratedHtmlId({ prefix: 'summarizationAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
-        defaultMessage: 'Summarization',
+        defaultMessage: 'Model settings',
       }),
       children: <SummarizationPanel />,
+      dataTestId: 'summarizationAccordion',
     },
     {
       id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.sourceTitle', {
-        defaultMessage: 'Sources',
+        defaultMessage: 'Indices',
       }),
       extraAction: !!selectedIndicesCount && (
         <EuiText size="xs">
@@ -50,13 +51,14 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
         </EuiText>
       ),
       children: <SourcesPanelSidebar />,
+      dataTestId: 'sourcesAccordion',
     },
   ];
   const [openAccordionId, setOpenAccordionId] = useState(accordions[0].id);
 
   return (
     <EuiFlexGroup direction="column" className="eui-yScroll" gutterSize="none">
-      {accordions.map(({ id, title, extraAction, children }, index) => (
+      {accordions.map(({ id, title, extraAction, children, dataTestId }, index) => (
         <EuiFlexItem
           key={id}
           css={{
@@ -77,6 +79,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
             buttonProps={{ paddingSize: 'l' }}
             forceState={openAccordionId === id ? 'open' : 'closed'}
             onToggle={() => setOpenAccordionId(openAccordionId === id ? '' : id)}
+            data-test-subj={dataTestId}
           >
             {children}
             <EuiSpacer size="l" />

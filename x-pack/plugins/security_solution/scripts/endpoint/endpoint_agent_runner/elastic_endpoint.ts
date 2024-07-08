@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dump } from '../common/utils';
 import { generateVmName } from '../common/vm_services';
 import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import {
@@ -12,7 +13,6 @@ import {
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
-import { dump } from './utils';
 
 export const enrollEndpointHost = async (): Promise<string | undefined> => {
   let vmName;

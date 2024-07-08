@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -14,15 +14,17 @@ import {
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
+  EuiThemeComputed,
   EuiThemeProvider,
   EuiWindowEvent,
   keys,
+  useEuiTheme,
+  useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 
 import {
-  EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
   EmbeddableConsoleView,
 } from '../../../types/embeddable_console';
@@ -31,6 +33,7 @@ import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
 
 import './_index.scss';
+import { EmbeddedConsoleResizeButton, getCurrentConsoleMaxSize } from './console_resize_button';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
 
@@ -42,14 +45,39 @@ const ConsoleWrapper = dynamic(async () => ({
   default: (await import('./console_wrapper')).ConsoleWrapper,
 }));
 
+const getInitialConsoleHeight = (
+  getConsoleHeight: EmbeddableConsoleDependencies['getConsoleHeight'],
+  euiTheme: EuiThemeComputed
+) => {
+  const lastHeight = getConsoleHeight();
+  if (lastHeight) {
+    try {
+      const value = parseInt(lastHeight, 10);
+      if (!isNaN(value) && value > 0) {
+        return value;
+      }
+    } catch {
+      // ignore bad local storage value
+    }
+  }
+  return getCurrentConsoleMaxSize(euiTheme);
+};
+
 export const EmbeddableConsole = ({
-  size = 'm',
   core,
   usageCollection,
   setDispatch,
   alternateView,
   isMonacoEnabled,
-}: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
+  getConsoleHeight,
+  setConsoleHeight,
+}: EmbeddableConsoleDependencies) => {
+  const { euiTheme } = useEuiTheme();
+  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+  const [consoleHeight, setConsoleHeightState] = useState<number>(
+    getInitialConsoleHeight(getConsoleHeight, euiTheme)
+  );
+
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
     store.initialValue,
@@ -71,6 +99,13 @@ export const EmbeddableConsole = ({
     document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
     return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
   }, []);
+  useEffect(() => {
+    setGlobalCSSVariables({
+      '--embedded-console-height': `${consoleHeight}px`,
+      '--embedded-console-bottom': `-${consoleHeight}px`,
+    });
+    setConsoleHeight(consoleHeight.toString());
+  }, [consoleHeight, setGlobalCSSVariables, setConsoleHeight]);
 
   const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
   const showConsole =
@@ -105,14 +140,10 @@ export const EmbeddableConsole = ({
 
   const classes = classNames('embeddableConsole', {
     'embeddableConsole-isOpen': isOpen,
-    'embeddableConsole--large': size === 'l',
-    'embeddableConsole--medium': size === 'm',
-    'embeddableConsole--small': size === 's',
     'embeddableConsole--classicChrome': chromeStyle === 'classic',
     'embeddableConsole--projectChrome': chromeStyle === 'project',
     'embeddableConsole--unknownChrome': chromeStyle === undefined,
     'embeddableConsole--fixed': true,
-    'embeddableConsole--showOnMobile': false,
   });
 
   return (
@@ -127,31 +158,46 @@ export const EmbeddableConsole = ({
             <h2>{landmarkHeading}</h2>
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-            <div className="embeddableConsole__controls">
-              <EuiButtonEmpty
-                color="text"
-                iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-                onClick={toggleConsole}
-                className="embeddableConsole__controls--button"
-                data-test-subj="consoleEmbeddedControlBar"
-                data-telemetry-id="console-embedded-controlbar-button"
-              >
-                {i18n.translate('console.embeddableConsole.title', {
-                  defaultMessage: 'Console',
-                })}
-              </EuiButtonEmpty>
-              {alternateView && (
-                <div className="embeddableConsole__controls--altViewButton-container">
-                  <alternateView.ActivationButton
-                    activeView={showAlternateView}
-                    onClick={clickAlternateViewActivateButton}
-                  />
-                </div>
+            <div>
+              {isOpen && (
+                <EmbeddedConsoleResizeButton
+                  consoleHeight={consoleHeight}
+                  setConsoleHeight={setConsoleHeightState}
+                />
               )}
+
+              <div className="embeddableConsole__controls">
+                <EuiButtonEmpty
+                  color="text"
+                  iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+                  onClick={toggleConsole}
+                  className="embeddableConsole__controls--button"
+                  data-test-subj="consoleEmbeddedControlBar"
+                  data-telemetry-id="console-embedded-controlbar-button"
+                >
+                  {i18n.translate('console.embeddableConsole.title', {
+                    defaultMessage: 'Console',
+                  })}
+                </EuiButtonEmpty>
+                {alternateView && (
+                  <div className="embeddableConsole__controls--altViewButton-container">
+                    <alternateView.ActivationButton
+                      activeView={showAlternateView}
+                      onClick={clickAlternateViewActivateButton}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </EuiThemeProvider>
-          {showConsole ? (
-            <ConsoleWrapper {...{ core, usageCollection, onKeyDown, isMonacoEnabled }} />
+          {consoleState.consoleHasBeenOpened ? (
+            <ConsoleWrapper
+              isOpen={showConsole}
+              core={core}
+              usageCollection={usageCollection}
+              onKeyDown={onKeyDown}
+              isMonacoEnabled={isMonacoEnabled}
+            />
           ) : null}
           {showAlternateView ? (
             <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">

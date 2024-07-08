@@ -26,7 +26,7 @@ export * from './src/stub_web_worker';
 
 export * from './src/testbed';
 
-export * from './src/axe_helpers';
+export * from './src/testing_library_react_helpers';
 
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 

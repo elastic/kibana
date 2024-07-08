@@ -87,6 +87,7 @@ export const api: IRuleMonitoringApiClient = {
       sortField,
       sortOrder,
       signal,
+      runTypeFilters,
     } = args;
 
     const url = getRuleExecutionResultsUrl(ruleId);
@@ -105,6 +106,7 @@ export const api: IRuleMonitoringApiClient = {
         sort_order: sortOrder,
         page,
         per_page: perPage,
+        run_type_filters: runTypeFilters?.sort()?.join(','),
       },
       signal,
     });

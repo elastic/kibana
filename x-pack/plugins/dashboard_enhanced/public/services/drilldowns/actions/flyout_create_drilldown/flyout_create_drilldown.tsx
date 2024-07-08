@@ -11,7 +11,7 @@ import {
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   tracksOverlays,
@@ -123,7 +123,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
           templates={templates}
           onClose={close}
         />,
-        { theme$: core.theme.theme$ }
+        core
       ),
       {
         ownFocus: true,

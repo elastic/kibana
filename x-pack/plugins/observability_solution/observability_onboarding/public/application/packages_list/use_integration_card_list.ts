@@ -7,8 +7,48 @@
 
 import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CustomCard } from './types';
 import { toCustomCard } from './utils';
+
+export function toOnboardingPath({
+  basePath,
+  category,
+  search,
+}: {
+  basePath?: string;
+  category?: string | null;
+  search?: string;
+}): string | null {
+  if (typeof basePath !== 'string' && !basePath) return null;
+  const path = `${basePath}/app/observabilityOnboarding`;
+  if (!category && !search) return path;
+  const params = new URLSearchParams();
+  if (category) params.append('category', category);
+  if (search) params.append('search', search);
+  return `${path}?${params.toString()}`;
+}
+
+export function addPathParamToUrl(url: string, onboardingLink: string) {
+  const encoded = encodeURIComponent(onboardingLink);
+  if (url.indexOf('?') >= 0) {
+    return `${url}&observabilityOnboardingLink=${encoded}`;
+  }
+  return `${url}?observabilityOnboardingLink=${encoded}`;
+}
+
+function useCardUrlRewrite(props: { category?: string | null; search?: string }) {
+  const kibana = useKibana();
+  const basePath = kibana.services.http?.basePath.get();
+  const onboardingLink = useMemo(() => toOnboardingPath({ basePath, ...props }), [basePath, props]);
+  return (card: IntegrationCardItem) => ({
+    ...card,
+    url:
+      card.url.indexOf('/app/integrations') >= 0 && onboardingLink
+        ? addPathParamToUrl(card.url, onboardingLink)
+        : card.url,
+  });
+}
 
 function extractFeaturedCards(filteredCards: IntegrationCardItem[], featuredCardNames?: string[]) {
   const featuredCards: Record<string, IntegrationCardItem | undefined> = {};
@@ -21,28 +61,31 @@ function extractFeaturedCards(filteredCards: IntegrationCardItem[], featuredCard
 }
 
 function formatCustomCards(
+  rewriteUrl: (card: IntegrationCardItem) => IntegrationCardItem,
   customCards: CustomCard[],
   featuredCards: Record<string, IntegrationCardItem | undefined>
 ) {
   const cards: IntegrationCardItem[] = [];
   for (const card of customCards) {
     if (card.type === 'featured' && !!featuredCards[card.name]) {
-      cards.push(toCustomCard(featuredCards[card.name]!));
-    } else if (card.type === 'generated') {
-      cards.push(toCustomCard(card));
+      cards.push(toCustomCard(rewriteUrl(featuredCards[card.name]!)));
+    } else if (card.type === 'virtual') {
+      cards.push(toCustomCard(rewriteUrl(card)));
     }
   }
   return cards;
 }
 
 function useFilteredCards(
+  rewriteUrl: (card: IntegrationCardItem) => IntegrationCardItem,
   integrationsList: IntegrationCardItem[],
-  selectedCategory: string,
+  selectedCategory: string[],
   customCards?: CustomCard[]
 ) {
   return useMemo(() => {
     const integrationCards = integrationsList
-      .filter((card) => card.categories.includes(selectedCategory))
+      .filter((card) => card.categories.some((category) => selectedCategory.includes(category)))
+      .map(rewriteUrl)
       .map(toCustomCard);
 
     if (!customCards) {
@@ -56,7 +99,7 @@ function useFilteredCards(
       ),
       integrationCards,
     };
-  }, [integrationsList, customCards, selectedCategory]);
+  }, [integrationsList, customCards, selectedCategory, rewriteUrl]);
 }
 
 /**
@@ -69,18 +112,22 @@ function useFilteredCards(
  */
 export function useIntegrationCardList(
   integrationsList: IntegrationCardItem[],
-  selectedCategory = 'observability',
+  selectedCategory: string[],
   customCards?: CustomCard[],
+  flowCategory?: string | null,
+  flowSearch?: string,
   fullList = false
 ): IntegrationCardItem[] {
+  const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: flowSearch });
   const { featuredCards, integrationCards } = useFilteredCards(
+    rewriteUrl,
     integrationsList,
     selectedCategory,
     customCards
   );
 
   if (customCards && customCards.length > 0) {
-    const formattedCustomCards = formatCustomCards(customCards, featuredCards);
+    const formattedCustomCards = formatCustomCards(rewriteUrl, customCards, featuredCards);
     if (fullList) {
       return [...formattedCustomCards, ...integrationCards] as IntegrationCardItem[];
     }

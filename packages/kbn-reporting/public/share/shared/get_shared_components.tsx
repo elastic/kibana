@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import React from 'react';
+import { Observable } from 'rxjs';
+
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
+import { StartServices } from '..';
 import { ReportingAPIClient } from '../..';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
+
 /**
  * Properties for displaying a share menu with Reporting features.
  */
@@ -53,24 +57,20 @@ export interface ReportingPublicComponents {
  * Related Discuss issue: https://github.com/elastic/kibana/issues/101422
  */
 export function getSharedComponents(
-  core: CoreSetup,
-  apiClient: ReportingAPIClient
+  apiClient: ReportingAPIClient,
+  startServices$: Observable<StartServices>
 ): ReportingPublicComponents {
   return {
     ReportingPanelPDFV2(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
       if (props.layoutOption === 'canvas') {
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
             reportType={PDF_REPORT_TYPE_V2}
             apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
             layoutOption={'canvas' as const}
+            startServices$={startServices$}
             {...props}
-            getJobParams={getJobParams}
           />
         );
       } else {
@@ -78,55 +78,43 @@ export function getSharedComponents(
       }
     },
     ReportingPanelPNGV2(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
       if (props.layoutOption === 'canvas') {
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
             reportType={PNG_REPORT_TYPE_V2}
             apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
             layoutOption={'canvas' as const}
+            startServices$={startServices$}
             {...props}
-            getJobParams={getJobParams}
           />
         );
       }
     },
     ReportingModalPDF(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
       if (props.layoutOption === 'canvas') {
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
-            reportType={PDF_REPORT_TYPE_V2}
+            reportType={PDF_REPORT_TYPE}
             apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
             layoutOption={'canvas' as const}
+            startServices$={startServices$}
             {...props}
-            getJobParams={getJobParams}
           />
         );
       }
     },
     ReportingModalPNG(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
       if (props.layoutOption === 'canvas') {
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
-            reportType={PDF_REPORT_TYPE_V2}
+            reportType={PNG_REPORT_TYPE}
             apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
             layoutOption={'canvas' as const}
+            startServices$={startServices$}
             {...props}
-            getJobParams={getJobParams}
           />
         );
       }

@@ -10,18 +10,19 @@ import type { LinkItem } from '../../../../common/links/types';
 import type { SolutionNavLink } from '../../../../common/links';
 import * as i18n from './settings_translations';
 
+const ENTITY_ANALYTICS_LINKS = [
+  SecurityPageName.entityAnalyticsManagement,
+  SecurityPageName.entityAnalyticsAssetClassification,
+];
+
 export const createSettingsLinksFromManage = (manageLink: LinkItem): LinkItem[] => {
-  const entityAnalyticsLink = manageLink.links?.find(
-    ({ id }) => id === SecurityPageName.entityAnalyticsManagement
-  );
-  return entityAnalyticsLink
-    ? [
-        {
-          ...entityAnalyticsLink,
-          sideNavDisabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
-        },
-      ]
-    : [];
+  const entityAnalyticsLinks =
+    manageLink.links?.filter(({ id }) => ENTITY_ANALYTICS_LINKS.includes(id)) ?? [];
+
+  return entityAnalyticsLinks.map((link) => ({
+    ...link,
+    sideNavDisabled: true, // Link disabled from the side nav but configured in the navigationTree (breadcrumbs). It is displayed in the management cards landing.
+  }));
 };
 
 export const settingsNavLinks: SolutionNavLink[] = [

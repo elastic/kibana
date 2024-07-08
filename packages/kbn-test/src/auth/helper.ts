@@ -20,3 +20,33 @@ export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> =>
 
   return Object.entries(JSON.parse(data)) as Array<[Role, User]>;
 };
+
+export const isValidUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch (err) {
+    return false;
+  }
+};
+
+export const isValidHostname = (value: string) => {
+  if (value.length === 0) {
+    return false;
+  }
+
+  const validChars = /^[a-zA-Z0-9-.]{1,253}\.?$/g;
+  if (!validChars.test(value)) {
+    return false;
+  }
+
+  if (value.endsWith('.')) {
+    value = value.slice(0, value.length - 1);
+  }
+
+  if (value.length > 253) {
+    return false;
+  }
+
+  return true;
+};

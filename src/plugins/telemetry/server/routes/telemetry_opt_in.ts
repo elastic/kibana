@@ -118,9 +118,8 @@ export function registerTelemetryOptInRoutes({
     request: { body: schema.object({ enabled: schema.boolean() }) },
     response: {
       200: {
-        body: schema.arrayOf(
-          schema.object({ clusterUuid: schema.string(), stats: schema.string() })
-        ),
+        body: () =>
+          schema.arrayOf(schema.object({ clusterUuid: schema.string(), stats: schema.string() })),
       },
     },
   };

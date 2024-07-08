@@ -1,0 +1,304 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useTimelineColumns augmentedColumnHeaders should return the default columns 1`] = `
+Array [
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "date",
+    ],
+    "format": "",
+    "id": "@timestamp",
+    "initialWidth": 190,
+    "name": "@timestamp",
+    "readFromDocValues": true,
+    "searchable": true,
+    "type": "date",
+  },
+  Object {
+    "aggregatable": false,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "text",
+    ],
+    "format": "string",
+    "id": "message",
+    "initialWidth": 180,
+    "name": "message",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "event.category",
+    "initialWidth": 180,
+    "name": "event.category",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "event.action",
+    "initialWidth": 180,
+    "name": "event.action",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "host.name",
+    "initialWidth": 180,
+    "name": "host.name",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "ip",
+    ],
+    "format": "",
+    "id": "source.ip",
+    "initialWidth": 180,
+    "name": "source.ip",
+    "searchable": true,
+    "type": "ip",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "ip",
+    ],
+    "format": "",
+    "id": "destination.ip",
+    "initialWidth": 180,
+    "name": "destination.ip",
+    "searchable": true,
+    "type": "ip",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "user.name",
+    "initialWidth": 180,
+    "name": "user.name",
+    "searchable": true,
+    "type": "string",
+  },
+]
+`;
+
+exports[`useTimelineColumns augmentedColumnHeaders should return the default unified data table (udt) columns 1`] = `
+Array [
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "date",
+    ],
+    "format": "",
+    "id": "@timestamp",
+    "initialWidth": 215,
+    "name": "@timestamp",
+    "readFromDocValues": true,
+    "searchable": true,
+    "type": "date",
+  },
+  Object {
+    "aggregatable": false,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "text",
+    ],
+    "format": "string",
+    "id": "message",
+    "initialWidth": 360,
+    "name": "message",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "event.category",
+    "name": "event.category",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "event.action",
+    "name": "event.action",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "host.name",
+    "name": "host.name",
+    "searchable": true,
+    "type": "string",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "ip",
+    ],
+    "format": "",
+    "id": "source.ip",
+    "name": "source.ip",
+    "searchable": true,
+    "type": "ip",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "ip",
+    ],
+    "format": "",
+    "id": "destination.ip",
+    "name": "destination.ip",
+    "searchable": true,
+    "type": "ip",
+  },
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "keyword",
+    ],
+    "format": "string",
+    "id": "user.name",
+    "name": "user.name",
+    "searchable": true,
+    "type": "string",
+  },
+]
+`;
+
+exports[`useTimelineColumns augmentedColumnHeaders should return the provided columns 1`] = `
+Array [
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "ip",
+    ],
+    "format": "",
+    "id": "source.ip",
+    "initialWidth": 150,
+    "name": "source.ip",
+    "searchable": true,
+    "type": "ip",
+  },
+  Object {
+    "columnHeaderType": "not-filtered",
+    "id": "agent.type",
+    "initialWidth": 150,
+  },
+]
+`;
+
+exports[`useTimelineColumns getTimelineQueryFieldsFromColumns should have a width of 152 for 5 actions 1`] = `
+Array [
+  "source.ip",
+  "agent.type",
+  "@timestamp",
+  "kibana.alert.workflow_status",
+  "kibana.alert.workflow_tags",
+  "kibana.alert.workflow_assignee_ids",
+  "kibana.alert.group.id",
+  "kibana.alert.original_time",
+  "kibana.alert.building_block_type",
+  "kibana.alert.rule.from",
+  "kibana.alert.rule.name",
+  "kibana.alert.rule.to",
+  "kibana.alert.rule.uuid",
+  "kibana.alert.rule.rule_id",
+  "kibana.alert.rule.type",
+  "kibana.alert.suppression.docs_count",
+  "kibana.alert.original_event.kind",
+  "kibana.alert.original_event.module",
+  "file.path",
+  "file.Ext.code_signature.subject_name",
+  "file.Ext.code_signature.trusted",
+  "file.hash.sha256",
+  "host.os.family",
+  "event.code",
+  "process.entry_leader.entity_id",
+]
+`;
+
+exports[`useTimelineColumns getTimelineQueryFieldsFromColumns should return the list of all the fields 1`] = `
+Array [
+  "@timestamp",
+  "message",
+  "event.category",
+  "event.action",
+  "host.name",
+  "source.ip",
+  "destination.ip",
+  "user.name",
+  "@timestamp",
+  "kibana.alert.workflow_status",
+  "kibana.alert.workflow_tags",
+  "kibana.alert.workflow_assignee_ids",
+  "kibana.alert.group.id",
+  "kibana.alert.original_time",
+  "kibana.alert.building_block_type",
+  "kibana.alert.rule.from",
+  "kibana.alert.rule.name",
+  "kibana.alert.rule.to",
+  "kibana.alert.rule.uuid",
+  "kibana.alert.rule.rule_id",
+  "kibana.alert.rule.type",
+  "kibana.alert.suppression.docs_count",
+  "kibana.alert.original_event.kind",
+  "kibana.alert.original_event.module",
+  "file.path",
+  "file.Ext.code_signature.subject_name",
+  "file.Ext.code_signature.trusted",
+  "file.hash.sha256",
+  "host.os.family",
+  "event.code",
+  "process.entry_leader.entity_id",
+]
+`;

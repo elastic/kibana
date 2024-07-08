@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { NoDataPageProvider, NoDataPageKibanaProvider } from '@kbn/shared-ux-page-no-data';
 import type {
@@ -17,7 +17,7 @@ import type {
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataConfigPageProvider: FC<NoDataConfigPageServices> = ({
+export const NoDataConfigPageProvider: FC<PropsWithChildren<NoDataConfigPageServices>> = ({
   children,
   ...services
 }) => {
@@ -27,9 +27,8 @@ export const NoDataConfigPageProvider: FC<NoDataConfigPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NoDataConfigPageKibanaProvider: FC<NoDataConfigPageKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const NoDataConfigPageKibanaProvider: FC<
+  PropsWithChildren<NoDataConfigPageKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   return <NoDataPageKibanaProvider {...dependencies}>{children}</NoDataPageKibanaProvider>;
 };

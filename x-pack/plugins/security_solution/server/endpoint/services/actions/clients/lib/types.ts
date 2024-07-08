@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -20,6 +21,9 @@ import type {
   ResponseActionUploadParameters,
   EndpointActionData,
   LogsEndpointActionResponse,
+  UploadedFileInfo,
+  ResponseActionScanOutputContent,
+  ResponseActionScanParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -28,6 +32,7 @@ import type {
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
   BaseActionRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -60,6 +65,12 @@ export interface CommonResponseActionMethodOptions
 export interface ProcessPendingActionsMethodOptions {
   addToQueue: (...docs: LogsEndpointActionResponse[]) => void;
   abortSignal: AbortSignal;
+}
+
+export interface GetFileDownloadMethodResponse {
+  stream: Readable;
+  fileName: string;
+  mimeType?: string;
 }
 
 /**
@@ -118,4 +129,28 @@ export interface ResponseActionsClient {
    * the time of this writing, is being controlled by the background task.
    */
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
+
+  /**
+   * Retrieve a file for download
+   * @param actionId
+   * @param fileId
+   */
+  getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse>;
+
+  /**
+   * Retrieve info about a file
+   * @param actionId
+   * @param fileId
+   */
+  getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo>;
+
+  /**
+   * Scan a file path/folder
+   * @param actionRequest
+   * @param options
+   */
+  scan: (
+    actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
 }

@@ -9,13 +9,12 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import type { ExpandedDetailType } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { getScopedActions, isTimelineScope } from '../../../../../helpers';
+import { getScopedActions } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -49,10 +48,7 @@ const HostNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
@@ -75,17 +71,17 @@ const HostNameComponent: React.FC<Props> = ({
 
       const { timelineID, tabType } = eventContext;
 
-      const openNewFlyout = () =>
+      if (!expandableFlyoutDisabled) {
         openRightPanel({
           id: HostPanelKey,
           params: {
             hostName,
             contextID: contextId,
-            scopeId: TableId.alertsOnAlertsPage,
+            scopeId: timelineID,
             isDraggable,
           },
         });
-      const openOldFlyout = () => {
+      } else {
         const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'hostDetail',
           params: {
@@ -102,28 +98,16 @@ const HostNameComponent: React.FC<Props> = ({
             })
           );
         }
-      };
-
-      if (
-        (isTimelineScope(timelineID) &&
-          isNewHostDetailsFlyoutEnabled &&
-          expandableTimelineFlyoutEnabled) ||
-        isNewHostDetailsFlyoutEnabled
-      ) {
-        openNewFlyout();
-      } else {
-        openOldFlyout();
       }
     },
     [
       contextId,
       dispatch,
       eventContext,
-      expandableTimelineFlyoutEnabled,
+      expandableFlyoutDisabled,
       hostName,
       isDraggable,
       isInTimelineContext,
-      isNewHostDetailsFlyoutEnabled,
       onClick,
       openRightPanel,
     ]

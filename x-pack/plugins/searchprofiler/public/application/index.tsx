@@ -7,45 +7,43 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import { HttpStart as Http, ToastsSetup, CoreTheme } from '@kbn/core/public';
+import { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { LicenseStatus } from '../../common';
-import { KibanaThemeProvider } from '../shared_imports';
+import { KibanaRenderContextProvider } from '../shared_imports';
 import { App } from './app';
 import { AppContextProvider } from './contexts/app_context';
 import { ProfileContextProvider } from './contexts/profiler_context';
+import { SearchProfilerStartServices } from '../types';
 
 interface AppDependencies {
   el: HTMLElement;
   http: Http;
-  I18nContext: any;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
-  theme$: Observable<CoreTheme>;
   location: RouteComponentProps['location'];
+  startServices: SearchProfilerStartServices;
 }
 
 export const renderApp = ({
   el,
   http,
-  I18nContext,
   notifications,
   initialLicenseStatus,
-  theme$,
   location,
+  startServices,
 }: AppDependencies) => {
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <AppContextProvider args={{ initialLicenseStatus, notifications, http, location }}>
-          <ProfileContextProvider>
-            <App />
-          </ProfileContextProvider>
-        </AppContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...startServices}>
+      <AppContextProvider
+        args={{ initialLicenseStatus, notifications, http, location, ...startServices }}
+      >
+        <ProfileContextProvider>
+          <App />
+        </ProfileContextProvider>
+      </AppContextProvider>
+    </KibanaRenderContextProvider>,
     el
   );
 

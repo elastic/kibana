@@ -62,7 +62,7 @@ export class AiopsPlugin
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
     // Register server side APIs
-    core.getStartServices().then(([coreStart, depsStart]) => {
+    void core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
       defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });

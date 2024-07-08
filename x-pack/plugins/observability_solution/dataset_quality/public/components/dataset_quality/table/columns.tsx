@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
+  formatNumber,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -24,15 +25,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { formatBytes } from '@kbn/formatters';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
+  BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicator } from '../../quality_indicator';
-import { IntegrationIcon } from '../../common';
-import { useLinkToLogsExplorer } from '../../../hooks';
+import { NavigationSource } from '../../../services/telemetry';
+import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
+import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
+import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 
@@ -43,7 +45,7 @@ const collapseDatasetAriaLabel = i18n.translate('xpack.datasetQuality.collapseLa
   defaultMessage: 'Collapse',
 });
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
-  defaultMessage: 'Dataset Name',
+  defaultMessage: 'Data Set Name',
 });
 
 const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
@@ -55,7 +57,11 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 });
 
 const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
-  defaultMessage: 'Degraded Docs',
+  defaultMessage: 'Degraded Docs (%)',
+});
+
+const datasetQualityColumnName = i18n.translate('xpack.datasetQuality.datasetQualityColumnName', {
+  defaultMessage: 'Data Set Quality',
 });
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
@@ -84,38 +90,65 @@ const inactiveDatasetActivityColumnTooltip = i18n.translate(
   }
 );
 
-const degradedDocsDescription = (minimimPercentage: number) =>
+const degradedDocsDescription = (
+  quality: string,
+  minimimPercentage: number,
+  comparator: string = ''
+) =>
   i18n.translate('xpack.datasetQuality.degradedDocsQualityDescription', {
-    defaultMessage: 'greater than {minimimPercentage}%',
-    values: { minimimPercentage },
+    defaultMessage: '{quality} -{comparator} {minimimPercentage}%',
+    values: { quality, minimimPercentage, comparator },
   });
 
 const degradedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.degradedDocsColumnTooltip"
-    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset. {visualQueue}"
+    defaultMessage="The percentage of documents with the {ignoredProperty} property in your data set."
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
           _ignored
         </EuiCode>
       ),
+    }}
+  />
+);
+
+const datasetQualityColumnTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.datasetQualityColumnTooltip"
+    defaultMessage="Quality is based on the percentage of degraded docs in a data set. {visualQueue}"
+    values={{
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <QualityIndicator
               quality="poor"
-              description={` ${degradedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
+              description={` ${degradedDocsDescription(
+                'Poor',
+                POOR_QUALITY_MINIMUM_PERCENTAGE,
+                ' greater than'
+              )}`}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
               quality="degraded"
-              description={` ${degradedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
+              description={` ${degradedDocsDescription(
+                'Degraded',
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+                ' greater than'
+              )}`}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <QualityIndicator quality="good" description={' 0%'} />
+            <QualityIndicator
+              quality="good"
+              description={` ${degradedDocsDescription(
+                'Good',
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE
+              )}`}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -125,18 +158,24 @@ const degradedDocsColumnTooltip = (
 
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
+  canUserMonitorDataset,
+  canUserMonitorAnyDataStream,
   selectedDataset,
   openFlyout,
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
+  isSizeStatsAvailable,
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
+  canUserMonitorDataset: boolean;
+  canUserMonitorAnyDataStream: boolean;
   selectedDataset?: FlyoutDataset;
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
+  isSizeStatsAvailable: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
@@ -149,7 +188,7 @@ export const getDatasetQualityTableColumns = ({
         return (
           <EuiButtonIcon
             data-test-subj="datasetQualityExpandButton"
-            size="m"
+            size="xs"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
             iconType={isExpanded ? 'minimize' : 'expand'}
@@ -196,21 +235,51 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
+    ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
+      ? [
+          {
+            name: sizeColumnName,
+            field: 'sizeBytes',
+            sortable: true,
+            render: (_: any, dataStreamStat: DataStreamStat) => {
+              return (
+                <PrivilegesWarningIconWrapper
+                  title={`sizeBytes-${dataStreamStat.title}`}
+                  hasPrivileges={dataStreamStat.userPrivileges?.canMonitor ?? true}
+                >
+                  <EuiSkeletonRectangle
+                    width="60px"
+                    height="20px"
+                    borderRadius="m"
+                    isLoading={loadingDataStreamStats || loadingDegradedStats}
+                  >
+                    {formatNumber(
+                      DataStreamStat.calculateFilteredSize(dataStreamStat),
+                      BYTE_NUMBER_FORMAT
+                    )}
+                  </EuiSkeletonRectangle>
+                </PrivilegesWarningIconWrapper>
+              );
+            },
+            width: '100px',
+          },
+        ]
+      : []),
     {
-      name: sizeColumnName,
-      field: 'sizeBytes',
+      name: (
+        <EuiToolTip content={datasetQualityColumnTooltip}>
+          <span>
+            {`${datasetQualityColumnName} `}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
-        <EuiSkeletonRectangle
-          width="60px"
-          height="20px"
-          borderRadius="m"
-          isLoading={loadingDataStreamStats}
-        >
-          {formatBytes(dataStreamStat.sizeBytes || 0)}
-        </EuiSkeletonRectangle>
+        <DatasetQualityIndicator isLoading={loadingDegradedStats} dataStreamStat={dataStreamStat} />
       ),
-      width: '100px',
+      width: '140px',
     },
     {
       name: (
@@ -231,54 +300,66 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '140px',
     },
-    {
-      name: lastActivityColumnName,
-      field: 'lastActivity',
-      render: (timestamp: number) => (
-        <EuiSkeletonRectangle
-          width="200px"
-          height="20px"
-          borderRadius="m"
-          isLoading={loadingDataStreamStats}
-        >
-          {!isActiveDataset(timestamp) ? (
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-              <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                <EuiIcon tabIndex={0} type="iInCircle" size="s" />
-              </EuiToolTip>
-            </EuiFlexGroup>
-          ) : (
-            fieldFormats
-              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-              .convert(timestamp)
-          )}
-        </EuiSkeletonRectangle>
-      ),
-      width: '300px',
-      sortable: true,
-    },
+    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+      ? [
+          {
+            name: lastActivityColumnName,
+            field: 'lastActivity',
+            render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
+              <PrivilegesWarningIconWrapper
+                title={`lastActivity-${title}`}
+                hasPrivileges={userPrivileges?.canMonitor ?? true}
+              >
+                <EuiSkeletonRectangle
+                  width="200px"
+                  height="20px"
+                  borderRadius="m"
+                  isLoading={loadingDataStreamStats}
+                >
+                  {!isActiveDataset(timestamp) ? (
+                    <EuiFlexGroup gutterSize="xs" alignItems="center">
+                      <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+                      <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                        <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+                      </EuiToolTip>
+                    </EuiFlexGroup>
+                  ) : (
+                    fieldFormats
+                      .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+                      .convert(timestamp)
+                  )}
+                </EuiSkeletonRectangle>
+              </PrivilegesWarningIconWrapper>
+            ),
+            width: '300px',
+            sortable: true,
+          },
+        ]
+      : []),
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <RedirectLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogsExplorerLink = ({
+const RedirectLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
+  const redirectLinkProps = useRedirectLink({
+    dataStreamStat,
+    telemetry: { page: 'main', navigationSource: NavigationSource.Table },
+  });
 
   return (
-    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...logsExplorerLinkProps}>
+    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...redirectLinkProps.linkProps}>
       {title}
     </EuiLink>
   );

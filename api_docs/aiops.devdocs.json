@@ -242,9 +242,9 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.OptInConfig",
                 "text": "OptInConfig"
               },
@@ -252,9 +252,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.TelemetryCounter",
                 "text": "TelemetryCounter"
               },
@@ -664,7 +664,7 @@
             "signature": [
               "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
               "EuiComboBoxOptionOption",
-              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<{ dataView: ",
+              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<React.PropsWithChildren<{ dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -688,7 +688,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; dslQuery?: object | undefined; }>; } | undefined"
+              " | undefined; dslQuery?: object | undefined; }>>; } | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -782,6 +782,29 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [
+              "Observability AI Assistant"
+            ],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPublicStart",
+                "text": "ObservabilityAIAssistantPublicStart"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -1070,12 +1093,12 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisAppStateProps.stickyHistogram",
+            "id": "def-public.LogRateAnalysisAppStateProps.showContextualInsights",
             "type": "CompoundType",
             "tags": [],
-            "label": "stickyHistogram",
+            "label": "showContextualInsights",
             "description": [
-              "Option to make main histogram sticky"
+              "Optional flag to indicate whether to show contextual insights"
             ],
             "signature": [
               "boolean | undefined"
@@ -1133,22 +1156,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               }
-            ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisContentWrapperProps.stickyHistogram",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "stickyHistogram",
-            "description": [
-              "Option to make main histogram sticky"
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
@@ -1428,7 +1435,127 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "parentPluginId": "aiops",
+      "id": "def-public.AiopsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiopsPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/aiops/public/types/index.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "aiops",
+          "id": "def-public.AiopsPluginStart.getPatternAnalysisAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "getPatternAnalysisAvailable",
+          "description": [],
+          "signature": [
+            "() => Promise<(dataView: ",
+            {
+              "pluginId": "dataViews",
+              "scope": "common",
+              "docId": "kibDataViewsPluginApi",
+              "section": "def-common.DataView",
+              "text": "DataView"
+            },
+            ") => Promise<boolean>>"
+          ],
+          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "aiops",
+          "id": "def-public.AiopsPluginStart.PatternAnalysisComponent",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "PatternAnalysisComponent",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "LogCategorizationEmbeddableWrapperProps",
+            ", any> | React.FunctionComponent<",
+            "LogCategorizationEmbeddableWrapperProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "aiops",
+          "id": "def-public.AiopsPluginStart.ChangePointDetectionComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "ChangePointDetectionComponent",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "ChangePointDetectionProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "aiops",
+              "id": "def-public.AiopsPluginStart.ChangePointDetectionComponent.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "aiops",
+              "id": "def-public.AiopsPluginStart.ChangePointDetectionComponent.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "aiops",
+      "id": "def-public.AiopsPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "AiopsPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/aiops/public/types/index.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

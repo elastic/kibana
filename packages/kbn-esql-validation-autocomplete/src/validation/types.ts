@@ -32,7 +32,6 @@ export interface ReferenceMaps {
   variables: Map<string, ESQLVariable[]>;
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
-  metadataFields: Set<string>;
   query: string;
 }
 
@@ -167,6 +166,26 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
+  };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
   };
 }
 

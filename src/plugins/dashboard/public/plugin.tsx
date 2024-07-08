@@ -30,6 +30,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
@@ -39,7 +40,6 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -56,6 +56,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
+import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
 import {
   type DashboardAppLocator,
   DashboardAppLocatorDefinition,
@@ -69,7 +70,7 @@ import {
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { addPanelMenuTrigger } from './triggers';
+import { GetPanelPlacementSettings } from './dashboard_container/panel_placement';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -119,6 +120,10 @@ export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
+  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
+    embeddableType: string,
+    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
+  ) => void;
 }
 
 export let resolveServicesReady: () => void;
@@ -160,10 +165,6 @@ export class DashboardPlugin
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
-
-    // this trigger enables external consumers to register actions for
-    // adding items to the add panel menu
-    uiActions.registerTrigger(addPanelMenuTrigger);
 
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -221,7 +222,7 @@ export class DashboardPlugin
 
         // We also don't want to store the table list view state.
         // The question is: what _do_ we want to save here? :)
-        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by'];
         return replaceUrlHashQuery(newNavLink, (query) => {
           [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
             delete query[param];
@@ -257,6 +258,8 @@ export class DashboardPlugin
         const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
+        const [coreStart] = await core.getStartServices();
+
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
           scopedHistory: () => this.currentHistory!,
@@ -265,7 +268,7 @@ export class DashboardPlugin
         };
 
         return mountApp({
-          core,
+          coreStart,
           appUnMounted,
           element: params.element,
           mountContext,
@@ -342,6 +345,7 @@ export class DashboardPlugin
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
+      registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { pluginServices } = await import('./services/plugin_services');
         const {

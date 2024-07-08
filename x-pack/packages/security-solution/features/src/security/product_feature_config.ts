@@ -42,6 +42,16 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.investigationGuideInteractions]: {
+    privileges: {
+      all: {
+        ui: ['investigation-guide-interactions'],
+      },
+      read: {
+        ui: ['investigation-guide-interactions'],
+      },
+    },
+  },
 
   [ProductFeatureSecurityKey.threatIntelligence]: {
     privileges: {
@@ -95,6 +105,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.processOperations,
       SecuritySubFeatureId.fileOperations,
       SecuritySubFeatureId.executeAction,
+      SecuritySubFeatureId.scanAction,
     ],
     subFeaturesPrivileges: [
       {
@@ -110,4 +121,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
   [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
   [ProductFeatureSecurityKey.externalRuleActions]: {},
+  [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
+  [ProductFeatureSecurityKey.integrationAssistant]: {},
 };

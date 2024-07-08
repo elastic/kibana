@@ -16,8 +16,7 @@ import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { timelineActions } from '../../../timelines/store';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
@@ -26,6 +25,9 @@ import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_r
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -78,6 +80,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     onSelectAll,
     showEventsSelect,
     showSelectAllCheckbox,
+    showFullScreenToggle = true,
     sort,
     tabType,
     timelineId,
@@ -88,9 +91,12 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
     const dispatch = useDispatch();
 
-    const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineEnabled'
+    );
+
     const { defaultColumns } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, timelineId)
+      selectTimelineById(state, timelineId)
     );
 
     const toggleFullScreen = useCallback(() => {
@@ -222,52 +228,54 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
             </EventsThContent>
           </EventsTh>
         )}
-        <EventsTh role="button">
-          <FieldBrowserContainer>
-            {triggersActionsUi.getFieldBrowser({
-              browserFields,
-              columnIds: columnHeaders.map(({ id }) => id),
-              onResetColumns,
-              onToggleColumn,
-              options: fieldBrowserOptions,
-            })}
-          </FieldBrowserContainer>
-        </EventsTh>
+        {fieldBrowserOptions && (
+          <EventsTh role="button">
+            <FieldBrowserContainer>
+              {triggersActionsUi.getFieldBrowser({
+                browserFields,
+                columnIds: columnHeaders.map(({ id }) => id),
+                onResetColumns,
+                onToggleColumn,
+                options: fieldBrowserOptions,
+              })}
+            </FieldBrowserContainer>
+          </EventsTh>
+        )}
 
-        <EventsTh role="button">
-          <StatefulRowRenderersBrowser
-            data-test-subj="row-renderers-browser"
-            timelineId={timelineId}
-          />
-        </EventsTh>
-
-        <EventsTh role="button">
-          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
-              <EuiButtonIcon
-                aria-label={
-                  isFullScreen({
-                    globalFullScreen,
-                    isActiveTimelines: isActiveTimeline(timelineId),
-                    timelineFullScreen,
-                  })
-                    ? EXIT_FULL_SCREEN
-                    : i18n.FULL_SCREEN
-                }
-                display={fullScreen ? 'fill' : 'empty'}
-                color="primary"
-                data-test-subj={
-                  // a full screen button gets created for timeline and for the host page
-                  // this sets the data-test-subj for each case so that tests can differentiate between them
-                  isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
-                }
-                iconType="fullScreen"
-                onClick={toggleFullScreen}
-              />
-            </EuiToolTip>
-          </EventsThContent>
-        </EventsTh>
-        {tabType !== TimelineTabs.eql && (
+        {!unifiedComponentsInTimelineEnabled && (
+          <EventsTh role="button">
+            <StatefulRowRenderersBrowser timelineId={timelineId} />
+          </EventsTh>
+        )}
+        {showFullScreenToggle && (
+          <EventsTh role="button">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+                <EuiButtonIcon
+                  aria-label={
+                    isFullScreen({
+                      globalFullScreen,
+                      isActiveTimelines: isActiveTimeline(timelineId),
+                      timelineFullScreen,
+                    })
+                      ? EXIT_FULL_SCREEN
+                      : i18n.FULL_SCREEN
+                  }
+                  display={fullScreen ? 'fill' : 'empty'}
+                  color="primary"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
+                  }
+                  iconType="fullScreen"
+                  onClick={toggleFullScreen}
+                />
+              </EuiToolTip>
+            </EventsThContent>
+          </EventsTh>
+        )}
+        {tabType !== TimelineTabs.eql && !unifiedComponentsInTimelineEnabled && (
           <EventsTh role="button" data-test-subj="timeline-sorting-fields">
             <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip content={i18n.SORT_FIELDS}>

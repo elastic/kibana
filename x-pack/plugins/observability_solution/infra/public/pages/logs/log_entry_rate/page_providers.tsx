@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { logEntryCategoriesJobType, logEntryRateJobType } from '../../../../common/log_analysis';
 import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
@@ -18,7 +18,7 @@ import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
-export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
+export const LogEntryRatePageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     hasFailedLoading,
     isLoading,

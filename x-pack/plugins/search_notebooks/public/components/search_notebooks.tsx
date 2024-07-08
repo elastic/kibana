@@ -70,7 +70,7 @@ export const SearchNotebooks = () => {
               />
               <TitlePanel>
                 {i18n.translate('xpack.searchNotebooks.notebooksList.availableNotebooks.title', {
-                  defaultMessage: 'Available Notebooks',
+                  defaultMessage: 'Notebook previews',
                 })}
               </TitlePanel>
               <NotebooksList

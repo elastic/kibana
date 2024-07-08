@@ -7,17 +7,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { checkLicense } from '../../license_check';
+import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
+import React from 'react';
+import { firstValueFrom } from 'rxjs';
 import {
   ExportModalShareOpts,
   ExportPanelShareOpts,
   JobParamsProviderOptions,
   ReportingSharingData,
 } from '.';
+import { checkLicense } from '../../license_check';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
@@ -45,12 +46,10 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
  */
 export const reportingScreenshotShareProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   license,
   application,
   usesUiCapabilities,
-  theme,
+  startServices$,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -136,15 +135,13 @@ export const reportingScreenshotShareProvider = ({
         content: (
           <ScreenCapturePanelContent
             apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
+            startServices$={startServices$}
             reportType={'pngV2'}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             getJobParams={getJobParams(jobProviderOptions, 'pngV2')}
             isDirty={isDirty}
             onClose={onClose}
-            theme={theme}
           />
         ),
       },
@@ -169,8 +166,7 @@ export const reportingScreenshotShareProvider = ({
         content: (
           <ScreenCapturePanelContent
             apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
+            startServices$={startServices$}
             reportType={'printablePdfV2'}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
@@ -178,7 +174,6 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(jobProviderOptions, 'printablePdfV2')}
             isDirty={isDirty}
             onClose={onClose}
-            theme={theme}
           />
         ),
       },
@@ -200,8 +195,7 @@ export const reportingExportModalProvider = ({
   license,
   application,
   usesUiCapabilities,
-  theme,
-  i18n: i18nStart,
+  startServices$,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -294,7 +288,8 @@ export const reportingExportModalProvider = ({
 
       return apiClient
         .createReportingJob('printablePdfV2', decoratedJobParams)
-        .then(() => {
+        .then(() => firstValueFrom(startServices$))
+        .then(([startServices]) => {
           toasts.addSuccess({
             title: intl.formatMessage(
               {
@@ -318,7 +313,7 @@ export const reportingExportModalProvider = ({
                   ),
                 }}
               />,
-              { theme, i18n: i18nStart }
+              startServices
             ),
             'data-test-subj': 'queueReportSuccess',
           });
@@ -335,10 +330,13 @@ export const reportingExportModalProvider = ({
     };
 
     const generateReportPNG = ({ intl }: { intl: InjectedIntl }) => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
-
+      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'pngV2')();
+      let dimensions = outerLayout?.dimensions;
+      if (!dimensions) {
+        const el = document.querySelector('[data-shared-items-container]');
+        const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+        dimensions = { height, width };
+      }
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
         layout: { id: 'preserve_layout', dimensions },
@@ -347,7 +345,8 @@ export const reportingExportModalProvider = ({
       });
       return apiClient
         .createReportingJob('pngV2', decoratedJobParams)
-        .then(() => {
+        .then(() => firstValueFrom(startServices$))
+        .then(([startServices]) => {
           toasts.addSuccess({
             title: intl.formatMessage(
               {
@@ -371,7 +370,7 @@ export const reportingExportModalProvider = ({
                   ),
                 }}
               />,
-              { theme, i18n: i18nStart }
+              startServices
             ),
             'data-test-subj': 'queueReportSuccess',
           });
@@ -397,24 +396,22 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      generateReport: generateReportPDF,
+      generateExport: generateReportPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
         <FormattedMessage
           id="reporting.printablePdfV2.helpText"
-          defaultMessage="Exports can take a few minutes to generate."
+          defaultMessage="Select the file type you would like to export for this visualization."
         />
       ),
-      generateReportButton: (
+      generateExportButton: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
-          data-test-subj="generateReportButton"
-          defaultMessage="Generate export"
+          defaultMessage="Export file"
         />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
-      theme,
       renderLayoutOptionSwitch: objectType === 'dashboard',
       renderCopyURLButton: true,
       absoluteUrl: new URL(relativePathPDF, window.location.href).toString(),
@@ -430,21 +427,17 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      generateReport: generateReportPNG,
+      generateExport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
         <FormattedMessage
           id="reporting.pngV2.helpText"
-          defaultMessage="Exports can take a few minutes to generate."
+          defaultMessage="Select the file type you would like to export for this visualization."
         />
       ),
-      generateReportButton: (
-        <FormattedMessage
-          id="reporting.pngV2.generateButtonLabel"
-          defaultMessage="Generate export"
-          data-test-subj="generateReportButton"
-        />
+      generateExportButton: (
+        <FormattedMessage id="reporting.pngV2.generateButtonLabel" defaultMessage="Export file" />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderCopyURLButton: true,

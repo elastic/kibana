@@ -234,14 +234,14 @@
           {
             "parentPluginId": "@kbn/text-based-editor",
             "id": "def-public.TextBasedLanguagesEditorProps.query",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "The aggregate type query"
             ],
             "signature": [
-              "{ sql: string; } | { esql: string; }"
+              "{ esql: string; }"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
@@ -274,7 +274,7 @@
               {
                 "parentPluginId": "@kbn/text-based-editor",
                 "id": "def-public.TextBasedLanguagesEditorProps.onTextLangQueryChange.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
@@ -322,7 +322,7 @@
               {
                 "parentPluginId": "@kbn/text-based-editor",
                 "id": "def-public.TextBasedLanguagesEditorProps.onTextLangQuerySubmit.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
@@ -620,6 +620,22 @@
             "label": "hideQueryHistory",
             "description": [
               "hide query history"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.hideHeaderWhenExpanded",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideHeaderWhenExpanded",
+            "description": [
+              "hide header buttons when editor is expanded"
             ],
             "signature": [
               "boolean | undefined"

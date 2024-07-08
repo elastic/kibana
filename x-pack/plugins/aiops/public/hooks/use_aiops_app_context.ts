@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { createContext, type FC, useContext } from 'react';
+import { createContext, type FC, type PropsWithChildren, useContext } from 'react';
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -119,12 +120,14 @@ export interface AiopsAppDependencies {
       renderOption: EuiComboBoxProps<string>['renderOption'];
       closeFlyout: () => void;
     };
-    FieldStatsFlyoutProvider: FC<{
-      dataView: DataView;
-      fieldStatsServices: FieldStatsServices;
-      timeRangeMs?: TimeRangeMs;
-      dslQuery?: FieldStatsProps['dslQuery'];
-    }>;
+    FieldStatsFlyoutProvider: FC<
+      PropsWithChildren<{
+        dataView: DataView;
+        fieldStatsServices: FieldStatsServices;
+        timeRangeMs?: TimeRangeMs;
+        dslQuery?: FieldStatsProps['dslQuery'];
+      }>
+    >;
   };
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
@@ -132,6 +135,8 @@ export interface AiopsAppDependencies {
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin?: string;
+  /** Observability AI Assistant */
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 /**

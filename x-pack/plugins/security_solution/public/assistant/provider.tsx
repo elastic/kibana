@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -13,26 +14,29 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
   bulkUpdateConversations,
-  mergeBaseWithPersistedConversations,
-  useFetchCurrentUserConversations,
+  getUserConversations,
+  getPrompts,
+  bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
 
-import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { useObservable } from 'react-use';
+import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
-import { useBaseConversations } from './use_conversation_store';
-import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
+import { useBaseConversations } from './use_conversation_store';
+import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
+import { licenseService } from '../common/hooks/use_license';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -46,22 +50,15 @@ const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
 );
 
 export const createConversations = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conversationsData: Record<string, any>,
   notifications: NotificationsStart,
   http: HttpSetup,
   storage: Storage
 ) => {
   // migrate conversations with messages from the local storage
   // won't happen next time
-  const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
+  const conversations = storage.get(`${APP_ID}.${LOCAL_STORAGE_KEY}`);
 
-  if (
-    conversationsData &&
-    Object.keys(conversationsData).length === 0 &&
-    conversations &&
-    Object.keys(conversations).length > 0
-  ) {
+  if (conversations && Object.keys(conversations).length > 0) {
     const conversationsToCreate = Object.values(conversations).filter(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c: any) => c.messages && c.messages.length > 0
@@ -87,10 +84,14 @@ export const createConversations = async (
             const selectedConnector = (connectors ?? []).find(
               (connector) => connector.id === c.apiConfig.connectorId
             );
-            c.apiConfig = {
-              ...c.apiConfig,
-              actionTypeId: selectedConnector?.actionTypeId,
-            };
+            if (selectedConnector) {
+              c.apiConfig = {
+                ...c.apiConfig,
+                actionTypeId: selectedConnector.actionTypeId,
+              };
+            } else {
+              c.apiConfig = undefined;
+            }
           }
           res[c.id] = {
             ...c,
@@ -104,7 +105,7 @@ export const createConversations = async (
       notifications.toasts
     );
     if (bulkResult && bulkResult.success) {
-      storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
+      storage.remove(`${APP_ID}.${LOCAL_STORAGE_KEY}`);
       notifications.toasts?.addSuccess({
         iconType: 'check',
         title: LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE,
@@ -115,11 +116,28 @@ export const createConversations = async (
   }
 };
 
+export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
+  const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS, ...BASE_SECURITY_SYSTEM_PROMPTS];
+
+  // post bulk create
+  const bulkResult = await bulkUpdatePrompts(
+    http,
+    {
+      create: promptsToCreate,
+    },
+    notifications.toasts
+  );
+  if (bulkResult && bulkResult.success) {
+    return true;
+  }
+};
+
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
-export const AssistantProvider: React.FC = ({ children }) => {
+export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
+    application: { navigateToApp, currentAppId$ },
     http,
     notifications,
     storage,
@@ -131,31 +149,58 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const baseConversations = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
-
-  const migrateConversationsFromLocalStorage = once(
-    (conversationsData: Record<string, Conversation>) =>
-      createConversations(conversationsData, notifications, http, storage)
-  );
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
-      const mergedData = mergeBaseWithPersistedConversations({}, conversationsData);
-      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
-        migrateConversationsFromLocalStorage(mergedData);
+  const currentAppId = useObservable(currentAppId$, '');
+  const hasEnterpriseLicence = licenseService.isEnterprise();
+  useEffect(() => {
+    const migrateConversationsFromLocalStorage = once(async () => {
+      if (
+        hasEnterpriseLicence &&
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege
+      ) {
+        const res = await getUserConversations({
+          http,
+        });
+        if (res.total === 0) {
+          await createConversations(notifications, http, storage);
+        }
       }
-      return mergedData;
-    },
-    [
-      assistantAvailability.hasAssistantPrivilege,
-      assistantAvailability.isAssistantEnabled,
-      migrateConversationsFromLocalStorage,
-    ]
-  );
-  useFetchCurrentUserConversations({
+    });
+    migrateConversationsFromLocalStorage();
+  }, [
+    assistantAvailability.hasAssistantPrivilege,
+    assistantAvailability.isAssistantEnabled,
+    hasEnterpriseLicence,
     http,
-    onFetch: onFetchedConversations,
-    isAssistantEnabled:
-      assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege,
-  });
+    notifications,
+    storage,
+  ]);
+
+  useEffect(() => {
+    const createSecurityPrompts = once(async () => {
+      if (
+        hasEnterpriseLicence &&
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege
+      ) {
+        const res = await getPrompts({
+          http,
+          toasts: notifications.toasts,
+        });
+
+        if (res.total === 0) {
+          await createBasePrompts(notifications, http);
+        }
+      }
+    });
+    createSecurityPrompts();
+  }, [
+    assistantAvailability.hasAssistantPrivilege,
+    assistantAvailability.isAssistantEnabled,
+    hasEnterpriseLicence,
+    http,
+    notifications,
+  ]);
 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
@@ -171,13 +216,13 @@ export const AssistantProvider: React.FC = ({ children }) => {
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
-      baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
+      navigateToApp={navigateToApp}
       title={ASSISTANT_TITLE}
       toasts={toasts}
+      currentAppId={currentAppId ?? 'securitySolutionUI'}
     >
       {children}
     </ElasticAssistantProvider>

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -22,8 +23,10 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -32,6 +35,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -226,6 +230,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  [ALERT_RULE_EXECUTION_TIMESTAMP]: date,
   [ALERT_RULE_NAME]: 'rule-name',
   [ALERT_RULE_PARAMETERS]: { bar: true },
   [ALERT_RULE_PRODUCER]: 'alerts',
@@ -233,6 +238,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SEVERITY_IMPROVING]: false,
   [ALERT_START]: date,
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: date },
@@ -251,6 +257,8 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+  [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: undefined,
   ...overrides,
 });
 
@@ -265,6 +273,8 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: date },
   [ALERT_STATUS]: 'recovered',
   [ALERT_CONSECUTIVE_MATCHES]: 0,
+  [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: true,
   ...overrides,
 });
 
@@ -311,7 +321,6 @@ describe('Alerts Client', () => {
           ruleRunMetricsStore,
           shouldLogAlerts: false,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
           alertDelay: 0,
         };
@@ -673,6 +682,7 @@ describe('Alerts Client', () => {
                   },
                 },
                 [TIMESTAMP]: date,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_CONSECUTIVE_MATCHES]: 1,
@@ -680,6 +690,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -954,6 +965,7 @@ describe('Alerts Client', () => {
                   },
                 },
                 [TIMESTAMP]: date,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_CONSECUTIVE_MATCHES]: 1,
@@ -961,6 +973,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1002,6 +1015,7 @@ describe('Alerts Client', () => {
                   },
                 },
                 [TIMESTAMP]: date,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: date,
                 [EVENT_ACTION]: 'close',
                 [ALERT_ACTION_GROUP]: 'recovered',
                 [ALERT_CONSECUTIVE_MATCHES]: 0,
@@ -1009,6 +1023,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1019,6 +1034,7 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',
@@ -1099,6 +1115,7 @@ describe('Alerts Client', () => {
               // ongoing alert doc
               getOngoingIndexedAlertDoc({
                 [TIMESTAMP]: startedAtDate,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: startedAtDate,
                 [ALERT_UUID]: 'def',
                 [ALERT_INSTANCE_ID]: '2',
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
@@ -1112,6 +1129,7 @@ describe('Alerts Client', () => {
               // new alert doc
               getNewIndexedAlertDoc({
                 [TIMESTAMP]: startedAtDate,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: startedAtDate,
                 [ALERT_UUID]: uuid3,
                 [ALERT_INSTANCE_ID]: '3',
                 [ALERT_START]: startedAtDate,
@@ -1129,6 +1147,118 @@ describe('Alerts Client', () => {
               // recovered alert doc
               getRecoveredIndexedAlertDoc({
                 [TIMESTAMP]: startedAtDate,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: startedAtDate,
+                [ALERT_DURATION]: 1951841000,
+                [ALERT_UUID]: 'abc',
+                [ALERT_END]: startedAtDate,
+                [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
+              }),
+            ],
+          });
+        });
+
+        test('should use runTimestamp time if provided', async () => {
+          const runTimestamp = '2023-10-01T00:00:00.000Z';
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
+                },
+              ],
+            },
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+              '2': trackedAlert2Raw,
+            },
+            runTimestamp: new Date(runTimestamp),
+            startedAt: new Date(startedAtDate),
+          });
+
+          // Report 1 new alert and 1 active alert, recover 1 alert
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('2').scheduleActions('default');
+          alertExecutorService.create('3').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+          const uuid3 = alertsToReturn['3'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: true,
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  if_seq_no: 42,
+                  if_primary_term: 666,
+                  require_alias: false,
+                },
+              },
+              // ongoing alert doc
+              getOngoingIndexedAlertDoc({
+                [TIMESTAMP]: startedAtDate,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp,
+                [ALERT_UUID]: 'def',
+                [ALERT_INSTANCE_ID]: '2',
+                [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
+                [ALERT_DURATION]: 37951841000,
+                [ALERT_START]: '2023-03-28T02:27:28.159Z',
+                [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+              }),
+              {
+                create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              getNewIndexedAlertDoc({
+                [TIMESTAMP]: startedAtDate,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp,
+                [ALERT_UUID]: uuid3,
+                [ALERT_INSTANCE_ID]: '3',
+                [ALERT_START]: startedAtDate,
+                [ALERT_TIME_RANGE]: { gte: startedAtDate },
+              }),
+              {
+                index: {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              // recovered alert doc
+              getRecoveredIndexedAlertDoc({
+                [TIMESTAMP]: startedAtDate,
+                [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp,
                 [ALERT_DURATION]: 1951841000,
                 [ALERT_UUID]: 'abc',
                 [ALERT_END]: startedAtDate,

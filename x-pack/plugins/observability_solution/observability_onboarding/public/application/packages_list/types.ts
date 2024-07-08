@@ -7,8 +7,8 @@
 
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
-export type GeneratedCard = {
-  type: 'generated';
+export type VirtualCard = {
+  type: 'virtual';
 } & IntegrationCardItem;
 
 export interface FeaturedCard {
@@ -16,4 +16,4 @@ export interface FeaturedCard {
   name: string;
 }
 
-export type CustomCard = FeaturedCard | GeneratedCard;
+export type CustomCard = FeaturedCard | VirtualCard;

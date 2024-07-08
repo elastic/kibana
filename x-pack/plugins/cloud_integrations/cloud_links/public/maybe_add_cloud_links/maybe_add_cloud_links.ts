@@ -22,7 +22,7 @@ export interface MaybeAddCloudLinksDeps {
   share: SharePluginStart;
 }
 
-export function maybeAddCloudLinks({ core, security, cloud, share }: MaybeAddCloudLinksDeps): void {
+export function maybeAddCloudLinks({ core, security, cloud }: MaybeAddCloudLinksDeps): void {
   const userObservable = defer(() => security.authc.getCurrentUser()).pipe(
     // Check if user is a cloud user.
     map((user) => user.elastic_cloud_user),
@@ -56,9 +56,6 @@ export function maybeAddCloudLinks({ core, security, cloud, share }: MaybeAddClo
         const helpMenuLinks = createHelpMenuLinks({
           docLinks: core.docLinks,
           helpSupportUrl,
-          core,
-          share,
-          cloud,
         });
 
         core.chrome.setHelpMenuLinks(helpMenuLinks);

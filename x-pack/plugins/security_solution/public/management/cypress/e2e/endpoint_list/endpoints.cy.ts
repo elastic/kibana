@@ -41,7 +41,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
         return enableAllPolicyProtections(policy.id).then(() => {
           // Create and enroll a new Endpoint host
-          return createEndpointHost(policy.policy_id).then((host) => {
+          return createEndpointHost(policy.policy_ids[0]).then((host) => {
             createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });
@@ -80,12 +80,13 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     loadPage(APP_ENDPOINTS_PATH);
 
     const agentIdPath = 'response.body.data[0].metadata.agent.id';
-    // ideally we should use applied policy instead: https://github.com/elastic/security-team/issues/8837
-    const policyVersionPath = 'response.body.data[0].policy_info.endpoint.revision';
+    const policyVersionPath =
+      'response.body.data[0].metadata.Endpoint.policy.applied.endpoint_policy_version';
     cy.wait('@metadataRequest', { timeout: 30000 });
     cy.get('@metadataRequest').its(agentIdPath).should('be.a', 'string').as('endpointId');
     cy.get('@metadataRequest')
       .its(policyVersionPath)
+      .then((version) => parseInt(version, 10))
       .should('be.a', 'number')
       .as('originalPolicyRevision');
     cy.get<string>('@endpointId')
@@ -124,7 +125,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get<number>('@originalPolicyRevision').then((originalRevision: number) => {
       const revisionRegex = new RegExp(`^rev\\. ${originalRevision + 1}$`);
-      cy.get('@endpointRow').findByTestSubj('policyListRevNo').contains(revisionRegex);
+      cy.get('@endpointRow').findByTestSubj('policyNameCellLink-revision').contains(revisionRegex);
     });
   });
 
@@ -195,8 +196,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
         .and('be.enabled');
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
 
-      // ideally we should use applied policy instead: https://github.com/elastic/security-team/issues/8837
-      const policyIdPath = 'response.body.data[0].policy_info.agent.configured.id';
+      const policyIdPath = 'response.body.data[0].policy_info.agent.applied.id';
       // relies on multiple transforms so might take some extra time
       cy.get('@metadataRequest', { timeout: 120000 })
         .its(policyIdPath)

@@ -19,6 +19,7 @@ export type {
   ObservabilityRouteHandlerResources,
   AbstractObservabilityServerRouteRepository,
   ObservabilityServerRouteRepository,
+  APIEndpoint,
   ObservabilityAPIReturnType,
 } from './routes/types';
 

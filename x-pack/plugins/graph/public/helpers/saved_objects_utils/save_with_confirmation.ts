@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
+import type { CoreStart, SavedObjectsCreateOptions } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import { CONTENT_ID, GraphCreateIn, GraphCreateOut } from '../../../common/content_management';
 import { OVERWRITE_REJECTED } from './constants';
@@ -32,9 +32,12 @@ export async function saveWithConfirmation(
   source: GraphSavedObjectAttributes,
   savedObject: Pick<GraphWorkspaceSavedObject, 'title' | 'getEsType' | 'displayName'>,
   options: SavedObjectsCreateOptions,
-  services: { overlays: OverlayStart; contentClient: ContentClient }
+  services: { contentClient: ContentClient } & Pick<
+    CoreStart,
+    'overlays' | 'analytics' | 'i18n' | 'theme'
+  >
 ): Promise<{ item: GraphSavedObject }> {
-  const { overlays, contentClient } = services;
+  const { contentClient, ...startServices } = services;
   try {
     return await contentClient.create<GraphCreateIn, GraphCreateOut>({
       contentTypeId: CONTENT_ID,
@@ -60,7 +63,7 @@ export async function saveWithConfirmation(
         defaultMessage: 'Overwrite',
       });
 
-      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, startServices)
         .then(() =>
           contentClient.create<GraphCreateIn, GraphCreateOut>({
             contentTypeId: CONTENT_ID,

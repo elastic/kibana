@@ -110,10 +110,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableExpandableFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -468,6 +464,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableMultiSignal': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -488,7 +488,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:aiAssistantSearchConnectorIndexPattern': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logsExplorer:allowedDataViews': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
+  },
+  'observability:logSources': {
     type: 'array',
     items: {
       type: 'keyword',
@@ -539,7 +550,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableESQL': {
+  enableESQL: {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -620,6 +631,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInfrastructureHostsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureContainerAssetView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

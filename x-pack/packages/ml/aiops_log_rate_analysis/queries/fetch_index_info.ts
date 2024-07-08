@@ -17,6 +17,12 @@ import { getTotalDocCountRequest } from './get_total_doc_count_request';
 // TODO Consolidate with duplicate `fetchPValues` in
 // `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
+// Supported field names for text fields for log rate analysis.
+// If we analyse all detected text fields, we might run into performance
+// issues with the `categorize_text` aggregation. Until this is resolved, we
+// rely on a predefined white list of supported text fields.
+const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
+
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
   ES_FIELD_TYPES.IP,
@@ -24,8 +30,6 @@ const SUPPORTED_ES_FIELD_TYPES = [
 ];
 
 const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
-
-const IGNORE_FIELD_NAMES = ['_tier'];
 
 interface IndexInfo {
   fieldCandidates: string[];
@@ -45,9 +49,19 @@ export const fetchIndexInfo = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(
     {
-      index,
       fields: '*',
+      filters: '-metadata',
       include_empty_fields: false,
+      index,
+      index_filter: {
+        range: {
+          [params.timeFieldName]: {
+            gte: params.deviationMin,
+            lte: params.deviationMax,
+          },
+        },
+      },
+      types: [...SUPPORTED_ES_FIELD_TYPES, ...SUPPORTED_ES_FIELD_TYPES_TEXT],
     },
     { signal: abortSignal, maxRetries: 0 }
   );
@@ -64,11 +78,11 @@ export const fetchIndexInfo = async (
     const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
 
     // Check if fieldName is something we can aggregate on
-    if (isSupportedType && isAggregatable && !IGNORE_FIELD_NAMES.includes(key)) {
+    if (isSupportedType && isAggregatable) {
       acceptableFields.add(key);
     }
 
-    if (isTextField && !IGNORE_FIELD_NAMES.includes(key)) {
+    if (isTextField && TEXT_FIELD_WHITE_LIST.includes(key)) {
       acceptableTextFields.add(key);
     }
 

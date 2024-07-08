@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render, screen } from '@testing-library/react';
 import { SourcesPanelSidebar } from './sources_panel_sidebar';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
@@ -19,7 +19,7 @@ jest.mock('../../hooks/use_query_indices', () => ({
   useQueryIndices: jest.fn(),
 }));
 
-const Wrapper: React.FC = ({ children }) => {
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <IntlProvider locale="en">{children}</IntlProvider>

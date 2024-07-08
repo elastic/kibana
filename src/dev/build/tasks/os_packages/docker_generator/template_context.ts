@@ -24,7 +24,7 @@ export interface TemplateContext {
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   publicArtifactSubdomain: string;
-  baseImage: 'none' | 'ubi' | 'ubuntu';
+  baseImage: 'none' | 'ubi' | 'ubuntu' | 'wolfi';
   baseImageName: string;
   cloud?: boolean;
   serverless?: boolean;

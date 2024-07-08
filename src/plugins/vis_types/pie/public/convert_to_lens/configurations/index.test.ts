@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { LegendValue } from '@elastic/charts';
 import { getConfiguration } from '.';
 import { samplePieVis } from '../../sample_vis.test.mocks';
 
@@ -38,7 +39,7 @@ describe('getConfiguration', () => {
           percentDecimals: 2,
           primaryGroups: ['bucket-1'],
           secondaryGroups: [],
-          showValuesInLegend: true,
+          legendStats: [LegendValue.Value],
           truncateLegend: true,
         },
       ],

@@ -58,9 +58,10 @@ const _extendAction = <C extends Partial<CellAction>>(
     } else {
       isCompatible = async (context) => {
         // call extended and default `isCompatible` to make sure the default `execute` will run properly
-        return (
-          (await actionTemplate.isCompatible(context)) && (await extendedIsCompatible(context))
-        );
+        if (!(await actionTemplate.isCompatible(context))) {
+          return false;
+        }
+        return extendedIsCompatible(context);
       };
     }
   }

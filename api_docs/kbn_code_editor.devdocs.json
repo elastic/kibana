@@ -423,6 +423,22 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.editorWillUnmount",
+            "type": "Function",
+            "tags": [],
+            "label": "editorWillUnmount",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.useDarkTheme",
             "type": "CompoundType",
             "tags": [],
@@ -570,6 +586,20 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,

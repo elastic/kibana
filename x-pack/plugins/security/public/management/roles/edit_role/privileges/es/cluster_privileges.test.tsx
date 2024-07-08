@@ -17,6 +17,7 @@ test('it renders without crashing', () => {
   const role: Role = {
     name: '',
     elasticsearch: {
+      remote_cluster: [],
       cluster: [],
       indices: [],
       run_as: [],
@@ -39,6 +40,7 @@ test('it renders fields as disabled when not editable', () => {
     name: '',
     elasticsearch: {
       cluster: [],
+      remote_cluster: [],
       indices: [],
       run_as: [],
     },
@@ -61,6 +63,7 @@ test('it allows for custom cluster privileges', () => {
     name: '',
     elasticsearch: {
       cluster: ['existing-custom', 'monitor'],
+      remote_cluster: [],
       indices: [],
       run_as: [],
     },

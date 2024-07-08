@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 import React from 'react';
 
-import '../../../../common/mock/match_media';
 import { mockGlobalState, TestProviders } from '../../../../common/mock';
 import { ExpandableHostDetails } from './expandable_host';
 import { mockAnomalies } from '../../../../common/components/ml/mock';

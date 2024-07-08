@@ -8,18 +8,29 @@ import Chance from 'chance';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { getCloudProductTier } from './cloud_security_metering';
-import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
+import {
+  getCloudSecurityUsageRecord,
+  getSearchQueryByCloudSecuritySolution,
+} from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
-import type { CloudSecuritySolutions } from './types';
+
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM } from './constants';
+import {
+  CLOUD_SECURITY_TASK_TYPE,
+  CSPM,
+  KSPM,
+  CNVM,
+  CLOUD_DEFEND,
+  BILLABLE_ASSETS_CONFIG,
+} from './constants';
+import { getCloudDefendUsageRecords } from './defend_for_containers_metering';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const chance = new Chance();
 
-const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM];
+const cloudSecuritySolutions: Array<typeof CSPM | typeof KSPM> = [CSPM, KSPM];
 
 describe('getCloudSecurityUsageRecord', () => {
   beforeEach(() => {
@@ -50,18 +61,33 @@ describe('getCloudSecurityUsageRecord', () => {
   });
 
   test.each(cloudSecuritySolutions)(
-    'should return usageRecords with correct values for cspm, kspm, and cnvm when Elasticsearch response has aggregations',
+    'should return usageRecords with correct values for cspm and kspm when Elasticsearch response has aggregations',
     async (cloudSecuritySolution) => {
       // @ts-ignore
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
       });
+      const randomIndex = Math.floor(
+        Math.random() * BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values.length
+      );
+      const randomBillableAsset = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values[randomIndex];
 
       // @ts-ignore
       mockEsClient.search.mockResolvedValueOnce({
         aggregations: {
-          unique_assets: {
-            value: 10,
+          resource_sub_type: {
+            buckets: [
+              {
+                key: randomBillableAsset,
+                doc_count: 100,
+                unique_assets: { value: 10 },
+              },
+              {
+                key: 'not_billable_asset',
+                doc_count: 50,
+                unique_assets: { value: 11 },
+              },
+            ],
           },
           min_timestamp: {
             value_as_string: '2023-07-30T15:11:41.738Z',
@@ -96,6 +122,10 @@ describe('getCloudSecurityUsageRecord', () => {
             sub_type: cloudSecuritySolution,
             quantity: 10,
             period_seconds: expect.any(Number),
+            metadata: {
+              [randomBillableAsset]: '10',
+              not_billable_asset: '11',
+            },
           },
           source: {
             id: taskId,
@@ -108,6 +138,62 @@ describe('getCloudSecurityUsageRecord', () => {
       ]);
     }
   );
+
+  it('should return usageRecords with correct values for cnvm when Elasticsearch response has aggregations', async () => {
+    const cloudSecuritySolution = CNVM;
+
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
+    });
+
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      aggregations: {
+        unique_assets: {
+          value: 10,
+        },
+        min_timestamp: {
+          value_as_string: '2023-07-30T15:11:41.738Z',
+        },
+      },
+    });
+
+    const projectId = chance.guid();
+    const taskId = chance.guid();
+
+    const tier = 'essentials' as ProductTier;
+    const result = await getCloudSecurityUsageRecord({
+      esClient: mockEsClient,
+      projectId,
+      logger,
+      taskId,
+      lastSuccessfulReport: new Date(),
+      cloudSecuritySolution,
+      tier,
+    });
+
+    expect(result).toEqual([
+      {
+        id: expect.stringContaining(`${CLOUD_SECURITY_TASK_TYPE}_cnvm_${projectId}`),
+        usage_timestamp: '2023-07-30T15:11:41.738Z',
+        creation_timestamp: expect.any(String), // Expect a valid ISO string
+        usage: {
+          type: CLOUD_SECURITY_TASK_TYPE,
+          sub_type: CNVM,
+          quantity: 10,
+          period_seconds: expect.any(Number),
+        },
+        source: {
+          id: taskId,
+          instance_group_id: projectId,
+          metadata: {
+            tier: 'essentials',
+          },
+        },
+      },
+    ]);
+  });
 
   it('should return undefined when Elasticsearch response does not have aggregations', async () => {
     // @ts-ignore
@@ -156,6 +242,72 @@ describe('getCloudSecurityUsageRecord', () => {
   });
 });
 
+describe('getSearchQueryByCloudSecuritySolution', () => {
+  it('should return the correct search query for CSPM', () => {
+    const result = getSearchQueryByCloudSecuritySolution('cspm');
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+          {
+            term: {
+              'rule.benchmark.posture_type': 'cspm',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should return the correct search query for KSPM', () => {
+    const result = getSearchQueryByCloudSecuritySolution('kspm');
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+          {
+            term: {
+              'rule.benchmark.posture_type': 'kspm',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should return the correct search query for CNVM', () => {
+    const result = getSearchQueryByCloudSecuritySolution(CNVM);
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+});
+
 describe('should return the relevant product tier', () => {
   it('should return the relevant product tier for cloud product line', async () => {
     const serverlessSecurityConfig = {
@@ -172,38 +324,42 @@ describe('should return the relevant product tier', () => {
     expect(tier).toBe('complete');
   });
 
-  it('should return usageRecords with correct values for cloud defend', async () => {
+  it('should return none tier in case cloud product line is missing ', async () => {
+    const serverlessSecurityConfig = {
+      enabled: true,
+      developer: {},
+      productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
+    } as unknown as ServerlessSecurityConfig;
+
+    const tier = getCloudProductTier(serverlessSecurityConfig, logger);
+
+    expect(tier).toBe('none');
+  });
+});
+
+describe('cloud defend metering', () => {
+  it('should return usageRecords with correct values', async () => {
     const cloudSecuritySolution = 'cloud_defend';
-    // @ts-ignore
-    mockEsClient.search.mockResolvedValueOnce({
-      hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
-    });
+    const agentId1 = chance.guid();
+    const eventIngestedStr = '2024-05-28T12:10:51Z';
+    const eventIngestedTimestamp = new Date(eventIngestedStr);
 
     // @ts-ignore
     mockEsClient.search.mockResolvedValueOnce({
-      aggregations: {
-        asset_count_groups: {
-          buckets: [
-            {
-              key_as_string: 'true',
-              unique_assets: {
-                value: 10,
-              },
-              min_timestamp: {
-                value_as_string: '2023-07-30T15:11:41.738Z',
-              },
-            },
-            {
-              key_as_string: 'false',
-              unique_assets: {
-                value: 5,
-              },
-              min_timestamp: {
-                value_as_string: '2023-07-30T15:11:41.738Z',
+      hits: {
+        hits: [
+          {
+            _id: 'someRecord',
+            _index: 'mockIndex',
+            _source: {
+              'cloud_defend.block_action_enabled': true,
+              'agent.id': agentId1,
+              event: {
+                ingested: eventIngestedStr,
               },
             },
-          ],
-        },
+          },
+        ],
       },
     });
 
@@ -212,48 +368,33 @@ describe('should return the relevant product tier', () => {
 
     const tier = 'essentials' as ProductTier;
 
-    const result = await getCloudSecurityUsageRecord({
+    const result = await getCloudDefendUsageRecords({
       esClient: mockEsClient,
       projectId,
-      logger,
       taskId,
       lastSuccessfulReport: new Date(),
       cloudSecuritySolution,
+      logger,
       tier,
     });
+
+    const roundedIngestedTimestamp = eventIngestedTimestamp;
+    roundedIngestedTimestamp.setMinutes(0);
+    roundedIngestedTimestamp.setSeconds(0);
+    roundedIngestedTimestamp.setMilliseconds(0);
 
     expect(result).toEqual([
       {
         id: expect.stringContaining(
-          `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}`
+          `${projectId}_${agentId1}_${roundedIngestedTimestamp.toISOString()}`
         ),
-        usage_timestamp: '2023-07-30T15:11:41.738Z',
-        creation_timestamp: expect.any(String), // Expect a valid ISO string
+        usage_timestamp: eventIngestedStr,
+        creation_timestamp: expect.any(String),
         usage: {
           type: CLOUD_SECURITY_TASK_TYPE,
-          sub_type: `${cloudSecuritySolution}_block_action_enabled_true`,
-          quantity: 10,
-          period_seconds: expect.any(Number),
-        },
-        source: {
-          id: taskId,
-          instance_group_id: projectId,
-          metadata: {
-            tier: 'essentials',
-          },
-        },
-      },
-      {
-        id: expect.stringContaining(
-          `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}`
-        ),
-        usage_timestamp: '2023-07-30T15:11:41.738Z',
-        creation_timestamp: expect.any(String), // Expect a valid ISO string
-        usage: {
-          type: CLOUD_SECURITY_TASK_TYPE,
-          sub_type: `${cloudSecuritySolution}_block_action_enabled_false`,
-          quantity: 5,
-          period_seconds: expect.any(Number),
+          sub_type: CLOUD_DEFEND,
+          quantity: 1,
+          period_seconds: 3600,
         },
         source: {
           id: taskId,
@@ -266,15 +407,102 @@ describe('should return the relevant product tier', () => {
     ]);
   });
 
-  it('should return none tier in case cloud product line is missing ', async () => {
-    const serverlessSecurityConfig = {
-      enabled: true,
-      developer: {},
-      productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
-    } as unknown as ServerlessSecurityConfig;
+  it('should return an empty array when Elasticsearch returns an empty response', async () => {
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      hits: {
+        hits: [],
+      },
+    });
+    const tier = 'essentials' as ProductTier;
+    // Call the function with mock parameters
+    const result = await getCloudDefendUsageRecords({
+      esClient: mockEsClient,
+      projectId: chance.guid(),
+      taskId: chance.guid(),
+      lastSuccessfulReport: new Date(),
+      cloudSecuritySolution: 'cloud_defend',
+      logger,
+      tier,
+    });
 
-    const tier = getCloudProductTier(serverlessSecurityConfig, logger);
+    // Assert that the result is an empty array
+    expect(result).toEqual([]);
+  });
 
-    expect(tier).toBe('none');
+  it('should handle errors from Elasticsearch', async () => {
+    // Mock Elasticsearch client's search method to throw an error
+    mockEsClient.search.mockRejectedValueOnce(new Error('Elasticsearch query failed'));
+
+    const tier = 'essentials' as ProductTier;
+
+    // Call the function with mock parameters
+    await getCloudDefendUsageRecords({
+      esClient: mockEsClient,
+      projectId: chance.guid(),
+      taskId: chance.guid(),
+      lastSuccessfulReport: new Date(),
+      cloudSecuritySolution: 'cloud_defend',
+      logger,
+      tier,
+    });
+
+    // Assert that the logger's error method was called with the correct error message
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to fetch cloud_defend metering data Error: Elasticsearch query failed'
+    );
+  });
+
+  it('should return usageRecords when Elasticsearch returns multiple records', async () => {
+    // Mock Elasticsearch response with multiple records
+    const agentId1 = chance.guid();
+    const agentId2 = chance.guid();
+    const eventIngestedStr1 = '2024-05-28T12:10:51Z';
+    const eventIngestedStr2 = '2024-05-28T13:10:51Z';
+
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _id: 'record1',
+            _index: 'mockIndex',
+            _source: {
+              'cloud_defend.block_action_enabled': true,
+              'agent.id': agentId1,
+              event: {
+                ingested: eventIngestedStr1,
+              },
+            },
+          },
+          {
+            _id: 'record2',
+            _index: 'mockIndex',
+            _source: {
+              'cloud_defend.block_action_enabled': true,
+              'agent.id': agentId2,
+              event: {
+                ingested: eventIngestedStr2,
+              },
+            },
+          },
+        ],
+      },
+    });
+    const tier = 'essentials' as ProductTier;
+
+    // Call the function with mock parameters
+    const result = await getCloudDefendUsageRecords({
+      esClient: mockEsClient,
+      projectId: chance.guid(),
+      taskId: chance.guid(),
+      lastSuccessfulReport: new Date(),
+      cloudSecuritySolution: 'cloud_defend',
+      logger,
+      tier,
+    });
+
+    // Assert that the result contains usage records for both records
+    expect(result).toHaveLength(2);
   });
 });

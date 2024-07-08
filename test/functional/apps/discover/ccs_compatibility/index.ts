@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const config = getService('config');
+  const isCcsTest = config.get('esTestCluster.ccs');
 
   describe('discover/ccs_compatible', function () {
     before(async function () {
@@ -23,5 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_data_view_editor'));
     loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_search_errors'));
+    if (isCcsTest) loadTestFile(require.resolve('./_timeout_results'));
   });
 }

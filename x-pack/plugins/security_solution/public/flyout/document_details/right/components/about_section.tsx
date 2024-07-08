@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -16,7 +15,7 @@ import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
@@ -30,8 +29,8 @@ const KEY = 'about';
  * For generic events (event.kind is event), it shows the event category description and event renderer.
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
-export const AboutSection: FC = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+export const AboutSection = memo(() => {
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 

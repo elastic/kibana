@@ -23,6 +23,7 @@ const defaultProps: Props = {
   description: 'Test description',
   getPromptContext: () => Promise.resolve('Test prompt context'),
   tooltip: 'Test tooltip',
+  isAssistantEnabled: true,
 };
 
 describe('NewChat', () => {
@@ -32,6 +33,14 @@ describe('NewChat', () => {
 
   it('renders the default New Chat button with a discuss icon', () => {
     render(<NewChat {...defaultProps} />);
+
+    const newChatButton = screen.getByTestId('newChat');
+
+    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+  });
+
+  it('renders the default New Chat button even if the Assistant is disabled', () => {
+    render(<NewChat {...defaultProps} isAssistantEnabled={false} />);
 
     const newChatButton = screen.getByTestId('newChat');
 
@@ -78,5 +87,35 @@ describe('NewChat', () => {
     userEvent.click(newChatButton);
 
     expect(mockUseAssistantOverlay.showAssistantOverlay).toHaveBeenCalledWith(true);
+  });
+
+  it('renders new chat as link', () => {
+    render(<NewChat {...defaultProps} asLink={true} />);
+
+    const newChatLink = screen.getByTestId('newChatLink');
+
+    expect(newChatLink).toBeInTheDocument();
+  });
+
+  it('calls onShowOverlay callback on click', () => {
+    const onShowOverlaySpy = jest.fn();
+    render(<NewChat {...defaultProps} onShowOverlay={onShowOverlaySpy} />);
+
+    const newChatButton = screen.getByTestId('newChat');
+
+    userEvent.click(newChatButton);
+
+    expect(onShowOverlaySpy).toHaveBeenCalled();
+  });
+
+  it('calls onShowOverlay callback on click for link', () => {
+    const onShowOverlaySpy = jest.fn();
+    render(<NewChat {...defaultProps} asLink={true} onShowOverlay={onShowOverlaySpy} />);
+
+    const newChatLink = screen.getByTestId('newChatLink');
+
+    userEvent.click(newChatLink);
+
+    expect(onShowOverlaySpy).toHaveBeenCalled();
   });
 });

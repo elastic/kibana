@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
   VisToExpressionAst,
@@ -47,6 +47,7 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
     shouldTruncate: params.truncateLegend,
     showSingleSeries: true,
     legendSize,
+    legendStats: params.labels.show ? [LegendValue.CurrentAndLastValue] : undefined,
   });
 
   return buildExpression([legend]);
@@ -434,7 +435,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
-    valuesInLegend: vis.params.labels.show,
     singleTable: true,
   });
 

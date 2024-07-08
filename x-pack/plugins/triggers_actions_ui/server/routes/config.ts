@@ -23,7 +23,7 @@ export interface ConfigRouteOpts {
   // alertingConfig is a function because "isUsingSecurity" is pulled from the license
   // state which gets populated after plugin setup().
   alertingConfig: () => AlertingRulesConfig;
-  getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
 }
 
 export function createConfigRoute({
@@ -48,10 +48,18 @@ export function createConfigRoute({
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     // Check that user has access to at least one rule type
-    const rulesClient = getRulesClientWithRequest(req);
+    const rulesClient = await getRulesClientWithRequest(req);
     const ruleTypes = Array.from(await rulesClient.listRuleTypes());
+    const { minimumScheduleInterval, maxScheduledPerMinute, isUsingSecurity } = alertingConfig(); // Only returns exposed config values
+
     if (ruleTypes.length > 0) {
-      return res.ok({ body: alertingConfig() });
+      return res.ok({
+        body: {
+          minimumScheduleInterval,
+          maxScheduledPerMinute,
+          isUsingSecurity,
+        },
+      });
     } else {
       return res.forbidden({
         body: { message: `Unauthorized to access config` },

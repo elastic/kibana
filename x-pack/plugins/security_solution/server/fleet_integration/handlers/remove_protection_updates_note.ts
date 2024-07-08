@@ -23,11 +23,8 @@ export const removeProtectionUpdatesNote = async (
         id: policy.id,
       },
     });
-    await pMap(
-      foundProtectionUpdatesNotes.saved_objects,
-      (protectionUpdatesNote: { id: string }) => {
-        soClient.delete(protectionUpdatesNoteSavedObjectType, protectionUpdatesNote.id);
-      }
+    await pMap(foundProtectionUpdatesNotes.saved_objects, (protectionUpdatesNote: { id: string }) =>
+      soClient.delete(protectionUpdatesNoteSavedObjectType, protectionUpdatesNote.id)
     );
   }
 };

@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -66,7 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const instance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance(instanceName);
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             )
         );
       });
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns service node metadata', async () => {
         const response = await callApi();

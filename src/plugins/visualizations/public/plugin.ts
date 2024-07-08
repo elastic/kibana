@@ -36,7 +36,7 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -48,9 +48,9 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import {
+  CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
-  registerSavedObjectToPanelMethod,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -105,6 +105,8 @@ import {
   setEmbeddable,
   setDocLinks,
   setSpaces,
+  setAnalytics,
+  setI18n,
   setTheme,
   setExecutionContext,
   setFieldFormats,
@@ -124,6 +126,7 @@ import {
 } from '../common/content_management';
 import { SerializedVisData } from '../common';
 import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
+import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -386,6 +389,7 @@ export class VisualizationsPlugin
     }
 
     setUISettings(core.uiSettings);
+    setAnalytics(core.analytics);
     setTheme(core.theme);
 
     expressions.registerFunction(rangeExpressionFunction);
@@ -395,7 +399,9 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(visualizeEditorTrigger);
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
-    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
+    const addAggVisAction = new AddAggVisualizationPanelAction();
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
@@ -407,36 +413,36 @@ export class VisualizationsPlugin
       name: 'Visualize Library',
     });
 
-    registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        const visState = savedObject.attributes.visState;
+    embeddable.registerSavedObjectToPanelMethod<
+      VisualizationSavedObjectAttributes,
+      VisualizeByValueInput
+    >(CONTENT_ID, (savedObject) => {
+      const visState = savedObject.attributes.visState;
 
-        // not sure if visState actually is ever undefined, but following the type
-        if (!savedObject.managed || !visState) {
-          return {
-            savedObjectId: savedObject.id,
-          };
-        }
-
-        // data is not always defined, so I added a default value since the extract
-        // routine in the embeddable factory expects it to be there
-        const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-          data?: SerializedVisData;
-        };
-
-        if (!savedVis.data) {
-          savedVis.data = {
-            searchSource: {},
-            aggs: [],
-          };
-        }
-
+      // not sure if visState actually is ever undefined, but following the type
+      if (!savedObject.managed || !visState) {
         return {
-          savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+          savedObjectId: savedObject.id,
         };
       }
-    );
+
+      // data is not always defined, so I added a default value since the extract
+      // routine in the embeddable factory expects it to be there
+      const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+        data?: SerializedVisData;
+      };
+
+      if (!savedVis.data) {
+        savedVis.data = {
+          searchSource: {},
+          aggs: [],
+        };
+      }
+
+      return {
+        savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+      };
+    });
 
     return {
       ...this.types.setup(),
@@ -464,6 +470,7 @@ export class VisualizationsPlugin
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
+    setI18n(core.i18n);
     setEmbeddable(embeddable);
     setApplication(core.application);
     setCapabilities(core.application.capabilities);

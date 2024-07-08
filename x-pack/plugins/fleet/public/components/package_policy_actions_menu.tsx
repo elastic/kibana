@@ -10,8 +10,8 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { policyHasFleetServer } from '../services';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -19,14 +19,14 @@ import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
-  agentPolicy?: AgentPolicy;
+  agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
   from?: 'fleet-policy-list' | undefined;
 }> = ({
-  agentPolicy,
+  agentPolicies,
   packagePolicy,
   showAddAgent,
   upgradePackagePolicyHref,
@@ -35,8 +35,13 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-  const canAddAgents = useAuthz().fleet.addAgents;
+  const authz = useAuthz();
+
+  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
+
+  const canAddAgents = isFleetServerPolicy ? authz.fleet.addFleetServers : authz.fleet.addAgents;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
@@ -122,7 +127,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;
     menuItems.push(
-      <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
+      <PackagePolicyDeleteProvider agentPolicies={agentPolicies} key="packagePolicyDelete">
         {(deletePackagePoliciesPrompt) => {
           return (
             <ContextMenuItem

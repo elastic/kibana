@@ -22,14 +22,16 @@
     ],
     "optionalPlugins": [
       "cases",
+      "observabilityAIAssistant",
       "usageCollection"
     ],
     "requiredBundles": [
+      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
       "embeddable",
-      "cases"
+      "cases",
     ]
   }
 }

@@ -2,19 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
-    "@kbn/analytics-client",
     "@kbn/logging-mocks",
+    "@kbn/ebt",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

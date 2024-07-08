@@ -58,11 +58,6 @@ export const commonXYArgs: CommonXYFn['args'] = {
     default: false,
     help: strings.getHideEndzonesHelp(),
   },
-  valuesInLegend: {
-    types: ['boolean'],
-    default: false,
-    help: strings.getValuesInLegendHelp(),
-  },
   ariaLabel: {
     types: ['string'],
     help: strings.getAriaLabelHelp(),

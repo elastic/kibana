@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,7 +38,7 @@ export const getDomain = (series: Array<{ name?: string; data: Coordinate[] }>) 
   };
 };
 
-const EmptyContainer: React.FC = ({ children }) => (
+const EmptyContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',

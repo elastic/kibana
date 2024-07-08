@@ -135,7 +135,7 @@ export class QueueProcessor<T = unknown> {
   public addToQueue(...data: T[]) {
     if (data.length > 0) {
       this.queue.push(...data);
-      this.processQueue();
+      this.processQueue().catch(() => {});
     }
   }
 

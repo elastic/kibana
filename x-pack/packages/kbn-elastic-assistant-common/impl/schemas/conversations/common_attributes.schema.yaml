@@ -6,27 +6,6 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    NonEmptyString:
-      type: string
-      pattern: ^(?! *$).+$
-      minLength: 1
-      description: A string that is not empty and does not contain only whitespace
-
-    UUID:
-      type: string
-      format: uuid
-      description: A universally unique identifier
-
-    User:
-      type: object
-      description: Could be any string, not necessarily a UUID
-      properties:
-        id:
-          type: string
-          description: User id.
-        name:
-          type: string
-          description: User name.
 
     TraceData:
       type: object
@@ -97,7 +76,7 @@ components:
           $ref: '#/components/schemas/MessageRole'
           description: Message role.
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: The timestamp message was sent or received.
         isError:
           type: boolean
@@ -114,10 +93,10 @@ components:
       properties:
         connectorId:
           type: string
-          description: connector Id
+          description: connector id
         actionTypeId:
           type: string
-          description: action type Id
+          description: action type id
         defaultSystemPromptId:
           type: string
           description: defaultSystemPromptId
@@ -135,7 +114,7 @@ components:
           type: string
           description: Summary text of the conversation over time.
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: The timestamp summary was updated.
         public:
           type: boolean
@@ -151,7 +130,7 @@ components:
       additionalProperties: false
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         error:
           type: object
           required:
@@ -175,9 +154,7 @@ components:
         - category
       properties:
         id:
-          oneOf:
-            - $ref: '#/components/schemas/UUID'
-            - $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         title:
           type: string
           description: The conversation title.
@@ -187,7 +164,7 @@ components:
         summary:
           $ref: '#/components/schemas/ConversationSummary'
         'timestamp':
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         updatedAt:
           description: The last time conversation was updated.
           type: string
@@ -199,7 +176,7 @@ components:
         users:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
         messages:
           type: array
           items:
@@ -224,9 +201,7 @@ components:
         - id
       properties:
         id:
-          oneOf:
-            - $ref: '#/components/schemas/UUID'
-            - $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         title:
           type: string
           description: The conversation title.
@@ -254,6 +229,9 @@ components:
       required:
         - title
       properties:
+        id:
+          type: string
+          description: The conversation id.
         title:
           type: string
           description: The conversation title.

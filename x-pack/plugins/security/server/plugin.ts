@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -44,7 +44,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
-import { buildSecurityApi } from './build_security_api';
+import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
@@ -52,6 +52,8 @@ import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
+import type { FipsServiceSetupInternal } from './fips';
+import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
@@ -60,9 +62,6 @@ import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
-import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
-import type { UserSettingServiceStart } from './user_profile/user_setting_service';
-import { UserSettingService } from './user_profile/user_setting_service';
 import type { AuthenticatedUser, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 
@@ -91,6 +90,7 @@ export interface PluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -172,15 +172,15 @@ export class SecurityPlugin
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
 
-  private readonly userSettingService: UserSettingService;
-  private userSettingServiceStart?: UserSettingServiceStart;
-  private userProfileSettingsClient: UserProfileSettingsClient;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
     }
     return this.userProfileStart;
   };
+
+  private readonly fipsService: FipsService;
+  private fipsServiceSetup?: FipsServiceSetupInternal;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -202,15 +202,10 @@ export class SecurityPlugin
     this.userProfileService = new UserProfileService(
       this.initializerContext.logger.get('user-profile')
     );
-    this.userSettingService = new UserSettingService(
-      this.initializerContext.logger.get('user-settings')
-    );
 
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
 
-    this.userProfileSettingsClient = new UserProfileSettingsClient(
-      this.initializerContext.logger.get('user-settings-client')
-    );
+    this.fipsService = new FipsService(this.initializerContext.logger.get('fips'));
   }
 
   public setup(
@@ -237,8 +232,6 @@ export class SecurityPlugin
       elasticsearch: coreServices.elasticsearch,
       features: depsServices.features,
     }));
-
-    core.userSettings.setUserProfileSettings(this.userProfileSettingsClient);
 
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
@@ -294,6 +287,9 @@ export class SecurityPlugin
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
+    this.fipsServiceSetup = this.fipsService.setup({ config, license });
+    this.fipsServiceSetup.validateLicenseForFips();
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
@@ -310,9 +306,15 @@ export class SecurityPlugin
 
     this.registerDeprecations(core, license);
 
-    core.security.registerSecurityApi(
+    core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+        audit: this.auditSetup,
+      })
+    );
+    core.userProfile.registerUserProfileDelegate(
+      buildUserProfileApi({
+        getUserProfile: this.getUserProfileService.bind(this),
       })
     );
 
@@ -381,8 +383,6 @@ export class SecurityPlugin
     this.session = session;
 
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
-    this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
-    this.userProfileSettingsClient.setUserSettingsServiceStart(this.userSettingServiceStart);
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =

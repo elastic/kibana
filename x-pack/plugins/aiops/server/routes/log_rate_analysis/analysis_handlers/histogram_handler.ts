@@ -18,9 +18,9 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
 import {
-  addSignificantItemsHistogramAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+  addSignificantItemsHistogram,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
@@ -41,7 +41,6 @@ export const histogramHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async (
     fieldValuePairsCount: number,
@@ -51,7 +50,7 @@ export const histogramHandlerFactory =
   ) => {
     function pushHistogramDataLoadingState() {
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
@@ -132,14 +131,6 @@ export const histogramHandlerFactory =
               ) ?? {
                 doc_count: 0,
               };
-              if (version === '1') {
-                return {
-                  key: o.key,
-                  key_as_string: o.key_as_string ?? '',
-                  doc_count_significant_term: current.doc_count,
-                  doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                };
-              }
 
               return {
                 key: o.key,
@@ -154,21 +145,18 @@ export const histogramHandlerFactory =
           stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
           pushHistogramDataLoadingState();
           responseStream.push(
-            addSignificantItemsHistogramAction(
-              [
-                {
-                  fieldName,
-                  fieldValue,
-                  histogram,
-                },
-              ],
-              version
-            )
+            addSignificantItemsHistogram([
+              {
+                fieldName,
+                fieldValue,
+                histogram,
+              },
+            ])
           );
         }
       }, MAX_CONCURRENT_QUERIES);
 
-      fieldValueHistogramQueue.push(significantTerms);
+      await fieldValueHistogramQueue.push(significantTerms);
       await fieldValueHistogramQueue.drain();
     }
 
@@ -237,15 +225,6 @@ export const histogramHandlerFactory =
               doc_count: 0,
             };
 
-            if (version === '1') {
-              return {
-                key: o.key,
-                key_as_string: o.key_as_string ?? '',
-                doc_count_significant_term: current.doc_count,
-                doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-              };
-            }
-
             return {
               key: o.key,
               key_as_string: o.key_as_string ?? '',
@@ -259,16 +238,13 @@ export const histogramHandlerFactory =
         stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
         pushHistogramDataLoadingState();
         responseStream.push(
-          addSignificantItemsHistogramAction(
-            [
-              {
-                fieldName,
-                fieldValue,
-                histogram,
-              },
-            ],
-            version
-          )
+          addSignificantItemsHistogram([
+            {
+              fieldName,
+              fieldValue,
+              histogram,
+            },
+          ])
         );
       }
     }

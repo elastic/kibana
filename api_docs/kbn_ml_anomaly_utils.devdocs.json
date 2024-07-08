@@ -3029,7 +3029,7 @@
           "\nThe type of the anomaly result, such as bucket, influencer or record."
         ],
         "signature": [
-          "\"record\" | \"bucket\" | \"influencer\""
+          "\"bucket\" | \"record\" | \"influencer\""
         ],
         "path": "x-pack/packages/ml/anomaly_utils/types.ts",
         "deprecated": false,

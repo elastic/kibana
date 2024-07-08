@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,77 +24,72 @@ import {
   EuiSwitchEvent,
   EuiText,
   EuiToolTip,
+  type EuiRadioGroupOption,
 } from '@elastic/eui';
-import useMountedState from 'react-use/lib/useMountedState';
-import { ShareMenuItem } from '../../../types';
+import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
   layoutOption?: 'print';
-  aggregateReportTypes: ShareMenuItem[];
+  aggregateReportTypes: ShareMenuItemV2[];
   intl: InjectedIntl;
+  publicAPIEnabled: boolean;
 };
 
-type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'lens_csv';
-
-const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: ExportProps) => {
-  // needed for CSV in Discover
-  const firstRadio =
-    (aggregateReportTypes[0].reportType as AllowedExports) ?? ('printablePdfV2' as const);
-  const [, setIsStale] = useState(false);
-  const [isCreatingReport, setIsCreatingReport] = useState<boolean>(false);
-  const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(firstRadio);
+const ExportContentUi = ({
+  isDirty,
+  aggregateReportTypes,
+  intl,
+  onClose,
+  publicAPIEnabled,
+}: ExportProps) => {
+  const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
-  const isMounted = useMountedState();
 
-  const markAsStale = useCallback(() => {
-    if (!isMounted) return;
-    setIsStale(true);
-  }, [isMounted]);
+  const radioOptions = useMemo(() => {
+    return aggregateReportTypes
+      .filter(({ reportType }) => reportType)
+      .map(({ reportType, label }) => {
+        return { id: reportType, label, 'data-test-subj': `${reportType}-radioOption` };
+      }) as EuiRadioGroupOption[];
+  }, [aggregateReportTypes]);
 
-  const getProperties = useCallback(() => {
-    if (objectType === 'search') {
-      return aggregateReportTypes[0];
-    } else {
-      return aggregateReportTypes?.filter(({ reportType }) => reportType === selectedRadio)[0];
-    }
-  }, [selectedRadio, aggregateReportTypes, objectType]);
+  const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
+    radioOptions[0].id as SupportedExportTypes
+  );
+
+  const {
+    generateExportButton,
+    helpText,
+    renderCopyURLButton,
+    generateExport,
+    absoluteUrl,
+    renderLayoutOptionSwitch,
+  } = useMemo(() => {
+    return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
+  }, [selectedRadio, aggregateReportTypes]);
 
   const handlePrintLayoutChange = useCallback(
     (evt: EuiSwitchEvent) => {
       setPrintLayout(evt.target.checked);
-      getProperties();
     },
-    [setPrintLayout, getProperties]
+    [setPrintLayout]
   );
 
-  const {
-    generateReportButton,
-    helpText,
-    renderCopyURLButton,
-    generateReport,
-    generateReportForPrinting,
-    downloadCSVLens,
-    absoluteUrl,
-    renderLayoutOptionSwitch,
-  } = getProperties();
-
-  const getRadioOptions = useCallback(() => {
-    if (!aggregateReportTypes.length) {
-      throw new Error('No content registered for this tab');
+  const getReport = useCallback(async () => {
+    try {
+      setIsCreatingExport(true);
+      await generateExport({ intl, optimizedForPrinting: usePrintLayout });
+    } finally {
+      setIsCreatingExport(false);
+      onClose?.();
     }
-    return aggregateReportTypes.map(({ reportType, label }) => {
-      if (reportType == null) {
-        throw new Error('expected reportType to be string!');
-      }
-      return { id: reportType, label, 'data-test-subj': `${reportType}-radioOption` };
-    });
-  }, [aggregateReportTypes]);
+  }, [generateExport, intl, usePrintLayout, onClose]);
 
   const renderLayoutOptionsSwitch = useCallback(() => {
     if (renderLayoutOptionSwitch) {
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={
@@ -109,7 +105,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
               data-test-subj="usePrintLayout"
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
                 <FormattedMessage
@@ -126,70 +122,36 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     }
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
-  useEffect(() => {
-    isMounted();
-    getRadioOptions();
-    renderLayoutOptionsSwitch();
-    getProperties();
-    markAsStale();
-  }, [
-    aggregateReportTypes,
-    getProperties,
-    getRadioOptions,
-    renderLayoutOptionsSwitch,
-    markAsStale,
-    isMounted,
-  ]);
-
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton)
+    if (renderCopyURLButton && publicAPIEnabled)
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                isDirty ? (
+            <EuiCopy textToCopy={absoluteUrl ?? ''}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  iconType="copyClipboard"
+                  onClick={copy}
+                  data-test-subj="shareReportingCopyURL"
+                  data-share-url={absoluteUrl}
+                >
                   <FormattedMessage
-                    id="share.modalContent.unsavedStateErrorText"
-                    defaultMessage="Save your work before copying this URL."
+                    id="share.modalContent.copyUrlButtonLabel"
+                    defaultMessage="Copy Post URL"
                   />
-                ) : (
-                  <FormattedMessage
-                    id="share.modalContent.savedStateErrorText"
-                    defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-                  />
-                )
-              }
-            >
-              <EuiCopy textToCopy={absoluteUrl ?? ''}>
-                {(copy) => (
-                  <EuiButtonEmpty
-                    iconType="copy"
-                    flush="both"
-                    onClick={copy}
-                    data-test-subj="shareReportingCopyURL"
-                  >
-                    <EuiToolTip
-                      id="share.savePostURLMessage"
-                      content="Unsaved changes. This URL will not reflect later saved changes unless you save."
-                    >
-                      <FormattedMessage
-                        id="share.modalContent.copyUrlButtonLabel"
-                        defaultMessage="Post URL"
-                      />
-                    </EuiToolTip>
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            </EuiToolTip>
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
-                <FormattedMessage
-                  id="share.postURLWatcherMessage"
-                  defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher. Unsaved changes: URL may change if you upgrade Kibana"
-                />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="share.postURLWatcherMessage"
+                    defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+                  />
+                </EuiText>
               }
             >
               <EuiIcon type="questionInCircle" />
@@ -197,54 +159,29 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, isDirty, renderCopyURLButton]);
-
-  const getReport = useCallback(() => {
-    if (!generateReportForPrinting && !generateReport && !downloadCSVLens) {
-      throw new Error('Report cannot be run due to no generate report method registered');
-    }
-    if (objectType === 'lens' && selectedRadio === 'lens_csv') {
-      return downloadCSVLens!();
-    }
-    return usePrintLayout ? generateReportForPrinting!({ intl }) : generateReport!({ intl });
-  }, [
-    downloadCSVLens,
-    generateReport,
-    generateReportForPrinting,
-    objectType,
-    selectedRadio,
-    usePrintLayout,
-    intl,
-  ]);
+  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        color="primary"
-        onClick={() => {
-          setIsCreatingReport(true);
-          getReport();
-          setIsCreatingReport(false);
-        }}
+        color={isDirty ? 'warning' : 'primary'}
+        onClick={getReport}
         data-test-subj="generateReportButton"
-        isLoading={Boolean(isCreatingReport)}
+        isLoading={isCreatingExport}
       >
-        {generateReportButton}
+        {generateExportButton}
       </EuiButton>
     );
-  }, [generateReportButton, getReport, isCreatingReport]);
+  }, [generateExportButton, getReport, isCreatingExport, isDirty]);
 
   const renderRadioOptions = () => {
-    if (getRadioOptions().length > 1) {
+    if (radioOptions.length > 1) {
       return (
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup
-            options={getRadioOptions()}
-            onChange={(id) => {
-              setSelectedRadio(id as AllowedExports);
-              getProperties();
-            }}
+            options={radioOptions}
+            onChange={(id) => setSelectedRadio(id as SupportedExportTypes)}
             name="image reporting radio group"
             idSelected={selectedRadio}
             legend={{
@@ -256,32 +193,42 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     }
   };
 
-  const getHelpText = () => {
-    if (objectType === 'lens' && generateReport !== undefined) {
-      return helpText;
-    } else {
-      return (
-        <FormattedMessage
-          id="share.helpText.goldLicense.roleNotPDFPNG"
-          defaultMessage="Export a CSV of this visualization."
-        />
-      );
-    }
+  const renderHelpText = () => {
+    const showHelpText = publicAPIEnabled && isDirty;
+    return (
+      showHelpText && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            color="warning"
+            title={
+              <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+            }
+          >
+            <FormattedMessage
+              id="share.postURLWatcherMessage.unsavedChanges"
+              defaultMessage="URL may change if you upgrade Kibana."
+            />
+          </EuiCallOut>
+        </>
+      )
+    );
   };
 
   return (
     <>
       <EuiForm>
         <EuiSpacer size="l" />
-        {getHelpText()}
+        <>{helpText}</>
         <EuiSpacer size="m" />
-        {renderRadioOptions()}
+        <>{renderRadioOptions()}</>
+        {renderHelpText()}
         <EuiSpacer size="xl" />
       </EuiForm>
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        {renderLayoutOptionsSwitch()}
-        {showCopyURLButton()}
-        {renderGenerateReportButton()}
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">
+        <>{renderLayoutOptionsSwitch()}</>
+        <>{showCopyURLButton()}</>
+        <>{renderGenerateReportButton()}</>
       </EuiFlexGroup>
     </>
   );

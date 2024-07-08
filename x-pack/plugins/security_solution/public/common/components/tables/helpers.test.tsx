@@ -8,7 +8,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import '../../mock/match_media';
 import {
   RowItemOverflowComponent,
   OverflowFieldComponent,

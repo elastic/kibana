@@ -5,42 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { type ESQLSource, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
-// retrieves the index pattern from the aggregate query for SQL
-export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  let sql = sqlQuery?.replaceAll('"', '').replaceAll("'", '');
-  const splitFroms = sql?.split(new RegExp(/FROM\s/, 'ig'));
-  const fromsLength = splitFroms?.length ?? 0;
-  if (splitFroms && splitFroms?.length > 2) {
-    sql = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
-  }
-  // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;]+)/, 'i');
-  const matches = sql?.match(regex);
-  if (matches) {
-    return matches[1];
-  }
-  return '';
+// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
+export function getIndexPatternFromESQLQuery(esql?: string) {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
+  const indices = args.filter((arg) => arg.sourceType === 'index');
+  return indices?.map((index) => index.text).join(',');
 }
 
-// retrieves the index pattern from the aggregate query for ES|QL
-export function getIndexPatternFromESQLQuery(esql?: string): string {
-  let fromPipe = (esql || '').split('|')[0];
-  const splitFroms = fromPipe?.split(new RegExp(/FROM\s/, 'ig'));
-  const fromsLength = splitFroms?.length ?? 0;
-  if (splitFroms && splitFroms?.length > 2) {
-    fromPipe = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
+// For ES|QL we consider stats and keep transformational command
+// The metrics command too but only if it aggregates
+export function hasTransformationalCommand(esql?: string) {
+  const transformationalCommands = ['stats', 'keep'];
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
+    ast.find(({ name }) => name === command)
+  );
+  if (hasAtLeastOneTransformationalCommand) {
+    return true;
   }
-  const parsedString = fromPipe?.replaceAll('`', '');
-  // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;\s]+)/, 'i');
-  const matches = parsedString?.match(regex);
-  if (matches) {
-    return matches[1]?.trim();
+  const metricsCommand = ast.find(({ name }) => name === 'metrics');
+
+  if (metricsCommand && 'aggregates' in metricsCommand) {
+    return true;
   }
-  return '';
+
+  return false;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {

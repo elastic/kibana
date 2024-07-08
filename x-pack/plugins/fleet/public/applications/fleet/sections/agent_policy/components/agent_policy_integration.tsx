@@ -47,13 +47,14 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
   return (
     <EuiForm>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.createAgentPolicyLabel"
               defaultMessage="Create agent policy"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage

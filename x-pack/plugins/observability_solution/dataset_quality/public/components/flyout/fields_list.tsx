@@ -15,19 +15,22 @@ import {
   EuiHorizontalRule,
   EuiSkeletonTitle,
   EuiSkeletonText,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 
 export function FieldsList({
   title,
   fields,
   actionsMenu: ActionsMenu,
+  dataTestSubj = `datasetQualityFlyoutFieldsList-${title.toLowerCase().split(' ').join('_')}`,
 }: {
   title: string;
-  fields: Array<{ fieldTitle: string; fieldValue: ReactNode }>;
+  fields: Array<{ fieldTitle: string; fieldValue: ReactNode; isLoading: boolean }>;
   actionsMenu?: ReactNode;
+  dataTestSubj?: string;
 }) {
   return (
-    <EuiPanel hasBorder grow={false}>
+    <EuiPanel hasBorder grow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiTitle size="s">
           <span>{title}</span>
@@ -36,7 +39,7 @@ export function FieldsList({
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup direction="column" gutterSize="none">
-        {fields.map(({ fieldTitle, fieldValue }, index) => (
+        {fields.map(({ fieldTitle, fieldValue, isLoading: isFieldLoading }, index) => (
           <Fragment key={index + fieldTitle}>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
@@ -44,9 +47,11 @@ export function FieldsList({
                   <span>{fieldTitle}</span>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={4} data-test-subj="datasetQualityFlyoutFieldValue">
-                {fieldValue}
-              </EuiFlexItem>
+              <EuiSkeletonRectangle width={260} isLoading={isFieldLoading} title={title}>
+                <EuiFlexItem grow={4} data-test-subj="datasetQualityFlyoutFieldValue">
+                  {fieldValue}
+                </EuiFlexItem>
+              </EuiSkeletonRectangle>
             </EuiFlexGroup>
 
             {index < fields.length - 1 ? <EuiHorizontalRule margin="s" /> : null}

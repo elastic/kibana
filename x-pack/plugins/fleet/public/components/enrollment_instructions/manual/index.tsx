@@ -9,7 +9,7 @@ import type { DownloadSource, FleetProxy } from '../../../types';
 
 function getfleetServerHostsEnrollArgs(
   apiKey: string,
-  fleetServerHosts: string[],
+  fleetServerHost: string,
   fleetProxy?: FleetProxy
 ) {
   const proxyHeadersArgs = fleetProxy?.proxy_headers
@@ -20,12 +20,12 @@ function getfleetServerHostsEnrollArgs(
       }, '')
     : '';
   const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
-  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}${proxyArgs}`;
+  return `--url=${fleetServerHost || `FLEET_SERVER_HOST`} --enrollment-token=${apiKey}${proxyArgs}`;
 }
 
 export const ManualInstructions = ({
   apiKey,
-  fleetServerHosts,
+  fleetServerHost,
   fleetProxy,
   downloadSource,
   agentVersion: agentVersion,
@@ -34,7 +34,7 @@ export const ManualInstructions = ({
   gcpAccountType,
 }: {
   apiKey: string;
-  fleetServerHosts: string[];
+  fleetServerHost: string;
   fleetProxy?: FleetProxy;
   downloadSource?: DownloadSource;
   agentVersion: string;
@@ -42,7 +42,7 @@ export const ManualInstructions = ({
   gcpOrganizationId?: string;
   gcpAccountType?: string;
 }) => {
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHost, fleetProxy);
   const downloadBaseUrl = downloadSource
     ? downloadSource.host.endsWith('/')
       ? downloadSource.host.substring(0, downloadSource.host.length - 1)

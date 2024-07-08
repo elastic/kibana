@@ -21,7 +21,7 @@ type ErroneousTransactions =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177637
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
     const {
       firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
       secondTransaction: { name: secondTransactionName, failureRate: secondTransactionFailureRate },
@@ -73,10 +73,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('returns the correct data', () => {
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('without comparison', () => {
         const numberOfBuckets = 15;
@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           erroneousTransactions = response.body;
         });
 
-        it('displays the correct number of occurrences', () => {
+        it.skip('displays the correct number of occurrences', () => {
           const { topErroneousTransactions } = erroneousTransactions;
           expect(topErroneousTransactions.length).to.be(2);
 

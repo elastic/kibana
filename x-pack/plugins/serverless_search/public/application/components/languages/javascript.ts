@@ -39,7 +39,7 @@ const client = new Client({
   },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
-  ingestData: `// Sample books data
+  ingestData: ({ ingestPipeline }) => `// Sample books data
 const dataset = [
   {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470},
   {"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585},
@@ -51,7 +51,7 @@ const dataset = [
 
 // Index with the bulk helper
 const result = await client.helpers.bulk({
-  datasource: dataset,
+  datasource: dataset,${ingestPipeline ? `\n  pipeline: "${ingestPipeline}",` : ''}
   onDocument (doc) {
     return { index: { _index: 'my-index-name' }};
   }
@@ -74,6 +74,7 @@ console.log(result);
     apiKey,
     url,
     indexName,
+    ingestPipeline,
   }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
   node: '${url}',
@@ -87,7 +88,7 @@ const dataset = [
 
 // Index with the bulk helper
 const result = await client.helpers.bulk({
-  datasource: dataset,
+  datasource: dataset,${ingestPipeline ? `\n  pipeline: "${ingestPipeline}",` : ''}
   onDocument (doc) {
     return { index: { _index: '${indexName ?? 'index_name'}' }};
   }

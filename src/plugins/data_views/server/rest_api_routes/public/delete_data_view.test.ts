@@ -11,9 +11,9 @@ import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from './test_utils';
 
 describe('delete data view', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
-    deleteDataView({
+    await deleteDataView({
       dataViewsService,
       counterName: 'DELETE /path',
       usageCollection,

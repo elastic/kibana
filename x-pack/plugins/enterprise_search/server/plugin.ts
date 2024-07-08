@@ -274,11 +274,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
-    getStartServices().then(([coreStart, { data }]) => {
+    void getStartServices().then(([coreStart, { data }]) => {
       registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
     });
 
-    getStartServices().then(([, { security: securityStart }]) => {
+    void getStartServices().then(([, { security: securityStart }]) => {
       registerApiKeysRoutes(dependencies, securityStart);
     });
 
@@ -292,7 +292,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
     let savedObjectsStarted: SavedObjectsServiceStart;
 
-    getStartServices().then(([coreStart]) => {
+    void getStartServices().then(([coreStart]) => {
       savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {

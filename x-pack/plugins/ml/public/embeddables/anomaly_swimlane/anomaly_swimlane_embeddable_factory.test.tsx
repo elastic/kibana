@@ -8,10 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import {
-  ReactEmbeddableRenderer,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
@@ -19,6 +16,7 @@ import { of } from 'rxjs';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 // Mock dependencies
 const pluginStartDeps = {
@@ -84,7 +82,8 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
   const factory = getAnomalySwimLaneEmbeddableFactory(getStartServices);
 
   beforeAll(() => {
-    registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
+    const embeddable = embeddablePluginMock.createSetupContract();
+    embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
       return factory;
     });
     setStubKibanaServices();
@@ -98,13 +97,21 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     >;
 
     render(
-      <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+      <ReactEmbeddableRenderer<
+        AnomalySwimLaneEmbeddableState,
+        AnomalySwimLaneEmbeddableState,
+        AnomalySwimLaneEmbeddableApi
+      >
         maybeId={'maybe_id'}
         type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
-        state={{
-          rawState,
-        }}
         onApiAvailable={onApiAvailable}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({ rawState }),
+          executionContext: {
+            type: 'dashboard',
+            id: 'dashboard-id',
+          },
+        })}
       />
     );
 

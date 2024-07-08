@@ -10,7 +10,6 @@ import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import {
   mockDetailItemData,
@@ -57,6 +56,12 @@ jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallbac
     }),
   };
 });
+
+jest.mock('../guided_onboarding_tour/tour_step', () => ({
+  GuidedOnboardingTourStep: jest.fn(({ children }) => (
+    <div data-test-subj="guided-onboarding">{children}</div>
+  )),
+}));
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -168,6 +173,10 @@ describe('EventDetails', () => {
       expect((defaultRowRenderers[0].renderRow as jest.Mock).mock.calls[0][0].contextId).toEqual(
         EVENT_DETAILS_CONTEXT_ID
       );
+    });
+
+    test('renders GuidedOnboardingTourStep', () => {
+      expect(alertsWrapper.find('[data-test-subj="guided-onboarding"]').exists()).toEqual(true);
     });
   });
 

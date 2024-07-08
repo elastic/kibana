@@ -34,12 +34,16 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_MAX_SIGNALS,
+} from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
-import { useInvestigationFields } from '../../hooks/use_investigation_fields';
+import { useAllEsqlRuleFields } from '../../hooks';
+import { MaxSignals } from '../max_signals';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -129,10 +133,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     [getFields]
   );
 
-  const { investigationFields, isLoading: isInvestigationFieldsLoading } = useInvestigationFields({
-    esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
-    indexPatternsFields: indexPattern.fields,
-  });
+  const { fields: investigationFields, isLoading: isInvestigationFieldsLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
 
   return (
     <>
@@ -327,6 +332,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
+            <EuiFormRow fullWidth>
+              <UseField
+                path="maxSignals"
+                component={MaxSignals}
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleMaxSignals',
+                  dataTestSubj: 'detectionEngineStepAboutRuleMaxSignals',
+                  isDisabled: isLoading,
+                  placeholder: DEFAULT_MAX_SIGNALS,
+                }}
+              />
+            </EuiFormRow>
             {isThreatMatchRuleValue && (
               <>
                 <CommonUseField

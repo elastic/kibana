@@ -6,7 +6,7 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -45,7 +45,7 @@ export const apiKeysManagementApp = Object.freeze({
       async mount({ element, setBreadcrumbs, history }) {
         const [[coreStart], { APIKeysGridPage }] = await Promise.all([
           getStartServices(),
-          import('./api_keys_grid'),
+          import('./api_keys_grid/api_keys_grid_page'),
         ]);
 
         render(
@@ -82,7 +82,7 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   history,
   authc,

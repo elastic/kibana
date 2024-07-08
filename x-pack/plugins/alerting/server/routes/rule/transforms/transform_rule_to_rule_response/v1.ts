@@ -13,7 +13,7 @@ import {
 } from '../../../../../common/routes/rule/response';
 import { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
 
-const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
+export const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   return {
     outcome: lastRun.outcome,
     ...(lastRun.outcomeOrder !== undefined ? { outcome_order: lastRun.outcomeOrder } : {}),
@@ -23,7 +23,7 @@ const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   };
 };
 
-const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
+export const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
   return {
     run: {
       history: monitoring.run.history.map((history) => ({
@@ -39,7 +39,7 @@ const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
 };
 
 export const transformRuleActions = (
-  actions: Rule['actions'],
+  actions: Rule['actions'] = [],
   systemActions: Rule['systemActions'] = []
 ): RuleResponseV1['actions'] => {
   return [
@@ -115,15 +115,19 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
-  execution_status: {
-    status: rule.executionStatus.status,
-    ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
-    ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
-    last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
-    ...(rule.executionStatus.lastDuration !== undefined
-      ? { last_duration: rule.executionStatus.lastDuration }
-      : {}),
-  },
+  ...(rule.executionStatus
+    ? {
+        execution_status: {
+          status: rule.executionStatus.status,
+          ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
+          ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
+          last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
+          ...(rule.executionStatus.lastDuration !== undefined
+            ? { last_duration: rule.executionStatus.lastDuration }
+            : {}),
+        },
+      }
+    : {}),
   ...(rule.monitoring ? { monitoring: transformMonitoring(rule.monitoring) } : {}),
   ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
   ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),

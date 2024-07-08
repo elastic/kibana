@@ -14,7 +14,9 @@ import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
@@ -30,7 +32,7 @@ import {
   UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
@@ -308,9 +310,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,
@@ -323,9 +323,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,
@@ -334,6 +332,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     unifiedSearch,
   };
 
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
@@ -341,28 +340,30 @@ export const IndexDataVisualizer: FC<Props> = ({
   };
 
   return (
-    <KibanaThemeProvider
-      theme$={coreStart.theme.theme$}
-      modify={{
-        breakpoint: {
-          xxl: XXL_BREAKPOINT,
-        },
-      }}
-    >
-      <KibanaContextProvider services={{ ...services }}>
-        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
-          <DatePickerContextProvider {...datePickerDeps}>
-            {!esql ? (
-              <DataVisualizerStateContextProvider
-                IndexDataVisualizerComponent={IndexDataVisualizerView}
-                getAdditionalLinks={getAdditionalLinks}
-              />
-            ) : (
-              <DataVisualizerESQLStateContextProvider />
-            )}
-          </DatePickerContextProvider>
-        </StorageContextProvider>
-      </KibanaContextProvider>
-    </KibanaThemeProvider>
+    <KibanaRenderContextProvider {...startServices}>
+      <KibanaThemeProvider
+        theme={coreStart.theme}
+        modify={{
+          breakpoint: {
+            xxl: XXL_BREAKPOINT,
+          },
+        }}
+      >
+        <KibanaContextProvider services={{ ...services }}>
+          <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              {!esql ? (
+                <DataVisualizerStateContextProvider
+                  IndexDataVisualizerComponent={IndexDataVisualizerView}
+                  getAdditionalLinks={getAdditionalLinks}
+                />
+              ) : (
+                <DataVisualizerESQLStateContextProvider />
+              )}
+            </DatePickerContextProvider>
+          </StorageContextProvider>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };

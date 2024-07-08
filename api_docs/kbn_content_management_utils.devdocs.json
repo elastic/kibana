@@ -1227,7 +1227,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<object>, \"references\" | \"attributes\"> & { attributes: object; references: ",
+              "<object>, \"attributes\" | \"references\"> & { attributes: object; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "common",
@@ -1606,7 +1606,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attributes>, \"references\" | \"attributes\"> & { attributes: Partial<Attributes>; references: ",
+              "<Attributes>, \"attributes\" | \"references\"> & { attributes: Partial<Attributes>; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "common",
@@ -2642,6 +2642,22 @@
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectUpdateOptions.mergeAttributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mergeAttributes",
+            "description": [
+              "\nBy default, update will merge the provided attributes with the ones present on the document\n(performing a standard partial update). Setting this option to `false` will change the behavior, performing\na \"full\" update instead, where the provided attributes will fully replace the existing ones.\nDefaults to `true`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3005,6 +3021,34 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
             "id": "def-common.SOWithMetadata.error",
             "type": "Object",
             "tags": [],
@@ -3211,7 +3255,7 @@
             "section": "def-common.SOWithMetadata",
             "text": "SOWithMetadata"
           },
-          "<Attributes>, \"references\" | \"attributes\"> & { attributes: Partial<Attributes>; references: ",
+          "<Attributes>, \"attributes\" | \"references\"> & { attributes: Partial<Attributes>; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "common",
@@ -4021,7 +4065,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { id: string; type: string; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
+              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ [x: string]: any; } & {}>; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; }> | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -4068,6 +4112,27 @@
                 "text": "Type"
               },
               "<number | undefined>"
+            ],
+            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.updateOptionsSchema.mergeAttributes",
+            "type": "Object",
+            "tags": [],
+            "label": "mergeAttributes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,

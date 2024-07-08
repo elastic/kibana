@@ -15,7 +15,7 @@ import { roundNumber } from '../../utils';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: nodeServiceName, environment: 'dev', agentName: 'node' })
           .instance('instance-node');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -95,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns correct summary stats', async () => {
         const { status, body } = await callApi();

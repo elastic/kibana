@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import { from, ReplaySubject } from 'rxjs';
+import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
-import {
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-  IUiSettingsClient,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -31,14 +24,14 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
   getSharedComponents,
-  reportingCsvShareProvider,
   reportingCsvShareModalProvider,
   reportingExportModalProvider,
-  reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
+import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
+import { StartServices } from './types';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -46,6 +39,7 @@ export interface ReportingPublicPluginSetupDependencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
+  intl: InjectedIntl;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -56,6 +50,8 @@ export interface ReportingPublicPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
 }
+
+type StartServices$ = Observable<StartServices>;
 
 /**
  * @internal
@@ -81,29 +77,18 @@ export class ReportingPublicPlugin
   });
   private config: ClientConfigType;
   private contract?: ReportingSetup;
+  private startServices$?: StartServices$;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  /*
-   * Use a single instance of ReportingAPIClient for all the reporting code
-   */
-  private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
-    if (!this.apiClient) {
-      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
-    }
-    return this.apiClient;
-  }
-
-  private getContract(core?: CoreSetup) {
-    if (core) {
-      this.contract = {
-        usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
-      };
-    }
+  private getContract(apiClient: ReportingAPIClient, startServices$: StartServices$) {
+    this.contract = {
+      usesUiCapabilities: () => this.config.roles?.enabled === false,
+      components: getSharedComponents(apiClient, startServices$),
+    };
 
     if (!this.contract) {
       throw new Error(`Setup error in Reporting plugin!`);
@@ -116,7 +101,7 @@ export class ReportingPublicPlugin
     core: CoreSetup<ReportingPublicPluginStartDependencies>,
     setupDeps: ReportingPublicPluginSetupDependencies
   ) {
-    const { getStartServices, uiSettings } = core;
+    const { getStartServices } = core;
     const {
       home: homeSetup,
       management: managementSetup,
@@ -125,10 +110,25 @@ export class ReportingPublicPlugin
       uiActions: uiActionsSetup,
     } = setupDeps;
 
-    const startServices$ = from(getStartServices());
+    const startServices$: Observable<StartServices> = from(getStartServices()).pipe(
+      map(([services, ...rest]) => {
+        return [
+          {
+            application: services.application,
+            analytics: services.analytics,
+            i18n: services.i18n,
+            theme: services.theme,
+            notifications: services.notifications,
+            uiSettings: services.uiSettings,
+          },
+          ...rest,
+        ];
+      })
+    );
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = this.getApiClient(core.http, core.uiSettings);
+    const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
+    this.apiClient = apiClient;
 
     homeSetup.featureCatalogue.register({
       id: 'reporting',
@@ -148,6 +148,7 @@ export class ReportingPublicPlugin
       id: 'reporting',
       title: this.title,
       order: 3,
+      keywords: ['reports', 'report', 'reporting'],
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[coreStart, startDeps], { mountManagementSection }] = await Promise.all([
@@ -204,76 +205,42 @@ export class ReportingPublicPlugin
       })
     );
 
-    const reportingStart = this.getContract(core);
-    const { toasts } = core.notifications;
-
-    startServices$.subscribe(([{ application, i18n: i18nStart }, { licensing }]) => {
+    startServices$.subscribe(([{ application }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
-          reportingCsvShareProvider({
+          reportingCsvShareModalProvider({
             apiClient,
-            toasts,
-            uiSettings,
             license,
             application,
             usesUiCapabilities,
-            theme: core.theme,
+            startServices$,
           })
         );
-        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          // needed for Canvas and legacy tests
-          shareSetup.register(
-            reportingScreenshotShareProvider({
-              apiClient,
-              toasts,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-            })
-          );
-        }
-        if (shareSetup.isNewVersion()) {
-          shareSetup.register(
-            reportingCsvShareModalProvider({
-              apiClient,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-              i18n: i18nStart,
-            })
-          );
 
-          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-            shareSetup.register(
-              reportingExportModalProvider({
-                apiClient,
-                uiSettings,
-                license,
-                application,
-                usesUiCapabilities,
-                theme: core.theme,
-                i18n: i18nStart,
-              })
-            );
-          }
+        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+          shareSetup.register(
+            reportingExportModalProvider({
+              apiClient,
+              license,
+              application,
+              usesUiCapabilities,
+              startServices$,
+            })
+          );
         }
       });
     });
-    return reportingStart;
+
+    this.startServices$ = startServices$;
+    return this.getContract(apiClient, startServices$);
   }
 
   public start(core: CoreStart) {
-    const { notifications, docLinks } = core;
-    const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const streamHandler = new StreamHandler(notifications, apiClient, core.theme, docLinks);
+    const streamHandler = new StreamHandler(this.apiClient!, core);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     streamHandler.startPolling(interval, this.stop$);
 
-    return this.getContract();
+    return this.getContract(this.apiClient!, this.startServices$!);
   }
 
   public stop() {

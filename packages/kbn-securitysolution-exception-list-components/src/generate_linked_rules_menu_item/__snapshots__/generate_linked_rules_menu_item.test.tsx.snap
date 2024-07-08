@@ -13,7 +13,7 @@ Object {
           class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
         >
           <div
-            class="euiFlexGroup css-5zp1nn"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -24,7 +24,7 @@ Object {
               />
             </div>
             <div
-              class="euiFlexItem emotion-EuiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 data-test-subj="securityLinkAnchorComponent"
@@ -50,7 +50,7 @@ Object {
         class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
       >
         <div
-          class="euiFlexGroup css-5zp1nn"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -61,7 +61,7 @@ Object {
             />
           </div>
           <div
-            class="euiFlexItem emotion-EuiFlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
           >
             <div
               data-test-subj="securityLinkAnchorComponent"
@@ -144,10 +144,10 @@ Object {
           class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
         >
           <div
-            class="euiFlexGroup css-5zp1nn"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem emotion-EuiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 data-test-subj="securityLinkAnchorComponent"
@@ -173,10 +173,10 @@ Object {
         class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
       >
         <div
-          class="euiFlexGroup css-5zp1nn"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-EuiFlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
           >
             <div
               data-test-subj="securityLinkAnchorComponent"

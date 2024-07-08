@@ -94,8 +94,16 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Contains the Discover application and the saved search embeddable.
 
 
+|{kib-repo}blob/{branch}/src/plugins/discover_shared/README.md[discoverShared]
+|A stateful layer to register shared features and provide an access point to discover without a direct dependency.
+
+
 |{kib-repo}blob/{branch}/src/plugins/embeddable/README.md[embeddable]
-|The Embeddables Plugin provides an opportunity to expose reusable interactive widgets that can be embedded outside the original plugin.
+|Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
+
+
+|{kib-repo}blob/{branch}/src/plugins/esql_datagrid/README.md[esqlDataGrid]
+|Contains a Discover-like table specifically for ES|QL queries:
 
 
 |{kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
@@ -462,8 +470,8 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -523,8 +531,12 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/data_quality/README.md[dataQuality]
+|Page where users can see the quality of their log data sets.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/dataset_quality/README.md[datasetQuality]
-|In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
+|In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
@@ -557,6 +569,10 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
+|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
@@ -570,12 +586,16 @@ activities.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/fields_metadata/README.md[fieldsMetadata]
+|The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
 |WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
-|Fleet needs to have Elasticsearch API keys enabled.
+|Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
@@ -618,6 +638,14 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|Team owner: Security Integrations Scalability
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
+|undefined
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
@@ -643,6 +671,10 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
+|Exposes services to access logs data.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
@@ -659,7 +691,7 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/metrics_data_access/README.md[metricsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
 |Exposes utilities to access metrics data.
 
 
@@ -755,6 +787,14 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
+|The Search Homepage is a shared homepage for elasticsearch users.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
+|The Inference Endpoints is a tool used to manage inference endpoints
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]

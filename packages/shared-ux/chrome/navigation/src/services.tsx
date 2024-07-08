@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { NavigationKibanaDependencies, NavigationServices } from './types';
@@ -16,14 +16,17 @@ const Context = React.createContext<NavigationServices | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NavigationProvider: FC<NavigationServices> = ({ children, ...services }) => {
+export const NavigationProvider: FC<PropsWithChildren<NavigationServices>> = ({
+  children,
+  ...services
+}) => {
   return <Context.Provider value={services}>{children}</Context.Provider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
+export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDependencies>> = ({
   children,
   ...dependencies
 }) => {

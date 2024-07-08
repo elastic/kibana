@@ -1,0 +1,9 @@
+{
+  "delete_by_query": {
+    "data_autocomplete_rules": {
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      }
+    }
+  }
+}

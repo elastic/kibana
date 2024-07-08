@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { BehaviorSubject, EMPTY, merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -22,7 +22,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { PanelPackage } from '@kbn/presentation-containers';
-import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import { EmbeddableStart } from '../../plugin';
@@ -63,10 +63,6 @@ export abstract class Container<
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
-
-  public lastSavedState: Subject<void> = new Subject();
-  public getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined = () =>
-    undefined;
 
   constructor(
     input: TContainerInput,
@@ -121,6 +117,10 @@ export abstract class Container<
         )
       )
     );
+  }
+
+  public getPanelCount() {
+    return Object.keys(this.getInput().panels).length;
   }
 
   public removePanel(id: string) {
@@ -349,6 +349,31 @@ export abstract class Container<
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
           // @ts-expect-error undefined in not assignable to TEmbeddable | ErrorEmbeddable
+          resolve(undefined);
+        }
+      });
+    });
+  }
+
+  public async untilReactEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {
+    if (!this.input.panels[id]) {
+      throw new PanelNotFoundError();
+    }
+
+    if (this.children$.value[id]) {
+      return this.children$.value[id] as ApiType;
+    }
+
+    return new Promise((resolve, reject) => {
+      const subscription = merge(this.children$, this.getInput$()).subscribe(() => {
+        if (this.children$.value[id]) {
+          subscription.unsubscribe();
+          resolve(this.children$.value[id] as ApiType);
+        }
+
+        // If we hit this, the panel was removed before the embeddable finished loading.
+        if (this.input.panels[id] === undefined) {
+          subscription.unsubscribe();
           resolve(undefined);
         }
       });

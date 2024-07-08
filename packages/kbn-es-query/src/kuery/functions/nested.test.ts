@@ -13,8 +13,6 @@ import * as ast from '../ast';
 import * as nested from './nested';
 import type { KqlNestedFunctionNode } from './nested';
 
-jest.mock('../grammar');
-
 const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
 
 describe('kuery functions', () => {

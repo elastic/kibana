@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataViewField, RuntimeField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
-import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 
 export type SearchHandler = (
   params: IKibanaSearchRequest['params']

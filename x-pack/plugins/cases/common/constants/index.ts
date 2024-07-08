@@ -133,6 +133,12 @@ export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
+export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
+export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATES_LENGTH = 10 as const;
+export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
+export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 
 /**
  * Cases features
@@ -192,6 +198,7 @@ export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
+export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 
 /**
  * Delays

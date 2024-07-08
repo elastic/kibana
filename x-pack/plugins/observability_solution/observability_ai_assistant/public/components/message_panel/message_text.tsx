@@ -21,7 +21,7 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo, useRef } from 'react';
 import type { Node } from 'unist';
 import { ChatActionClickHandler } from '../chat/types';
-import { EsqlCodeBlock } from './esql_code_block';
+import { CodeBlock, EsqlCodeBlock } from './esql_code_block';
 
 interface Props {
   content: string;
@@ -104,6 +104,9 @@ const esqlLanguagePlugin = () => {
 
     if (node.type === 'code' && node.lang === 'esql') {
       node.type = 'esql';
+    } else if (node.type === 'code') {
+      // switch to type that allows us to control rendering
+      node.type = 'codeBlock';
     }
   };
 
@@ -131,6 +134,14 @@ export function MessageText({ loading, content, onActionClick }: Props) {
     processingPlugins[1][1].components = {
       ...components,
       cursor: Cursor,
+      codeBlock: (props) => {
+        return (
+          <>
+            <CodeBlock>{props.value}</CodeBlock>
+            <EuiSpacer size="m" />
+          </>
+        );
+      },
       esql: (props) => {
         return (
           <>

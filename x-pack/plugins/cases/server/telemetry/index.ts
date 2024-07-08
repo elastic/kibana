@@ -36,7 +36,7 @@ interface CreateCasesTelemetryArgs {
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
-export const createCasesTelemetry = async ({
+export const createCasesTelemetry = ({
   core,
   taskManager,
   usageCollection,

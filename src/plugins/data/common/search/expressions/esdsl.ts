@@ -11,9 +11,11 @@ import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { lastValueFrom } from 'rxjs';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { EsRawResponse } from './es_raw_response';
-import { ISearchGeneric, KibanaContext } from '..';
+
+import { KibanaContext } from '..';
 import { getEsQueryConfig } from '../../es_query';
 import { UiSettingsCommon } from '../..';
 
@@ -49,6 +51,7 @@ export const getEsdslFn = ({
     name,
     type: 'es_raw_response',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.esdsl.help', {
       defaultMessage: 'Run Elasticsearch request',
     }),

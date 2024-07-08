@@ -1069,4 +1069,41 @@ describe('RuleToImport', () => {
       expect(stringifyZodError(result.error)).toContain('data_view_id: Expected string');
     });
   });
+
+  describe('rule_source', () => {
+    test('it should validate a rule with "rule_source" set to internal', () => {
+      const payload = getImportRulesSchemaMock({
+        rule_source: {
+          type: 'internal',
+        },
+      });
+
+      const result = RuleToImport.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    test('it should validate a rule with "rule_source" set to external', () => {
+      const payload = getImportRulesSchemaMock({
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+        },
+      });
+
+      const result = RuleToImport.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    test('it should validate a rule with "rule_source" set to undefined', () => {
+      const payload = getImportRulesSchemaMock({
+        rule_source: undefined,
+      });
+
+      const result = RuleToImport.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+  });
 });

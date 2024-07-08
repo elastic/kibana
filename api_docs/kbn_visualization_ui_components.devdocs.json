@@ -350,7 +350,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
@@ -405,7 +405,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -948,15 +948,13 @@
                 "label": "dataView",
                 "description": [],
                 "signature": [
-                  "{ fields: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
                     "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.DataViewFieldBase",
-                    "text": "DataViewFieldBase"
-                  },
-                  "[]; id?: string | undefined; title: string; }"
+                    "section": "def-common.DataViewBase",
+                    "text": "DataViewBase"
+                  }
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,
@@ -1975,126 +1973,6 @@
                   }
                 ],
                 "returnComment": []
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/visualization-ui-components",
-        "id": "def-public.useDebouncedValue",
-        "type": "Function",
-        "tags": [],
-        "label": "useDebouncedValue",
-        "description": [
-          "\nDebounces value changes and updates inputValue on root state changes if no debounced changes\nare in flight because the user is currently modifying the value.\n\n* allowFalsyValue: update upstream with all falsy values but null or undefined\n\nWhen testing this function mock the \"debounce\" function in lodash (see this module test for an example)"
-        ],
-        "signature": [
-          "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue }?: { allowFalsyValue?: boolean | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
-        ],
-        "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.useDebouncedValue.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
-            "description": [],
-            "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$1.onChange",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(val: T) => void"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/visualization-ui-components",
-                    "id": "def-public.useDebouncedValue.$1.onChange.$1",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "val",
-                    "description": [],
-                    "signature": [
-                      "T"
-                    ],
-                    "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$1.value",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$1.defaultValue",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "defaultValue",
-                "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.useDebouncedValue.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{ allowFalsyValue }",
-            "description": [],
-            "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/visualization-ui-components",
-                "id": "def-public.useDebouncedValue.$2.allowFalsyValue",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "allowFalsyValue",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
-                "deprecated": false,
-                "trackAdoption": false
               }
             ]
           }

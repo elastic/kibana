@@ -5,293 +5,324 @@
  * 2.0.
  */
 
-import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreRequestHandlerContext, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import type {
+  AlertDetailsContextualInsight,
+  AlertDetailsContextualInsightsHandler,
+} from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
-import * as t from 'io-ts';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import type { MlClient } from '../../../lib/helpers/get_ml_client';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { isEmpty } from 'lodash';
+import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
+import { getApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { getMlClient } from '../../../lib/helpers/get_ml_client';
+import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getApmServiceSummary } from '../get_apm_service_summary';
-import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
-import { getLogCategories } from '../get_log_categories';
-import { ApmTimeseriesType, getApmTimeseries } from '../get_apm_timeseries';
+import {
+  APMDownstreamDependency,
+  getAssistantDownstreamDependencies,
+} from '../get_apm_downstream_dependencies';
+import { getLogCategories, LogCategory } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
+import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
+import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import { getApmErrors } from './get_apm_errors';
 
-export const observabilityAlertDetailsContextRt = t.intersection([
-  t.type({
-    alert_started_at: t.string,
-  }),
-  t.partial({
-    // apm fields
-    'service.name': t.string,
-    'service.environment': t.string,
-    'transaction.type': t.string,
-    'transaction.name': t.string,
+export const getAlertDetailsContextHandler = (
+  resourcePlugins: APMRouteHandlerResources['plugins'],
+  logger: Logger
+): AlertDetailsContextualInsightsHandler => {
+  return async (requestContext, query) => {
+    const resources = {
+      getApmIndices: async () => {
+        const coreContext = await requestContext.core;
+        return resourcePlugins.apmDataAccess.setup.getApmIndices(coreContext.savedObjects.client);
+      },
+      request: requestContext.request,
+      params: { query: { _inspect: false } },
+      plugins: resourcePlugins,
+      context: {
+        core: requestContext.core,
+        licensing: requestContext.licensing,
+        alerting: resourcePlugins.alerting!.start().then((startContract) => {
+          return {
+            getRulesClient() {
+              return startContract.getRulesClientWithRequest(requestContext.request);
+            },
+          };
+        }),
+        rac: resourcePlugins.ruleRegistry.start().then((startContract) => {
+          return {
+            getAlertsClient() {
+              return startContract.getRacClientWithRequest(requestContext.request);
+            },
+          };
+        }),
+      },
+    };
 
-    // infrastructure fields
-    'host.name': t.string,
-    'container.id': t.string,
-  }),
-]);
-
-export async function getObservabilityAlertDetailsContext({
-  coreContext,
-  annotationsClient,
-  apmAlertsClient,
-  apmEventClient,
-  esClient,
-  logger,
-  mlClient,
-  query,
-}: {
-  coreContext: CoreRequestHandlerContext;
-  annotationsClient?: ScopedAnnotationsClient;
-  apmAlertsClient: ApmAlertsClient;
-  apmEventClient: APMEventClient;
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  mlClient?: MlClient;
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
-}) {
-  const alertStartedAt = query.alert_started_at;
-  const serviceEnvironment = query['service.environment'];
-  const hostName = query['host.name'];
-  const [serviceName, containerId] = await Promise.all([
-    getServiceNameFromSignals({
-      query,
-      esClient,
-      coreContext,
+    const [
       apmEventClient,
-    }),
-    getContainerIdFromSignals({
-      query,
-      esClient,
+      annotationsClient,
+      apmAlertsClient,
       coreContext,
-      apmEventClient,
-    }),
-  ]);
+      mlClient,
+      randomSampler,
+    ] = await Promise.all([
+      getApmEventClient(resources),
+      resourcePlugins.observability.setup.getScopedAnnotationsClient(
+        resources.context,
+        requestContext.request
+      ),
+      getApmAlertsClient(resources),
+      requestContext.core,
+      getMlClient(resources),
+      getRandomSampler({
+        security: resourcePlugins.security,
+        probability: 1,
+        request: requestContext.request,
+      }),
+    ]);
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-  const serviceSummaryPromise = serviceName
-    ? getApmServiceSummary({
-        apmEventClient,
-        annotationsClient,
+    const alertStartedAt = query.alert_started_at;
+    const serviceEnvironment = query['service.environment'];
+    const hostName = query['host.name'];
+    const kubernetesPodName = query['kubernetes.pod.name'];
+
+    const [serviceName, containerId] = await Promise.all([
+      getServiceNameFromSignals({
+        query,
         esClient,
-        apmAlertsClient,
-        mlClient,
-        logger,
-        arguments: {
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-          end: alertStartedAt,
-        },
-      })
-    : undefined;
-
-  const downstreamDependenciesPromise = serviceName
-    ? getAssistantDownstreamDependencies({
+        coreContext,
         apmEventClient,
+      }),
+      getContainerIdFromSignals({
+        query,
+        esClient,
+        coreContext,
+        apmEventClient,
+      }),
+    ]);
+
+    const downstreamDependenciesPromise = serviceName
+      ? getAssistantDownstreamDependencies({
+          apmEventClient,
+          arguments: {
+            'service.name': serviceName,
+            'service.environment': serviceEnvironment,
+            start: moment(alertStartedAt).subtract(24, 'hours').toISOString(),
+            end: alertStartedAt,
+          },
+          randomSampler,
+        })
+      : undefined;
+
+    const dataFetchers: Array<() => Promise<AlertDetailsContextualInsight>> = [];
+
+    // service summary
+    if (serviceName) {
+      dataFetchers.push(async () => {
+        const serviceSummary = await getApmServiceSummary({
+          apmEventClient,
+          annotationsClient,
+          esClient,
+          apmAlertsClient,
+          mlClient,
+          logger,
+          arguments: {
+            'service.name': serviceName,
+            'service.environment': serviceEnvironment,
+            start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+            end: alertStartedAt,
+          },
+        });
+
+        return {
+          key: 'serviceSummary',
+          description: `Metadata for the service "${serviceName}" that produced the alert. The alert might be caused by an issue in the service itself or one of its dependencies.`,
+          data: serviceSummary,
+        };
+      });
+    }
+
+    // downstream dependencies
+    if (serviceName) {
+      dataFetchers.push(async () => {
+        const downstreamDependencies = await downstreamDependenciesPromise;
+        return {
+          key: 'downstreamDependencies',
+          description: `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}"`,
+          data: downstreamDependencies,
+        };
+      });
+    }
+
+    // log categories
+    dataFetchers.push(async () => {
+      const downstreamDependencies = await downstreamDependenciesPromise;
+      const { logCategories, entities } = await getLogCategories({
+        apmEventClient,
+        esClient,
+        coreContext,
         arguments: {
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+          start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
           end: alertStartedAt,
-        },
-      })
-    : undefined;
-
-  const logCategoriesPromise = getLogCategories({
-    esClient,
-    coreContext,
-    arguments: {
-      start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-      end: alertStartedAt,
-      'service.name': serviceName,
-      'host.name': hostName,
-      'container.id': containerId,
-    },
-  });
-
-  const serviceChangePointsPromise = getServiceChangePoints({
-    apmEventClient,
-    alertStartedAt,
-    serviceName,
-    serviceEnvironment,
-    transactionType: query['transaction.type'],
-    transactionName: query['transaction.name'],
-  });
-
-  const exitSpanChangePointsPromise = getExitSpanChangePoints({
-    apmEventClient,
-    alertStartedAt,
-    serviceName,
-    serviceEnvironment,
-  });
-
-  const anomaliesPromise = getAnomalies({
-    start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
-    end: moment(alertStartedAt).valueOf(),
-    environment: serviceEnvironment,
-    mlClient,
-    logger,
-  });
-
-  const [
-    serviceSummary,
-    downstreamDependencies,
-    logCategories,
-    serviceChangePoints,
-    exitSpanChangePoints,
-    anomalies,
-  ] = await Promise.all([
-    serviceSummaryPromise,
-    downstreamDependenciesPromise,
-    logCategoriesPromise,
-    serviceChangePointsPromise,
-    exitSpanChangePointsPromise,
-    anomaliesPromise,
-  ]);
-
-  return {
-    serviceSummary,
-    downstreamDependencies,
-    logCategories,
-    serviceChangePoints,
-    exitSpanChangePoints,
-    anomalies,
-  };
-}
-
-async function getServiceChangePoints({
-  apmEventClient,
-  alertStartedAt,
-  serviceName,
-  serviceEnvironment,
-  transactionType,
-  transactionName,
-}: {
-  apmEventClient: APMEventClient;
-  alertStartedAt: string;
-  serviceName: string | undefined;
-  serviceEnvironment: string | undefined;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
-}) {
-  if (!serviceName) {
-    return [];
-  }
-
-  const res = await getApmTimeseries({
-    apmEventClient,
-    arguments: {
-      start: moment(alertStartedAt).subtract(12, 'hours').toISOString(),
-      end: alertStartedAt,
-      stats: [
-        {
-          title: 'Latency',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.transactionLatency,
-            function: LatencyAggregationType.p95,
-            'transaction.type': transactionType,
-            'transaction.name': transactionName,
+          entities: {
+            'service.name': serviceName,
+            'host.name': hostName,
+            'container.id': containerId,
+            'kubernetes.pod.name': kubernetesPodName,
           },
         },
-        {
-          title: 'Throughput',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.transactionThroughput,
-            'transaction.type': transactionType,
-            'transaction.name': transactionName,
-          },
-        },
-        {
-          title: 'Failure rate',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.transactionFailureRate,
-            'transaction.type': transactionType,
-            'transaction.name': transactionName,
-          },
-        },
-        {
-          title: 'Error events',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.errorEventRate,
-          },
-        },
-      ],
-    },
-  });
+      });
 
-  return res
-    .filter((timeseries) => timeseries.changes.length > 0)
-    .map((timeseries) => ({
-      title: timeseries.stat.title,
-      grouping: timeseries.id,
-      changes: timeseries.changes,
-    }));
-}
+      const entitiesAsString = entities.map(({ key, value }) => `${key}:${value}`).join(', ');
 
-async function getExitSpanChangePoints({
-  apmEventClient,
-  alertStartedAt,
-  serviceName,
-  serviceEnvironment,
-}: {
-  apmEventClient: APMEventClient;
-  alertStartedAt: string;
-  serviceName: string | undefined;
-  serviceEnvironment: string | undefined;
-}) {
-  if (!serviceName) {
-    return [];
-  }
-
-  const res = await getApmTimeseries({
-    apmEventClient,
-    arguments: {
-      start: moment(alertStartedAt).subtract(30, 'minute').toISOString(),
-      end: alertStartedAt,
-      stats: [
-        {
-          title: 'Exit span latency',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.exitSpanLatency,
-          },
-        },
-        {
-          title: 'Exit span failure rate',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.exitSpanFailureRate,
-          },
-        },
-      ],
-    },
-  });
-
-  return res
-    .filter((timeseries) => timeseries.changes.length > 0)
-    .map((timeseries) => {
       return {
-        title: timeseries.stat.title,
-        grouping: timeseries.id,
-        changes: timeseries.changes,
+        key: 'logCategories',
+        description: `Log events occurring up to 15 minutes before the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
+        data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
       };
     });
+
+    // apm errors
+    if (serviceName) {
+      dataFetchers.push(async () => {
+        const apmErrors = await getApmErrors({
+          apmEventClient,
+          start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+          end: alertStartedAt,
+          serviceName,
+          serviceEnvironment,
+        });
+
+        const downstreamDependencies = await downstreamDependenciesPromise;
+        const errorsWithDownstreamServiceName = getApmErrorsWithDownstreamServiceName(
+          apmErrors,
+          downstreamDependencies
+        );
+
+        return {
+          key: 'apmErrors',
+          description: `Exceptions (errors) thrown by the service "${serviceName}". If an error contains a downstream service name this could be a possible root cause. If relevant please describe what the error means and what it could be caused by.`,
+          data: errorsWithDownstreamServiceName,
+        };
+      });
+    }
+
+    // exit span change points
+    dataFetchers.push(async () => {
+      const exitSpanChangePoints = await getExitSpanChangePoints({
+        apmEventClient,
+        start: moment(alertStartedAt).subtract(6, 'hours').toISOString(),
+        end: alertStartedAt,
+        serviceName,
+        serviceEnvironment,
+      });
+
+      return {
+        key: 'exitSpanChangePoints',
+        description: `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies`,
+        data: exitSpanChangePoints,
+      };
+    });
+
+    // service change points
+    dataFetchers.push(async () => {
+      const serviceChangePoints = await getServiceChangePoints({
+        apmEventClient,
+        start: moment(alertStartedAt).subtract(6, 'hours').toISOString(),
+        end: alertStartedAt,
+        serviceName,
+        serviceEnvironment,
+        transactionType: query['transaction.type'],
+        transactionName: query['transaction.name'],
+      });
+
+      return {
+        key: 'serviceChangePoints',
+        description: `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate`,
+        data: serviceChangePoints,
+      };
+    });
+
+    // Anomalies
+    dataFetchers.push(async () => {
+      const anomalies = await getAnomalies({
+        start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
+        end: moment(alertStartedAt).valueOf(),
+        environment: serviceEnvironment,
+        mlClient,
+        logger,
+      });
+
+      return {
+        key: 'anomalies',
+        description: `Anomalies for services running in the environment "${serviceEnvironment}". Anomalies are detected using machine learning and can help you spot unusual patterns in your data.`,
+        data: anomalies,
+      };
+    });
+
+    const items = await Promise.all(
+      dataFetchers.map(async (dataFetcher) => {
+        try {
+          return await dataFetcher();
+        } catch (error) {
+          logger.error('Error while fetching observability alert details context');
+          logger.error(error);
+          return;
+        }
+      })
+    );
+
+    return items.filter((item) => item && !isEmpty(item.data)) as AlertDetailsContextualInsight[];
+  };
+};
+
+function getApmErrorsWithDownstreamServiceName(
+  apmErrors?: Awaited<ReturnType<typeof getApmErrors>>,
+  downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
+) {
+  return apmErrors?.map(({ name, lastSeen, occurrences, downstreamServiceResource }) => {
+    const downstreamServiceName = downstreamDependencies?.find(
+      (dependency) => dependency['span.destination.service.resource'] === downstreamServiceResource
+    )?.['service.name'];
+
+    return {
+      message: name,
+      lastSeen: new Date(lastSeen).toISOString(),
+      occurrences,
+      downstream: {
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: downstreamServiceResource,
+        [SERVICE_NAME]: downstreamServiceName,
+      },
+    };
+  });
+}
+
+function logCategoriesWithDownstreamServiceName(
+  logCategories?: LogCategory[],
+  downstreamDependencies?: APMDownstreamDependency[]
+) {
+  return logCategories?.map(
+    ({ errorCategory, docCount, sampleMessage, downstreamServiceResource }) => {
+      const downstreamServiceName = downstreamDependencies?.find(
+        (dependency) =>
+          dependency['span.destination.service.resource'] === downstreamServiceResource
+      )?.['service.name'];
+
+      return {
+        errorCategory,
+        docCount,
+        sampleMessage,
+        downstream: {
+          [SPAN_DESTINATION_SERVICE_RESOURCE]: downstreamServiceResource,
+          [SERVICE_NAME]: downstreamServiceName,
+        },
+      };
+    }
+  );
 }

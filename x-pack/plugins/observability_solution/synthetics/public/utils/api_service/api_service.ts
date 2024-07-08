@@ -50,9 +50,8 @@ class ApiService {
       } else {
         // eslint-disable-next-line no-console
         console.error(
-          `API ${apiUrl} is not returning expected response, ${formatErrors(
-            decoded.left
-          )} for response`,
+          `API $s is not returning expected response, ${formatErrors(decoded.left)} for response`,
+          apiUrl,
           response
         );
       }

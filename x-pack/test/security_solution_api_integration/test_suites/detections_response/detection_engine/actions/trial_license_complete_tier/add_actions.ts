@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess add_actions', () => {
+  describe('@serverless @serverlessQA @ess add_actions', () => {
     describe('adding actions', () => {
       beforeEach(async () => {
         await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });

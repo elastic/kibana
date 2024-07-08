@@ -23,7 +23,10 @@ import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
+const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
@@ -87,42 +90,49 @@ const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
 const appendConversationMessages = jest.fn();
 const mockContext = {
-  elasticAssistant: {
-    actions: {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+  resolve: jest.fn().mockResolvedValue({
+    elasticAssistant: {
+      actions: {
+        getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+      },
+      getRegisteredTools: jest.fn(() => []),
+      getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+      logger: loggingSystemMock.createLogger(),
+      telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+      getCurrentUser: () => ({
+        username: 'user',
+        email: 'email',
+        fullName: 'full name',
+        roles: ['user-role'],
+        enabled: true,
+        authentication_realm: { name: 'native1', type: 'native' },
+        lookup_realm: { name: 'native1', type: 'native' },
+        authentication_provider: { type: 'basic', name: 'basic1' },
+        authentication_type: 'realm',
+        elastic_cloud_user: false,
+        metadata: { _reserved: false },
+      }),
+      getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
+        getConversation: jest.fn().mockResolvedValue(existingConversation),
+        updateConversation: jest.fn().mockResolvedValue(existingConversation),
+        appendConversationMessages:
+          appendConversationMessages.mockResolvedValue(existingConversation),
+      }),
+      getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+      }),
     },
-    getRegisteredTools: jest.fn(() => []),
-    logger: loggingSystemMock.createLogger(),
-    telemetry: { ...coreMock.createSetup().analytics, reportEvent },
-    getCurrentUser: () => ({
-      username: 'user',
-      email: 'email',
-      fullName: 'full name',
-      roles: ['user-role'],
-      enabled: true,
-      authentication_realm: { name: 'native1', type: 'native' },
-      lookup_realm: { name: 'native1', type: 'native' },
-      authentication_provider: { type: 'basic', name: 'basic1' },
-      authentication_type: 'realm',
-      elastic_cloud_user: false,
-      metadata: { _reserved: false },
-    }),
-    getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
-      getConversation: jest.fn().mockResolvedValue(existingConversation),
-      updateConversation: jest.fn().mockResolvedValue(existingConversation),
-      appendConversationMessages:
-        appendConversationMessages.mockResolvedValue(existingConversation),
-    }),
-    getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
-      findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
-    }),
-  },
-  core: {
-    elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+    core: {
+      elasticsearch: {
+        client: elasticsearchServiceMock.createScopedClusterClient(),
+      },
+      savedObjects: coreMock.createRequestHandlerContext().savedObjects,
     },
-    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
-  },
+    licensing: {
+      ...licensingMock.createRequestHandlerContext({ license }),
+      license,
+    },
+  }),
 };
 
 const mockRequest = {
@@ -151,6 +161,7 @@ describe('postActionsConnectorExecuteRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    license.hasAtLeast.mockReturnValue(true);
     actionsClient.getBulk.mockResolvedValue([
       {
         id: '1',
@@ -193,6 +204,7 @@ describe('postActionsConnectorExecuteRoute', () => {
                   data: mockActionResponse,
                   status: 'ok',
                 },
+                headers: { 'content-type': 'application/json' },
               });
             }),
           };
@@ -652,11 +664,84 @@ describe('postActionsConnectorExecuteRoute', () => {
               );
 
               expect(result).toEqual({
-                body: {
-                  connector_id: 'mock-connector-id',
-                  data: mockActionResponse,
-                  status: 'ok',
+                body: mockStream,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                  'Transfer-Encoding': 'chunked',
+                  'X-Accel-Buffering': 'no',
+                  'X-Content-Type-Options': 'nosniff',
                 },
+              });
+            }),
+          };
+        }),
+      },
+    };
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeAI and actionTypeId=.gen-ai', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeAI',
+                    actionTypeId: '.gen-ai',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: { connector_id: 'mock-connector-id', data: mockActionResponse, status: 'ok' },
+                headers: {
+                  'content-type': 'application/json',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeAI and actionTypeId=.bedrock', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeAI',
+                    actionTypeId: '.bedrock',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: { connector_id: 'mock-connector-id', data: mockActionResponse, status: 'ok' },
                 headers: {
                   'content-type': 'application/json',
                 },

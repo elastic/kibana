@@ -116,7 +116,7 @@ export const bulkActionConversationsRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
@@ -127,7 +127,7 @@ export const bulkActionConversationsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),

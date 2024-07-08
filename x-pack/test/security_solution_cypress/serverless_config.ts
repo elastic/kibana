@@ -35,8 +35,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           { product_line: 'cloud', product_tier: 'complete' },
         ])}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForNonSequenceEqlRuleEnabled',
-          'alertSuppressionForNewTermsRuleEnabled',
+          'alertSuppressionForEsqlRuleEnabled',
+          'bulkCustomHighlightedFieldsEnabled',
+          'alertSuppressionForMachineLearningRuleEnabled',
+          'manualRuleRunEnabled',
         ])}`,
       ],
     },

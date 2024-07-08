@@ -143,6 +143,10 @@ export const registerExportRoute = (
   router.post(
     {
       path: '/_export',
+      options: {
+        access: 'public',
+        description: `Export saved objects`,
+      },
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
@@ -164,20 +168,20 @@ export const registerExportRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
-      const cleaned = cleanOptions(req.body);
+    catchAndReturnBoomErrors(async (context, request, response) => {
+      const cleaned = cleanOptions(request.body);
       const { typeRegistry, getExporter, getClient } = (await context.core).savedObjects;
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
 
       let options: EitherExportOptions;
       try {
         options = validateOptions(cleaned, {
-          request: req,
+          request,
           exportSizeLimit: maxImportExportSize,
           supportedTypes,
         });
       } catch (e) {
-        return res.badRequest({
+        return response.badRequest({
           body: e,
         });
       }
@@ -191,7 +195,11 @@ export const registerExportRoute = (
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsExport({ request: req, types: cleaned.types, supportedTypes })
+        .incrementSavedObjectsExport({
+          request,
+          types: cleaned.types ?? [],
+          supportedTypes,
+        })
         .catch(() => {});
 
       try {
@@ -207,7 +215,7 @@ export const registerExportRoute = (
           createConcatStream([]),
         ]);
 
-        return res.ok({
+        return response.ok({
           body: docsToExport.join('\n'),
           headers: {
             'Content-Disposition': `attachment; filename="export.ndjson"`,
@@ -216,7 +224,7 @@ export const registerExportRoute = (
         });
       } catch (e) {
         if (e instanceof SavedObjectsExportError) {
-          return res.badRequest({
+          return response.badRequest({
             body: {
               message: e.message,
               attributes: e.attributes,

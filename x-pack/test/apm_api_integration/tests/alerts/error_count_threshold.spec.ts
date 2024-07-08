@@ -8,7 +8,6 @@
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/error_count/register_error_count_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -31,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
     const javaErrorMessage = 'a java error';
@@ -96,13 +95,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
-      return Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
+      return Promise.all([
+        apmSynthtraceEsClient.index(events),
+        apmSynthtraceEsClient.index(phpEvents),
+      ]);
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     // FLAKY: https://github.com/elastic/kibana/issues/176948
-    describe('create rule without kql filter', () => {
+    describe.skip('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
       let actionId: string;
@@ -211,14 +213,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: 'opbeans-php',
             environment: 'production',
             transactionName: 'tx-php',
-            errorGroupingKey: getErrorGroupingKey(phpErrorMessage),
+            errorGroupingKey: '000000000000000000000a php error',
             errorGroupingName: phpErrorMessage,
           },
           {
             serviceName: 'opbeans-java',
             environment: 'production',
             transactionName: 'tx-java',
-            errorGroupingKey: getErrorGroupingKey(javaErrorMessage),
+            errorGroupingKey: '00000000000000000000a java error',
             errorGroupingName: javaErrorMessage,
           },
         ]);
@@ -251,7 +253,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/176964
-    describe('create rule with kql filter for opbeans-php', () => {
+    describe.skip('create rule with kql filter for opbeans-php', () => {
       let ruleId: string;
 
       before(async () => {
@@ -280,7 +282,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('produces one alert for the opbeans-php service', async () => {
         const alerts = await waitForAlertsForRule({ es, ruleId });
         expect(alerts[0]['kibana.alert.reason']).to.be(
-          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.'
+          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.'
         );
       });
     });

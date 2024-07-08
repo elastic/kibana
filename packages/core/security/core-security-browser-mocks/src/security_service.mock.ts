@@ -11,10 +11,11 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-browser-internal';
+import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {
-    registerSecurityApi: jest.fn(),
+    registerSecurityDelegate: jest.fn(),
   };
 
   return mock;
@@ -32,7 +33,7 @@ const createStartMock = () => {
 
 const createInternalSetupMock = () => {
   const mock: jest.Mocked<InternalSecurityServiceSetup> = {
-    registerSecurityApi: jest.fn(),
+    registerSecurityDelegate: jest.fn(),
   };
 
   return mock;
@@ -64,4 +65,6 @@ export const securityServiceMock = {
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,
   createInternalStart: createInternalStartMock,
+  createMockAuthenticatedUser: (props: MockAuthenticatedUserProps = {}) =>
+    mockAuthenticatedUser(props),
 };

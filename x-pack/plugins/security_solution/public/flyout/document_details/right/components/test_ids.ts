@@ -147,6 +147,8 @@ export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
 
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
+export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
+  `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
 
 /* Response section */
 

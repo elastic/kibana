@@ -61,6 +61,11 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -115,6 +120,11 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -168,6 +178,11 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -224,6 +239,11 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "roleManagementEnabled": false,
@@ -2002,6 +2022,57 @@ describe('createConfig()', () => {
         },
       })
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
+  });
+
+  it('allows filtering audit events', () => {
+    expect(
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+          appender: {
+            type: 'file',
+            fileName: '/path/to/file.txt',
+            layout: {
+              type: 'json',
+            },
+          },
+          ignore_filters: [
+            {
+              actions: ['authentication_success', 'authorization_failure'],
+              categories: ['database'],
+              outcomes: ['unknown'],
+              spaces: ['default'],
+              types: ['index'],
+              users: ['elastic'],
+            },
+          ],
+        },
+      }).audit.ignore_filters
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actions": Array [
+            "authentication_success",
+            "authorization_failure",
+          ],
+          "categories": Array [
+            "database",
+          ],
+          "outcomes": Array [
+            "unknown",
+          ],
+          "spaces": Array [
+            "default",
+          ],
+          "types": Array [
+            "index",
+          ],
+          "users": Array [
+            "elastic",
+          ],
+        },
+      ]
+    `);
   });
 
   describe('#getExpirationTimeouts', () => {

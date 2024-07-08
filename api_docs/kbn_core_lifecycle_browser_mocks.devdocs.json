@@ -252,6 +252,14 @@
                 "section": "def-common.SecurityServiceStart",
                 "text": "SecurityServiceStart"
               },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-common.UserProfileService",
+                "text": "UserProfileService"
+              },
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               {
                 "pluginId": "@kbn/core-http-browser-mocks",
@@ -315,6 +323,14 @@
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
                 "section": "def-common.SecurityServiceSetup",
                 "text": "SecurityServiceSetup"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
               },
               ">; plugins: { onSetup: jest.Mock<any, any, any>; onStart: jest.Mock<any, any, any>; }; }"
             ],
@@ -512,6 +528,14 @@
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
                 "section": "def-common.SecurityServiceStart",
                 "text": "SecurityServiceStart"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-common.UserProfileService",
+                "text": "UserProfileService"
               },
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],

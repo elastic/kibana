@@ -41,9 +41,13 @@ export const MINIMUM_LICENSE_FOR_SUPPRESSION = 'platinum' as const;
 
 export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'threshold',
+  'esql',
   'saved_query',
   'query',
   'new_terms',
   'threat_match',
   'eql',
+  'machine_learning',
 ];
+
+export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = ['saved_query', 'query'];

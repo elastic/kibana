@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless @ess rule exceptions execution', () => {
+  describe('@serverless @serverlessQA @ess rule exceptions execution', () => {
     before(async () => {
       await esArchiver.load(path);
     });
@@ -67,7 +67,8 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(path);
     });
 
-    describe('creating rules with exceptions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/181887
+    describe.skip('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
       });

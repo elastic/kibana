@@ -22,6 +22,7 @@ export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedT
 export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
   const {
     header,
+    isSortEnabled,
     pageInfo,
     columns,
     rowRenderers,
@@ -39,6 +40,8 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     onChangePage,
     activeTab,
     updatedAt,
+    trailingControlColumns,
+    leadingControlColumns,
   } = props;
 
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
@@ -68,6 +71,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
           <UnifiedTimeline
             columns={columnsHeader}
             rowRenderers={rowRenderers}
+            isSortEnabled={isSortEnabled}
             timelineId={timelineId}
             itemsPerPage={itemsPerPage}
             itemsPerPageOptions={itemsPerPageOptions}
@@ -83,6 +87,8 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             activeTab={activeTab}
             updatedAt={updatedAt}
             isTextBasedQuery={false}
+            trailingControlColumns={trailingControlColumns}
+            leadingControlColumns={leadingControlColumns}
           />
         </RootDragDropProvider>
       </StyledTableFlexItem>

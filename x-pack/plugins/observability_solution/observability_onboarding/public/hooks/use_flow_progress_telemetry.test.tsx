@@ -47,7 +47,7 @@ describe('useFlowProgressTelemetry', () => {
     expect(render.result.current.analytics.reportEvent).toHaveBeenCalledWith(
       'observability_onboarding',
       {
-        uses_legacy_onboarding_page: true,
+        uses_legacy_onboarding_page: false,
         flow: 'test-flow',
         step: 'ea-download',
         step_status: 'complete',

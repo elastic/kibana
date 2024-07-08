@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import { niceTimeFormatter, TooltipProps } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -70,7 +70,7 @@ export const getDomain = (series: Series, stacked: boolean = false) => {
   return { yMin: min || 0, yMax: max || 0, xMin: minTimestamp, xMax: maxTimestamp };
 };
 
-export const EmptyContainer: React.FC = ({ children }) => (
+export const EmptyContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',
@@ -84,7 +84,7 @@ export const EmptyContainer: React.FC = ({ children }) => (
   </div>
 );
 
-export const ChartContainer: React.FC = ({ children }) => (
+export const ChartContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',

@@ -6,18 +6,49 @@
  */
 
 import datemath from '@elastic/datemath';
+import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
-import { KibanaRequest } from '@kbn/core/server';
 import { FunctionRegistrationParameters } from '.';
 
-const OMITTED_ALERT_FIELDS = [
+const defaultFields = [
+  '@timestamp',
+  'kibana.alert.start',
+  'kibana.alert.end',
+  'kibana.alert.flapping',
+  'kibana.alert.group',
+  'kibana.alert.instance.id',
+  'kibana.alert.reason',
+  'kibana.alert.rule.category',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.tags',
+  'kibana.alert.start',
+  'kibana.alert.status',
+  'kibana.alert.time_range.gte',
+  'kibana.alert.time_range.lte',
+  'kibana.alert.workflow_status',
   'tags',
+  // infra
+  'host.name',
+  'container.id',
+  'kubernetes.pod.name',
+  // APM
+  'processor.event',
+  'service.environment',
+  'service.name',
+  'service.node.name',
+  'transaction.type',
+  'transaction.name',
+];
+
+const OMITTED_ALERT_FIELDS = [
   'event.action',
   'event.kind',
   'kibana.alert.rule.execution.uuid',
@@ -46,23 +77,75 @@ export function registerAlertsFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
+      name: 'get_alerts_dataset_info',
+      visibility: FunctionVisibility.AssistantOnly,
+      description: `Use this function to get information about alerts data.`,
+      parameters: {
+        type: 'object',
+        properties: {
+          start: {
+            type: 'string',
+            description:
+              'The start of the current time range, in datemath, like now-24h or an ISO timestamp',
+          },
+          end: {
+            type: 'string',
+            description:
+              'The end of the current time range, in datemath, like now-24h or an ISO timestamp',
+          },
+        },
+      } as const,
+    },
+    async (
+      { arguments: { start, end }, chat, messages },
+      signal
+    ): Promise<{
+      content: {
+        fields: string[];
+      };
+    }> => {
+      const core = await resources.context.core;
+
+      const { fields } = await getRelevantFieldNames({
+        index: `.alerts-observability*`,
+        messages,
+        esClient: core.elasticsearch.client.asInternalUser,
+        dataViews: await resources.plugins.dataViews.start(),
+        savedObjectsClient: core.savedObjects.client,
+        signal,
+        chat: (
+          operationName,
+          { messages: nextMessages, functionCall, functions: nextFunctions }
+        ) => {
+          return chat(operationName, {
+            messages: nextMessages,
+            functionCall,
+            functions: nextFunctions,
+            signal,
+          });
+        },
+      });
+
+      return {
+        content: {
+          fields: fields.length === 0 ? defaultFields : fields,
+        },
+      };
+    }
+  );
+
+  functions.registerFunction(
+    {
       name: 'alerts',
-      contexts: ['core'],
-      description:
-        'Get alerts for Observability. Display the response in tabular format if appropriate.',
+      description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.      
+        Use this to get open (and optionally recovered) alerts for Observability assets, like services,
+        hosts or containers.
+        Display the response in tabular format if appropriate.
+      `,
       descriptionForUser: 'Get alerts for Observability',
       parameters: {
         type: 'object',
         properties: {
-          featureIds: {
-            type: 'array',
-            items: {
-              type: 'string',
-              enum: DEFAULT_FEATURE_IDS,
-            },
-            description:
-              'The Observability apps for which to retrieve alerts. By default it will return alerts for all apps.',
-          },
           start: {
             type: 'string',
             description: 'The start of the time range, in Elasticsearch date math, like `now`.',
@@ -73,8 +156,7 @@ export function registerAlertsFunction({
           },
           kqlFilter: {
             type: 'string',
-            description:
-              'a KQL query to filter the data by. If no filter should be applied, leave it empty.',
+            description: `Filter alerts by field:value pairs`,
           },
           includeRecovered: {
             type: 'boolean',
@@ -86,15 +168,7 @@ export function registerAlertsFunction({
       } as const,
     },
     async (
-      {
-        arguments: {
-          start: startAsDatemath,
-          end: endAsDatemath,
-          featureIds,
-          filter,
-          includeRecovered,
-        },
-      },
+      { arguments: { start: startAsDatemath, end: endAsDatemath, filter, includeRecovered } },
       signal
     ) => {
       const alertsClient = await pluginsStart.ruleRegistry.getRacClientWithRequest(
@@ -107,10 +181,7 @@ export function registerAlertsFunction({
       const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
 
       const response = await alertsClient.find({
-        featureIds:
-          !!featureIds && !!featureIds.length
-            ? featureIds
-            : (DEFAULT_FEATURE_IDS as unknown as string[]),
+        featureIds: DEFAULT_FEATURE_IDS as unknown as string[],
         query: {
           bool: {
             filter: [
@@ -135,6 +206,7 @@ export function registerAlertsFunction({
             ],
           },
         },
+        size: 10,
       });
 
       // trim some fields

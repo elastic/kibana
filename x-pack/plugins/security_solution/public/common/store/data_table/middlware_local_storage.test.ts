@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../mock/match_media';
 import { defaultHeaders, createSecuritySolutionStorageMock, createMockStore } from '../../mock';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';

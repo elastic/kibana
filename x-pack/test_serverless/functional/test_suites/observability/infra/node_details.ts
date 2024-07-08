@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
 
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginWithRole('viewer');
         await pageObjects.common.navigateToApp(
           `metrics/${NODE_DETAILS_PATH}/demo-stack-kubernetes-01`
         );
@@ -44,7 +44,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       describe('Osquery Tab', () => {

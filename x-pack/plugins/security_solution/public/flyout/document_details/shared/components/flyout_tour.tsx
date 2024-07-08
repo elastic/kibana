@@ -68,7 +68,7 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
 
   useEffect(() => {
     storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.FLYOUT, tourState);
-    if (tourState.currentTourStep === 1 && goToOverviewTab) {
+    if (tourState.isTourActive && tourState.currentTourStep === 1 && goToOverviewTab) {
       goToOverviewTab();
     }
   }, [storage, tourState, goToOverviewTab]);

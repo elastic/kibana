@@ -121,6 +121,7 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
+            "getLicenseType": [Function],
             "getUnavailableReason": [Function],
             "hasAtLeast": [Function],
             "isEnabled": [Function],
@@ -133,10 +134,16 @@ describe('Security Plugin', () => {
       `);
     });
 
-    it('calls core.security.registerSecurityApi', () => {
+    it('calls core.security.registerSecurityDelegate', () => {
       plugin.setup(mockCoreSetup, mockSetupDependencies);
 
-      expect(mockCoreSetup.security.registerSecurityApi).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
     });
   });
 

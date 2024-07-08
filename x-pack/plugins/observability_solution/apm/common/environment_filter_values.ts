@@ -10,7 +10,7 @@ import { escapeKuery } from '@kbn/es-query';
 import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import { Environment } from './environment_rt';
 
-const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
+export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
 
 export const allOptionText = i18n.translate('xpack.apm.filter.environment.allLabel', {

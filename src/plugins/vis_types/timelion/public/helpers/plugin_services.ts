@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -19,6 +20,8 @@ export const [getIndexPatterns, setIndexPatterns] =
 export const [getDataSearch, setDataSearch] = createGetterSetter<ISearchStart>('Search');
 
 export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('Charts');
+
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 export const [getFieldFormats, setFieldFormats] =
   createGetterSetter<FieldFormatsStart>('FieldFormats');

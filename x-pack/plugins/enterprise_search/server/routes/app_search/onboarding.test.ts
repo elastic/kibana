@@ -26,8 +26,8 @@ describe('engine routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute({ body: {} });
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute({ body: {} });
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/onboarding/complete',
         hasJsonResponse: false,

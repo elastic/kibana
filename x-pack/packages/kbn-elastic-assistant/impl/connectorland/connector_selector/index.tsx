@@ -11,6 +11,9 @@ import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { some } from 'lodash';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -27,6 +30,8 @@ interface Props {
   selectedConnectorId?: string;
   displayFancy?: (displayText: string) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
+  isFlyoutMode: boolean;
+  stats?: AttackDiscoveryStats | null;
 }
 
 export type AIConnector = ActionConnector & {
@@ -42,6 +47,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     selectedConnectorId,
     onConnectorSelectionChange,
     setIsOpen,
+    isFlyoutMode,
+    stats = null,
   }) => {
     const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
     // Connector Modal State
@@ -88,23 +95,40 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
             : connectorTypeTitle;
+          const attackDiscoveryStats =
+            stats !== null
+              ? stats.statsPerConnector.find((s) => s.connectorId === connector.id) ?? null
+              : null;
+
           return {
             value: connector.id,
             'data-test-subj': connector.id,
             inputDisplay: displayFancy?.(connector.name) ?? connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
-                <strong>{connector.name}</strong>
-                {connectorDetails && (
-                  <EuiText size="xs" color="subdued">
-                    <p>{connectorDetails}</p>
-                  </EuiText>
-                )}
+                <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <strong>{connector.name}</strong>
+                    {connectorDetails && (
+                      <EuiText size="xs" color="subdued">
+                        <p>{connectorDetails}</p>
+                      </EuiText>
+                    )}
+                  </EuiFlexItem>
+                  {attackDiscoveryStats && (
+                    <AttackDiscoveryStatusIndicator {...attackDiscoveryStats} />
+                  )}
+                </EuiFlexGroup>
               </React.Fragment>
             ),
           };
         }),
-      [actionTypeRegistry, aiConnectors, displayFancy]
+      [actionTypeRegistry, aiConnectors, displayFancy, stats]
+    );
+
+    const connectorExists = useMemo(
+      () => some(aiConnectors, ['id', selectedConnectorId]),
+      [aiConnectors, selectedConnectorId]
     );
 
     // Only include add new connector option if user has privilege
@@ -153,18 +177,29 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiSuperSelect
-          aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-          compressed={true}
-          data-test-subj="connector-selector"
-          disabled={localIsDisabled}
-          hasDividers={true}
-          isOpen={modalForceOpen}
-          onChange={onChange}
-          options={allConnectorOptions}
-          valueOfSelected={selectedConnectorId}
-          popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
-        />
+        {isFlyoutMode && !connectorExists && !connectorOptions.length ? (
+          <EuiButtonEmpty
+            data-test-subj="addNewConnectorButton"
+            iconType="plusInCircle"
+            size="xs"
+            onClick={() => setIsConnectorModalVisible(true)}
+          >
+            {i18n.ADD_CONNECTOR}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiSuperSelect
+            aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
+            compressed={true}
+            data-test-subj="connector-selector"
+            disabled={localIsDisabled}
+            hasDividers={true}
+            isOpen={modalForceOpen}
+            onChange={onChange}
+            options={allConnectorOptions}
+            valueOfSelected={selectedConnectorId}
+            popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
+          />
+        )}
         {isConnectorModalVisible && (
           // Crashing management app otherwise
           <Suspense fallback>

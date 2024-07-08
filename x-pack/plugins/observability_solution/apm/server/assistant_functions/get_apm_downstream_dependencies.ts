@@ -7,16 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FunctionRegistrationParameters } from '.';
+import { RandomSampler } from '../lib/helpers/get_random_sampler';
 import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
+
+interface DownstreamDependenciesFunctionRegistrationParams extends FunctionRegistrationParameters {
+  randomSampler: RandomSampler;
+}
 
 export function registerGetApmDownstreamDependenciesFunction({
   apmEventClient,
   registerFunction,
-}: FunctionRegistrationParameters) {
+  randomSampler,
+}: DownstreamDependenciesFunctionRegistrationParams) {
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
-      contexts: ['core'],
       description: `Get the downstream dependencies (services or uninstrumented backends) for a 
       service. This allows you to map the downstream dependency name to a service, by 
       returning both span.destination.service.resource and service.name. Use this to 
@@ -39,7 +44,8 @@ export function registerGetApmDownstreamDependenciesFunction({
           },
           'service.environment': {
             type: 'string',
-            description: 'The environment that the service is running in',
+            description:
+              'The environment that the service is running in. Leave empty to query for all environments.',
           },
           start: {
             type: 'string',
@@ -58,6 +64,7 @@ export function registerGetApmDownstreamDependenciesFunction({
         content: await getAssistantDownstreamDependencies({
           arguments: args,
           apmEventClient,
+          randomSampler,
         }),
       };
     }

@@ -442,7 +442,14 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
   });
 }
 
-export function useLoadInferenceModels() {
+export function getInferenceEndpoints() {
+  return sendRequest({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
+  });
+}
+
+export function useLoadInferenceEndpoints() {
   return useRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
     method: 'get',

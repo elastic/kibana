@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { Dispatch } from 'redux';
@@ -13,57 +13,61 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import type { ControlColumnProps } from '../../../../../../common/types';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../../common/lib/kibana';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import type { ControlColumnProps } from '../../../../../../common/types';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { useTimelineEvents } from '../../../../containers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { calculateTotalPages } from '../../helpers';
 import { TimelineRefetch } from '../../refetch_timeline';
 import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
-import { SuperDatePicker } from '../../../../../common/components/super_date_picker';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
-import { TimelineDatePickerLock } from '../../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
-import { EqlQueryBarTimeline } from '../../query_bar/eql';
-import { getDefaultControlColumn } from '../../body/control_columns';
-import type { Sort } from '../../body/sort';
-import { Sourcerer } from '../../../../../common/components/sourcerer';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import {
   EventsCountBadge,
   FullWidthFlexGroup,
   ScrollableFlexItem,
-  StyledEuiFlyoutHeader,
   StyledEuiFlyoutBody,
   StyledEuiFlyoutFooter,
   VerticalRule,
-  TabHeaderContainer,
 } from '../shared/layout';
-import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
+import {
+  TIMELINE_EMPTY_EVENTS,
+  isTimerangeSame,
+  timelineEmptyTrailingControlColumns,
+  TIMELINE_NO_SORTING,
+} from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
+import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
+import { EqlTabHeader } from './header';
+import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
+import { NotesFlyout } from '../../properties/notes_flyout';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
-
-const NO_SORTING: Sort[] = [];
-
-const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 export const EqlTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -81,7 +85,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   start,
   timerangeKind,
+  pinnedEventIds,
+  eventIdToNoteIds,
 }) => {
+  const { telemetry } = useKibana().services;
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
@@ -93,50 +100,139 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+  const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
-  const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const currentTimeline = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? TimelineId.active)
+  );
+
+  const { sampleSize } = currentTimeline;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
-  const canQueryTimeline = () =>
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end) &&
-    !isBlankTimeline;
-
-  const getTimelineQueryFields = () => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const columnFields = columnsHeader.map((c) => c.id);
-
-    return [...columnFields, ...requiredFieldsForActions];
-  };
+  const canQueryTimeline = useCallback(
+    () =>
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      !isBlankTimeline,
+    [end, isBlankTimeline, loadingSourcerer, start]
+  );
 
   const [
-    queryLoadingState,
+    dataLoadingState,
     { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
     eqlOptions: restEqlOption,
-    fields: getTimelineQueryFields(),
+    fields: timelineQueryFieldsFromColumns,
     filterQuery: eqlQuery ?? '',
     id: timelineId,
     indexNames: selectedPatterns,
     language: 'eql',
-    limit: itemsPerPage,
+    limit: unifiedComponentsInTimelineEnabled ? sampleSize : itemsPerPage,
     runtimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,
   });
 
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const { openFlyout } = useExpandableFlyoutApi();
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
+  const onToggleShowNotes = useCallback(
+    (eventId?: string) => {
+      const indexName = selectedPatterns.join(',');
+      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelNotesTab,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+        });
+        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+          location: timelineId,
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'left',
+        });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
+      }
+    },
+    [
+      expandableFlyoutDisabled,
+      openFlyout,
+      securitySolutionNotesEnabled,
+      selectedPatterns,
+      telemetry,
+      timelineId,
+      setNotesEventId,
+      showNotesFlyout,
+    ]
+  );
+
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort: TIMELINE_NO_SORTING,
+    timelineId,
+    activeTab: TimelineTabs.eql,
+    refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
+    onToggleShowNotes,
+  });
+
   const isQueryLoading = useMemo(
     () =>
-      queryLoadingState === DataLoadingState.loading ||
-      queryLoadingState === DataLoadingState.loadingMore,
-    [queryLoadingState]
+      dataLoadingState === DataLoadingState.loading ||
+      dataLoadingState === DataLoadingState.loadingMore,
+    [dataLoadingState]
   );
 
   const handleOnPanelClosed = useCallback(() => {
@@ -152,72 +248,91 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const leadingControlColumns = useMemo(
-    () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
-        ...x,
-        headerCellRender: HeaderActions,
-      })),
-    [ACTION_BUTTON_COUNT]
+  const unifiedHeader = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" direction="column">
+        <EqlTabHeader
+          activeTab={activeTab}
+          setTimelineFullScreen={setTimelineFullScreen}
+          timelineFullScreen={timelineFullScreen}
+          timelineId={timelineId}
+        />
+      </EuiFlexGroup>
+    ),
+    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
+
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
 
   return (
     <>
-      <InPortal node={eqlEventsCountPortalNode}>
-        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
-      </InPortal>
-      <TimelineRefetch
-        id={`${timelineId}-${TimelineTabs.eql}`}
-        inputId={InputsModelId.timeline}
-        inspect={inspect}
-        loading={isQueryLoading}
-        refetch={refetch}
-      />
-      <FullWidthFlexGroup>
-        <ScrollableFlexItem grow={2}>
-          <EuiFlexGroup gutterSize="s" direction="column">
-            <EuiFlexItem grow={false}>
-              <StyledEuiFlyoutHeader
-                data-test-subj={`${activeTab}-tab-flyout-header`}
-                hasBorder={false}
-              >
-                <TabHeaderContainer data-test-subj="timelineHeader">
-                  <EuiFlexGroup
-                    className="euiScrollBar"
-                    alignItems="flexStart"
-                    gutterSize="s"
-                    data-test-subj="timeline-date-picker-container"
-                    responsive={false}
-                  >
-                    {timelineFullScreen && setTimelineFullScreen != null && (
-                      <ExitFullScreen
-                        fullScreen={timelineFullScreen}
-                        setFullScreen={setTimelineFullScreen}
-                      />
-                    )}
-                    <EuiFlexItem grow={false}>
-                      {activeTab === TimelineTabs.eql && (
-                        <Sourcerer scope={SourcererScopeName.timeline} />
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <SuperDatePicker
-                        width="auto"
-                        id={InputsModelId.timeline}
-                        timelineId={timelineId}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TimelineDatePickerLock />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </TabHeaderContainer>
-              </StyledEuiFlyoutHeader>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EqlQueryBarTimeline timelineId={timelineId} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
+      {unifiedComponentsInTimelineEnabled ? (
+        <>
+          <InPortal node={eqlEventsCountPortalNode}>
+            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+          </InPortal>
+          {NotesFlyoutMemo}
+          <FullWidthFlexGroup>
+            <ScrollableFlexItem grow={2}>
+              <UnifiedTimelineBody
+                header={unifiedHeader}
+                columns={augmentedColumnHeaders}
+                isSortEnabled={false}
+                rowRenderers={rowRenderers}
+                timelineId={timelineId}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                sort={TIMELINE_NO_SORTING}
+                events={events}
+                refetch={refetch}
+                dataLoadingState={dataLoadingState}
+                totalCount={isBlankTimeline ? 0 : totalCount}
+                onEventClosed={onEventClosed}
+                expandedDetail={expandedDetail}
+                showExpandedDetails={showExpandedDetails}
+                onChangePage={loadPage}
+                activeTab={activeTab}
+                updatedAt={refreshedAt}
+                isTextBasedQuery={false}
+                pageInfo={pageInfo}
+                leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+              />
+            </ScrollableFlexItem>
+          </FullWidthFlexGroup>
+        </>
+      ) : (
+        <>
+          <InPortal node={eqlEventsCountPortalNode}>
+            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+          </InPortal>
+          {NotesFlyoutMemo}
+          <TimelineRefetch
+            id={`${timelineId}-${TimelineTabs.eql}`}
+            inputId={InputsModelId.timeline}
+            inspect={inspect}
+            loading={isQueryLoading}
+            refetch={refetch}
+          />
+          <FullWidthFlexGroup>
+            <ScrollableFlexItem grow={2}>
+              <EqlTabHeader
+                activeTab={activeTab}
+                setTimelineFullScreen={setTimelineFullScreen}
+                timelineFullScreen={timelineFullScreen}
+                timelineId={timelineId}
+              />
               <EventDetailsWidthProvider>
                 <StyledEuiFlyoutBody
                   data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
@@ -226,19 +341,19 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
-                    data={isBlankTimeline ? EMPTY_EVENTS : events}
+                    data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
                     id={timelineId}
                     refetch={refetch}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={NO_SORTING}
+                    sort={TIMELINE_NO_SORTING}
                     tabType={TimelineTabs.eql}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCount,
                       itemsPerPage,
                     })}
-                    leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={trailingControlColumns}
+                    leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
+                    trailingControlColumns={timelineEmptyTrailingControlColumns}
                   />
                 </StyledEuiFlyoutBody>
 
@@ -264,24 +379,24 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   )}
                 </StyledEuiFlyoutFooter>
               </EventDetailsWidthProvider>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ScrollableFlexItem>
-        {showExpandedDetails && (
-          <>
-            <VerticalRule />
-            <ScrollableFlexItem grow={1}>
-              <DetailsPanel
-                browserFields={browserFields}
-                runtimeMappings={runtimeMappings}
-                tabType={TimelineTabs.eql}
-                scopeId={timelineId}
-                handleOnPanelClosed={handleOnPanelClosed}
-              />
             </ScrollableFlexItem>
-          </>
-        )}
-      </FullWidthFlexGroup>
+            {showExpandedDetails && (
+              <>
+                <VerticalRule />
+                <ScrollableFlexItem grow={1}>
+                  <DetailsPanel
+                    browserFields={browserFields}
+                    runtimeMappings={runtimeMappings}
+                    tabType={TimelineTabs.eql}
+                    scopeId={timelineId}
+                    handleOnPanelClosed={handleOnPanelClosed}
+                  />
+                </ScrollableFlexItem>
+              </>
+            )}
+          </FullWidthFlexGroup>
+        </>
+      )}
     </>
   );
 };
@@ -292,8 +407,16 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const { activeTab, columns, eqlOptions, expandedDetail, itemsPerPage, itemsPerPageOptions } =
-      timeline;
+    const {
+      activeTab,
+      columns,
+      eqlOptions,
+      expandedDetail,
+      itemsPerPage,
+      itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
+    } = timeline;
 
     return {
       activeTab,
@@ -305,6 +428,8 @@ const makeMapStateToProps = () => {
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
       showExpandedDetails:
         !!expandedDetail[TimelineTabs.eql] && !!expandedDetail[TimelineTabs.eql]?.panelView,
 
@@ -337,6 +462,8 @@ const EqlTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )
 );

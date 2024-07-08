@@ -98,5 +98,12 @@
     "@kbn/es-query",
     "@kbn/utility-types",
     "@kbn/synthetics-plugin",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/alerting-comparators",
+    "@kbn/search-types",
+    "@kbn/reporting-server",
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ]
 }

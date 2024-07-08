@@ -14,12 +14,19 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiPopover,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { Dashboard } from '../../../common/api_types';
+
+const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
+  defaultMessage: 'Integration actions',
+});
+
 const seeIntegrationText = i18n.translate('xpack.datasetQuality.flyoutSeeIntegrationActionText', {
   defaultMessage: 'See integration',
 });
@@ -32,9 +39,19 @@ const viewDashboardsText = i18n.translate('xpack.datasetQuality.flyoutViewDashbo
   defaultMessage: 'View dashboards',
 });
 
-export function IntegrationActionsMenu({ integration }: { integration: Integration }) {
-  const { type, name } = useDatasetQualityFlyout().dataStreamStat!;
-  const { dashboards = [], version, name: integrationName } = integration;
+export function IntegrationActionsMenu({
+  integration,
+  dashboards,
+  dashboardsLoading,
+}: {
+  integration: Integration;
+  dashboards: Dashboard[];
+  dashboardsLoading: boolean;
+}) {
+  const { dataStreamStat, canUserAccessDashboards, canUserViewIntegrations } =
+    useDatasetQualityFlyout();
+  const { version, name: integrationName } = integration;
+  const { type, name } = dataStreamStat!;
   const {
     isOpen,
     handleCloseMenu,
@@ -46,6 +63,8 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
 
   const actionButton = (
     <EuiButtonIcon
+      title={integrationActionsText}
+      aria-label={integrationActionsText}
       iconType="boxesHorizontal"
       onClick={handleToggleMenu}
       data-test-subj="datasetQualityFlyoutIntegrationActionsButton"
@@ -57,11 +76,13 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
     buttonText,
     routerLinkProps,
     iconType,
+    disabled = false,
   }: {
     dataTestSubject: string;
-    buttonText: string;
+    buttonText: string | React.ReactNode;
     routerLinkProps: RouterLinkProps;
     iconType: string;
+    disabled?: boolean;
   }) => (
     <EuiButtonEmpty
       {...routerLinkProps}
@@ -72,6 +93,7 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
       color="text"
       iconType={iconType}
       data-test-subj={dataTestSubject}
+      disabled={disabled}
     >
       {buttonText}
     </EuiButtonEmpty>
@@ -79,16 +101,21 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
 
   const panelItems = useMemo(() => {
     const firstLevelItems: EuiContextMenuPanelItemDescriptor[] = [
-      {
-        renderItem: () => (
-          <MenuActionItem
-            buttonText={seeIntegrationText}
-            dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
-            routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
-            iconType="package"
-          />
-        ),
-      },
+      ...(canUserViewIntegrations
+        ? [
+            {
+              renderItem: () => (
+                <MenuActionItem
+                  buttonText={seeIntegrationText}
+                  dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
+                  routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
+                  iconType="package"
+                  disabled={!canUserViewIntegrations}
+                />
+              ),
+            },
+          ]
+        : []),
       {
         renderItem: () => (
           <MenuActionItem
@@ -108,12 +135,20 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
       },
     ];
 
-    if (dashboards.length) {
+    if (dashboards.length && canUserAccessDashboards) {
       firstLevelItems.push({
         icon: 'dashboardApp',
         panel: 1,
         name: viewDashboardsText,
         'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
+        disabled: false,
+      });
+    } else if (dashboardsLoading) {
+      firstLevelItems.push({
+        icon: 'dashboardApp',
+        name: <EuiSkeletonRectangle width={120} title={viewDashboardsText} />,
+        'data-test-subj': 'datasetQualityFlyoutIntegrationActionDashboardsLoading',
+        disabled: true,
       });
     }
 
@@ -150,6 +185,9 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
     name,
     type,
     version,
+    dashboardsLoading,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   ]);
 
   return (

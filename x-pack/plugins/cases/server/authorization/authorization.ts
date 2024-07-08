@@ -171,7 +171,7 @@ export class Authorization {
     return { authorized, unauthorized };
   }
 
-  private async logSavedObjects({
+  private logSavedObjects({
     entities,
     operation,
     error,

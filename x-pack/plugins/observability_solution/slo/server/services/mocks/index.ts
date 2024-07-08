@@ -6,7 +6,7 @@
  */
 
 import { ResourceInstaller } from '../resource_installer';
-import { SLIClient } from '../sli_client';
+import { BurnRatesClient } from '../burn_rates_client';
 import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
 import { SummarySearchClient } from '../summary_search_client';
@@ -62,9 +62,9 @@ const createSummarySearchClientMock = (): jest.Mocked<SummarySearchClient> => {
   };
 };
 
-const createSLIClientMock = (): jest.Mocked<SLIClient> => {
+const createBurnRatesClientMock = (): jest.Mocked<BurnRatesClient> => {
   return {
-    fetchSLIDataFrom: jest.fn(),
+    calculate: jest.fn(),
   };
 };
 
@@ -75,5 +75,5 @@ export {
   createSLORepositoryMock,
   createSummaryClientMock,
   createSummarySearchClientMock,
-  createSLIClientMock,
+  createBurnRatesClientMock,
 };

@@ -10,15 +10,15 @@ import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/search-types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -51,6 +51,19 @@ import {
   fetchDataWithTimeout,
   rateLimitingForkJoin,
 } from '../search_strategy/requests/fetch_utils';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
+
+const getPopulatedFieldsInIndex = (
+  populatedFieldsInIndexWithoutRuntimeFields: Set<string> | undefined | null,
+  runtimeFieldMap: MappingRuntimeFields | undefined
+): Set<string> | undefined | null => {
+  if (!populatedFieldsInIndexWithoutRuntimeFields) return undefined;
+  const runtimeFields = runtimeFieldMap ? Object.keys(runtimeFieldMap) : undefined;
+  return runtimeFields && runtimeFields?.length > 0
+    ? new Set([...Array.from(populatedFieldsInIndexWithoutRuntimeFields), ...runtimeFields])
+    : populatedFieldsInIndexWithoutRuntimeFields;
+};
+
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   esql = false,
   searchStrategyParams: TParams | undefined,
@@ -68,7 +81,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
-  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<
+  const [populatedFieldsInIndexWithoutRuntimeFields, setPopulatedFieldsInIndex] = useState<
     | Set<string>
     // request to fields caps has not been made yet
     | undefined
@@ -92,10 +105,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       // If null, that means we tried to fetch populated fields already but it timed out
       // so don't try again
-      if (!searchStrategyParams || populatedFieldsInIndex === null) return;
+      if (!searchStrategyParams || populatedFieldsInIndexWithoutRuntimeFields === null) return;
 
-      const { index, searchQuery, timeFieldName, earliest, latest, runtimeFieldMap } =
-        searchStrategyParams;
+      const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
@@ -107,12 +119,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           return;
         }
 
-        const filterCriteria = buildBaseFilterCriteria(
-          timeFieldName,
-          earliest,
-          latest,
-          searchQuery
-        );
+        const filterCriteria = buildFilterCriteria(timeFieldName, earliest, latest, searchQuery);
 
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
@@ -131,15 +138,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
         if (!unmounted) {
           if (Array.isArray(nonEmptyFields)) {
-            setPopulatedFieldsInIndex(
-              new Set([
-                ...nonEmptyFields.map((field) => field.name),
-                // Field caps API don't know about runtime fields
-                // so by default we expect runtime fields to be populated
-                // so we can later check as needed
-                ...Object.keys(runtimeFieldMap ?? {}),
-              ])
-            );
+            setPopulatedFieldsInIndex(new Set([...nonEmptyFields.map((field) => field.name)]));
           } else {
             setPopulatedFieldsInIndex(null);
           }
@@ -154,24 +153,33 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      data.dataViews,
       searchStrategyParams?.timeFieldName,
       searchStrategyParams?.earliest,
       searchStrategyParams?.latest,
-      searchStrategyParams?.searchQuery,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({ query: searchStrategyParams?.searchQuery }),
       searchStrategyParams?.index,
-      searchStrategyParams?.runtimeFieldMap,
     ]
   );
+
   const startFetch = useCallback(async () => {
     try {
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
 
-      if (!searchStrategyParams || lastRefresh === 0 || populatedFieldsInIndex === undefined) {
+      if (
+        !searchStrategyParams ||
+        lastRefresh === 0 ||
+        populatedFieldsInIndexWithoutRuntimeFields === undefined
+      ) {
         return;
       }
+
+      const populatedFieldsInIndex = getPopulatedFieldsInIndex(
+        populatedFieldsInIndexWithoutRuntimeFields,
+        searchStrategyParams.runtimeFieldMap
+      );
 
       setFetchState({
         ...getInitialProgress(),
@@ -391,7 +399,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         displayError(toasts, searchStrategyParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data, searchStrategyParams, toasts, lastRefresh, probability, populatedFieldsInIndex]);
+  }, [
+    data,
+    searchStrategyParams,
+    toasts,
+    lastRefresh,
+    probability,
+    populatedFieldsInIndexWithoutRuntimeFields,
+  ]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

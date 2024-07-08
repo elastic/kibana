@@ -13,7 +13,12 @@ import { resolve } from 'path';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { readCloudUsersFromFile } from './helper';
-import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
+import {
+  createCloudSAMLSession,
+  createLocalSAMLSession,
+  getSecurityProfile,
+  Session,
+} from './saml_auth';
 import { Role, User } from './types';
 
 export interface HostOptions {
@@ -35,18 +40,23 @@ export interface SamlSessionManagerOptions {
  * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
+  private readonly DEFAULT_ROLES_FILE_NAME: string = 'role_users.json';
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
-  private readonly userRoleFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
   private readonly supportedRoles: string[];
+  private readonly userRoleFilePath: string;
 
-  constructor(options: SamlSessionManagerOptions) {
+  constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
     this.isCloud = options.isCloud;
     this.log = options.log;
+    // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
+    const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
+    this.log.info(`Using the file ${rolesFile} for the role users`);
+    this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
@@ -141,8 +151,14 @@ export class SamlSessionManager {
     return session.getCookieValue();
   }
 
+  async getEmail(role: string) {
+    const session = await this.getSessionByRole(role);
+    return session.email;
+  }
+
   async getUserData(role: string) {
-    const { email, fullname } = await this.getSessionByRole(role);
-    return { email, fullname };
+    const { cookie } = await this.getSessionByRole(role);
+    const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
+    return profileData;
   }
 }

@@ -6,26 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiBadge, EuiStat } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
-  initializeTimeRange,
   fetch$,
+  initializeTimeRange,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { Api, Services, State } from './types';
+import { SearchApi, Services, SearchSerializedState, SearchRuntimeState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<State, Api> = {
+  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchRuntimeState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_ID,
-    deserializeState: (state) => {
-      return state.rawState as State;
-    },
+    deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const timeRange = initializeTimeRange(state);
       const defaultDataView = await services.dataViews.getDefaultDataView();
@@ -33,10 +34,22 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         defaultDataView ? [defaultDataView] : undefined
       );
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+
+      if (!defaultDataView) {
+        blockingError$.next(
+          new Error(
+            i18n.translate('embeddableExamples.search.noDataViewError', {
+              defaultMessage: 'Please install a data view to view this example',
+            })
+          )
+        );
+      }
 
       const api = buildApi(
         {
           ...timeRange.api,
+          blockingError: blockingError$,
           dataViews: dataViews$,
           dataLoading: dataLoading$,
           serializeState: () => {
@@ -53,25 +66,32 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         }
       );
 
-      const error$ = new BehaviorSubject<Error | undefined>(undefined);
       const count$ = new BehaviorSubject<number>(0);
+      let prevRequestAbortController: AbortController | undefined;
       const fetchSubscription = fetch$(api)
         .pipe(
+          tap(() => {
+            if (prevRequestAbortController) {
+              prevRequestAbortController.abort();
+            }
+          }),
           switchMap(async (fetchContext) => {
-            error$.next(undefined);
+            blockingError$.next(undefined);
             if (!defaultDataView) {
               return;
             }
 
             try {
               dataLoading$.next(true);
+              const abortController = new AbortController();
+              prevRequestAbortController = abortController;
               const count = await getCount(
                 defaultDataView,
                 services.data,
                 fetchContext.filters ?? [],
                 fetchContext.query,
                 // timeRange and timeslice provided seperatly so consumers can decide
-                // whether to refetch data for just mask current data.
+                // whether to refetch data or just mask current data.
                 // In this example, we must refetch because we need a count within the time range.
                 fetchContext.timeslice
                   ? {
@@ -79,11 +99,13 @@ export const getSearchEmbeddableFactory = (services: Services) => {
                       to: new Date(fetchContext.timeslice[1]).toISOString(),
                       mode: 'absolute' as 'absolute',
                     }
-                  : fetchContext.timeRange
+                  : fetchContext.timeRange,
+                abortController.signal,
+                fetchContext.searchSessionId
               );
               return { count };
             } catch (error) {
-              return { error };
+              return error.name === 'AbortError' ? undefined : { error };
             }
           })
         )
@@ -93,14 +115,14 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             count$.next(next.count);
           }
           if (next && next.hasOwnProperty('error')) {
-            error$.next(next.error);
+            blockingError$.next(next.error);
           }
         });
 
       return {
         api,
         Component: () => {
-          const [count, error] = useBatchedPublishingSubjects(count$, error$);
+          const [count, error] = useBatchedPublishingSubjects(count$, blockingError$);
 
           useEffect(() => {
             return () => {
@@ -108,26 +130,37 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             };
           }, []);
 
-          if (!defaultDataView) {
-            return (
-              <EuiCallOut title="Default data view not found" color="warning" iconType="warning">
-                <p>Please install a sample data set to run example.</p>
-              </EuiCallOut>
-            );
-          }
-
-          if (error) {
-            return (
-              <EuiCallOut title="Search error" color="warning" iconType="warning">
-                <p>{error.message}</p>
-              </EuiCallOut>
-            );
-          }
+          // in error case we can return null because the panel will handle rendering the blocking error.
+          if (error || !defaultDataView) return null;
 
           return (
-            <p>
-              Found <strong>{count}</strong> from {defaultDataView.name}
-            </p>
+            <div
+              css={css`
+                width: 100%;
+                padding: ${euiThemeVars.euiSizeM};
+              `}
+            >
+              <EuiStat
+                title={count}
+                titleColor="subdued"
+                description={
+                  <span>
+                    <EuiBadge iconType="index" color="hollow">
+                      {i18n.translate('embeddableExamples.search.dataViewName', {
+                        defaultMessage: '{dataViewName}',
+                        values: { dataViewName: defaultDataView.name },
+                      })}
+                    </EuiBadge>
+                  </span>
+                }
+                titleSize="l"
+              >
+                {i18n.translate('embeddableExamples.search.result', {
+                  defaultMessage: '{count, plural, one {document} other {documents}} found',
+                  values: { count },
+                })}
+              </EuiStat>
+            </div>
           );
         },
       };

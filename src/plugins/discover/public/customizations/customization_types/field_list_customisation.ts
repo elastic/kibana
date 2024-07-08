@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldsGroup } from '@kbn/unified-field-list/src/types';
-
 export interface FieldListCustomization {
   id: 'field_list';
-  additionalFieldGroups?: {
-    smartFields?: FieldsGroup<DataViewField>['fields'];
-  };
+  logsFieldsEnabled: boolean; // TODO / NOTE: Just temporary until Discover's data type contextual awareness lands.
 }

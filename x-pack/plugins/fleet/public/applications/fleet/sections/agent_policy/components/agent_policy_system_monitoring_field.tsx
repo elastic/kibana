@@ -12,11 +12,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AgentPolicyPackageBadge } from '../../../components';
 
 interface Props {
+  isDisabled?: boolean;
   withSysMonitoring: boolean;
   updateSysMonitoring: (newValue: boolean) => void;
 }
 
 export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Props> = ({
+  isDisabled = false,
   withSysMonitoring,
   updateSysMonitoring,
 }) => {
@@ -24,6 +26,7 @@ export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Pr
     <EuiFormRow>
       <EuiCheckbox
         id="agentPolicyFormSystemMonitoringCheckbox"
+        disabled={isDisabled}
         label={
           <>
             <FormattedMessage

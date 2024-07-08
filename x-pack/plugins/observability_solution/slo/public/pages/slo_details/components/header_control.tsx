@@ -18,11 +18,12 @@ import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
-import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { useCapabilities } from '../../../hooks/use_capabilities';
+import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
-import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { usePermissions } from '../../../hooks/use_permissions';
+import { useResetSlo } from '../../../hooks/use_reset_slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
@@ -43,16 +44,18 @@ export function HeaderControl({ isLoading, slo }: Props) {
   } = useKibana().services;
 
   const hasApmReadCapabilities = capabilities.apm.show;
-  const { hasWriteCapabilities } = useCapabilities();
+  const { data: permissions } = usePermissions();
 
-  const { isDeletingSlo, removeDeleteQueryParam } = useGetQueryParams();
+  const { isDeletingSlo, isResettingSlo, removeDeleteQueryParam, removeResetQueryParam } =
+    useGetQueryParams();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
-  const { mutate: deleteSlo } = useDeleteSlo();
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: slo ? [slo.id] : undefined,
@@ -67,7 +70,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
     if (isDeletingSlo) {
       setDeleteConfirmationModalOpen(true);
     }
-  }, [isDeletingSlo]);
+    if (isResettingSlo) {
+      setResetConfirmationModalOpen(true);
+    }
+  }, [isDeletingSlo, isResettingSlo]);
 
   const onCloseRuleFlyout = () => {
     setRuleFlyoutVisibility(false);
@@ -78,7 +84,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl } = useSloActions({
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -120,10 +126,30 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleDeleteConfirm = async () => {
-    if (slo) {
-      deleteSlo({ id: slo.id, name: slo.name });
-      navigate(basePath.prepend(paths.slos));
+    removeDeleteQueryParam();
+    setDeleteConfirmationModalOpen(false);
+    navigate(basePath.prepend(paths.slos));
+  };
+
+  const handleReset = () => {
+    if (!!remoteResetUrl) {
+      window.open(remoteResetUrl, '_blank');
+    } else {
+      setResetConfirmationModalOpen(true);
     }
+  };
+
+  const handleResetConfirm = async () => {
+    if (slo) {
+      await resetSlo({ id: slo.id, name: slo.name });
+      removeResetQueryParam();
+      setResetConfirmationModalOpen(false);
+    }
+  };
+
+  const handleResetCancel = () => {
+    removeResetQueryParam();
+    setResetConfirmationModalOpen(false);
   };
 
   const navigate = useCallback(
@@ -172,7 +198,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           items={[
             <EuiContextMenuItem
               key="edit"
-              disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
               icon="pencil"
               href={sloEditUrl}
               target={isRemote ? '_blank' : undefined}
@@ -188,7 +214,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="createBurnRateRule"
-              disabled={!hasWriteCapabilities || isRemote}
+              disabled={!permissions?.hasAllWriteRequested || isRemote}
               icon="bell"
               onClick={handleOpenRuleFlyout}
               data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
@@ -200,7 +226,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="manageRules"
-              disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
               icon="gear"
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
@@ -236,7 +262,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
-                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
                 icon="copy"
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
@@ -252,7 +278,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               <EuiContextMenuItem
                 key="delete"
                 icon="trash"
-                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
                 onClick={handleDelete}
                 data-test-subj="sloDetailsHeaderControlPopoverDelete"
                 toolTipContent={
@@ -261,6 +287,21 @@ export function HeaderControl({ isLoading, slo }: Props) {
               >
                 {i18n.translate('xpack.slo.slo.item.actions.delete', {
                   defaultMessage: 'Delete',
+                })}
+                {showRemoteLinkIcon}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="reset"
+                icon="refresh"
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                onClick={handleReset}
+                data-test-subj="sloDetailsHeaderControlPopoverReset"
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
+              >
+                {i18n.translate('xpack.slo.slo.item.actions.reset', {
+                  defaultMessage: 'Reset',
                 })}
                 {showRemoteLinkIcon}
               </EuiContextMenuItem>
@@ -286,10 +327,15 @@ export function HeaderControl({ isLoading, slo }: Props) {
       ) : null}
 
       {slo && isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
+      ) : null}
+
+      {slo && isResetConfirmationModalOpen ? (
+        <SloResetConfirmationModal
           slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
+          onCancel={handleResetCancel}
+          onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
     </>

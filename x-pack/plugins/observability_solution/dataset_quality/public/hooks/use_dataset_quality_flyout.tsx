@@ -18,25 +18,52 @@ export const useDatasetQualityFlyout = () => {
 
   const {
     dataset: dataStreamStat,
+    datasetSettings: dataStreamSettings,
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
     breakdownField,
-  } = useSelector(service, (state) => state.context.flyout);
+    isNonAggregatable,
+    integration,
+  } = useSelector(service, (state) => state.context.flyout) ?? {};
+
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
-  const dataStreamDetailsLoading = useSelector(
+  const loadingState = useSelector(service, (state) => ({
+    dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
+    dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
+    datasetIntegrationDashboardLoading: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+    ),
+    datasetIntegrationDone: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+    ),
+  }));
+
+  const canUserAccessDashboards = useSelector(
     service,
     (state) =>
-      state.matches('datasets.loaded.flyoutOpen.fetching') ||
-      state.matches('flyout.initializing.dataStreamDetails.fetching')
+      !state.matches(
+        'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized'
+      )
+  );
+
+  const canUserViewIntegrations = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges.canViewIntegrations
   );
 
   return {
     dataStreamStat,
+    dataStreamSettings,
     dataStreamDetails,
-    dataStreamDetailsLoading,
+    isNonAggregatable,
+    integration,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,
+    loadingState,
+    flyoutLoading: !dataStreamStat,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   };
 };

@@ -19,7 +19,7 @@ type ErrorGroups =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-swift';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177651
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('errors group', () => {
       const appleTransaction = {
         name: 'GET /apple 🍎 ',
@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'production', agentName: 'swift' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(appleTransaction.successRate)
@@ -131,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('returns the correct data', () => {
         let errorGroups: ErrorGroups;

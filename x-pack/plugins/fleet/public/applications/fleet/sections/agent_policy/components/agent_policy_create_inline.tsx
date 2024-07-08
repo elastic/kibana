@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
-import { sendCreateAgentPolicy, useStartServices } from '../../../hooks';
+import { sendCreateAgentPolicy, useStartServices, useAuthz } from '../../../hooks';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../common/services/generate_new_agent_policy';
 
@@ -51,11 +51,13 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   agentPolicyName,
 }) => {
   const { docLinks } = useStartServices();
+  const authz = useAuthz();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
 
   const [isLoading, setIsLoading] = useState(false);
+  const isDisabled = !authz.fleet.allAgentPolicies || isLoading;
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -128,7 +130,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
           />
         )}
       </EuiText>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -139,7 +141,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             <EuiFieldText
               fullWidth
               value={newAgentPolicy.name}
-              disabled={isLoading}
+              disabled={isDisabled}
               onChange={(e) => updateNewAgentPolicy({ name: e.target.value })}
               isInvalid={Boolean(touchedFields.name && validation.name)}
               onBlur={() => setTouchedFields({ ...touchedFields, name: true })}
@@ -155,6 +157,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             disabled={!newAgentPolicy.name}
             onClick={() => createAgentPolicy()}
             isLoading={isLoading}
+            isDisabled={isDisabled}
             data-test-subj={isFleetServerPolicy ? 'createFleetServerPolicyBtn' : 'createPolicyBtn'}
           >
             <FormattedMessage
@@ -166,24 +169,26 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <AgentPolicyFormSystemMonitoringCheckbox
+        isDisabled={isDisabled}
         withSysMonitoring={withSysMonitoring}
         updateSysMonitoring={(value) => setWithSysMonitoring(value)}
       />
 
       <>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <StyledEuiAccordion
           id="advancedOptionsJustChanged"
           data-test-subj="advancedOptionsButton"
+          isDisabled={isDisabled}
           buttonContent={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
               defaultMessage="Advanced options"
             />
           }
-          buttonClassName="ingest-active-button"
+          buttonClassName={!isDisabled ? 'ingest-active-button' : undefined}
         >
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           <AgentPolicyAdvancedOptionsContent
             agentPolicy={newAgentPolicy}
             updateAgentPolicy={updateNewAgentPolicy}

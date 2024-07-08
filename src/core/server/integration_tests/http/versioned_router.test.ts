@@ -29,7 +29,7 @@ interface AdditionalOptions {
 
 describe('Routing versioned requests', () => {
   let router: IRouter;
-  let supertest: Supertest.SuperTest<Supertest.Test>;
+  let supertest: Supertest.Agent;
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();
@@ -199,14 +199,16 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'forbid' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'forbid' }) } },
+          },
           version: '2',
         },
         async (ctx, req, res) => {
@@ -215,7 +217,9 @@ describe('Routing versioned requests', () => {
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'allow' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'allow' }) } },
+          },
           version: '3',
         },
         async (ctx, req, res) => {
@@ -271,7 +275,7 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
@@ -294,11 +298,11 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { version: '1', validate: { response: { 200: { body: schema.number() } } } },
+        { version: '1', validate: { response: { 200: { body: () => schema.number() } } } },
         async (ctx, req, res) => res.ok()
       )
       .addVersion(
-        { version: '2', validate: { response: { 200: { body: schema.number() } } } },
+        { version: '2', validate: { response: { 200: { body: () => schema.number() } } } },
         async (ctx, req, res) => res.ok()
       );
     await server.start();

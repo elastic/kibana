@@ -67,7 +67,7 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
           },
           response: {
             200: {
-              body: schema.arrayOf(schema.string()),
+              body: () => schema.arrayOf(schema.string()),
             },
           },
         },

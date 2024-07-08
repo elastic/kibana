@@ -45,6 +45,23 @@ export function createRemoteSloDeleteUrl(slo: SLOWithSummaryResponse, spaceId: s
   return remoteUrl.toString();
 }
 
+export function createRemoteSloResetUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
+  if (!slo.remote || slo.remote.kibanaUrl === '') {
+    return undefined;
+  }
+
+  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const detailsPath = paths.sloDetails(
+    slo.id,
+    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
+  );
+
+  const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
+  remoteUrl.searchParams.append('reset', 'true');
+
+  return remoteUrl.toString();
+}
+
 export function createRemoteSloEditUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
   if (!slo.remote || slo.remote.kibanaUrl === '') {
     return undefined;

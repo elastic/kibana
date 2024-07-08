@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 
 let isActive = false;
 
@@ -15,7 +15,7 @@ export interface LoadingIndicatorInterface {
   hide: () => void;
 }
 
-const loadingCount$ = new Rx.BehaviorSubject(0);
+const loadingCount$ = new BehaviorSubject(0);
 
 export const initLoadingIndicator = (addLoadingCount: CoreStart['http']['addLoadingCountSource']) =>
   addLoadingCount(loadingCount$);

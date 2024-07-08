@@ -50,7 +50,7 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
   onFormTypeSelect,
 }) => {
   const { uiSettings } = useTriggerUiActionServices();
-  const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
+  const isEsqlEnabled = uiSettings?.get('enableESQL');
 
   const formTypeItems = useMemo(() => {
     const items: Array<{ formType: SearchType; label: string; description: string }> = [

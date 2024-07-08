@@ -129,7 +129,7 @@ describe('getShapeFilters', () => {
         throw new Error('Simulated elasticsearch search error');
       },
     } as unknown as ElasticsearchClient;
-    expect(async () => {
+    await expect(async () => {
       await getShapeFilters(boundariesRequestMeta, mockEsClient);
     }).rejects.toThrow();
   });
@@ -144,7 +144,7 @@ describe('getShapeFilters', () => {
         };
       },
     } as unknown as ElasticsearchClient;
-    expect(async () => {
+    await expect(async () => {
       await getShapeFilters(boundariesRequestMeta, mockEsClient);
     }).rejects.toThrow();
   });

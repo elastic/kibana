@@ -21,6 +21,7 @@ import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporti
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
+import { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
 
@@ -41,7 +42,10 @@ interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
   getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job | undefined>; // Sends a request to queue a job, with the job params in the POST body
+  createReportingJob<T>(
+    exportType: string,
+    jobParams: BaseParams & T
+  ): Promise<Job | undefined | ReactElement>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
@@ -172,6 +176,20 @@ export class ReportingAPIClient implements IReportingAPI {
     return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
   }
 
+  public async createReportingShareJob(exportType: string, jobParams: BaseParams) {
+    const jobParamsRison = rison.encode(jobParams);
+    const resp: { job?: ReportApiJSON } | undefined = await this.http.post(
+      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ jobParams: jobParamsRison }),
+      }
+    );
+    if (resp?.job) {
+      this.addPendingJobId(resp.job.id);
+      return new Job(resp.job);
+    }
+  }
   /**
    * Calls the internal API to generate a report job on-demand
    */
@@ -192,7 +210,7 @@ export class ReportingAPIClient implements IReportingAPI {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
-      throw new Error('invalid response!');
+      throw new Error(`${err.body?.message}`);
     }
   }
 

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export const SLOS_BASE_PATH = '/app/slos';
-export const SLO_PREFIX = '/slos';
 export const SLOS_PATH = '/' as const;
 export const SLOS_WELCOME_PATH = '/welcome' as const;
-export const SLO_DETAIL_PATH = '/:sloId' as const;
+export const SLO_DETAIL_PATH = '/:sloId/:tabId?' as const;
 export const SLO_CREATE_PATH = '/create' as const;
 export const SLO_EDIT_PATH = '/edit/:sloId' as const;
 export const SLOS_OUTDATED_DEFINITIONS_PATH = '/outdated-definitions' as const;
@@ -25,10 +25,13 @@ export const paths = {
   sloEdit: (sloId: string) => `${SLOS_BASE_PATH}/edit/${encodeURIComponent(sloId)}`,
   sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
     `${SLOS_BASE_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,
-  sloDetails: (sloId: string, instanceId?: string, remoteName?: string) => {
+  sloDetails: (sloId: string, instanceId?: string, remoteName?: string, tabId?: string) => {
     const qs = new URLSearchParams();
-    if (!!instanceId) qs.append('instanceId', instanceId);
+    if (!!instanceId && instanceId !== '*') qs.append('instanceId', instanceId);
     if (!!remoteName) qs.append('remoteName', remoteName);
+    if (tabId) {
+      return `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}/${tabId}?${qs.toString()}`;
+    }
     return `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}?${qs.toString()}`;
   },
 };

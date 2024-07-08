@@ -115,7 +115,8 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics",
+          "label": "Adding Performance Metrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -133,6 +134,9 @@
         {
           "id": "kibDevTutorialVersioningInterfaces",
           "label": "Versioning interfaces"
+        },
+        {
+          "id": "kibDevTutorialGeneratingOASForHTTPAPIs"
         },
         {
           "id": "kibDevTutorialSubmitPullRequest"
@@ -166,6 +170,9 @@
         },
         {
           "id": "kibDevTutorialAdvancedSettings"
+        },
+        {
+          "id": "kibDevTutorialCcsSetup"
         }
       ]
     },

@@ -110,12 +110,14 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
           defaultMessage: 'Supported from integration version 1.5.0 and above',
         })
       : undefined,
+    testId: 'awsOrganizationTestId',
   },
   {
     id: AWS_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
       defaultMessage: 'Single Account',
     }),
+    testId: 'awsSingleTestId',
   },
 ];
 
@@ -150,6 +152,7 @@ const getAzureAccountTypeOptions = (
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
+    testId: 'azureOrganizationAccountTestId',
     disabled: isAzureOrganizationDisabled,
     tooltip: isAzureOrganizationDisabled
       ? i18n.translate(
@@ -165,6 +168,7 @@ const getAzureAccountTypeOptions = (
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.singleAccountLabel', {
       defaultMessage: 'Single Subscription',
     }),
+    testId: 'azureSingleAccountTestId',
   },
 ];
 
@@ -529,14 +533,13 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
-    agentPolicy,
     newPolicy,
     onChange,
     validationResults,
     isEditPage,
     packageInfo,
     handleSetupTechnologyChange,
-    agentlessPolicy,
+    isAgentlessEnabled,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
@@ -545,10 +548,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
+    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
-      agentPolicy,
-      agentlessPolicy,
+      isAgentlessEnabled,
       handleSetupTechnologyChange,
       isEditPage,
     });
@@ -763,7 +765,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           <SetupTechnologySelector
             disabled={isEditPage}
             setupTechnology={setupTechnology}
-            onSetupTechnologyChange={setSetupTechnology}
+            onSetupTechnologyChange={updateSetupTechnology}
           />
         )}
 

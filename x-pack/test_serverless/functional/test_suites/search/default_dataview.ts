@@ -12,20 +12,22 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const dataViewApi = getService('dataViewApi');
 
   describe('default dataView', function () {
-    // Error: expected testSubject(kbnOverviewElasticsearchGettingStarted) to exist
-    this.tags(['failsOnMKI']);
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
+
+      // re-create the default data view in case it has been cleaned up by another test
+      await dataViewApi.create({
+        id: 'default_all_data_id',
+        name: 'default:all-data',
+        title: '*,-.*',
+      });
     });
 
-    after(async () => {
-      await svlCommonPage.forceLogout();
-    });
-
-    it('should show dashboard but with no data', async () => {
+    it('should show discover but with no data', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-discover');
       await testSubjects.existOrFail('discover-dataView-switch-link');

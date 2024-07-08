@@ -20,10 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.click('solutionsFilterButton');
-      await testSubjects.click('solutionstackAlertsFilterOption');
-      await testSubjects.setValue('solutionsFilterButton', 'solutionstackAlertsFilterOption');
       await testSubjects.click('.geo-containment-SelectOption');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await comboBox.setCustom('entitiesDataView', 'Kibana Sample Data Logs');
       await commonScreenshots.takeScreenshot(
         'alert-types-tracking-containment-conditions',

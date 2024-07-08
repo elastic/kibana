@@ -6,15 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/right';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
@@ -29,7 +29,6 @@ import type { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { getEventType, isEvenEqlSequence } from '../helpers';
-import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
@@ -71,14 +70,17 @@ interface Props {
   timelineId: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  onToggleShowNotes?: (eventId?: string) => void;
 }
 
 const emptyNotes: string[] = [];
 
-const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
-  const width = useEventDetailsWidthContext();
-  return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
-});
+const EventsTrSupplementContainerWrapper = React.memo<PropsWithChildren<unknown>>(
+  ({ children }) => {
+    const width = useEventDetailsWidthContext();
+    return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
+  }
+);
 
 EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
@@ -104,16 +106,14 @@ const StatefulEventComponent: React.FC<Props> = ({
   timelineId,
   leadingControlColumns,
   trailingControlColumns,
+  onToggleShowNotes,
 }) => {
+  const { telemetry } = useKibana().services;
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
-
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
@@ -123,7 +123,8 @@ const StatefulEventComponent: React.FC<Props> = ({
     tabType,
   });
 
-  const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
+  const [, setFocusedNotes] = useState<{ [eventId: string]: boolean }>({});
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
@@ -181,26 +182,30 @@ const StatefulEventComponent: React.FC<Props> = ({
     [event.ecs, rowRenderers]
   );
 
-  const onToggleShowNotes = useCallback(() => {
-    setShowNotes((prevShowNotes) => {
-      if (prevShowNotes[eventId]) {
-        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-        setTimeout(() => {
-          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-            `.${NOTES_BUTTON_CLASS_NAME}`
-          );
-          notesButtonElement?.focus();
-        }, 0);
-      }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const indexName = event._index!;
 
-      return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
-    });
-  }, [eventId]);
+  const onToggleShowNotesHandler = useCallback(
+    (currentEventId?: string) => {
+      onToggleShowNotes?.(currentEventId);
+      setFocusedNotes((prevShowNotes) => {
+        if (prevShowNotes[eventId]) {
+          // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+          setTimeout(() => {
+            const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+              `.${NOTES_BUTTON_CLASS_NAME}`
+            );
+            notesButtonElement?.focus();
+          }, 0);
+        }
+
+        return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
+      });
+    },
+    [onToggleShowNotes, eventId]
+  );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const indexName = event._index!;
-
     const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
@@ -210,7 +215,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       },
     };
 
-    if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
+    if (!expandableFlyoutDisabled) {
       openFlyout({
         right: {
           id: DocumentDetailsRightPanelKey,
@@ -220,6 +225,10 @@ const StatefulEventComponent: React.FC<Props> = ({
             scopeId: timelineId,
           },
         },
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'right',
       });
     } else {
       // opens the panel when clicking on the table row action
@@ -232,29 +241,16 @@ const StatefulEventComponent: React.FC<Props> = ({
       );
     }
   }, [
-    dispatch,
     eventId,
-    event._index,
-    expandableTimelineFlyoutEnabled,
-    isSecurityFlyoutEnabled,
-    openFlyout,
+    indexName,
     refetch,
-    tabType,
+    expandableFlyoutDisabled,
+    openFlyout,
     timelineId,
+    telemetry,
+    dispatch,
+    tabType,
   ]);
-
-  const associateNote = useCallback(
-    (noteId: string) => {
-      dispatch(
-        timelineActions.addNoteToEvent({
-          eventId,
-          id: timelineId,
-          noteId,
-        })
-      );
-    },
-    [dispatch, eventId, timelineId]
-  );
 
   const setEventsLoading = useCallback<SetEventsLoading>(
     ({ eventIds, isLoading }) => {
@@ -303,10 +299,10 @@ const StatefulEventComponent: React.FC<Props> = ({
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
-          showNotes={!!showNotes[eventId]}
+          showNotes={true}
           tabType={tabType}
           timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes}
+          toggleShowNotes={onToggleShowNotesHandler}
           leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
           setEventsLoading={setEventsLoading}
@@ -314,21 +310,6 @@ const StatefulEventComponent: React.FC<Props> = ({
         />
 
         <EventsTrSupplementContainerWrapper>
-          <EventsTrSupplement
-            className="siemEventsTable__trSupplement--notes"
-            data-test-subj="event-notes-flex-item"
-            $display="block"
-          >
-            <NoteCards
-              ariaRowindex={ariaRowindex}
-              associateNote={associateNote}
-              data-test-subj="note-cards"
-              notes={notes}
-              showAddNote={!!showNotes[eventId]}
-              toggleShowAddNote={onToggleShowNotes}
-            />
-          </EventsTrSupplement>
-
           <EuiFlexGroup gutterSize="none" justifyContent="center">
             <EuiFlexItem grow={false}>
               <EventsTrSupplement>

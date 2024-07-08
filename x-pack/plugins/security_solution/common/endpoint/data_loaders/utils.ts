@@ -10,13 +10,14 @@ import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Flags } from '@kbn/dev-cli-runner';
 import moment from 'moment/moment';
+import { EndpointError } from '../errors';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
   'no_shard_available_action_exception',
   'illegal_index_shard_state_exception',
 ];
 
-export class EndpointDataLoadingError extends Error {
+export class EndpointDataLoadingError extends EndpointError {
   constructor(message: string, public meta?: unknown) {
     super(message);
   }
@@ -88,7 +89,8 @@ export const retryOnError = async <T>(
 
       return result;
     } catch (err) {
-      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
+      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message.split('\n').at(0)}`));
+      log.verbose(err);
 
       // If not an error that is retryable, then end loop here and return that error;
       if (!isRetryableError(err)) {

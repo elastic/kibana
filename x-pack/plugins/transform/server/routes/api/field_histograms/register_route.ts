@@ -15,7 +15,7 @@ import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   router.versioned
     .post({
       path: addInternalBasePath('field_histograms/{dataViewTitle}'),
@@ -31,8 +31,11 @@ export function registerRoute({ router, license }: RouteDependencies) {
           },
         },
       },
-      license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
-        routeHandler
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }

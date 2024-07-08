@@ -9,12 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
 import React from 'react';
-import {
-  source,
-  derivedIndexPattern,
-  resp,
-  createSeries,
-} from '../../../../utils/fixtures/metrics_explorer';
+import { resp, createSeries } from '../../../../utils/fixtures/metrics_explorer';
 
 jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
   useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
@@ -30,8 +25,7 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
 }));
 
 const renderUseMetricsExplorerStateHook = () =>
-  renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
-    initialProps: { source, derivedIndexPattern },
+  renderHook(() => useMetricsExplorerState(), {
     wrapper: ({ children }) => (
       <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
     ),

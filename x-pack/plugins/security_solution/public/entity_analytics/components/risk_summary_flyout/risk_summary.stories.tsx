@@ -26,6 +26,24 @@ export const Default: Story<void> = () => {
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
+            recalculatingScore={false}
+          />
+        </div>
+      </TestProvider>
+    </StorybookProviders>
+  );
+};
+
+export const PreviewMode: Story<void> = () => {
+  return (
+    <StorybookProviders>
+      <TestProvider>
+        <div style={{ maxWidth: '300px' }}>
+          <RiskSummary
+            riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            queryId={'testQuery'}
+            recalculatingScore={false}
+            isPreviewMode
           />
         </div>
       </TestProvider>

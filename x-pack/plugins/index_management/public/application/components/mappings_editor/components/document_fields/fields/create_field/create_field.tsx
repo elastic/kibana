@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,28 +13,43 @@ import {
   EuiOutsideClickDetector,
   EuiSpacer,
 } from '@elastic/eui';
-import { FieldWithSemanticTextInfo } from '../../../../types';
-
+import { i18n } from '@kbn/i18n';
+import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { useDispatch } from '../../../../mappings_state_context';
+import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
+import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
 import {
-  Form,
-  FormDataProvider,
-  FormHook,
-  UseField,
-  useForm,
-  useFormData,
-} from '../../../../shared_imports';
-import { MainType, NormalizedFields } from '../../../../types';
+  CustomInferenceEndpointConfig,
+  Field,
+  MainType,
+  NormalizedFields,
+} from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
-import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
+import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
+import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
+export interface InferenceToModelIdMap {
+  [key: string]: {
+    trainedModelId: ElasticsearchModelDefaultOptions | string;
+    isDeployed: boolean;
+    isDeployable: boolean;
+  };
+}
 
+export interface SemanticTextInfo {
+  isSemanticTextEnabled?: boolean;
+  indexName?: string;
+  ml?: MlPluginStart;
+  setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>>;
+}
 interface Props {
   allFields: NormalizedFields['byId'];
   isRootLevelField: boolean;
@@ -48,22 +59,8 @@ interface Props {
   maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
-  isSemanticTextEnabled?: boolean;
-  indexName?: string;
+  semanticTextInfo?: SemanticTextInfo;
 }
-
-const useFieldEffect = (
-  form: FormHook,
-  fieldName: string,
-  setState: React.Dispatch<React.SetStateAction<string | undefined>>
-) => {
-  const fieldValue = form.getFields()?.[fieldName]?.value as string;
-  useEffect(() => {
-    if (fieldValue !== undefined) {
-      setState(fieldValue);
-    }
-  }, [form, fieldValue, setState]);
-};
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
@@ -74,12 +71,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
   maxNestedDepth,
   onCancelAddingNewFields,
   isAddingFields,
-  isSemanticTextEnabled,
-  indexName,
+  semanticTextInfo,
 }: Props) {
+  const { isSemanticTextEnabled, indexName, ml, setErrorsInTrainedModelDeployment } =
+    semanticTextInfo ?? {};
   const dispatch = useDispatch();
 
-  const { form } = useForm<FieldWithSemanticTextInfo>({
+  const { form } = useForm<Field>({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
   });
@@ -95,7 +93,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     return subscription.unsubscribe;
   }, [dispatch, subscribe]);
-
+  const [customInferenceEndpointConfig, setCustomInferenceEndpointConfig] = useState<
+    CustomInferenceEndpointConfig | undefined
+  >(undefined);
   const cancel = () => {
     if (isAddingFields && onCancelAddingNewFields) {
       onCancelAddingNewFields();
@@ -104,26 +104,24 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
-  const [nameValue, setNameValue] = useState<string>();
-  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
-  const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
+  const {
+    referenceFieldComboValue,
+    nameValue,
+    inferenceIdComboValue,
+    setInferenceValue,
+    semanticFieldType,
+    handleSemanticText,
+  } = useSemanticText({
+    form,
+    setErrorsInTrainedModelDeployment,
+    ml,
+  });
 
-  useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
-  useFieldEffect(form, 'inferenceId', setInferenceIdComboValue);
-  useFieldEffect(form, 'name', setNameValue);
-
-  const fieldTypeValue = form.getFields()?.type?.value as Array<{ value: string }>;
-  useEffect(() => {
-    if (fieldTypeValue === undefined || fieldTypeValue.length === 0) {
-      return;
-    }
-    setSemanticTextFieldType(
-      fieldTypeValue[0]?.value === 'semantic_text' ? fieldTypeValue[0].value : undefined
-    );
-  }, [form, fieldTypeValue]);
-
-  const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
+  const submitForm = async (
+    e?: React.FormEvent,
+    exitAfter: boolean = false,
+    clickOutside: boolean = false
+  ) => {
     if (e) {
       e.preventDefault();
     }
@@ -132,8 +130,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (isValid) {
       form.reset();
-      if (data.type === 'semantic_text') {
-        dispatch({ type: 'field.addSemanticText', value: data });
+
+      if (data.type === 'semantic_text' && !clickOutside) {
+        handleSemanticText(data, customInferenceEndpointConfig);
       } else {
         dispatch({ type: 'field.add', value: data });
       }
@@ -152,7 +151,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         cancel();
       }
     } else {
-      submitForm(undefined, true);
+      submitForm(undefined, true, true);
     }
   };
 
@@ -238,70 +237,69 @@ export const CreateField = React.memo(function CreateFieldComponent({
   );
 
   return (
-    <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
-      <Form
-        form={form}
-        FormWrapper={formWrapper}
-        onSubmit={submitForm}
-        data-test-subj="createFieldForm"
-      >
-        <div
-          className={classNames('mappingsEditor__createFieldWrapper', {
-            'mappingsEditor__createFieldWrapper--toggle':
-              Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-            'mappingsEditor__createFieldWrapper--multiField': isMultiField,
-          })}
-          style={{
-            paddingLeft: `${
-              isMultiField
-                ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-                : paddingLeft
-            }px`,
-          }}
+    <>
+      <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
+        <Form
+          form={form}
+          FormWrapper={formWrapper}
+          onSubmit={submitForm}
+          data-test-subj="createFieldForm"
         >
-          <div className="mappingsEditor__createFieldContent">
-            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem>{renderFormFields()}</EuiFlexItem>
-            </EuiFlexGroup>
+          <div
+            className={classNames('mappingsEditor__createFieldWrapper', {
+              'mappingsEditor__createFieldWrapper--toggle':
+                Boolean(maxNestedDepth) && maxNestedDepth! > 0,
+              'mappingsEditor__createFieldWrapper--multiField': isMultiField,
+            })}
+            style={{
+              paddingLeft: `${
+                isMultiField
+                  ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
+                  : paddingLeft
+              }px`,
+            }}
+          >
+            <div className="mappingsEditor__createFieldContent">
+              {renderFormFields()}
 
-            <FormDataProvider pathsToWatch={['type', 'subType']}>
-              {({ type, subType }) => {
-                const RequiredParametersForm = getRequiredParametersFormForType(
-                  type?.[0]?.value,
-                  subType?.[0]?.value
-                );
+              <FormDataProvider pathsToWatch={['type', 'subType']}>
+                {({ type, subType }) => {
+                  const RequiredParametersForm = getRequiredParametersFormForType(
+                    type?.[0]?.value,
+                    subType?.[0]?.value
+                  );
 
-                if (!RequiredParametersForm) {
-                  return null;
-                }
+                  if (!RequiredParametersForm) {
+                    return null;
+                  }
 
-                const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
+                  const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
 
-                return (
-                  <div className="mappingsEditor__createFieldRequiredProps">
-                    {typeDefinition.isBeta ? (
-                      <>
-                        <FieldBetaBadge />
-                        <EuiSpacer size="m" />
-                      </>
-                    ) : null}
+                  return (
+                    <div className="mappingsEditor__createFieldRequiredProps">
+                      {typeDefinition.isBeta ? (
+                        <>
+                          <FieldBetaBadge />
+                          <EuiSpacer size="m" />
+                        </>
+                      ) : null}
 
-                    <RequiredParametersForm key={subType ?? type} allFields={allFields} />
-                  </div>
-                );
-              }}
-            </FormDataProvider>
-            {/* Field inference_id for semantic_text field type */}
-            <InferenceIdCombo />
-
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={true} />
-              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
-            </EuiFlexGroup>
+                      <RequiredParametersForm key={subType ?? type} allFields={allFields} />
+                    </div>
+                  );
+                }}
+              </FormDataProvider>
+              {/* Field inference_id for semantic_text field type */}
+              <InferenceIdCombo
+                setValue={setInferenceValue}
+                setCustomInferenceEndpointConfig={setCustomInferenceEndpointConfig}
+              />
+              {renderFormActions()}
+            </div>
           </div>
-        </div>
-      </Form>
-    </EuiOutsideClickDetector>
+        </Form>
+      </EuiOutsideClickDetector>
+    </>
   );
 });
 
@@ -321,8 +319,35 @@ function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
   );
 }
 
-function InferenceIdCombo() {
+interface InferenceProps {
+  setValue: (value: string) => void;
+  setCustomInferenceEndpointConfig: (config: CustomInferenceEndpointConfig) => void;
+}
+
+function InferenceIdCombo({ setValue, setCustomInferenceEndpointConfig }: InferenceProps) {
+  const { inferenceToModelIdMap } = useMappingsState();
+  const dispatch = useDispatch();
   const [{ type }] = useFormData({ watch: 'type' });
+
+  // update new inferenceEndpoint
+  const setNewInferenceEndpoint = useCallback(
+    (
+      newInferenceEndpoint: InferenceToModelIdMap,
+      customInferenceEndpointConfig: CustomInferenceEndpointConfig
+    ) => {
+      dispatch({
+        type: 'inferenceToModelIdMap.update',
+        value: {
+          inferenceToModelIdMap: {
+            ...inferenceToModelIdMap,
+            ...newInferenceEndpoint,
+          },
+        },
+      });
+      setCustomInferenceEndpointConfig(customInferenceEndpointConfig);
+    },
+    [dispatch, inferenceToModelIdMap, setCustomInferenceEndpointConfig]
+  );
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
     return null;
@@ -332,7 +357,13 @@ function InferenceIdCombo() {
     <>
       <EuiSpacer />
       <UseField path="inferenceId">
-        {(field) => <SelectInferenceId onChange={field.setValue} />}
+        {(field) => (
+          <SelectInferenceId
+            onChange={field.setValue}
+            setValue={setValue}
+            setNewInferenceEndpoint={setNewInferenceEndpoint}
+          />
+        )}
       </UseField>
     </>
   );

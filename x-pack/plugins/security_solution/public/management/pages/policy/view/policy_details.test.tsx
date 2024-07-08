@@ -96,6 +96,7 @@ describe('Policy Details', () => {
     beforeEach(() => {
       policyPackagePolicy = generator.generatePolicyPackagePolicy();
       policyPackagePolicy.id = '1';
+      policyPackagePolicy.policy_id = policyPackagePolicy.policy_ids[0];
 
       const policyListApiHandlers = policyListApiPathHandlers();
 
