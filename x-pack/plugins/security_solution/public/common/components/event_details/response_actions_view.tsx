@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiNotificationBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
@@ -103,12 +103,13 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
 
   const [isLive, setIsLive] = useState(false);
 
-  const { data: alertResponseActions, isFetched } = useGetEndpointActionList(
-    { alertIds: [alertId] },
-    { enabled: !shouldEarlyReturn, refetchInterval: isLive ? DEFAULT_POLL_INTERVAL : false }
-  );
+  const { data: alertResponseActions, isFetched: isEndpointActionFetched } =
+    useGetEndpointActionList(
+      { alertIds: [alertId] },
+      { enabled: !shouldEarlyReturn, refetchInterval: isLive ? DEFAULT_POLL_INTERVAL : false }
+    );
 
-  const { data: automatedList } = useFetchOsQueryAutomatedActions(
+  const { data: automatedList, isFetched: isOsQueryFetched } = useFetchOsQueryAutomatedActions(
     {
       alertIds: [alertId],
     },
@@ -118,6 +119,10 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   const actionList: Array<ActionDetails | LogsOsqueryAction> = useMemo(() => {
     return [...(alertResponseActions?.data ?? []), ...(automatedList?.items ?? [])];
   }, [alertResponseActions?.data, automatedList?.items]);
+
+  const hasDataBeenLoaded: boolean = useMemo(() => {
+    return shouldEarlyReturn || (isEndpointActionFetched && isOsQueryFetched);
+  }, [isEndpointActionFetched, isOsQueryFetched, shouldEarlyReturn]);
 
   useEffect(() => {
     setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
@@ -143,10 +148,18 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
         <>
           <EuiSpacer size="s" />
           <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-            {isFetched && !!automatedListItems.length ? (
-              <ResponseActionsResults actions={actionList} ruleName={ruleName} ecsData={ecsData} />
+            {hasDataBeenLoaded ? (
+              automatedListItems.length ? (
+                <ResponseActionsResults
+                  actions={actionList}
+                  ruleName={ruleName}
+                  ecsData={ecsData}
+                />
+              ) : (
+                <EmptyResponseActions />
+              )
             ) : (
-              <EmptyResponseActions />
+              <EuiLoadingSpinner />
             )}
           </TabContentWrapper>
         </>
