@@ -18,7 +18,7 @@ import { getServiceColumns } from './get_service_columns';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 type ServicesDetailedStatisticsAPIResponse =
-  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
 
 export enum ServiceInventoryFieldName {
   ServiceName = 'serviceName',
@@ -37,8 +37,8 @@ interface Props {
   initialSortDirection: 'asc' | 'desc';
   noItemsMessage: React.ReactNode;
   data: MainStatisticsApiResponse['services'];
-  comparisonDataLoading: boolean;
-  comparisonData?: ServicesDetailedStatisticsAPIResponse;
+  timeseriesDataLoading: boolean;
+  timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }
 
 export function MultiSignalServicesTable({
@@ -48,8 +48,8 @@ export function MultiSignalServicesTable({
   initialPageSize,
   initialSortDirection,
   noItemsMessage,
-  comparisonDataLoading,
-  comparisonData,
+  timeseriesDataLoading,
+  timeseriesData,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { query } = useApmParams('/services');
@@ -61,10 +61,10 @@ export function MultiSignalServicesTable({
       query: omit(query, 'page', 'pageSize', 'sortDirection', 'sortField'),
       breakpoints,
       link,
-      comparisonDataLoading,
-      comparisonData,
+      timeseriesDataLoading,
+      timeseriesData,
     });
-  }, [query, breakpoints, link, comparisonDataLoading, comparisonData]);
+  }, [query, breakpoints, link, timeseriesDataLoading, timeseriesData]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>

@@ -26,7 +26,6 @@ import {
 import { ServiceListItem } from '../../../../../common/service_inventory';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
@@ -87,7 +86,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
   services: ServiceListItem[];
 }) {
   const {
-    query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -102,7 +101,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
 
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
-  const comparisonFetch = useProgressiveFetcher(
+  const timeseriesDataFetch = useProgressiveFetcher(
     (callApmApi) => {
       const serviceNames = services.map(({ serviceName }) => serviceName);
 
@@ -113,14 +112,13 @@ function useServicesEntitiesDetailedStatisticsFetcher({
         mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
         dataSourceOptions
       ) {
-        return callApmApi('POST /internal/apm/services/detailed_statistics', {
+        return callApmApi('POST /internal/apm/entities/services/detailed_statistics', {
           params: {
             query: {
               environment,
               kuery,
               start,
               end,
-              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               documentType: dataSourceOptions.source.documentType,
               rollupInterval: dataSourceOptions.source.rollupInterval,
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
@@ -135,14 +133,14 @@ function useServicesEntitiesDetailedStatisticsFetcher({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, services, offset, comparisonEnabled],
+    [mainStatisticsData.requestId, services],
     { preservePreviousData: false }
   );
 
-  return { comparisonFetch };
+  return { timeseriesDataFetch };
 }
 
-export const MultiSignalInventory = () => {
+export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
   const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
@@ -155,7 +153,7 @@ export const MultiSignalInventory = () => {
     fieldsToSearch: [ServiceInventoryFieldName.ServiceName],
   });
 
-  const { comparisonFetch } = useServicesEntitiesDetailedStatisticsFetcher({
+  const { timeseriesDataFetch } = useServicesEntitiesDetailedStatisticsFetcher({
     mainStatisticsFetch,
     services: mainStatisticsData.services,
   });
@@ -184,8 +182,8 @@ export const MultiSignalInventory = () => {
             initialSortField={initialSortField}
             initialPageSize={INITIAL_PAGE_SIZE}
             initialSortDirection={INITIAL_SORT_DIRECTION}
-            comparisonData={comparisonFetch?.data}
-            comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
+            timeseriesData={timeseriesDataFetch?.data}
+            timeseriesDataLoading={timeseriesDataFetch.status === FETCH_STATUS.LOADING}
             noItemsMessage={
               <EmptyMessage
                 heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
@@ -198,4 +196,4 @@ export const MultiSignalInventory = () => {
       </EuiFlexGroup>
     </>
   );
-};
+}
