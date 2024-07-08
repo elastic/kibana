@@ -12,7 +12,7 @@ export const deleteInferenceEndpoint = async (
   type: string,
   id: string
 ): Promise<void> => {
-  await client.transport.request({
+  return await client.transport.request({
     method: 'DELETE',
     path: `/_inference/${type}/${id}`,
   });
