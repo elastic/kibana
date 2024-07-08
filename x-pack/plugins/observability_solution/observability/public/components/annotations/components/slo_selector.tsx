@@ -25,16 +25,16 @@ interface Props {
 }
 
 type Option = EuiComboBoxOptionOption<string>;
+const mapSlosToOptions = (slos: SLOWithSummaryResponse[] | SloItem[] | undefined) =>
+  slos?.map((slo) => ({
+    label:
+      slo.instanceId !== ALL_VALUE
+        ? `${slo.name ?? slo.id} (${slo.instanceId})`
+        : slo.name ?? slo.id,
+    value: `${slo.id}-${slo.instanceId}`,
+  })) ?? [];
 
 export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
-  const mapSlosToOptions = (slos: SLOWithSummaryResponse[] | undefined) =>
-    slos?.map((slo) => ({
-      label:
-        slo.instanceId !== ALL_VALUE
-          ? `${slo.name ?? slo.id} (${slo.instanceId})`
-          : slo.name ?? slo.id,
-      value: `${slo.id}-${slo.instanceId}`,
-    })) ?? [];
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -64,10 +64,13 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
   }, [initialSlos, sloList]);
 
   const onChange = (opts: Option[]) => {
-    setSelectedOptions(opts);
-    if (opts?.[0]?.value === ALL_VALUE) {
+    const isAllSelected = opts.find((opt) => opt.value === ALL_VALUE);
+    const prevIsAllSelected = selectedOptions.find((opt) => opt.value === ALL_VALUE);
+    if (isAllSelected && !prevIsAllSelected) {
+      setSelectedOptions([ALL_OPTION]);
       onSelected({ all: true });
     } else {
+      setSelectedOptions(opts);
       const selectedSlos =
         opts.length >= 1
           ? sloList!.results?.filter((slo) =>

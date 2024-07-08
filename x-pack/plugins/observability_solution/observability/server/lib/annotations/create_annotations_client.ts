@@ -175,28 +175,67 @@ export function createAnnotationsClient(params: {
 
       const shouldClauses: QueryDslQueryContainer[] = [];
       if (sloId || sloInstanceId) {
-        const query: QueryDslQueryContainer = {
-          nested: {
-            path: 'slos',
-            query: {
-              bool: {
-                filter: [
-                  ...(sloId ? [{ term: { 'slos.id': sloId } }] : []),
-                  ...(sloInstanceId ? [{ term: { 'slos.instanceId': sloInstanceId } }] : []),
-                ],
+        const sloFilters: QueryDslQueryContainer[] = [];
+        if (sloId) {
+          sloFilters.push({
+            nested: {
+              path: 'slos',
+              query: {
+                match_phrase: {
+                  'slos.id': sloId,
+                },
               },
             },
+          });
+        }
+        if (sloInstanceId) {
+          sloFilters.push({
+            nested: {
+              path: 'slos',
+              query: {
+                match_phrase: {
+                  'slos.instanceId': sloInstanceId,
+                },
+              },
+            },
+          });
+        }
+        const sloFilter: QueryDslQueryContainer = {
+          bool: {
+            filter: sloFilters,
+          },
+        };
+
+        const allSloFilter: QueryDslQueryContainer = {
+          bool: {
+            filter: [
+              {
+                nested: {
+                  path: 'slos',
+                  query: {
+                    bool: {
+                      should: [
+                        {
+                          term: {
+                            'slos.id': '*',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        };
+        const query: QueryDslQueryContainer = {
+          bool: {
+            should: [allSloFilter, sloFilter],
           },
         };
         shouldClauses.push(query);
       }
-      if (sloInstanceId && sloInstanceId !== '*') {
-        shouldClauses.push({
-          term: {
-            'slos.instanceId': sloInstanceId,
-          },
-        });
-      }
+
       if (serviceName) {
         shouldClauses.push({
           term: {
@@ -204,6 +243,29 @@ export function createAnnotationsClient(params: {
           },
         });
       }
+
+      console.log(
+        JSON.stringify({
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: start ?? 'now-30d',
+                    lte: end ?? 'now',
+                  },
+                },
+              },
+              {
+                bool: {
+                  should: shouldClauses,
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        })
+      );
 
       const result = await esClient.search({
         index: readIndex,
@@ -215,8 +277,8 @@ export function createAnnotationsClient(params: {
               {
                 range: {
                   '@timestamp': {
-                    gte: start,
-                    lte: end,
+                    gte: start ?? 'now-30d',
+                    lte: end ?? 'now',
                   },
                 },
               },
@@ -230,7 +292,14 @@ export function createAnnotationsClient(params: {
           },
         },
       });
-      return result.hits.hits.map((hit) => ({ ...(hit._source as Annotation), id: hit._id }));
+      const items = result.hits.hits.map((hit) => ({
+        ...(hit._source as Annotation),
+        id: hit._id,
+      }));
+      return {
+        items,
+        total: result.hits.total.value,
+      };
     }),
     delete: ensureGoldLicense(async (deleteParams: DeleteAnnotationParams) => {
       const { id } = deleteParams;

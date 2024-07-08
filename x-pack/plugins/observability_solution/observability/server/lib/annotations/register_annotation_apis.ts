@@ -142,7 +142,7 @@ export function registerAnnotationAPIs({
 
   router.get(
     {
-      path: '/api/observability/annotations/find',
+      path: '/api/observability/annotation/find',
       validate: {
         query: unknowns,
       },

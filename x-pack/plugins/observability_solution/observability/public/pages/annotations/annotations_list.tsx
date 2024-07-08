@@ -14,9 +14,9 @@ import {
   EuiSearchBarProps,
   EuiButton,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { AnnotationApplyTo } from './annotation_apply_to';
 import { TimestampRangeLabel } from '../../components/annotations/components/timestamp_range_label';
 import { DatePicker } from './date_picker';
 import { useDeleteAnnotation } from '../../components/annotations/hooks/use_delete_annotation';
@@ -67,7 +67,7 @@ export function AnnotationsList() {
       <DatePicker start={start} end={end} setStart={setStart} setEnd={setEnd} refetch={refetch} />,
     ];
   };
-  const allTags = data?.map((obj) => obj.tags ?? []).flat() ?? [];
+  const allTags = data?.items?.map((obj) => obj.tags ?? []).flat() ?? [];
   const search: EuiSearchBarProps = {
     toolsLeft: renderToolsLeft(),
     toolsRight: renderToolsRight(),
@@ -123,35 +123,7 @@ export function AnnotationsList() {
     {
       name: APPLY_TO_LABEL,
       render: (annotation: Annotation) => {
-        const slos = annotation.slos;
-        const serviceName = annotation.service?.name;
-        const sloLabel = slos?.length
-          ? i18n.translate('xpack.observability.columns.sloTextLabel', {
-              defaultMessage: 'SLOs: {slos}',
-              values: { slos: slos.map((slo) => slo.id).join(', ') },
-            })
-          : '';
-        const serviceLabel = serviceName
-          ? i18n.translate('xpack.observability.columns.serviceLabel', {
-              defaultMessage: 'Service: {serviceName}',
-              values: { serviceName },
-            })
-          : '';
-
-        if (!slos?.length && !serviceName) {
-          return (
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.columns.TextLabel', { defaultMessage: '--' })}
-            </EuiText>
-          );
-        }
-
-        return (
-          <EuiText size="s">
-            {serviceLabel}
-            {sloLabel}
-          </EuiText>
-        );
+        return <AnnotationApplyTo annotation={annotation} />;
       },
     },
     {
@@ -175,7 +147,7 @@ export function AnnotationsList() {
       <EuiInMemoryTable
         childrenBetween={
           <AnnotationsListChart
-            data={data ?? []}
+            data={data?.items ?? []}
             start={start}
             end={end}
             isEditing={isEditing}
@@ -185,7 +157,7 @@ export function AnnotationsList() {
         tableCaption={i18n.translate('xpack.observability.annotationsTableCaption', {
           defaultMessage: 'List of annotations for the selected time range.',
         })}
-        items={data ?? []}
+        items={data?.items ?? []}
         itemId="id"
         loading={isLoading}
         columns={columns}

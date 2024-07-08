@@ -10,6 +10,11 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Annotation } from '../../../../common/annotations';
 import { useKibana } from '../../../utils/kibana_react';
 
+interface FindAnnotationsResponse {
+  items: Annotation[];
+  total: number;
+}
+
 export function useFetchAnnotations({
   start,
   end,
@@ -31,7 +36,7 @@ export function useFetchAnnotations({
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: ['fetchAnnotationList', start, end, sloId, sloInstanceId, serviceName],
     queryFn: async ({}) => {
-      return await http.get<Annotation[]>('/api/observability/annotations/find', {
+      return await http.get<FindAnnotationsResponse>('/api/observability/annotation/find', {
         query: {
           start,
           end,
