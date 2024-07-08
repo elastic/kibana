@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutResizable } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
