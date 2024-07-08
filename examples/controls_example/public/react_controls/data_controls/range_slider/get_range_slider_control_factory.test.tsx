@@ -16,6 +16,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { TimeRange } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
 import { ControlApiRegistration } from '../../types';

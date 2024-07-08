@@ -39,7 +39,7 @@ export const getRangesliderControlFactory = (
       return field.aggregatable && field.type === 'number';
     },
     CustomOptionsComponent: ({ initialState, updateState, setControlEditorValid }) => {
-      const [step, setStep] = useState(initialState.step);
+      const [step, setStep] = useState(initialState.step ?? 1);
 
       return (
         <>
