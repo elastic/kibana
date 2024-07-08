@@ -28,6 +28,11 @@ disabled:
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
 
+  # Cypress configs, for now these are still run manually
+  - x-pack/test/fleet_cypress/cli_config.ts
+  - x-pack/test/fleet_cypress/config.ts
+  - x-pack/test/fleet_cypress/visual_config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -351,5 +356,3 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
-  - x-pack/test/fleet_cypress/cli_config.ts
-  - x-pack/test/fleet_cypress/visual_config.ts
