@@ -11,7 +11,7 @@ import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SpanKind, context } from '@opentelemetry/api';
-import { merge, omit } from 'lodash';
+import { last, merge, omit } from 'lodash';
 import {
   catchError,
   combineLatest,
@@ -334,13 +334,12 @@ export class ObservabilityAIAssistantClient {
                 const initialMessagesWithAddedMessages =
                   messagesWithUpdatedSystemMessage.concat(addedMessages);
 
-                const lastMessage =
-                  initialMessagesWithAddedMessages[initialMessagesWithAddedMessages.length - 1];
+                const lastMessage = last(initialMessagesWithAddedMessages);
 
                 // if a function request is at the very end, close the stream to consumer
                 // without persisting or updating the conversation. we need to wait
                 // on the function response to have a valid conversation
-                const isFunctionRequest = lastMessage.message.function_call?.name;
+                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
                 if (!persist || isFunctionRequest) {
                   return of();
@@ -438,18 +437,20 @@ export class ObservabilityAIAssistantClient {
             if (this.dependencies.logger.isLevelEnabled('debug')) {
               switch (event.type) {
                 case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(`Added message: ${JSON.stringify(event.message)}`);
+                  this.dependencies.logger.debug(
+                    () => `Added message: ${JSON.stringify(event.message)}`
+                  );
                   break;
 
                 case StreamingChatResponseEventType.ConversationCreate:
                   this.dependencies.logger.debug(
-                    `Created conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
 
                 case StreamingChatResponseEventType.ConversationUpdate:
                   this.dependencies.logger.debug(
-                    `Updated conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
               }
