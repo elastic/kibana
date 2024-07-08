@@ -1424,7 +1424,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
+/x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Threat Hunting Investigations
 
