@@ -100,10 +100,13 @@ export const AlertsOverview = ({
     [onBrushEnd, baseTheme]
   );
 
-  const handleAlertStatusChange = (id: AlertStatus) => {
-    setAlertStatus(id);
-    setUrlState({ alertStatus: id });
-  };
+  const handleAlertStatusChange = useCallback(
+    (id: AlertStatus) => {
+      setAlertStatus(id);
+      setUrlState({ alertStatus: id });
+    },
+    [setUrlState]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">

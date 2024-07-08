@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -23,6 +23,7 @@ import { CreateAlertRuleButton } from '../../../../shared/alerts/links/create_al
 import { LinkToAlertsPage } from '../../../../shared/alerts/links/link_to_alerts_page';
 import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { INTEGRATIONS } from '../../../constants';
+import { useIntersectingState } from '../../../hooks/use_intersecting_state';
 
 export const AlertsSummaryContent = ({
   assetId,
@@ -33,6 +34,7 @@ export const AlertsSummaryContent = ({
   assetType: InventoryItemType;
   dateRange: TimeRange;
 }) => {
+  const ref = useRef<HTMLDivElement>(null);
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
   const { overrides } = useAssetDetailsRenderPropsContext();
@@ -40,13 +42,13 @@ export const AlertsSummaryContent = ({
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
 
-  const onLoaded = (alertsCount?: AlertsCount) => {
+  const onLoaded = useCallback((alertsCount?: AlertsCount) => {
     const { activeAlertCount = 0 } = alertsCount ?? {};
     const hasActiveAlerts = activeAlertCount > 0;
 
     setCollapsibleStatus(hasActiveAlerts ? 'open' : 'closed');
     setActiveAlertsCount(alertsCount?.activeAlertCount);
-  };
+  }, []);
 
   const assetIdField = findInventoryFields(assetType).id;
   const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
@@ -54,9 +56,12 @@ export const AlertsSummaryContent = ({
     featureFlags.inventoryThresholdAlertRuleEnabled &&
     (assetType !== 'container' || isDockerContainer);
 
+  const state = useIntersectingState(ref, { dateRange });
+
   return (
     <>
       <Section
+        ref={ref}
         title={<AlertsSectionTitle />}
         collapsible
         data-test-subj="infraAssetDetailsAlertsCollapsible"
@@ -76,7 +81,7 @@ export const AlertsSummaryContent = ({
             <EuiFlexItem grow={false}>
               <LinkToAlertsPage
                 kuery={`${assetIdField}:"${assetId}"`}
-                dateRange={dateRange}
+                dateRange={state.dateRange}
                 data-test-subj="infraAssetDetailsAlertsTabAlertsShowAllButton"
               />
             </EuiFlexItem>
@@ -85,7 +90,7 @@ export const AlertsSummaryContent = ({
       >
         <AlertsOverview
           onLoaded={onLoaded}
-          dateRange={dateRange}
+          dateRange={state.dateRange}
           assetId={assetId}
           assetType={assetType}
         />

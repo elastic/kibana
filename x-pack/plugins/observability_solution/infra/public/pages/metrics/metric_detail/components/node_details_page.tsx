@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTemplateHeaderBreadcrumbs } from '../../../../components/asset_details/hooks/use_page_header';
-import { useNodeDetails } from '../hooks/use_node_details';
 import { MetricsSideNav } from './side_nav';
 import { MetricsTimeControls } from './time_controls';
 import { SideNavContext, NavItem } from '../lib/side_nav_context';
@@ -55,26 +57,41 @@ const parseRange = (range: MetricsTimeInput) => {
 export const NodeDetailsPage = (props: Props) => {
   const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
   const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
-  const { metrics, loading, makeRequest, error } = useNodeDetails(
-    props.requiredMetrics,
-    props.nodeId,
-    props.nodeType,
-    props.sourceId,
-    parsedTimeRange,
-    props.cloudId
+
+  const {
+    data: { metrics } = { metrics: [] },
+    status,
+    error,
+    refetch,
+  } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/metrics/node_details', {
+        method: 'POST',
+        body: JSON.stringify({
+          metrics: props.requiredMetrics,
+          nodeId: props.nodeId,
+          nodeType: props.nodeType,
+          timerange: parsedTimeRange,
+          cloudId: props.cloudId,
+          sourceId: props.sourceId,
+        }),
+      });
+
+      return decodeOrThrow(NodeDetailsMetricDataResponseRT)(response);
+    },
+    [
+      props.requiredMetrics,
+      props.nodeId,
+      props.nodeType,
+      parsedTimeRange,
+      props.cloudId,
+      props.sourceId,
+    ]
   );
 
-  const refetch = useCallback(() => {
-    setParsedTimeRange(parseRange(props.timeRange));
-  }, [props.timeRange]);
-
   useEffect(() => {
     setParsedTimeRange(parseRange(props.timeRange));
   }, [props.timeRange]);
-
-  useEffect(() => {
-    makeRequest();
-  }, [makeRequest, parsedTimeRange]);
 
   if (error) {
     return <PageError error={error} name={props.name} />;
@@ -111,7 +128,7 @@ export const NodeDetailsPage = (props: Props) => {
           >
             <MetadataContext.Provider value={props.metadata}>
               <PageBody
-                loading={metrics.length > 0 && props.isAutoReloading ? false : loading}
+                loading={metrics.length > 0 && props.isAutoReloading ? false : isPending(status)}
                 refetch={refetch}
                 type={props.nodeType}
                 metrics={metrics}

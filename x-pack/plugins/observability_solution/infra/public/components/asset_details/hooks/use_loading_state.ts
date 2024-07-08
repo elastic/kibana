@@ -21,10 +21,11 @@ import {
   Observable,
 } from 'rxjs';
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 
 export type RequestState = 'running' | 'done' | 'error';
 const WAIT_MS = 1000;
@@ -35,15 +36,11 @@ export const useLoadingState = () => {
   const {
     data: { search },
   } = services;
+  const { updateSearchSessionId } = useSearchSessionContext();
 
   const isAutoRefreshRequestPending$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const requestsCount$ = useMemo(() => new BehaviorSubject(0), []);
   const requestState$ = useMemo(() => new BehaviorSubject<RequestState | null>(null), []);
-  const [searchSessionId, setSearchSessionId] = useState<string>();
-
-  const updateSearchSessionId = useCallback(() => {
-    setSearchSessionId(() => search.session.start());
-  }, [search.session]);
 
   const waitUntilRequestsCompletes$ = useCallback(
     () =>
@@ -161,8 +158,6 @@ export const useLoadingState = () => {
   ]);
 
   return {
-    updateSearchSessionId,
-    searchSessionId,
     requestState$,
     isAutoRefreshRequestPending$,
   };

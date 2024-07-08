@@ -12,10 +12,12 @@ import { BehaviorSubject, EMPTY, of, Subject, Subscription, skip } from 'rxjs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('./use_date_picker');
 jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_search_session');
 jest.mock('@kbn/data-plugin/public', () => ({
   ...jest.requireActual('@kbn/data-plugin/public'),
   waitUntilNextSessionCompletes$: jest.fn(),
@@ -33,15 +35,26 @@ const waitUntilNextSessionCompletesMock$ = waitUntilNextSessionCompletes$ as jes
   typeof waitUntilNextSessionCompletes$
 >;
 
+const useSearchSessionContextMock = useSearchSessionContext as jest.MockedFunction<
+  typeof useSearchSessionContext
+>;
+
 describe('useLoadingState', () => {
   let subscription: Subscription;
 
   const autoRefreshTick$ = new Subject();
   const autoRefreshConfig$ = new BehaviorSubject<
     UseDateRangeProviderProps['autoRefresh'] | undefined
-  >({ interval: 5000, isPaused: false });
+  >({ interval: 1000, isPaused: false });
 
-  const sessionStartMock = jest.fn();
+  const updateSearchSessionIdMock = jest.fn();
+
+  const mockSearchSessionContext = () => {
+    useSearchSessionContextMock.mockReturnValue({
+      updateSearchSessionId: updateSearchSessionIdMock,
+      searchSessionId: '',
+    });
+  };
 
   const mockDatePickerContext = () => {
     useDatePickerContextMock.mockReturnValue({
@@ -55,16 +68,7 @@ describe('useLoadingState', () => {
     useKibanaContextForPluginMock.mockReturnValue({
       services: {
         ...coreMock.createStart(),
-        data: {
-          ...dataPluginStartMock,
-          search: {
-            ...dataPluginStartMock.search,
-            session: {
-              ...dataPluginStartMock.search.session,
-              start: sessionStartMock,
-            },
-          },
-        },
+        data: dataPluginStartMock,
       },
     } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
   };
@@ -73,6 +77,7 @@ describe('useLoadingState', () => {
     subscription = new Subscription();
     jest.useFakeTimers();
     waitUntilNextSessionCompletesMock$.mockReturnValue(of(SearchSessionState.None));
+    mockSearchSessionContext();
     mockUseKibana();
     mockDatePickerContext();
   });
@@ -145,7 +150,7 @@ describe('useLoadingState', () => {
     });
 
     // only the mount call must  happen
-    await waitFor(() => expect(sessionStartMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(updateSearchSessionIdMock).toHaveBeenCalledTimes(1));
 
     unmount();
   });
@@ -161,7 +166,7 @@ describe('useLoadingState', () => {
       jest.runOnlyPendingTimers();
     });
 
-    await waitFor(() => expect(sessionStartMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(updateSearchSessionIdMock).toHaveBeenCalledTimes(2));
 
     unmount();
   });
