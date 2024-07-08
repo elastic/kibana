@@ -63,6 +63,8 @@ export type RuleFieldsDiff = CommonFieldsDiff &
 export interface FullRuleDiff {
   fields: RuleFieldsDiff;
   has_conflict: boolean;
+  number_fields_with_updates: number;
+  number_fields_with_conflicts: number;
 }
 
 /**

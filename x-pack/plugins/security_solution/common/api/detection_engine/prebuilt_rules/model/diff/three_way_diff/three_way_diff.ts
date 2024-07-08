@@ -19,6 +19,12 @@ import type { ThreeWayMergeOutcome } from './three_way_merge_outcome';
 export const MissingVersion = Symbol('MissingVersion');
 export type MissingVersion = typeof MissingVersion;
 
+export enum ThreeWayDiffConflictResolutionResult {
+  NO,
+  SOLVABLE,
+  NON_SOLVABLE,
+}
+
 /**
  * Three versions of a value to pass to a diff algorithm.
  */
@@ -107,15 +113,15 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
   has_update: boolean;
 
   /**
-   * True if:
-   *   - current != target and we couldn't automatically resolve the conflict between them
+   * Enum of possible conflict outcomes of a three-way diff:
+   *   - NON_SOLVABLE: current != target and we couldn't automatically resolve the conflict between them
+   *   - SOLVABLE: current != target and we automatically resolved the conflict between them
+   *   - NO:
+   *       - current == target (value won't change)
+   *       - current != target && current == base (stock rule will get a new value)
    *
-   * False if:
-   *   - current == target (value won't change)
-   *   - current != target && current == base (stock rule will get a new value)
-   *   - current != target and we automatically resolved the conflict between them
    */
-  has_conflict: boolean;
+  has_conflict: ThreeWayDiffConflictResolutionResult;
 }
 
 /**

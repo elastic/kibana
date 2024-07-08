@@ -13,6 +13,7 @@ import type {
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
+  ThreeWayDiffConflictResolutionResult,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -49,7 +50,10 @@ export const simpleDiffAlgorithm = <TValue>(
     diff_outcome: diffOutcome,
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
-    has_conflict: mergeOutcome === ThreeWayMergeOutcome.Conflict,
+    has_conflict:
+      mergeOutcome === ThreeWayMergeOutcome.Conflict
+        ? ThreeWayDiffConflictResolutionResult.NON_SOLVABLE
+        : ThreeWayDiffConflictResolutionResult.NO,
   };
 };
 

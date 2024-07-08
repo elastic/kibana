@@ -10,7 +10,10 @@ import type {
   FullRuleDiff,
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { MissingVersion } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import {
+  MissingVersion,
+  ThreeWayDiffConflictResolutionResult,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -75,14 +78,19 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     target_version: diffableTargetVersion,
   });
 
-  const hasAnyFieldConflict = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).some(
-    (fieldDiff) => fieldDiff.has_conflict
-  );
+  const numberFieldsWithUpdates = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).filter(
+    (fieldDiff) => fieldDiff.has_update
+  ).length;
+  const numberFieldsWithConflicts = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).filter(
+    (fieldDiff) => fieldDiff.has_conflict !== ThreeWayDiffConflictResolutionResult.NO
+  ).length;
 
   return {
     ruleDiff: {
       fields: fieldsDiff,
-      has_conflict: hasAnyFieldConflict,
+      has_conflict: numberFieldsWithConflicts > 0,
+      number_fields_with_updates: numberFieldsWithUpdates,
+      number_fields_with_conflicts: numberFieldsWithConflicts,
     },
     ruleVersions: {
       input: {
