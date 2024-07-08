@@ -29,8 +29,8 @@ const StyledShaValue = styled(EuiText)`
 
 const IconContainer = styled(EuiText)`
   padding: 2px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: ${({ theme }) => theme.eui.euiBorderThin};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
 `;
 
 interface PolicyResponseArtifactItemProps {
@@ -54,14 +54,27 @@ const COPY_TOOLTIP = {
 
 export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArtifactItemProps) => {
   return (
-    <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-start' }}>
-        <StyledArtifactName data-test-subj="endpointPolicyResponseArtifactName">
-          {artifact.name}
-        </StyledArtifactName>
+    <EuiFlexGroup
+      direction="row"
+      alignItems="center"
+      justifyContent="spaceBetween"
+      style={{ flexWrap: 'nowrap' }}
+    >
+      <EuiFlexItem grow={true} style={{ alignItems: 'flex-start' }} className={'eui-textTruncate'}>
+        <EuiToolTip position="top" content={artifact.name} anchorClassName={'eui-textTruncate'}>
+          <StyledArtifactName data-test-subj="endpointPolicyResponseArtifactName">
+            {artifact.name}
+          </StyledArtifactName>
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexGroup
+          direction="row"
+          alignItems="center"
+          justifyContent="flexEnd"
+          gutterSize="s"
+          style={{ flexWrap: 'nowrap' }}
+        >
           <EuiFlexItem grow={false}>
             <IconContainer size={'xs'}>{'sha256'}</IconContainer>
           </EuiFlexItem>
