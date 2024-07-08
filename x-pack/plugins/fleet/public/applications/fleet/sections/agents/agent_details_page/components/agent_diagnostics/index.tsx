@@ -232,7 +232,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         );
       },
     },
-    ...(authz.fleet.allAgents
+    ...((authz.fleet.allAgents
       ? [
           {
             name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.actionsLabelText', {
@@ -264,7 +264,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             ],
           },
         ]
-      : []),
+      : []) as Array<EuiBasicTableColumn<AgentDiagnostics>>),
   ];
 
   const requestDiagnosticsButton = (
