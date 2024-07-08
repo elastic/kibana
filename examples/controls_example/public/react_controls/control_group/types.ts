@@ -49,6 +49,11 @@ export interface DataControlFetchContext {
   timeRange?: TimeRange | undefined;
 }
 
+export interface ChainingContext {
+  chainingFilters?: Filter[] | undefined;
+  timeRange?: TimeRange | undefined;
+}
+
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
@@ -62,6 +67,7 @@ export type ControlGroupApi = PresentationContainer &
   Partial<HasParentApi<PublishesUnifiedSearch>> & {
     autoApplySelections$: PublishingSubject<boolean>;
     dataControlFetch$: Observable<DataControlFetchContext>;
+    chaining$: (controlUuid: string) => Observable<ChainingContext>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
   };
 
