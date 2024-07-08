@@ -165,7 +165,6 @@ describe.skip('useSourceIndicesFields Hook', () => {
     expect(postMock).toHaveBeenCalled();
 
     await act(async () => {
-      expect(result.current.noFieldsIndicesWarning).toEqual('missing_fields_index');
       expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
@@ -219,7 +218,6 @@ describe.skip('useSourceIndicesFields Hook', () => {
     expect(postMock).toHaveBeenCalled();
 
     await act(async () => {
-      expect(result.current.noFieldsIndicesWarning).toBeNull();
       expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {

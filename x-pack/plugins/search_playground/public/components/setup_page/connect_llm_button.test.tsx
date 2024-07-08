@@ -60,7 +60,7 @@ describe('ConnectLLMButton', () => {
       isSuccess: true,
     });
     const { getByTestId } = render(<ConnectLLMButton />);
-    expect(getByTestId('setupGenAIConnectorButton')).toBeInTheDocument();
+    expect(getByTestId('connectLLMButton')).toBeInTheDocument();
   });
 
   it('show the flyout when the button is clicked', async () => {
@@ -73,7 +73,18 @@ describe('ConnectLLMButton', () => {
 
     expect(queryByTestId('addConnectorFlyout')).not.toBeInTheDocument();
 
-    fireEvent.click(getByTestId('setupGenAIConnectorButton'));
+    fireEvent.click(getByTestId('connectLLMButton'));
     await waitFor(() => expect(getByTestId('addConnectorFlyout')).toBeInTheDocument());
+  });
+
+  it('show success button when connector exists', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      data: [{}],
+      isLoading: false,
+      isSuccess: true,
+    });
+    const { queryByTestId } = render(<ConnectLLMButton />);
+
+    expect(queryByTestId('successConnectLLMButton')).toBeInTheDocument();
   });
 });

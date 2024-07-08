@@ -33,8 +33,8 @@ const isQueryFieldSelected = (
   queryFields: ChatForm[ChatFormFields.queryFields],
   index: string,
   field: string
-) => {
-  return queryFields[index]?.includes(field);
+): boolean => {
+  return Boolean(queryFields[index]?.includes(field));
 };
 
 export const QueryMode: React.FC = () => {
@@ -172,7 +172,7 @@ export const QueryMode: React.FC = () => {
                           <EuiText
                             size="s"
                             color="subdued"
-                            data-test-subj={`skipped_fields_${index}`}
+                            data-test-subj={`skippedFields-${indexNum}`}
                           >
                             <EuiIcon type="eyeClosed" />
                             {` `}

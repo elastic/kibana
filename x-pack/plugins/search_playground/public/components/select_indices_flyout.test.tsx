@@ -41,7 +41,7 @@ describe('SelectIndicesFlyout', () => {
       loading: false,
       addIndex: () => {},
       removeIndex: () => {},
-      noFieldsIndicesWarning: null,
+      isFieldsLoading: false,
     });
 
     mockedUseQueryIndices.mockReturnValue({
@@ -66,7 +66,7 @@ describe('SelectIndicesFlyout', () => {
       wrapper: Wrapper,
     });
 
-    fireEvent.click(getByTestId('selectIndex-2'));
+    fireEvent.click(getByTestId('sourceIndex-2'));
     fireEvent.click(getByTestId('saveButton'));
 
     await waitFor(() => {
@@ -97,7 +97,7 @@ describe('SelectIndicesFlyout', () => {
       loading: false,
       addIndex: () => {},
       removeIndex: () => {},
-      noFieldsIndicesWarning: null,
+      isFieldsLoading: false,
     });
 
     const { getByTestId } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
