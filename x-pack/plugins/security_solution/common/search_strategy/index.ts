@@ -9,3 +9,4 @@ export * from './common';
 export * from './security_solution';
 export * from './timeline';
 export * from './index_fields';
+export * from './automated_response_actions';

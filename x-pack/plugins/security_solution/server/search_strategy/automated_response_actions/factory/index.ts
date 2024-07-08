@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
-import type { EndpointFactoryQueryTypes } from '../../../../common/search_strategy/endpoint';
+import { ResponseActionsQueries } from '../../../../common/search_strategy';
+import type { EndpointFactoryQueryTypes } from '../../../../common/search_strategy';
 
 import type { AutomatedActionsSearchStrategyFactory } from './types';
 import { allActions } from './osquery';
 
-export const responseActionsFactory: Record<
-  ResponseActionsQueries,
-  AutomatedActionsSearchStrategyFactory<EndpointFactoryQueryTypes>
-> = {
-  [ResponseActionsQueries.actions]: allActions,
-};
-
-export const endpointFactory: Record<
+export const automatedActionsFactory: Record<
   EndpointFactoryQueryTypes,
   AutomatedActionsSearchStrategyFactory<EndpointFactoryQueryTypes>
 > = {
-  ...responseActionsFactory,
+  [ResponseActionsQueries.actions]: allActions,
 };

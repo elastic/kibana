@@ -14,7 +14,7 @@ import type {
   ActionRequestOptions,
   ActionRequestStrategyResponse,
   ResponseActionsQueries,
-} from '../../../../../common/search_strategy/endpoint/response_actions';
+} from '../../../../../common/search_strategy';
 
 export const allActions: AutomatedActionsSearchStrategyFactory<ResponseActionsQueries.actions> = {
   buildDsl: (options: ActionRequestOptions) => buildResponseActionsQuery(options),

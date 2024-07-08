@@ -20,7 +20,6 @@ import type { EndpointAutomatedActionListRequestQuery } from '../../../../common
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetEndpointActionList } from '../../../management/hooks';
 import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
-import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
@@ -35,11 +34,11 @@ import { DEFAULT_POLL_INTERVAL } from '../../../management/common/constants';
 import type {
   ActionRequestOptions,
   ActionRequestStrategyResponse,
-} from '../../../../common/search_strategy/endpoint/response_actions';
-import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
+  ResponseActionsSearchHit,
+  SearchHit,
+} from '../../../../common/search_strategy';
+import { ResponseActionsQueries, SortOrder } from '../../../../common/search_strategy';
 import { useKibana } from '../../lib/kibana';
-import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
-import { SortOrder } from '../../../../common/search_strategy/endpoint/response_actions/types';
 import { ENDPOINT_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
 const TabContentWrapper = styled.div`

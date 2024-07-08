@@ -12,12 +12,12 @@ import type {
   EndpointStrategyRequestType,
   EndpointStrategyResponseType,
   EndpointFactoryQueryTypes,
-} from '../../../common/search_strategy/endpoint';
+} from '../../../common/search_strategy';
 import type { AutomatedActionsSearchStrategyFactory } from './factory/types';
 
-import { endpointFactory } from './factory';
+import { automatedActionsFactory } from './factory';
 
-export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
+export const automatedActionsSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<EndpointStrategyRequestType<T>, EndpointStrategyResponseType<T>> => {
   const es = data.search.searchAsInternalUser as unknown as ISearchStrategy<
@@ -32,7 +32,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       }
 
       const queryFactory: AutomatedActionsSearchStrategyFactory<T> =
-        endpointFactory[request.factoryQueryType];
+        automatedActionsFactory[request.factoryQueryType];
       const strictRequest = {
         factoryQueryType: request.factoryQueryType,
         sort: request.sort,

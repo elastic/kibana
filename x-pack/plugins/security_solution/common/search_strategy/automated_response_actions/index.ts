@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import type {
-  ResponseActionsQueries,
-  ActionRequestOptions,
-  ActionRequestStrategyResponse,
-} from './response_actions';
+import type { ActionRequestOptions, ActionRequestStrategyResponse } from './action';
+
+export * from './action';
+export * from './types';
+export * from './response';
+
+export enum ResponseActionsQueries {
+  actions = 'responseActions',
+}
+
+export type {
+  ActionResponsesRequestOptions,
+  ActionResponsesRequestStrategyResponse,
+} from './response';
 
 export type EndpointFactoryQueryTypes = ResponseActionsQueries;
 
