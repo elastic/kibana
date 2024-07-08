@@ -173,6 +173,14 @@ const isInItemRange = (position: number, items: ESQLAstItem[]): boolean => {
   return true;
 };
 
+const isPastItemRange = (position: number, items: ESQLAstItem[]): boolean => {
+  const last = getLastItem(items);
+  if (!last || position > last.location.max) {
+    return true;
+  }
+  return false;
+};
+
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
 
@@ -202,7 +210,7 @@ function findAstPosition(ast: ESQLAst, offset: number) {
       } else if (
         command.grouping &&
         command.grouping.length &&
-        isInItemRange(offset, command.grouping)
+        isPastItemRange(offset, command.aggregates ?? [])
       ) {
         commandPosition = 'grouping';
       }

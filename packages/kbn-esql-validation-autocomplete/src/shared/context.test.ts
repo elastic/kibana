@@ -105,6 +105,18 @@ describe('context', () => {
       });
 
       describe('... BY <grouping> ...', () => {
+        test('returns "grouping" position on space after <aggregates>', async () => {
+          const { context } = await getContext('METRICS index aggregate ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'grouping',
+          });
+        });
+
         test('returns "grouping" position on space after "BY"', async () => {
           const { context } = await getContext('METRICS index aggregate BY ');
 
