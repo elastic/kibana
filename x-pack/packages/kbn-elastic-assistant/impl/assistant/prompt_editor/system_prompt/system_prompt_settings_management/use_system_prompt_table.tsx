@@ -61,13 +61,11 @@ export const useSystemPromptTable = () => {
           <BadgesColumn items={defaultConversations} prefix={id} />
         ),
       },
-      /* TODO: enable when createdAt is added
       {
         align: 'left',
         field: 'createdAt',
         name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON,
       },
-      */
       {
         align: 'center',
         name: 'Actions',

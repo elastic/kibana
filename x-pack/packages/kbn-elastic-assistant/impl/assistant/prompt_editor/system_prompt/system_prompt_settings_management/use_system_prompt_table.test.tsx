@@ -69,10 +69,11 @@ describe('useSystemPromptTable', () => {
         onDeleteActionClicked,
       });
 
-      expect(columns).toHaveLength(3);
+      expect(columns).toHaveLength(4);
       expect(columns[0].name).toBe('Name');
       expect(columns[1].name).toBe('Default conversations');
-      expect(columns[2].name).toBe('Actions');
+      expect(columns[2].name).toBe('Created on');
+      expect(columns[3].name).toBe('Actions');
     });
   });
 

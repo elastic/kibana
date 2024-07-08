@@ -13,10 +13,10 @@ export const QUICK_PROMPTS_TABLE_COLUMN_NAME = i18n.translate(
   }
 );
 
-export const QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnCreatedAt',
+export const QUICK_PROMPTS_TABLE_COLUMN_CREATED_ON = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnCreatedOn',
   {
-    defaultMessage: 'Created at',
+    defaultMessage: 'Created on',
   }
 );
 

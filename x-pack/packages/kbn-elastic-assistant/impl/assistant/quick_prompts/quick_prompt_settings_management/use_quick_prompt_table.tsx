@@ -47,13 +47,11 @@ export const useQuickPromptTable = () => {
           ) : null;
         },
       },
-      /* TODO: enable when createdAt is added
       {
         align: 'left',
         field: 'createdAt',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT,
+        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_ON,
       },
-      */
       {
         align: 'center',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,

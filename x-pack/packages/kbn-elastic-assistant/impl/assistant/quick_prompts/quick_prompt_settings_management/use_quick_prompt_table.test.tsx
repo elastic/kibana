@@ -29,10 +29,11 @@ describe('useQuickPromptTable', () => {
         onDeleteActionClicked: mockOnDeleteActionClicked,
       });
 
-      expect(columns).toHaveLength(3);
+      expect(columns).toHaveLength(4);
       expect(columns[0].name).toBe('Name');
       expect(columns[1].name).toBe('Contexts');
-      expect(columns[2].name).toBe('Actions');
+      expect(columns[2].name).toBe('Created on');
+      expect(columns[3].name).toBe('Actions');
     });
 
     it('should render contexts column correctly', () => {
@@ -62,7 +63,7 @@ describe('useQuickPromptTable', () => {
         onDeleteActionClicked: mockOnDeleteActionClicked,
       });
 
-      const mockRowActions = (columns[2] as EuiTableComputedColumnType<PromptResponse>).render(
+      const mockRowActions = (columns[3] as EuiTableComputedColumnType<PromptResponse>).render(
         MOCK_QUICK_PROMPTS[0]
       );
 
@@ -83,7 +84,7 @@ describe('useQuickPromptTable', () => {
 
       const nonDefaultPrompt = MOCK_QUICK_PROMPTS.find((qp) => !qp.isDefault);
       if (nonDefaultPrompt) {
-        const mockRowActions = (columns[2] as EuiTableComputedColumnType<PromptResponse>).render(
+        const mockRowActions = (columns[3] as EuiTableComputedColumnType<PromptResponse>).render(
           nonDefaultPrompt
         );
         expect(mockRowActions).toHaveProperty('props', {

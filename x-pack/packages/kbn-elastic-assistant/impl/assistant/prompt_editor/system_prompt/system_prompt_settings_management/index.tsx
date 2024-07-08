@@ -93,14 +93,6 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     setPromptsBulkActions,
   } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded);
 
-  const systemPrompts = useMemo(
-    () =>
-      systemPromptSettings.length === 0
-        ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
-        : systemPromptSettings,
-    [allPrompts.data, systemPromptSettings]
-  );
-
   // System Prompt Selection State
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
 
@@ -113,6 +105,14 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
       setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
     }
   }, [selectedSystemPrompt, systemPromptSettings]);
+
+  const systemPrompts = useMemo(
+    () =>
+      systemPromptSettings.length === 0
+        ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+        : systemPromptSettings,
+    [allPrompts.data, systemPromptSettings]
+  );
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {

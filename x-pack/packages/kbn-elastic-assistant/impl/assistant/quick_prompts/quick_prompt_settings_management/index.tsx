@@ -55,6 +55,18 @@ const QuickPromptSettingsManagementComponent = () => {
     false // Quick Prompt settings do not require conversations
   );
 
+  // Quick Prompt Selection State
+  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+  const onSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
+    setSelectedQuickPrompt(quickPrompt);
+  }, []);
+
+  useEffect(() => {
+    if (selectedQuickPrompt != null) {
+      setSelectedQuickPrompt(quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name));
+    }
+  }, [quickPromptSettings, selectedQuickPrompt]);
+
   const quickPrompts = useMemo(
     () =>
       quickPromptSettings.length === 0
@@ -62,17 +74,6 @@ const QuickPromptSettingsManagementComponent = () => {
         : quickPromptSettings,
     [allPrompts.data, quickPromptSettings]
   );
-
-  // Quick Prompt Selection State
-  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
-  const onSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
-    setSelectedQuickPrompt(quickPrompt);
-  }, []);
-  useEffect(() => {
-    if (selectedQuickPrompt != null) {
-      setSelectedQuickPrompt(quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name));
-    }
-  }, [quickPromptSettings, selectedQuickPrompt]);
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
