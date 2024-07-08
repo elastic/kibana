@@ -16,7 +16,7 @@ paths:
   /api/timeline/_draft:
     get:
       x-codegen-enabled: true
-      operationId: getDraftTimelines
+      operationId: GetDraftTimelines
       summary: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
       tags:
         - access:securitySolution

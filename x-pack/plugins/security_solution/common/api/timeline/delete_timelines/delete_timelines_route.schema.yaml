@@ -16,7 +16,7 @@ paths:
   /api/timeline:
     delete:
       x-codegen-enabled: true
-      operationId: deleteTimelines
+      operationId: DeleteTimelines
       summary: Deletes one or more timelines or timeline templates.
       tags:
         - access:securitySolution

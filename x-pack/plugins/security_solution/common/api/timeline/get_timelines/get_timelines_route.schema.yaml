@@ -16,14 +16,13 @@ paths:
   /api/timelines:
     get:
       x-codegen-enabled: true
-      operationId: getTimelines
+      operationId: GetTimelines
       summary: This API is used to retrieve a list of existing saved timelines or timeline templates.
       tags:
         - access:securitySolution
       parameters:
         - in: query
           name: only_user_favorite
-          required: true
           schema:
             nullable: true
             type: string
@@ -33,18 +32,14 @@ paths:
           description: If true, only timelines that are marked as favorites by the user are returned.
         - in: query
           name: timeline_type
-          required: true
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
-            nullable: true
         - in: query
           name: sort_field
-          required: true
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/SortFieldTimeline'
         - in: query
           name: sort_order
-          required: true
           schema:
             type: string
             enum:
@@ -52,28 +47,23 @@ paths:
               - desc
         - in: query
           name: page_size
-          required: true
           schema:
             nullable: true
             type: string
         - in: query
           name: page_index
-          required: true
           schema:
             nullable: true
             type: string
         - in: query
           name: search
-          required: true
           schema:
             nullable: true
             type: string
         - in: query
           name: status
-          required: true
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
-            nullable: true
       responses:
         '200':
           description: Indicates that the (template) timelines were found and returned.
@@ -85,33 +75,36 @@ paths:
                 properties:
                   data:
                     type: object
-                    required:
-                      [
-                        timelines,
-                        totalCount,
-                        defaultTimelineCount,
-                        templateTimelineCount,
-                        favoriteCount,
-                        elasticTemplateTimelineCount,
-                        customTemplateTimelineCount,
-                      ]
                     properties:
-                      timelines:
-                        type: array
-                        items:
-                          $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                      totalCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      customTemplateTimelineCount:
-                        type: number
+                      getOneTimeline:
+                        type: object
+                        required:
+                          [
+                            timelines,
+                            totalCount,
+                            defaultTimelineCount,
+                            templateTimelineCount,
+                            favoriteCount,
+                            elasticTemplateTimelineCount,
+                            customTemplateTimelineCount,
+                          ]
+                        properties:
+                          timelines:
+                            type: array
+                            items:
+                              $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                          totalCount:
+                            type: number
+                          defaultTimelineCount:
+                            type: number
+                          templateTimelineCount:
+                            type: number
+                          favoriteCount:
+                            type: number
+                          elasticTemplateTimelineCount:
+                            type: number
+                          customTemplateTimelineCount:
+                            type: number
         '400':
           description: Bad request. The user supplied invalid data.
           content:

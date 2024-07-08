@@ -69,9 +69,9 @@ import {
   PerformBulkActionRequestQueryInput,
   PerformBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
-import { PersistFavoriteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
-import { PersistNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
-import { PersistPinnedEventRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
+import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
+import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
+import { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
@@ -182,9 +182,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Creates a new timeline.
-     */
     createTimelines(props: CreateTimelinesProps) {
       return supertest
         .post('/api/timeline')
@@ -200,9 +197,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-     * Deletes a note from a timeline.
-     */
     deleteNote(props: DeleteNoteProps) {
       return supertest
         .delete('/api/note')
@@ -222,9 +216,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Deletes one or more timelines or timeline templates.
-     */
     deleteTimelines(props: DeleteTimelinesProps) {
       return supertest
         .delete('/api/timeline')
@@ -245,9 +236,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object)
         .query(props.query);
     },
-    /**
-     * Exports timelines as an NDJSON file
-     */
     exportTimelines(props: ExportTimelinesProps) {
       return supertest
         .post('/api/timeline/_export')
@@ -305,9 +293,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
-     */
     getDraftTimelines(props: GetDraftTimelinesProps) {
       return supertest
         .get('/api/timeline/_draft')
@@ -359,9 +344,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
-     */
     getTimeline(props: GetTimelineProps) {
       return supertest
         .get('/api/timeline')
@@ -370,9 +352,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * This API is used to retrieve a list of existing saved timelines or timeline templates.
-     */
     getTimelines(props: GetTimelinesProps) {
       return supertest
         .get('/api/timelines')
@@ -392,9 +371,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Imports timelines.
-     */
     importTimelines(props: ImportTimelinesProps) {
       return supertest
         .post('/api/timeline/_import')
@@ -410,9 +386,6 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-     * Installs prepackaged timelines.
-     */
     installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
       return supertest
         .post('/api/timeline/_prepackaged')
@@ -463,10 +436,7 @@ finalize it.
         .send(props.body as object)
         .query(props.query);
     },
-    /**
-     * Persists a given users favorite status of a timeline.
-     */
-    persistFavorite(props: PersistFavoriteProps) {
+    persistFavoriteRoute(props: PersistFavoriteRouteProps) {
       return supertest
         .patch('/api/timeline/_favorite')
         .set('kbn-xsrf', 'true')
@@ -474,10 +444,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Persists a note to a timeline.
-     */
-    persistNote(props: PersistNoteProps) {
+    persistNoteRoute(props: PersistNoteRouteProps) {
       return supertest
         .patch('/api/note')
         .set('kbn-xsrf', 'true')
@@ -485,10 +452,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Persists a pinned event to a timeline.
-     */
-    persistPinnedEvent(props: PersistPinnedEventProps) {
+    persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
       return supertest
         .patch('/api/pinned_event')
         .set('kbn-xsrf', 'true')
@@ -668,14 +632,14 @@ export interface PerformBulkActionProps {
   query: PerformBulkActionRequestQueryInput;
   body: PerformBulkActionRequestBodyInput;
 }
-export interface PersistFavoriteProps {
-  body: PersistFavoriteRequestBodyInput;
+export interface PersistFavoriteRouteProps {
+  body: PersistFavoriteRouteRequestBodyInput;
 }
-export interface PersistNoteProps {
-  body: PersistNoteRequestBodyInput;
+export interface PersistNoteRouteProps {
+  body: PersistNoteRouteRequestBodyInput;
 }
-export interface PersistPinnedEventProps {
-  body: PersistPinnedEventRequestBodyInput;
+export interface PersistPinnedEventRouteProps {
+  body: PersistPinnedEventRouteRequestBodyInput;
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;

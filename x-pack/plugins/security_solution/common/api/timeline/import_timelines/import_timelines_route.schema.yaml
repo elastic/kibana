@@ -16,7 +16,7 @@ paths:
   /api/timeline/_import:
     post:
       x-codegen-enabled: true
-      operationId: importTimelines
+      operationId: ImportTimelines
       summary: Imports timelines.
       tags:
         - access:securitySolution
@@ -37,11 +37,17 @@ paths:
                       properties:
                         hapi:
                           type: object
+                          required: [filename, headers]
                           properties:
                             filename:
                               type: string
                             headers:
                               type: object
+                        isImmutable:
+                          type: string
+                          enum:
+                            - 'true'
+                            - 'false'
       responses:
         '200':
           description: Indicates the import of timelines was successful.

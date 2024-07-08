@@ -13,7 +13,7 @@ paths:
   /api/timeline/_favorite:
     patch:
       x-codegen-enabled: true
-      operationId: persistFavoriteRoute
+      operationId: PersistFavoriteRoute
       summary: Persists a given users favorite status of a timeline.
       tags:
         - access:securitySolution
@@ -37,7 +37,8 @@ paths:
                   nullable: true
                 timelineType:
                   nullable: true
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+                  allOf:
+                    - $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
       responses:
         '200':
           description: Indicates the favorite status was successfully updated.

@@ -29,8 +29,6 @@ export type PatchTimelineRequestBodyInput = z.input<typeof PatchTimelineRequestB
 export type PatchTimelineResponse = z.infer<typeof PatchTimelineResponse>;
 export const PatchTimelineResponse = z.object({
   data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse,
-    }),
+    persistTimeline: TimelineResponse,
   }),
 });

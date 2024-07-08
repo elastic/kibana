@@ -12,14 +12,17 @@ servers:
 paths:
   /api/note:
     get:
-      operationId: getNotes
+      operationId: GetNotes
       description: Gets notes
+      summary: Get all notes for a given document.
       tags:
         - access:securitySolution
       parameters:
         - name: documentIds
           in: query
+          required: true
           schema:
+            nullable: true
             oneOf:
               - type: array
                 items:
@@ -27,34 +30,40 @@ paths:
               - type: string
         - name: page
           in: query
+          required: true
           schema:
             type: number
             nullable: true
         - name: perPage
           in: query
+          required: true
           schema:
             type: number
             nullable: true
         - name: search
           in: query
+          required: true
           schema:
             type: string
             nullable: true
         - name: sortField
           in: query
+          required: true
           schema:
             type: string
             nullable: true
         - name: sortOrder
           in: query
+          required: true
           schema:
             type: string
             nullable: true
         - name: filter
           in: query
+          required: true
           schema:
             type: string
             nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the requested notes were returned.

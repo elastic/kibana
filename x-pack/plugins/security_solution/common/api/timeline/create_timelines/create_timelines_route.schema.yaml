@@ -15,7 +15,7 @@ servers:
 paths:
   /api/timeline:
     post:
-      operationId: createTimelines
+      operationId: CreateTimelines
       x-codegen-enabled: true
       summary: Creates a new timeline.
       tags:
@@ -27,12 +27,12 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                [status, timelineId, templateTimelineId, templateTimelineVersion, timelineType, version, timeline]
+              required: [timeline]
               properties:
                 status:
                   nullable: true
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
+                  allOf:
+                    - $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
                 timelineId:
                   type: string
                   nullable: true
@@ -44,7 +44,8 @@ paths:
                   nullable: true
                 timelineType:
                   nullable: true
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+                  allOf:
+                    - $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                 version:
                   type: string
                   nullable: true
@@ -64,11 +65,7 @@ paths:
                     required: [persistTimeline]
                     properties:
                       persistTimeline:
-                        type: object
-                        required: [timeline]
-                        properties:
-                          timeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
         '405':
           description: Indicates that there was an error in the timeline creation.
           content:

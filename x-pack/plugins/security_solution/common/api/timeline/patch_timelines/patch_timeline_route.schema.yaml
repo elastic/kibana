@@ -49,11 +49,7 @@ paths:
                     required: [persistTimeline]
                     properties:
                       persistTimeline:
-                        type: object
-                        required: [timeline]
-                        properties:
-                          timeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
         '405':
           description: Indicates that the user does not have the required access to create a draft timeline.
           content:

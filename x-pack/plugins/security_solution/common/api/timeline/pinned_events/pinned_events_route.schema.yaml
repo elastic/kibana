@@ -16,7 +16,7 @@ paths:
   /api/pinned_event:
     patch:
       x-codegen-enabled: true
-      operationId: persistPinnedEventRoute
+      operationId: PersistPinnedEventRoute
       summary: Persists a pinned event to a timeline.
       tags:
         - access:securitySolution
@@ -27,7 +27,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [eventId, pinnedEventId, timelineId]
+              required: [eventId, timelineId]
               properties:
                 eventId:
                   type: string

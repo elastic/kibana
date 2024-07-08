@@ -13,7 +13,7 @@ paths:
   /api/timeline/_prepackaged:
     post:
       x-codegen-enabled: true
-      operationId: installPrepackedTimelines
+      operationId: InstallPrepackedTimelines
       summary: Installs prepackaged timelines.
       tags:
         - access:securitySolution
@@ -29,15 +29,15 @@ paths:
                 timelinesToInstall:
                   type: array
                   items:
-                    allOf:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelines'
                     nullable: true
+                    allOf:
+                      - $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelines'
                 timelinesToUpdate:
                   type: array
                   items:
-                    allOf:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelines'
                     nullable: true
+                    allOf:
+                      - $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelines'
                 prepackagedTimelines:
                   type: array
                   items:

@@ -25,6 +25,8 @@
     {{~else~}}
       .merge({{> zod_schema_item }})
     {{~/if~}}
+    {{~#if ../nullable}}.nullable(){{/if~}}
+    {{~#if (eq ../requiredBool false)}}.optional(){{/if~}}
   {{~/each~}}
 {{~/if~}}
 

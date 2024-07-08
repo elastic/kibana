@@ -16,20 +16,18 @@ paths:
   /api/timeline:
     get:
       x-codegen-enabled: true
-      operationId: getTimeline
+      operationId: GetTimeline
       summary: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
       tags:
         - access:securitySolution
       parameters:
         - in: query
           name: template_timeline_id
-          required: true
           schema:
             type: string
           description: The ID of the template timeline to retrieve
         - in: query
           name: id
-          required: true
           schema:
             type: string
           description: The ID of the timeline to retrieve
@@ -44,8 +42,9 @@ paths:
                 properties:
                   data:
                     type: object
-                    required: [getOnetimeline]
+                    required: [getOneTimeline]
                     properties:
                       getOneTimeline:
                         nullable: true
-                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                        allOf:                        
+                          - $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

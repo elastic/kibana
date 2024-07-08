@@ -286,8 +286,9 @@ components:
       type: object
       properties:
         columns:
-          $ref: '#/components/schemas/ColumnHeaderResult'
           nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ColumnHeaderResult'
         created:
           type: number
           nullable: true
@@ -350,7 +351,8 @@ components:
           nullable: true
         kqlQuery:
           nullable: true
-          $ref: '#/components/schemas/SerializedFilterQueryResult'
+          allOf:
+            - $ref: '#/components/schemas/SerializedFilterQueryResult'
         indexNames:
           type: array
           nullable: true
@@ -361,7 +363,8 @@ components:
           nullable: true
         sort:
           nullable: true
-          $ref: '#/components/schemas/Sort'
+          allOf:
+            - $ref: '#/components/schemas/Sort'
         status:
           type: string
           nullable: true
@@ -380,7 +383,8 @@ components:
           nullable: true
         timelineType:
           nullable: true
-          $ref: '#/components/schemas/TimelineType'
+          allOf:
+            - $ref: '#/components/schemas/TimelineType'
         updated:
           type: number
           nullable: true

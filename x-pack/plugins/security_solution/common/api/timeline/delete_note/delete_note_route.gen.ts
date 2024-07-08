@@ -19,6 +19,11 @@ import { z } from 'zod';
 export type DeleteNoteRequestBody = z.infer<typeof DeleteNoteRequestBody>;
 export const DeleteNoteRequestBody = z.object({
   noteId: z.string().nullable().optional(),
-  noteIds: z.array(z.string().nullable()).optional(),
+  noteIds: z.array(z.string()).nullable().optional(),
 });
 export type DeleteNoteRequestBodyInput = z.input<typeof DeleteNoteRequestBody>;
+
+export type DeleteNoteResponse = z.infer<typeof DeleteNoteResponse>;
+export const DeleteNoteResponse = z.object({
+  data: z.object({}).optional(),
+});

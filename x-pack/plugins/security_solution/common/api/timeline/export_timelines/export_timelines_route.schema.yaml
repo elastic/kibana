@@ -16,7 +16,7 @@ paths:
   /api/timeline/_export:
     post:
       x-codegen-enabled: true
-      operationId: exportTimelines
+      operationId: ExportTimelines
       summary: Exports timelines as an NDJSON file
       tags:
         - access:securitySolution
@@ -34,7 +34,6 @@ paths:
           application/json:
             schema:
               type: object
-              required: [ids]
               properties:
                 ids:
                   nullable: true

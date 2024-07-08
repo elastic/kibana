@@ -28,26 +28,30 @@ export const GetTimelinesRequestQuery = z.object({
   /**
    * If true, only timelines that are marked as favorites by the user are returned.
    */
-  only_user_favorite: z.enum(['true', 'false']).nullable(),
-  timeline_type: TimelineType.nullable(),
-  sort_field: SortFieldTimeline,
-  sort_order: z.enum(['asc', 'desc']),
-  page_size: z.string().nullable(),
-  page_index: z.string().nullable(),
-  search: z.string().nullable(),
-  status: TimelineStatus.nullable(),
+  only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
+  timeline_type: TimelineType.optional(),
+  sort_field: SortFieldTimeline.optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
+  page_size: z.string().nullable().optional(),
+  page_index: z.string().nullable().optional(),
+  search: z.string().nullable().optional(),
+  status: TimelineStatus.optional(),
 });
 export type GetTimelinesRequestQueryInput = z.input<typeof GetTimelinesRequestQuery>;
 
 export type GetTimelinesResponse = z.infer<typeof GetTimelinesResponse>;
 export const GetTimelinesResponse = z.object({
   data: z.object({
-    timelines: z.array(TimelineResponse),
-    totalCount: z.number(),
-    defaultTimelineCount: z.number(),
-    templateTimelineCount: z.number(),
-    favoriteCount: z.number(),
-    elasticTemplateTimelineCount: z.number(),
-    customTemplateTimelineCount: z.number(),
+    getOneTimeline: z
+      .object({
+        timelines: z.array(TimelineResponse),
+        totalCount: z.number(),
+        defaultTimelineCount: z.number(),
+        templateTimelineCount: z.number(),
+        favoriteCount: z.number(),
+        elasticTemplateTimelineCount: z.number(),
+        customTemplateTimelineCount: z.number(),
+      })
+      .optional(),
   }),
 });

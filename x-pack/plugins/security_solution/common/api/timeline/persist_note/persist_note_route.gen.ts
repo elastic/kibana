@@ -18,17 +18,20 @@ import { z } from 'zod';
 
 import { BareNote, Note } from '../model/components.gen';
 
-export type PersistNoteRequestBody = z.infer<typeof PersistNoteRequestBody>;
-export const PersistNoteRequestBody = z.object({
+export type PersistNoteRouteRequestBody = z.infer<typeof PersistNoteRouteRequestBody>;
+export const PersistNoteRouteRequestBody = z.object({
   note: BareNote,
-  overrideOwner: z.boolean().nullable(),
-  noteId: z.string().nullable(),
-  version: z.string().nullable(),
+  overrideOwner: z.boolean().nullable().optional(),
+  noteId: z.string().nullable().optional(),
+  version: z.string().nullable().optional(),
+  eventIngested: z.string().nullable().optional(),
+  eventTimestamp: z.string().nullable().optional(),
+  eventDataView: z.string().nullable().optional(),
 });
-export type PersistNoteRequestBodyInput = z.input<typeof PersistNoteRequestBody>;
+export type PersistNoteRouteRequestBodyInput = z.input<typeof PersistNoteRouteRequestBody>;
 
-export type PersistNoteResponse = z.infer<typeof PersistNoteResponse>;
-export const PersistNoteResponse = z.object({
+export type PersistNoteRouteResponse = z.infer<typeof PersistNoteRouteResponse>;
+export const PersistNoteRouteResponse = z.object({
   data: z.object({
     persistNote: z.object({
       code: z.number(),

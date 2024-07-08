@@ -16,7 +16,7 @@ paths:
   /api/note:
     patch:
       x-codegen-enabled: true
-      operationId: persistNoteRoute
+      operationId: PersistNoteRoute
       summary: Persists a note to a timeline.
       tags:
         - access:securitySolution
@@ -27,7 +27,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [note, overrideOwner, noteId, version]
+              required: [note]
               properties:
                 note:
                   $ref: '../model/components.schema.yaml#/components/schemas/BareNote'
@@ -38,6 +38,15 @@ paths:
                   type: string
                   nullable: true
                 version:
+                  type: string
+                  nullable: true
+                eventIngested:
+                  type: string
+                  nullable: true
+                eventTimestamp:
+                  type: string
+                  nullable: true
+                eventDataView:
                   type: string
                   nullable: true
       responses:

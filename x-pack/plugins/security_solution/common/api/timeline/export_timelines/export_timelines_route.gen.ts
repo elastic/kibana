@@ -27,6 +27,6 @@ export type ExportTimelinesRequestQueryInput = z.input<typeof ExportTimelinesReq
 
 export type ExportTimelinesRequestBody = z.infer<typeof ExportTimelinesRequestBody>;
 export const ExportTimelinesRequestBody = z.object({
-  ids: z.array(z.string()).nullable(),
+  ids: z.array(z.string()).nullable().optional(),
 });
 export type ExportTimelinesRequestBodyInput = z.input<typeof ExportTimelinesRequestBody>;

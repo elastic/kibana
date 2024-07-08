@@ -19,7 +19,10 @@ import { z } from 'zod';
 export type DeleteTimelinesRequestBody = z.infer<typeof DeleteTimelinesRequestBody>;
 export const DeleteTimelinesRequestBody = z.object({
   savedObjectIds: z.array(z.string()),
-  searchId: z.array(z.string()).optional(),
+  /**
+   * Saved search ids that should be deleted alongside the timelines
+   */
+  searchIds: z.array(z.string()).optional(),
 });
 export type DeleteTimelinesRequestBodyInput = z.input<typeof DeleteTimelinesRequestBody>;
 

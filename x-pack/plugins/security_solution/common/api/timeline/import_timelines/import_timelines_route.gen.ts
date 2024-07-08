@@ -23,9 +23,10 @@ export const ImportTimelinesRequestBody = z.object({
   file: Readable.merge(
     z.object({
       hapi: z.object({
-        filename: z.string().optional(),
-        headers: z.object({}).optional(),
+        filename: z.string(),
+        headers: z.object({}),
       }),
+      isImmutable: z.enum(['true', 'false']).optional(),
     })
   ),
 });
