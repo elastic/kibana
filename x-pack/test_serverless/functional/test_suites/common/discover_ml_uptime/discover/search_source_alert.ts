@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
   const dataViews = getService('dataViews');
-  const browser = getService('browser');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
