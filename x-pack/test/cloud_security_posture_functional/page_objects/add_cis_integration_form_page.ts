@@ -282,6 +282,12 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.find(`button-replace-${secretField}`);
   };
 
+  const inputIntegrationName = async (nameExtension: string) => {
+    const flyout = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await flyout.findAllByCssSelector('input[id="name"]');
+    await nameField[0].type(nameExtension);
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -316,5 +322,6 @@ export function AddCisIntegrationFormPageProvider({
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
     getReplaceSecretButton,
+    inputIntegrationName,
   };
 }

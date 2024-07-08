@@ -40,6 +40,7 @@ export default function (providerContext: FtrProviderContext) {
       it('KSPM EKS Assume Role workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
+        await cisIntegration.inputIntegrationName('-TEST 1');
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -60,6 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_DIRECT_ACCESS_TEST_ID);
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.inputIntegrationName('-TEST 2');
         await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
@@ -88,6 +90,7 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_TEMPORARY_KEYS_TEST_ID);
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.inputIntegrationName('-TEST 3');
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
@@ -123,6 +126,7 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_SHARED_CREDENTIAL_TEST_ID);
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.inputIntegrationName('-TEST 4');
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
