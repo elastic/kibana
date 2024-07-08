@@ -38,7 +38,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
     <EuiToolTip
       delay="long"
       anchorClassName="eui-displayBlock"
-      content={i18n.translate('xpack.infra.metrics.settingsTabTitle', {
+      content={i18n.translate('xpack.infra.hostsViewPage.table.nameTooltip', {
         defaultMessage: '{providerName}: {name}',
         values: {
           providerName,
