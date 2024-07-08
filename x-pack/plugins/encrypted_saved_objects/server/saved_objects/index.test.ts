@@ -15,6 +15,7 @@ import {
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { ClientInstanciator } from '.';
 import { setupSavedObjects } from '.';
@@ -53,6 +54,7 @@ describe('#setupSavedObjects', () => {
   describe('#setupContract', () => {
     it('includes hiddenTypes when specified', async () => {
       setupContract({ includedHiddenTypes: ['hiddenType'] });
+      await nextTick();
       expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith([
         'hiddenType',
       ]);
