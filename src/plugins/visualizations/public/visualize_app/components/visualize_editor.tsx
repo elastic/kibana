@@ -105,7 +105,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     () => new PersistedState(currentAppState?.uiState ?? {}),
     [currentAppState]
   );
-  console.log('CURRENT APP STATE', currentAppState);
 
   const [initialState, references] = useInitialVisState({ visualizationIdFromUrl, services });
 

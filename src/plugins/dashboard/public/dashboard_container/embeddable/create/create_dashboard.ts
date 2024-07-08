@@ -375,6 +375,7 @@ export const initializeDashboard = async ({
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
+
   if (incomingEmbeddable) {
     const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
       container.setScrollToPanelId(id);
@@ -401,9 +402,9 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
-      untilDashboardReady().then((container) =>
-        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
-      );
+      untilDashboardReady().then((container) => {
+        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string);
+      });
     } else {
       // otherwise this incoming embeddable is brand new and can be added after the dashboard container is created.
 

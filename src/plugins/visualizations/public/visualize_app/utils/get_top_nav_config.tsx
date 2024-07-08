@@ -44,7 +44,6 @@ import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { NavigateToLensFn, SerializeStateFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
-import { VisualizeOutputState } from '../../react_embeddable/types';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -131,9 +130,9 @@ export const getTopNavConfig = (
    * Called when the user clicks "Save" button.
    */
   async function doSave(
-    rawState: VisualizeOutputState,
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
   ) {
+    const { rawState, references } = serializeState(true);
     const {
       savedVis: serializedVis,
       lastSavedTitle,
@@ -172,7 +171,6 @@ export const getTopNavConfig = (
     };
 
     try {
-      console.log('Saving', visSavedObjectAttributes, saveOptions, serializeState().references);
       const id = await saveVisualization(
         visSavedObjectAttributes,
         saveOptions,
@@ -180,7 +178,7 @@ export const getTopNavConfig = (
           savedObjectsTagging,
           ...startServices,
         },
-        serializeState().references ?? []
+        references ?? []
       );
 
       if (id) {
@@ -282,11 +280,12 @@ export const getTopNavConfig = (
       return;
     }
 
+    const { rawState } = serializeState();
+
     const state = {
-      input: serializeState().rawState,
+      input: rawState,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
-      searchSessionId: data.search.session.getSessionId(),
     };
 
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
@@ -570,7 +569,7 @@ export const getTopNavConfig = (
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
-                const response = await doSave(rawState, saveOptions);
+                const response = await doSave(saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
                   rawState.savedVis.title = currentTitle;
@@ -699,7 +698,7 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
-              return doSave(rawState, saveOptions);
+              return doSave(saveOptions);
             },
           },
         ]

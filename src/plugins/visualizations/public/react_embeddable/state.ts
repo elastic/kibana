@@ -41,6 +41,7 @@ import {
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
+  console.log('DESERIALIZE', state);
   if (!state.rawState)
     return {
       vis: {
@@ -148,43 +149,57 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
   } as VisualizeSavedVisInputState;
 };
 
-export const serializeState = ({
-  serializedVis, // Serialize the vis before passing it to this function for easier testing
-  titles,
-  id,
-  savedObjectProperties,
-}: {
-  serializedVis: SerializedVis;
-  titles: SerializedTitles;
-  id?: string;
-  savedObjectProperties?: ExtraSavedObjectProperties;
-}) => {
-  const { references, serializedSearchSource } = serializeReferences(serializedVis);
+export const serializeState = (
+  {
+    serializedVis, // Serialize the vis before passing it to this function for easier testing
+    titles,
+    id,
+    savedObjectProperties,
+  }: {
+    serializedVis: SerializedVis;
+    titles: SerializedTitles;
+    id?: string;
+    savedObjectProperties?: ExtraSavedObjectProperties;
+  },
+  extractReferences?: boolean
+) => {
   const titlesWithDefaults = {
     title: '',
     description: '',
     ...titles,
   };
+  if (extractReferences) {
+    const { references, serializedSearchSource } = serializeReferences(serializedVis);
+
+    return {
+      rawState: {
+        ...titlesWithDefaults,
+        ...savedObjectProperties,
+        savedVis: {
+          ...serializedVis,
+          id,
+          data: {
+            ...omit(serializedVis.data, 'savedSearchId'),
+            searchSource: serializedSearchSource,
+            ...(serializedVis.data.savedSearchId
+              ? {
+                  savedSearchRefName: references.find(
+                    (r) => r.id === serializedVis.data.savedSearchId
+                  ),
+                }
+              : {}),
+          },
+        },
+      },
+      references,
+    };
+  }
   return {
     rawState: {
       ...titlesWithDefaults,
       ...savedObjectProperties,
-      savedVis: {
-        ...serializedVis,
-        id,
-        data: {
-          ...omit(serializedVis.data, 'savedSearchId'),
-          searchSource: serializedSearchSource,
-          ...(serializedVis.data.savedSearchId
-            ? {
-                savedSearchRefName: references.find(
-                  (r) => r.id === serializedVis.data.savedSearchId
-                ),
-              }
-            : {}),
-        },
-      },
+      savedVis: { ...serializedVis, id },
     },
-    references,
+    references: [],
   };
 };

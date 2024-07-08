@@ -19,7 +19,9 @@ export type NavigateToLensFn = (
   vis: Vis,
   timefilter: TimefilterContract
 ) => Promise<NavigateToLensContext | undefined | null> | undefined;
-export type SerializeStateFn = () => SerializedPanelState<VisualizeOutputState>;
+export type SerializeStateFn = (
+  extractReferences?: boolean
+) => SerializedPanelState<VisualizeOutputState>;
 export type GetVisFn = () => Vis;
 
 export interface EmbeddableApiHandler {

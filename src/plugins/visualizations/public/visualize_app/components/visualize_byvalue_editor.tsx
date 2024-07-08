@@ -52,7 +52,6 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     serializeState: [serializeStateFn],
     getVis: [getVis],
   } = embeddableApiHandler;
-  console.log('BY VALUE EDITOR');
 
   useEffect(() => {
     const { stateTransferService, history, data } = services;
@@ -67,8 +66,6 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setOriginatingPath(pathValue);
     setOriginatingApp(value);
     setEmbeddableId(embeddableIdValue);
-
-    console.log('VALUE INPUT', valueInputValue);
 
     if (!valueInputValue) {
       // if there is no value input to load, redirect to the visualize listing page.
