@@ -52,7 +52,9 @@ export const ResponseActionsResults = React.memo(
     return (
       <>
         {actions.map((action) => {
-          const key = isEndpoint(action) ? action.id : action.action_id;
+          // The concatenation of `endpoint` and `osquery` below is necessary because the automated
+          // actions seem to be using the same action ID for both OSQuery and Endpoint
+          const key = isEndpoint(action) ? `endpoint-${action.id}` : `osquery-${action.action_id}`;
 
           return (
             <React.Fragment key={key}>
