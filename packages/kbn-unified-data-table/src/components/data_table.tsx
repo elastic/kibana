@@ -830,7 +830,7 @@ export const UnifiedDataTable = ({
     if (isSortEnabled) {
       // in ES|QL mode, sorting is disabled when in Document view
       // ideally we want the @timestamp column to be sortable server side
-      // but it needs discussion
+      // but it needs discussion before moving forward like this
       if (isPlainRecord && !columns.length) {
         return undefined;
       }
