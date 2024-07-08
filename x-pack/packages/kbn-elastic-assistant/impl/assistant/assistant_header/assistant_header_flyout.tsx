@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,6 +48,9 @@ interface OwnProps {
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 type Props = OwnProps;
@@ -74,6 +78,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   refetchConversationsState,
   onConversationCreate,
   isAssistantEnabled,
+  refetchPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -164,6 +169,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               conversationsLoaded={conversationsLoaded}
               refetchConversationsState={refetchConversationsState}
               isFlyoutMode={true}
+              refetchPrompts={refetchPrompts}
             />
           </EuiFlexItem>
 
