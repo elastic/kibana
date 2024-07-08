@@ -143,7 +143,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
   useEffect(() => {
     solutionNavExperiment?.then((isEnabled) => {
-      console.log(isEnabled ? 'yeah' : 'nope');
       setIsSolutionNavEnabled(isEnabled);
     });
   }, [solutionNavExperiment]);
@@ -250,8 +249,8 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
                     <EuiBadge color="primary">
                       <FormattedMessage
                         id="xpack.spaces.management.spaceDetails.space.badge.isCurrent"
-                        description="Text for a badge shown in the Space details the particular Space is the one currently in the user session."
-                        defaultMessage="current"
+                        description="Text for a badge shown in the Space details page when the particular Space currently active."
+                        defaultMessage="Current"
                       />
                     </EuiBadge>
                   </>

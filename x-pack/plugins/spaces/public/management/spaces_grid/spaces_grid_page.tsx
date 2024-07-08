@@ -298,7 +298,7 @@ export class SpacesGridPage extends Component<Props, State> {
       {
         field: 'disabledFeatures',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.featuresColumnName', {
-          defaultMessage: 'Features',
+          defaultMessage: 'Features visible',
         }),
         sortable: (space: Space) => {
           return getEnabledFeatures(this.state.features, space).length;
@@ -326,7 +326,7 @@ export class SpacesGridPage extends Component<Props, State> {
           return (
             <FormattedMessage
               id="xpack.spaces.management.spacesGridPage.someFeaturesEnabled"
-              defaultMessage="{enabledFeatureCount} / {totalFeatureCount} features visible"
+              defaultMessage="{enabledFeatureCount} / {totalFeatureCount}"
               values={{
                 enabledFeatureCount,
                 totalFeatureCount: this.state.features.length,
