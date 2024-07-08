@@ -6,7 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryIndexName } from '../helpers/generate_index_name';
+import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
 function createIdTemplate(definition: EntityDefinition) {
   return definition.identityFields.reduce((template, id) => {
@@ -14,13 +14,13 @@ function createIdTemplate(definition: EntityDefinition) {
   }, definition.displayNameTemplate);
 }
 
-function mapDestinationToPainless(destination: string, source: string) {
+function mapDestinationToPainless(destination: string) {
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
     if (currentIndex + 1 === parts.length) {
       return `${acc}\n  ctx${parts
         .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${source}.keySet();`;
+        .join('')} = ctx.entity.metadata.${destination}.keySet();`;
     }
     return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
       .slice(0, currentIndex + 1)
@@ -34,16 +34,15 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return '';
   }
   return definition.metadata.reduce((script, def) => {
-    const source = def.source;
     const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
+    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
       '.',
       '?.'
-    )} != null) {${mapDestinationToPainless(destination, source)}\n}\n`;
+    )} != null) {${mapDestinationToPainless(destination)}\n}\n`;
   }, '');
 }
 
-export function generateHistoryProcessors(definition: EntityDefinition, spaceId: string) {
+export function generateHistoryProcessors(definition: EntityDefinition) {
   return [
     {
       set: {
@@ -55,12 +54,6 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
       set: {
         field: 'entity.type',
         value: definition.type,
-      },
-    },
-    {
-      set: {
-        field: 'entity.spaceId',
-        value: spaceId,
       },
     },
     {
@@ -141,7 +134,7 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
     {
       date_index_name: {
         field: '@timestamp',
-        index_name_prefix: `${generateHistoryIndexName(definition)}.${spaceId}.`,
+        index_name_prefix: `${generateHistoryIndexName(definition)}.`,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
