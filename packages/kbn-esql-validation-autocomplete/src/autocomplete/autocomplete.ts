@@ -180,7 +180,7 @@ export async function suggest(
       if (astContext.commandPosition === 'aggregates') {
         const { nodeArg } = extractArgMeta(astContext.command, astContext.node);
         const fieldsMap: Map<string, ESQLRealField> = await new Map();
-        const anyVariables = collectVariables([], fieldsMap, innerText);
+        const anyVariables = collectVariables(ast, fieldsMap, innerText);
         const field = metrics.aggregates?.find((f) => {
           return f.location.min <= offset && offset <= f.location.max;
         });

@@ -201,7 +201,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('METRICS a a = min(b)/ | sort b', [',', '|']);
       });
 
-      test.skip('increments suggested variable name counter', async () => {
+      test('increments suggested variable name counter', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('METRICS a var0=min(b),var1=c,/', [
