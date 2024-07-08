@@ -777,8 +777,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // flaky
-    it.skip('should continue claiming recurring task even if maxAttempts has been reached', async () => {
+    it('should continue claiming recurring task even if maxAttempts has been reached', async () => {
       const task = await scheduleTask({
         taskType: 'sampleRecurringTaskTimingOut',
         schedule: { interval: '1s' },
@@ -786,8 +785,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
-        expect(scheduledTask.id).to.eql(task.id);
+        const scheduledTask = await currentTask(task.id);
         expect(scheduledTask.status).to.eql('claiming');
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
