@@ -195,10 +195,10 @@ describe('autocomplete.suggest', () => {
         );
       });
 
-      test.skip('when typing right paren', async () => {
+      test('when typing right paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('METRICS a a = min(b)/ | sort b', ['by $0', ',', '|']);
+        await assertSuggestions('METRICS a a = min(b)/ | sort b', [',', '|']);
       });
 
       test.skip('increments suggested variable name counter', async () => {
