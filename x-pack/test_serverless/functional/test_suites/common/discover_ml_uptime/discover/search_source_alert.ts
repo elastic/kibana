@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -291,6 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (retries > 1) {
         // It might take time for a rule to get created. Waiting for it.
         await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       }
       const rulesList = await testSubjects.find('rulesList');
       const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
@@ -376,12 +376,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       log.debug('create connector');
       connectorId = await createConnector();
-
-      // TODO: fetching connectors fails server side in Serverless with
-      // "index_not_found_exception: no such index [.kibana_ingest]"
-      if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-        await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-      }
     });
 
     after(async () => {
@@ -399,11 +393,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // should not have data view selected by default
       const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      // TODO: Serverless Security and Search have an existing data view by default
+      // Serverless Security and Search have an existing data view by default
       const dataViewSelectorText = await dataViewSelector.getVisibleText();
       if (
         !dataViewSelectorText.includes('.alerts-security') &&
-        !dataViewSelectorText.includes('default:all-data')
+        !dataViewSelectorText.includes('default:all-data') &&
+        !dataViewSelectorText.includes('ec') // ecommerce
       ) {
         expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
       }
