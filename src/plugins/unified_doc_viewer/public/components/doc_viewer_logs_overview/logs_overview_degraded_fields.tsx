@@ -290,7 +290,6 @@ const DatasetQualityLink = React.memo(
               type: paramsForLocator.dataStreamType,
               name: paramsForLocator.dataStreamName,
               namespace: paramsForLocator.dataStreamNamespace,
-              title: paramsForLocator.dataStreamName,
             },
           },
         }

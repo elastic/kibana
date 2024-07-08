@@ -29,7 +29,6 @@ type DatasetConfig = {
   type: string;
   name: string;
   namespace: string;
-  title: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
