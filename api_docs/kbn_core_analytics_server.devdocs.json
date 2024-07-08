@@ -692,20 +692,20 @@
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/services/analytics/types.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
-              },
-              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/utils/recall/recall_and_score.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/types.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
               },
               {
                 "plugin": "integrationAssistant",
@@ -818,6 +818,14 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "securitySolution",
