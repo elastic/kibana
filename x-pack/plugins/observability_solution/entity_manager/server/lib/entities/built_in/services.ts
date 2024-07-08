@@ -24,6 +24,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   identityFields: ['service.name', { field: 'service.environment', optional: true }],
   displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
   metadata: [
+    { source: '_index', destination: 'sourceIndex' },
     'data_stream.type',
     'service.instance.id',
     'service.namespace',
