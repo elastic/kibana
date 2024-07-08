@@ -88,7 +88,6 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_NAME_INPUT_TITLE}
-        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={!!baseErrors?.name?.length}
         error={baseErrors?.name}
       >
@@ -103,7 +102,6 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
-        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={!!baseErrors?.tags?.length}
         error={baseErrors?.tags}
       >

@@ -120,7 +120,6 @@ export const RuleSchedule = () => {
       data-test-subj="ruleSchedule"
       display="rowCompressed"
       helpText={helpText}
-      // @ts-expect-error upgrade typescript v5.1.6
       isInvalid={hasIntervalError}
       error={baseErrors?.interval}
     >
@@ -129,7 +128,6 @@ export const RuleSchedule = () => {
           <EuiFieldNumber
             fullWidth
             prepend={[SCHEDULE_TITLE_PREFIX]}
-            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={hasIntervalError}
             value={intervalNumber}
             name="interval"
