@@ -168,7 +168,6 @@
     "@kbn/apm-data-view",
     "@kbn/core-saved-objects-api-server",
     "@kbn/search-types",
-    "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/alerting-comparators",
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
