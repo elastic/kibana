@@ -157,7 +157,7 @@ function TitlesAlignmentOption({
   onChange: (alignment: MetricStyle['titlesTextAlign']) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.titlesAlignment', {
-    defaultMessage: 'Titles Alignment',
+    defaultMessage: 'Titles alignment',
   });
 
   return (
@@ -204,7 +204,7 @@ function ValuesAlignmentOption({
   onChange: (alignment: MetricStyle['valuesTextAlign']) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.valuesAlignment', {
-    defaultMessage: 'Values Alignment',
+    defaultMessage: 'Values alignment',
   });
 
   return (
@@ -269,7 +269,7 @@ function IconAlignmentOption({
   onChange: (alignment: MetricStyle['iconAlign']) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.iconAlignment', {
-    defaultMessage: 'Icon Alignment',
+    defaultMessage: 'Icon alignment',
   });
 
   return (
