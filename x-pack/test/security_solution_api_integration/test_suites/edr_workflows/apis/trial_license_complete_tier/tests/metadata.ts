@@ -30,6 +30,8 @@ import {
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { generateAgentDocs, generateMetadataDocs } from '../common/fixtures/metadata.fixtures';
+
+import { FtrProviderContext } from '../common/ftr_provider_context';
 import {
   bulkIndex,
   deleteAllDocsFromFleetAgents,
@@ -38,8 +40,7 @@ import {
   deleteAllDocsFromMetadataDatastream,
   startTransform,
   stopTransform,
-} from '../common/data_stream_helper';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+} from '../../../../../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

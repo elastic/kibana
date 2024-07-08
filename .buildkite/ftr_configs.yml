@@ -14,10 +14,8 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/apis/trial_license_complete_tier/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
-  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -579,8 +577,6 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.trial.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts

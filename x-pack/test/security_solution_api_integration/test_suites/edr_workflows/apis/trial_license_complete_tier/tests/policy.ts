@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../common/ftr_provider_context';
-import { deletePolicyStream } from '../common/data_stream_helper';
+import { deletePolicyStream } from '../../../../../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

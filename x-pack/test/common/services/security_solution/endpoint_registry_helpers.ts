@@ -8,7 +8,7 @@
 import path from 'path';
 
 import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage as ingestDockerImage } from '../../../../../../fleet_api_integration/config.base';
+import { dockerImage as ingestDockerImage } from '../../../fleet_api_integration/config.base';
 
 /**
  * This is used by CI to set the docker registry port
