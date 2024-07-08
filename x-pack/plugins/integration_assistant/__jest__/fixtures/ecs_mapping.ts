@@ -87,8 +87,18 @@ export const ecsMappingExpectedResults = {
         },
       },
       {
+        script: {
+          description: 'Ensures the date processor does not receive an array value.',
+          lang: 'painless',
+          source:
+            'if (ctx.mysql_enterprise.audit.timestamp instanceof ArrayList){\n    ctx.mysql_enterprise.audit.timestamp = ctx.mysql_enterprise.audit.timestamp[0];\n}\n',
+          tag: 'script_convert_array_to_string',
+        },
+      },
+      {
         date: {
           field: 'mysql_enterprise.audit.timestamp',
+          tag: 'date_processor_mysql_enterprise.audit.timestamp',
           target_field: '@timestamp',
           formats: ['yyyy-MM-dd HH:mm:ss'],
           if: 'ctx.mysql_enterprise?.audit?.timestamp != null',
@@ -443,6 +453,6 @@ export const ecsTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
   packageName: 'testpackage',
-  dataStreamName: 'testdatastream',
+  dataStreamName: 'testDataStream',
   formattedSamples: '{"test1": "test1"}',
 };

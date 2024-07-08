@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const errorMessageHeader = 'Error validating circuit breaker';
+import { errorMessageHeader } from '@kbn/alerting-types';
 
 export const parseRuleCircuitBreakerErrorMessage = (
   message: string

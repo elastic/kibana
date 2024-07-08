@@ -15,3 +15,4 @@ export * from './get_initial_multi_consumer';
 export * from './get_initial_schedule';
 export * from './has_fields_for_aad';
 export * from './get_selected_action_group';
+export * from './get_initial_consumer';

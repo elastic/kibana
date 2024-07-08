@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
 import {
   RuleNotifyWhenType,
@@ -15,7 +16,6 @@ import {
   RuleActionFrequency,
 } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,12 +29,13 @@ import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  useEuiTheme,
   EuiSuperSelectOption,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getTimeOptions } from '../utils';
 import { DEFAULT_FREQUENCY } from '../constants';
+import { getTimeOptions } from '../utils';
 
 const FOR_EACH_ALERT = i18n.translate('AlertsUIShared.actiActionsonNotifyWhen.forEachOption', {
   defaultMessage: 'For each alert',
@@ -42,10 +43,6 @@ const FOR_EACH_ALERT = i18n.translate('AlertsUIShared.actiActionsonNotifyWhen.fo
 const SUMMARY_OF_ALERTS = i18n.translate('AlertsUIShared.actiActionsonNotifyWhen.summaryOption', {
   defaultMessage: 'Summary of alerts',
 });
-
-const SummaryContextMenuOption = euiStyled(EuiContextMenuItem)`
-  min-width: 300px;
-`;
 
 export interface NotifyWhenSelectOptions {
   isSummaryOption?: boolean;
@@ -247,30 +244,39 @@ export const RuleActionsNotifyWhen = ({
     ]
   );
 
+  const { euiTheme } = useEuiTheme();
+  const summaryContextMenuOptionStyles = useMemo(
+    () => css`
+      min-width: 300px;
+      padding: ${euiTheme.size.s};
+    `,
+    [euiTheme]
+  );
+
   const summaryOptions = useMemo(
     () => [
-      <SummaryContextMenuOption
-        className="euiSuperSelect__item"
+      <EuiContextMenuItem
         key="summary"
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-summary"
         data-test-subj="actionNotifyWhen-option-summary"
+        className={summaryContextMenuOptionStyles}
       >
         {SUMMARY_OF_ALERTS}
-      </SummaryContextMenuOption>,
-      <SummaryContextMenuOption
-        className="euiSuperSelect__item"
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         key="for_each"
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-for_each"
         data-test-subj="actionNotifyWhen-option-for_each"
+        className={summaryContextMenuOptionStyles}
       >
         {FOR_EACH_ALERT}
-      </SummaryContextMenuOption>,
+      </EuiContextMenuItem>,
     ],
-    [frequency.summary, selectSummaryOption]
+    [frequency.summary, selectSummaryOption, summaryContextMenuOptionStyles]
   );
 
   const summaryOrPerRuleSelect = (
@@ -283,7 +289,7 @@ export const RuleActionsNotifyWhen = ({
       anchorPosition="downLeft"
       aria-label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
       aria-roledescription={i18n.translate(
-        'AlertsUIShared.actiActionsonNotifyWhen.summaryOrRulePerSelectRoleDescription',
+        'alertsUIShared.ruleActionsNotifyWhen.summaryOrRulePerSelectRoleDescription',
         { defaultMessage: 'Action frequency type select' }
       )}
       button={
@@ -302,7 +308,12 @@ export const RuleActionsNotifyWhen = ({
   );
 
   return (
-    <EuiFormRow fullWidth>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('alertsUIShared.ruleActionsNotifyWhen.actionFrequencyLabel', {
+        defaultMessage: 'Action frequency',
+      })}
+    >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiSuperSelect
@@ -325,9 +336,12 @@ export const RuleActionsNotifyWhen = ({
                       value={throttle ?? 1}
                       name="throttle"
                       data-test-subj="throttleInput"
-                      prepend={i18n.translate('AlertsUIShared.freqActionsuencyNotifyWhen.label', {
-                        defaultMessage: 'Run every',
-                      })}
+                      prepend={i18n.translate(
+                        'alertsUIShared.ruleActionsNotifyWhen.frequencyNotifyWhen.label',
+                        {
+                          defaultMessage: 'Run every',
+                        }
+                      )}
                       onChange={(e) => {
                         pipe(
                           some(e.target.value.trim()),
@@ -365,7 +379,7 @@ export const RuleActionsNotifyWhen = ({
                   <EuiSpacer size="xs" />
                   <EuiText size="xs" color="danger">
                     {i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning',
+                      'alertsUIShared.ruleActionsNotifyWhen.notifyWhenThrottleWarning',
                       {
                         defaultMessage:
                           "Custom action intervals cannot be shorter than the rule's check interval",

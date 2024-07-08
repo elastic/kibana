@@ -16,7 +16,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
   await generate({
     title: 'API route schemas',
     rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: './**/*.schema.yaml',
+    sourceGlob: './common/**/*.schema.yaml',
     templateName: 'zod_operation_schema',
     skipLinting: true,
   });
@@ -24,7 +24,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
   await generate({
     title: 'API client for tests',
     rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: './**/*.schema.yaml',
+    sourceGlob: './common/**/*.schema.yaml',
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {

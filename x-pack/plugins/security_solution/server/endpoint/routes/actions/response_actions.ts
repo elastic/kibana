@@ -50,7 +50,7 @@ import type {
   KillOrSuspendProcessRequestBody,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -301,7 +301,7 @@ export function registerResponseActionRoutes(
         withEndpointAuthz(
           { all: ['canWriteScanOperations'] },
           logger,
-          responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
         )
       );
   }
@@ -319,7 +319,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
-    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
+    logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since

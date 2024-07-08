@@ -149,8 +149,8 @@ describe('validateRuleParams', () => {
   });
 });
 describe('hasRuleErrors', () => {
-  test('should check if there are any errors', () => {
-    let result = hasRuleErrors({
+  test('should return false if there are no errors', () => {
+    const result = hasRuleErrors({
       baseErrors: {},
       paramsErrors: {},
       actionsErrors: {},
@@ -158,8 +158,10 @@ describe('hasRuleErrors', () => {
     });
 
     expect(result).toBeFalsy();
+  });
 
-    result = hasRuleErrors({
+  test('should return true if base has errors', () => {
+    const result = hasRuleErrors({
       baseErrors: {
         name: ['error'],
       },
@@ -169,8 +171,10 @@ describe('hasRuleErrors', () => {
     });
 
     expect(result).toBeTruthy();
+  });
 
-    result = hasRuleErrors({
+  test('should return true if params have errors', () => {
+    let result = hasRuleErrors({
       baseErrors: {},
       paramsErrors: {
         someValue: ['error'],

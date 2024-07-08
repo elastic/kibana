@@ -10,6 +10,7 @@ import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_sett
 import userEvent from '@testing-library/user-event';
 import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
+import { LegendValue } from '@elastic/charts';
 
 describe('Legend Settings', () => {
   let defaultProps: LegendSettingsPopoverProps;
@@ -49,7 +50,6 @@ describe('Legend Settings', () => {
       renderOptions
     );
     const openLegendPopover = () => userEvent.click(screen.getByRole('button', { name: 'Legend' }));
-
     openLegendPopover();
 
     return {
@@ -124,5 +124,29 @@ describe('Legend Settings', () => {
   it('should hide switch group on hide mode', () => {
     renderLegendSettingsPopover({ mode: 'hide', renderNestedLegendSwitch: true });
     expect(screen.queryByRole('switch', { name: 'Nested' })).toBeNull();
+  });
+
+  it('should display allowed legend stats', () => {
+    const onLegendStatsChange = jest.fn();
+    renderLegendSettingsPopover({
+      allowedLegendStats: [
+        {
+          label: 'Current and last value',
+          value: LegendValue.CurrentAndLastValue,
+          toolTipContent: 'Shows the current and last value',
+        },
+        {
+          label: 'Average',
+          value: LegendValue.Average,
+          toolTipContent: 'Shows the average value',
+        },
+      ],
+      onLegendStatsChange,
+    });
+    expect(screen.queryByRole('button', { name: 'Layout' })).toBeNull();
+    fireEvent.click(screen.getByRole('combobox', { name: 'Statistics' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
+    // expect(screen.getByRole('group', { name: 'Layout' })).toBeInTheDocument();
+    expect(onLegendStatsChange).toBeCalledWith([LegendValue.CurrentAndLastValue], false);
   });
 });

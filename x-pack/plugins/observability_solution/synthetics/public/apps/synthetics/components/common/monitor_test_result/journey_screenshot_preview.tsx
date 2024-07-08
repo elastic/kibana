@@ -8,6 +8,7 @@
 import React, { useCallback, useState, MouseEvent } from 'react';
 import { EuiPopover, useEuiTheme } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { POPOVER_SCREENSHOT_SIZE, ScreenshotImageSize } from '../screenshot/screenshot_size';
 import { JourneyScreenshotDialog } from '../screenshot/journey_screenshot_dialog';
 import { ScreenshotImage } from '../screenshot/screenshot_image';
@@ -77,7 +78,14 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
 
   const renderScreenshotImage = (screenshotSize: ScreenshotImageSize) => (
     <ScreenshotImage
-      label={stepName}
+      label={i18n.translate('xpack.synthetics.monitorTestResult.screenshotImageLabel', {
+        defaultMessage: '"{stepName}", {stepNumber} of {totalSteps}',
+        values: {
+          stepName,
+          stepNumber,
+          totalSteps: maxSteps ?? stepNumber,
+        },
+      })}
       imgSrc={imgSrc}
       isLoading={isLoading}
       size={screenshotSize}

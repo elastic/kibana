@@ -287,4 +287,31 @@ describe('useLoadDependencies', () => {
 
     expect(result.current.ruleType).toEqual(indexThresholdRuleType);
   });
+
+  test('should not use ruleTypeId if it is editing a rule', async () => {
+    useResolveRule.mockReturnValue({
+      isLoading: false,
+      isInitialLoading: false,
+      data: null,
+    });
+
+    const { result } = renderHook(
+      () => {
+        return useLoadDependencies({
+          http: httpMock as unknown as HttpStart,
+          toasts: toastsMock as unknown as ToastsStart,
+          ruleTypeRegistry: ruleTypeRegistryMock,
+          id: 'rule-id',
+          consumer: 'stackAlerts',
+        });
+      },
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      return expect(result.current.isInitialLoading).toEqual(false);
+    });
+
+    expect(result.current.ruleType).toBeFalsy();
+  });
 });
