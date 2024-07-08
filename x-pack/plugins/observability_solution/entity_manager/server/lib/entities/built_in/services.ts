@@ -8,6 +8,16 @@
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from './constants';
 
+const serviceTransactionFilter = (additionalFilters: string[] = []) => {
+  const baseFilters = [
+    'processor.event: "metric"',
+    'metricset.name: "service_transaction"',
+    'metricset.interval: "1m"',
+  ];
+
+  return [...baseFilters, ...additionalFilters].join(' AND ');
+};
+
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
@@ -52,8 +62,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'avg',
-            filter:
-              'processor.event: "metric" AND metricset.name: "transaction" AND data_stream.dataset: "apm.transaction.1m"',
+            filter: serviceTransactionFilter(),
             field: 'transaction.duration.histogram',
           },
         ],
@@ -65,8 +74,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter:
-              'processor.event: "metric" AND metricset.name: "service_transaction" AND metricset.interval: "1m"',
+            filter: serviceTransactionFilter(),
           },
         ],
       },
@@ -77,14 +85,12 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter:
-              'processor.event: "metric" AND metricset.name: "transaction" AND event.outcome: "failure"',
+            filter: serviceTransactionFilter(['event.outcome: "failure"']),
           },
           {
             name: 'B',
             aggregation: 'doc_count',
-            filter:
-              'processor.event: "metric" AND metricset.name: "transaction" AND event.outcome: *',
+            filter: serviceTransactionFilter(['event.outcome: *']),
           },
         ],
       },
