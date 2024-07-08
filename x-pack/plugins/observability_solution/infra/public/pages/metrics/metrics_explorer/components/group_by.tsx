@@ -14,10 +14,9 @@ import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
-  errorOptions?: string[];
 }
 
-export const MetricsExplorerGroupBy = ({ options, onChange, errorOptions }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange }: Props) => {
   const { metricsView } = useMetricsDataViewContext();
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
@@ -28,17 +27,9 @@ export const MetricsExplorerGroupBy = ({ options, onChange, errorOptions }: Prop
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({
-        label: field,
-        color: errorOptions?.includes(field) ? 'danger' : undefined,
-      }))
+    ? options.groupBy.map((field) => ({ label: field }))
     : options.groupBy
-    ? [
-        {
-          label: options.groupBy,
-          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
-        },
-      ]
+    ? [{ label: options.groupBy }]
     : [];
 
   const comboOptions = (metricsView?.fields ?? [])
