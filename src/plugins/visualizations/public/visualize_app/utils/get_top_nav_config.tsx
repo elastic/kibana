@@ -27,7 +27,7 @@ import {
   SavedObjectSaveOpts,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { getFullPath, VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../..';
+import { getFullPath, VISUALIZE_EMBEDDABLE_TYPE } from '../..';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 
 import { VisualizeConstants } from '../../../common/constants';
@@ -51,6 +51,12 @@ interface VisualizeCapabilities {
   save: boolean;
   saveQuery: boolean;
   show: boolean;
+}
+
+interface SavedVisMetadata {
+  title: string;
+  description?: string;
+  tags?: string[];
 }
 
 export interface TopNavConfigParams {
@@ -130,7 +136,8 @@ export const getTopNavConfig = (
    * Called when the user clicks "Save" button.
    */
   async function doSave(
-    saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
+    saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean },
+    metadata?: SavedVisMetadata
   ) {
     const { rawState, references } = serializeState(true);
     const {
@@ -143,6 +150,11 @@ export const getTopNavConfig = (
     } = rawState;
 
     const newlyCreated = !Boolean(serializedVis.id) || saveOptions.copyOnSave;
+    if (metadata) {
+      serializedVis.title = metadata.title;
+      serializedVis.description = metadata.description;
+    }
+
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
       title: serializedVis.title,
@@ -168,6 +180,7 @@ export const getTopNavConfig = (
       getDisplayName,
       getEsType,
       managed,
+      ...(savedObjectsTagging && { tags: metadata?.tags ?? [] }),
     };
 
     try {
@@ -519,16 +532,18 @@ export const getTopNavConfig = (
                 returnToOrigin,
                 dashboardId,
                 addToLibrary,
+                ...rest
               }: OnSaveProps & { returnToOrigin?: boolean } & {
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
               }) => {
-                const currentTitle = rawState.savedVis.title;
-                rawState.savedVis.title = newTitle;
-                rawState.savedVis.description = newDescription;
+                const metadata: SavedVisMetadata = {
+                  title: newTitle,
+                  description: newDescription,
+                };
 
                 if (savedObjectsTagging) {
-                  rawState.savedVis.tags = selectedTags;
+                  metadata.tags = selectedTags;
                 }
 
                 const saveOptions = {
@@ -569,11 +584,7 @@ export const getTopNavConfig = (
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
-                const response = await doSave(saveOptions);
-                // If the save wasn't successful, put the original values back.
-                if (!response.id || response.error) {
-                  rawState.savedVis.title = currentTitle;
-                }
+                const response = await doSave(saveOptions, metadata);
 
                 return response;
               };
@@ -582,7 +593,7 @@ export const getTopNavConfig = (
               let tagOptions: React.ReactNode | undefined;
 
               if (savedObjectsTagging) {
-                selectedTags = rawState.savedVis.tags || [];
+                selectedTags = [];
                 tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}
@@ -642,7 +653,7 @@ export const getTopNavConfig = (
                     )}
                     onClose={() => {}}
                     mustCopyOnSaveMessage={
-                      rawState.savedVis.managed // TODO: fix this
+                      rawState.managed
                         ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
                             defaultMessage:
                               'Elastic manages this visualization. Save any changes to a new visualization.',
