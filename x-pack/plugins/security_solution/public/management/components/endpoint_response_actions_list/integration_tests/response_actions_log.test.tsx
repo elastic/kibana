@@ -1505,7 +1505,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions (without `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
+      mockedContext.setExperimentalFlag({
+        responseActionUploadEnabled: true,
+        responseActionScanEnabled: false,
+      });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 

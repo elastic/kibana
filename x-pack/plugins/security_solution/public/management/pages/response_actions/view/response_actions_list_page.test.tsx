@@ -464,6 +464,9 @@ describe('Response actions history page', () => {
     });
 
     it('should set selected command filter options to URL params ', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionScanEnabled: true,
+      });
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -476,7 +479,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
     });
 
@@ -608,6 +611,9 @@ describe('Response actions history page', () => {
 
   describe('Clear all selected options on a filter', () => {
     it('should clear all selected options on `actions` filter', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionScanEnabled: true,
+      });
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -620,7 +626,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
