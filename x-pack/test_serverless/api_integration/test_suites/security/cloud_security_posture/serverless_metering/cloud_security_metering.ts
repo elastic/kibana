@@ -88,6 +88,9 @@ export default function (providerContext: FtrProviderContext) {
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
       ]);
     });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('Should intercept usage API request for CSPM', async () => {
       await createPackagePolicy(
