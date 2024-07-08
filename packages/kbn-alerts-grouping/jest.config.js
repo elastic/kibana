@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './use_alert_data_view';
-export * from './use_rule_aad_fields';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-alerts-grouping'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-alerts-grouping/setup_tests.ts'],
+};

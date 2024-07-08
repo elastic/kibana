@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-
-export const NO_INDEX_PATTERNS: DataView[] = [];
-export * from '../common/constants';
+export { AlertsGrouping } from './src/components/alerts_grouping';
+export { type AlertsGroupingProps } from './src/types';
+export { useAlertsGroupingState } from './src/contexts/alerts_grouping_context';

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-
-export const NO_INDEX_PATTERNS: DataView[] = [];
-export * from '../common/constants';
+export const DEFAULT_PAGE_SIZE = 25;
+export const DEFAULT_PAGE_INDEX = 0;
+export const MAX_GROUPING_LEVELS = 3;

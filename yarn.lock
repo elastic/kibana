@@ -3313,6 +3313,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerts-grouping@link:packages/kbn-alerts-grouping":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts-restricted-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted":
   version "0.0.0"
   uid ""
