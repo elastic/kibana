@@ -13,7 +13,7 @@ import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext } from '../types';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { builtinFunctions } from '../../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
+import { statsAggregationFunctionDefinitions as aggregationFunctionDefinitions } from '../../definitions/aggs';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 
 interface Integration {
@@ -170,7 +170,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...statsAggregationFunctionDefinitions);
+    list.push(...aggregationFunctionDefinitions);
     // right now all grouping functions are agg functions too
     list.push(...groupingFunctionDefinitions);
   }

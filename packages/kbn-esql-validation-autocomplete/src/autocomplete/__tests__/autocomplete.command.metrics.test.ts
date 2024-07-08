@@ -19,7 +19,7 @@ const visibleIndices = indexes
   .map(({ name }) => name)
   .sort();
 
-const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
+const allAggFunctions = getFunctionSignaturesByReturnType('metrics', 'any', {
   agg: true,
 });
 
@@ -156,18 +156,28 @@ describe('autocomplete.suggest', () => {
         ]);
       });
 
-      test.skip('when typing inside function left paren', async () => {
+      test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
           ...getFieldNamesByType(['number', 'date']),
-          ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+          ...getFunctionSignaturesByReturnType('metrics', ['number', 'date'], {
+            agg: true,
             evalMath: true,
           }),
         ];
 
-        await assertSuggestions('METRICS a a=min(/)', expected);
-        await assertSuggestions('METRICS a a=min(/b), b=max()', expected);
-        await assertSuggestions('METRICS a a=min(b), b=max(/)', expected);
+        await assertSuggestions(
+          'METRICS a a=min(/)',
+          expected.filter((s) => s !== 'MIN($0)')
+        );
+        await assertSuggestions(
+          'METRICS a a=min(/b), b=max()',
+          expected.filter((s) => s !== 'MIN($0)')
+        );
+        await assertSuggestions(
+          'METRICS a a=min(b), b=max(/)',
+          expected.filter((s) => s !== 'MAX($0)')
+        );
       });
 
       test.skip('inside function argument list', async () => {

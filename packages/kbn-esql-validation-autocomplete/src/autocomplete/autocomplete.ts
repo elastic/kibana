@@ -186,7 +186,7 @@ export async function suggest(
         });
         const hasAssignmentExpression = field ? Walker.hasFunction(field, '=') : false;
 
-        return [
+        const suggestions = [
           // varX =
           ...(hasAssignmentExpression
             ? []
@@ -205,6 +205,8 @@ export async function suggest(
             }
           )),
         ];
+
+        return suggestions;
       }
     }
 
