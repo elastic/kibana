@@ -13,8 +13,3 @@
  *   title: Get Live Query Details Schema
  *   version: 2023-10-31
  */
-
-import { z } from 'zod';
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

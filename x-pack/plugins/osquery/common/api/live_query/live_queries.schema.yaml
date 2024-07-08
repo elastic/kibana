@@ -6,24 +6,29 @@ paths:
   /api/osquery/live_queries:
     get:
       summary: Find live queries
-      operationId: findLiveQueries
-      x-codegen-enabled: false
+      operationId: OsqueryFindLiveQueries
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-        - $ref: './find_live_query.schema.yaml#/components/parameters/FindLiveQueryRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './find_live_query.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+
     post:
       summary: Create a live query
-      operationId: createLiveQuery
-      x-codegen-enabled: false
+      operationId: OsqueryCreateLiveQuery
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
@@ -39,40 +44,59 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './create_live_query.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+
   /api/osquery/live_queries/{id}:
     get:
       summary: Get live query details
-      operationId: getLiveQueryDetails
-      x-codegen-enabled: false
+      operationId: OsqueryGetLiveQueryDetails
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-        - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestQueryParameter'
-        - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestParameter'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+        - name: query
+          in: query
+          schema:
+            type: object
+            additionalProperties: true
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
       summary: Get live query results
-      operationId: getLiveQueryResults
-      x-codegen-enabled: false
+      operationId: OsqueryGetLiveQueryResults
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-        - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsQueryParameter'
-        - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestQuery'
+        - name: query
+          in: path
+          required: true
+          schema:
+            $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestParams'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_live_query_results.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+

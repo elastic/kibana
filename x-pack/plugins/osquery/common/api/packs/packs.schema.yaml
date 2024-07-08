@@ -6,24 +6,28 @@ paths:
   /api/osquery/packs:
     get:
       summary: Find packs
-      operationId: findPacks
-      x-codegen-enabled: false
+      operationId: OsqueryFindPacks
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-          - $ref: './find_packs.schema.yaml#/components/parameters/FindPacksRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './find_packs.schema.yaml#/components/schemas/FindPacksRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     post:
       summary: Create a packs
-      operationId: createPacks
-      x-codegen-enabled: false
+      operationId: OsqueryCreatePacks
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
@@ -39,44 +43,52 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './create_pack.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
   /api/osquery/packs/{id}:
     get:
       summary: Get packs details
-      operationId: getPacksDetails
-      x-codegen-enabled: false
+      operationId: OsqueryGetPacksDetails
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-        - $ref: './read_packs.schema.yaml#/components/parameters/ReadPacksRequestQueryParameter'
+        - name: query
+          in: path
+          required: true
+          schema:
+            $ref: './read_packs.schema.yaml#/components/schemas/ReadPacksRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './read_packs.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     delete:
       summary: Delete packs
-      operationId: deletePacks
-      x-codegen-enabled: false
+      operationId: OsqueryDeletePacks
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-        - $ref: './delete_packs.schema.yaml#/components/parameters/DeletePacksRequestQueryParameter'
+        - name: query
+          in: path
+          required: true
+          schema:
+            $ref: './delete_packs.schema.yaml#/components/schemas/DeletePacksRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     put:
       summary: Update packs
-      operationId: updatePacks
-      x-codegen-enabled: false
+      operationId: OsqueryUpdatePacks
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
@@ -87,11 +99,15 @@ paths:
             schema:
               $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
       parameters:
-        - $ref: './update_packs.schema.yaml#/components/parameters/UpdatePacksRequestQueryParameter'
+        - name: query
+          in: path
+          required: true
+          schema:
+            $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestParams'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './update_packs.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
