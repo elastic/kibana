@@ -101,6 +101,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('LandingImageCards-accordionButton');
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');

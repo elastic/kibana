@@ -16,6 +16,7 @@ import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -37,9 +38,10 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
+      withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
         const { packageName, dataStreamName, rawSamples, mapping } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
+
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
@@ -54,9 +56,8 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
           const model = new llmClass({
-            actions: actionsPlugin,
+            actionsClient,
             connectorId: connector.id,
-            request: req,
             logger,
             llmType: isOpenAI ? 'openai' : 'bedrock',
             model: connector.config?.defaultModel,
@@ -86,6 +87,6 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         } catch (e) {
           return res.badRequest({ body: e });
         }
-      }
+      })
     );
 }
