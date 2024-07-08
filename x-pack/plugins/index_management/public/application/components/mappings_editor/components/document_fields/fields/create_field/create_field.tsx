@@ -17,18 +17,12 @@ import { i18n } from '@kbn/i18n';
 import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { useDispatch } from '../../../../mappings_state_context';
 import { Form, FormDataProvider, useForm, useFormData } from '../../../../shared_imports';
-import {
-  CustomInferenceEndpointConfig,
-  Field,
-  MainType,
-  NormalizedFields,
-  SemanticTextField,
-} from '../../../../types';
+import { Field, MainType, NormalizedFields, SemanticTextField } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
@@ -51,7 +45,9 @@ export interface SemanticTextInfo {
   isSemanticTextEnabled?: boolean;
   indexName?: string;
   ml?: MlPluginStart;
-  setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>>;
+  setErrorsInTrainedModelDeployment: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
 }
 interface Props {
   allFields: NormalizedFields['byId'];
@@ -96,9 +92,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     return subscription.unsubscribe;
   }, [dispatch, subscribe]);
-  const [customInferenceEndpointConfig, setCustomInferenceEndpointConfig] = useState<
-    CustomInferenceEndpointConfig | undefined
-  >(undefined);
   const cancel = () => {
     if (isAddingFields && onCancelAddingNewFields) {
       onCancelAddingNewFields();
@@ -107,7 +100,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const { handleSemanticText } = useSemanticText({
+  const { createInferenceEndpoint, handleSemanticText } = useSemanticText({
     form,
     setErrorsInTrainedModelDeployment,
     ml,
@@ -129,7 +122,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     if (isValid) {
       if (data.type === 'semantic_text' && !clickOutside) {
         if (isSemanticTextField(data)) {
-          handleSemanticText(data, customInferenceEndpointConfig);
+          handleSemanticText(data);
         } else {
           // this should never happen
           throw new Error('Invalid semantic text field');
@@ -290,9 +283,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               </FormDataProvider>
 
               {isSemanticText && (
-                <SelectInferenceId
-                  setCustomInferenceEndpointConfig={setCustomInferenceEndpointConfig}
-                />
+                <SelectInferenceId createInferenceEndpoint={createInferenceEndpoint} />
               )}
               {renderFormActions()}
             </div>

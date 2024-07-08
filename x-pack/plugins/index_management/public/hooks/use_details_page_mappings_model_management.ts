@@ -16,17 +16,11 @@ import {
   InferenceServiceSettings,
   LocalInferenceServiceSettings,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useAppContext } from '../application/app_context';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
-import { deNormalize } from '../application/components/mappings_editor/lib';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
-import {
-  DefaultInferenceModels,
-  Field,
-  NormalizedFields,
-  SemanticTextField,
-} from '../application/components/mappings_editor/types';
+import { DefaultInferenceModels } from '../application/components/mappings_editor/types';
 import { getInferenceEndpoints } from '../application/services/api';
 
 function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceServiceSettings {
@@ -35,35 +29,40 @@ function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceS
 
 const getCustomInferenceIdMap = (
   models: InferenceAPIConfigResponse[],
-  modelStatsById: Record<string, TrainedModelStat | undefined>,
+  modelStatsById: Record<string, TrainedModelStat['deployment_stats'] | undefined>,
   downloadStates: Record<string, ModelDownloadState | undefined>
 ) => {
   const inferenceIdMap = models.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
-    inferenceMap[model.model_id] = {
-      trainedModelId: isLocalModel(model) ? model.service_settings.model_id : '', // third-party models don't have trained model ids
-      isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
-      isDeployed: isLocalModel(model)
-        ? modelStatsById[model.service_settings.model_id]?.deployment_stats?.state === 'started'
-        : false,
-      isDownloading: Boolean(downloadStates[model.model_id]),
-      modelStats: isLocalModel(model) ? modelStatsById[model.service_settings.model_id] : undefined,
-    };
+    const inferenceEntry = isLocalModel(model)
+      ? {
+          trainedModelId: model.service_settings.model_id, // third-party models don't have trained model ids
+          isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
+          isDeployed: modelStatsById[model.service_settings.model_id]?.state === 'started',
+          isDownloading: Boolean(downloadStates[model.service_settings.model_id]),
+          modelStats: modelStatsById[model.service_settings.model_id],
+        }
+      : {
+          trainedModelId: '',
+          isDeployable: false,
+          isDeployed: false,
+          isDownloading: false,
+          modelStats: undefined,
+        };
+    inferenceMap[model.model_id] = inferenceEntry;
     return inferenceMap;
   }, {});
   const defaultInferenceIds = {
     [DefaultInferenceModels.elser_model_2]: {
       trainedModelId: ELSER_LINUX_OPTIMIZED_MODEL_ID,
       isDeployable: true,
-      isDeployed:
-        modelStatsById[ELSER_LINUX_OPTIMIZED_MODEL_ID]?.deployment_stats?.state === 'started',
+      isDeployed: modelStatsById[ELSER_LINUX_OPTIMIZED_MODEL_ID]?.state === 'started',
       isDownloading: Boolean(downloadStates[ELSER_LINUX_OPTIMIZED_MODEL_ID]),
       modelStats: modelStatsById[ELSER_LINUX_OPTIMIZED_MODEL_ID],
     },
     [DefaultInferenceModels.e5]: {
       trainedModelId: E5_LINUX_OPTIMIZED_MODEL_ID,
       isDeployable: true,
-      isDeployed:
-        modelStatsById[E5_LINUX_OPTIMIZED_MODEL_ID]?.deployment_stats?.state === 'started',
+      isDeployed: modelStatsById[E5_LINUX_OPTIMIZED_MODEL_ID]?.state === 'started',
       isDownloading: Boolean(downloadStates[E5_LINUX_OPTIMIZED_MODEL_ID]),
       modelStats: modelStatsById[E5_LINUX_OPTIMIZED_MODEL_ID],
     },
@@ -71,14 +70,7 @@ const getCustomInferenceIdMap = (
   return { ...defaultInferenceIds, ...inferenceIdMap };
 };
 
-function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
-  return Boolean(field.inference_id && field.type === 'semantic_text');
-}
-
-export const useDetailsPageMappingsModelManagement = (
-  fields: NormalizedFields,
-  inferenceToModelIdMap?: InferenceToModelIdMap
-) => {
+export const useDetailsPageMappingsModelManagement = () => {
   const {
     plugins: { ml },
   } = useAppContext();
@@ -89,12 +81,15 @@ export const useDetailsPageMappingsModelManagement = (
     const inferenceModels = await getInferenceEndpoints();
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
     const downloadStates = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
-    const modelStatsById = Object.entries(trainedModelStats?.trained_model_stats || {}).reduce<
-      Record<string, TrainedModelStat | undefined>
-    >((acc, [modelId, stats]) => {
-      acc[modelId] = stats;
-      return acc;
-    }, {});
+    const modelStatsById =
+      trainedModelStats?.trained_model_stats.reduce<
+        Record<string, TrainedModelStat['deployment_stats'] | undefined>
+      >((acc, { model_id: modelId, deployment_stats: stats }) => {
+        if (modelId && stats) {
+          acc[modelId] = stats;
+        }
+        return acc;
+      }, {}) || {};
     const modelIdMap = getCustomInferenceIdMap(
       inferenceModels.data || [],
       modelStatsById,
@@ -107,28 +102,7 @@ export const useDetailsPageMappingsModelManagement = (
     });
   }, [dispatch, ml?.mlApi?.trainedModels]);
 
-  const inferenceIdsInPendingList = useMemo(() => {
-    return Object.values(deNormalize(fields))
-      .filter(isSemanticTextField)
-      .map((field) => field.inference_id);
-  }, [fields]);
-
-  const pendingDeployments = useMemo(() => {
-    return inferenceIdsInPendingList
-      .map((inferenceId) => {
-        if (!inferenceId) {
-          return undefined;
-        }
-        const trainedModelId = inferenceToModelIdMap?.[inferenceId]?.trainedModelId ?? '';
-        return trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed
-          ? trainedModelId
-          : undefined;
-      })
-      .filter((trainedModelId) => !!trainedModelId);
-  }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
-
   return {
-    pendingDeployments,
     fetchInferenceToModelIdMap,
   };
 };

@@ -8,35 +8,44 @@ import { EuiConfirmModal, useGeneratedHtmlId, EuiHealth } from '@elastic/eui';
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import { useEffect, useState } from 'react';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { deNormalize } from '../../../../components/mappings_editor/lib';
+import { Field, SemanticTextField } from '../../../../components/mappings_editor/types';
+import { useMLModelNotificationToasts } from '../../../../../hooks/use_ml_model_status_toasts';
+import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
+import { useAppContext } from '../../../../app_context';
 
-interface SemanticTextProps {
-  setIsModalVisible: (isVisible: boolean) => void;
-  refreshModal: () => void;
-  pendingDeployments: Array<string | undefined>;
-  errorsInTrainedModelDeployment: string[];
-  url?: SharePluginStart['url'];
+export interface TrainedModelsDeploymentModalProps {
+  fetchData: () => void;
+  errorsInTrainedModelDeployment: Record<string, string | undefined>;
+  setErrorsInTrainedModelDeployment: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
 }
 
 const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 const TRAINED_MODELS_MANAGE = 'trained_models';
 
+function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
+  return Boolean(field.inference_id && field.type === 'semantic_text');
+}
+
 export function TrainedModelsDeploymentModal({
-  setIsModalVisible,
-  refreshModal,
-  pendingDeployments = [],
-  errorsInTrainedModelDeployment = [],
-  url,
-}: SemanticTextProps) {
+  errorsInTrainedModelDeployment = {},
+  fetchData,
+  setErrorsInTrainedModelDeployment,
+}: TrainedModelsDeploymentModalProps) {
+  const { fields, inferenceToModelIdMap } = useMappingsState();
+  const {
+    plugins: { ml },
+    url,
+  } = useAppContext();
   const modalTitleId = useGeneratedHtmlId();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const closeModal = () => setIsModalVisible(false);
   const [mlManagementPageUrl, setMlManagementPageUrl] = useState<string>('');
-
-  useEffect(() => {
-    setIsModalVisible(pendingDeployments.length > 0);
-  }, [pendingDeployments, setIsModalVisible]);
+  const { showErrorToasts } = useMLModelNotificationToasts();
 
   useEffect(() => {
     const mlLocator = url?.locators.get(ML_APP_LOCATOR);
@@ -51,18 +60,66 @@ export function TrainedModelsDeploymentModal({
     generateUrl();
   }, [url]);
 
+  const inferenceIdsInPendingList = useMemo(() => {
+    return Object.values(deNormalize(fields))
+      .filter(isSemanticTextField)
+      .map((field) => field.inference_id);
+  }, [fields]);
+
+  const [pendingDeployments, setPendingDeployments] = useState<string[]>([]);
+
+  const startModelAllocation = async (trainedModelId: string) => {
+    try {
+      await ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId);
+    } catch (error) {
+      setErrorsInTrainedModelDeployment((previousState) => ({
+        ...previousState,
+        [trainedModelId]: error.message,
+      }));
+      showErrorToasts(error);
+      setIsModalVisible(true);
+    }
+  };
+
+  useEffect(() => {
+    const newPendingDeployments: string[] = inferenceIdsInPendingList
+      .map((inferenceId) => {
+        if (!inferenceId) {
+          return '';
+        }
+        const model = inferenceToModelIdMap?.[inferenceId];
+        if (model && !model.isDownloading && !model.isDeployed) {
+          // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
+          startModelAllocation(model.trainedModelId);
+        }
+        const trainedModelId = model?.trainedModelId ?? '';
+        return trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed
+          ? trainedModelId
+          : '';
+      })
+      .filter((trainedModelId) => !!trainedModelId);
+    setPendingDeployments(newPendingDeployments);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
+
   const erroredDeployments = pendingDeployments.filter(
-    (deployment) => deployment !== undefined && errorsInTrainedModelDeployment.includes(deployment)
+    (deployment) => !!deployment && errorsInTrainedModelDeployment[deployment]
   );
 
-  const pendingDeploymentsList = pendingDeployments.map((deployment, index) => (
-    <li key={index}>
+  const pendingDeploymentsList = pendingDeployments.map((deployment) => (
+    <li key={deployment}>
       <EuiHealth textSize="xs" color="danger">
         {deployment}
       </EuiHealth>
     </li>
   ));
-  return (
+
+  useEffect(() => {
+    if (erroredDeployments.length > 0 || pendingDeployments.length > 0) {
+      setIsModalVisible(true);
+    }
+  }, [erroredDeployments.length, pendingDeployments.length]);
+  return isModalVisible ? (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       style={{ width: 600 }}
@@ -80,7 +137,7 @@ export function TrainedModelsDeploymentModal({
       }
       titleProps={{ id: modalTitleId }}
       onCancel={closeModal}
-      onConfirm={refreshModal}
+      onConfirm={fetchData}
       cancelButtonText={i18n.translate(
         'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.closeButtonLabel',
         {
@@ -124,5 +181,5 @@ export function TrainedModelsDeploymentModal({
         )}
       </EuiLink>
     </EuiConfirmModal>
-  );
+  ) : null;
 }

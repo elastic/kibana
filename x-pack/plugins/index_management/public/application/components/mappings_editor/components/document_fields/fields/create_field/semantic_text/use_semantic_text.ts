@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect } from 'react';
@@ -25,7 +24,9 @@ import { getInferenceEndpoints } from '../../../../../../../services/api';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
-  setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>> | undefined;
+  setErrorsInTrainedModelDeployment?: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
 }
 interface DefaultInferenceEndpointConfig {
   taskType: InferenceTaskType;
@@ -36,7 +37,8 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const { form, setErrorsInTrainedModelDeployment, ml } = props;
   const { fields, mappingViewFields, inferenceToModelIdMap } = useMappingsState();
   const dispatch = useDispatch();
-  const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
+  const { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast } =
+    useMLModelNotificationToasts();
 
   const fieldTypeValue = form.getFormData()?.type;
   useEffect(() => {
@@ -71,16 +73,9 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const createInferenceEndpoint = useCallback(
     async (
       trainedModelId: string,
-      data: SemanticTextField,
+      inferenceId: string,
       customInferenceEndpointConfig?: CustomInferenceEndpointConfig
     ) => {
-      if (data.inference_id === undefined) {
-        throw new Error(
-          i18n.translate('xpack.idxMgmt.mappingsEditor.createField.undefinedInferenceIdError', {
-            defaultMessage: 'Inference ID is undefined',
-          })
-        );
-      }
       const isElser = [ELSER_LINUX_OPTIMIZED_MODEL_ID, ELSER_ID_V1, ELSER_MODEL_ID].includes(
         trainedModelId
       );
@@ -102,11 +97,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       const taskType: InferenceTaskType =
         customInferenceEndpointConfig?.taskType ?? defaultInferenceEndpointConfig.taskType;
 
-      await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-        data.inference_id,
-        taskType,
-        modelConfig
-      );
+      await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(inferenceId, taskType, modelConfig);
     },
     [ml?.mlApi?.inferenceModels]
   );
@@ -127,37 +118,47 @@ export function useSemanticText(props: UseSemanticTextProps) {
     }
 
     const { trainedModelId } = inferenceData;
-    const value = {
-      ...data,
-      name,
-    };
-    dispatch({ type: 'field.add', value });
-
+    dispatch({ type: 'field.add', value: data });
+    const inferenceEndpoints = await getInferenceEndpoints();
+    const hasInferenceEndpoint = inferenceEndpoints.data?.some(
+      (inference) => inference.model_id === inferenceId
+    );
+    // if inference endpoint exists already, do not create new inference endpoint
+    if (hasInferenceEndpoint) {
+      return;
+    }
     try {
-      const inferenceEndpoints = await getInferenceEndpoints();
-      const hasInferenceEndpoint = inferenceEndpoints.data?.some(
-        (inference) => inference.model_id === inferenceId
-      );
-      // if inference endpoint exists already, do not create new inference endpoint
-      if (hasInferenceEndpoint) {
-        return;
-      }
       // Only show toast if it's an internal Elastic model that hasn't been deployed yet
       if (trainedModelId && inferenceData.isDeployable && !inferenceData.isDeployed) {
         showSuccessToasts(trainedModelId);
       }
-
-      await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
+      await createInferenceEndpoint(
+        trainedModelId,
+        data.inference_id,
+        customInferenceEndpointConfig
+      );
+      if (trainedModelId) {
+        // clear error because we've succeeded here
+        setErrorsInTrainedModelDeployment?.((prevItems) => ({
+          ...prevItems,
+          [trainedModelId]: undefined,
+        }));
+      }
+      showSuccessfullyDeployedToast(trainedModelId);
     } catch (error) {
       // trainedModelId is empty string when it's a third party model
       if (trainedModelId) {
-        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
+        setErrorsInTrainedModelDeployment?.((prevItems) => ({
+          ...prevItems,
+          [trainedModelId]: error,
+        }));
       }
       showErrorToasts(error);
     }
   };
 
   return {
+    createInferenceEndpoint,
     handleSemanticText,
   };
 }

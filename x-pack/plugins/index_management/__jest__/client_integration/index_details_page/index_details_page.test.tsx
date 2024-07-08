@@ -693,6 +693,7 @@ describe('<IndexDetailsPage />', () => {
                   ml: {
                     mlApi: {
                       trainedModels: {
+                        getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
                         getTrainedModels: jest.fn().mockResolvedValue([
                           {
                             model_id: '.elser_model_2',

@@ -39,8 +39,8 @@ import { useAppContext } from '../../../../../app_context';
 import { UseField } from '../../../shared_imports';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
-import { CustomInferenceEndpointConfig } from '../../../types';
 import { useDispatch, useMappingsState } from '../../../mappings_state_context';
+import { CustomInferenceEndpointConfig } from '../../../types';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, string> = {
   elser: ELSER_LINUX_OPTIMIZED_MODEL_ID,
@@ -53,12 +53,16 @@ const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
   }
 };
 export interface SelectInferenceIdProps {
+  createInferenceEndpoint: (
+    trainedModelId: string,
+    inferenceId: string,
+    modelConfig: CustomInferenceEndpointConfig
+  ) => void;
   'data-test-subj'?: string;
-  setCustomInferenceEndpointConfig: (config: CustomInferenceEndpointConfig) => void;
 }
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
+  createInferenceEndpoint,
   'data-test-subj': dataTestSubj,
-  setCustomInferenceEndpointConfig,
 }: SelectInferenceIdProps) => {
   const {
     core: { application },
@@ -132,11 +136,11 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
 
   useEffect(() => {
     const mergedOptions = {
-      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
       ...inferenceIdOptionsFromModels.reduce(
         (acc, option) => ({ ...acc, [option.label]: option }),
         {}
       ),
+      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
     };
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
@@ -162,27 +166,36 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
 
         setOptions([...options, ...newOption]);
 
-        const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-        const downloadStats = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
         const trainedModelId =
           modelConfig.service_settings.model_id ||
           inferenceServiceTypeElasticsearchModelMap[modelConfig.service] ||
           '';
-        const modelStats = trainedModelStats?.trained_model_stats.find(
-          (model) => model.model_id === trainedModelId
-        );
+        let modelStats;
+        let isDownloading = false;
+        let isDeployed = false;
+        if (trainedModelId) {
+          // Third-party models don't have these things so only checking if there's  trained model
+          const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
+          const downloadStats = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
+
+          modelStats = trainedModelStats?.trained_model_stats.find(
+            (model) => model.model_id === trainedModelId
+          );
+          isDownloading = Boolean(downloadStats?.[trainedModelId]);
+          isDeployed = modelStats?.deployment_stats?.state === 'started';
+        }
         const inferenceModel = {
           trainedModelId,
           isDeployable,
-          isDeployed: modelStats?.deployment_stats?.state === 'started',
-          isDownloading: Boolean(downloadStats?.[trainedModelId]),
+          isDeployed,
+          isDownloading,
           modelStats,
         };
-        const customInferenceEndpointConfig: CustomInferenceEndpointConfig = {
+        const customModelConfig = {
           taskType,
           modelConfig,
         };
-        setCustomInferenceEndpointConfig(customInferenceEndpointConfig);
+        createInferenceEndpoint(trainedModelId, inferenceId, customModelConfig);
         dispatch({
           type: 'inferenceToModelIdMap.update',
           value: {
@@ -197,12 +210,12 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
       }
     },
     [
+      isInferenceFlyoutVisible,
+      options,
+      ml?.mlApi?.trainedModels,
+      createInferenceEndpoint,
       dispatch,
       inferenceToModelIdMap,
-      isInferenceFlyoutVisible,
-      ml?.mlApi?.trainedModels,
-      options,
-      setCustomInferenceEndpointConfig,
       showErrorToasts,
     ]
   );

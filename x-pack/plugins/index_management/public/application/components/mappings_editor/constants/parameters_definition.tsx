@@ -1093,7 +1093,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   inference_id: {
     fieldConfig: {
-      defaultValue: '',
+      defaultValue: 'elser_model_2',
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.inferenceIdLabel', {
         defaultMessage: 'Select an inference endpoint:',
       }),
