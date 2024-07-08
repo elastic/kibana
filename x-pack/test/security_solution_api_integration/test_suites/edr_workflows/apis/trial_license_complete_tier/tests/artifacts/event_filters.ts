@@ -25,7 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('@ess @serverless Endpoint artifacts (via lists plugin): Event Filters', function () {
+  // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
+  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Event Filters', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {

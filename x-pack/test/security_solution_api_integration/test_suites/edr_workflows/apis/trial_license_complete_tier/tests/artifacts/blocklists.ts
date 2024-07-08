@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('@ess @serverless Endpoint artifacts (via lists plugin): Blocklists', function () {
+  // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
+  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Blocklists', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -150,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('and has authorization to manage endpoint security', () => {
         for (const blocklistApiCall of blocklistApiCalls) {
-          it(`@skipInServerlessMKI should error on [${blocklistApiCall.method}] if invalid condition entry fields are used`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.entries[0].field = 'some.invalid.field';
@@ -163,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/types that failed validation:/));
           });
 
-          it(`@skipInServerlessMKI should error on [${blocklistApiCall.method}] if an invalid hash is used`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if an invalid hash is used`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.entries = [
@@ -184,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid hash/));
           });
 
-          it(`@skipInServerlessMKI should error on [${blocklistApiCall.method}] if no values`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if no values`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.entries = [
@@ -204,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/Invalid value \"\[\]\"/));
           });
 
-          it(`@skipInServerlessMKI should error on [${blocklistApiCall.method}] if signer is set for a non windows os entry item`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if signer is set for a non windows os entry item`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.os_types = ['linux'];
@@ -232,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/^.*(?!file\.Ext\.code_signature)/));
           });
 
-          it(`@skipInServerlessMKI should error on [${blocklistApiCall.method}] if more than one entry and not a hash`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if more than one entry and not a hash`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.os_types = ['windows'];
@@ -266,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/one entry is allowed/));
           });
 
-          it(`@skipInServerlessMKI should error on [${blocklistApiCall.method}] if more than one OS is set`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if more than one OS is set`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.os_types = ['linux', 'windows'];
@@ -295,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         }
         for (const blocklistApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
-          it(`@skipInServerlessMKI should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
+          it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
               .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
@@ -306,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // no such role in serverless
-      describe('@skipInServerless @skipInServerlessMKI and user has authorization to read blocklist', function () {
+      describe('@skipInServerless and user has authorization to read blocklist', function () {
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)

@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('@ess @serverless Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
+  // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
+  describe('@ess @serverless @skipInServerlessMKI Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
 
