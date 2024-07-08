@@ -257,7 +257,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return;
     }
 
-    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
+    this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
     const attachments: CaseAttachments = [
       {
@@ -298,7 +298,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       })
     );
 
-    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
+    this.log.debug(() => `Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
   protected getMethodOptions<
@@ -542,7 +542,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     const doc = this.buildActionResponseEsDoc(options);
 
-    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
+    this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
       .index<LogsEndpointActionResponse<TOutputContent>>({
