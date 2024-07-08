@@ -12,6 +12,7 @@ import {
   DataTableCompareToolbarBtn,
   DataTableDocumentToolbarBtn,
   SelectButton,
+  SelectAllButton,
 } from './data_table_document_selection';
 import { buildSelectedDocsState, dataTableContextMock } from '../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../table_context';
@@ -39,7 +40,38 @@ describe('document selection', () => {
     });
   });
 
-  // TODO: add tests for SelectAllButton
+  describe('SelectAllButton', () => {
+    test('is not checked', () => {
+      const contextMock = {
+        ...dataTableContextMock,
+      };
+
+      const component = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <SelectAllButton />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      const checkBox = findTestSubject(component, 'selectAllDocsOnPageToggle');
+      expect(checkBox.props().checked).toBeFalsy();
+    });
+
+    test('is checked correctly', () => {
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+      };
+
+      const component = mountWithIntl(
+        <UnifiedDataTableContext.Provider value={contextMock}>
+          <SelectAllButton />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      const checkBox = findTestSubject(component, 'selectAllDocsOnPageToggle');
+      expect(checkBox.props().checked).toBeTruthy();
+    });
+  });
 
   describe('SelectButton', () => {
     test('is not checked', () => {

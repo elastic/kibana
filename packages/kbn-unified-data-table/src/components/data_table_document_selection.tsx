@@ -128,6 +128,7 @@ export const SelectAllButton = () => {
         </span>
       </EuiScreenReaderOnly>
       <EuiCheckbox
+        data-test-subj="selectAllDocsOnPageToggle"
         id="select-all-docs-on-page-toggle"
         aria-label={title}
         title={title}
