@@ -211,10 +211,12 @@ export async function suggest(
         case 'grouping': {
           const definition = getCommandDefinition(metrics.name);
           const suggestions: SuggestionRawDefinition[] = [];
-          const theByKeywordAlreadyInText = /^\s*metrics\s+.+BY\s*/i.test(innerText);
 
-          if (!theByKeywordAlreadyInText && (!metrics.grouping || !metrics.grouping.length)) {
-            suggestions.push(buildOptionDefinition(definition.options[0], false));
+          if (!metrics.grouping || !metrics.grouping.length) {
+            const theByKeywordAlreadyInText = /^\s*metrics\s+.+BY\s*/i.test(innerText);
+            if (!theByKeywordAlreadyInText) {
+              suggestions.push(buildOptionDefinition(definition.options[0], false));
+            }
           }
 
           const caretAtEndOfGroupingBlock =
