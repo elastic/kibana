@@ -8,25 +8,27 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const indexManagementService = getService('indexManagement');
+  const svlClusterNodesApi = getService('svlClusterNodesApi');
+  const svlUserManager = getService('svlUserManager');
+
+  let roleAuthc: RoleCredentials;
 
   describe('nodes', () => {
-    let getNodesPlugins: typeof indexManagementService['clusterNodes']['api']['getNodesPlugins'];
-
     before(async () => {
-      ({
-        clusterNodes: {
-          api: { getNodesPlugins },
-        },
-      } = indexManagementService);
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    it('should fetch the nodes plugins', async () => {
-      const { body } = await getNodesPlugins().expect(200);
+    it('should NOT fetch the nodes plugins in serverless', async () => {
+      const { body, status } = await svlClusterNodesApi.getNodesPlugins(roleAuthc);
+      expect(status).to.eql(410);
 
-      expect(Array.isArray(body)).to.be(true);
+      expect(Array.isArray(body)).to.be(false);
     });
   });
 }
