@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { RiskEngineScheduleNowResponse } from '../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
@@ -38,6 +39,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
   API_VERSIONS,
+  RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '../../../common/constants';
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
@@ -100,6 +102,15 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const disableRiskEngine = () =>
       http.fetch<RiskEngineDisableResponse>(RISK_ENGINE_DISABLE_URL, {
+        version: '1',
+        method: 'POST',
+      });
+
+    /**
+     * Enable risk score engine
+     */
+    const scheduleNowRiskEngine = () =>
+      http.fetch<RiskEngineScheduleNowResponse>(RISK_ENGINE_SCHEDULE_NOW_URL, {
         version: '1',
         method: 'POST',
       });
@@ -235,6 +246,7 @@ export const useEntityAnalyticsRoutes = () => {
       initRiskEngine,
       enableRiskEngine,
       disableRiskEngine,
+      scheduleNowRiskEngine,
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,

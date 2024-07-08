@@ -13,13 +13,17 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   useEuiTheme,
+  EuiText,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildAnnotationsFromError } from '../helpers';
+import { useScheduleNowRiskEngineMutation } from '../../../api/hooks/use_schedule_now_risk_engine_mutation';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 export const AssetCriticalityResultStep: React.FC<{
   result?: AssetCriticalityBulkUploadResponse;
@@ -28,6 +32,23 @@ export const AssetCriticalityResultStep: React.FC<{
   onReturn: () => void;
 }> = React.memo(({ result, validLinesAsText, errorMessage, onReturn }) => {
   const { euiTheme } = useEuiTheme();
+  const scheduleNowMutation = useScheduleNowRiskEngineMutation();
+  //   onSuccess: () => {
+  //     addSuccess(i18n.RISK_SCORE_MODULE_TURNED_OFF, toastOptions);
+  //   },
+
+  const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus();
+
+  const scheduleRiskEngine = useCallback(() => {
+    scheduleNowMutation.mutate();
+  }, [scheduleNowMutation]);
+
+  // console.log('risk_engine_task_status', riskEngineStatus?.risk_engine_task_status);
+
+  // interval: "1h"
+  // runAt: "2024-07-08T12:48:37.575Z"
+  // startedAt: null
+  // status: "idle"
 
   if (errorMessage !== undefined) {
     return (
@@ -71,10 +92,63 @@ export const AssetCriticalityResultStep: React.FC<{
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
         </EuiCallOut>
+
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          data-test-subj="???"
+          title={i18n.translate('?????', { defaultMessage: 'Risk score' })}
+          color="primary"
+          iconType="iInCircle"
+        >
+          <FormattedMessage
+            defaultMessage="The assigned criticalities will influence the calculated risk score on the next engine run."
+            id="???"
+          />
+          <EuiHorizontalRule />
+          <EuiFlexGroup
+            direction="row"
+            // justifyContent="spaceBetween"
+            // alignItems="center"
+            // gutterSize="s"
+            // responsive={false}
+          >
+            <EuiFlexItem>
+              <EuiText size="xs">
+                {'Next engine is schedule to run in: '}
+                {scheduleNowMutation.isLoading || isRiskEngineStatusLoading
+                  ? 'Now running'
+                  : riskEngineStatus?.risk_engine_task_status?.runAt}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="play"
+                size="xs"
+                onClick={scheduleRiskEngine}
+                isLoading={scheduleNowMutation.isLoading || isRiskEngineStatusLoading}
+              >
+                {'Run engine now'}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCallOut>
         <ResultStepFooter onReturn={onReturn} />
       </>
     );
   }
+
+  //   /* Vector */
+
+  // width: 16px;
+  // height: 16px;
+
+  // /* Core / $euiColorDarkestShade */
+  // background: #343741;
+
+  // /* Inside auto layout */
+  // flex: none;
+  // order: 0;
+  // flex-grow: 0;
 
   const annotations = buildAnnotationsFromError(result.errors);
 
