@@ -181,8 +181,10 @@ export async function suggest(
         const { nodeArg } = extractArgMeta(astContext.command, astContext.node);
         const fieldsMap: Map<string, ESQLRealField> = await new Map();
         const anyVariables = collectVariables([], fieldsMap, innerText);
-        const hasAssignmentExpression =
-          metrics.aggregates && Walker.hasFunction(metrics.aggregates, '=');
+        const field = metrics.aggregates?.find((f) => {
+          return f.location.min <= offset && offset <= f.location.max;
+        });
+        const hasAssignmentExpression = field ? Walker.hasFunction(field, '=') : false;
 
         return [
           // varX =

@@ -111,7 +111,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('metrics a a=/', [...allAggFunctions, ...allEvaFunctions]);
       });
 
-      test.skip('on space after aggregate field with comma', async () => {
+      test('on space after aggregate field with comma', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('METRICS a a=max(b), /', [
