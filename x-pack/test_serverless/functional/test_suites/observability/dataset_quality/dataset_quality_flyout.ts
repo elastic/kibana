@@ -54,7 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const degradedDatasetName = datasetNames[2];
 
-  describe('Flyout', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/187566
+  describe.skip('Flyout', function () {
+    // see details: https://github.com/elastic/kibana/issues/187624
+    this.tags(['failsOnMKI']);
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);

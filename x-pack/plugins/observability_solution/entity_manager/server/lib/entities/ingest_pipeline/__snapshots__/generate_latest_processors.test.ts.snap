@@ -16,12 +16,6 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.spaceId",
-      "value": "default",
-    },
-  },
-  Object {
-    "set": Object {
       "field": "entity.definitionId",
       "value": "admin-console-services",
     },
@@ -52,7 +46,7 @@ if (ctx.entity?.metadata?.host?.os?.name.data != null) {
   Object {
     "set": Object {
       "field": "_index",
-      "value": ".entities-observability.latest-v1.admin-console-services.default",
+      "value": ".entities.v1.latest.admin-console-services",
     },
   },
 ]
