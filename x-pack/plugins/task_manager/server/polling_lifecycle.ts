@@ -44,6 +44,8 @@ import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
 
+const MAX_BUFFER_OPERATIONS = 100;
+
 export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
 }
@@ -99,7 +101,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   constructor({
     logger,
     middleware,
-    maxWorkersConfiguration$,
+    capacityConfiguration$,
     pollIntervalConfiguration$,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
@@ -121,13 +123,13 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
-      bufferMaxOperations: config.max_workers,
+      bufferMaxOperations: MAX_BUFFER_OPERATIONS,
       logger,
     });
 
     this.pool = new TaskPool({
       logger,
-      maxWorkers$: maxWorkersConfiguration$,
+      capacity$: capacityConfiguration$,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -159,7 +161,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     let pollIntervalDelay$: Observable<number> | undefined;
     if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
       pollIntervalDelay$ = delayOnClaimConflicts(
-        maxWorkersConfiguration$,
+        capacityConfiguration$,
         pollIntervalConfiguration$,
         this.events$,
         config.version_conflict_threshold,

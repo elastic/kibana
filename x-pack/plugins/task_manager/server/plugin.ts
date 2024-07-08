@@ -248,8 +248,7 @@ export class TaskManagerPlugin
     const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
-      startingMaxWorkers: this.config!.max_workers,
-      startingPollInterval: this.config!.poll_interval,
+      config: this.config!,
     });
 
     // Only poll for tasks if configured to run tasks

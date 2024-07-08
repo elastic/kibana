@@ -16,6 +16,12 @@ export enum TaskPriority {
   Normal = 50,
 }
 
+export enum TaskCost {
+  Tiny = 1,
+  Normal = 2,
+  ExtraLarge = 10,
+}
+
 /*
  * Type definitions and validations for tasks.
  */

@@ -40,7 +40,6 @@ describe('managed configuration', () => {
     clock = sinon.useFakeTimers();
 
     const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-      max_workers: 10,
       max_attempts: 9,
       poll_interval: 3000,
       allow_reading_invalid_state: false,
