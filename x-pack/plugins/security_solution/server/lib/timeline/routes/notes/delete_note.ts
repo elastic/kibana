@@ -48,22 +48,22 @@ export const deleteNoteRoute = (
           const noteId = request.body?.noteId ?? '';
           const noteIds = request.body?.noteIds ?? null;
           if (noteIds != null) {
-            const res = await deleteNote({
+            await deleteNote({
               request: frameworkRequest,
               noteIds,
             });
 
             return response.ok({
-              body: { data: { persistNote: res } },
+              body: { data: {} },
             });
           } else {
-            const res = await deleteNote({
+            await deleteNote({
               request: frameworkRequest,
               noteIds: [noteId],
             });
 
             return response.ok({
-              body: { data: { persistNote: res } },
+              body: { data: {} },
             });
           }
         } catch (err) {
