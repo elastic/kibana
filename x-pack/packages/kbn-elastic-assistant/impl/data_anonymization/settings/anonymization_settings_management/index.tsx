@@ -13,7 +13,11 @@ import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
 import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonymization_list_update';
-import { useSettingsUpdater } from '../../../assistant/settings/use_settings_updater/use_settings_updater';
+import {
+  DEFAULT_ANONYMIZATION_FIELDS,
+  DEFAULT_CONVERSATIONS,
+  useSettingsUpdater,
+} from '../../../assistant/settings/use_settings_updater/use_settings_updater';
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
@@ -25,7 +29,7 @@ export interface Props {
 
 const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
   const { toasts } = useAssistantContext();
-  const { data: anonymizationFields } = useFetchAnonymizationFields();
+  const { data: anonymizationFields, refetch } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const {
@@ -34,19 +38,13 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     setUpdatedAnonymizationData,
     resetSettings,
     saveSettings,
+    updatedAnonymizationData,
   } = useSettingsUpdater(
-    {}, // Anonymization settings do not require conversations
+    DEFAULT_CONVERSATIONS, // Anonymization settings do not require conversations
     false, // Anonymization settings do not require conversations
-    anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
+    anonymizationFields ?? DEFAULT_ANONYMIZATION_FIELDS
   );
-
-  const handleChange = useCallback(
-    (callback) => (value: unknown) => {
-      setHasPendingChanges(true);
-      callback(value);
-    },
-    []
-  );
+  console.log('anonymizationFields--------------');
 
   const onCancelClick = useCallback(() => {
     resetSettings();
@@ -70,16 +68,24 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     handleSave();
   }, [handleSave]);
 
-  const handleAnonymizationFieldsBulkActions = useCallback(() => {
-    handleChange(setAnonymizationFieldsBulkActions);
-  }, [handleChange, setAnonymizationFieldsBulkActions]);
+  const handleAnonymizationFieldsBulkActions = useCallback(
+    (value) => {
+      setHasPendingChanges(true);
+      setAnonymizationFieldsBulkActions(value);
+    },
+    [setAnonymizationFieldsBulkActions]
+  );
 
-  const handleUpdatedAnonymizationData = useCallback(() => {
-    handleChange(setUpdatedAnonymizationData);
-  }, [handleChange, setUpdatedAnonymizationData]);
+  const handleUpdatedAnonymizationData = useCallback(
+    (value) => {
+      setHasPendingChanges(true);
+      setUpdatedAnonymizationData(value);
+    },
+    [setUpdatedAnonymizationData]
+  );
 
   const onListUpdated = useAnonymizationListUpdate({
-    anonymizationFields,
+    anonymizationFields: updatedAnonymizationData,
     anonymizationFieldsBulkActions,
     setAnonymizationFieldsBulkActions: handleAnonymizationFieldsBulkActions,
     setUpdatedAnonymizationData: handleUpdatedAnonymizationData,
@@ -98,7 +104,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
         <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
           <Stats
             isDataAnonymizable={true}
-            anonymizationFields={anonymizationFields.data}
+            anonymizationFields={updatedAnonymizationData.data}
             titleSize="m"
             gap={euiThemeVars.euiSizeS}
           />
@@ -107,7 +113,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
         <EuiSpacer size="m" />
 
         <ContextEditor
-          anonymizationFields={anonymizationFields}
+          anonymizationFields={updatedAnonymizationData}
           compressed={false}
           onListUpdated={onListUpdated}
           rawData={null}

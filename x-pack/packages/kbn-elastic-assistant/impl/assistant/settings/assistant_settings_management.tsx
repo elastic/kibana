@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { KnowledgeBaseSettings, EvaluationSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
-import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 import { ConnectorsSettingsManagement } from '../../connectorland/connector_settings_management';
 import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
@@ -32,14 +29,12 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { AssistantSettingsBottomBar } from './assistant_settings_bottom_bar';
+import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
+import { EvaluationSettings } from '.';
 
 interface Props {
-  conversations: Record<string, Conversation>;
-  conversationsLoaded: boolean;
   selectedConversation: Conversation;
   isFlyoutMode: boolean;
-  refetchConversations: () => void;
 }
 
 /**
@@ -47,63 +42,27 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({
-    conversations,
-    conversationsLoaded,
-    isFlyoutMode,
-    refetchConversations,
-    selectedConversation: defaultSelectedConversation,
-  }) => {
+  ({ isFlyoutMode, selectedConversation: defaultSelectedConversation }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
-      toasts,
     } = useAssistantContext();
-
-    const { data: anonymizationFields } = useFetchAnonymizationFields();
 
     const { data: connectors } = useLoadConnectors({
       http,
     });
     const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-    const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
-
-    const { knowledgeBase, setUpdatedKnowledgeBaseSettings, saveSettings, resetSettings } =
-      useSettingsUpdater(
-        conversations,
-        conversationsLoaded,
-        anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
-      );
 
     useEffect(() => {
       if (selectedSettingsTab == null) {
         setSelectedSettingsTab(CONNECTORS_TAB);
       }
     }, [selectedSettingsTab, setSelectedSettingsTab]);
-
-    const handleSave = useCallback(
-      async (shouldRefetchConversation?: boolean) => {
-        await saveSettings();
-        toasts?.addSuccess({
-          iconType: 'check',
-          title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-        });
-        setHasPendingChanges(false);
-        if (shouldRefetchConversation) {
-          refetchConversations();
-        }
-      },
-      [refetchConversations, saveSettings, toasts]
-    );
-
-    const onSaveButtonClicked = useCallback(() => {
-      handleSave(true);
-    }, [handleSave]);
 
     const tabsConfig = useMemo(
       () => [
@@ -152,18 +111,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       }));
     }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
 
-    const handleChange = useCallback(
-      (callback) => (value: unknown) => {
-        setHasPendingChanges(true);
-        callback(value);
-      },
-      []
-    );
-
-    const onCancelClick = useCallback(() => {
-      resetSettings();
-      setHasPendingChanges(false);
-    }, [resetSettings]);
     return (
       <>
         <EuiPageTemplate.Header
@@ -213,14 +160,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
           {selectedSettingsTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
-          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && <KnowledgeBaseSettings />}
+          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && <KnowledgeBaseSettingsManagement />}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
-        <AssistantSettingsBottomBar
-          hasPendingChanges={hasPendingChanges}
-          onCancelClick={onCancelClick}
-          onSaveButtonClicked={onSaveButtonClicked}
-        />
       </>
     );
   }

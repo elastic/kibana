@@ -17,6 +17,14 @@ import {
 } from '../../api/conversations/bulk_update_actions_conversations';
 import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
 
+export const DEFAULT_ANONYMIZATION_FIELDS = {
+  page: 0,
+  perPage: 0,
+  total: 0,
+  data: [],
+};
+
+export const DEFAULT_CONVERSATIONS: Record<string, Conversation> = {};
 interface UseSettingsUpdater {
   assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
@@ -47,7 +55,7 @@ interface UseSettingsUpdater {
 export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
   conversationsLoaded: boolean,
-  anonymizationFields: FindAnonymizationFieldsResponse
+  anonymizationFields: FindAnonymizationFieldsResponse = DEFAULT_ANONYMIZATION_FIELDS // Put default as a constant to avoid re-creating it on every render
 ): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
@@ -88,7 +96,6 @@ export const useSettingsUpdater = (
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
-
   /**
    * Reset all pending settings
    */

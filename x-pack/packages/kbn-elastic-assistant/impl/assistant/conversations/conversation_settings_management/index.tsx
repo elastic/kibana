@@ -83,12 +83,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     setConversationSettings,
     setConversationsSettingsBulkActions,
     setUpdatedAssistantStreamingEnabled,
-  } = useSettingsUpdater(conversations, conversationsLoaded, {
-    page: 0,
-    perPage: 0,
-    total: 0,
-    data: [],
-  });
+  } = useSettingsUpdater(conversations, conversationsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
@@ -105,17 +100,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [saveSettings, toasts]
   );
 
-  const handleChange = useCallback(
-    (callback) => (value: unknown) => {
+  const setAssistantStreamingEnabled = useCallback(
+    (value) => {
       setHasPendingChanges(true);
-      callback(value);
+      setUpdatedAssistantStreamingEnabled(value);
     },
-    []
+    [setUpdatedAssistantStreamingEnabled]
   );
-
-  const setAssistantStreamingEnabled = useCallback(() => {
-    handleChange(setUpdatedAssistantStreamingEnabled);
-  }, [handleChange, setUpdatedAssistantStreamingEnabled]);
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave({ callback: refetchConversations });

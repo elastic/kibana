@@ -87,12 +87,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     setConversationsSettingsBulkActions,
     resetSettings,
     saveSettings,
-  } = useSettingsUpdater(conversations, conversationsLoaded, {
-    page: 0,
-    perPage: 0,
-    total: 0,
-    data: [],
-  });
+  } = useSettingsUpdater(conversations, conversationsLoaded);
 
   // System Prompt Selection State
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();

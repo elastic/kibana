@@ -36,8 +36,7 @@ const QuickPromptSettingsManagementComponent = () => {
   const { saveSettings, quickPromptSettings, setUpdatedQuickPromptSettings, resetSettings } =
     useSettingsUpdater(
       {}, // Quick Prompt settings do not require conversations
-      false, // Quick Prompt settings do not require conversations
-      { page: 0, perPage: 0, total: 0, data: [] } // Quick Prompt settings do not require anonymizationFields
+      false // Quick Prompt settings do not require conversations
     );
 
   // Quick Prompt Selection State
