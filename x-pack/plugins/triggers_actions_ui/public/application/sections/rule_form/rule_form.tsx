@@ -795,7 +795,7 @@ export const RuleForm = ({
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
               /* @ts-expect-error upgrade typescript v5.1.6 */
-              isInvalid={errors['schedule.interval'].length > 0}
+              isInvalid={!!errors['schedule.interval'].length}
               error={errors['schedule.interval']}
             >
               <EuiFlexGroup gutterSize="s">
@@ -806,7 +806,7 @@ export const RuleForm = ({
                     min={1}
                     isInvalid={
                       /* @ts-expect-error upgrade typescript v5.1.6 */
-                      errors['schedule.interval'].length > 0
+                      !!errors['schedule.interval'].length
                     }
                     value={ruleInterval || ''}
                     name="interval"
