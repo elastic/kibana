@@ -136,33 +136,47 @@ export const fixupQuery = (query: string, caretPosition: number, context: Editor
 
   // Insert a marker, if:
   //
-  //   1. it is a comma/colon by the user;
+  //   1. it is a comma/colon by the user: `x, <here>` or `fn(x, <here>)`;
   //   2. or, a forced trigger by a function argument suggestion to make the
-  //      expression still valid;
+  //      expression still valid: `fn(x, <here>)`;
   //   3. or, a space that separates <sources> from <aggregates> in the METRICS
-  //      command. (METRICS <sources> <aggregates>)
-  const charThatNeedMarkers = [',', ':'];
-  const triggeredByUserChar = triggerCharacter && charThatNeedMarkers.includes(triggerCharacter);
-  const triggeredByFunctionArgSuggestion =
-    (context.triggerKind === 0 &&
-      missingBrackets.roundCount === 0 &&
-      getLastCharFromTrimmed(leftOfCaret) !== '_') ||
-    (triggerCharacter === ' ' &&
-      (isMathFunction(leftOfCaret, caretPosition) ||
-        isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])));
-  const isMetricsCommandTransitionIntoAggregates =
-    triggerCharacter === ' ' && /^metrics\s([^,],?)+ $/i.test(leftOfCaret);
+  //      command: `METRICS index1, index2 <here>`;
+  //   4. or, a space that separates <aggregates> from <grouping> in the METRICS
+  //      command: `METRICS index1, index2 agg1, agg2 <here>`.
+  let insertion = '';
 
-  if (
-    triggeredByUserChar ||
-    triggeredByFunctionArgSuggestion ||
-    isMetricsCommandTransitionIntoAggregates
-  ) {
-    fixedQuery =
-      leftOfCaret.substring(0, caretPosition) +
-      EDITOR_MARKER +
-      leftOfCaret.substring(caretPosition);
+  const isMetricsCommandTransitionIntoGrouping =
+    triggerCharacter === ' ' &&
+    /^metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s+([^\s,]+)\s*(,\s*[^\s,]+)*\s+$/i.test(leftOfCaret);
+  if (isMetricsCommandTransitionIntoGrouping) {
+    insertion = 'BY ' + EDITOR_MARKER;
+  } else {
+    const charThatNeedMarkers = [',', ':'];
+    const triggeredByUserChar = triggerCharacter && charThatNeedMarkers.includes(triggerCharacter);
+    const triggeredByFunctionArgSuggestion =
+      (context.triggerKind === 0 &&
+        missingBrackets.roundCount === 0 &&
+        getLastCharFromTrimmed(leftOfCaret) !== '_') ||
+      (triggerCharacter === ' ' &&
+        (isMathFunction(leftOfCaret, caretPosition) ||
+          isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])));
+    const isMetricsCommandTransitionIntoAggregates =
+      triggerCharacter === ' ' && /^metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s+$/i.test(leftOfCaret);
+
+    if (
+      triggeredByUserChar ||
+      triggeredByFunctionArgSuggestion ||
+      isMetricsCommandTransitionIntoAggregates
+    ) {
+      insertion = EDITOR_MARKER;
+    }
   }
+
+  if (insertion) {
+    fixedQuery =
+      leftOfCaret.substring(0, caretPosition) + insertion + leftOfCaret.substring(caretPosition);
+  }
+
   if (missingBrackets.stack) fixedQuery += missingBrackets.stack.join('');
 
   return fixedQuery;
