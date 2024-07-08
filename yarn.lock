@@ -8096,12 +8096,12 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/cli@^1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.16.0.tgz#c8885ad46bb9993792e4266535692ce0ceb3895f"
-  integrity sha512-REmwkNHOd4e50vPeL6mDgHVdyUQ8e+y0cggi/cNXQzGpkZEk17Z+WFL8UFlcM+WebMWDXulJE712jT2lGYS9Zg==
+"@redocly/cli@^1.17.0":
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.17.1.tgz#a6b5523e98ff84530b7c2654a897414b16dcf6b5"
+  integrity sha512-a7OIlsGQT8OBRMPswqcJzCoub/nvm1zYvOCOBnaLt1cYeYK9nRzYCXA6Bnx0I7wMCXf5YmL7rVTMG8RJTC+3mA==
   dependencies:
-    "@redocly/openapi-core" "1.16.0"
+    "@redocly/openapi-core" "1.17.1"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8120,18 +8120,18 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.6.0":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.6.1.tgz#931da21d6cbf8e73a873ca12ae690902d848cbb5"
-  integrity sha512-p4mlj+CD3Byec3wOxDlDln0B0gOcNvEkpl4jn3/e9y8h11ogzXnWxnlJAtE5Kcr1ByujS/7Mbt01df9z1xfMbg==
+"@redocly/config@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.6.2.tgz#b5180ccb407673ee048b818c3be9a4f9d0636a64"
+  integrity sha512-c3K5u64eMnr2ootPcpEI0ioIRLE8QP8ptvLxG9MwAmb2sU8HMRfVwXDU3AZiMVY2w4Ts0mDc+Xv4HTIk8DRqFw==
 
-"@redocly/openapi-core@1.16.0", "@redocly/openapi-core@^1.4.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.16.0.tgz#95afcf822890af3fe8f1bde97018370b5cadb8ca"
-  integrity sha512-z06h+svyqbUcdAaePq8LPSwTPlm6Ig7j2VlL8skPBYnJvyaQ2IN7x/JkOvRL4ta+wcOCBdAex5JWnZbKaNktJg==
+"@redocly/openapi-core@1.17.1", "@redocly/openapi-core@^1.4.0":
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.17.1.tgz#d18c5223e5b578d64d789c4101b96cbb589162dc"
+  integrity sha512-PQxDLLNk5cBatJBBxvfk49HFw/nVozw1XZ6Dw/GX0Tviq+WxeEjEuLAKfnLVvb5L0wgs4TNmVG4Y+JyofSPu1A==
   dependencies:
     "@redocly/ajv" "^8.11.0"
-    "@redocly/config" "^0.6.0"
+    "@redocly/config" "^0.6.2"
     colorette "^1.2.0"
     https-proxy-agent "^7.0.4"
     js-levenshtein "^1.1.6"
