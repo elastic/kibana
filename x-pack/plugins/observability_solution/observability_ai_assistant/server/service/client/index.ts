@@ -11,7 +11,7 @@ import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SpanKind, context } from '@opentelemetry/api';
-import { merge, omit } from 'lodash';
+import { last, merge, omit } from 'lodash';
 import {
   catchError,
   combineLatest,
@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -60,7 +61,6 @@ import {
   KnowledgeBaseService,
   RecalledEntry,
 } from '../knowledge_base_service';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -93,7 +93,6 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
-      resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
       user?: {
         id?: string;
@@ -107,7 +106,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       query: {
         bool: {
           filter: [
@@ -335,13 +334,12 @@ export class ObservabilityAIAssistantClient {
                 const initialMessagesWithAddedMessages =
                   messagesWithUpdatedSystemMessage.concat(addedMessages);
 
-                const lastMessage =
-                  initialMessagesWithAddedMessages[initialMessagesWithAddedMessages.length - 1];
+                const lastMessage = last(initialMessagesWithAddedMessages);
 
                 // if a function request is at the very end, close the stream to consumer
                 // without persisting or updating the conversation. we need to wait
                 // on the function response to have a valid conversation
-                const isFunctionRequest = lastMessage.message.function_call?.name;
+                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
                 if (!persist || isFunctionRequest) {
                   return of();
@@ -439,18 +437,20 @@ export class ObservabilityAIAssistantClient {
             if (this.dependencies.logger.isLevelEnabled('debug')) {
               switch (event.type) {
                 case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(`Added message: ${JSON.stringify(event.message)}`);
+                  this.dependencies.logger.debug(
+                    () => `Added message: ${JSON.stringify(event.message)}`
+                  );
                   break;
 
                 case StreamingChatResponseEventType.ConversationCreate:
                   this.dependencies.logger.debug(
-                    `Created conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
 
                 case StreamingChatResponseEventType.ConversationUpdate:
                   this.dependencies.logger.debug(
-                    `Updated conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
               }
@@ -594,7 +594,7 @@ export class ObservabilityAIAssistantClient {
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -686,7 +686,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       document: createdConversation,
       refresh: true,
     });

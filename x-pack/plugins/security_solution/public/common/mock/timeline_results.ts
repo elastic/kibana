@@ -11,7 +11,7 @@ import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { RowRendererId, TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
@@ -2068,7 +2068,26 @@ export const defaultTimelineProps: CreateTimelineProps = {
     },
     eventIdToNoteIds: {},
     eventType: 'all',
-    excludedRowRendererIds: [],
+    excludedRowRendererIds: [
+      RowRendererId.alert,
+      RowRendererId.alerts,
+      RowRendererId.auditd,
+      RowRendererId.auditd_file,
+      RowRendererId.library,
+      RowRendererId.netflow,
+      RowRendererId.plain,
+      RowRendererId.registry,
+      RowRendererId.suricata,
+      RowRendererId.system,
+      RowRendererId.system_dns,
+      RowRendererId.system_endgame_process,
+      RowRendererId.system_file,
+      RowRendererId.system_fim,
+      RowRendererId.system_security_event,
+      RowRendererId.system_socket,
+      RowRendererId.threat_match,
+      RowRendererId.zeek,
+    ],
     expandedDetail: {},
     filters: [],
     highlightedDropAndProviderId: '',

@@ -61,3 +61,10 @@ export const TEMPLATE_HELP_TEXT = i18n.translate('xpack.cases.create.templateHel
 export const SOLUTION_SELECTOR_LABEL = i18n.translate('xpack.cases.create.solutionSelectorLabel', {
   defaultMessage: 'Create case under:',
 });
+
+export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
+  'xpack.cases.create.defaultEmptyTemplateName',
+  {
+    defaultMessage: 'No template selected',
+  }
+);

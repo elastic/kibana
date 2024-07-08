@@ -8,6 +8,10 @@ import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
+import {
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
+} from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 
 const ENTITIES_INDEX_NAME = '.entities-observability.latest-*';
@@ -29,6 +33,9 @@ export interface EntitiesESClient {
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
+  msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    allSearches: TSearchRequest[]
+  ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }>;
 }
 
 export async function createEntitiesESClient({
@@ -62,6 +69,37 @@ export async function createEntitiesESClient({
       });
 
       return unwrapEsResponse(promise);
+    },
+
+    async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+      allSearches: TSearchRequest[]
+    ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+      const searches = allSearches
+        .map((params) => {
+          const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+            {
+              index: [ENTITIES_INDEX_NAME],
+            },
+            {
+              ...params.body,
+            },
+          ];
+
+          return searchParams;
+        })
+        .flat();
+
+      const promise = esClient.msearch(
+        { searches },
+        {
+          meta: true,
+        }
+      ) as unknown as Promise<{
+        body: { responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> };
+      }>;
+
+      const { body } = await promise;
+      return { responses: body.responses };
     },
   };
 }

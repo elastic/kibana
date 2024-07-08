@@ -17,13 +17,13 @@ import { install } from '../../install';
 /* eslint-disable no-console */
 
 const mockLogger = loggingSystemMock.create().get();
-mockLogger.warn = jest.fn((message: string | Error) => {
+mockLogger.warn = jest.fn((message: string | (() => string) | Error) => {
   console.warn(message);
 });
-mockLogger.debug = jest.fn((message: string | Error) => {
+mockLogger.debug = jest.fn((message: string | (() => string) | Error) => {
   console.log(message);
 });
-mockLogger.error = jest.fn((message: string | Error) => {
+mockLogger.error = jest.fn((message: string | (() => string) | Error) => {
   console.error(message);
 });
 
