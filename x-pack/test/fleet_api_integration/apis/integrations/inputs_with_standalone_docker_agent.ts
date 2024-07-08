@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
 
   // Failing: See https://github.com/elastic/kibana/issues/184681
+  // Failing: See https://github.com/elastic/kibana/issues/184681
   describe.skip('inputs_with_standalone_docker_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     let apiKey: string;
