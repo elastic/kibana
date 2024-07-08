@@ -410,7 +410,7 @@ export class Plugin implements InfraClientPluginClass {
       getDisplayNameTooltip: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.description', {
           defaultMessage:
-            "Add a table of live streaming logs. It's not recommended to use Log stream, go to Discover and create a saved search instead.",
+            'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved search instead of using Log stream.',
         }),
       getIconType: () => 'logsApp',
       isCompatible: async ({ embeddable }) => {
