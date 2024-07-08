@@ -11,9 +11,6 @@ if [[ "${SKIP_NODE_SETUP:-}" =~ ^(1|true)$ ]]; then
 else
   source .buildkite/scripts/common/setup_node.sh
   source .buildkite/scripts/common/setup_buildkite_deps.sh
-
-  echo '--- Agent Debug Info'
-  ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 fi
 
 if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-}" == *"Upload Pipeline"* ]]; then
