@@ -26,12 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Findings - Querying data', () => {
-      //   beforeEach(async () => {
-      //     const groupSelector = await findings.groupSelector();
-      //     await groupSelector.openDropDown();
-      //     await groupSelector.setValue('None');
-      //   });
-
       afterEach(async () => {
         // Reset the group selector to None
         const groupSelector = await findings.groupSelector();
