@@ -121,7 +121,7 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
    *       - current != target && current == base (stock rule will get a new value)
    *
    */
-  has_conflict: ThreeWayDiffConflictResolutionResult;
+  conflict: ThreeWayDiffConflictResolutionResult;
 }
 
 /**

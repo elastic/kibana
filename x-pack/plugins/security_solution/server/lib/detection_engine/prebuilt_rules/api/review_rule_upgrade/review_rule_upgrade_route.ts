@@ -90,7 +90,7 @@ const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStat
   const allTags = new Set<string>(
     results.flatMap((result) => result.ruleVersions.input.current?.tags ?? [])
   );
-  debugger;
+
   return {
     num_rules_to_upgrade_total: results.length,
     tags: [...allTags].sort((a, b) => a.localeCompare(b)),

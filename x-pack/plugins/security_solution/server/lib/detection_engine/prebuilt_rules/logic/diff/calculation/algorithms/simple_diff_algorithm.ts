@@ -50,7 +50,7 @@ export const simpleDiffAlgorithm = <TValue>(
     diff_outcome: diffOutcome,
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
-    has_conflict:
+    conflict:
       mergeOutcome === ThreeWayMergeOutcome.Conflict
         ? ThreeWayDiffConflictResolutionResult.NON_SOLVABLE
         : ThreeWayDiffConflictResolutionResult.NO,

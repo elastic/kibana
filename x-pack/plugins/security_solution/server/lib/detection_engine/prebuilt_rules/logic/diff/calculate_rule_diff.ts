@@ -82,7 +82,7 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     (fieldDiff) => fieldDiff.has_update
   ).length;
   const numberFieldsWithConflicts = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).filter(
-    (fieldDiff) => fieldDiff.has_conflict !== ThreeWayDiffConflictResolutionResult.NO
+    (fieldDiff) => fieldDiff.conflict !== ThreeWayDiffConflictResolutionResult.NO
   ).length;
 
   return {

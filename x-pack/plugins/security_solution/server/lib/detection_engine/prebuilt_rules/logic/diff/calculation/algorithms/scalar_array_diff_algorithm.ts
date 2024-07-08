@@ -53,7 +53,7 @@ export const scalarArrayDiffAlgorithm = <TValue>(
     diff_outcome: diffOutcome,
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
-    has_conflict:
+    conflict:
       mergeOutcome === ThreeWayMergeOutcome.Conflict
         ? ThreeWayDiffConflictResolutionResult.SOLVABLE
         : ThreeWayDiffConflictResolutionResult.NO,
