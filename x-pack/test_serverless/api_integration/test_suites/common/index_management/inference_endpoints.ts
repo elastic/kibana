@@ -41,9 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
         log.debug('[Cleanup error] Error deleting trained model and saved ml objects');
         throw err;
       }
-       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
-   
+
     it('create inference endpoint', async () => {
       log.debug(`create inference endpoint`);
       const createInferenceEndpointResponse = await ml.api.createInferenceEndpoint(
@@ -77,8 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('get all inference endpoints and confirm inference endpoint exist', async () => {
       const { body: inferenceEndpoints } = await supertestWithoutAuth
         .get(`${API_BASE_PATH}/inference/all`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .expect(200);
 
       expect(inferenceEndpoints).to.be.ok();
@@ -92,7 +92,6 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Deleting inference endpoint`);
       await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
       log.debug('> Inference endpoint deleted');
-      });
     });
   });
 }
