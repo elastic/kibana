@@ -41,6 +41,7 @@ const datasetRT = rt.intersection([
   rt.exact(
     rt.partial({
       integration: integrationRT,
+      title: rt.string,
     })
   ),
 ]);
