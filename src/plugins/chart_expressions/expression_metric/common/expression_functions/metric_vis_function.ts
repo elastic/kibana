@@ -91,7 +91,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     iconAlign: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.valuesTextAlign.help', {
+      help: i18n.translate('expressionMetricVis.function.iconAlign.help', {
         defaultMessage: 'The alignment of icon.',
       }),
     },
