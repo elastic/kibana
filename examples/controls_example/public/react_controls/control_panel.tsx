@@ -10,7 +10,6 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import {
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
