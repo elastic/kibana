@@ -1009,8 +1009,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
           });
 
-          it('should compare values insensitive of case', async () => {
-            // Install base prebuilt detection rule
+          it('should compare values sensitive of case', async () => {
             // Install base prebuilt detection rule
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
               createRuleAssetSavedObject({
