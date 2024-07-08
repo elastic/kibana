@@ -1490,6 +1490,14 @@ describe('Response actions history', () => {
   });
 
   describe('Actions filter', () => {
+    const featureFlags = {
+      responseActionUploadEnabled: true,
+      responseActionScanEnabled: false,
+    };
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag(featureFlags);
+    });
+
     const filterPrefix = 'actions-filter';
 
     it('should have a search bar', () => {
@@ -1505,7 +1513,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions (without `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
+      mockedContext.setExperimentalFlag({
+        ...featureFlags,
+        responseActionScanEnabled: false,
+      });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1529,7 +1540,7 @@ describe('Response actions history', () => {
 
     it('should show a list of actions (with `scan`) when opened', () => {
       mockedContext.setExperimentalFlag({
-        responseActionUploadEnabled: true,
+        ...featureFlags,
         responseActionScanEnabled: true,
       });
       render();
