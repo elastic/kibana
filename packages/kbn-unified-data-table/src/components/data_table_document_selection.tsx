@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   useEuiTheme,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -118,22 +119,31 @@ export const SelectAllButton = () => {
         });
 
   return (
-    <EuiCheckbox
-      id="select-all-docs-on-page-toggle"
-      aria-label={title}
-      title={title}
-      indeterminate={isIndeterminateForCurrentPage}
-      checked={areDocsSelectedForCurrentPage}
-      onChange={(e) => {
-        const shouldClearSelection = isIndeterminateForCurrentPage || !e.target.checked;
+    <>
+      <EuiScreenReaderOnly>
+        <span>
+          {i18n.translate('unifiedDataTable.selectColumnHeader', {
+            defaultMessage: 'Select column',
+          })}
+        </span>
+      </EuiScreenReaderOnly>
+      <EuiCheckbox
+        id="select-all-docs-on-page-toggle"
+        aria-label={title}
+        title={title}
+        indeterminate={isIndeterminateForCurrentPage}
+        checked={areDocsSelectedForCurrentPage}
+        onChange={(e) => {
+          const shouldClearSelection = isIndeterminateForCurrentPage || !e.target.checked;
 
-        if (shouldClearSelection) {
-          deselectSomeDocs(docIdsFromCurrentPage);
-        } else {
-          selectMoreDocs(docIdsFromCurrentPage);
-        }
-      }}
-    />
+          if (shouldClearSelection) {
+            deselectSomeDocs(docIdsFromCurrentPage);
+          } else {
+            selectMoreDocs(docIdsFromCurrentPage);
+          }
+        }}
+      />
+    </>
   );
 };
 
