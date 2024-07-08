@@ -61,6 +61,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     // loadTestFile(require.resolve('./artifacts/trusted_apps'));
     // loadTestFile(require.resolve('./artifacts/event_filters'));
     // loadTestFile(require.resolve('./artifacts/host_isolation_exceptions'));
-    // loadTestFile(require.resolve('./artifacts/blocklists'));
+    loadTestFile(require.resolve('./artifacts/blocklists'));
   });
 }

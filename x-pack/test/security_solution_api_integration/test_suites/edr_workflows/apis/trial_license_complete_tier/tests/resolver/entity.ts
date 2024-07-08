@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // illegal_argument_exception: unknown setting [index.lifecycle.name] in before
-    describe('@brokenInServerless signals index mapping tests', function () {
+    describe('@skipInServerless @skipInServerlessMKI signals index mapping tests', function () {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
