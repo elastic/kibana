@@ -48,11 +48,11 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
   const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
   const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
-  // If the referenced component template is part of a package and is managed
-  // we can allow the user to roll it over if possible.
+  // If the component template is referenced by an index template that is part of
+  // a package and is managed we can allow the user to roll it over if possible.
   const { data: refCompTemplate } = api.useLoadReferencedComponentTemplateMeta(decodedName);
   const canRollover = useMemo(
-    () => refCompTemplate?.managed_by && refCompTemplate?.package,
+    () => Boolean(refCompTemplate?.managed_by && refCompTemplate?.package),
     [refCompTemplate]
   );
 

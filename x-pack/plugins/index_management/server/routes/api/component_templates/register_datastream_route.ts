@@ -100,6 +100,8 @@ export const registerReferencedComponentTemplateMeta = ({
           indexTemplate.index_template?.composed_of?.includes(name)
         );
 
+        // We should always match against the first result which should yield
+        // the index template we are after.
         if (result[0]) {
           return response.ok({
             body: result[0].index_template._meta,
