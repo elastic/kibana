@@ -10,7 +10,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
