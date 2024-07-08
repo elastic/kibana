@@ -47,6 +47,7 @@ interface OwnershipClaimingOpts {
   taskTypes: Set<string>;
   removedTypes: Set<string>;
   excludedTypes: Set<string>;
+  getCapacity: (taskType?: string | undefined) => number;
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
@@ -109,6 +110,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     taskStore,
     events$,
     claimOwnershipUntil,
+    getCapacity,
     size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
   });
@@ -266,6 +268,7 @@ async function searchAvailableTasks({
   removedTypes,
   excludedTypes,
   taskStore,
+  getCapacity,
   size,
   taskMaxAttempts,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
