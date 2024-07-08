@@ -69,7 +69,7 @@ export const OtelLogsPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const AGENT_CDN_BASE_URL = isServerless
-    ? 'snapshots.elastic.co/8.15.0-90bfa704/downloads/beats/elastic-agent'
+    ? 'snapshots.elastic.co/8.15.0-474afc1d/downloads/beats/elastic-agent'
     : 'artifacts.elastic.co/downloads/beats/elastic-agent';
   // TODO change once otel flow is shown on serverless
   // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
@@ -390,11 +390,6 @@ data:
         insecure_skip_verify: true
         k8s_api_config:
           auth_type: serviceAccount
-        metric_groups:
-          - node
-          - pod
-          - node
-          - volume
         metrics:
           k8s.pod.cpu.node.utilization:
             enabled: true
