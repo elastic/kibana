@@ -34,9 +34,11 @@ export const pixelCoordinateToGrid = ({
   runtimeSettings,
   gridOrigin,
   panelTopLeft,
+  isResize,
   panel,
 }: {
   panel?: GridData;
+  isResize: boolean;
   panelTopLeft: PixelCoordinate;
   gridOrigin: PixelCoordinate;
   runtimeSettings: RuntimeGridSettings;
@@ -45,7 +47,7 @@ export const pixelCoordinateToGrid = ({
   const localXCoordinate = panelTopLeft.x - gridOrigin.x;
   const localYCoordinate = panelTopLeft.y - gridOrigin.y;
 
-  const maxColumn = panel ? columnCount - panel.width : columnCount;
+  const maxColumn = panel && !isResize ? columnCount - panel.width : columnCount;
 
   const column = Math.min(
     Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),

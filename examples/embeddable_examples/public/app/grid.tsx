@@ -22,9 +22,9 @@ export const GridPage = () => {
       panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
       panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
     },
-    // {
-    //   panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' },
-    // },
+    {
+      panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' },
+    },
   ]);
 
   return (

@@ -91,7 +91,7 @@ export const KibanaGridElement = ({
           onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.dropEffect = 'move';
-            // e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
+            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
             const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().left;
             const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().top;
             updateShift({ x: shiftX, y: shiftY });
@@ -107,7 +107,7 @@ export const KibanaGridElement = ({
           onDragStart={(e) => {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.dropEffect = 'move';
-            // e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
+            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
             const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().right;
             const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().bottom;
             updateShift({ x: shiftX, y: shiftY });

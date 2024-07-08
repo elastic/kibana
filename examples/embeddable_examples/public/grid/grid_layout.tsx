@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
@@ -58,13 +57,6 @@ export const KibanaGridLayout = ({
   // store the last interaction data to avoid unnecessary re-renders
   // const lastInteractionData = useRef<InteractionData | undefined>(undefined);
 
-  const testDivPosRef = useRef<HTMLDivElement | null>(null);
-  const testDragPosRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    addEventListener('dragover', (event) => {});
-  }, []);
-
   const updateInteractionData = useCallback(
     (nextInteractionData?: InteractionData) => {
       // if (isGridDataEqual(nextInteractionData?.panelData, lastInteractionData.current?.panelData)) {
@@ -104,27 +96,27 @@ export const KibanaGridLayout = ({
   );
 
   const onDragOver = useCallback(
-    function (this: Window, e: DragEvent) {
-      e.preventDefault();
-      e.stopPropagation();
+    (mouseCoordinate: PixelCoordinate) => {
       if (!interactionData) return;
+      const panelTopLeft = {
+        x: mouseCoordinate.x - shiftRef.current.x,
+        y: mouseCoordinate.y - shiftRef.current.y,
+      };
 
       const rowIndex = getClosestGridRowIndex({
-        panelTopLeft: { x: e.clientX - shiftRef.current.x, y: e.clientY - shiftRef.current.y },
+        panelTopLeft,
         gridDivs: gridRefs.current,
       });
       const rowDiv = gridRefs.current[rowIndex];
       if (!rowDiv) return;
 
-      testDivPosRef.current!.style.left = `${rowDiv.offsetLeft}px`;
-      testDivPosRef.current!.style.top = `${rowDiv.offsetTop}px`;
-
-      testDragPosRef.current!.style.left = `${e.clientX}px`;
-      testDragPosRef.current!.style.top = `${e.clientY}px`;
-
       const { row, column } = pixelCoordinateToGrid({
-        panelTopLeft: { x: e.clientX - shiftRef.current.x, y: e.clientY - shiftRef.current.y },
-        gridOrigin: { x: rowDiv.offsetLeft, y: rowDiv.offsetTop },
+        panelTopLeft,
+        gridOrigin: {
+          x: rowDiv.getBoundingClientRect().left,
+          y: rowDiv.getBoundingClientRect().top,
+        },
+        isResize: interactionData.type === 'resize',
         panel: interactionData.panelData,
         runtimeSettings,
       });
@@ -145,34 +137,39 @@ export const KibanaGridLayout = ({
   );
 
   useEffect(() => {
-    window.addEventListener('dragover', onDragOver);
-    return () => {
-      window.removeEventListener('dragover', onDragOver);
+    const onMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!interactionData) return;
+      const mouseTargetPixel = { x: e.clientX, y: e.clientY };
+      onDragOver(mouseTargetPixel);
     };
-  }, [onDragOver]);
+
+    const onMouseUp = () => {
+      setInteractionData(undefined);
+    };
+    window.addEventListener('dragover', onMouseMove);
+    window.addEventListener('dragend', onMouseUp);
+    // const onDragEnd = () => {
+    //   setInteractionData(undefined);
+    // };
+    // window.addEventListener('dragover', onDragOver);
+    // // window.addEventListener('dragend', (event) => {
+    // //   event.preventDefault();
+    // //   event.stopPropagation();
+    // //   console.log('drag ended');
+    // //   onDragEnd();
+    // // });
+    return () => {
+      window.removeEventListener('dragover', onMouseMove);
+      window.removeEventListener('dragend', onMouseUp);
+      // window.removeEventListener('dragover', onDragOver);
+      // window.removeEventListener('dragend', onDragEnd);
+    };
+  }, [interactionData, onDragOver]);
 
   return (
-    <div ref={parentResizeRef} onDragEnd={() => setInteractionData(undefined)}>
-      <div
-        css={css`
-          position: absolute;
-          background-color: red;
-          z-index: 1000;
-          width: 5px;
-          height: 5px;
-        `}
-        ref={testDivPosRef}
-      />
-      <div
-        css={css`
-          position: absolute;
-          background-color: green;
-          z-index: 1000;
-          width: 5px;
-          height: 5px;
-        `}
-        ref={testDragPosRef}
-      />
+    <div ref={parentResizeRef}>
       {gridLayout.map((gridRow, rowIndex) => {
         return (
           <KibanaGridRow
