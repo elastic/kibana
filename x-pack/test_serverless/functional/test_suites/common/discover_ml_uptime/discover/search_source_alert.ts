@@ -272,8 +272,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // follow url provided by alert to see documents triggered the alert
     const baseUrl = deployment.getHostPort();
-    // TODO: In Serverless `link` is a full URL instead of just a path as in stateful
-    const fullLink = link.startsWith(baseUrl) ? link : baseUrl + link;
+    // In Serverless `link` is a full URL instead of just a path as in stateful
+    const fullLink = link.startsWith('http') ? link : baseUrl + link;
     await browser.navigateTo(fullLink);
     await PageObjects.discover.waitUntilSearchingHasFinished();
   };
@@ -391,18 +391,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create an alert when there is no data view', async () => {
       await openManagementAlertFlyout();
 
-      // should not have data view selected by default
-      const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      // Serverless Security and Search have an existing data view by default
-      const dataViewSelectorText = await dataViewSelector.getVisibleText();
-      if (
-        !dataViewSelectorText.includes('.alerts-security') &&
-        !dataViewSelectorText.includes('default:all-data') &&
-        !dataViewSelectorText.includes('ec') // ecommerce
-      ) {
-        expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
-      }
-
       log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
       const outputDataViewResponse = await createDataView(OUTPUT_DATA_VIEW);
@@ -421,10 +409,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await defineSearchSourceAlert(RULE_NAME);
       await testSubjects.click('selectDataViewExpression');
 
+      await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
       const input = await find.activeElement();
       // search-source-alert-output index does not have time field
       await input.type('search-source-alert-o*');
+      await testSubjects.existOrFail('explore-matching-indices-button');
       await testSubjects.click('explore-matching-indices-button');
 
       await retry.waitFor('selection to happen', async () => {
@@ -608,10 +598,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newAlert = 'New Alert for checking its status';
       await createDataView('search-source*');
 
-      await PageObjects.common.navigateToApp('management');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // TODO: Navigation to Rule Management is different in Serverless
+      // Navigation to Rule Management is different in Serverless
       await PageObjects.common.navigateToApp('triggersActions');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
