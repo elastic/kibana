@@ -150,7 +150,7 @@ const getFirstItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {
     return undefined;
   }
   const first = items[0];
-  return isSingleItem(first) ? first : getFirstItem(first.args);
+  return isSingleItem(first) ? first : getFirstItem(first);
 };
 
 const getLastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {

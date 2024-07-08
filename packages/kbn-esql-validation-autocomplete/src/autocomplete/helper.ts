@@ -147,7 +147,7 @@ export const fixupQuery = (query: string, caretPosition: number, context: Editor
 
   const isMetricsCommandTransitionIntoGrouping =
     triggerCharacter === ' ' &&
-    /^metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s+([^\s,]+)\s*(,\s*[^\s,]+)*\s+$/i.test(leftOfCaret);
+    /^\s*metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s+([^\s,]+)\s*(,\s*[^\s,]+)*\s+$/i.test(leftOfCaret);
   if (isMetricsCommandTransitionIntoGrouping) {
     insertion = 'BY ' + EDITOR_MARKER;
   } else {
@@ -162,7 +162,7 @@ export const fixupQuery = (query: string, caretPosition: number, context: Editor
           isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])));
     const isMetricsCommandTransitionIntoAggregatesOrAfterBy =
       triggerCharacter === ' ' &&
-      /^metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*(\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s*by)?\s+$/i.test(
+      /^\s*metrics\s*([^\s,]+)\s*(,\s*[^\s,]+)*(\s*([^\s,]+)\s*(,\s*[^\s,]+)*\s*by)?\s+$/i.test(
         leftOfCaret
       );
 
