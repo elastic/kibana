@@ -45,6 +45,7 @@ interface Props {
   defaultActiveWizardSection?: WizardSection;
   onStepChange?: (stepId: string) => void;
   dataStreams?: string[];
+  canRollover?: boolean;
 }
 
 const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
@@ -91,6 +92,7 @@ export const ComponentTemplateForm = ({
     },
   },
   dataStreams,
+  canRollover,
   isEditing,
   isSaving,
   saveError,
@@ -262,6 +264,7 @@ export const ComponentTemplateForm = ({
         <StepReviewContainer
           getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
           dataStreams={dataStreams}
+          canRollover={canRollover}
         />
       </FormWizardStep>
     </FormWizard>

@@ -48,6 +48,13 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
   const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
   const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
+  // If the referenced component template is part of a package and is managed
+  // we can allow the user to roll it over if possible.
+  const { data: refCompTemplate } = api.useLoadReferencedComponentTemplateMeta(decodedName);
+  const canRollover = useMemo(
+    () => refCompTemplate?.managed_by && refCompTemplate?.package,
+    [refCompTemplate]
+  );
 
   const { showDatastreamRolloverModal } = useDatastreamsRollover();
 
@@ -68,14 +75,10 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    // If the referenced component template is part of a package and is managed
-    // we can allow the user to roll it over if possible.
-    const { data: refCompTemplate } = await api.getReferencedComponentTemplateMeta(updatedComponentTemplate.name);
-    const refCompTemplateCanRollover = refCompTemplate?.managed_by && refCompTemplate?.package;
-
-    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET || refCompTemplateCanRollover) {
+    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET || canRollover) {
       await showDatastreamRolloverModal(updatedComponentTemplate.name);
     }
+
     redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
@@ -155,6 +158,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
         dataStreams={dataStreams}
+        canRollover={canRollover}
         defaultActiveWizardSection={defaultActiveStep}
         onStepChange={updateStep}
         onSave={onSave}

@@ -52,10 +52,11 @@ const getDescriptionText = (data: any) => {
 interface Props {
   componentTemplate: ComponentTemplateDeserialized;
   dataStreams?: string[];
+  canRollover?: boolean;
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ dataStreams, componentTemplate }) => {
+  ({ dataStreams, canRollover, componentTemplate }) => {
     const { name } = componentTemplate;
 
     const serializedComponentTemplate = serializeComponentTemplate(
@@ -71,7 +72,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     } = serializedComponentTemplate;
 
     const isFleetDatastreamsVisible =
-      Boolean(dataStreams?.length) && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
+      Boolean(dataStreams?.length) &&
+      (componentTemplate._meta?.managed_by === MANAGED_BY_FLEET || canRollover);
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">

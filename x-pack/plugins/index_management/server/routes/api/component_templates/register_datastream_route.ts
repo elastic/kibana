@@ -94,13 +94,15 @@ export const registerReferencedComponentTemplateMeta = ({
       const { name } = request.params;
 
       try {
-        const { index_templates: indexTemplates } = await client.asCurrentUser.indices.getIndexTemplate();
-        const result = indexTemplates
-          .filter((indexTemplate) => indexTemplate.index_template?.composed_of?.includes(name));
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
+        const result = indexTemplates.filter((indexTemplate) =>
+          indexTemplate.index_template?.composed_of?.includes(name)
+        );
 
         if (result[0]) {
           return response.ok({
-            body: result[0].index_template._meta
+            body: result[0].index_template._meta,
           });
         }
 
