@@ -22,7 +22,7 @@ export function AnnotationApplyTo({ annotation }: { annotation: Annotation }) {
     : '';
   const isAllSlos = slos?.find((slo) => slo.id === ALL_VALUE);
   if (isAllSlos) {
-    sloLabel = i18n.translate('xpack.observability.columns.sloTextLabel', {
+    sloLabel = i18n.translate('xpack.observability.columns.sloTextLabel.all', {
       defaultMessage: 'SLOs: All',
     });
   }
