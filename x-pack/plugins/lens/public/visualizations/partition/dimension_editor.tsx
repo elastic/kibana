@@ -17,7 +17,8 @@ import {
   AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';

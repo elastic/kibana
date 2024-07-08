@@ -12,7 +12,10 @@ import { getDefaultConfigSettings } from '../common/config_settings';
 import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = [
+    'responseActionUploadEnabled',
+    'responseActionScanEnabled',
+  ];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,

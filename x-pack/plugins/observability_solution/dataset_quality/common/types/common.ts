@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { DataStreamStatType } from '../data_streams_stats';
+import { Integration } from '../data_streams_stats/integration';
+
 export type SortDirection = 'asc' | 'desc';
 
 export type Maybe<T> = T | null | undefined;
@@ -12,4 +15,13 @@ export type Maybe<T> = T | null | undefined;
 export interface Coordinate {
   x: number;
   y: Maybe<number>;
+}
+
+export interface BasicDataStream {
+  type: string;
+  name: DataStreamStatType['name'];
+  rawName: string;
+  namespace: string;
+  title: string;
+  integration?: Integration;
 }
