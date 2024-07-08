@@ -57,7 +57,7 @@ export async function installEntityDefinition({
   };
 
   try {
-    logger.debug(`Installing definition ${JSON.stringify(definition)}`);
+    logger.debug(() => `Installing definition ${JSON.stringify(definition)}`);
 
     validateDefinitionCanCreateValidTransformIds(definition);
 
