@@ -146,7 +146,8 @@ const previouslyRegisteredTypes = [
   'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
   'url',
-  'usage-counters',
+  'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
+  'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
 ].sort();
