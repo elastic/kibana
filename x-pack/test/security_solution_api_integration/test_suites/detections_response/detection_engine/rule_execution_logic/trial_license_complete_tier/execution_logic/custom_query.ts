@@ -22,7 +22,7 @@ import {
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-
+import moment from 'moment';
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -60,6 +60,9 @@ import {
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   dataGeneratorFactory,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import {
   createRule,
@@ -2417,6 +2420,219 @@ export default ({ getService }: FtrProviderContext) => {
 
         const alertsAfterEnable = await getAlerts(supertest, log, es, ruleBody, 'succeeded');
         expect(alertsAfterEnable.hits.hits.length > 0).toEqual(true);
+      });
+    });
+
+    describe('manual rule run', () => {
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      /*
+       * This test is to verify that when a rule is run manually in the past, on time range, which is not covered by schedule exexution
+       * it generates an alert
+       * and when the rule is run again in the past, it does not generate a duplicate alert.
+       */
+      it('should run rule in the past and generate alert, without duplicates', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h').toISOString();
+        const secondTimestamp = new Date().toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-2',
+          },
+        };
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+      });
+
+      /*
+       * This test is to verify that when a rule is run manually in the past, on time range, which is covered by schedule exexution
+       * it don't generates an alert
+       */
+      it("should run rule in the past and don't generate duplicate alert", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(5, 'm').toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        await indexListOfDocuments([firstDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment().subtract(1, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(1);
+      });
+
+      it("disabling rule should't affect manual runs", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(4, 'h').toISOString();
+        const secondTimestamp = moment(new Date()).subtract(3, 'h');
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-2',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(0);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(10, 'h'),
+          endDate: moment().subtract(1, 'm'),
+        });
+
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
+      });
+
+      it("change rule name shoulnd't affect rule name of alerts generated by manual rule", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(4, 'h').toISOString();
+        const secondTimestamp = moment(new Date()).subtract(3, 'h');
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-2',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          name: 'original rule name',
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(0);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(10, 'h'),
+          endDate: moment().subtract(1, 'm'),
+        });
+
+        await patchRule(supertest, log, { id: createdRule.id, name: 'new rule name' });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
+        expect(allNewAlerts.hits.hits[0]?._source?.['kibana.alert.rule.name']).toEqual(
+          'original rule name'
+        );
+        expect(allNewAlerts.hits.hits[1]?._source?.['kibana.alert.rule.name']).toEqual(
+          'original rule name'
+        );
       });
     });
   });

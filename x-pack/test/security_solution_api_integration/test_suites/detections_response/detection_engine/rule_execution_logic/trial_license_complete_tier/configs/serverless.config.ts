@@ -21,6 +21,7 @@ export default createTestConfig({
       'bulkCustomHighlightedFieldsEnabled',
       'alertSuppressionForMachineLearningRuleEnabled',
       'alertSuppressionForEsqlRuleEnabled',
+      'manualRuleRunEnabled',
     ])}`,
   ],
 });
