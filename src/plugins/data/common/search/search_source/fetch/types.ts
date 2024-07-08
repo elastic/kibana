@@ -19,12 +19,11 @@ import { GetConfigFn } from '../../../types';
  * where `ISearchRequestParams` is used externally instead.
  * FIXME: replace with estypes.SearchRequest?
  */
-export interface SearchRequest {
+export type SearchRequest<T extends Record<string, any> = Record<string, any>> = {
   index?: DataView | string;
   query?: Array<Query | AggregateQuery>;
   filters?: Filter[] | (() => Filter[]);
-  [propName: string]: any;
-}
+} & Omit<T, 'index' | 'query' | 'filters'>;
 
 export interface FetchHandlers {
   getConfig: GetConfigFn;
