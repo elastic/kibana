@@ -3407,6 +3407,26 @@
       }
     }
   },
+  "usage-counter": {
+    "dynamic": false,
+    "properties": {
+      "count": {
+        "type": "integer"
+      },
+      "counterName": {
+        "type": "keyword"
+      },
+      "counterType": {
+        "type": "keyword"
+      },
+      "domainId": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {

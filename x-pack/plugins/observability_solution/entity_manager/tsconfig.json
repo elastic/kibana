@@ -27,6 +27,6 @@
     "@kbn/zod-helpers",
     "@kbn/security-plugin",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
   ]
 }
