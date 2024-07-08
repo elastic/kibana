@@ -57,7 +57,7 @@ const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   lastUsedDataViewId$: new BehaviorSubject<string>(mockDataView.id!),
 };
-const mockedControlGroupApi = {
+const controlGroupApi = {
   parentApi: dashboardApi,
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
@@ -76,7 +76,7 @@ describe('Data control editor', () => {
         <DataControlEditor
           onCancel={() => {}}
           onSave={() => {}}
-          parentApi={mockedControlGroupApi}
+          parentApi={controlGroupApi}
           initialState={{
             dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
             ...initialState,
@@ -106,9 +106,9 @@ describe('Data control editor', () => {
 
   beforeAll(() => {
     const mockRegistry = {
-      search: getMockedSearchControlFactory({ parentApi: mockedControlGroupApi }),
-      optionsList: getMockedOptionsListControlFactory({ parentApi: mockedControlGroupApi }),
-      rangeSlider: getMockedRangeSliderControlFactory({ parentApi: mockedControlGroupApi }),
+      search: getMockedSearchControlFactory({ parentApi: controlGroupApi }),
+      optionsList: getMockedOptionsListControlFactory({ parentApi: controlGroupApi }),
+      rangeSlider: getMockedRangeSliderControlFactory({ parentApi: controlGroupApi }),
     };
     (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
     (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]);
