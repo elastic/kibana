@@ -176,7 +176,6 @@ export async function suggest(
 
     if (astContext.command.name === 'metrics') {
       const metrics = astContext.command as ESQLAstMetricsCommand;
-
       if (astContext.commandPosition === 'aggregates') {
         const { nodeArg } = extractArgMeta(astContext.command, astContext.node);
         const fieldsMap: Map<string, ESQLRealField> = await new Map();
@@ -1166,7 +1165,7 @@ async function getFunctionArgsSuggestions(
       (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
-      command.name !== 'stats'
+      command.name !== 'stats' && command.name !== 'metrics'
         ? -1
         : commandArgIndex < 0
         ? Math.max(command.args.length - 1, 0)
@@ -1177,7 +1176,7 @@ async function getFunctionArgsSuggestions(
     const fnToIgnore = [];
     // just ignore the current function
     if (
-      command.name !== 'stats' ||
+      (command.name !== 'stats' && command.name !== 'metrics') ||
       (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       fnToIgnore.push(node.name);

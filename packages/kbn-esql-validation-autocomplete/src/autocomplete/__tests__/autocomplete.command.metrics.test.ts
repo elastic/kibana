@@ -121,11 +121,11 @@ describe('autocomplete.suggest', () => {
         ]);
       });
 
-      test.skip('on function left paren', async () => {
+      test('on function left paren', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('METRICS a round(/', [
-          ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
+          ...getFunctionSignaturesByReturnType('metrics', 'number', { agg: true, grouping: true }),
           ...getFieldNamesByType('number'),
           ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
             'round',
@@ -160,20 +160,19 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = [
           ...getFieldNamesByType(['number', 'date']),
-          ...getFunctionSignaturesByReturnType('metrics', ['number', 'date'], {
-            agg: true,
-            evalMath: true,
-          }),
+          ...getFunctionSignaturesByReturnType(
+            'metrics',
+            ['number', 'date'],
+            {
+              evalMath: true,
+            },
+            undefined,
+            ['min']
+          ),
         ];
 
-        await assertSuggestions(
-          'METRICS a a=min(/)',
-          expected.filter((s) => s !== 'MIN($0)')
-        );
-        await assertSuggestions(
-          'METRICS a a=min(/b), b=max()',
-          expected.filter((s) => s !== 'MIN($0)')
-        );
+        await assertSuggestions('METRICS a a=min(/)', expected);
+        await assertSuggestions('METRICS a a=min(/b), b=max()', expected);
         await assertSuggestions(
           'METRICS a a=min(b), b=max(/)',
           expected.filter((s) => s !== 'MAX($0)')
@@ -189,7 +188,6 @@ describe('autocomplete.suggest', () => {
             ...getFieldNamesByType('number'),
             ...getFunctionSignaturesByReturnType('metrics', 'number', {
               evalMath: true,
-              agg: true,
             }),
           ].filter((s) => s !== 'AVG($0)')
         );

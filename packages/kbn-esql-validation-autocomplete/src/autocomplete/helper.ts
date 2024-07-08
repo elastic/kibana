@@ -23,9 +23,12 @@ function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
 }
 
-function checkContent(fn: ESQLFunction): boolean {
+function hasAggFunctionInCallChain(fn: ESQLFunction): boolean {
   const fnDef = getFunctionDefinition(fn.name);
-  return (!!fnDef && fnDef.type === 'agg') || extractFunctionArgs(fn.args).some(checkContent);
+  return (
+    (!!fnDef && fnDef.type === 'agg') ||
+    extractFunctionArgs(fn.args).some(hasAggFunctionInCallChain)
+  );
 }
 
 export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number) {
@@ -33,7 +36,7 @@ export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number)
     return false;
   }
   const arg = command.args[argIndex];
-  return isFunctionItem(arg) ? checkContent(arg) : false;
+  return isFunctionItem(arg) ? hasAggFunctionInCallChain(arg) : false;
 }
 
 function getFnContent(fn: ESQLFunction): string[] {
