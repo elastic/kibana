@@ -7,31 +7,43 @@
 
 import expect from '@kbn/expect';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const log = getService('log');
   const ml = getService('ml');
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
   const service = 'elser';
+
   const modelId = '.elser_model_2';
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   // FLAKY: https://github.com/elastic/kibana/issues/185216
   describe('Inference endpoints', function () {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
     after(async () => {
       try {
         log.debug(`Deleting underlying trained model`);
         await ml.api.deleteTrainedModelES(modelId);
         await ml.testResources.cleanMLSavedObjects();
       } catch (err) {
-        log.debug('[Cleanup error] Error deleting trained model or saved ml objects');
+        log.debug('[Cleanup error] Error deleting trained model and saved ml objects');
         throw err;
       }
+       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
+   
     it('create inference endpoint', async () => {
       log.debug(`create inference endpoint`);
       const createInferenceEndpointResponse = await ml.api.createInferenceEndpoint(
@@ -63,10 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
     it('get all inference endpoints and confirm inference endpoint exist', async () => {
-      const { body: inferenceEndpoints } = await supertest
+      const { body: inferenceEndpoints } = await supertestWithoutAuth
         .get(`${API_BASE_PATH}/inference/all`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
         .expect(200);
 
       expect(inferenceEndpoints).to.be.ok();
@@ -80,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Deleting inference endpoint`);
       await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
       log.debug('> Inference endpoint deleted');
+      });
     });
   });
 }

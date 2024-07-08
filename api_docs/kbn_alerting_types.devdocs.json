@@ -1345,7 +1345,7 @@
           {
             "parentPluginId": "@kbn/alerting-types",
             "id": "def-common.Rule.alertDelay",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "alertDelay",
             "description": [],
@@ -1357,7 +1357,7 @@
                 "section": "def-common.AlertDelay",
                 "text": "AlertDelay"
               },
-              " | undefined"
+              " | null | undefined"
             ],
             "path": "packages/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -2780,6 +2780,21 @@
           "\"default\""
         ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.errorMessageHeader",
+        "type": "string",
+        "tags": [],
+        "label": "errorMessageHeader",
+        "description": [],
+        "signature": [
+          "\"Error validating circuit breaker\""
+        ],
+        "path": "packages/kbn-alerting-types/circuit_breaker_message_header.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
