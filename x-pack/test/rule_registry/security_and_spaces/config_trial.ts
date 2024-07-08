@@ -9,7 +9,7 @@ import { createTestConfig } from '../common/config';
 
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig('security_and_spaces', {
-  license: 'basic',
+  license: 'trial',
   ssl: true,
   testFiles: [require.resolve('./tests/trial')],
 });

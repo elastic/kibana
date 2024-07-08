@@ -19,7 +19,7 @@ const profilingDebugLogger = {
 
 const profilingFtrConfigs = {
   cloud: {
-    license: 'basic' as const,
+    license: 'trial' as const,
     kibanaConfig: {
       'logging.loggers': [profilingDebugLogger],
       config: kibanaYamlFilePath,

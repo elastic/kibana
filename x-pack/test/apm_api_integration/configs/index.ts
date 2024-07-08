@@ -26,11 +26,11 @@ const apmFtrConfigs = {
     kibanaConfig,
   },
   trial: {
-    license: 'basic' as const,
+    license: 'trial' as const,
     kibanaConfig,
   },
   rules: {
-    license: 'basic' as const,
+    license: 'trial' as const,
     kibanaConfig: {
       ...kibanaConfig,
       'xpack.ruleRegistry.write.enabled': 'true',

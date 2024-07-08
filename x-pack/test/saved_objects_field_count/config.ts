@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('./test')],
 
     esTestCluster: {
-      license: 'basic',
+      license: 'trial',
       from: 'snapshot',
       serverArgs: ['path.repo=/tmp/'],
     },
