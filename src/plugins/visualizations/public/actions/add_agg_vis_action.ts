@@ -17,6 +17,8 @@ import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiHasType } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel, CanAddNewPanel } from '@kbn/presentation-containers';
+import { VisGroups } from '../vis_types/vis_groups_enum';
+import { TypesService } from '../vis_types/types_service';
 import { showNewVisModal } from '../wizard/show_new_vis';
 
 const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
@@ -31,10 +33,16 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
   public readonly type = ADD_AGG_VIS_ACTION_ID;
   public readonly id = ADD_AGG_VIS_ACTION_ID;
   public readonly grouping = [COMMON_EMBEDDABLE_GROUPING.legacy];
+  private readonly aggVisualizationCreationEnabled: boolean;
 
   public readonly order = 20;
 
-  constructor() {}
+  constructor(visTypes: ReturnType<TypesService['start']>) {
+    this.aggVisualizationCreationEnabled =
+      visTypes.all().filter((type) => {
+        return !type.disableCreate && type.group === VisGroups.AGGBASED;
+      }).length > 0;
+  }
 
   public getIconType() {
     return 'visualizeApp';
@@ -47,7 +55,8 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return isApiCompatible(embeddable);
+    // only mark this action as compatible in environments that have agg based visualizations creation enabled
+    return this.aggVisualizationCreationEnabled && isApiCompatible(embeddable);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
