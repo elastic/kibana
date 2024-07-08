@@ -42,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
@@ -57,16 +57,16 @@ export default function (providerContext: FtrProviderContext) {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_DIRECT_ACCESS_TEST_ID);
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
@@ -84,9 +84,9 @@ export default function (providerContext: FtrProviderContext) {
         const accessKeySecretKey = 'accessKeySecretKeyTest';
         const tempAccessSessionToken = 'tempAccessSessionTokenTest';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_TEMPORARY_KEYS_TEST_ID);
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
@@ -97,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
           tempAccessSessionToken
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -118,16 +118,16 @@ export default function (providerContext: FtrProviderContext) {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_SHARED_CREDENTIAL_TEST_ID);
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
