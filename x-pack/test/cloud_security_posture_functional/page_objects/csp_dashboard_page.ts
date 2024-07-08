@@ -14,6 +14,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
 const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+type DashboardTabs = 'Cloud' | 'Kubernetes';
 
 export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -82,6 +83,35 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       }
     },
 
+    getAllComplianceScoresByCisSection: async (tab: DashboardTabs) => {
+      await dashboard.getDashoard(tab);
+      const pageContainer = await testSubjects.find('pageContainer');
+      return await pageContainer.findAllByTestSubject('cloudSecurityFindingsComplianceScore');
+    },
+
+    getDashoard: async (tab: DashboardTabs) => {
+      if (tab === 'Cloud') {
+        return await dashboard.getCloudDashboard();
+      }
+      if (tab === 'Kubernetes') {
+        return await dashboard.getKubernetesDashboard();
+      }
+    },
+
+    getFindingsLinkAtIndex: async (tab: DashboardTabs, linkIndex = 0) => {
+      await dashboard.getDashoard(tab);
+      const pageContainer = await testSubjects.find('pageContainer');
+      const allLinks = await pageContainer.findAllByXpath(`//button[contains(@class, 'euiLink')]`);
+      return await allLinks[linkIndex];
+    },
+
+    getFindingsLinksCount: async (tab: DashboardTabs) => {
+      await dashboard.getDashoard(tab);
+      const pageContainer = await testSubjects.find('pageContainer');
+      const allLinks = await pageContainer.findAllByXpath(`//button[contains(@class, 'euiLink')]`);
+      return await allLinks.length;
+    },
+
     getIntegrationDashboardContainer: () => testSubjects.find('dashboard-container'),
 
     // Cloud Dashboard
@@ -99,14 +129,6 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     getAllCloudComplianceScores: async () => {
       await dashboard.getCloudDashboard();
       return await testSubjects.findAll('dashboard-summary-section-compliance-score');
-    },
-
-    getAllComplianceScoresByCisSection: async () => {
-      await dashboard.getCloudDashboard();
-      const getCloudSummarySection = await dashboard.getCloudSummarySection();
-      return await getCloudSummarySection.findAllByTestSubject(
-        'cloudSecurityFindingsComplianceScore'
-      );
     },
 
     getCloudComplianceScore: async () => {

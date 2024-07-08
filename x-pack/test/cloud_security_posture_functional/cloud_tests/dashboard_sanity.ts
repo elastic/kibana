@@ -6,20 +6,23 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { integer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard', 'header']);
+  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard', 'header', 'findings']);
 
   describe('Cloud Posture Dashboard Page - Sanity Tests', function () {
     this.tags(['cloud_security_posture_ui_sanity']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
+    let findings: typeof pageObjects.findings;
 
     before(async () => {
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
+      findings = pageObjects.findings;
       await cspDashboard.waitForPluginInitialized();
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
@@ -54,12 +57,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Compliance By CIS sections have non empty values', async () => {
-        const compliancScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection();
-        expect(compliancScoresChartPanel.length).to.be.greaterThan(0);
-        for (const score of compliancScoresChartPanel) {
+        const complianceScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection(
+          'Cloud'
+        );
+        expect(complianceScoresChartPanel.length).to.be.greaterThan(0);
+        for (const score of complianceScoresChartPanel) {
           const scoreValue = await score.getVisibleText();
           // Check if the score is a percentage
           expect(scoreValue).to.match(/^\d+%$/);
+        }
+      });
+
+      it('Navigation to Findings page', async () => {
+        const findingsLinkCount = await dashboard.getFindingsLinksCount('Cloud');
+        for (let i = 0; i < findingsLinkCount; i++) {
+          const link = await dashboard.getFindingsLinkAtIndex('Cloud', i);
+          // for (const link of findingsLink) {
+          await link.click();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const groupSelector = await findings.groupSelector();
+          await groupSelector.openDropDown();
+          await groupSelector.setValue('None');
+          expect(
+            await findings.createDataTableObject('latest_findings_table').getRowsCount()
+          ).to.be.greaterThan(0);
+          await cspDashboard.navigateToComplianceDashboardPage();
+          await pageObjects.header.waitUntilLoadingHasFinished();
         }
       });
     });
@@ -79,6 +102,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           10
         );
         expect(resourcesEvaluatedCount).greaterThan(150);
+      });
+
+      it('Compliance By CIS sections have non empty values', async () => {
+        const complianceScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection(
+          'Kubernetes'
+        );
+        expect(complianceScoresChartPanel.length).to.be.greaterThan(0);
+        for (const score of complianceScoresChartPanel) {
+          const scoreValue = await score.getVisibleText();
+          // Check if the score is a percentage
+          expect(scoreValue).to.match(/^\d+%$/);
+        }
+      });
+
+      it('Navigation to Findings page', async () => {
+        const findingsLinkCount = await dashboard.getFindingsLinksCount('Kubernetes');
+        for (let i = 0; i < findingsLinkCount; i++) {
+          const link = await dashboard.getFindingsLinkAtIndex('Kubernetes', i);
+          // for (const link of findingsLink) {
+          await link.click();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const groupSelector = await findings.groupSelector();
+          await groupSelector.openDropDown();
+          await groupSelector.setValue('None');
+          expect(
+            await findings.createDataTableObject('latest_findings_table').getRowsCount()
+          ).to.be.greaterThan(0);
+          await cspDashboard.navigateToComplianceDashboardPage();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await dashboard.getKubernetesDashboard();
+        }
       });
     });
   });
