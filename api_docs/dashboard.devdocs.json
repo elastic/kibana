@@ -1105,9 +1105,9 @@
           "label": "registerDashboardPanelPlacementSetting",
           "description": [],
           "signature": [
-            "(embeddableType: string, getPanelPlacementSettings: ",
+            "<SerializedState extends object = object>(embeddableType: string, getPanelPlacementSettings: ",
             "GetPanelPlacementSettings",
-            "<object>) => void"
+            "<SerializedState>) => void"
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
@@ -1137,7 +1137,7 @@
               "description": [],
               "signature": [
                 "GetPanelPlacementSettings",
-                "<object>"
+                "<SerializedState>"
               ],
               "path": "src/plugins/dashboard/public/plugin.tsx",
               "deprecated": false,
