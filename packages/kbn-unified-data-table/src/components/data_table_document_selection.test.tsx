@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
@@ -196,16 +197,28 @@ describe('document selection', () => {
         rows: dataTableContextMock.rows,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
         setIsFilterActive: jest.fn(),
-        clearAllSelectedDocs: jest.fn(),
         setIsCompareActive: jest.fn(),
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
       expect(button.length).toBe(1);
       expect(button.text()).toBe('Selected2');
-    });
 
-    // TODO: add a test for "Select all X rows" button
+      act(() => {
+        button.simulate('click');
+      });
+
+      component.update();
+
+      expect(findTestSubject(component, 'dscGridShowSelectedDocuments').length).toBe(1);
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').text()).toBe('Select all 5 rows');
+
+      act(() => {
+        findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
+      });
+
+      expect(props.selectedDocsState.clearAllSelectedDocs).toHaveBeenCalled();
+    });
   });
 
   describe('DataTableCompareToolbarBtn', () => {
