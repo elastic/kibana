@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { reduce } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -92,9 +91,8 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
 
 const OutputContent = memo<{
   action: MaybeImmutable<ActionDetails>;
-  fromAlertWorkaround?: boolean;
   'data-test-subj'?: string;
-}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
+}>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
   const {
@@ -105,23 +103,6 @@ const OutputContent = memo<{
 
   const { command: _command, isCompleted, isExpired, wasSuccessful } = action;
   const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
-
-  // FIXME:PT remove once automated response actions are corrected to use `ActionDetails` (team issue 9822)
-  if (fromAlertWorkaround && action.errors?.length) {
-    return (
-      <>
-        {(
-          action.errors ?? [
-            i18n.translate('xpack.securitySolution.actionLogExpandedTray.missingErrors', {
-              defaultMessage: 'Action did not specify any errors',
-            }),
-          ]
-        ).map((error) => (
-          <EuiFlexItem>{error}</EuiFlexItem>
-        ))}
-      </>
-    );
-  }
 
   if (isExpired) {
     return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
@@ -203,10 +184,8 @@ OutputContent.displayName = 'OutputContent';
 
 export const ActionsLogExpandedTray = memo<{
   action: MaybeImmutable<ActionDetails>;
-  // Delete prop `fromAlert` once we refactor automated response actions
-  fromAlertWorkaround?: boolean;
   'data-test-subj'?: string;
-}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
+}>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
@@ -317,16 +296,12 @@ export const ActionsLogExpandedTray = memo<{
         description: (
           // codeblock for output
           <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-            <OutputContent
-              action={action}
-              data-test-subj={dataTestSubj}
-              fromAlertWorkaround={fromAlertWorkaround}
-            />
+            <OutputContent action={action} data-test-subj={dataTestSubj} />
           </StyledEuiCodeBlock>
         ),
       },
     ],
-    [action, dataTestSubj, fromAlertWorkaround, getTestId]
+    [action, dataTestSubj, getTestId]
   );
 
   return (
