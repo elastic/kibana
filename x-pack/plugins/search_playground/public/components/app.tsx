@@ -16,7 +16,7 @@ import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { ChatForm, ChatFormFields } from '../types';
 import { Chat } from './chat';
 
-interface AppProps {
+export interface AppProps {
   showDocs?: boolean;
 }
 

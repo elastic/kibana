@@ -137,8 +137,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectViewQueryHasFields() {
         await testSubjects.existOrFail('queryMode');
         await testSubjects.click('queryMode');
-        await testSubjects.existOrFail('fieldsAccordion-0');
-        await testSubjects.click('fieldsAccordion-0');
         const fields = await testSubjects.findAll('fieldName');
 
         expect(fields.length).to.be(1);

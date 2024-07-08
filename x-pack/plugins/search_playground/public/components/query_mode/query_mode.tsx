@@ -119,6 +119,7 @@ export const QueryMode: React.FC = () => {
                       <h5>{index}</h5>
                     </EuiText>
                   }
+                  initialIsOpen
                   data-test-subj={`fieldsAccordion-${indexNum}`}
                 >
                   <EuiSpacer size="s" />

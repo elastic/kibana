@@ -12,8 +12,9 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AppPluginStartDependencies } from './types';
 import { queryClient } from './utils/query_client';
+import { AppProps } from './components/app';
 
-export const Playground = dynamic(async () => ({
+export const Playground = dynamic<React.FC<AppProps>>(async () => ({
   default: (await import('./components/app')).App,
 }));
 
