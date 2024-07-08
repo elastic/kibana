@@ -6,7 +6,6 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { integer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -18,11 +17,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
     let findings: typeof pageObjects.findings;
+    let TAB_TYPES: typeof pageObjects.cloudPostureDashboard.TAB_TYPES;
 
     before(async () => {
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
       findings = pageObjects.findings;
+      TAB_TYPES = pageObjects.cloudPostureDashboard.TAB_TYPES;
       await cspDashboard.waitForPluginInitialized();
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
@@ -58,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('Compliance By CIS sections have non empty values', async () => {
         const complianceScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection(
-          'Cloud'
+          TAB_TYPES.CLOUD
         );
         expect(complianceScoresChartPanel.length).to.be.greaterThan(0);
         for (const score of complianceScoresChartPanel) {
@@ -69,9 +70,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Navigation to Findings page', async () => {
-        const findingsLinkCount = await dashboard.getFindingsLinksCount('Cloud');
+        const findingsLinkCount = await dashboard.getFindingsLinksCount(TAB_TYPES.CLOUD);
         for (let i = 0; i < findingsLinkCount; i++) {
-          const link = await dashboard.getFindingsLinkAtIndex('Cloud', i);
+          const link = await dashboard.getFindingsLinkAtIndex(TAB_TYPES.CLOUD, i);
           // for (const link of findingsLink) {
           await link.click();
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -117,10 +118,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Navigation to Findings page', async () => {
-        const findingsLinkCount = await dashboard.getFindingsLinksCount('Kubernetes');
+        const findingsLinkCount = await dashboard.getFindingsLinksCount(TAB_TYPES.KUBERNETES);
         for (let i = 0; i < findingsLinkCount; i++) {
-          const link = await dashboard.getFindingsLinkAtIndex('Kubernetes', i);
-          // for (const link of findingsLink) {
+          const link = await dashboard.getFindingsLinkAtIndex(TAB_TYPES.KUBERNETES, i);
           await link.click();
           await pageObjects.header.waitUntilLoadingHasFinished();
           const groupSelector = await findings.groupSelector();

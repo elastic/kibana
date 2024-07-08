@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const testCases = [
         {
-          query:
+          searchQuery:
             'cloud.provider : "aws" and cloud.region : "eu-west-3" and result.evaluation : "failed"  and rule.tags : "CIS 5.4"',
           provider: 'aws',
           expectedRowsCount: 3,
@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expectedUnitCount: '3 findings',
         },
         {
-          query:
+          searchQuery:
             'cloud.provider : "gcp" and rule.benchmark.rule_number : "3.1" and result.evaluation : "failed"',
           provider: 'gcp',
           expectedRowsCount: 1,
@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expectedUnitCount: '1 finding',
         },
         {
-          query:
+          searchQuery:
             'cloud.provider : "azure" and rule.benchmark.rule_number : "7.1" and result.evaluation : "failed"',
           provider: 'azure',
           expectedRowsCount: 1,
@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expectedUnitCount: '1 finding',
         },
         {
-          query:
+          searchQuery:
             'rule.benchmark.id : "cis_k8s" and rule.benchmark.rule_number : "4.2.4" and result.evaluation : "failed"',
           provider: 'k8s',
           expectedRowsCount: 2,
@@ -70,7 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expectedUnitCount: '2 findings',
         },
         {
-          query: 'rule.benchmark.id : "cis_eks" and rule.benchmark.rule_number : "3.1.1"',
+          searchQuery: 'rule.benchmark.id : "cis_eks" and rule.benchmark.rule_number : "3.1.1"',
           provider: 'eks',
           expectedRowsCount: 2,
           expectedGroupCount: '0 cloud accounts',
@@ -79,10 +79,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ];
 
       testCases.forEach(
-        ({ query, provider, expectedRowsCount, expectedGroupCount, expectedUnitCount }) => {
+        ({ searchQuery, provider, expectedRowsCount, expectedGroupCount, expectedUnitCount }) => {
           it(`Querying ${provider} provider data`, async () => {
             // Execute the query
-            await queryBar.setQuery(query);
+            await queryBar.setQuery(searchQuery);
             await queryBar.submitQuery();
             // Get the number of rows in the data table
             const rowsCount = await findings
@@ -115,37 +115,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       type SortDirection = 'asc' | 'desc';
-      type TestCase = [string, string, string, SortDirection, string];
-      const paginationAndsortingTestCases: TestCase[] = [
-        [
-          'cloud.provider : "aws" and resource.sub_type : "aws-iam-user" and result.evaluation : "passed"',
-          '250',
-          'rule.benchmark.rule_number',
-          'desc',
-          '1.7',
-        ],
-        [
-          'cloud.provider : "azure" and result.evaluation : "failed"',
-          '500',
-          'rule.benchmark.rule_number',
-          'asc',
-          '1.23',
-        ],
-        [
-          'cloud.provider : "gcp" and result.evaluation : "passed"',
-          '500',
-          'resource.sub_type',
-          'desc',
-          'gcp-storage-bucket',
-        ],
+      const paginationAndsortingTestCases: Array<{
+        searchQuery: string;
+        paginationRowsCount: string;
+        columnName: string;
+        sortType: SortDirection;
+        expectedResult: string;
+      }> = [
+        {
+          searchQuery:
+            'cloud.provider : "aws" and resource.sub_type : "aws-iam-user" and result.evaluation : "passed"',
+          paginationRowsCount: '250',
+          columnName: 'rule.benchmark.rule_number',
+          sortType: 'desc',
+          expectedResult: '1.7',
+        },
+        {
+          searchQuery: 'cloud.provider : "azure" and result.evaluation : "failed"',
+          paginationRowsCount: '500',
+          columnName: 'rule.benchmark.rule_number',
+          sortType: 'asc',
+          expectedResult: '1.23',
+        },
+        {
+          searchQuery: 'cloud.provider : "gcp" and result.evaluation : "passed"',
+          paginationRowsCount: '500',
+          columnName: 'resource.sub_type',
+          sortType: 'desc',
+          expectedResult: 'gcp-storage-bucket',
+        },
       ];
 
       paginationAndsortingTestCases.forEach(
-        ([query, paginationRowsCount, columnName, sortType, expectedResult]) => {
+        ({ searchQuery, paginationRowsCount, columnName, sortType, expectedResult }) => {
           it(`Paginating and sorting data`, async () => {
             // Run query
             await queryBar.clearQuery();
-            await queryBar.setQuery(query);
+            await queryBar.setQuery(searchQuery);
             await queryBar.submitQuery();
             // Update latest findings table pagination
             const paginationBtn = await testSubjects.find('tablePaginationPopoverButton');
