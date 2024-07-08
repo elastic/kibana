@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiDescribedFormGroup, EuiSpacer, EuiCallOut } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import styled from 'styled-components';
+import { EuiDescribedFormGroup, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   NewAgentPolicy,
@@ -26,6 +25,13 @@ interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   isDisabled?: boolean;
 }
+
+// Fix to align description to top during empty state w/ unsupported callout
+const DescribedFormGroup = styled(EuiDescribedFormGroup)`
+  .euiFlexGroup {
+    align-items: flex-start;
+  }
+`;
 
 export const CustomFields: React.FunctionComponent<Props> = ({
   agentPolicy,
@@ -58,7 +64,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
   const unsupportedInputs = findUnsupportedInputs(agentPolicy, GLOBAL_DATA_TAG_EXCLUDED_INPUTS);
 
   return (
-    <EuiDescribedFormGroup
+    <DescribedFormGroup
       fullWidth
       title={
         <h3>
@@ -81,7 +87,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
                 title={
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.globalDataTagUnsupportedInputTitle"
-                    defaultMessage="Unsupported Inputs"
+                    defaultMessage="Unsupported inputs"
                   />
                 }
                 color="warning"
@@ -109,6 +115,6 @@ export const CustomFields: React.FunctionComponent<Props> = ({
         updateAgentPolicy={updateAgentPolicy}
         globalDataTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
       />
-    </EuiDescribedFormGroup>
+    </DescribedFormGroup>
   );
 };

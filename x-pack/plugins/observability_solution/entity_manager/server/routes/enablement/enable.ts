@@ -93,7 +93,6 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         await installBuiltInEntityDefinitions({
           logger,
           builtInDefinitions,
-          spaceId: 'default',
           esClient: scopedEsClient,
           soClient: scopedSoClient,
         });
