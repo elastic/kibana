@@ -107,7 +107,7 @@ export const getVisualizeEmbeddableFactory: (
           }),
         onEdit: async () => {
           const stateTransferService = embeddableStart.getStateTransfer();
-          const visId = vis$.getValue().id;
+          const visId = savedObjectId$.getValue();
           const editPath = visId ? urlFor(visId) : '#/edit_by_value';
           await stateTransferService.navigateToEditor('visualize', {
             path: editPath,

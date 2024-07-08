@@ -41,7 +41,6 @@ import {
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
-  console.log('DESERIALIZE', state);
   if (!state.rawState)
     return {
       vis: {
@@ -56,7 +55,6 @@ export const deserializeState = async (
   const references: Reference[] = state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
-  console.log('deserializedSavedVis', deserializedSavedVis, serializedState, references);
   const vis = await createVisInstance(deserializedSavedVis);
   return {
     ...serializedState,
