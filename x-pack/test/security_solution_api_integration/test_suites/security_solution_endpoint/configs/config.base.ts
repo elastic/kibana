@@ -8,11 +8,12 @@
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
-import {
-  getRegistryUrlAsArray,
-  createEndpointDockerConfig,
-} from '../../security_solution_endpoint_api_int/registry';
+
 import type { TargetTags } from '../target_tags';
+import {
+  createEndpointDockerConfig,
+  getRegistryUrlAsArray,
+} from '../../../../common/services/security_solution';
 
 export const SUITE_TAGS: Record<
   'ess' | 'serverless',

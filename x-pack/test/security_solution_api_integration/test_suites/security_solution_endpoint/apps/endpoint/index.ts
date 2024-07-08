@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
   getRegistryUrlFromTestEnv,
   isRegistryEnabled,
-} from '../../../security_solution_endpoint_api_int/registry';
+} from '../../../../../common/services/security_solution';
 
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;

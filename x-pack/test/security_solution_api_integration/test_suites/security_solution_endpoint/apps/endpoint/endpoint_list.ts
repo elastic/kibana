@@ -8,12 +8,11 @@
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-
 import {
-  deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+  deleteMetadataStream,
+} from '../../../../../common/services/security_solution';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
