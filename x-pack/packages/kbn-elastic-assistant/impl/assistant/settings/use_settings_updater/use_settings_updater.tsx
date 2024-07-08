@@ -32,6 +32,8 @@ export const DEFAULT_ANONYMIZATION_FIELDS = {
 };
 
 export const DEFAULT_CONVERSATIONS: Record<string, Conversation> = {};
+
+export const DEFAULT_PROMPTS: FindPromptsResponse = { page: 0, perPage: 0, total: 0, data: [] };
 interface UseSettingsUpdater {
   assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;

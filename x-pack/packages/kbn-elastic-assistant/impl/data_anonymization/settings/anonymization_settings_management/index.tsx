@@ -16,6 +16,7 @@ import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonym
 import {
   DEFAULT_ANONYMIZATION_FIELDS,
   DEFAULT_CONVERSATIONS,
+  DEFAULT_PROMPTS,
   useSettingsUpdater,
 } from '../../../assistant/settings/use_settings_updater/use_settings_updater';
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
@@ -29,7 +30,7 @@ export interface Props {
 
 const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
   const { toasts } = useAssistantContext();
-  const { data: anonymizationFields, refetch } = useFetchAnonymizationFields();
+  const { data: anonymizationFields } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const {
@@ -41,10 +42,10 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     updatedAnonymizationData,
   } = useSettingsUpdater(
     DEFAULT_CONVERSATIONS, // Anonymization settings do not require conversations
+    DEFAULT_PROMPTS, // Anonymization settings do not require prompts
     false, // Anonymization settings do not require conversations
     anonymizationFields ?? DEFAULT_ANONYMIZATION_FIELDS
   );
-  console.log('anonymizationFields--------------');
 
   const onCancelClick = useCallback(() => {
     resetSettings();
