@@ -28,8 +28,8 @@ import { FeedbackModal } from './feedback_modal';
 import { UnauthorisedModal } from './unauthorized_modal';
 
 export function EntityEnablement() {
-  const [isFeedbackModalVisiable, setsIsFeedbackModalVisiable] = useState(false);
-  const [isUnauthorizedVisiable, setsIsUnauthorizedModalVisiable] = useState(false);
+  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
+  const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
 
   const {
     services: { entityManager },
@@ -47,11 +47,11 @@ export function EntityEnablement() {
       const response = await entityManager.entityClient.disableManagedEntityDiscovery();
       if (response.success) {
         setIsLoading(false);
-        setsIsFeedbackModalVisiable(true);
+        setsIsFeedbackModalVisible(true);
       }
     } catch (error) {
       setIsLoading(false);
-      setsIsFeedbackModalVisiable(true);
+      setsIsFeedbackModalVisible(true);
       console.error(error);
     }
   };
@@ -67,12 +67,17 @@ export function EntityEnablement() {
 
       if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
         setIsLoading(false);
-        setsIsUnauthorizedModalVisiable(true);
+        setsIsUnauthorizedModalVisible(true);
       }
     } catch (error) {
       setIsLoading(false);
       console.error(error);
     }
+  };
+
+  const handdleOnCloseFeedback = () => {
+    setsIsFeedbackModalVisible(false);
+    refetch();
   };
 
   return isEnablementPending ? (
@@ -145,14 +150,12 @@ export function EntityEnablement() {
         </EuiFlexItem>
       )}
       <FeedbackModal
-        isFeedbackModalVisiable={isFeedbackModalVisiable}
-        setsIsFeedbackModalVisiable={setsIsFeedbackModalVisiable}
-        refetch={refetch}
+        isFeedbackModalVisible={isFeedbackModalVisible}
+        onClose={handdleOnCloseFeedback}
       />
       <UnauthorisedModal
-        isUnauthorizedVisiable={isUnauthorizedVisiable}
-        setsIsUnauthorizedModalVisiable={setsIsUnauthorizedModalVisiable}
-        refetch={refetch}
+        isUnauthorizedModalVisible={isUnauthorizedModalVisible}
+        onClose={() => setsIsUnauthorizedModalVisible(false)}
       />
     </EuiFlexGroup>
   );

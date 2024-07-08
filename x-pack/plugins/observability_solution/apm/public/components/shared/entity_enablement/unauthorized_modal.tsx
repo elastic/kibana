@@ -18,25 +18,21 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 
 export function UnauthorisedModal({
-  isUnauthorizedVisiable,
-  setsIsUnauthorizedModalVisiable,
+  isUnauthorizedModalVisible = false,
+  onClose,
 }: {
-  isUnauthorizedVisiable: boolean;
-  setsIsUnauthorizedModalVisiable: (value: boolean) => void;
+  isUnauthorizedModalVisible?: boolean;
+  onClose: () => void;
 }) {
-  const closeModal = () => {
-    setsIsUnauthorizedModalVisiable(false);
-  };
-
   return (
     <>
-      {isUnauthorizedVisiable && (
+      {isUnauthorizedModalVisible && (
         <EuiConfirmModal
           title={i18n.translate('xpack.apm.eem.unauthorised.title', {
             defaultMessage: 'This feature is turned off',
           })}
-          onCancel={closeModal}
-          onConfirm={closeModal}
+          onCancel={onClose}
+          onConfirm={onClose}
           confirmButtonText={
             <EuiButton data-test-subj="xpack.apm.unauthorised.button.open" fill size="s">
               {i18n.translate('xpack.apm.unauthorised.button.openSurvey', {

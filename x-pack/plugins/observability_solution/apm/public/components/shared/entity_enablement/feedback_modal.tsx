@@ -10,28 +10,21 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 
 export function FeedbackModal({
-  isFeedbackModalVisiable,
-  setsIsFeedbackModalVisiable,
-  refetch,
+  isFeedbackModalVisible = false,
+  onClose,
 }: {
-  isFeedbackModalVisiable: boolean;
-  setsIsFeedbackModalVisiable: (value: boolean) => void;
-  refetch: () => void;
+  isFeedbackModalVisible?: boolean;
+  onClose: () => void;
 }) {
-  const closeModal = () => {
-    setsIsFeedbackModalVisiable(false);
-    refetch();
-  };
-
   return (
     <>
-      {isFeedbackModalVisiable && (
+      {isFeedbackModalVisible && (
         <EuiConfirmModal
           title={i18n.translate('xpack.apm.eemFeedback.title', {
             defaultMessage: 'Thank you',
           })}
-          onCancel={closeModal}
-          onConfirm={closeModal}
+          onCancel={onClose}
+          onConfirm={onClose}
           cancelButtonText={i18n.translate('xpack.apm.eemFeedback.button.cancel', {
             defaultMessage: 'Maybe later',
           })}
