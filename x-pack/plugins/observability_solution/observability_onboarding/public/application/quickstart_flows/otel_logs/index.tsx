@@ -69,7 +69,7 @@ export const OtelLogsPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const AGENT_CDN_BASE_URL = isServerless
-    ? 'snapshots.elastic.co/8.15.0-474afc1d/downloads/beats/elastic-agent'
+    ? 'snapshots.elastic.co/8.15.0-dd63864e/downloads/beats/elastic-agent'
     : 'artifacts.elastic.co/downloads/beats/elastic-agent';
   // TODO change once otel flow is shown on serverless
   // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
@@ -724,7 +724,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                     <EuiCallOut
                       title={i18n.translate(
                         'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
-                        { defaultMessage: 'Default config limitations' }
+                        { defaultMessage: 'Configuration Information' }
                       )}
                       color="warning"
                       iconType="iInCircle"
@@ -733,8 +733,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                         {i18n.translate(
                           'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
                           {
-                            defaultMessage:
-                              'We only collect new log messages from the setup onward.',
+                            defaultMessage: 'New log messages are collected from the setup onward.',
                           }
                         )}
                       </p>
@@ -744,7 +743,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                             'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
                             {
                               defaultMessage:
-                                'The default log path to be scraped is /var/log/*. You can change this path in the otel.yml file if needed.',
+                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
                             }
                           )}
                         </p>
