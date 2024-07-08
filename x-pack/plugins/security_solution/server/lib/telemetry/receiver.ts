@@ -204,6 +204,7 @@ export interface ITelemetryReceiver {
   }>;
 
   fetchPrebuiltRuleAlertsBatch(
+    index: string,
     executeFrom: string,
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
@@ -746,13 +747,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
+  public async *fetchPrebuiltRuleAlertsBatch(
+    index: string,
+    executeFrom: string,
+    executeTo: string
+  ) {
     this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
 
-    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
+    let pitId = await this.openPointInTime(index);
     let fetchMore = true;
     let searchAfter: SortResults | undefined;
 
