@@ -34,6 +34,7 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'namespace',
   'alias_purpose',
   'alias_target_id',
+  'outcome',
 ]);
 
 // `response_actions` is only part of the optional fields in QueryRuleCreateFields and SavedQueryRuleCreateFields
@@ -53,10 +54,10 @@ export const RuleAssetTypeSpecificCreateProps = z.discriminatedUnion('type', [
   QueryRuleAssetFields,
   SavedQueryRuleAssetFields,
   ThresholdRuleCreateFields,
+  ThreatMatchRuleCreateFields,
   MachineLearningRuleCreateFields,
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
-  ThreatMatchRuleCreateFields,
 ]);
 
 function zodMaskFor<T>() {
