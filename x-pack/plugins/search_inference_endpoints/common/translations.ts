@@ -151,3 +151,10 @@ export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.s
 export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {
   defaultMessage: 'Type',
 });
+
+export const TRAINED_MODELS_STAT_GATHER_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.trainedModelsStatGatherFailed',
+  {
+    defaultMessage: 'Failed to gather trained models stats',
+  }
+);

@@ -9,6 +9,8 @@ import React, { useCallback, useEffect } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
 import { FilterOptions } from './types';
@@ -36,7 +38,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     useAllInferenceEndpointsState();
 
   const {
-    services: { ml },
+    services: { ml, notifications },
   } = useKibana();
 
   const onFilterChangedCallback = useCallback(
@@ -66,8 +68,13 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       }
     };
 
-    fetchDeploymentStatus();
-  }, [ml]);
+    fetchDeploymentStatus().catch((error) => {
+      const errorObj = extractErrorProperties(error);
+      notifications?.toasts?.addError(errorObj.message ? new Error(error.message) : error, {
+        title: i18n.TRAINED_MODELS_STAT_GATHER_FAILED,
+      });
+    });
+  }, [ml, notifications]);
 
   const { paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
