@@ -75,10 +75,7 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
               "SyntaxError: token recognition error at: '='",
               "SyntaxError: token recognition error at: '1'",
             ]);
-            await expectErrors('metrics `index`', [
-              "SyntaxError: token recognition error at: '`'",
-              "SyntaxError: token recognition error at: '`'",
-            ]);
+            await expectErrors('metrics `index`', ['Unknown index [`index`]']);
           });
 
           test('errors on unknown index', async () => {

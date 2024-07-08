@@ -82,10 +82,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on invalid syntax', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('FROM `index`', [
-              "SyntaxError: token recognition error at: '`'",
-              "SyntaxError: token recognition error at: '`'",
-            ]);
+            await expectErrors('FROM `index`', ['Unknown index [`index`]']);
             await expectErrors(`from assignment = 1`, [
               "SyntaxError: mismatched input '=' expecting <EOF>",
               'Unknown index [assignment]',

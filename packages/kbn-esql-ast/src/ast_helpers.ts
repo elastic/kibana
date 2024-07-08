@@ -275,7 +275,7 @@ function safeBackticksRemoval(text: string | undefined) {
   return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
-export function sanitizeIdentifierString(ctx: ParserRuleContext) {
+function sanitizeSourceString(ctx: ParserRuleContext) {
   const contextText = ctx.getText();
   // If wrapped by triple quote, remove
   if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
@@ -285,6 +285,10 @@ export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
     return contextText.slice(1, -1);
   }
+  return contextText;
+}
+
+export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
@@ -329,7 +333,7 @@ export function createSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
-  const text = sanitizeIdentifierString(ctx);
+  const text = sanitizeSourceString(ctx);
   return {
     type: 'source',
     name: text,
