@@ -45,6 +45,9 @@ export const CreateIndexButton: React.FC = () => {
       title={i18n.translate('xpack.searchPlayground.createIndexCallout', {
         defaultMessage: 'You need to create an index first',
       })}
+      size="s"
+      color="warning"
+      data-test-subj="createIndexCallout"
     />
   );
 };

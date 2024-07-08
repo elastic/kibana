@@ -24,7 +24,14 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
+      },
+
+      async expectPlaygroundStartChatPageIndexButtonExists() {
         await testSubjects.existOrFail('createIndexButton');
+      },
+
+      async expectPlaygroundStartChatPageIndexCalloutExists() {
+        await testSubjects.existOrFail('createIndexCallout');
       },
 
       async expectPlaygroundHeaderComponentsToExist() {
