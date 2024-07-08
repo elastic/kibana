@@ -533,14 +533,13 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
-    agentPolicies,
     newPolicy,
     onChange,
     validationResults,
     isEditPage,
     packageInfo,
     handleSetupTechnologyChange,
-    agentlessPolicy,
+    isAgentlessEnabled,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
@@ -551,8 +550,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
-      agentPolicies,
-      agentlessPolicy,
+      isAgentlessEnabled,
       handleSetupTechnologyChange,
       isEditPage,
     });

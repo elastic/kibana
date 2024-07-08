@@ -8,9 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import { EuiTableComputedColumnType } from '@elastic/eui';
-import { QuickPrompt } from '../types';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const mockOnEditActionClicked = jest.fn();
 const mockOnDeleteActionClicked = jest.fn();
@@ -43,7 +43,7 @@ describe('useQuickPromptTable', () => {
       });
 
       const mockQuickPrompt = { ...MOCK_QUICK_PROMPTS[0], categories: ['alert'] };
-      const mockBadgesColumn = (columns[1] as EuiTableComputedColumnType<QuickPrompt>).render(
+      const mockBadgesColumn = (columns[1] as EuiTableComputedColumnType<PromptResponse>).render(
         mockQuickPrompt
       );
       const selectedPromptContexts = mockPromptContexts
@@ -51,7 +51,7 @@ describe('useQuickPromptTable', () => {
         .map((bpc) => bpc.description);
       expect(mockBadgesColumn).toHaveProperty('props', {
         items: selectedPromptContexts,
-        prefix: MOCK_QUICK_PROMPTS[0].title,
+        prefix: MOCK_QUICK_PROMPTS[0].name,
       });
     });
 
@@ -62,7 +62,7 @@ describe('useQuickPromptTable', () => {
         onDeleteActionClicked: mockOnDeleteActionClicked,
       });
 
-      const mockRowActions = (columns[2] as EuiTableComputedColumnType<QuickPrompt>).render(
+      const mockRowActions = (columns[2] as EuiTableComputedColumnType<PromptResponse>).render(
         MOCK_QUICK_PROMPTS[0]
       );
 
@@ -83,7 +83,7 @@ describe('useQuickPromptTable', () => {
 
       const nonDefaultPrompt = MOCK_QUICK_PROMPTS.find((qp) => !qp.isDefault);
       if (nonDefaultPrompt) {
-        const mockRowActions = (columns[2] as EuiTableComputedColumnType<QuickPrompt>).render(
+        const mockRowActions = (columns[2] as EuiTableComputedColumnType<PromptResponse>).render(
           nonDefaultPrompt
         );
         expect(mockRowActions).toHaveProperty('props', {
