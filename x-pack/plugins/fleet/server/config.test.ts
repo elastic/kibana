@@ -116,7 +116,11 @@ describe('Config schema', () => {
         agentless: {
           api: {
             url: 'https://agentless.api.url',
-            tls: { certificate: 'config/certs/agentless.crt', key: 'config/certs/agentless.key' },
+            tls: {
+              certificate: 'config/certs/agentless.crt',
+              key: 'config/certs/agentless.key',
+              ca: 'config/certs/ca.crt',
+            },
           },
         },
       });

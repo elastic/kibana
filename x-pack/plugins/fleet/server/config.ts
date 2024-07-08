@@ -150,6 +150,7 @@ export const config: PluginConfigDescriptor = {
             tls: schema.object({
               certificate: schema.string(),
               key: schema.string(),
+              ca: schema.string(),
             }),
           }),
         })

@@ -1119,6 +1119,7 @@ class AgentPolicyService {
         enabled: true,
         certificate: agentlessConfig.api.tls.certificate,
         key: agentlessConfig.api.tls.key,
+        certificateAuthorities: agentlessConfig.api.tls.ca,
       })
     );
 
@@ -1139,12 +1140,13 @@ class AgentPolicyService {
             rejectUnauthorized: tlsConfig.rejectUnauthorized,
             cert: tlsConfig.certificate,
             key: tlsConfig.key,
+            ca: tlsConfig.certificateAuthorities,
           }),
         }
       );
 
       // if status is not CREATED, throw an error
-      if (status !== 201) {
+      if (status !== 200) {
         throw new AgentlessAgentCreateError(
           `received response status: ${status} with message ${statusText}`
         );
@@ -1173,17 +1175,17 @@ class AgentPolicyService {
     const { items: fleetHosts } = await listFleetServerHosts(soClient);
     // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
     // https://github.com/elastic/security-team/issues/9695
-    const fleetHost =
+    const defaultFleetHost =
       fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
 
-    if (!fleetHost) {
+    if (!defaultFleetHost) {
       throw new AgentlessAgentCreateError('missing Fleet server host');
     }
     if (!enrollmentApiKeys.length) {
       throw new AgentlessAgentCreateError('missing Fleet enrollment token');
     }
     const fleetToken = enrollmentApiKeys[0].api_key;
-    const fleetUrl = fleetHost?.host_urls[0];
+    const fleetUrl = defaultFleetHost?.host_urls[0];
     return { fleetUrl, fleetToken };
   }
 

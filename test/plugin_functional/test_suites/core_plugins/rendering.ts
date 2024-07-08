@@ -263,6 +263,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agentless.api.url (string)',
         'xpack.fleet.agentless.api.tls.certificate (string)',
         'xpack.fleet.agentless.api.tls.key (string)',
+        'xpack.fleet.agentless.api.tls.ca (string)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
