@@ -858,7 +858,7 @@ async function getExpressionSuggestionsByType(
       } else {
         const index = getSourcesFromCommands(commands, 'index');
         // This is going to be empty for simple indices, and not empty for integrations
-        if (index && index.text) {
+        if (index && index.text && index.text !== EDITOR_MARKER) {
           const source = index.text.replace(EDITOR_MARKER, '');
           const dataSource = await getDatastreamsForIntegration(source);
           const newDefinitions = buildSourcesDefinitions(
