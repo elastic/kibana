@@ -39,7 +39,6 @@
     "@kbn/data-plugin",
     "@kbn/search-types",
     "@kbn/utility-types",
-    "@kbn/rule-registry-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/core-application-browser",
     "@kbn/react-kibana-mount",

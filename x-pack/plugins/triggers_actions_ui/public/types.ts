@@ -56,8 +56,10 @@ import {
   SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type {
+  RuleRegistrySearchRequestPagination,
+  EcsFieldsResponse,
+} from '@kbn/rule-registry-plugin/common';
 import {
   QueryDslQueryContainer,
   SortCombinations,

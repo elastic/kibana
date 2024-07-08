@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-
-export type Alert = EcsFieldsResponse;
 export interface LegacyField {
   field: string;
   value: string[];

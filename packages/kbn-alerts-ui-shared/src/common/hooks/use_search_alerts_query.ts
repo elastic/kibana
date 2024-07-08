@@ -15,15 +15,13 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchResponse,
-} from '@kbn/rule-registry-plugin/common';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
 import type { UseQueryOptions } from '@tanstack/react-query/src/types';
+import type { Alert } from '@kbn/alerting-types';
+import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '@kbn/alerting-types';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
-import { Alert, EsQuerySnapshot, LegacyField } from '../types';
+import type { EsQuerySnapshot, LegacyField } from '../types';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
 
 export interface UseSearchAlertsQueryParams {
