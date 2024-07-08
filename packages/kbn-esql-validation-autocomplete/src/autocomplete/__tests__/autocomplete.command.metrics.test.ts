@@ -180,13 +180,19 @@ describe('autocomplete.suggest', () => {
         );
       });
 
-      test.skip('inside function argument list', async () => {
+      test('inside function argument list', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('METRICS a avg(b/) by stringField', [
-          ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
-        ]);
+        await assertSuggestions(
+          'METRICS a avg(b/) by stringField',
+          [
+            ...getFieldNamesByType('number'),
+            ...getFunctionSignaturesByReturnType('metrics', 'number', {
+              evalMath: true,
+              agg: true,
+            }),
+          ].filter((s) => s !== 'AVG($0)')
+        );
       });
 
       test.skip('when typing right paren', async () => {
