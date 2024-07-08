@@ -291,22 +291,24 @@ export const ReactControlExample = ({
         {controlGroupApi && (
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={async () => {
-                const { type: controlType, state: initialState } = await openDataControlEditor({
+              onClick={() => {
+                openDataControlEditor({
                   initialState: {
                     grow: DEFAULT_CONTROL_GROW,
                     width: DEFAULT_CONTROL_WIDTH,
                     dataViewId: dashboardApi.lastUsedDataViewId.getValue(),
+                  },
+                  onSave: ({ type: controlType, state: initialState }) => {
+                    controlGroupApi.addNewPanel({
+                      panelType: controlType,
+                      initialState,
+                    });
                   },
                   controlGroupApi,
                   services: {
                     core,
                     dataViews: dataViewsService,
                   },
-                });
-                controlGroupApi.addNewPanel({
-                  panelType: controlType,
-                  initialState,
                 });
               }}
               size="s"

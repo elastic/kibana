@@ -27,84 +27,84 @@ export type DataControlEditorState = Omit<DefaultDataControlState, 'fieldName'> 
   defaultPanelTitle?: string;
 };
 
-export const openDataControlEditor = async <
+export const openDataControlEditor = <
   State extends DataControlEditorState = DataControlEditorState
 >({
   initialState,
+  onSave,
   controlGroupApi,
   services,
 }: {
   initialState: State;
+  onSave: ({ type, state }: { type: string; state: State }) => void;
   controlGroupApi: ControlGroupApi;
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
   };
-}): Promise<{ type: string; state: State }> => {
-  return new Promise((resolve) => {
-    const closeOverlay = (overlayRef: OverlayRef) => {
-      if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-        controlGroupApi.parentApi.clearOverlays();
-      }
-      overlayRef.close();
-    };
-
-    const onCancel = (newState: State, overlay: OverlayRef) => {
-      if (deepEqual(initialState, newState)) {
-        closeOverlay(overlay);
-        return;
-      }
-      services.core.overlays
-        .openConfirm(
-          i18n.translate('controls.controlGroup.management.discard.sub', {
-            defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
-          }),
-          {
-            confirmButtonText: i18n.translate('controls.controlGroup.management.discard.confirm', {
-              defaultMessage: 'Discard changes',
-            }),
-            cancelButtonText: i18n.translate('controls.controlGroup.management.discard.cancel', {
-              defaultMessage: 'Cancel',
-            }),
-            title: i18n.translate('controls.controlGroup.management.discard.title', {
-              defaultMessage: 'Discard changes?',
-            }),
-            buttonColor: 'danger',
-          }
-        )
-        .then((confirmed) => {
-          if (confirmed) {
-            closeOverlay(overlay);
-          }
-        });
-    };
-
-    const overlay = services.core.overlays.openFlyout(
-      toMountPoint(
-        <DataControlEditor<State>
-          parentApi={controlGroupApi}
-          initialState={initialState}
-          onCancel={(state) => {
-            onCancel(state, overlay);
-          }}
-          onSave={(state, selectedControlType) => {
-            closeOverlay(overlay);
-            resolve({ type: selectedControlType, state });
-          }}
-          services={{ dataViews: services.dataViews }}
-        />,
-        {
-          theme: services.core.theme,
-          i18n: services.core.i18n,
-        }
-      ),
-      {
-        onClose: () => closeOverlay(overlay),
-      }
-    );
-
+}): void => {
+  const closeOverlay = (overlayRef: OverlayRef) => {
     if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-      controlGroupApi.parentApi.openOverlay(overlay);
+      controlGroupApi.parentApi.clearOverlays();
     }
-  });
+    overlayRef.close();
+  };
+
+  const onCancel = (newState: State, overlay: OverlayRef) => {
+    if (deepEqual(initialState, newState)) {
+      closeOverlay(overlay);
+      return;
+    }
+    services.core.overlays
+      .openConfirm(
+        i18n.translate('controls.controlGroup.management.discard.sub', {
+          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
+        }),
+        {
+          confirmButtonText: i18n.translate('controls.controlGroup.management.discard.confirm', {
+            defaultMessage: 'Discard changes',
+          }),
+          cancelButtonText: i18n.translate('controls.controlGroup.management.discard.cancel', {
+            defaultMessage: 'Cancel',
+          }),
+          title: i18n.translate('controls.controlGroup.management.discard.title', {
+            defaultMessage: 'Discard changes?',
+          }),
+          buttonColor: 'danger',
+        }
+      )
+      .then((confirmed) => {
+        if (confirmed) {
+          closeOverlay(overlay);
+        }
+      });
+  };
+
+  const overlay = services.core.overlays.openFlyout(
+    toMountPoint(
+      <DataControlEditor<State>
+        parentApi={controlGroupApi}
+        initialState={initialState}
+        onCancel={(state) => {
+          onCancel(state, overlay);
+        }}
+        onSave={(state, selectedControlType) => {
+          closeOverlay(overlay);
+          onSave({ type: selectedControlType, state });
+        }}
+        services={{ dataViews: services.dataViews }}
+      />,
+      {
+        theme: services.core.theme,
+        i18n: services.core.i18n,
+      }
+    ),
+    {
+      onClose: () => closeOverlay(overlay),
+    }
+  );
+
+  if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
+    controlGroupApi.parentApi.openOverlay(overlay);
+  }
 };

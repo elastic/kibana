@@ -124,10 +124,21 @@ export const initializeDataControl = <EditorState extends object = {}>(
     }, {} as DefaultDataControlState & EditorState);
 
     // open the editor to get the new state
-    const { type: newType, state: newState } = await openDataControlEditor<
-      DefaultDataControlState & EditorState
-    >({
+    openDataControlEditor<DefaultDataControlState & EditorState>({
       services,
+      onSave: ({ type: newType, state: newState }) => {
+        if (newType === controlType) {
+          // apply the changes from the new state via the state manager
+          (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
+            (key) => {
+              mergedStateManager[key].next(newState[key]);
+            }
+          );
+        } else {
+          // replace the control with a new one of the updated type
+          controlGroup.replacePanel(controlId, { panelType: newType, initialState });
+        }
+      },
       initialState: {
         ...initialState,
         controlType,
@@ -136,18 +147,6 @@ export const initializeDataControl = <EditorState extends object = {}>(
       },
       controlGroupApi: controlGroup,
     });
-
-    if (newType === controlType) {
-      // apply the changes from the new state via the state manager
-      (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
-        (key) => {
-          mergedStateManager[key].next(newState[key]);
-        }
-      );
-    } else {
-      // replace the control with a new one of the updated type
-      controlGroup.replacePanel(controlId, { panelType: newType, initialState });
-    }
   };
 
   const api: ControlApiInitialization<DataControlApi> = {
