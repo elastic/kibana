@@ -35,7 +35,7 @@ const FILTER_DELTA = {
 describe('chaining$', () => {
   const onFireMock = jest.fn();
   const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL');
-  const controlsInOrder$ = new BehaviorSubject<Array<{ id: string }>>([]);
+  const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
   const getControlApi = (uuid: string) => {
     if (uuid === 'alpha') {
       return {
@@ -64,10 +64,10 @@ describe('chaining$', () => {
     onFireMock.mockReset();
     chainingSystem$.next('HIERARCHICAL');
     controlsInOrder$.next([
-      { id: 'alpha' },
-      { id: 'bravo' },
-      { id: 'charlie' },
-      { id: 'delta' },
+      { id: 'alpha', type: 'whatever' },
+      { id: 'bravo', type: 'whatever' },
+      { id: 'charlie', type: 'whatever' },
+      { id: 'delta', type: 'whatever' },
     ]);
   });
 
@@ -130,10 +130,10 @@ describe('chaining$', () => {
       
       // Move control to right of 'delta' control
       controlsInOrder$.next([
-        { id: 'alpha' },
-        { id: 'bravo' },
-        { id: 'delta' },
-        { id: 'charlie' },
+        { id: 'alpha', type: 'whatever' },
+        { id: 'bravo', type: 'whatever' },
+        { id: 'delta', type: 'whatever' },
+        { id: 'charlie', type: 'whatever' },
       ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -166,9 +166,9 @@ describe('chaining$', () => {
       
       // remove 'bravo' control
       controlsInOrder$.next([
-        { id: 'alpha' },
-        { id: 'charlie' },
-        { id: 'delta' },
+        { id: 'alpha', type: 'whatever' },
+        { id: 'charlie', type: 'whatever' },
+        { id: 'delta', type: 'whatever' },
       ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
 

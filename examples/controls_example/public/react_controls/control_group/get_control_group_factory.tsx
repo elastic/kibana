@@ -48,6 +48,7 @@ import {
   ControlGroupUnsavedChanges,
 } from './types';
 import { dataControlFetch$ } from './data_control_fetch';
+import { chaining$ } from './chaining';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -105,17 +106,28 @@ export const getControlGroupEmbeddableFactory = (services: {
         undefined
       );
 
-      const controlOrder = new BehaviorSubject<Array<{ id: string; order: number; type: string }>>(
-        Object.keys(childControlState)
+      const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
+      const controlsOrderSubscription = children$.subscribe(children => {
+        const controlsInOrder = Object.keys(children)
           .map((key) => ({
             id: key,
             order: childControlState[key].order,
             type: childControlState[key].type,
           }))
-          .sort((a, b) => (a.order > b.order ? 1 : -1))
-      );
+          .sort((a, b) => (a.order > b.order ? 1 : -1));
+        controlsInOrder$.next(controlsInOrder);
+      });
+
       const api = setApi({
         dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
+        chaining$: (controlUuid: string) => chaining$(
+          controlUuid,
+          chainingSystem$,
+          controlsInOrder$,
+          (uuid: string) => {
+            return children$.value[uuid];
+          }
+        ),
         ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
@@ -153,7 +165,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         serializeState: () => {
           return serializeControlGroup(
             children$.getValue(),
-            controlOrder.getValue().map(({ id }) => id),
+            controlsInOrder$.getValue().map(({ id }) => id),
             {
               labelPosition: labelPosition$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
@@ -231,13 +243,14 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const controlsInOrder = useStateFromPublishingSubject(controlOrder);
+          const controlsInOrder = useStateFromPublishingSubject(controlsInOrder$);
 
           useEffect(() => {
             return () => {
               outputFiltersSubscription.unsubscribe();
               childDataViewsSubscription.unsubscribe();
               childrenTimesliceSubscription.unsubscribe();
+              controlsOrderSubscription.unsubscribe();
             };
           }, []);
 

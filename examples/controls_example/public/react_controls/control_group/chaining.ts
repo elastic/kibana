@@ -14,7 +14,7 @@ import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMa
 export function chaining$(
   uuid: string,
   chainingSystem$: PublishingSubject<ControlGroupChainingSystem>,
-  controlsInOrder$: PublishingSubject<Array<{ id: string }>>,
+  controlsInOrder$: PublishingSubject<Array<{ id: string; type: string }>>,
   getControlApi: (uuid: string) => undefined | unknown
 ) {
   return combineLatest([chainingSystem$, controlsInOrder$]).pipe(
