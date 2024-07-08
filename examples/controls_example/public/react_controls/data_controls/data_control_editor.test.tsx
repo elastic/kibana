@@ -16,16 +16,21 @@ import { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 
-import { registerControlFactory } from '../control_factory_registry';
+import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
+jest.mock('../control_factory_registry', () => ({
+  ...jest.requireActual('../control_factory_registry'),
+  getAllControlTypes: jest.fn(),
+  getControlFactory: jest.fn(),
+}));
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
+import { DataControlEditorState } from './open_data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
 } from './mocks/data_control_mocks';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
-import { DataControlEditorState } from './open_data_control_editor';
 
 const mockDataViews = dataViewPluginMocks.createStartContract();
 const mockDataView = createStubDataView({
@@ -52,7 +57,7 @@ const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   lastUsedDataViewId$: new BehaviorSubject<string>(mockDataView.id!),
 };
-const controlGroupApi = {
+const mockedControlGroupApi = {
   parentApi: dashboardApi,
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
@@ -71,7 +76,7 @@ describe('Data control editor', () => {
         <DataControlEditor
           onCancel={() => {}}
           onSave={() => {}}
-          parentApi={controlGroupApi}
+          parentApi={mockedControlGroupApi}
           initialState={{
             dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
             ...initialState,
@@ -100,16 +105,13 @@ describe('Data control editor', () => {
   };
 
   beforeAll(() => {
-    /** Register all of my mocked data controls */
-    registerControlFactory('search', async () => {
-      return getMockedSearchControlFactory({ parentApi: controlGroupApi });
-    });
-    registerControlFactory('optionsList', async () => {
-      return getMockedOptionsListControlFactory({ parentApi: controlGroupApi });
-    });
-    registerControlFactory('rangeSlider', async () => {
-      return getMockedRangeSliderControlFactory({ parentApi: controlGroupApi });
-    });
+    const mockRegistry = {
+      search: getMockedSearchControlFactory({ parentApi: mockedControlGroupApi }),
+      optionsList: getMockedOptionsListControlFactory({ parentApi: mockedControlGroupApi }),
+      rangeSlider: getMockedRangeSliderControlFactory({ parentApi: mockedControlGroupApi }),
+    };
+    (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
+    (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]);
   });
 
   describe('creating a new control', () => {
