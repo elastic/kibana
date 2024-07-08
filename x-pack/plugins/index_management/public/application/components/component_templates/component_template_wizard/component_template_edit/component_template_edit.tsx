@@ -68,7 +68,12 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET) {
+    // If the referenced component template is part of a package and is managed
+    // we can allow the user to roll it over if possible.
+    const { data: refCompTemplate } = await api.getReferencedComponentTemplateMeta(updatedComponentTemplate.name);
+    const refCompTemplateCanRollover = refCompTemplate?.managed_by && refCompTemplate?.package;
+
+    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET || refCompTemplateCanRollover) {
       await showDatastreamRolloverModal(updatedComponentTemplate.name);
     }
     redirectTo({

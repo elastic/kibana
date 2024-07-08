@@ -77,3 +77,37 @@ export const registerGetDatastreams = ({
     }
   );
 };
+
+export const registerReferencedComponentTemplateMeta = ({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies): void => {
+  router.get(
+    {
+      path: addBasePath('/component_templates/{name}/referenced_component_template_meta'),
+      validate: {
+        params: paramsSchema,
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { name } = request.params;
+
+      try {
+        const { index_templates: indexTemplates } = await client.asCurrentUser.indices.getIndexTemplate();
+        const result = indexTemplates
+          .filter((indexTemplate) => indexTemplate.index_template?.composed_of?.includes(name));
+
+        if (result[0]) {
+          return response.ok({
+            body: result[0].index_template._meta
+          });
+        }
+
+        return response.notFound();
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
+  );
+};

@@ -11,6 +11,7 @@ import {
   ComponentTemplateDeserialized,
   ComponentTemplateSerialized,
   ComponentTemplateDatastreams,
+  ComponentTemplateMeta,
 } from '../shared_imports';
 import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
@@ -109,12 +110,20 @@ export const getApi = (
     });
   }
 
+  async function getReferencedComponentTemplateMeta(name: string) {
+    return sendRequest<ComponentTemplateMeta>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/referenced_component_template_meta`,
+      method: 'get',
+    });
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
     useLoadComponentTemplate,
     createComponentTemplate,
     updateComponentTemplate,
+    getReferencedComponentTemplateMeta,
     useLoadComponentTemplatesDatastream,
     getComponentTemplateDatastreams,
     postDataStreamRollover,
