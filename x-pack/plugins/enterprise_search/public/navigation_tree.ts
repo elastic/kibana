@@ -76,7 +76,6 @@ export const getNavigationTreeDefinition = ({
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: isSearchHomepageEnabled ? 'searchHomepage' : 'enterpriseSearch',
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
