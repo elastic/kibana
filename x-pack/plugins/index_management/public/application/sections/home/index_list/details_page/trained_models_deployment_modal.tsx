@@ -82,37 +82,30 @@ export function TrainedModelsDeploymentModal({
   };
 
   useEffect(() => {
-    const newPendingDeployments: string[] = inferenceIdsInPendingList
-      .map((inferenceId) => {
-        if (!inferenceId) {
-          return '';
-        }
-        const model = inferenceToModelIdMap?.[inferenceId];
-        if (model && !model.isDownloading && !model.isDeployed) {
-          // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
-          startModelAllocation(model.trainedModelId);
-        }
-        const trainedModelId = model?.trainedModelId ?? '';
-        return trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed
-          ? trainedModelId
-          : '';
+    const models = inferenceIdsInPendingList.map(
+      (inferenceId) => inferenceToModelIdMap?.[inferenceId]
+    );
+    for (const model of models) {
+      if (model && !model.isDownloading && !model.isDeployed) {
+        // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
+        startModelAllocation(model.trainedModelId);
+      }
+    }
+    const pendingModels = models
+      .map((model) => {
+        return model?.trainedModelId && !model?.isDeployed ? model?.trainedModelId : '';
       })
       .filter((trainedModelId) => !!trainedModelId);
-    setPendingDeployments(newPendingDeployments);
+    const uniqueDeployments = pendingModels.filter(
+      (deployment, index) => pendingModels.indexOf(deployment) === index
+    );
+    setPendingDeployments(uniqueDeployments);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
 
   const erroredDeployments = pendingDeployments.filter(
-    (deployment) => !!deployment && errorsInTrainedModelDeployment[deployment]
+    (deployment) => errorsInTrainedModelDeployment[deployment]
   );
-
-  const pendingDeploymentsList = pendingDeployments.map((deployment) => (
-    <li key={deployment}>
-      <EuiHealth textSize="xs" color="danger">
-        {deployment}
-      </EuiHealth>
-    </li>
-  ));
 
   useEffect(() => {
     if (erroredDeployments.length > 0 || pendingDeployments.length > 0) {
@@ -170,7 +163,15 @@ export function TrainedModelsDeploymentModal({
             )}
       </p>
       <ul style={{ listStyleType: 'none' }}>
-        {erroredDeployments.length > 0 ? erroredDeployments : pendingDeploymentsList}
+        {(erroredDeployments.length > 0 ? erroredDeployments : pendingDeployments).map(
+          (deployment) => (
+            <li key={deployment}>
+              <EuiHealth textSize="xs" color="danger">
+                {deployment}
+              </EuiHealth>
+            </li>
+          )
+        )}
       </ul>
       <EuiLink href={mlManagementPageUrl} target="_blank">
         {i18n.translate(
