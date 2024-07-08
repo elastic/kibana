@@ -78,8 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await browser.refresh();
         });
-        it('hide gen ai panel', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnector();
+        it('show success llm button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
         });
       });
 
@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('creates a connector successfully', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnectorAfterCreatingConnector(
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
             createConnector
           );
         });
@@ -102,17 +102,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        it('show no index callout', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
-        });
-
         it('hide no index callout when index added', async () => {
           await createIndex();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectIndex(indexName);
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         });
 
         after(async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.removeIndexFromComboBox();
           await esArchiver.unload(esArchiveIndex);
           await browser.refresh();
         });
@@ -125,14 +120,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
 
-        it('dropdown shows up', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectIndicesInDropdown();
-        });
-
-        it('can select index from dropdown and navigate to chat window', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndStartButtonEnabled(
-            indexName
-          );
+        it('can select index from dropdown and load chat page', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
         });
 
         after(async () => {

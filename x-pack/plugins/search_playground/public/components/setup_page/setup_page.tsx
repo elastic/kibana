@@ -16,7 +16,7 @@ import {
 import React, { useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import { CreateIndexButton } from '../create_index_button';
+import { CreateIndexButton } from './create_index_button';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { docLinks } from '../../../common/doc_links';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
@@ -46,6 +46,7 @@ export const SetupPage: React.FC = () => {
   return (
     <EuiEmptyPrompt
       iconType="discuss"
+      data-test-subj="setupPage"
       title={
         <h2>
           <FormattedMessage

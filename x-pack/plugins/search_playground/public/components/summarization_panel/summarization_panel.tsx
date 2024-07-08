@@ -20,7 +20,7 @@ export const SummarizationPanel: React.FC = () => {
   const models = useLLMsModels();
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="summarizationPanel">
       <Controller
         name={ChatFormFields.summarizationModel}
         rules={{ required: true }}

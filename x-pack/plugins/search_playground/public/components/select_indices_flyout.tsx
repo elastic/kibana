@@ -77,7 +77,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
                   ({
                     label: index,
                     checked: selectedTempIndices.includes(index) ? 'on' : '',
-                    'data-test-subj': `selectIndex-${num}`,
+                    'data-test-subj': `sourceIndex-${num}`,
                   } as EuiSelectableOption)
               ),
             ]}

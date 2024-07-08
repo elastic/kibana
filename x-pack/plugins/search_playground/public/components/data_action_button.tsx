@@ -28,6 +28,7 @@ export const DataActionButton: React.FC = () => {
         iconType="database"
         onClick={handleShowFlyout}
         disabled={!selectedIndices?.length}
+        data-test-subj="dataSourceActionButton"
       >
         <FormattedMessage id="xpack.searchPlayground.dataActionButton" defaultMessage="Data" />
       </EuiButton>

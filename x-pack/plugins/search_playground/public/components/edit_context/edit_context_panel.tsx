@@ -54,7 +54,7 @@ export const EditContextPanel: React.FC = () => {
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="editContextPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -100,12 +100,12 @@ export const EditContextPanel: React.FC = () => {
                 </h5>
               </EuiText>
             </EuiFlexItem>
-            {Object.entries(fields).map(([index, group]) => (
+            {Object.entries(fields).map(([index, group], indexNum) => (
               <EuiFlexItem grow={false} key={index}>
                 <EuiFormRow label={index} fullWidth>
                   {!!group.source_fields?.length ? (
                     <EuiSuperSelect
-                      data-test-subj={`contextFieldsSelectable_${index}`}
+                      data-test-subj={`contextFieldsSelectable-${indexNum}`}
                       options={group.source_fields.map((field) => ({
                         value: field,
                         inputDisplay: field,

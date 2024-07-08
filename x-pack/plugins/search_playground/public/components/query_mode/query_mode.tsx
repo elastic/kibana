@@ -109,7 +109,7 @@ export const QueryMode: React.FC = () => {
               />
             </h5>
           </EuiText>
-          {Object.entries(fields).map(([index, group]) => (
+          {Object.entries(fields).map(([index, group], indexNum) => (
             <EuiFlexItem grow={false} key={index}>
               <EuiPanel grow={false} hasShadow={false} hasBorder>
                 <EuiAccordion
@@ -119,12 +119,12 @@ export const QueryMode: React.FC = () => {
                       <h5>{index}</h5>
                     </EuiText>
                   }
+                  data-test-subj={`fieldsAccordion-${indexNum}`}
                 >
                   <EuiSpacer size="s" />
 
                   <EuiBasicTable
                     tableCaption="Query Model table"
-                    data-test-subj={`queryFieldsSelectable_${index}`}
                     items={[
                       ...group.semantic_fields,
                       ...group.elser_query_fields,
@@ -138,11 +138,12 @@ export const QueryMode: React.FC = () => {
                         typeof field === 'string' ? field : field.field
                       ),
                     }))}
-                    rowHeader="firstName"
+                    rowHeader="name"
                     columns={[
                       {
                         field: 'name',
                         name: 'Field',
+                        'data-test-subj': 'fieldName',
                       },
                       {
                         field: 'checked',

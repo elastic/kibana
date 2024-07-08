@@ -41,12 +41,14 @@ export const Header: React.FC<HeaderProps> = ({
       label: i18n.translate('xpack.searchPlayground.header.view.chat', {
         defaultMessage: 'Chat',
       }),
+      'data-test-subj': 'chatMode',
     },
     {
       id: ViewMode.query,
       label: i18n.translate('xpack.searchPlayground.header.view.query', {
         defaultMessage: 'Query',
       }),
+      'data-test-subj': 'queryMode',
     },
   ];
 
@@ -87,6 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
           onChange={onModeChange}
           buttonSize="compressed"
           isDisabled={isActionsDisabled}
+          data-test-subj="viewModeSelector"
         />
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>

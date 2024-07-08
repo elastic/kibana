@@ -24,7 +24,12 @@ export const AddDataSources: React.FC = () => {
     <>
       {showFlyout && <SelectIndicesFlyout onClose={handleFlyoutClose} />}
       {hasSelectedIndices ? (
-        <EuiButtonEmpty iconType="check" color="success">
+        <EuiButtonEmpty
+          iconType="check"
+          color="success"
+          onClick={() => setShowFlyout(true)}
+          data-test-subj="dataSourcesSuccessButton"
+        >
           <FormattedMessage
             id="xpack.searchPlayground.setupPage.addedDataSourcesLabel"
             defaultMessage="Data sources added"

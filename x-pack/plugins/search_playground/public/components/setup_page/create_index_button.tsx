@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../hooks/use_kibana';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const CreateIndexButton: React.FC = () => {
   const {
@@ -39,5 +40,11 @@ export const CreateIndexButton: React.FC = () => {
         defaultMessage="Create an index"
       />
     </EuiButton>
-  ) : null;
+  ) : (
+    <EuiCallOut
+      title={i18n.translate('xpack.searchPlayground.createIndexCallout', {
+        defaultMessage: 'You need to create an index first',
+      })}
+    />
+  );
 };

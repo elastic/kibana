@@ -7,12 +7,12 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CreateIndexButton } from './create_index_button';
 
 // Mocking the useKibana hook
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
     services: {
       application: {

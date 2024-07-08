@@ -49,7 +49,12 @@ export const ConnectLLMButton: React.FC = () => {
   return (
     <>
       {connectors?.length ? (
-        <EuiButtonEmpty iconType="check" color="success" onClick={handleSetupGenAiConnector}>
+        <EuiButtonEmpty
+          iconType="check"
+          color="success"
+          onClick={handleSetupGenAiConnector}
+          data-test-subj="successConnectLLMButton"
+        >
           <FormattedMessage
             id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
             defaultMessage="LLM connected"
