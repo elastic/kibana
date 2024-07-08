@@ -111,7 +111,7 @@ export const useAnnotations = ({
       lines: LineAnnotationEvent[];
     }) => {
       if (annotations.rects.length) {
-        const selectedAnnotation = data?.find((a) => annotations.rects[0].id.includes(a.id));
+        const selectedAnnotation = data?.items?.find((a) => annotations.rects[0].id.includes(a.id));
         if (selectedAnnotation) {
           const editData = clone(selectedAnnotation);
           reset({
@@ -124,7 +124,7 @@ export const useAnnotations = ({
         }
       }
       if (annotations.lines.length) {
-        const selectedAnnotation = data?.find((a) => annotations.lines[0].id.includes(a.id));
+        const selectedAnnotation = data?.items?.find((a) => annotations.lines[0].id.includes(a.id));
         if (selectedAnnotation) {
           const editData = clone(selectedAnnotation);
           reset({

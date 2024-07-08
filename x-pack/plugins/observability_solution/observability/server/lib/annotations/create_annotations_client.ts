@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
   Annotation,
@@ -275,7 +275,7 @@ export function createAnnotationsClient(params: {
       }));
       return {
         items,
-        total: result.hits.total.value,
+        total: (result.hits.total as SearchTotalHits)?.value,
       };
     }),
     delete: ensureGoldLicense(async (deleteParams: DeleteAnnotationParams) => {

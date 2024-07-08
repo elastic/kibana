@@ -47,12 +47,12 @@ export function AnnotationTooltip({
     },
   ];
 
-  if (annotation.slo?.id) {
+  if (annotation.slos?.length) {
     listItems.push({
       title: i18n.translate('xpack.observability.annotationTooltip.slo', {
-        defaultMessage: 'SLO',
+        defaultMessage: 'SLOs',
       }),
-      description: annotation.slo?.id ?? '--',
+      description: annotation.slos.map((slo) => slo.id).join(', '),
     });
   }
 

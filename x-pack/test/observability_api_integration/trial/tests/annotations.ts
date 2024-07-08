@@ -33,7 +33,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('Observability annotations', () => {
+  describe('ObservabilityAnnotations', () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
         const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });

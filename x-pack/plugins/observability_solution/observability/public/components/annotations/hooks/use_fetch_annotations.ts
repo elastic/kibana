@@ -10,7 +10,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Annotation } from '../../../../common/annotations';
 import { useKibana } from '../../../utils/kibana_react';
 
-interface FindAnnotationsResponse {
+export interface FindAnnotationsResponse {
   items: Annotation[];
   total: number;
 }
