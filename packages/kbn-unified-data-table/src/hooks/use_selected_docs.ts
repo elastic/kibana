@@ -13,7 +13,7 @@ export interface UseSelectedDocsState {
   isDocSelected: (docId: string) => boolean;
   getCountOfSelectedDocs: (docIds: string[]) => number;
   hasSelectedDocs: boolean;
-  usedSelectedDocs: string[];
+  selectedDocIds: string[];
   toggleDocSelection: (docId: string) => void;
   selectAllDocs: () => void;
   selectMoreDocs: (docIds: string[]) => void;
@@ -60,7 +60,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
     setSelectedDocsSet(new Set());
   }, []);
 
-  const usedSelectedDocs = useMemo(
+  const selectedDocIds = useMemo(
     () => Array.from(selectedDocsSet).filter((docId) => docMap.has(docId)),
     [selectedDocsSet, docMap]
   );
@@ -70,7 +70,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
     [selectedDocsSet, docMap]
   );
 
-  const usedSelectedDocsCount = usedSelectedDocs.length;
+  const usedSelectedDocsCount = selectedDocIds.length;
 
   const getCountOfSelectedDocs = useCallback(
     (docIds) => {
@@ -88,7 +88,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       isDocSelected,
       hasSelectedDocs: usedSelectedDocsCount > 0,
       getCountOfSelectedDocs,
-      usedSelectedDocs,
+      selectedDocIds,
       toggleDocSelection,
       selectAllDocs,
       selectMoreDocs,
@@ -106,7 +106,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       replaceSelectedDocs,
       clearAllSelectedDocs,
       usedSelectedDocsCount,
-      usedSelectedDocs,
+      selectedDocIds,
     ]
   );
 };

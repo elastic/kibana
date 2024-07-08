@@ -30,7 +30,7 @@ import type { DocumentDiffMode } from './types';
 
 export interface ComparisonControlsProps {
   isPlainRecord?: boolean;
-  selectedDocs: string[];
+  selectedDocIds: string[];
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
   showDiffDecorations: boolean | undefined;
@@ -47,7 +47,7 @@ export interface ComparisonControlsProps {
 
 export const ComparisonControls = ({
   isPlainRecord,
-  selectedDocs,
+  selectedDocIds,
   showDiff,
   diffMode,
   showDiffDecorations,
@@ -72,13 +72,13 @@ export const ComparisonControls = ({
               <FormattedMessage
                 id="unifiedDataTable.comparingResults"
                 defaultMessage="Comparing {documentCount} results"
-                values={{ documentCount: selectedDocs.length }}
+                values={{ documentCount: selectedDocIds.length }}
               />
             ) : (
               <FormattedMessage
                 id="unifiedDataTable.comparingDocuments"
                 defaultMessage="Comparing {documentCount} documents"
-                values={{ documentCount: selectedDocs.length }}
+                values={{ documentCount: selectedDocIds.length }}
               />
             )}
           </strong>

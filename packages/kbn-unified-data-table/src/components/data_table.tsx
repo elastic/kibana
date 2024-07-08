@@ -470,8 +470,7 @@ export const UnifiedDataTable = ({
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
-  const { isDocSelected, hasSelectedDocs, usedSelectedDocs, replaceSelectedDocs } =
-    selectedDocsState;
+  const { isDocSelected, hasSelectedDocs, selectedDocIds, replaceSelectedDocs } = selectedDocsState;
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -860,18 +859,18 @@ export const UnifiedDataTable = ({
     controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !usedSelectedDocs.length) {
+    if (!externalAdditionalControls && !selectedDocIds.length) {
       return null;
     }
 
     return (
       <>
-        {Boolean(usedSelectedDocs.length) && (
+        {Boolean(selectedDocIds.length) && (
           <EuiFlexGroup gutterSize="s" responsive={false}>
-            {enableComparisonMode && usedSelectedDocs.length > 1 && (
+            {enableComparisonMode && selectedDocIds.length > 1 && (
               <EuiFlexItem grow={false}>
                 <DataTableCompareToolbarBtn
-                  selectedDocs={usedSelectedDocs}
+                  selectedDocIds={selectedDocIds}
                   setIsCompareActive={setIsCompareActive}
                 />
               </EuiFlexItem>
@@ -891,7 +890,7 @@ export const UnifiedDataTable = ({
       </>
     );
   }, [
-    usedSelectedDocs,
+    selectedDocIds,
     selectedDocsState,
     externalAdditionalControls,
     isPlainRecord,
@@ -1054,7 +1053,7 @@ export const UnifiedDataTable = ({
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
               additionalFieldGroups={additionalFieldGroups}
-              selectedDocs={usedSelectedDocs}
+              selectedDocIds={selectedDocIds}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
               showFullScreenButton={showFullScreenButton}

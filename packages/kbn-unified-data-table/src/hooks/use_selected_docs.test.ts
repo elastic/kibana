@@ -22,7 +22,7 @@ describe('useSelectedDocs', () => {
     const { result } = renderHook(() => useSelectedDocs(docsMap));
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [],
+        selectedDocIds: [],
         hasSelectedDocs: false,
       })
     );
@@ -37,7 +37,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id],
+        selectedDocIds: [docs[0].id],
         hasSelectedDocs: true,
       })
     );
@@ -51,7 +51,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id, docs[1].id],
+        selectedDocIds: [docs[0].id, docs[1].id],
         hasSelectedDocs: true,
       })
     );
@@ -65,7 +65,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[1].id],
+        selectedDocIds: [docs[1].id],
         hasSelectedDocs: true,
       })
     );
@@ -79,7 +79,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [],
+        selectedDocIds: [],
         hasSelectedDocs: false,
       })
     );
@@ -98,7 +98,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id, docs[1].id],
+        selectedDocIds: [docs[0].id, docs[1].id],
         hasSelectedDocs: true,
       })
     );
@@ -109,7 +109,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[1].id, docs[2].id],
+        selectedDocIds: [docs[1].id, docs[2].id],
         hasSelectedDocs: true,
       })
     );
@@ -128,7 +128,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: docs.map((doc) => doc.id),
+        selectedDocIds: docs.map((doc) => doc.id),
         hasSelectedDocs: true,
       })
     );
@@ -147,7 +147,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id, docs[1].id],
+        selectedDocIds: [docs[0].id, docs[1].id],
         hasSelectedDocs: true,
       })
     );
@@ -158,7 +158,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id, docs[1].id, docs[2].id],
+        selectedDocIds: [docs[0].id, docs[1].id, docs[2].id],
         hasSelectedDocs: true,
       })
     );
@@ -179,7 +179,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id, docs[1].id, docs[2].id],
+        selectedDocIds: [docs[0].id, docs[1].id, docs[2].id],
         hasSelectedDocs: true,
       })
     );
@@ -190,7 +190,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[1].id],
+        selectedDocIds: [docs[1].id],
         hasSelectedDocs: true,
       })
     );
@@ -210,7 +210,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [docs[0].id, docs[1].id],
+        selectedDocIds: [docs[0].id, docs[1].id],
         hasSelectedDocs: true,
       })
     );
@@ -221,7 +221,7 @@ describe('useSelectedDocs', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        usedSelectedDocs: [],
+        selectedDocIds: [],
         hasSelectedDocs: false,
       })
     );

@@ -22,9 +22,9 @@ export interface UseComparisonColumnsProps {
   wrapper: HTMLElement | null;
   isPlainRecord: boolean;
   fieldColumnId: string;
-  selectedDocs: string[];
+  selectedDocIds: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
-  replaceSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (docIds: string[]) => void;
 }
 
 export const DEFAULT_COLUMN_WIDTH = 300;
@@ -37,7 +37,7 @@ export const useComparisonColumns = ({
   wrapper,
   isPlainRecord,
   fieldColumnId,
-  selectedDocs,
+  selectedDocIds,
   getDocById,
   replaceSelectedDocs,
 }: UseComparisonColumnsProps) => {
@@ -54,11 +54,11 @@ export const useComparisonColumns = ({
     const currentColumns = [fieldsColumn];
     const wrapperWidth = wrapper?.offsetWidth ?? 0;
     const columnWidth =
-      DEFAULT_COLUMN_WIDTH * selectedDocs.length + FIELD_COLUMN_WIDTH > wrapperWidth
+      DEFAULT_COLUMN_WIDTH * selectedDocIds.length + FIELD_COLUMN_WIDTH > wrapperWidth
         ? DEFAULT_COLUMN_WIDTH
         : undefined;
 
-    selectedDocs.forEach((docId, docIndex) => {
+    selectedDocIds.forEach((docId, docIndex) => {
       const doc = getDocById(docId);
 
       if (!doc) {
@@ -75,7 +75,7 @@ export const useComparisonColumns = ({
           }),
           size: 'xs',
           onClick: () => {
-            const newSelectedDocs = [...selectedDocs];
+            const newSelectedDocs = [...selectedDocIds];
             const index = newSelectedDocs.indexOf(docId);
             const [baseDocId] = newSelectedDocs;
 
@@ -87,7 +87,7 @@ export const useComparisonColumns = ({
         });
       }
 
-      if (selectedDocs.length > 2) {
+      if (selectedDocIds.length > 2) {
         additional.push({
           iconType: 'cross',
           label: i18n.translate('unifiedDataTable.removeFromComparison', {
@@ -95,7 +95,7 @@ export const useComparisonColumns = ({
           }),
           size: 'xs',
           onClick: () => {
-            replaceSelectedDocs(selectedDocs.filter((id) => id !== docId));
+            replaceSelectedDocs(selectedDocIds.filter((id) => id !== docId));
           },
         });
       }
@@ -151,7 +151,7 @@ export const useComparisonColumns = ({
         actions: {
           showHide: false,
           showMoveLeft: docIndex > 1,
-          showMoveRight: docIndex > 0 && docIndex < selectedDocs.length - 1,
+          showMoveRight: docIndex > 0 && docIndex < selectedDocIds.length - 1,
           showSortAsc: false,
           showSortDesc: false,
           additional,
@@ -164,7 +164,7 @@ export const useComparisonColumns = ({
     fieldColumnId,
     getDocById,
     isPlainRecord,
-    selectedDocs,
+    selectedDocIds,
     replaceSelectedDocs,
     wrapper?.offsetWidth,
   ]);

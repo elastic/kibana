@@ -56,7 +56,7 @@ export function buildSelectedDocsState(selectedDocIds: string[]): UseSelectedDoc
     getCountOfSelectedDocs: (docIds: string[]) =>
       docIds.reduce((acc, docId) => (selectedDocsSet.has(docId) ? acc + 1 : acc), 0),
     hasSelectedDocs: selectedDocsSet.size > 0,
-    usedSelectedDocs: selectedDocIds,
+    selectedDocIds,
     toggleDocSelection: jest.fn(),
     selectAllDocs: jest.fn(),
     selectMoreDocs: jest.fn(),

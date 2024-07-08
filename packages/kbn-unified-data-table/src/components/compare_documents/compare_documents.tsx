@@ -42,13 +42,13 @@ export interface CompareDocumentsProps {
   dataView: DataView;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
-  selectedDocs: string[];
+  selectedDocIds: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
   showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
-  replaceSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
   additionalFieldGroups?: AdditionalFieldGroups;
 }
@@ -69,7 +69,7 @@ const CompareDocuments = ({
   isPlainRecord,
   selectedFieldNames,
   additionalFieldGroups,
-  selectedDocs,
+  selectedDocIds,
   schemaDetectors,
   forceShowAllFields,
   showFullScreenButton,
@@ -104,7 +104,7 @@ const CompareDocuments = ({
     dataView,
     selectedFieldNames,
     additionalFieldGroups,
-    selectedDocs,
+    selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
     getDocById: memoizedGetDocById,
@@ -113,7 +113,7 @@ const CompareDocuments = ({
     wrapper,
     isPlainRecord,
     fieldColumnId,
-    selectedDocs,
+    selectedDocIds,
     getDocById: memoizedGetDocById,
     replaceSelectedDocs,
   });
@@ -131,7 +131,7 @@ const CompareDocuments = ({
     () => (
       <ComparisonControls
         isPlainRecord={isPlainRecord}
-        selectedDocs={selectedDocs}
+        selectedDocIds={selectedDocIds}
         showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
@@ -150,7 +150,7 @@ const CompareDocuments = ({
       diffMode,
       forceShowAllFields,
       isPlainRecord,
-      selectedDocs,
+      selectedDocIds,
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
@@ -184,7 +184,7 @@ const CompareDocuments = ({
     dataView,
     comparisonFields,
     fieldColumnId,
-    selectedDocs,
+    selectedDocIds,
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
     getDocById: memoizedGetDocById,

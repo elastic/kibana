@@ -223,13 +223,13 @@ describe('document selection', () => {
 
   describe('DataTableCompareToolbarBtn', () => {
     const renderCompareBtn = ({
-      selectedDocs = ['1', '2'],
+      selectedDocIds = ['1', '2'],
       setIsCompareActive = jest.fn(),
     }: Partial<Parameters<typeof DataTableCompareToolbarBtn>[0]> = {}) => {
       render(
         <IntlProvider locale="en">
           <DataTableCompareToolbarBtn
-            selectedDocs={selectedDocs}
+            selectedDocIds={selectedDocIds}
             setIsCompareActive={setIsCompareActive}
           />
         </IntlProvider>
@@ -252,9 +252,9 @@ describe('document selection', () => {
     });
 
     it('should disable the button if limit is reached', () => {
-      const selectedDocs = Array.from({ length: 500 }, (_, i) => i.toString());
+      const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
       const setIsCompareActive = jest.fn();
-      const { getButton } = renderCompareBtn({ selectedDocs, setIsCompareActive });
+      const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
       getButton()?.click();
       expect(setIsCompareActive).not.toHaveBeenCalled();
     });

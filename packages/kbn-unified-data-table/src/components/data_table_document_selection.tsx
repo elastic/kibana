@@ -162,8 +162,7 @@ export function DataTableDocumentToolbarBtn({
   selectedDocsState: UseSelectedDocsState;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
-  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, usedSelectedDocs } =
-    selectedDocsState;
+  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
 
   const getMenuItems = useCallback(() => {
     return [
@@ -237,7 +236,7 @@ export function DataTableDocumentToolbarBtn({
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
-      ...(!isFilterActive && usedSelectedDocs.length < rows.length && rows.length > 1
+      ...(!isFilterActive && selectedDocIds.length < rows.length && rows.length > 1
         ? [
             <EuiContextMenuItem
               data-test-subj="dscGridSelectAllDocs"
@@ -279,7 +278,7 @@ export function DataTableDocumentToolbarBtn({
     isDocSelected,
     clearAllSelectedDocs,
     selectAllDocs,
-    usedSelectedDocs,
+    selectedDocIds,
   ]);
 
   const toggleSelectionToolbar = useCallback(
@@ -296,10 +295,10 @@ export function DataTableDocumentToolbarBtn({
         <EuiDataGridToolbarControl
           iconType="documents"
           onClick={toggleSelectionToolbar}
-          data-selected-documents={usedSelectedDocs.length}
+          data-selected-documents={selectedDocIds.length}
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
-          badgeContent={usedSelectedDocs.length}
+          badgeContent={selectedDocIds.length}
         >
           {isPlainRecord ? (
             <FormattedMessage
@@ -330,18 +329,18 @@ export function DataTableDocumentToolbarBtn({
 const MAX_SELECTED_DOCS_FOR_COMPARE = 100;
 
 export const DataTableCompareToolbarBtn = ({
-  selectedDocs,
+  selectedDocIds,
   setIsCompareActive,
 }: {
-  selectedDocs: string[];
+  selectedDocIds: string[];
   setIsCompareActive: (value: boolean) => void;
 }) => {
-  const isDisabled = selectedDocs.length > MAX_SELECTED_DOCS_FOR_COMPARE;
+  const isDisabled = selectedDocIds.length > MAX_SELECTED_DOCS_FOR_COMPARE;
   const button = (
     <EuiDataGridToolbarControl
       disabled={isDisabled}
       iconType="diff"
-      badgeContent={selectedDocs.length}
+      badgeContent={selectedDocIds.length}
       data-test-subj="unifiedDataTableCompareSelectedDocuments"
       onClick={() => {
         setIsCompareActive(true);
