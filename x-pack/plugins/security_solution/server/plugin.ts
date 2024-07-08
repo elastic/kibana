@@ -448,10 +448,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           'securitySolutionSearchStrategy',
           securitySolutionSearchStrategy
         );
-        const endpointSearchStrategy = endpointSearchStrategyProvider(
-          depsStart.data,
-          this.endpointContext
-        );
+        const endpointSearchStrategy = endpointSearchStrategyProvider(depsStart.data);
 
         plugins.data.search.registerSearchStrategy(
           ENDPOINT_SEARCH_STRATEGY,

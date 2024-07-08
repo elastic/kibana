@@ -17,11 +17,10 @@ import type {
 } from '../../../../../../common/search_strategy/endpoint/response_actions';
 
 export const allActions: EndpointFactory<ResponseActionsQueries.actions> = {
-  buildDsl: (options: ActionRequestOptions, { authz }) => buildResponseActionsQuery(options),
+  buildDsl: (options: ActionRequestOptions) => buildResponseActionsQuery(options),
   parse: async (
     options: ActionRequestOptions,
-    response: IEsSearchResponse,
-    deps
+    response: IEsSearchResponse
   ): Promise<ActionRequestStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildResponseActionsQuery(options))],

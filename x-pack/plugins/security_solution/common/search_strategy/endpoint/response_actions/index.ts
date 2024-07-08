@@ -7,7 +7,6 @@
 
 export enum ResponseActionsQueries {
   actions = 'responseActions',
-  results = 'responseActionsResults',
 }
 
 export type { ActionRequestOptions, ActionRequestStrategyResponse } from './action';

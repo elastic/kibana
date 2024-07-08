@@ -8,24 +8,14 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type {
   EndpointFactoryQueryTypes,
-  EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
   EndpointStrategyResponseType,
 } from '../../../../common/search_strategy/endpoint';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
-  buildDsl: (
-    options: EndpointStrategyRequestType<T>,
-    deps: {
-      authz: EndpointAuthz | undefined;
-    }
-  ) => ISearchRequestParams;
+  buildDsl: (options: EndpointStrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: EndpointStrategyRequestType<T>,
-    response: EndpointStrategyParseResponseType<T>,
-    deps: {
-      authz: EndpointAuthz | undefined;
-    }
+    response: EndpointStrategyResponseType<T>
   ) => Promise<EndpointStrategyResponseType<T>>;
 }
