@@ -28,6 +28,7 @@ import { runAndValidateEsqlQuery } from './validate_esql_query';
 import { INLINE_ESQL_QUERY_REGEX } from './constants';
 
 export const QUERY_FUNCTION_NAME = 'query';
+export const EXECUTE_QUERY_NAME = 'execute_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -89,13 +90,13 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   even if it has been called before.
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
+  If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
       : undefined
   );
 
   functions.registerFunction(
     {
-      name: 'execute_query',
+      name: EXECUTE_QUERY_NAME,
       visibility: FunctionVisibility.UserOnly,
       description: 'Display the results of an ES|QL query.',
       parameters: {
@@ -366,7 +367,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              content: `Answer the user's question that was previously asked ("${abbreviatedUserQuestion}...") using the attached documentation. Take into account any previous errors from the \`execute_query\` or \`visualize_query\` function.
+              content: `Answer the user's question that was previously asked ("${abbreviatedUserQuestion}...") using the attached documentation. Take into account any previous errors from the \`${EXECUTE_QUERY_NAME}\` or \`visualize_query\` function.
 
                 Format any ES|QL query as follows:
                 \`\`\`esql
@@ -450,7 +451,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             functionCall = undefined;
           } else if (args.intention === VisualizeESQLUserIntention.executeAndReturnResults) {
             functionCall = {
-              name: 'execute_query',
+              name: EXECUTE_QUERY_NAME,
               arguments: JSON.stringify({ query: esqlQuery }),
               trigger: MessageRole.Assistant as const,
             };

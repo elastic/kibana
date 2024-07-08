@@ -34,7 +34,6 @@ export interface InstallDefinitionParams {
   soClient: SavedObjectsClientContract;
   definition: EntityDefinition;
   logger: Logger;
-  spaceId: string;
 }
 
 export async function installEntityDefinition({
@@ -42,7 +41,6 @@ export async function installEntityDefinition({
   soClient,
   definition,
   logger,
-  spaceId,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   const installState = {
     ingestPipelines: {
@@ -66,9 +64,9 @@ export async function installEntityDefinition({
 
     // install ingest pipelines
     logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
-    await createAndInstallHistoryIngestPipeline(esClient, entityDefinition, logger, spaceId);
+    await createAndInstallHistoryIngestPipeline(esClient, entityDefinition, logger);
     installState.ingestPipelines.history = true;
-    await createAndInstallLatestIngestPipeline(esClient, entityDefinition, logger, spaceId);
+    await createAndInstallLatestIngestPipeline(esClient, entityDefinition, logger);
     installState.ingestPipelines.latest = true;
 
     // install transforms
@@ -110,7 +108,6 @@ export async function installBuiltInEntityDefinitions({
   soClient,
   logger,
   builtInDefinitions,
-  spaceId,
 }: Omit<InstallDefinitionParams, 'definition'> & {
   builtInDefinitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
@@ -130,7 +127,6 @@ export async function installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
-        spaceId,
       });
     }
 
@@ -144,7 +140,6 @@ export async function installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
-        spaceId,
       });
     }
 

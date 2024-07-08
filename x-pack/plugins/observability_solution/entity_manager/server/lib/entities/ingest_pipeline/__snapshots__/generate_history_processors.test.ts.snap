@@ -16,12 +16,6 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.spaceId",
-      "value": "default",
-    },
-  },
-  Object {
-    "set": Object {
       "field": "entity.definitionId",
       "value": "admin-console-services",
     },
@@ -115,7 +109,7 @@ if (ctx.entity?.metadata?.host?.os?.name != null) {
       ],
       "date_rounding": "M",
       "field": "@timestamp",
-      "index_name_prefix": ".entities-observability.history-v1.admin-console-services.default.",
+      "index_name_prefix": ".entities.v1.history.admin-console-services.",
     },
   },
 ]

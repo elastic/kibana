@@ -10,6 +10,7 @@ import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common'
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { EsqlTable, toEsQueryHits } from '../../../../common';
 
@@ -44,11 +45,20 @@ export async function fetchEsqlQuery({
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
-  const response = await esClient.transport.request<EsqlTable>({
-    method: 'POST',
-    path: '/_query',
-    body: query,
-  });
+  let response: EsqlTable;
+  try {
+    response = await esClient.transport.request<EsqlTable>({
+      method: 'POST',
+      path: '/_query',
+      body: query,
+    });
+  } catch (e) {
+    if (e.message?.includes('verification_exception')) {
+      throw createTaskRunError(e, TaskErrorSource.USER);
+    }
+    throw e;
+  }
+
   const hits = toEsQueryHits(response);
   const sourceFields = getSourceFields(response);
 
