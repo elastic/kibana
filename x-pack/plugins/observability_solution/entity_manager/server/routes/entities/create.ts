@@ -19,7 +19,6 @@ import { installEntityDefinition } from '../../lib/entities/install_entity_defin
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
-  spaces,
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
@@ -39,12 +38,10 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
       const core = await context.core;
       const soClient = core.savedObjects.client;
       const esClient = core.elasticsearch.client.asCurrentUser;
-      const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
       try {
         const definition = await installEntityDefinition({
           soClient,
           esClient,
-          spaceId,
           logger,
           definition: req.body,
         });

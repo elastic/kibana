@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
+import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import _ from 'lodash';
 import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   cleanRiskEngine,
@@ -16,6 +18,7 @@ import {
   getAssetCriticalityIndex,
   enableAssetCriticalityAdvancedSetting,
   disableAssetCriticalityAdvancedSetting,
+  createAssetCriticalityRecords,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -146,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('read', () => {
+    describe('get', () => {
       it('should correctly get asset criticality', async () => {
         const assetCriticality = {
           id_field: 'host.name',
@@ -176,6 +179,132 @@ export default ({ getService }: FtrProviderContext) => {
         await assetCriticalityRoutes.get('host.name', 'doesnt-matter', {
           expectStatusCode: 403,
         });
+      });
+    });
+
+    describe('list', () => {
+      const TEST_DATA_LENGTH = 40;
+      const LEVELS = ['low_impact', 'medium_impact', 'high_impact', 'extreme_impact'] as const;
+      const startTime = Date.now() - 1000 * TEST_DATA_LENGTH;
+      const records: AssetCriticalityRecord[] = Array.from(
+        { length: TEST_DATA_LENGTH },
+        (__, i) => ({
+          id_field: 'host.name',
+          id_value: `host-${i}`,
+          criticality_level: LEVELS[Math.floor(i / 10)],
+          '@timestamp': new Date(startTime + i * 1000).toISOString(),
+        })
+      );
+
+      const createRecords = () => createAssetCriticalityRecords(records, es);
+
+      before(async () => {
+        enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+      });
+
+      it('should return the first 10 asset criticality records if no args provided', async () => {
+        await createRecords();
+
+        const { body } = await assetCriticalityRoutes.list();
+
+        expect(omit(body, 'records')).to.eql({
+          total: TEST_DATA_LENGTH,
+          page: 1,
+          per_page: 10,
+        });
+
+        expect(body.records.map((record: AssetCriticalityRecord) => record.id_value)).to.eql(
+          records.slice(0, 10).map((record) => record.id_value)
+        );
+      });
+
+      it('should return the last 10 asset criticality records if sorting by timestamp desc', async () => {
+        await createRecords();
+
+        const { body } = await assetCriticalityRoutes.list({
+          sort_field: '@timestamp',
+          sort_direction: 'desc',
+        });
+
+        expect(omit(body, 'records')).to.eql({
+          total: TEST_DATA_LENGTH,
+          page: 1,
+          per_page: 10,
+        });
+
+        expect(body.records.map((record: AssetCriticalityRecord) => record.id_value)).to.eql(
+          _.reverse(records.slice(-10)).map((record) => record.id_value)
+        );
+      });
+
+      it('should only return 1 asset criticality record if per_page=1', async () => {
+        await createRecords();
+
+        const { body } = await assetCriticalityRoutes.list({ per_page: 1 });
+
+        expect(omit(body, 'records')).to.eql({
+          total: TEST_DATA_LENGTH,
+          page: 1,
+          per_page: 1,
+        });
+
+        expect(body.records[0].id_value).to.eql(records[0].id_value);
+      });
+
+      it('should return the next 10 asset criticality records if page=2', async () => {
+        await createRecords();
+
+        const { body } = await assetCriticalityRoutes.list({ page: 2 });
+
+        expect(omit(body, 'records')).to.eql({
+          total: TEST_DATA_LENGTH,
+          page: 2,
+          per_page: 10,
+        });
+
+        expect(body.records.map((record: AssetCriticalityRecord) => record.id_value)).to.eql(
+          records.slice(10, 20).map((record) => record.id_value)
+        );
+      });
+
+      it('should return 20 records if filtering by criticality_level low_impact and medium_impact', async () => {
+        await createRecords();
+
+        const { body } = await assetCriticalityRoutes.list({
+          kuery: 'criticality_level:low_impact OR criticality_level:medium_impact',
+        });
+
+        expect(omit(body, 'records')).to.eql({
+          total: 20,
+          page: 1,
+          per_page: 10,
+        });
+      });
+
+      it('should return all records if filtering by id_field = host.name', async () => {
+        await createRecords();
+
+        const { body } = await assetCriticalityRoutes.list({
+          kuery: 'id_field:host.name',
+        });
+
+        expect(omit(body, 'records')).to.eql({
+          total: TEST_DATA_LENGTH,
+          page: 1,
+          per_page: 10,
+        });
+      });
+
+      it('should return a 400 if page is 0', async () => {
+        await assetCriticalityRoutes.list({ page: 0 }, { expectStatusCode: 400 });
+      });
+
+      it('should return a 400 if per_page is 0', async () => {
+        await assetCriticalityRoutes.list({ per_page: 0 }, { expectStatusCode: 400 });
+      });
+
+      it('should return a 400 if per_page is greater than 10000', async () => {
+        await assetCriticalityRoutes.list({ per_page: 10001 }, { expectStatusCode: 400 });
       });
     });
 
@@ -261,7 +390,6 @@ export default ({ getService }: FtrProviderContext) => {
           id_value: 'host-1',
           criticality_level: 'high_impact',
         };
-
         const { body } = await assetCriticalityRoutes.bulkUpload([validRecord]);
         expect(body.errors).to.eql([]);
         expect(body.stats).to.eql({
@@ -274,11 +402,14 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should correctly upload valid records for multiple entities', async () => {
-        const validRecords: CreateAssetCriticalityRecord[] = Array.from({ length: 50 }, (_, i) => ({
-          id_field: 'host.name',
-          id_value: `host-${i}`,
-          criticality_level: 'high_impact',
-        }));
+        const validRecords: CreateAssetCriticalityRecord[] = Array.from(
+          { length: 50 },
+          (__, i) => ({
+            id_field: 'host.name',
+            id_value: `host-${i}`,
+            criticality_level: 'high_impact',
+          })
+        );
 
         const { body } = await assetCriticalityRoutes.bulkUpload(validRecords);
         expect(body.errors).to.eql([]);
