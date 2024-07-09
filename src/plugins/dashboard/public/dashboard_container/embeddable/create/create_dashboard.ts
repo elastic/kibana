@@ -375,8 +375,17 @@ export const initializeDashboard = async ({
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
+  console.log('INCOMING EMBEDDABLE', incomingEmbeddable);
 
   if (incomingEmbeddable) {
+    const setIncomingReferences = (container: DashboardContainer, embeddableId: string) => {
+      if (incomingEmbeddable.references) {
+        container.savedObjectReferences.push(
+          ...prefixReferencesFromPanel(embeddableId, incomingEmbeddable.references)
+        );
+      }
+    };
+
     const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
       container.setScrollToPanelId(id);
       container.setHighlightPanelId(id);
@@ -403,6 +412,7 @@ export const initializeDashboard = async ({
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
       untilDashboardReady().then((container) => {
+        // setIncomingReferences(container, incomingEmbeddable.embeddableId as string);
         scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string);
       });
     } else {
@@ -410,18 +420,26 @@ export const initializeDashboard = async ({
 
       untilDashboardReady().then(async (container) => {
         const createdEmbeddable = await (async () => {
+          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
+
           // if there is no width or height we can add the panel using the default behaviour.
           if (!incomingEmbeddable.size) {
-            return await container.addNewPanel<{ uuid: string }>({
-              panelType: incomingEmbeddable.type,
-              initialState: incomingEmbeddable.input,
-            });
+            setIncomingReferences(container, embeddableId);
+            return await container.addNewPanel<{ uuid: string }>(
+              {
+                panelType: incomingEmbeddable.type,
+                initialState: {
+                  ...incomingEmbeddable.input,
+                },
+              },
+              false,
+              embeddableId
+            );
           }
 
           // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
           const { width, height } = incomingEmbeddable.size;
           const currentPanels = container.getInput().panels;
-          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
           const { newPanelPlacement } = runPanelPlacementStrategy(
             PanelPlacementStrategy.findTopLeftMostOpenSpace,
             {
@@ -438,11 +456,9 @@ export const initializeDashboard = async ({
               i: embeddableId,
             },
           };
-          if (incomingEmbeddable.references) {
-            container.savedObjectReferences.push(
-              ...prefixReferencesFromPanel(embeddableId, incomingEmbeddable.references)
-            );
-          }
+
+          setIncomingReferences(container, embeddableId);
+
           container.updateInput({
             panels: {
               ...container.getInput().panels,

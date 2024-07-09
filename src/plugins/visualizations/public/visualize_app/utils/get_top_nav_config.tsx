@@ -293,13 +293,15 @@ export const getTopNavConfig = (
       return;
     }
 
-    const { rawState } = serializeState();
+    const { rawState, references } = serializeState(true);
 
     const state = {
       input: rawState,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
+      references,
     };
+    console.log('STATE', state);
 
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
   };

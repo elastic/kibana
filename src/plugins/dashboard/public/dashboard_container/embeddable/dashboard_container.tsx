@@ -475,7 +475,8 @@ export class DashboardContainer
 
   public async addNewPanel<ApiType extends unknown = unknown>(
     panelPackage: PanelPackage,
-    displaySuccessMessage?: boolean
+    displaySuccessMessage?: boolean,
+    uuid?: string
   ) {
     const {
       notifications: { toasts },
@@ -496,7 +497,7 @@ export class DashboardContainer
       this.trackPanelAddMetric(METRIC_TYPE.CLICK, panelPackage.panelType);
     }
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
-      const newId = v4();
+      const newId = uuid ?? v4();
 
       const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,

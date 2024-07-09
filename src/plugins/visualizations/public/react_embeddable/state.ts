@@ -48,6 +48,7 @@ export const deserializeState = async (
       },
     } as VisualizeRuntimeState;
   let serializedState = cloneDeep(state.rawState);
+  console.error('DESERIALIZE', serializedState, state.references);
   if (isVisualizeSavedObjectState(serializedState)) {
     serializedState = await deserializeSavedObjectState(serializedState);
   }
@@ -166,38 +167,28 @@ export const serializeState = (
     description: '',
     ...titles,
   };
-  if (extractReferences) {
-    const { references, serializedSearchSource } = serializeReferences(serializedVis);
+  const { references, serializedSearchSource } = serializeReferences(serializedVis);
 
-    return {
-      rawState: {
-        ...titlesWithDefaults,
-        ...savedObjectProperties,
-        savedVis: {
-          ...serializedVis,
-          id,
-          data: {
-            ...omit(serializedVis.data, 'savedSearchId'),
-            searchSource: serializedSearchSource,
-            ...(serializedVis.data.savedSearchId
-              ? {
-                  savedSearchRefName: references.find(
-                    (r) => r.id === serializedVis.data.savedSearchId
-                  ),
-                }
-              : {}),
-          },
-        },
-      },
-      references,
-    };
-  }
   return {
     rawState: {
       ...titlesWithDefaults,
       ...savedObjectProperties,
-      savedVis: { ...serializedVis, id },
+      savedVis: {
+        ...serializedVis,
+        id,
+        data: {
+          ...omit(serializedVis.data, 'savedSearchId'),
+          searchSource: serializedSearchSource,
+          ...(serializedVis.data.savedSearchId
+            ? {
+                savedSearchRefName: references.find(
+                  (r) => r.id === serializedVis.data.savedSearchId
+                ),
+              }
+            : {}),
+        },
+      },
     },
-    references: [],
+    references,
   };
 };
