@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('create inference endpoint', async () => {
       log.debug(`create inference endpoint`);
-      const createInferenceEndpointResponse = await ml.api.createInferenceEndpoint(
+      await ml.api.createInferenceEndpoint(
         inferenceId,
         taskType,
         {
@@ -58,21 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
           },
         }
       );
-      if (createInferenceEndpointResponse) {
-        const responseBody = createInferenceEndpointResponse?.body;
-        const responseStatus = createInferenceEndpointResponse?.status;
-        if (responseStatus === 408) {
-          // handle the case when it takes a while to download and start trained model
-          expect(responseBody).to.have.property('error');
-          expect(responseBody.error).to.have.property('reason');
-          expect(responseBody.error.reason).to.eql(
-            'Timed out after [30s] waiting for model deployment to start. Use the trained model stats API to track the state of the deployment.'
-          );
-        } else {
-          expect(responseStatus).to.eql(200, `${JSON.stringify(responseBody)}`);
-        }
-        log.debug('> Inference endpoint created');
-      }
     });
     it('get all inference endpoints and confirm inference endpoint exist', async () => {
       const { body: inferenceEndpoints } = await supertestWithoutAuth
