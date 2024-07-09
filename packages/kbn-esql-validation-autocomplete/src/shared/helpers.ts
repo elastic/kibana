@@ -17,7 +17,7 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLAstMetricsCommand, ESQLInlineCast } from '@kbn/esql-ast/src/types';
+import { ESQLAstMetricsCommand, ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -405,7 +405,7 @@ export function checkFunctionArgMatchesDefinition(
   parentCommand?: string
 ) {
   const argType = parameterDefinition.type;
-  if (argType === 'any') {
+  if (argType === 'any' || isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
@@ -579,3 +579,9 @@ export const isMetricsCommand = (x: unknown): x is ESQLAstMetricsCommand =>
   typeof x === 'object' &&
   (x as ESQLAstMetricsCommand).type === 'command' &&
   (x as ESQLAstMetricsCommand).name === 'metrics';
+
+export const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';
