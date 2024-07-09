@@ -31,6 +31,19 @@ interface RegisterAPIRoutesArgs<P extends Props> {
   restCounter?: UsageCounter;
 }
 
+function recursiveSortObjectByKeys(obj: unknown): unknown {
+  if (typeof obj !== 'object' || obj === null) return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(recursiveSortObjectByKeys);
+  }
+  return Object.keys(obj)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = recursiveSortObjectByKeys(obj[key]);
+      return acc;
+    }, {} as Record<string, unknown>);
+}
+
 export function registerAPIRoutes<P extends Props>({
   http,
   contentManagement,
@@ -43,6 +56,8 @@ export function registerAPIRoutes<P extends Props>({
   const { versioned: versionedRouter } = http.createRouter();
 
   // TODO add usage collection
+
+  // TODO add authorization checks
 
   // Create API route
   const createRoute = versionedRouter.post({
@@ -139,7 +154,8 @@ export function registerAPIRoutes<P extends Props>({
         }
 
         const outTransform = getTransforms()[version].outTransform ?? ((data) => data);
-        const body = prettyPrintAndSortKeys(outTransform(result), Boolean(req.query.pretty));
+        const transformedResult = outTransform(result);
+        const body = recursiveSortObjectByKeys(transformedResult);
         return res.ok({ body });
       }
     );

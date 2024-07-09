@@ -27,6 +27,7 @@ export const baseGetSchema = schema.object({
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
   updatedAt: schema.maybe(schema.string()),
   updatedBy: schema.maybe(schema.string()),
+  error: schema.maybe(schema.string()),
   createdAt: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),

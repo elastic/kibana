@@ -117,13 +117,15 @@ export class DashboardPlugin
                 attributes.kibanaSavedObjectMeta;
               return {
                 ...restItem,
-                ...restAttributes,
-                kibanaSavedObjectMeta: {
-                  ...restKibanaSavedObjectMeta,
-                  searchSource: JSON.parse(searchSourceJSON),
+                attributes: {
+                  ...restAttributes,
+                  kibanaSavedObjectMeta: {
+                    ...restKibanaSavedObjectMeta,
+                    searchSource: JSON.parse(searchSourceJSON),
+                  },
+                  panels: JSON.parse(panelsJSON),
+                  options: JSON.parse(optionsJSON ?? ''),
                 },
-                panels: JSON.parse(panelsJSON),
-                options: JSON.parse(optionsJSON ?? ''),
               };
             },
           },
