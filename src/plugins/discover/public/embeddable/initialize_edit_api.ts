@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import {
   apiHasAppContext,
   FetchContext,
+  HasAppContext,
+  HasEditCapabilities,
   PublishesDataViews,
   PublishesSavedObjectId,
   PublishingSubject,
@@ -42,7 +44,10 @@ export async function getAppTarget(
   return { path: editPath, app: editApp, editUrl };
 }
 
-export function initializeEditApi({
+export function initializeEditApi<
+  ParentApiType = unknown,
+  ReturnType = ParentApiType extends HasAppContext ? HasEditCapabilities : {}
+>({
   uuid,
   parentApi,
   partialApi,
@@ -50,19 +55,19 @@ export function initializeEditApi({
   discoverServices,
 }: {
   uuid: string;
-  parentApi?: unknown;
+  parentApi?: ParentApiType;
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   discoverServices: DiscoverServices;
-}) {
+}): ReturnType {
   /**
    * If the parent is providing context, then the embeddable state transfer service can be used
    * and editing should be allowed; otherwise, do not provide editing capabilities
    */
   if (!parentApi || !apiHasAppContext(parentApi)) {
-    return {};
+    return {} as ReturnType;
   }
   const parentApiContext = parentApi.getAppContext();
 
@@ -72,8 +77,9 @@ export function initializeEditApi({
         defaultMessage: 'search',
       }),
     onEdit: async () => {
-      const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const appTarget = await getAppTarget(partialApi, discoverServices);
+      const stateTransfer = discoverServices.embeddable.getStateTransfer();
+
       await stateTransfer.navigateToEditor(appTarget.app, {
         path: appTarget.path,
         state: {
@@ -89,5 +95,5 @@ export function initializeEditApi({
     getEditHref: async () => {
       return (await getAppTarget(partialApi, discoverServices))?.path;
     },
-  };
+  } as ReturnType;
 }

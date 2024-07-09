@@ -52,7 +52,7 @@ type SavedSearchPartialFetchApi = PublishesSavedSearch &
     dataLoading: BehaviorSubject<boolean | undefined>;
     blockingError: BehaviorSubject<Error | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
-  } & HasParentApi;
+  } & Partial<HasParentApi>;
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');
@@ -101,9 +101,11 @@ export function initializeFetch({
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
+
         // Abort any in-progress requests
+        const currentAbortController = new AbortController();
         abortController.abort();
-        abortController = new AbortController();
+        abortController = currentAbortController;
 
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
         updateSearchSource(
@@ -126,7 +128,6 @@ export function initializeFetch({
           api.dataLoading.next(true);
           // Log request to inspector
           requestAdapter.reset();
-
           await discoverServices.profilesManager.resolveDataSourceProfile({
             dataSource: isOfAggregateQueryType(searchSourceQuery)
               ? createEsqlDataSource()
@@ -150,7 +151,7 @@ export function initializeFetch({
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
               dataView,
-              abortSignal: abortController.signal,
+              abortSignal: currentAbortController.signal,
               inspectorAdapters: discoverServices.inspector,
               data: discoverServices.data,
               expressions: discoverServices.expressions,
@@ -173,7 +174,7 @@ export function initializeFetch({
            */
           const { rawResponse: resp } = await lastValueFrom(
             savedSearch.searchSource.fetch$({
-              abortSignal: abortController.signal,
+              abortSignal: currentAbortController.signal,
               sessionId: searchSessionId,
               inspector: {
                 adapter: requestAdapter,
@@ -189,7 +190,6 @@ export function initializeFetch({
               disableWarningToasts: true,
             })
           );
-
           const interceptedWarnings: SearchResponseWarning[] = [];
           discoverServices.data.search.showWarnings(requestAdapter, (warning) => {
             interceptedWarnings.push(warning);

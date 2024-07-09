@@ -267,9 +267,9 @@ export const getSearchEmbeddableFactory = ({
 
           const renderAsFieldStatsTable = useMemo(
             () =>
-              discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) &&
+              Boolean(discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS)) &&
               viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              dataView &&
+              Boolean(dataView) &&
               Array.isArray(savedSearch.columns),
             [savedSearch, dataView, viewMode]
           );

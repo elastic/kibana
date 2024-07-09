@@ -16,6 +16,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
+  PublishesWritablePanelTitle,
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
@@ -73,6 +74,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
+  PublishesWritablePanelTitle &
   PublishesSavedSearch &
   PublishesDataViews &
   HasInPlaceLibraryTransforms &
