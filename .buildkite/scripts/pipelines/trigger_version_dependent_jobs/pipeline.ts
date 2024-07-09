@@ -7,13 +7,7 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { getKibanaDir, BuildkiteTriggerStep } from '#pipeline-utils';
-
-function emitPipeline(pipelineSteps: BuildkiteTriggerStep[]) {
-  console.log(JSON.stringify(pipelineSteps, null, 2));
-}
+import { getVersionsFile, BuildkiteTriggerStep } from '#pipeline-utils';
 
 const pipelineSets = {
   'es-forward': 'kibana-es-forward-compatibility-testing',
@@ -71,17 +65,17 @@ async function main() {
  */
 function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
-  const kibanaPrevMajor = versions.find((v) => v.previousMajor)?.branch;
-  const targetESVersions = versions.filter((v) => v.currentMajor).map((v) => v.version);
+  const kibanaPrevMajor = versions.prevMajors[0];
+  const targetESVersions = [versions.prevMinors, versions.current].flat();
 
-  return targetESVersions.map((version) => {
+  return targetESVersions.map(({ version }) => {
     return {
       trigger: pipelineSets['es-forward'],
       async: true,
-      label: `Triggering Kibana ${kibanaPrevMajor} + ES ${version} forward compatibility`,
+      label: `Triggering Kibana ${kibanaPrevMajor.version} + ES ${version} forward compatibility`,
       build: {
         message: process.env.MESSAGE || `ES forward-compatibility test for ES ${version}`,
-        branch: kibanaPrevMajor,
+        branch: kibanaPrevMajor.branch,
         commit: 'HEAD',
         env: {
           ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
@@ -99,9 +93,9 @@ function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
 function getArtifactSnapshotPipelineTriggers() {
   // Trigger for all named branches
   const versions = getVersionsFile();
-  const branches = versions.map((v) => v.branch);
+  const targetVersions = [versions.prevMajors, versions.prevMinors, versions.current].flat();
 
-  return branches.map((branch) => {
+  return targetVersions.map(({ branch }) => {
     return {
       trigger: pipelineSets['artifacts-snapshot'],
       async: true,
@@ -125,9 +119,9 @@ function getArtifactSnapshotPipelineTriggers() {
 function getArtifactStagingPipelineTriggers() {
   // Trigger for all branches, that are not current minor+major
   const versions = getVersionsFile();
-  const branches = versions.filter((v) => v.branch !== 'main').map((v) => v.branch);
+  const targetVersions = [versions.prevMajors, versions.prevMinors].flat();
 
-  return branches.map((branch) => {
+  return targetVersions.map(({ branch }) => {
     return {
       trigger: pipelineSets['artifacts-staging'],
       async: true,
@@ -152,12 +146,11 @@ function getArtifactStagingPipelineTriggers() {
  * TODO: we could basically do the check logic of .buildkite/scripts/steps/artifacts/trigger.sh in here, and remove kibana-artifacts-trigger
  */
 function getArtifactBuildTriggers() {
-  const branches = getVersionsFile()
-    .filter((v) => v.branch !== 'main' && v.branch !== '7.17')
-    .map((v) => v.branch);
+  const versions = getVersionsFile();
+  const targetVersions = versions.prevMinors;
 
-  return branches.map(
-    (branch) =>
+  return targetVersions.map(
+    ({ branch }) =>
       ({
         trigger: pipelineSets['artifacts-trigger'],
         async: true,
@@ -174,22 +167,8 @@ function getArtifactBuildTriggers() {
   );
 }
 
-function getVersionsFile(): Array<{
-  version: string;
-  branch: string;
-  previousMajor?: boolean;
-  previousMinor?: boolean;
-  currentMajor?: boolean;
-  currentMinor?: boolean;
-}> {
-  try {
-    const versions = JSON.parse(
-      fs.readFileSync(path.join(getKibanaDir(), 'versions.json')).toString()
-    );
-    return versions.versions;
-  } catch (error) {
-    throw new Error(`Failed to read versions.json: ${error}`);
-  }
+function emitPipeline(pipelineSteps: BuildkiteTriggerStep[]) {
+  console.log(JSON.stringify(pipelineSteps, null, 2));
 }
 
 main().catch((error) => {
