@@ -11,12 +11,12 @@ import {
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
 import { type BaseMessage } from '@langchain/core/messages';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { parseGeminiStream } from '../utils/gemini';
 import { parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
@@ -27,23 +27,21 @@ export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
 });
 
 export interface CustomChatModelInput extends BaseChatModelParams {
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   logger: Logger;
   llmType?: string;
   signal?: AbortSignal;
   model?: string;
   temperature?: number;
-  request: KibanaRequest;
   streaming: boolean;
   maxTokens?: number;
 }
 
 export class ActionsClientSimpleChatModel extends SimpleChatModel {
-  #actions: ActionsPluginStart;
+  #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest;
   #traceId: string;
   #signal?: AbortSignal;
   #maxTokens?: number;
@@ -53,12 +51,11 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   temperature?: number;
 
   constructor({
-    actions,
+    actionsClient,
     connectorId,
     llmType,
     logger,
     model,
-    request,
     temperature,
     signal,
     streaming,
@@ -66,12 +63,11 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   }: CustomChatModelInput) {
     super({});
 
-    this.#actions = actions;
+    this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
     this.#traceId = uuidv4();
     this.#logger = logger;
     this.#signal = signal;
-    this.#request = request;
     this.#maxTokens = maxTokens;
     this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
@@ -98,24 +94,18 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
-    const formattedMessages = [];
-    if (messages.length >= 2) {
-      messages.forEach((message, i) => {
-        if (typeof message.content !== 'string') {
-          throw new Error('Multimodal messages are not supported.');
-        }
-        formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
-      });
-    } else {
-      if (typeof messages[0].content !== 'string') {
+    const formattedMessages: Array<{ content: string; role: string }> = [];
+    messages.forEach((message, i) => {
+      if (typeof message.content !== 'string') {
         throw new Error('Multimodal messages are not supported.');
       }
-      formattedMessages.push(getMessageContentAndRole(messages[0].content));
-    }
+      formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
+    });
     this.#logger.debug(
-      `ActionsClientSimpleChatModel#_call\ntraceId: ${
-        this.#traceId
-      }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
+      () =>
+        `ActionsClientSimpleChatModel#_call\ntraceId: ${
+          this.#traceId
+        }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {
@@ -125,16 +115,12 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
-          maxTokens: this.#maxTokens,
-          ...getDefaultArguments(this.llmType, this.temperature, options.stop),
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
     };
 
-    // create an actions client from the authenticated request context:
-    const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-
-    const actionResult = await actionsClient.execute(requestBody);
+    const actionResult = await this.#actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
       throw new Error(

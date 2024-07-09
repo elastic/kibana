@@ -9,7 +9,7 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-export const navigationTree: NavigationTreeDefinition = {
+export const navigationTree = (useSearchHomepage: boolean = false): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
@@ -25,7 +25,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.home', {
             defaultMessage: 'Home',
           }),
-          link: 'serverlessElasticsearch',
+          link: useSearchHomepage ? 'searchHomepage' : 'serverlessElasticsearch',
           spaceBefore: 'm',
         },
         {
@@ -149,4 +149,4 @@ export const navigationTree: NavigationTreeDefinition = {
       ],
     },
   ],
-};
+});

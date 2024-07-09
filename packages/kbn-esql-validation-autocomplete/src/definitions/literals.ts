@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Literals } from './types';
 
-export const timeLiterals: Literals[] = [
+export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'year',
     description: i18n.translate(
@@ -25,6 +25,24 @@ export const timeLiterals: Literals[] = [
       'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.years',
       {
         defaultMessage: 'Years (Plural)',
+      }
+    ),
+  },
+  {
+    name: 'quarter',
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.quarter',
+      {
+        defaultMessage: 'Quarter',
+      }
+    ),
+  },
+  {
+    name: 'quarters',
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.quarters',
+      {
+        defaultMessage: 'Quarters (Plural)',
       }
     ),
   },
@@ -155,3 +173,50 @@ export const timeLiterals: Literals[] = [
     ),
   },
 ];
+
+export const timeUnits: string[] = [
+  ...timeUnitsToSuggest.map((literal) => literal.name),
+  'ms',
+  's',
+  'm',
+  'h',
+  'd',
+  'w',
+  'mo',
+  'q',
+  'y',
+  'yr',
+];
+
+export const chronoLiterals: Literals[] = [
+  'ALIGNED_DAY_OF_WEEK_IN_MONTH',
+  'ALIGNED_DAY_OF_WEEK_IN_YEAR',
+  'ALIGNED_WEEK_OF_MONTH',
+  'ALIGNED_WEEK_OF_YEAR',
+  'AMPM_OF_DAY',
+  'CLOCK_HOUR_OF_AMPM',
+  'CLOCK_HOUR_OF_DAY',
+  'DAY_OF_MONTH',
+  'DAY_OF_WEEK',
+  'DAY_OF_YEAR',
+  'EPOCH_DAY',
+  'ERA',
+  'HOUR_OF_AMPM',
+  'HOUR_OF_DAY',
+  'INSTANT_SECONDS',
+  'MICRO_OF_DAY',
+  'MICRO_OF_SECOND',
+  'MILLI_OF_DAY',
+  'MILLI_OF_SECOND',
+  'MINUTE_OF_DAY',
+  'MINUTE_OF_HOUR',
+  'MONTH_OF_YEAR',
+  'NANO_OF_DAY',
+  'NANO_OF_SECOND',
+  'OFFSET_SECONDS',
+  'PROLEPTIC_MONTH',
+  'SECOND_OF_DAY',
+  'SECOND_OF_MINUTE',
+  'YEAR',
+  'YEAR_OF_ERA',
+].map((name) => ({ name: `"${name}"`, description: '' }));

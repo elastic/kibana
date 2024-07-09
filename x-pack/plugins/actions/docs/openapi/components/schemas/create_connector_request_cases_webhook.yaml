@@ -15,12 +15,10 @@ properties:
     description: The type of connector.
     enum:
       - .cases-webhook
-    examples:
-      - .cases-webhook
+    example: .cases-webhook
   name:
     type: string
     description: The display name for the connector.
-    examples:
-      - my-connector
+    example: my-connector
   secrets:
     $ref: 'secrets_properties_cases_webhook.yaml' 

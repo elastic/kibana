@@ -36,7 +36,7 @@ paths:
           description: Sort order
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrder'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
         - name: 'page'
           in: query
           description: Page number
@@ -100,9 +100,3 @@ components:
         - 'is_default'
         - 'name'
         - 'updated_at'
-
-    SortOrder:
-      type: string
-      enum:
-        - 'asc'
-        - 'desc'

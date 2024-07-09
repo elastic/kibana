@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -30,6 +31,9 @@ export function AddCisIntegrationFormPageProvider({
 
     getPostInstallCloudFormationModal: async () => {
       return await testSubjects.find('postInstallCloudFormationModal');
+    },
+    showLaunchCloudFormationAgentlessButton: async () => {
+      return await testSubjects.exists('launchCloudFormationAgentlessButton');
     },
   };
 
@@ -89,6 +93,9 @@ export function AddCisIntegrationFormPageProvider({
       const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
       return fieldValue;
     },
+    showLaunchCloudShellAgentlessButton: async () => {
+      return await testSubjects.exists('launchGoogleCloudShellAgentlessButton');
+    },
   };
 
   const isRadioButtonChecked = async (selector: string) => {
@@ -108,6 +115,15 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/cspm',
+      { shouldUseHashForSubUrl: false }
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const navigateToAddIntegrationCspmWithVersionPage = async (packageVersion: string) => {
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
       { shouldUseHashForSubUrl: false }
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -179,6 +195,13 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
     const optionToBeClicked = await testSubjects.find(text);
     return await optionToBeClicked;
+  };
+
+  const clickAccordianButton = async (text: string) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const advancedAccordian = await testSubjects.find(text);
+    await advancedAccordian.scrollIntoView();
+    await advancedAccordian.click();
   };
 
   const clickOptionButton = async (text: string) => {
@@ -256,11 +279,22 @@ export function AddCisIntegrationFormPageProvider({
     return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
   };
 
+  const getReplaceSecretButton = async (secretField: string) => {
+    return await testSubjects.find(`button-replace-${secretField}`);
+  };
+
+  const inputUniqueIntegrationName = async () => {
+    const flyout = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await flyout.findAllByCssSelector('input[id="name"]');
+    await nameField[0].type(uuidv4());
+  };
+
   return {
     cisAzure,
     cisAws,
     cisGcp,
     navigateToAddIntegrationCspmPage,
+    navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,
     navigateToAddIntegrationKspmPage,
     navigateToIntegrationCspList,
@@ -277,6 +311,7 @@ export function AddCisIntegrationFormPageProvider({
     clickOptionButton,
     clickSaveButton,
     clickSaveIntegrationButton,
+    clickAccordianButton,
     getPostInstallModal,
     fillInTextField,
     chooseDropDown,
@@ -287,5 +322,7 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    getReplaceSecretButton,
+    inputUniqueIntegrationName,
   };
 }

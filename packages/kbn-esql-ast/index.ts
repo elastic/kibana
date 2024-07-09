@@ -22,8 +22,10 @@ export type {
   ESQLSource,
   ESQLColumn,
   ESQLLiteral,
+  ESQLParamLiteral,
   AstProviderFn,
   EditorError,
+  ESQLAstNode,
 } from './src/types';
 
 // Low level functions to parse grammar
@@ -37,3 +39,5 @@ export { getParser, getLexer, ROOT_STATEMENT } from './src/antlr_facade';
 export { getAstAndSyntaxErrors } from './src/ast_parser';
 
 export { ESQLErrorListener } from './src/antlr_error_listener';
+
+export { Walker, type WalkerOptions, walk } from './src/walker';
