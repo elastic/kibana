@@ -10,7 +10,7 @@ import { Reference } from '@kbn/content-management-utils';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { DefaultControlApi, DefaultControlState } from '../types';
+import { DefaultControlApi } from '../types';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
 export const deserializeControlGroup = (
@@ -75,7 +75,7 @@ export const serializeControlGroup = (
     const {
       rawState: { grow, width, ...rest },
       references: childReferences,
-    } = (child.serializeState as () => SerializedPanelState<DefaultControlState>)();
+    } = child.serializeState();
 
     if (childReferences && childReferences.length > 0) {
       references = [...references, ...childReferences];

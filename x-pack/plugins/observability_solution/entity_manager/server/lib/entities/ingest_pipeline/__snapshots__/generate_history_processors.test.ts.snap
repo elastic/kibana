@@ -91,6 +91,9 @@ if (ctx.entity?.metadata?.host?.os?.name != null) {
  if(ctx.host.os == null)  ctx[\\"host\\"][\\"os\\"] = new HashMap();
   ctx[\\"host\\"][\\"os\\"][\\"name\\"] = ctx.entity.metadata.host.os.name.keySet();
 }
+if (ctx.entity?.metadata?.sourceIndex != null) {
+  ctx[\\"sourceIndex\\"] = ctx.entity.metadata.sourceIndex.keySet();
+}
 ",
     },
   },
