@@ -5,23 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
-import type { Space } from '@kbn/spaces-plugin/server';
 
 import { DEFAULT_ROUTE_UI_SETTING_ID, DEFAULT_ROUTES } from '../common/constants';
 import { NavigationServerStartDependencies } from './types';
-
-const cache: { request?: KibanaRequest; activeSpace?: Space } = {};
 
 /**
  * uiSettings definitions for Navigation
  */
 export const getUiSettings = (
-  core: CoreSetup<NavigationServerStartDependencies>
+  core: CoreSetup<NavigationServerStartDependencies>,
+  logger: Logger
 ): Record<string, UiSettingsParams> => {
   return {
     [DEFAULT_ROUTE_UI_SETTING_ID]: {
@@ -36,16 +34,12 @@ export const getUiSettings = (
         }
 
         try {
-          let activeSpace = cache.activeSpace;
-          if (cache.request !== request || !activeSpace) {
-            activeSpace = await spaces.spacesService.getActiveSpace(request);
-          }
-          cache.request = request;
-          cache.activeSpace = activeSpace;
+          const activeSpace = await spaces.spacesService.getActiveSpace(request);
 
           const solution = activeSpace?.solution ?? 'classic';
           return DEFAULT_ROUTES[solution] ?? DEFAULT_ROUTES.classic;
         } catch (e) {
+          logger.error(`Failed to retrieve active space: ${e.message}`);
           return DEFAULT_ROUTES.classic;
         }
       },

@@ -102,14 +102,29 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
 
   private async getDefaultValues(context?: GetUiSettingsContext) {
     const values: { [key: string]: unknown } = {};
+    const promises: Array<[string, Promise<unknown>]> = [];
 
     for (const [key, definition] of Object.entries(this.defaults)) {
       if (definition.getValue) {
-        values[key] = await definition.getValue(context);
+        promises.push([key, definition.getValue(context)]);
       } else {
         values[key] = definition.value;
       }
     }
+
+    await Promise.all(
+      promises.map(([key, promise]) =>
+        promise
+          .then((value) => {
+            values[key] = value;
+          })
+          .catch((error) => {
+            this.log.error(`[UiSettingsClient] Failed to get value for key "${key}": ${error}`);
+            // Fallback to `value` prop if `getValue()` fails
+            values[key] = this.defaults[key].value;
+          })
+      )
+    );
 
     return values;
   }
