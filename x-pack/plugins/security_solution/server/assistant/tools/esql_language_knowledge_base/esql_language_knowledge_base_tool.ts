@@ -38,6 +38,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
       func: async (input, _, cbManager) => {
+        console.log('stephhh tool input', input);
         const result = await chain.invoke(
           {
             query: input.question,

@@ -12,6 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { BaseCallbackHandler } from '@langchain/core/dist/callbacks/base';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
@@ -21,6 +22,7 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: { input: string };
+  isOpenAI: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -42,6 +44,7 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
+  isOpenAI,
   logger,
   onLlmResponse,
   request,
@@ -77,14 +80,83 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
+  let message = '';
+  let tokenParentRunId = '';
+  const callbacks: Array<Partial<BaseCallbackHandler>> = isOpenAI
+    ? []
+    : [
+        {
+          handleLLMNewToken(payload, _idx, _runId, parentRunId) {
+            console.log('stephhh RIGHT HERE handleLLMNewToken', {
+              payload,
+              _idx,
+              _runId,
+              parentRunId,
+              con1: tokenParentRunId.length === 0 && !!parentRunId,
+              con2: payload.length && !didEnd && tokenParentRunId === parentRunId,
+            });
+            if (tokenParentRunId.length === 0 && !!parentRunId) {
+              // set the parent run id as the parentRunId of the first token
+              // this is used to ensure that all tokens in the stream are from the same run
+              // filtering out runs that are inside e.g. tool calls
+              tokenParentRunId = parentRunId;
+            }
+            if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
+              push({ payload, type: 'content' });
+              // store message in case of error
+              message += payload;
+            }
+          },
+          handleChainEnd(outputs, runId, parentRunId) {
+            // if parentRunId is undefined, this is the end of the stream
+            if (!parentRunId) {
+              console.log('stephhh handleChainEnd outputs???', {
+                outputs,
+                runId,
+                parentRunId,
+              });
+              console.log('message???', message);
+              handleStreamEnd(outputs.output ?? message);
+            }
+          },
+          handleLLMEnd(output, runId, parentRunId) {
+            const generations = output?.generations[0];
+            console.log('RIGHT HERE 2', {
+              generations,
+              generationsmessage: generations[0]?.message ?? 'no_message',
+              message: message ?? 'no_message',
+            });
+            console.log('stephhh handleLLMEnd???', {
+              output,
+              runId,
+              parentRunId,
+            });
+          },
+        },
+      ];
+
   let finalMessage = '';
   const stream = assistantGraph.streamEvents(inputs, {
-    callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+    callbacks: [...callbacks, apmTracer, ...(traceOptions?.tracers ?? [])],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
     streamMode: 'values',
     tags: traceOptions?.tags ?? [],
     version: 'v1',
   });
+  // .catch((err) => {
+  //   // if I throw an error here, it crashes the server. Not sure how to get around that.
+  //   // If I put await on this function the error works properly, but when there is not an error
+  //   // it waits for the entire stream to complete before resolving
+  //   const error = transformError(err);
+  //
+  //   if (error.message === 'AbortError') {
+  //     // user aborted the stream, we must end it manually here
+  //     return handleStreamEnd(message);
+  //   }
+  //   logger.error(`Error streaming from LangChain: ${error.message}`);
+  //   push({ payload: error.message, type: 'content' });
+  //   handleStreamEnd(error.message, true);
+  // });
 
   const processEvent = async () => {
     try {
@@ -94,26 +166,39 @@ export const streamGraph = async ({
       const event = value;
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+        console.log('stephhh RIGHT HERE 000', {
+          eventName: event.event,
+          event: JSON.stringify(event, null, 2),
+        });
         if (event.event === 'on_llm_stream') {
           const chunk = event.data?.chunk;
           // TODO: For Bedrock streaming support, override `handleLLMNewToken` in callbacks,
           // TODO: or maybe we can update ActionsClientSimpleChatModel to handle this `on_llm_stream` event
-          if (event.name === 'ActionsClientChatOpenAI') {
-            const msg = chunk.message;
+          // if (event.name === 'ActionsClientChatOpenAI') {
+          const msg = chunk.message;
 
-            if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
-              /* empty */
-            } else if (!didEnd) {
-              if (msg.response_metadata.finish_reason === 'stop') {
-                handleStreamEnd(finalMessage);
-              } else {
-                push({ payload: msg.content, type: 'content' });
-                finalMessage += msg.content;
-              }
+          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+            /* empty */
+          } else if (!didEnd) {
+            console.log('RIGHT HERE 1', {
+              content: msg.content,
+              response_metadata: msg.response_metadata,
+            });
+            if (msg.response_metadata?.finish_reason === 'stop') {
+              handleStreamEnd(finalMessage);
+            } else {
+              push({ payload: msg.content, type: 'content' });
+              finalMessage += msg.content;
             }
           }
+          // }
         } else if (event.event === 'on_llm_end') {
           const generations = event.data.output?.generations[0];
+          console.log('RIGHT HERE 2', {
+            generations,
+            finalMessage: finalMessage ?? 'nofinalmessage',
+            event: JSON.stringify(event, null, 2),
+          });
           if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
             handleStreamEnd(finalMessage);
           }
@@ -138,7 +223,7 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  void processEvent();
+  if (isOpenAI) void processEvent();
 
   return responseWithHeaders;
 };

@@ -137,6 +137,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         );
       }
 
+      console.log('stephhh returning string?', content);
       return content; // per the contact of _call, return a string
     }
 
@@ -151,26 +152,40 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
     let streamingFinished = false;
     const finalOutputStopRegex = /(?<!\\)\"/;
+    let extraOutput = '';
     const handleLLMNewToken = async (token: string) => {
       if (finalOutputIndex === -1) {
         // Remove whitespace to simplify parsing
         currentOutput += token.replace(/\s/g, '');
         if (currentOutput.includes(finalOutputStartToken)) {
+          console.log('found final output', currentOutput);
           finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+          const contentStartIndex = finalOutputIndex + finalOutputStartToken.length;
+          extraOutput = currentOutput.substring(contentStartIndex);
         }
       } else if (!streamingFinished) {
         const finalOutputEndIndex = token.search(finalOutputStopRegex);
         if (finalOutputEndIndex !== -1) {
+          console.log('stephhh streaming finished', token);
+          extraOutput = token.substring(0, finalOutputEndIndex);
           streamingFinished = true;
+          if (extraOutput.length > 0) {
+            console.log('stephhh streaming finished extraOutput', extraOutput);
+            await runManager?.handleLLMNewToken(extraOutput);
+          }
         } else {
-          await runManager?.handleLLMNewToken(token);
+          console.log('stephhh handleLLMNewToken extraOutput?', extraOutput);
+          console.log('stephhh handleLLMNewToken?', token);
+          const tokenOutput = `${extraOutput}${token}`;
+          extraOutput = '';
+          await runManager?.handleLLMNewToken(tokenOutput);
         }
       }
     };
     const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
 
     const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
-
+    console.log('stephhh returning parsed?', parsed);
     return parsed; // per the contact of _call, return a string
   }
 }
