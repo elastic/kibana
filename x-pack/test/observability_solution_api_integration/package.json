@@ -1,0 +1,17 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/observability_solution_api_integration",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "alerting_burn_rate:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/alerting/burn_rate/configs/serverless.config.ts",
+    "alerting_burn_rate:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/burn_rate/configs/serverless.config.ts",
+    "alerting_burn_rate:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/alerting/burn_rate/configs/ess.config.ts",
+    "alerting_burn_rate:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/burn_rate/configs/ess.config.ts",
+    "alerting_custom_threshold:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/alerting/custom_threshold/configs/serverless.config.ts",
+    "alerting_custom_threshold:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/custom_threshold/configs/serverless.config.ts",
+    "alerting_custom_threshold:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/alerting/custom_threshold/configs/ess.config.ts",
+    "alerting_custom_threshold:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/alerting/custom_threshold/configs/ess.config.ts"
+  }
+}

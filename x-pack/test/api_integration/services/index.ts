@@ -24,6 +24,8 @@ import { IngestPipelinesProvider } from './ingest_pipelines';
 import { IndexManagementProvider } from './index_management';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
+import { SloApiProvider as SloApiProviderNew } from './slo_api';
+import { AlertingApiProvider } from './alerting_api';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 
 export const services = {
@@ -45,4 +47,6 @@ export const services = {
   indexManagement: IndexManagementProvider,
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
+  alertingApi: AlertingApiProvider,
+  sloApi: SloApiProviderNew, // TODO: There was already an slo service here for the slo api tests. Unify SloApiProvider and SloApiProviderNew as part of the slo API migration issue https://github.com/elastic/kibana/issues/183397
 };

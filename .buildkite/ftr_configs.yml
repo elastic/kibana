@@ -17,6 +17,8 @@ disabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
+  - x-pack/test/observability_solution_api_integration/config/serverless/config.base.ts
+  - x-pack/test/observability_solution_api_integration/config/ess/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -584,3 +586,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/burn_rate/configs/serverless.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/burn_rate/configs/ess.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/custom_threshold/configs/serverless.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/custom_threshold/configs/ess.config.ts
