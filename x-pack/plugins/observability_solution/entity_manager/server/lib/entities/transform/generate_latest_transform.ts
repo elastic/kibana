@@ -25,6 +25,9 @@ export function generateLatestTransform(
 ): TransformPutTransformRequest {
   return {
     transform_id: generateLatestTransformId(definition),
+    _meta: {
+      definitionVersion: definition.version,
+    },
     defer_validation: true,
     source: {
       index: `${generateHistoryIndexName(definition)}.*`,
@@ -49,23 +52,18 @@ export function generateLatestTransform(
         ['entity.id']: {
           terms: { field: 'entity.id' },
         },
-        ['entity.displayName']: {
-          terms: { field: 'entity.displayName.keyword' },
-        },
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identityFields.${id.field}`]: {
-              terms: { field: `entity.identityFields.${id.field}`, missing_bucket: id.optional },
-            },
-          }),
-          {}
-        ),
       },
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
         ...generateLatestIdentityFieldsAggregations(definition),
+        'entity.displayName': {
+          terms: {
+            field: 'entity.displayName.keyword',
+            // Field should be a single value but the exact value might change if different values are found in identity fields
+            size: 1,
+          },
+        },
         'entity.lastSeenTimestamp': {
           max: {
             field: 'entity.lastSeenTimestamp',

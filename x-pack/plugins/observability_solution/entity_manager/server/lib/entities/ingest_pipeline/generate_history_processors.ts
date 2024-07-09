@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
+import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
 function createIdTemplate(definition: EntityDefinition) {
@@ -90,6 +91,18 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     },
     {
       set: {
+        field: 'entity.definitionVersion',
+        value: definition.version,
+      },
+    },
+    {
+      set: {
+        field: 'entity.schemaVersion',
+        value: ENTITY_SCHEMA_VERSION_V1,
+      },
+    },
+    {
+      set: {
         field: 'entity.displayName',
         value: createIdTemplate(definition),
       },
@@ -161,6 +174,18 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     {
       remove: {
         field: 'entity.identityFields',
+      },
+    },
+    {
+      remove: {
+        field: 'entity.identityFields',
+        ignore_missing: true,
+      },
+    },
+    {
+      set: {
+        field: 'entity.identityFields',
+        value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
     {
