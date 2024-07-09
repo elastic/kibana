@@ -221,31 +221,57 @@ export async function suggest(
           }
 
           const hasFields = !!metrics.grouping && !!metrics.grouping.length;
+          const isInsideExpression = !!astContext.node && astContext.node.type === 'function';
 
           if (theByKeywordMissing) {
             suggestions.push(...getFinalSuggestions());
-          } else if (!hasCommaBeforeCaret && hasFields) {
+          } else if (!isInsideExpression && !hasCommaBeforeCaret && hasFields) {
             suggestions.push(...getFinalSuggestions());
           } else {
-            const fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
-              // types[0] === 'column' ? ['any'] : types,
-              ['any'],
-              metrics.name,
-              definition.options[0].name,
-              getFieldsByType,
-              {
-                functions: true,
-                fields: true,
-              }
-            );
+            let fieldsAndFunctions: SuggestionRawDefinition[] = [];
+
+            if (isInsideExpression && isFunctionItem(astContext.node!)) {
+              const fieldsMap = await getFieldsMap();
+              const anyVariables = collectVariables(ast, fieldsMap, innerText);
+              const references = {
+                fields: fieldsMap,
+                variables: anyVariables,
+              };
+
+              fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
+                ['number'],
+                metrics.name,
+                'by',
+                getFieldsByType,
+                {
+                  functions: true,
+                  fields: true,
+                  variables: references.variables,
+                }
+              );
+            } else {
+              fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
+                ['any'],
+                metrics.name,
+                definition.options[0].name,
+                getFieldsByType,
+                {
+                  functions: true,
+                  fields: true,
+                }
+              );
+            }
 
             suggestions.push(...fieldsAndFunctions);
 
             const fieldsMap: Map<string, ESQLRealField> = await new Map();
             const anyVariables = collectVariables(ast, fieldsMap, innerText);
-            const variableSuggestion = buildNewVarDefinition(findNewVariable(anyVariables));
 
-            suggestions.push(variableSuggestion);
+            if (!isInsideExpression) {
+              const variableSuggestion = buildNewVarDefinition(findNewVariable(anyVariables));
+
+              suggestions.push(variableSuggestion);
+            }
           }
 
           return suggestions;
