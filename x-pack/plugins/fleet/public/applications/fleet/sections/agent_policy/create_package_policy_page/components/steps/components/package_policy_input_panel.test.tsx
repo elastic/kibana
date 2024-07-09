@@ -359,10 +359,13 @@ describe('PackagePolicyInputPanel', () => {
   describe('When agentless is enabled', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
+        agentlessAPIUrl: 'https://agentless.api.url',
         isAgentlessEnabled: true,
         isAgentlessPackagePolicy: jest.fn(),
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isAgentlessCloudEnabled: true,
+        isAgentlessServerlessEnabled: false,
       });
     });
 
@@ -392,10 +395,13 @@ describe('PackagePolicyInputPanel', () => {
   describe('When agentless not enabled', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
+        agentlessAPIUrl: undefined,
         isAgentlessEnabled: false,
         isAgentlessPackagePolicy: jest.fn(),
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isAgentlessCloudEnabled: true,
+        isAgentlessServerlessEnabled: false,
       });
     });
 

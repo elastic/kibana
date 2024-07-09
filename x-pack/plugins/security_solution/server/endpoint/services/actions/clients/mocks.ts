@@ -172,11 +172,10 @@ const createNoParamsResponseActionOptionsMock = (
 const createKillOrSuspendProcessOptionsMock = (
   overrides: Partial<KillOrSuspendProcessRequestBody> = {}
 ): KillOrSuspendProcessRequestBody => {
+  const parameters = overrides.parameters ?? { pid: 999 };
   const options: KillOrSuspendProcessRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
-    parameters: {
-      pid: 999,
-    },
+    parameters,
   };
   return merge(options, overrides);
 };
