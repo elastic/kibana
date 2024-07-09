@@ -9,6 +9,9 @@ import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
+import { isResponseActionsAlertAgentIdField } from '../../lib/endpoint';
+import { useAlertResponseActionsSupport } from '../../hooks/endpoint/use_alert_response_actions_support';
 import * as i18n from './translations';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
@@ -33,17 +36,6 @@ import { getEnrichedFieldInfo } from './helpers';
 import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
-import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import {
-  SENTINEL_ONE_AGENT_ID_FIELD,
-  isAlertFromSentinelOneEvent,
-} from '../../utils/sentinelone_alert_check';
-import {
-  CROWDSTRIKE_AGENT_ID_FIELD,
-  isAlertFromCrowdstrikeEvent,
-} from '../../utils/crowdstrike_alert_check';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
 const THRESHOLD_CARDINALITY_FIELD = `${ALERT_THRESHOLD_RESULT}.cardinality.field`;
@@ -56,12 +48,12 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   // ENDPOINT-related field //
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   {
-    id: SENTINEL_ONE_AGENT_ID_FIELD,
+    id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
     overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
   {
-    id: CROWDSTRIKE_AGENT_ID_FIELD,
+    id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
     overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
@@ -307,6 +299,16 @@ export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): E
   return { primaryEventCategory, allEventCategories };
 }
 
+export interface UseSummaryRowsProps {
+  data: TimelineEventsDetailsItem[];
+  browserFields: BrowserFields;
+  scopeId: string;
+  eventId: string;
+  investigationFields?: string[];
+  isDraggable?: boolean;
+  isReadOnly?: boolean;
+}
+
 export const useSummaryRows = ({
   data,
   browserFields,
@@ -315,21 +317,9 @@ export const useSummaryRows = ({
   isDraggable = false,
   isReadOnly = false,
   investigationFields,
-}: {
-  data: TimelineEventsDetailsItem[];
-  browserFields: BrowserFields;
-  scopeId: string;
-  eventId: string;
-  investigationFields?: string[];
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}) => {
-  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'sentinelOneManualHostActionsEnabled'
-  );
-  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
+}: UseSummaryRowsProps): AlertSummaryRow[] => {
+  const responseActionsSupport = useAlertResponseActionsSupport(data);
+
   return useMemo(() => {
     const eventCategories = getEventCategoriesFromData(data);
 
@@ -381,22 +371,14 @@ export const useSummaryRows = ({
             isReadOnly,
           };
 
-          if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
-            return acc;
-          }
-
+          // If the field is one used by a supported Response Actions agentType,
+          // and the alert's host supports response actions
+          // but the alert field is not the one that the agentType on the alert host uses,
+          // then exit and return accumulator
           if (
-            field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
-            sentinelOneManualHostActionsEnabled &&
-            !isAlertFromSentinelOneEvent({ data })
-          ) {
-            return acc;
-          }
-
-          if (
-            field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
-            crowdstrikeManualHostActionsEnabled &&
-            !isAlertFromCrowdstrikeEvent({ data })
+            isResponseActionsAlertAgentIdField(field.id) &&
+            responseActionsSupport.isSupported &&
+            responseActionsSupport.details.agentIdField !== field.id
           ) {
             return acc;
           }
@@ -429,15 +411,15 @@ export const useSummaryRows = ({
         }, [])
       : [];
   }, [
-    browserFields,
     data,
+    investigationFields,
+    scopeId,
+    browserFields,
     eventId,
     isDraggable,
-    scopeId,
     isReadOnly,
-    investigationFields,
-    sentinelOneManualHostActionsEnabled,
-    crowdstrikeManualHostActionsEnabled,
+    responseActionsSupport.details.agentIdField,
+    responseActionsSupport.isSupported,
   ]);
 };
 

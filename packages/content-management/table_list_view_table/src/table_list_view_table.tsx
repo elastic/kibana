@@ -27,11 +27,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
+import {
+  UserAvatarTip,
+  ManagedAvatarTip,
+  NoCreatorTip,
+} from '@kbn/content-management-user-profiles';
 import type {
   OpenContentEditorParams,
   SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { RecentlyAccessed } from '@kbn/recently-accessed';
 
 import {
   Table,
@@ -47,12 +53,13 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
-import { UserAvatarTip } from './components/user_avatar_tip';
-import { NoUsersTip } from './components/user_missing_tip';
-import { ManagedAvatarTip } from './components/managed_avatar_tip';
+import { sortByRecentlyAccessed } from './components/table_sort_select';
 
 interface ContentEditorConfig
-  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+  extends Pick<
+    OpenContentEditorParams,
+    'isReadonly' | 'onSave' | 'customValidators' | 'showActivityView'
+  > {
   enabled?: boolean;
 }
 
@@ -111,6 +118,7 @@ export interface TableListViewTableProps<
    */
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
+  recentlyAccessed?: Pick<RecentlyAccessed, 'get'>;
 
   tableCaption: string;
   /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
@@ -140,6 +148,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
   hasCreatedByMetadata: boolean;
+  hasRecentlyAccessedMetadata: boolean;
   pagination: Pagination;
   tableSort: {
     field: SortColumnField;
@@ -198,10 +207,19 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
   // in the query params. We might want to stop supporting both in a future release (v9.0?)
   stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
 
-  if (sanitizedParams.sort === 'title' || sanitizedParams.sort === 'updatedAt') {
-    const field = sanitizedParams.sort === 'title' ? 'attributes.title' : 'updatedAt';
+  if (
+    sanitizedParams.sort === 'title' ||
+    sanitizedParams.sort === 'updatedAt' ||
+    sanitizedParams.sort === 'accessedAt'
+  ) {
+    const field =
+      sanitizedParams.sort === 'title'
+        ? 'attributes.title'
+        : sanitizedParams.sort === 'accessedAt'
+        ? 'accessedAt'
+        : 'updatedAt';
 
-    stateFromURL.sort = { field, direction: 'asc' };
+    stateFromURL.sort = { field, direction: field === 'attributes.title' ? 'asc' : 'desc' };
 
     if (sanitizedParams.sortdir === 'desc' || sanitizedParams.sortdir === 'asc') {
       stateFromURL.sort.direction = sanitizedParams.sortdir;
@@ -297,6 +315,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   refreshListBouncer,
   setPageDataTestSubject,
   createdByEnabled = false,
+  recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -368,6 +387,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
       hasCreatedByMetadata: false,
+      hasRecentlyAccessedMetadata: recentlyAccessed ? recentlyAccessed.get().length > 0 : false,
       selectedIds: [],
       searchQuery: { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
@@ -382,7 +402,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         createdBy: [],
       },
     };
-  }, [initialPageSize, entityName]);
+  }, [initialPageSize, entityName, recentlyAccessed]);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -399,6 +419,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     totalItems,
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
+    hasRecentlyAccessedMetadata,
     pagination,
     tableSort,
     tableFilter,
@@ -428,6 +449,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       }
 
       if (idx === fetchIdx.current) {
+        // when recentlyAccessed is available, we sort the items by the recently accessed items
+        // then this sort will be used as the default sort for the table
+        if (recentlyAccessed && recentlyAccessed.get().length > 0) {
+          response.hits = sortByRecentlyAccessed(response.hits, recentlyAccessed.get());
+        }
+
         dispatch({
           type: 'onFetchItemsSuccess',
           data: {
@@ -443,7 +470,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
+  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -506,6 +533,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           title: item.attributes.title,
           description: item.attributes.description,
           tags,
+          createdAt: item.createdAt,
+          createdBy: item.createdBy,
+          updatedAt: item.updatedAt,
+          updatedBy: item.updatedBy,
+          managed: item.managed,
         },
         entityName,
         ...contentEditor,
@@ -575,7 +607,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             {i18n.translate('contentManagement.tableList.createdByColumnTitle', {
               defaultMessage: 'Creator',
             })}
-            <NoUsersTip />
           </>
         ),
         render: (field: string, record: { createdBy?: string; managed?: boolean }) =>
@@ -583,7 +614,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             <UserAvatarTip uid={record.createdBy} />
           ) : record.managed ? (
             <ManagedAvatarTip entityName={entityName} />
-          ) : null,
+          ) : (
+            <NoCreatorTip iconType={'minus'} />
+          ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
         width: '100px',
@@ -601,7 +634,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
         ),
         sortable: true,
-        width: '120px',
+        width: '130px',
       });
     }
 
@@ -1098,6 +1131,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           searchQuery={searchQuery}
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+          hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
           tableSort={tableSort}
           tableFilter={tableFilter}
           tableItemsRowActions={tableItemsRowActions}

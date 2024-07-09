@@ -53,7 +53,9 @@ spec:
           image: docker.elastic.co/beats/elastic-agent:VERSION
           args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
-            # The basic authentication username used to connect to Elasticsearch
+            # The API Key with access privilleges to connect to Elasticsearch. https://www.elastic.co/guide/en/fleet/current/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
+            - name: API_KEY
+            # The basic authentication username used to connect to Elasticsearch. Alternative to API_KEY access.
             # This user needs the privileges required to publish events to Elasticsearch.
             - name: ES_USERNAME
               value: "elastic"
@@ -349,9 +351,6 @@ spec:
           effect: NoSchedule
       serviceAccountName: elastic-agent
       hostNetwork: true
-      # 'hostPID: true' enables the Elastic Security integration to observe all process exec events on the host.
-      # Sharing the host process ID namespace gives visibility of all processes running on the same host.
-      hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
@@ -467,7 +466,7 @@ spec:
           hostPath:
             path: /var/lib
         # Mount /etc/machine-id from the host to determine host ID
-        # Needed for Elastic Security integration
+        # Needed for Kubernetes node autodiscovery
         - name: etc-mid
           hostPath:
             path: /etc/machine-id

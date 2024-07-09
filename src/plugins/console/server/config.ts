@@ -31,7 +31,7 @@ const schemaLatest = schema.object(
         defaultValue: 'stack',
       }),
     }),
-    dev: schema.object({ enableMonaco: schema.boolean({ defaultValue: false }) }),
+    dev: schema.object({ enableMonaco: schema.boolean({ defaultValue: true }) }),
   },
   { defaultValue: undefined }
 );

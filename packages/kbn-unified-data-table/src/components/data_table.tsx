@@ -650,10 +650,10 @@ export const UnifiedDataTable = ({
   const editField = useMemo(
     () =>
       onFieldEdited
-        ? (fieldName: string) => {
+        ? async (fieldName: string) => {
             closeFieldEditor.current =
               onFieldEdited &&
-              services?.dataViewFieldEditor?.openEditor({
+              (await services?.dataViewFieldEditor?.openEditor({
                 ctx: {
                   dataView,
                 },
@@ -661,7 +661,7 @@ export const UnifiedDataTable = ({
                 onSave: async () => {
                   await onFieldEdited();
                 },
-              });
+              }));
           }
         : undefined,
     [dataView, onFieldEdited, services?.dataViewFieldEditor]
@@ -828,6 +828,12 @@ export const UnifiedDataTable = ({
 
   const sorting = useMemo(() => {
     if (isSortEnabled) {
+      // in ES|QL mode, sorting is disabled when in Document view
+      // ideally we want the @timestamp column to be sortable server side
+      // but it needs discussion before moving forward like this
+      if (isPlainRecord && !columns.length) {
+        return undefined;
+      }
       return {
         columns: sortingColumns,
         onSort: onTableSort,
@@ -837,7 +843,7 @@ export const UnifiedDataTable = ({
       columns: sortingColumns,
       onSort: () => {},
     };
-  }, [isSortEnabled, sortingColumns, onTableSort]);
+  }, [isSortEnabled, sortingColumns, isPlainRecord, columns.length, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 

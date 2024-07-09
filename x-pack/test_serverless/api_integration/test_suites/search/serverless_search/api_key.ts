@@ -6,24 +6,34 @@
  */
 
 import expect from 'expect';
-import { kibanaTestUser } from '@kbn/test';
+import { kibanaTestSuperuserServerless } from '@kbn/test';
 import { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
   const es = getService('es');
   const log = getService('log');
+  let roleAuthc: RoleCredentials;
 
   describe('API Key routes', function () {
     describe('GET api_keys', function () {
+      before(async () => {
+        roleAuthc = await svlUserManager.createApiKeyForRole('developer');
+      });
+      after(async () => {
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
       it('return apiKeys', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/api_keys`)
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(body).toBeDefined();
@@ -37,7 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
         let apiKeys: SecurityApiKey[];
         // Delete existing API keys
         try {
-          const apiKeysResult = await es.security.getApiKey({ username: kibanaTestUser.username });
+          const apiKeysResult = await es.security.getApiKey({
+            username: kibanaTestSuperuserServerless.username,
+          });
           apiKeys = apiKeysResult.api_keys;
         } catch (err) {
           log.debug('[Setup error] error listing API keys');
@@ -54,18 +66,21 @@ export default function ({ getService }: FtrProviderContext) {
       };
       before(async () => {
         await deleteAllApiKeys();
+        roleAuthc = await svlUserManager.createApiKeyForRole('developer');
       });
       after(async () => {
         await deleteAllApiKeys();
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
       });
       it('can create a key that expires', async () => {
         const createBody = {
           name: 'test-api-key-001',
           expiration: '60d',
         };
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.cookieHeader)
           .send(createBody)
           .expect(200);
 
@@ -75,9 +90,10 @@ export default function ({ getService }: FtrProviderContext) {
         const createBody = {
           name: 'test-api-key-002',
         };
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.cookieHeader)
           .send(createBody)
           .expect(200);
 
@@ -87,10 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
         const createBody = {
           name: 'test-api-key-003',
         };
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
           .set(svlCommonApi.getInternalRequestHeader())
           .send(createBody)
+          .set(roleAuthc.cookieHeader)
           .expect(200);
 
         expect(body).toMatchObject({

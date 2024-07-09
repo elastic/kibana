@@ -428,6 +428,17 @@ export interface ConcreteTaskInstance extends TaskInstance {
   ownerId: string | null;
 }
 
+export interface ConcreteTaskInstanceVersion {
+  /** The _id of the the document (not the SO id) */
+  esId: string;
+  /** The _seq_no of the document when using seq_no_primary_term on fetch */
+  seqNo?: number;
+  /** The _primary_term of the document when using seq_no_primary_term on fetch */
+  primaryTerm?: number;
+  /** The error found if trying to resolve the version info for this esId */
+  error?: string;
+}
+
 /**
  * A task instance that has an id and is ready for storage.
  */
