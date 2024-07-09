@@ -380,11 +380,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
-      const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
-      await deleteAlerts([adhocRuleId]);
-      await deleteDataView(outputDataViewId);
-      await deleteConnector(connectorId);
+      // clean up what we can in case of failures in some tests which blocked the creation of the following objects
+      try {
+        deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
+      } catch {
+        // continue
+      }
+      try {
+        const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
+        await deleteAlerts([adhocRuleId]);
+      } catch {
+        // continue
+      }
+      try {
+        await deleteDataView(outputDataViewId);
+      } catch {
+        // continue
+      }
+      try {
+        await deleteConnector(connectorId);
+      } catch {
+        // continue
+      }
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.cleanStandardList();
     });
