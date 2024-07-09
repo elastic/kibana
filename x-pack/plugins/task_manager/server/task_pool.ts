@@ -95,7 +95,7 @@ export class TaskPool {
   }
 
   /**
-   * Gets how many workers are currently in use by type.
+   * Gets how much capacity is currently in use by each type.
    */
   public getUsedCapacityByType(type: string) {
     return [...this.tasksInPool.values()].reduce(
@@ -117,7 +117,10 @@ export class TaskPool {
     // Note `this.availableCapacity` is a getter with side effects, so we just want
     // to call it once for this bit of the code.
     const availableCapacity = this.availableCapacity;
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableCapacity);
+    const [tasksToRun, leftOverTasks] = determineTasksToRunBasedOnCapacity(
+      tasks,
+      availableCapacity
+    );
 
     if (attempt > MAX_RUN_ATTEMPTS) {
       const stats = [
@@ -168,7 +171,9 @@ export class TaskPool {
     }
 
     if (leftOverTasks.length) {
-      if (this.availableCapacity) {
+      // see if we have capacity for leftover tasks
+      const newAvailableCapacity = this.availableCapacity;
+      if (newAvailableCapacity) {
         return this.run(leftOverTasks, attempt + 1);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
@@ -247,9 +252,29 @@ export class TaskPool {
   }
 }
 
-function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
-  const listInCount = list.splice(0, count);
-  return [listInCount, list];
+export function determineTasksToRunBasedOnCapacity(
+  tasks: TaskRunner[],
+  availableCapacity: number
+): [TaskRunner[], TaskRunner[]] {
+  const tasksToRun: TaskRunner[] = [];
+  const leftOverTasks: TaskRunner[] = [];
+
+  let capacityAccumulator = 0;
+  for (const task of tasks) {
+    const taskCost = task.definition.cost;
+    if (capacityAccumulator + taskCost <= availableCapacity) {
+      tasksToRun.push(task);
+      capacityAccumulator += taskCost;
+    } else {
+      leftOverTasks.push(task);
+      // Don't claim further tasks even if lower cost tasks are next.
+      // It may be an extra large task and we need to make room for it
+      // for the next claiming cycle
+      capacityAccumulator = availableCapacity;
+    }
+  }
+
+  return [tasksToRun, leftOverTasks];
 }
 
 function durationAsString(duration: Duration): string {

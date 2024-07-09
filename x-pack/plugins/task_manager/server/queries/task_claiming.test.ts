@@ -77,7 +77,7 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
     });
 
     expect(taskManagerLogger.warn).toHaveBeenCalledWith(
@@ -126,7 +126,7 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
     });
 
     expect(taskManagerLogger.info).toHaveBeenCalledTimes(2);

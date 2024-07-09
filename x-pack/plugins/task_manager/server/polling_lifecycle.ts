@@ -127,10 +127,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger,
     });
 
-    this.pool = new TaskPool({
-      logger,
-      capacity$: capacityConfiguration$,
-    });
+    this.pool = new TaskPool({ logger, capacity$: capacityConfiguration$ });
     this.pool.load.subscribe(emitEvent);
 
     this.taskClaiming = new TaskClaiming({
@@ -141,17 +138,22 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions,
       unusedTypes,
       logger: this.logger,
-      getCapacity: (taskType?: string) =>
-        taskType && this.definitions.get(taskType)?.maxConcurrency
-          ? Math.max(
-              Math.min(
-                this.pool.availableWorkers,
-                this.definitions.get(taskType)!.maxConcurrency! -
-                  this.pool.getOccupiedWorkersByType(taskType)
-              ),
-              0
-            )
-          : this.pool.availableWorkers,
+      getAvailableCapacity: (taskType?: string) => {
+        const taskTypeDefinition = taskType ? this.definitions.get(taskType) : null;
+        if (taskTypeDefinition?.maxConcurrency) {
+          // calculate the max capacity that can be used for this task type based on cost
+          const maxCapacityForType = taskTypeDefinition.maxConcurrency * taskTypeDefinition.cost;
+          return Math.max(
+            Math.min(
+              this.pool.availableCapacity,
+              maxCapacityForType - this.pool.getUsedCapacityByType(taskType!)
+            ),
+            0
+          );
+        } else {
+          return this.pool.availableCapacity;
+        }
+      },
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
@@ -175,19 +177,20 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       pollInterval$: pollIntervalConfiguration$,
       pollIntervalDelay$,
       getCapacity: () => {
-        const capacity = this.pool.availableWorkers;
+        const capacity = this.pool.availableCapacity;
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
           // high load causes the poller to skip work (work isn't called when there is no capacity)
-          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.capacityLoad)));
 
           // Emit event indicating task manager utilization
-          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.capacityLoad)));
         }
         return capacity;
       },
       work: this.pollForWork,
     });
+
     this.subscribeToPoller(poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {

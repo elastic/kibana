@@ -6,7 +6,7 @@
  */
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
-import { TaskPool, TaskPoolRunResult } from './task_pool';
+import { TaskPool, TaskPoolRunResult, determineTasksToRunBasedOnCapacity } from './task_pool';
 import { resolvable, sleep } from './test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
@@ -15,6 +15,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { TaskRunningStage } from './task_running';
+import { TaskCost } from './task';
 
 describe('TaskPool', () => {
   beforeEach(() => {
@@ -26,47 +27,33 @@ describe('TaskPool', () => {
     jest.useRealTimers();
   });
 
-  test('occupiedWorkers are a sum of running tasks', async () => {
-    const pool = new TaskPool({
-      maxWorkers$: of(200),
-      logger: loggingSystemMock.create().get(),
-    });
-
+  test('usedCapacity is the sum of running tasks', async () => {
+    const pool = new TaskPool({ capacity$: of(20), logger: loggingSystemMock.create().get() });
     const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
-    expect(pool.occupiedWorkers).toEqual(3);
+    expect(pool.usedCapacity).toEqual(3 * TaskCost.Normal);
   });
 
-  test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
-    const pool = new TaskPool({
-      maxWorkers$: of(10),
-      logger: loggingSystemMock.create().get(),
-    });
-
+  test('availableCapacity are a function of capacity - usedCapacity', async () => {
+    const pool = new TaskPool({ capacity$: of(20), logger: loggingSystemMock.create().get() });
     const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
-    expect(pool.availableWorkers).toEqual(7);
+    expect(pool.availableCapacity).toEqual(20 - 3 * TaskCost.Normal);
   });
 
-  test('availableWorkers is 0 until maxWorkers$ pushes a value', async () => {
-    const maxWorkers$ = new Subject<number>();
-    const pool = new TaskPool({
-      maxWorkers$,
-      logger: loggingSystemMock.create().get(),
-    });
+  test('availableCapacity is 0 until capacity$ pushes a value', async () => {
+    const capacity$ = new Subject<number>();
+    const pool = new TaskPool({ capacity$, logger: loggingSystemMock.create().get() });
 
-    expect(pool.availableWorkers).toEqual(0);
-    maxWorkers$.next(10);
-    expect(pool.availableWorkers).toEqual(10);
+    expect(pool.availableCapacity).toEqual(0);
+    capacity$.next(20);
+    expect(pool.availableCapacity).toEqual(20);
   });
 
   test('does not run tasks that are beyond its available capacity', async () => {
-    const pool = new TaskPool({
-      maxWorkers$: of(2),
-      logger: loggingSystemMock.create().get(),
-    });
+    const pool = new TaskPool({ capacity$: of(5), logger: loggingSystemMock.create().get() });
 
     const shouldRun = mockRun();
     const shouldNotRun = mockRun();
@@ -78,24 +65,21 @@ describe('TaskPool', () => {
     ]);
 
     expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
-    expect(pool.availableWorkers).toEqual(0);
+    expect(pool.availableCapacity).toEqual(1);
     expect(shouldRun).toHaveBeenCalledTimes(2);
     expect(shouldNotRun).not.toHaveBeenCalled();
   });
 
   test('should log when marking a Task as running fails', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(2),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(6), logger });
 
     const taskFailedToMarkAsRunning = mockTask();
     taskFailedToMarkAsRunning.markTaskAsRunning.mockImplementation(async () => {
       throw new Error(`Mark Task as running has failed miserably`);
     });
 
-    const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
+    const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask(), mockTask()]);
 
     expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -108,10 +92,7 @@ describe('TaskPool', () => {
 
   test('should log when running a Task fails', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(3),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(6), logger });
 
     const taskFailedToRun = mockTask();
     taskFailedToRun.run.mockImplementation(async () => {
@@ -131,10 +112,7 @@ describe('TaskPool', () => {
 
   test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(3),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(6), logger });
 
     const taskFailedToRun = mockTask();
     taskFailedToRun.run.mockImplementation(async () => {
@@ -153,10 +131,7 @@ describe('TaskPool', () => {
 
   test('Running a task which fails still takes up capacity', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(1),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(2), logger });
 
     const taskFailedToRun = mockTask();
     taskFailedToRun.run.mockImplementation(async () => {
@@ -170,10 +145,7 @@ describe('TaskPool', () => {
   });
 
   test('clears up capacity when a task completes', async () => {
-    const pool = new TaskPool({
-      maxWorkers$: of(1),
-      logger: loggingSystemMock.create().get(),
-    });
+    const pool = new TaskPool({ capacity$: of(2), logger: loggingSystemMock.create().get() });
 
     const firstWork = resolvable();
     const firstRun = sinon.spy(async () => {
@@ -194,32 +166,29 @@ describe('TaskPool', () => {
     ]);
 
     expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
-    expect(pool.occupiedWorkers).toEqual(1);
-    expect(pool.availableWorkers).toEqual(0);
+    expect(pool.usedCapacity).toEqual(2);
+    expect(pool.availableCapacity).toEqual(0);
 
     await firstWork;
     sinon.assert.calledOnce(firstRun);
     sinon.assert.notCalled(secondRun);
 
-    expect(pool.occupiedWorkers).toEqual(0);
+    expect(pool.usedCapacity).toEqual(0);
     await pool.run([{ ...mockTask(), run: secondRun }]);
-    expect(pool.occupiedWorkers).toEqual(1);
+    expect(pool.usedCapacity).toEqual(2);
 
-    expect(pool.availableWorkers).toEqual(0);
+    expect(pool.availableCapacity).toEqual(0);
 
     await secondWork;
 
-    expect(pool.occupiedWorkers).toEqual(0);
-    expect(pool.availableWorkers).toEqual(1);
+    expect(pool.usedCapacity).toEqual(0);
+    expect(pool.availableCapacity).toEqual(2);
     sinon.assert.calledOnce(secondRun);
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(2),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(4), logger });
 
     const haltUntilWeAfterFirstRun = resolvable();
     const taskHasExpired = resolvable();
@@ -250,7 +219,7 @@ describe('TaskPool', () => {
       {
         ...mockTask({ id: '2' }),
         async run() {
-          // halt here so that we can verify that this task is counted in `occupiedWorkers`
+          // halt here so that we can verify that this task is counted in `usedCapacity`
           await haltUntilWeAfterFirstRun;
           return asOk({ state: {} });
         },
@@ -259,8 +228,8 @@ describe('TaskPool', () => {
     ]);
 
     expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
-    expect(pool.occupiedWorkers).toEqual(2);
-    expect(pool.availableWorkers).toEqual(0);
+    expect(pool.usedCapacity).toEqual(4);
+    expect(pool.availableCapacity).toEqual(0);
 
     // release first stage in task so that it has time to expire, but not complete
     haltUntilWeAfterFirstRun.resolve();
@@ -271,8 +240,8 @@ describe('TaskPool', () => {
     sinon.assert.calledOnce(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
 
-    expect(pool.occupiedWorkers).toEqual(1);
-    expect(pool.availableWorkers).toEqual(1);
+    expect(pool.usedCapacity).toEqual(2);
+    expect(pool.availableCapacity).toEqual(2);
 
     haltTaskSoThatItCanBeCanceled.resolve();
 
@@ -281,11 +250,8 @@ describe('TaskPool', () => {
     );
   });
 
-  test('calls to availableWorkers ensures we cancel expired tasks', async () => {
-    const pool = new TaskPool({
-      maxWorkers$: of(1),
-      logger: loggingSystemMock.create().get(),
-    });
+  test('calls to availableCapacity ensures we cancel expired tasks', async () => {
+    const pool = new TaskPool({ capacity$: of(2), logger: loggingSystemMock.create().get() });
 
     const taskIsRunning = resolvable();
     const taskHasExpired = resolvable();
@@ -316,13 +282,13 @@ describe('TaskPool', () => {
     await taskIsRunning;
 
     sinon.assert.notCalled(cancel);
-    expect(pool.occupiedWorkers).toEqual(1);
-    // The call to `availableWorkers` will clear the expired task so it's 1 instead of 0
-    expect(pool.availableWorkers).toEqual(1);
+    expect(pool.usedCapacity).toEqual(2);
+    // The call to `availableCapacity` will clear the expired task so it's 2 instead of 0
+    expect(pool.availableCapacity).toEqual(2);
     sinon.assert.calledOnce(cancel);
 
-    expect(pool.occupiedWorkers).toEqual(0);
-    expect(pool.availableWorkers).toEqual(1);
+    expect(pool.usedCapacity).toEqual(0);
+    expect(pool.availableCapacity).toEqual(2);
     // ensure cancel isn't called twice
     sinon.assert.calledOnce(cancel);
     taskHasExpired.resolve();
@@ -330,10 +296,7 @@ describe('TaskPool', () => {
 
   test('logs if cancellation errors', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      logger,
-      maxWorkers$: of(20),
-    });
+    const pool = new TaskPool({ logger, capacity$: of(40) });
 
     const cancelled = resolvable();
     const result = await pool.run([
@@ -355,7 +318,7 @@ describe('TaskPool', () => {
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     await pool.run([]);
 
-    expect(pool.occupiedWorkers).toEqual(0);
+    expect(pool.usedCapacity).toEqual(0);
 
     // Allow the task to cancel...
     await cancelled;
@@ -367,10 +330,7 @@ describe('TaskPool', () => {
 
   test('only allows one task with the same id in the task pool', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(2),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(4), logger });
 
     const shouldRun = mockRun();
     const shouldNotRun = mockRun();
@@ -392,28 +352,39 @@ describe('TaskPool', () => {
     expect(shouldNotRun).not.toHaveBeenCalled();
   });
 
+  test('should return used capacity by task type', async () => {
+    const pool = new TaskPool({ capacity$: of(20), logger: loggingSystemMock.create().get() });
+    const tasks = [
+      { ...mockTask({}, { type: 'typeA' }) },
+      { ...mockTask({}, { type: 'typeB', cost: TaskCost.Tiny }) },
+      { ...mockTask({}, { type: 'typeA' }) },
+    ];
+
+    pool.run(tasks);
+
+    expect(pool.getUsedCapacityByType('typeA')).toEqual(2 * TaskCost.Normal);
+    expect(pool.getUsedCapacityByType('typeB')).toEqual(TaskCost.Tiny);
+  });
+
   // This test is from https://github.com/elastic/kibana/issues/172116
   // It's not clear how to reproduce the actual error, but it is easy to
   // reproduce with the wacky test below.  It does log the exact error
   // from that issue, without the corresponding fix in task_pool.ts
-  test('works when available workers is 0 but there are tasks to run', async () => {
+  test('works when available capacity is 0 but there are tasks to run', async () => {
     const logger = loggingSystemMock.create().get();
-    const pool = new TaskPool({
-      maxWorkers$: of(2),
-      logger,
-    });
+    const pool = new TaskPool({ capacity$: of(4), logger });
 
     const shouldRun = mockRun();
 
     const taskId = uuidv4();
     const task1 = mockTask({ id: taskId, run: shouldRun });
 
-    // we need to alternate the values of `availableWorkers`.  First it
+    // we need to alternate the values of `availableCapacity`.  First it
     // should be 0, then 1, then 0, then 1, etc.  This will cause task_pool.run
     // to partition tasks (0 to run, everything as leftover), then at the
     // end of run(), to check if it should recurse, it should be > 0.
     let awValue = 1;
-    Object.defineProperty(pool, 'availableWorkers', {
+    Object.defineProperty(pool, 'availableCapacity', {
       get() {
         return ++awValue % 2;
       },
@@ -424,48 +395,82 @@ describe('TaskPool', () => {
 
     expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "task pool run attempts exceeded 3; assuming ran out of capacity; availableWorkers: 0, tasksToRun: 0, leftOverTasks: 1, maxWorkers: 2, occupiedWorkers: 0, workerLoad: 0",
+        "task pool run attempts exceeded 3; assuming ran out of capacity; availableCapacity: 0, tasksToRun: 0, leftOverTasks: 1, capacity: 4, usedCapacity: 0, capacityLoad: 0",
       ]
     `);
   });
-
-  function mockRun() {
-    return jest.fn(async () => {
-      await sleep(0);
-      return asOk({ state: {} });
-    });
-  }
-
-  function mockTask(overrides = {}) {
-    return {
-      isExpired: false,
-      taskExecutionId: uuidv4(),
-      id: uuidv4(),
-      cancel: async () => undefined,
-      markTaskAsRunning: jest.fn(async () => true),
-      run: mockRun(),
-      stage: TaskRunningStage.PENDING,
-      toString: () => `TaskType "shooooo"`,
-      isAdHocTaskAndOutOfAttempts: false,
-      removeTask: jest.fn(),
-      get expiration() {
-        return new Date();
-      },
-      get startedAt() {
-        return new Date();
-      },
-      get definition() {
-        return {
-          type: '',
-          title: '',
-          timeout: '5m',
-          createTaskRunner: jest.fn(),
-        };
-      },
-      isSameTask() {
-        return false;
-      },
-      ...overrides,
-    };
-  }
 });
+
+describe('determineTasksToRunBasedOnCapacity', () => {
+  test('should run all tasks in order if availableCapacity can accomodate', () => {
+    const tasks = [mockTask(), mockTask(), mockTask()];
+    const [tasksToRun, leftOverTasks] = determineTasksToRunBasedOnCapacity(tasks, 6);
+
+    expect(tasksToRun).toEqual(tasks);
+    expect(leftOverTasks).toEqual([]);
+  });
+
+  test('should run tasks up to large cost task, even if available capacity can accomodate other tasks further in the queue', () => {
+    const tasks = [
+      mockTask(),
+      mockTask(),
+      mockTask({}, { cost: TaskCost.ExtraLarge }),
+      mockTask(),
+      mockTask(),
+    ];
+    const [tasksToRun, leftOverTasks] = determineTasksToRunBasedOnCapacity(tasks, 8);
+
+    expect(tasksToRun).toEqual([tasks[0], tasks[1]]);
+    expect(leftOverTasks).toEqual([tasks[2], tasks[3], tasks[4]]);
+  });
+
+  test('should run no tasks if not enough available capacity', () => {
+    const tasks = [mockTask()];
+    const [tasksToRun, leftOverTasks] = determineTasksToRunBasedOnCapacity(tasks, 1);
+
+    expect(tasksToRun).toEqual([]);
+    expect(leftOverTasks).toEqual(tasks);
+  });
+});
+
+function mockRun() {
+  return jest.fn(async () => {
+    await sleep(0);
+    return asOk({ state: {} });
+  });
+}
+
+function mockTask(overrides = {}, definitionOverride = {}) {
+  return {
+    isExpired: false,
+    taskExecutionId: uuidv4(),
+    id: uuidv4(),
+    cancel: async () => undefined,
+    markTaskAsRunning: jest.fn(async () => true),
+    run: mockRun(),
+    stage: TaskRunningStage.PENDING,
+    toString: () => `TaskType "shooooo"`,
+    isAdHocTaskAndOutOfAttempts: false,
+    removeTask: jest.fn(),
+    get expiration() {
+      return new Date();
+    },
+    get startedAt() {
+      return new Date();
+    },
+    get definition() {
+      return {
+        type: '',
+        title: '',
+        timeout: '5m',
+        cost: TaskCost.Normal,
+        createTaskRunner: jest.fn(),
+        ...definitionOverride,
+      };
+    },
+    isSameTask() {
+      return false;
+    },
+    ...overrides,
+  };
+}

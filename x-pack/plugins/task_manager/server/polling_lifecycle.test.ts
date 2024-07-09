@@ -20,6 +20,7 @@ import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { TaskCost } from './task';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -87,7 +88,9 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
-    maxWorkersConfiguration$: of(100),
+    startingCapacity: 20,
+    startingPollInterval: 100,
+    capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
   };
@@ -103,10 +106,7 @@ describe('TaskPollingLifecycle', () => {
   describe('start', () => {
     test('begins polling once the ES and SavedObjects services are available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({
-        ...taskManagerOpts,
-        elasticsearchAndSOAvailability$,
-      });
+      new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
 
       clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
@@ -119,11 +119,12 @@ describe('TaskPollingLifecycle', () => {
 
     test('provides TaskClaiming with the capacity available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const maxWorkers$ = new Subject<number>();
+      const capacity$ = new Subject<number>();
       taskManagerOpts.definitions.registerTaskDefinitions({
         report: {
           title: 'report',
           maxConcurrency: 1,
+          cost: TaskCost.ExtraLarge,
           createTaskRunner: jest.fn(),
         },
         quickReport: {
@@ -136,36 +137,33 @@ describe('TaskPollingLifecycle', () => {
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         elasticsearchAndSOAvailability$,
-        maxWorkersConfiguration$: maxWorkers$,
+        capacityConfiguration$: capacity$,
       });
 
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
-        .calls[0][0].getCapacity;
+        .calls[0][0].getAvailableCapacity;
 
-      maxWorkers$.next(20);
-      expect(taskClaimingGetCapacity()).toEqual(20);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+      capacity$.next(40);
+      expect(taskClaimingGetCapacity()).toEqual(40);
+      expect(taskClaimingGetCapacity('report')).toEqual(10);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
 
-      maxWorkers$.next(30);
-      expect(taskClaimingGetCapacity()).toEqual(30);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+      capacity$.next(60);
+      expect(taskClaimingGetCapacity()).toEqual(60);
+      expect(taskClaimingGetCapacity('report')).toEqual(10);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
 
-      maxWorkers$.next(2);
-      expect(taskClaimingGetCapacity()).toEqual(2);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(2);
+      capacity$.next(4);
+      expect(taskClaimingGetCapacity()).toEqual(4);
+      expect(taskClaimingGetCapacity('report')).toEqual(4);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(4);
     });
   });
 
   describe('stop', () => {
     test('stops polling once the ES and SavedObjects services become unavailable', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({
-        elasticsearchAndSOAvailability$,
-        ...taskManagerOpts,
-      });
+      new TaskPollingLifecycle({ elasticsearchAndSOAvailability$, ...taskManagerOpts });
 
       elasticsearchAndSOAvailability$.next(true);
 

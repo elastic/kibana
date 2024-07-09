@@ -207,7 +207,8 @@ export function calculateStartingCapacity(config: TaskManagerConfig, logger: Log
     return config.capacity!;
   } else if (config.max_workers) {
     // Otherwise calculate capacity based on max_workers
-    return Math.min(config.max_workers! * 2, 100);
+    // Assume each worker can handle one normal cost task
+    return Math.min(config.max_workers! * TaskCost.Normal, 100);
   }
 
   // Neither are set, use DEFAULT CAPACITY
