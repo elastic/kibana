@@ -54,7 +54,7 @@ paths:
           required: false
           description: Determines which field is used to sort the results
           schema:
-            $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            type: string
         - name: sort_order
           in: query
           required: false
@@ -118,4 +118,4 @@ paths:
 components:
   schemas:
     FindExceptionListsFilter:
-      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string

@@ -18,11 +18,10 @@
 import { z } from 'zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
-import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ExceptionNamespaceType, ExceptionList } from '../model/exception_list_common.gen';
 
 export type FindExceptionListsFilter = z.infer<typeof FindExceptionListsFilter>;
-export const FindExceptionListsFilter = NonEmptyString;
+export const FindExceptionListsFilter = z.string();
 
 export type FindExceptionListsRequestQuery = z.infer<typeof FindExceptionListsRequestQuery>;
 export const FindExceptionListsRequestQuery = z.object({
@@ -53,7 +52,7 @@ or available in all spaces (`agnostic` or `single`)
   /**
    * Determines which field is used to sort the results
    */
-  sort_field: NonEmptyString.optional(),
+  sort_field: z.string().optional(),
   /**
    * Determines the sort order, which can be `desc` or `asc`
    */

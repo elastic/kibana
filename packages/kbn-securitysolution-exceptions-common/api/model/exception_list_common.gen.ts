@@ -43,7 +43,7 @@ export type ExceptionListTypeEnum = typeof ExceptionListType.enum;
 export const ExceptionListTypeEnum = ExceptionListType.enum;
 
 export type ExceptionListName = z.infer<typeof ExceptionListName>;
-export const ExceptionListName = NonEmptyString;
+export const ExceptionListName = z.string();
 
 export type ExceptionListDescription = z.infer<typeof ExceptionListDescription>;
 export const ExceptionListDescription = z.string();
@@ -65,7 +65,7 @@ export type ExceptionNamespaceTypeEnum = typeof ExceptionNamespaceType.enum;
 export const ExceptionNamespaceTypeEnum = ExceptionNamespaceType.enum;
 
 export type ExceptionListTags = z.infer<typeof ExceptionListTags>;
-export const ExceptionListTags = z.array(NonEmptyString);
+export const ExceptionListTags = z.array(z.string());
 
 export type ExceptionListOsType = z.infer<typeof ExceptionListOsType>;
 export const ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
