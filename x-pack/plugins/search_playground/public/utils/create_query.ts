@@ -55,6 +55,9 @@ export function createQuery(
   const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
+      if (!fieldDescriptors[index]) {
+        return acc;
+      }
       const indexFields: string[] = fields[index];
       const indexFieldDescriptors: QuerySourceFields = fieldDescriptors[index];
 
