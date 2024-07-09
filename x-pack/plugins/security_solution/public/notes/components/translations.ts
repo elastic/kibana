@@ -36,9 +36,9 @@ export const EVENT_ID_COLUMN = i18n.translate(
 );
 
 export const TIMELINE_ID_COLUMN = i18n.translate(
-  'xpack.securitySolution.notes.management.timelineIdColumnTitle',
+  'xpack.securitySolution.notes.management.timelineColumnTitle',
   {
-    defaultMessage: 'Timeline ID',
+    defaultMessage: 'Timeline',
   }
 );
 
@@ -102,3 +102,10 @@ export const DELETE_SELECTED = i18n.translate(
 export const REFRESH = i18n.translate('xpack.securitySolution.notes.management.refresh', {
   defaultMessage: 'Refresh',
 });
+
+export const OPEN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.notes.management.openTimeline',
+  {
+    defaultMessage: 'Open timeline',
+  }
+);
