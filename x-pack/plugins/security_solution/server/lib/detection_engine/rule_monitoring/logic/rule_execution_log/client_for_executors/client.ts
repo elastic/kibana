@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { sum } from 'lodash';
+import { isEmpty, sum } from 'lodash';
 import type { Duration } from 'moment';
 
 import type {
@@ -34,6 +34,7 @@ import { getCorrelationIds } from './correlation_ids';
 import type { IEventLogWriter } from '../event_log/event_log_writer';
 import type {
   IRuleExecutionLogForExecutors,
+  MetricsArgs,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
@@ -79,23 +80,25 @@ export const createRuleExecutionLogClientForExecutors = (
       writeMessage(messages, LogLevelEnum.error);
     },
 
+    writeMetrics(metrics: MetricsArgs | undefined): void {
+      const normalizedMetrics = normalizeMetrics(metrics);
+
+      writeMetrics(normalizedMetrics);
+    },
+
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
       await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
         const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
         const logMeta = correlationIds.getLogMeta();
+        const { metrics } = args;
+        const normalizedMetrics = normalizeMetrics(metrics);
+        // != null is needed to fix typescript warning
+        if (!isEmpty(metrics) && metrics != null) writeMetrics(normalizedMetrics);
 
-        try {
-          const normalizedArgs = normalizeStatusChangeArgs(args);
-
-          await Promise.all([
-            writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToRuleObject(normalizedArgs),
-            writeStatusChangeToEventLog(normalizedArgs),
-          ]);
-        } catch (e) {
-          const logMessage = `Error changing rule status to "${args.newStatus}"`;
-          writeExceptionToConsole(e, logMessage, logMeta);
-        }
+        const normalizedArgs = normalizeStatusChangeArgs(args);
+        writeStatusChangeToConsole(normalizedArgs, logMeta);
+        writeStatusChangeToRuleObject(normalizedArgs);
+        writeStatusChangeToEventLog(normalizedArgs);
       });
     },
   };
@@ -151,11 +154,6 @@ export const createRuleExecutionLogClientForExecutors = (
     });
   };
 
-  const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
-    const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
-    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
-  };
-
   const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
     const messageParts: string[] = [`Changing rule status to "${args.newStatus}"`, args.message];
     const logMessage = messageParts.filter(Boolean).join('. ');
@@ -163,29 +161,27 @@ export const createRuleExecutionLogClientForExecutors = (
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
-    const { newStatus, message, metrics, userError } = args;
+  const writeMetrics = (metrics: RuleExecutionMetrics): void => {
+    const { searchDurations, indexingDurations, executionGap } = metrics ?? {};
+
+    if (searchDurations != null) {
+      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(searchDurations);
+    }
+
+    if (indexingDurations != null) {
+      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(indexingDurations);
+    }
+
+    if (executionGap != null) {
+      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGap);
+    }
+  };
+
+  const writeStatusChangeToRuleObject = (args: NormalizedStatusChangeArgs): void => {
+    const { newStatus, message, userError } = args;
 
     if (newStatus === RuleExecutionStatusEnum.running) {
       return;
-    }
-
-    const {
-      total_search_duration_ms: totalSearchDurationMs,
-      total_indexing_duration_ms: totalIndexingDurationMs,
-      execution_gap_duration_s: executionGapDurationS,
-    } = metrics ?? {};
-
-    if (totalSearchDurationMs) {
-      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
-    }
-
-    if (totalIndexingDurationMs) {
-      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
-    }
-
-    if (executionGapDurationS) {
-      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
     }
 
     if (newStatus === RuleExecutionStatusEnum.failed) {
@@ -236,6 +232,17 @@ interface NormalizedStatusChangeArgs {
   userError?: boolean;
 }
 
+const normalizeMetrics = (metrics: MetricsArgs | undefined): RuleExecutionMetrics | undefined => {
+  return metrics
+    ? {
+        total_search_duration_ms: normalizeDurations(metrics.searchDurations),
+        total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
+        total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
+        execution_gap_duration_s: normalizeGap(metrics.executionGap),
+      }
+    : undefined;
+};
+
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
   if (args.newStatus === RuleExecutionStatusEnum.running) {
     return {
@@ -244,6 +251,8 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
     };
   }
   const { newStatus, message, metrics, userError } = args;
+
+  const normalizedMetrics = normalizeMetrics(metrics);
 
   return {
     newStatus,
