@@ -131,7 +131,11 @@ let mockedLogger: jest.Mocked<Logger>;
 
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
-  SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
+  SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
+    certificate,
+    key,
+    certificateAuthorities: [certificateAuthorities],
+  })),
 }));
 
 describe('Agent policy', () => {
@@ -341,23 +345,20 @@ describe('Agent policy', () => {
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(createAgentlessAgentReturnValue).toEqual(returnValue);
-      // expect(axios).toHaveBeenCalledWith({
-      //   method: 'post',
-      //   url: 'http://api.agentless.com/api/v1/ess/agents',
-      //   data: {
-      //     policy_id: 'mocked-agentless-agent-policy-id',
-      //     fleet_enrollment_token: 'mocked-fleet-enrollment-api-key',
-      //     fleet_server_hosts: ['http://fleetserver:8220'],
-      //     kibana: {
-      //       version: 'mocked-kibana-version-infinite',
-      //     },
-      //   },
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   httpsAgent: expect.any(Object),
-      //   timeout: 10000,
-      // });
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            fleet_token: 'mocked-fleet-enrollment-api-key',
+            fleet_url: 'http://fleetserver:8220',
+            policy_id: 'mocked-agentless-agent-policy-id',
+            stack_version: 'mocked-kibana-version-infinite',
+          }),
+          headers: expect.anything(),
+          httpsAgent: expect.anything(),
+          method: 'POST',
+          url: 'http://api.agentless.com/api/v1/ess/deployments',
+        })
+      );
     });
   });
 

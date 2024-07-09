@@ -1124,27 +1124,25 @@ class AgentPolicyService {
     );
 
     try {
-      const { data, status, statusText } = await axios<AgentlessApiResponse>(
-        `${agentlessConfig.api.url}/deployments`,
-        {
-          data: {
-            policy_id: policyId,
-            fleet_url: fleetUrl,
-            fleet_token: fleetToken,
-            stack_version: appContextService.getKibanaVersion(),
-          },
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json',
-          },
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: tlsConfig.rejectUnauthorized,
-            cert: tlsConfig.certificate,
-            key: tlsConfig.key,
-            ca: tlsConfig.certificateAuthorities,
-          }),
-        }
-      );
+      const { data, status, statusText } = await axios<AgentlessApiResponse>({
+        url: `${agentlessConfig.api.url}/deployments`,
+        data: {
+          policy_id: policyId,
+          fleet_url: fleetUrl,
+          fleet_token: fleetToken,
+          stack_version: appContextService.getKibanaVersion(),
+        },
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: tlsConfig.rejectUnauthorized,
+          cert: tlsConfig.certificate,
+          key: tlsConfig.key,
+          ca: tlsConfig.certificateAuthorities,
+        }),
+      });
 
       // if status is not CREATED, throw an error
       if (status !== 200) {
