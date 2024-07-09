@@ -25,9 +25,8 @@ image::management/connectors/images/gen-ai-connector.png[OpenAI connector]
 ====
 Elastic provides no official support for connecting to the Azure OpenAI service through a proxy.
 However if you must use a proxy,
-ensure that the proxy supports streaming and is SSE-compatible,
-or the connector will timeout when it attempts to communicate with the Azure OpenAI API,
-and the response will not be parsed.
+ensure that the proxy supports streaming and is SSE-compatible.
+Elastic will only parse streamed responses.
 
 To validate that your connectivity problems are caused by using a proxy,
 you can attempt to set up the connector and access the Azure OpenAI service without using a proxy.
