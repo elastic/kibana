@@ -28,6 +28,18 @@ export const initSideNavigation = async (services: Services) => {
   const essNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
       produce(navigationTree, (draft) => {
+        const mainNav = draft.body[0];
+        if (mainNav.type === 'navGroup') {
+          mainNav.children?.push({
+            id: 'otherTools',
+            title: i18n.translate('xpack.securitySolutionEss.nav.otherTools', {
+              defaultMessage: 'Other tools',
+            }),
+            children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
+            renderAs: 'accordion',
+          });
+        }
+
         if (draft.footer) {
           draft.footer.unshift({ type: 'recentlyAccessed' });
         }
