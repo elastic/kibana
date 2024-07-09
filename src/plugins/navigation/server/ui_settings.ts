@@ -12,15 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
 import type { Space } from '@kbn/spaces-plugin/server';
 
-import { DEFAULT_ROUTE_UI_SETTING_ID } from '../common/constants';
+import { DEFAULT_ROUTE_UI_SETTING_ID, DEFAULT_ROUTES } from '../common/constants';
 import { NavigationServerStartDependencies } from './types';
-
-const defaultValues = {
-  classic: '/app/home',
-  es: '/app/enterprise_search/overview',
-  oblt: '/app/observabilityOnboarding',
-  security: '/app/security/get_started',
-};
 
 const cache: { request?: KibanaRequest; activeSpace?: Space } = {};
 
@@ -39,7 +32,7 @@ export const getUiSettings = (
         const [_, { spaces }] = await core.getStartServices();
 
         if (!spaces || !request) {
-          return defaultValues.classic;
+          return DEFAULT_ROUTES.classic;
         }
 
         try {
@@ -51,9 +44,9 @@ export const getUiSettings = (
           cache.activeSpace = activeSpace;
 
           const solution = activeSpace?.solution ?? 'classic';
-          return defaultValues[solution] ?? defaultValues.classic;
+          return DEFAULT_ROUTES[solution] ?? DEFAULT_ROUTES.classic;
         } catch (e) {
-          return defaultValues.classic;
+          return DEFAULT_ROUTES.classic;
         }
       },
       schema: schema.string({
