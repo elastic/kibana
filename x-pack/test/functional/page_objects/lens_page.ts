@@ -319,6 +319,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
+    async waitForMissingField(field: string) {
+      await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
+    },
+
     async waitForMissingDataViewWarning() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`missing-refs-failure`);

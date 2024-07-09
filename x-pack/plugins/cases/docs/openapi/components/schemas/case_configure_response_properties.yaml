@@ -1,13 +1,5 @@
 closure_type:
   $ref: 'closure_types.yaml'
-customFields:
-  type: array
-  x-technical-preview: true
-  description: Custom fields configuration details.
-  items:
-    type: object
-    properties:
-      $ref: 'case_configure_customfields.yaml'
 connector: 
   type: object
   properties:
@@ -25,6 +17,14 @@ created_by:
       - username
   properties:
     $ref: 'user_properties.yaml'
+customFields:
+  type: array
+  x-technical-preview: true
+  description: Custom fields configuration details.
+  items:
+    type: object
+    properties:
+      $ref: 'case_configure_customfields.yaml'
 error:
   type:
     - "string"
@@ -54,6 +54,8 @@ mappings:
           - summary
 owner:
   $ref: 'owners.yaml'
+templates:
+  $ref: 'templates.yaml'
 updated_at:
   type:
     - "string"
