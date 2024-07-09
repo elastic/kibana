@@ -1698,6 +1698,39 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.hasBlockingError",
+        "type": "Function",
+        "tags": [],
+        "label": "hasBlockingError",
+        "description": [],
+        "signature": [
+          "(api: unknown) => boolean"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.hasBlockingError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.hasEditCapabilities",
         "type": "Function",
         "tags": [],
