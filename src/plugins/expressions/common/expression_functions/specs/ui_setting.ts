@@ -12,7 +12,7 @@ import { ExpressionFunctionDefinition } from '../..';
 import { UiSetting } from '../../expression_types/specs/ui_setting';
 
 interface UiSettingsClient {
-  get<T>(key: string): T | Promise<T>;
+  get<T>(key: string, defaultValue?: T): T | Promise<T>;
 }
 
 interface UiSettingStartDependencies {
@@ -78,7 +78,7 @@ export function getUiSettingFn({
         return {
           type: 'ui_setting',
           key: parameter,
-          value: await uiSettings.get(parameter),
+          value: await uiSettings.get(parameter, defaultValue),
         };
       } catch {
         throw new Error(
