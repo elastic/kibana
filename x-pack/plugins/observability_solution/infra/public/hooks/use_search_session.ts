@@ -17,7 +17,8 @@ export const useSearchSession = () => {
   const [searchSessionId, setSearchSessionId] = useState<string>('');
 
   const updateSearchSessionId = useCallback(() => {
-    setSearchSessionId(() => search.session.start());
+    const sessionId = search.session.start();
+    setSearchSessionId(sessionId);
   }, [search.session]);
 
   useEffect(() => {

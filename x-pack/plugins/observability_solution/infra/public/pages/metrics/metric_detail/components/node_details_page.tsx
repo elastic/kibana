@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -56,14 +56,8 @@ const parseRange = (range: MetricsTimeInput) => {
 
 export const NodeDetailsPage = (props: Props) => {
   const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
-  const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
 
-  const {
-    data: { metrics } = { metrics: [] },
-    status,
-    error,
-    refetch,
-  } = useFetcher(
+  const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/node_details', {
         method: 'POST',
@@ -71,7 +65,7 @@ export const NodeDetailsPage = (props: Props) => {
           metrics: props.requiredMetrics,
           nodeId: props.nodeId,
           nodeType: props.nodeType,
-          timerange: parsedTimeRange,
+          timerange: parseRange(props.timeRange),
           cloudId: props.cloudId,
           sourceId: props.sourceId,
         }),
@@ -80,18 +74,16 @@ export const NodeDetailsPage = (props: Props) => {
       return decodeOrThrow(NodeDetailsMetricDataResponseRT)(response);
     },
     [
-      props.requiredMetrics,
+      props.cloudId,
       props.nodeId,
       props.nodeType,
-      parsedTimeRange,
-      props.cloudId,
+      props.requiredMetrics,
       props.sourceId,
+      props.timeRange,
     ]
   );
 
-  useEffect(() => {
-    setParsedTimeRange(parseRange(props.timeRange));
-  }, [props.timeRange]);
+  const { metrics = [] } = data ?? {};
 
   if (error) {
     return <PageError error={error} name={props.name} />;
