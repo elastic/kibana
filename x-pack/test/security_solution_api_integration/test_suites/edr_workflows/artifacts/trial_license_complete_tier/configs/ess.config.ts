@@ -5,22 +5,6 @@
  * 2.0.
  */
 
-// import { FtrConfigProviderContext } from '@kbn/test';
-
-// export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-//   const xPackAPITestsConfig = await readConfigFile(
-//     require.resolve('../../../../../../api_integration/config.ts')
-//   );
-//
-//   return generateConfig({
-//     baseConfig: xPackAPITestsConfig,
-//     junitReportName: 'EDR Workflows - Artifacts Integration Tests - ESS Env - Trial License',
-//     target: 'ess',
-//     services,
-//     testFiles: [require.resolve('..')],
-//   });
-// }
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

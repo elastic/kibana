@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-// import { FtrConfigProviderContext } from '@kbn/test';
-// import { generateConfig } from '../../../../../edr_workflows/configs/config.base';
-// import { svlServices } from '../../../../../edr_workflows/services';
-//
-// export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-//   const serverlessTestsConfig = await readConfigFile(
-//     require.resolve('../../../../../../../test_serverless/shared/config.base.ts')
-//   );
-//
-//   return generateConfig({
-//     baseConfig: serverlessTestsConfig,
-//     junitReportName:
-//       'EDR Workflows - Metadata Integration Tests - Serverless Env - Complete Licenses',
-//     target: 'serverless',
-//     kbnServerArgs: ['--serverless=security'],
-//     services: svlServices,
-//     testFiles: [require.resolve('..')],
-//   });
-// }
+import { FtrConfigProviderContext } from '@kbn/test';
 
-import { createTestConfig } from '../../../../../config/serverless/config.base.edr_workflows';
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(
+    require.resolve('../../../../../config/serverless/config.base.edr_workflows')
+  );
 
-export default createTestConfig({
-  testFiles: [require.resolve('..')],
-  junit: {
-    reportName: 'EDR Workflows - Metadata Integration Tests - Serverless Env - Complete Licenses',
-  },
-});
+  return {
+    ...functionalConfig.getAll(),
+    testFiles: [require.resolve('..')],
+    junit: {
+      reportName: 'EDR Workflows - Metadata Integration Tests - Serverless Env - Complete',
+    },
+  };
+}

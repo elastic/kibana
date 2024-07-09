@@ -16,8 +16,11 @@ import {
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
-import { InsertedEvents, processEventsIndex } from '../../../../edr_workflows/services/resolver';
 import { deleteEventsStream } from '../../../../../common/services/security_solution';
+import {
+  InsertedEvents,
+  processEventsIndex,
+} from '../../../../config/services/security_solution_edr_workflows_resolver';
 
 interface EventIngested {
   event: {

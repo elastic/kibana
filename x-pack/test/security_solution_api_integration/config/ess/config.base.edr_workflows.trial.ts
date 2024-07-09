@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { createTestConfig } from './config.base';
+import { FtrConfigProviderContext } from '@kbn/test';
+import { generateConfig } from './config.base.edr_workflows';
 import { services } from './services_edr_workflows';
 
-export default createTestConfig({
-  license: 'trial',
-  ssl: true,
-  services,
-});
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackAPITestsConfig = await readConfigFile(
+    require.resolve('../../../api_integration/config.ts')
+  );
+
+  return generateConfig({
+    baseConfig: xPackAPITestsConfig,
+    junitReportName: 'X-Pack Endpoint API Integration Tests against ESS',
+    target: 'ess',
+    services,
+  });
+}

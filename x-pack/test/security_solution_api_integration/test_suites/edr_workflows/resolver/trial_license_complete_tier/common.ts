@@ -28,6 +28,11 @@ import {
   categoryMapping,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 
+export const HEADERS = Object.freeze({
+  'kbn-xsrf': 'security_solution',
+  'x-elastic-internal-origin': 'security_solution',
+});
+
 /**
  * Schema used for the /tree api post requests that uses the ancestry
  */

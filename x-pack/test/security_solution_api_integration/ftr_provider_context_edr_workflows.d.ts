@@ -7,6 +7,5 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from './edr_workflows/services';
-
+import { services } from './config/ess/services_edr_workflows';
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

@@ -7,7 +7,7 @@
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
-import { ROLE } from '../../../../edr_workflows/services/roles_users';
+import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import {
   getRegistryUrlFromTestEnv,
   isRegistryEnabled,

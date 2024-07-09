@@ -16,10 +16,18 @@ import {
   Tree,
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import {
+  GeneratedTrees,
+  Options,
+} from '../../../../config/services/security_solution_edr_workflows_resolver';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
-import { Options, GeneratedTrees } from '../../../../edr_workflows/services/resolver';
-import { HEADERS } from '../../../../edr_workflows/headers';
-import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
+import {
+  schemaWithAncestry,
+  schemaWithName,
+  schemaWithoutAncestry,
+  verifyTree,
+  HEADERS,
+} from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

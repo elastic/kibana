@@ -32,7 +32,7 @@ import {
 import {
   generateAgentDocs,
   generateMetadataDocs,
-} from '../../../../edr_workflows/fixtures/metadata.fixtures';
+} from '../../../../config/services/security_solution_edr_workflows_metadata';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 

@@ -17,19 +17,16 @@ export const generateConfig = async ({
   junitReportName,
   kbnServerArgs = [],
   target,
-  testFiles,
   services,
 }: {
   baseConfig: Config;
   junitReportName: string;
   kbnServerArgs?: string[];
   target: keyof typeof SUITE_TAGS;
-  testFiles: string[];
   services: any;
 }): Promise<Config> => {
   return {
     ...baseConfig.getAll(),
-    testFiles,
     dockerServers: createEndpointDockerConfig(),
     services,
     junit: {

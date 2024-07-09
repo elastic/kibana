@@ -6,46 +6,18 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 import { svlServices } from './services_edr_workflows';
-import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { generateConfig } from '../ess/config.base.edr_workflows';
 
-export interface CreateTestConfigOptions {
-  testFiles: string[];
-  junit: { reportName: string };
-  kbnTestServerArgs?: string[];
-  kbnTestServerEnv?: Record<string, string>;
-  services?: any;
-}
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const serverlessTestsConfig = await readConfigFile(
+    require.resolve('../../../../test_serverless/shared/config.base.ts')
+  );
 
-export function createTestConfig(options: CreateTestConfigOptions) {
-  return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../../test_serverless/shared/config.base.ts')
-    );
-    return {
-      ...svlSharedConfig.getAll(),
-      services: {
-        ...svlServices,
-      },
-      kbnTestServer: {
-        ...svlSharedConfig.get('kbnTestServer'),
-        serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          '--serverless=security',
-          `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
-          ...(options.kbnTestServerArgs || []),
-        ],
-        env: {
-          ...svlSharedConfig.get('kbnTestServer.env'),
-          ...options.kbnTestServerEnv,
-        },
-      },
-      testFiles: options.testFiles,
-      junit: options.junit,
-
-      mochaOpts: {
-        ...svlSharedConfig.get('mochaOpts'),
-        grep: '/^(?!.*@skipInServerless).*@serverless.*/',
-      },
-    };
-  };
+  return generateConfig({
+    baseConfig: serverlessTestsConfig,
+    junitReportName: 'X-Pack Endpoint API Integration Tests against Serverless',
+    target: 'serverless',
+    kbnServerArgs: ['--serverless=security'],
+    services: svlServices,
+  });
 }
