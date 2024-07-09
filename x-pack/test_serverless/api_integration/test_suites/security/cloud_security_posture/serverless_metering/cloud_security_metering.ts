@@ -19,13 +19,13 @@ import {
   createPackagePolicy,
   createCloudDefendPackagePolicy,
 } from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-
+import * as http from 'http';
 import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 const CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS = 'metrics-cloud_defend.heartbeat-default';
 
 export default function (providerContext: FtrProviderContext) {
-  const mockUsageApiServer = setupMockServer();
+  const mockUsageApiApp = setupMockServer();
   const { getService } = providerContext;
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -42,12 +42,13 @@ export default function (providerContext: FtrProviderContext) {
   */
   describe('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
+
+    let mockUsageApiServer: http.Server;
     let agentPolicyId: string;
     let roleAuthc: RoleCredentials;
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
-
     before(async () => {
-      mockUsageApiServer.listen(8081); // Start the usage api mock server on port 8081
+      mockUsageApiServer = mockUsageApiApp.listen(8081); // Start the usage api mock server on port 8081
     });
 
     beforeEach(async () => {
@@ -90,6 +91,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      mockUsageApiServer.close();
     });
 
     it('Should intercept usage API request for CSPM', async () => {
