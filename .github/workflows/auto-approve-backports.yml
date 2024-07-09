@@ -1,9 +1,9 @@
 on:
-  pull_request_target:
+  pull_request:
     branches-ignore:
       - main
-    types: [opened, synchronize, reopened]
-  workflow_dispatch: # Add this line to enable manual triggers
+    types:
+      - opened
 
 jobs:
   approve:
