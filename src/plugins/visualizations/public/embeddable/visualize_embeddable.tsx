@@ -371,6 +371,7 @@ export class VisualizeEmbeddable
   hasInspector = () => Boolean(this.getInspectorAdapters());
 
   onContainerLoading = () => {
+    console.log('onRenderProgress');
     this.renderComplete.dispatchInProgress();
     this.updateOutput({
       ...this.getOutput(),
@@ -389,6 +390,7 @@ export class VisualizeEmbeddable
   };
 
   onContainerRender = () => {
+    console.log('onRenderComplete');
     this.renderComplete.dispatchComplete();
     this.updateOutput({
       ...this.getOutput(),
@@ -397,6 +399,7 @@ export class VisualizeEmbeddable
   };
 
   onContainerError = (error: ExpressionRenderError) => {
+    console.log('onRenderError');
     if (this.abortController) {
       this.abortController.abort();
     }
