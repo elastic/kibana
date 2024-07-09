@@ -113,7 +113,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         sortable: true,
         truncateText: true,
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
-          defaultMessage: 'Name',
+          defaultMessage: 'Integration policy',
         }),
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiFlexGroup gutterSize="s" alignItems="center">
