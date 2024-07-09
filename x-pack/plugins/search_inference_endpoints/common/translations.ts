@@ -155,6 +155,6 @@ export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType
 export const TRAINED_MODELS_STAT_GATHER_FAILED = i18n.translate(
   'xpack.searchInferenceEndpoints.actions.trainedModelsStatGatherFailed',
   {
-    defaultMessage: 'Failed to gather trained models stats',
+    defaultMessage: 'Failed to retrieve trained model statistics',
   }
 );
