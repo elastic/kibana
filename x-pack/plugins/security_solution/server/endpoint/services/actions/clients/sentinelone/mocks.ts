@@ -8,6 +8,7 @@
 import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetActivitiesResponse,
+  SentinelOneGetRemoteScriptsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import {
   SENTINELONE_CONNECTOR_ID,
@@ -130,6 +131,53 @@ const createSentinelOneAgentDetailsMock = (
   );
 };
 
+const createSentinelOneGetRemoteScriptsApiResponseMock =
+  (): SentinelOneGetRemoteScriptsResponse => {
+    return {
+      errors: null,
+      data: [
+        {
+          bucketName: 'us-east-1-prod-remote-scripts',
+          createdAt: '2022-07-17T14:02:45.309427Z',
+          createdByUser: 'SentinelOne',
+          createdByUserId: '-1',
+          creator: 'SentinelOne',
+          creatorId: '-1',
+          fileName:
+            '-1/-1/75cYNKCLYJ7kEsjtBSrha0dXTSANJeMmBDQpXlRzPQA%3D/multi-operations-script-bash.sh',
+          fileSize: 13701,
+          id: '1466645476786791838',
+          inputExample: '--terminate --processes ping,chrome --force',
+          inputInstructions: '--terminate --processes <processes-name-templates> [-f|--force]',
+          inputRequired: true,
+          isAvailableForArs: false,
+          isAvailableForLite: false,
+          mgmtId: -1,
+          osTypes: ['macos', 'linux'],
+          outputFilePaths: null,
+          package: null,
+          scopeId: '-1',
+          scopeLevel: 'sentinel',
+          scopeName: null,
+          scopePath: 'Global',
+          scriptDescription: null,
+          scriptName: 'Terminate Processes (Linux/macOS)',
+          scriptRuntimeTimeoutSeconds: 3600,
+          scriptType: 'action',
+          shortFileName: 'multi-operations-script-bash.sh',
+          signature: '75cYNKCLYJ7kEsjtBSrha0dXTSANJeMmBDQpXlRzPQA=',
+          signatureType: 'SHA-256',
+          supportedDestinations: null,
+          updatedAt: '2024-06-30T06:37:53.904005Z',
+          updater: null,
+          updaterId: null,
+          version: '1.0.0',
+        },
+      ],
+      pagination: { nextCursor: null, totalItems: 1 },
+    };
+  };
+
 const createSentinelOneGetActivitiesApiResponseMock = (): SentinelOneGetActivitiesResponse => {
   return {
     errors: undefined,
@@ -225,6 +273,21 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
             data: createSentinelOneGetActivitiesApiResponseMock(),
           });
 
+        case SUB_ACTION.GET_REMOTE_SCRIPTS:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createSentinelOneGetRemoteScriptsApiResponseMock(),
+          });
+
+        case SUB_ACTION.EXECUTE_SCRIPT:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: {
+              data: {
+                affected: 1,
+                parentTaskId: 'task-789',
+              },
+            },
+          });
+
         default:
           return responseActionsClientMock.createConnectorActionExecuteResponse();
       }
@@ -249,4 +312,5 @@ export const sentinelOneMock = {
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,
   createSentinelOneActivitiesApiResponse: createSentinelOneGetActivitiesApiResponseMock,
+  createSentinelOneGetRemoteScriptsApiResponse: createSentinelOneGetRemoteScriptsApiResponseMock,
 };
