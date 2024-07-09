@@ -21,6 +21,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { Popover } from '../tabs/common/popover';
 
@@ -63,6 +64,7 @@ const COMMONLY_USED_RANGES: DurationRange[] = [
 ];
 
 export const DatePicker = () => {
+  const { updateSearchSessionId } = useSearchSessionContext();
   const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onAutoRefresh } =
     useDatePickerContext();
 
@@ -76,9 +78,14 @@ export const DatePicker = () => {
     ({ start, end, isInvalid }: OnTimeChangeProps) => {
       if (!isInvalid) {
         setDateRange({ from: start, to: end });
+
+        // auto-refresh updates the search session id when the date range changes
+        if (!autoRefresh || autoRefresh.isPaused) {
+          updateSearchSessionId();
+        }
       }
     },
-    [setDateRange]
+    [autoRefresh, setDateRange, updateSearchSessionId]
   );
 
   const handleAutoRefreshChange = useCallback(

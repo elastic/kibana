@@ -19,6 +19,7 @@ import {
   iif,
   merge,
   Observable,
+  of,
 } from 'rxjs';
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -41,6 +42,10 @@ export const useLoadingState = () => {
   const isAutoRefreshRequestPending$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const requestsCount$ = useMemo(() => new BehaviorSubject(0), []);
   const requestState$ = useMemo(() => new BehaviorSubject<RequestState | null>(null), []);
+
+  useEffect(() => {
+    updateSearchSessionId();
+  }, [updateSearchSessionId]);
 
   const waitUntilRequestsCompletes$ = useCallback(
     () =>
@@ -66,9 +71,10 @@ export const useLoadingState = () => {
     [autoRefreshConfig$]
   );
 
-  useEffect(() => {
-    updateSearchSessionId();
-  }, [updateSearchSessionId]);
+  const autoRefreshInterval$ = useCallback(
+    () => autoRefreshConfig$.pipe(map((config) => config?.interval ?? WAIT_MS)),
+    [autoRefreshConfig$]
+  );
 
   useEffect(() => {
     // Subscribe to updates in the request state
@@ -87,7 +93,13 @@ export const useLoadingState = () => {
           requestsCount$.pipe(
             distinctUntilChanged(),
             skipUntil(isAutoRefreshEnabled$()),
-            debounceTime(WAIT_MS),
+            switchMap((value) =>
+              autoRefreshInterval$().pipe(
+                switchMap((interval) => {
+                  return of(value).pipe(debounceTime(interval));
+                })
+              )
+            ),
             // Small window for requests to be considered in the auto-refresh cycle
             tap((runningRequestsCount) => {
               if (runningRequestsCount > 0) {
@@ -112,7 +124,11 @@ export const useLoadingState = () => {
           iif(
             () => count > 0,
             // Wait until requests complete before processing the next tick
-            waitUntilRequestsCompletes$().pipe(tap(() => isAutoRefreshRequestPending$.next(false))),
+            waitUntilRequestsCompletes$().pipe(
+              tap(() => {
+                isAutoRefreshRequestPending$.next(false);
+              })
+            ),
             // Else immediately emit false if the counter is already 0
             new Observable(() => {
               isAutoRefreshRequestPending$.next(false);
@@ -123,19 +139,19 @@ export const useLoadingState = () => {
 
       autoRefreshTick$.pipe(
         skipUntil(isAutoRefreshEnabled$()),
-        withLatestFrom(search.session.state$),
-        switchMap(([, state]) =>
+        withLatestFrom(search.session.state$, isAutoRefreshRequestPending$),
+        switchMap(([, state, isAutoRefreshRequestPending]) =>
           // if the current state$ value is not Completed
           iif(
-            () =>
-              state !== SearchSessionState.Completed &&
-              state !== SearchSessionState.BackgroundCompleted,
+            () => state === SearchSessionState.Loading,
             // Wait until queries using data.search complete before processing the next tick
             // data.search in the context of the Asset Details is used by Lens.
             waitUntilNextSessionCompletes$(search.session).pipe(tap(() => updateSearchSessionId())),
             // Else mmediately emit true if session state is already completed
             new Observable(() => {
-              updateSearchSessionId();
+              if (!isAutoRefreshRequestPending) {
+                updateSearchSessionId();
+              }
             })
           )
         )
@@ -147,6 +163,7 @@ export const useLoadingState = () => {
       autoRefreshTickSubscription.unsubscribe();
     };
   }, [
+    autoRefreshInterval$,
     autoRefreshTick$,
     isAutoRefreshEnabled$,
     isAutoRefreshRequestPending$,

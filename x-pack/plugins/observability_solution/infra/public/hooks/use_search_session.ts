@@ -14,7 +14,7 @@ export const useSearchSession = () => {
   const {
     data: { search },
   } = services;
-  const [searchSessionId, setSearchSessionId] = useState<string>();
+  const [searchSessionId, setSearchSessionId] = useState<string>('');
 
   const updateSearchSessionId = useCallback(() => {
     setSearchSessionId(() => search.session.start());

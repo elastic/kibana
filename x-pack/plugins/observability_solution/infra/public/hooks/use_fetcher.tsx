@@ -104,13 +104,18 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     requestObservable$,
   } = options;
 
-  const autoFetchRef = useRef(autoFetch ?? true);
-
-  const { searchSessionId } = useSearchSessionContext();
   const [result, setResult] = useState<FetcherResult<InferApiCallReturnType<Fn>>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
   });
+  const { searchSessionId } = useSearchSessionContext();
+  const [cachedSearchSessionId, setCachedSearchSessionId] = useState(searchSessionId);
+
+  useEffect(() => {
+    if (autoFetch) {
+      setCachedSearchSessionId(searchSessionId);
+    }
+  }, [autoFetch, searchSessionId]);
 
   const controller = useRef(new AbortController());
 
@@ -147,6 +152,8 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
           error: undefined,
         } as FetcherResult<InferApiCallReturnType<Fn>>);
       }
+
+      return data;
     } catch (e) {
       const err = e as InfraHttpError;
 
@@ -193,20 +200,21 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
   }, [requestObservable$, fetchWithAbort]);
 
   useEffect(() => {
-    autoFetchRef.current = autoFetch;
-  }, [autoFetch]);
+    // Allows the caller of useFetcher to control when the fetch can be triggered
+    if (autoFetch) {
+      setCachedSearchSessionId(searchSessionId);
+    }
+  }, [autoFetch, searchSessionId]);
 
   useEffect(() => {
-    if (!autoFetchRef.current) {
-      return;
-    }
-
-    triggerFetch();
-
     return () => {
       controller.current.abort();
     };
-  }, [fetchWithAbort, searchSessionId, triggerFetch]);
+  }, []);
+
+  useEffect(() => {
+    triggerFetch();
+  }, [fetchWithAbort, cachedSearchSessionId, triggerFetch]);
 
   return useMemo(
     () => ({
