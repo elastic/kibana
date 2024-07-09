@@ -31,7 +31,7 @@ export interface GlobalSearchBarPluginStartDeps {
 export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBarPluginStartDeps> {
   private config: GlobalSearchBarConfigType;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<GlobalSearchBarConfigType>();
   }
 

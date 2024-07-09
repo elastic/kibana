@@ -6,7 +6,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { GlobalSearchBarPlugin, type GlobalSearchBarPluginStartDeps } from './plugin';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
+import { GlobalSearchBarPlugin } from './plugin';
 
 describe('GlobalSearchBarPlugin', () => {
   describe('start', () => {
@@ -19,13 +20,15 @@ describe('GlobalSearchBarPlugin', () => {
         })
       );
 
-      await service.setup(coreSetup);
+      service.setup(coreSetup);
 
       const coreStart = coreMock.createStart();
 
       const navControlsRegisterSpy = jest.spyOn(coreStart.chrome.navControls, 'registerCenter');
 
-      const start = await service.start(coreStart, {} as GlobalSearchBarPluginStartDeps);
+      const start = service.start(coreStart, {
+        globalSearch: globalSearchPluginMock.createStartContract(),
+      });
 
       expect(start).toEqual({});
 
