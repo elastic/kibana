@@ -39,14 +39,11 @@ RUN tar \
   -zxf /tmp/kibana.tar.gz
 
 {{#fips}}
-# OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
-# need to be compiled on the machine to pass its own self validation on startup.
+# OpenSSL requires specific versions that are FIPS certified.
 #
 # See:
 # https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
 # https://www.openssl.org/docs/man3.0/man7/fips_module.html
-
-# Ideally we would handle this in the builder step, but OpenSSL requires linking of many submodules.
 RUN set -e ; \
  OPENSSL_VERSION='3.0.8'; \
  OPENSSL_PATH=/usr/share/kibana/openssl ; \
