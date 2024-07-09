@@ -7,7 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 
 export function FeedbackModal({
   isFeedbackModalVisible = false,
@@ -20,14 +29,11 @@ export function FeedbackModal({
     <>
       {isFeedbackModalVisible && (
         <EuiConfirmModal
-          title={i18n.translate('xpack.apm.eemFeedback.title', {
-            defaultMessage: 'Thank you',
-          })}
+          style={{
+            width: '600px',
+          }}
           onCancel={onClose}
           onConfirm={onClose}
-          cancelButtonText={i18n.translate('xpack.apm.eemFeedback.button.cancel', {
-            defaultMessage: 'Maybe later',
-          })}
           confirmButtonText={
             <EuiButton
               data-test-subj="xpack.apm.eemFeedback.button.open"
@@ -37,24 +43,44 @@ export function FeedbackModal({
               href="https://ela.st/services-feedback" // FIXME update with the new one
             >
               {i18n.translate('xpack.apm.eemFeedback.button.openSurvey', {
-                defaultMessage: 'Open survey',
+                defaultMessage: 'Tell us what you think!',
               })}
             </EuiButton>
           }
           defaultFocusedButton="confirm"
         >
-          <p>
-            {i18n.translate('xpack.apm.feedbackModal.body.thanks', {
-              defaultMessage:
-                'Thank you for trying the new services experience. Check back often as we continue to update this page. ',
-            })}
-          </p>
-          <p>
-            {i18n.translate('xpack.apm.feedbackModal.body.feedback', {
-              defaultMessage:
-                'Have any feedback or ideas for improvement? Let us know in a short survey.',
-            })}
-          </p>
+          <EuiPanel hasShadow={false}>
+            <EuiFlexGroup
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              gutterSize="s"
+            >
+              <EuiFlexItem>
+                <EuiIcon type="heart" size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle>
+                  <h2>
+                    {i18n.translate('xpack.apm.eemFeedback.title', {
+                      defaultMessage: 'Let us know what you think!',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiPanel hasShadow={false} paddingSize="s">
+            <EuiText grow={false} size="s">
+              <p>
+                {i18n.translate('xpack.apm.feedbackModal.body.thanks', {
+                  defaultMessage:
+                    "Thank you for trying our new experience. We'll be continuing to improve on this so please come back often.",
+                })}
+              </p>
+            </EuiText>
+          </EuiPanel>
         </EuiConfirmModal>
       )}
     </>
