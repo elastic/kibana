@@ -211,37 +211,42 @@ export async function suggest(
         case 'grouping': {
           const definition = getCommandDefinition(metrics.name);
           const suggestions: SuggestionRawDefinition[] = [];
+          const theByKeywordMissing = !/^\s*metrics\s+.+by\s*/i.test(innerText);
+          const hasCommaBeforeCaret = /^\s*metrics.+,\s*$/i.test(innerText);
+
           if (!metrics.grouping || !metrics.grouping.length) {
-            const theByKeywordAlreadyInText = /^\s*metrics\s+.+by\s*/i.test(innerText);
-            if (!theByKeywordAlreadyInText) {
+            if (theByKeywordMissing) {
               suggestions.push(buildOptionDefinition(definition.options[0], false));
             }
           }
 
-          const caretAtEndOfGroupingBlock =
-            !metrics.grouping ||
-            !metrics.grouping.length ||
-            offset >= metrics.grouping[metrics.grouping.length - 1].location.max;
+          const hasFields = !!metrics.grouping && !!metrics.grouping.length;
 
-          if (caretAtEndOfGroupingBlock) {
+          if (theByKeywordMissing) {
             suggestions.push(...getFinalSuggestions());
-          }
+          } else if (!hasCommaBeforeCaret && hasFields) {
+            suggestions.push(...getFinalSuggestions());
+          } else {
+            const fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
+              // types[0] === 'column' ? ['any'] : types,
+              ['any'],
+              metrics.name,
+              definition.options[0].name,
+              getFieldsByType,
+              {
+                functions: true,
+                fields: true,
+              }
+            );
 
-          const { nodeArg } = extractArgMeta(metrics, astContext.node);
-          const fieldsMap: Map<string, ESQLRealField> = await new Map();
-          const anyVariables = collectVariables(ast, fieldsMap, innerText);
-          const functions = await getFieldsOrFunctionsSuggestions(
-            ['any'],
-            astContext.command.name,
-            '',
-            getFieldsByType,
-            {
-              functions: true,
-              fields: false,
-              variables: nodeArg ? undefined : anyVariables,
-            }
-          );
-          suggestions.push(...functions);
+            suggestions.push(...fieldsAndFunctions);
+
+            const fieldsMap: Map<string, ESQLRealField> = await new Map();
+            const anyVariables = collectVariables(ast, fieldsMap, innerText);
+            const variableSuggestion = buildNewVarDefinition(findNewVariable(anyVariables));
+
+            suggestions.push(variableSuggestion);
+          }
 
           return suggestions;
         }
