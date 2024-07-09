@@ -27,7 +27,7 @@ import { MODELS } from '../common/models';
 export function createRetriever(esQuery: string) {
   return (question: string) => {
     try {
-      const replacedQuery = esQuery.replace(/{query}/g, question.replace(/"/g, '\\"'));
+      const replacedQuery = esQuery.replace(/\"{query}\"/g, JSON.stringify(question));
       const query = JSON.parse(replacedQuery);
       return query;
     } catch (e) {
@@ -96,7 +96,7 @@ export function defineRoutes({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
       const { messages, data } = await request.body;
-      const { chatModel, chatPrompt, connector } = await getChatParams(
+      const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
           model: data.summarization_model,
@@ -133,6 +133,7 @@ export function defineRoutes({
           inputTokensLimit: modelPromptLimit,
         },
         prompt: chatPrompt,
+        questionRewritePrompt,
       });
 
       let stream: ReadableStream<Uint8Array>;

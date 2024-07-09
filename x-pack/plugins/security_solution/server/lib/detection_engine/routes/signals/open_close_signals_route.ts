@@ -91,7 +91,7 @@ export const setSignalsStatusRoute = (
               DETECTION_ENGINE_SIGNALS_STATUS_URL,
               status
             );
-            logger.debug(`Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
+            logger.debug(() => `Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
             await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
           }
         }
