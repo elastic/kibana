@@ -268,7 +268,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 uiSettingsClient,
               });
 
-              if (readIndexWarningMessage != null) wrapperErrors.push(readIndexWarningMessage);
+              if (readIndexWarningMessage != null) wrapperWarnings.push(readIndexWarningMessage);
 
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
@@ -292,7 +292,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
-              wrapperErrors.push(warningMissingTimestampFieldsMessage);
+              if (warningMissingTimestampFieldsMessage != null)
+                wrapperWarnings.push(warningMissingTimestampFieldsMessage);
               skipExecution = foundNoIndices;
             }
           } catch (exc) {
@@ -300,7 +301,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               newStatus: RuleExecutionStatusEnum['partial failure'],
               message: `Check privileges failed to execute ${exc}`,
             });
-            wrapperErrors.push(`Check privileges failed to execute ${exc}`);
+            wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
           }
 
           const {
