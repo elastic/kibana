@@ -34,7 +34,7 @@ const createNameNotAllowedValidator =
       .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
       .map(([_runtimeFieldName]) => _runtimeFieldName);
 
-    if (value !== fieldName && dataView.fields.getByName(value)) {
+    if (value !== fieldName && (await dataView.getFieldByName(value))) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',

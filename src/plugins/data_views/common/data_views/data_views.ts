@@ -288,7 +288,7 @@ export interface DataViewsServicePublicMethods {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   updateSavedObject: (
-    indexPattern: DataView,
+    indexPattern: AbstractDataView,
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean

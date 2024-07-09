@@ -79,7 +79,7 @@ const geti18nTexts = (): {
 });
 
 export const FieldDetail = ({}) => {
-  const { links, existingConcreteFields, fieldTypeToProcess } = useFieldEditorContext();
+  const { links, fieldTypeToProcess } = useFieldEditorContext();
   const i18nTexts = geti18nTexts();
   return (
     <>
@@ -114,7 +114,7 @@ export const FieldDetail = ({}) => {
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+          <ScriptField links={links} />
         </FormRow>
       )}
 

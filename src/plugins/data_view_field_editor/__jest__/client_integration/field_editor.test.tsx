@@ -128,7 +128,6 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         },
         // getByName returns a value, which means that the field already exists
@@ -171,7 +170,6 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }
       );

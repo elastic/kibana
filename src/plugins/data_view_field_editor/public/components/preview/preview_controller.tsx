@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type {
   DataView,
+  DataViewLazy,
   DataViewField,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
@@ -36,7 +37,8 @@ export const defaultValueFormatter = (value: unknown) => {
 };
 
 interface PreviewControllerArgs {
-  dataView: DataView;
+  dataView: DataViewLazy;
+  dataViewToUpdate: DataView | DataViewLazy;
   onSave: (field: DataViewField[]) => void;
   fieldToEdit?: Field;
   fieldTypeToProcess: InternalFieldType;
@@ -79,13 +81,23 @@ const previewStateDefault: PreviewState = {
   /** Flag to show/hide the preview panel */
   isPanelVisible: true,
   isSaving: false,
+  concreteFields: [],
+  fieldMap: {},
 };
 
 export class PreviewController {
-  constructor({ deps, dataView, onSave, fieldToEdit, fieldTypeToProcess }: PreviewControllerArgs) {
+  constructor({
+    deps,
+    dataView,
+    dataViewToUpdate,
+    onSave,
+    fieldToEdit,
+    fieldTypeToProcess,
+  }: PreviewControllerArgs) {
     this.deps = deps;
 
     this.dataView = dataView;
+    this.dataViewToUpdate = dataViewToUpdate;
     this.onSave = onSave;
 
     this.fieldToEdit = fieldToEdit;
@@ -98,10 +110,14 @@ export class PreviewController {
     this.state$ = this.internalState$ as BehaviorObservable<PreviewState>;
 
     this.fetchSampleDocuments();
+
+    this.setExistingConcreteFields();
+    this.setFieldList();
   }
 
   // dependencies
-  private dataView: DataView;
+  private dataView: DataViewLazy;
+  private dataViewToUpdate: DataView | DataViewLazy;
 
   private deps: {
     search: ISearchStart;
@@ -134,50 +150,74 @@ export class PreviewController {
     documentId: undefined,
   };
 
-  getExistingConcreteFields = () => {
-    const existing: Array<{ name: string; type: string }> = [];
-
-    this.dataView.fields
-      .filter((fld) => {
-        const isFieldBeingEdited = this.fieldToEdit?.name === fld.name;
-        return !isFieldBeingEdited && fld.isMapped;
+  private setFieldList = async () => {
+    const fieldMap = (
+      await this.dataView.getFields({
+        fieldName: ['*'],
+        scripted: false,
+        runtime: false,
       })
-      .forEach((fld) => {
-        existing.push({
-          name: fld.name,
-          type: (fld.esTypes && fld.esTypes[0]) || '',
-        });
-      });
+    ).getFieldMapSorted();
 
-    return existing;
+    this.updateState({ fieldMap });
   };
 
-  updateConcreteField = (updatedField: Field): DataViewField[] => {
-    const editedField = this.dataView.getFieldByName(updatedField.name);
+  private setExistingConcreteFields = async () => {
+    const existing: Array<{ name: string; type: string }> = [];
+
+    const fieldMap = (
+      await this.dataView.getFields({
+        fieldName: ['*'],
+        scripted: false,
+        runtime: false,
+      })
+    ).getFieldMap();
+
+    // remove name of currently edited field
+    if (this.fieldToEdit?.name) {
+      delete fieldMap[this.fieldToEdit?.name];
+    }
+
+    Object.values(fieldMap).forEach((fld) => {
+      existing.push({
+        name: fld.name,
+        type: (fld.esTypes && fld.esTypes[0]) || '',
+      });
+    });
+
+    this.updateState({ concreteFields: existing });
+  };
+
+  updateConcreteField = async (updatedField: Field): Promise<DataViewField[]> => {
+    const editedField = await this.dataViewToUpdate.getFieldByName(updatedField.name);
 
     if (!editedField) {
       throw new Error(
         `Unable to find field named '${
           updatedField.name
-        }' on index pattern '${this.dataView.getIndexPattern()}'`
+        }' on index pattern '${this.dataViewToUpdate.getIndexPattern()}'`
       );
     }
 
     // Update custom label, popularity and format
-    this.dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
-    this.dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
+    this.dataViewToUpdate.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+    this.dataViewToUpdate.setFieldCustomDescription(
+      updatedField.name,
+      updatedField.customDescription
+    );
 
     editedField.count = updatedField.popularity || 0;
     if (updatedField.format) {
-      this.dataView.setFieldFormat(updatedField.name, updatedField.format!);
+      this.dataViewToUpdate.setFieldFormat(updatedField.name, updatedField.format!);
     } else {
-      this.dataView.deleteFieldFormat(updatedField.name);
+      this.dataViewToUpdate.deleteFieldFormat(updatedField.name);
     }
 
     return [editedField];
   };
 
-  updateRuntimeField = (updatedField: Field): DataViewField[] => {
+  updateRuntimeField = async (updatedField: Field): Promise<DataViewField[]> => {
+    console.log('updateRuntimeField');
     const nameHasChanged =
       Boolean(this.fieldToEdit) && this.fieldToEdit!.name !== updatedField.name;
     const typeHasChanged =
@@ -195,10 +235,10 @@ export class PreviewController {
       } catch {}
       // rename an existing runtime field
       if (nameHasChanged || hasChangeToOrFromComposite) {
-        this.dataView.removeRuntimeField(this.fieldToEdit!.name);
+        this.dataViewToUpdate.removeRuntimeField(this.fieldToEdit!.name);
       }
 
-      this.dataView.addRuntimeField(updatedField.name, {
+      this.dataViewToUpdate.addRuntimeField(updatedField.name, {
         type: updatedField.type as RuntimeType,
         script,
         fields: updatedField.fields,
@@ -210,7 +250,7 @@ export class PreviewController {
       } catch {}
     }
 
-    return this.dataView.addRuntimeField(updatedField.name, updatedField);
+    return this.dataViewToUpdate.addRuntimeField(updatedField.name, updatedField);
   };
 
   saveField = async (updatedField: Field) => {
@@ -228,8 +268,8 @@ export class PreviewController {
     try {
       const editedFields: DataViewField[] =
         this.fieldTypeToProcess === 'runtime'
-          ? this.updateRuntimeField(updatedField)
-          : this.updateConcreteField(updatedField as Field);
+          ? await this.updateRuntimeField(updatedField)
+          : await this.updateConcreteField(updatedField as Field);
 
       const afterSave = () => {
         const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
@@ -241,8 +281,8 @@ export class PreviewController {
         this.onSave(editedFields);
       };
 
-      if (this.dataView.isPersisted()) {
-        await this.deps.dataViews.updateSavedObject(this.dataView);
+      if (this.dataViewToUpdate.isPersisted()) {
+        await this.deps.dataViews.updateSavedObject(this.dataViewToUpdate);
       }
       afterSave();
 
