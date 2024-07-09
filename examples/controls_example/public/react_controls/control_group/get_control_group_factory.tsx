@@ -75,6 +75,9 @@ export const getControlGroupEmbeddableFactory = (services: {
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
+      function getControlApi(controlUuid) {
+        return children$.value[controlUuid];
+      }
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
@@ -118,9 +121,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const api = setApi({
         dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
         chaining$: (controlUuid: string) =>
-          chaining$(controlUuid, chainingSystem$, controlsInOrder$, (getControlUuid: string) => {
-            return children$.value[getControlUuid];
-          }),
+          chaining$(controlUuid, chainingSystem$, controlsInOrder$, getControlApi),
         ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
