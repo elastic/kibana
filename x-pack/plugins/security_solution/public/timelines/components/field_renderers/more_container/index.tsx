@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useContext, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TimelineContext } from '../../timeline';
+import { getSourcererScopeId } from '../../../../helpers';
+import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
+import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
+
+interface MoreContainerProps {
+  fieldName: string;
+  values: string[];
+  idPrefix: string;
+  moreMaxHeight: string;
+  overflowIndexStart: number;
+  render?: (item: string) => React.ReactNode;
+  scopeId?: string;
+}
+
+export const MoreContainer = React.memo<MoreContainerProps>(
+  ({ fieldName, idPrefix, moreMaxHeight, overflowIndexStart, render, values, scopeId }) => {
+    const { timelineId } = useContext(TimelineContext);
+    const defaultedScopeId = scopeId ?? timelineId;
+    const sourcererScopeId = getSourcererScopeId(defaultedScopeId ?? '');
+
+    const moreItemsWithHoverActions = useMemo(
+      () =>
+        values.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, value, index) => {
+          const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
+
+          if (typeof value === 'string' && fieldName != null) {
+            acc.push(
+              <EuiFlexItem key={id}>
+                <SecurityCellActions
+                  key={id}
+                  mode={CellActionsMode.HOVER_DOWN}
+                  visibleCellActions={5}
+                  showActionTooltips
+                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  data={{ value, field: fieldName }}
+                  sourcererScopeId={sourcererScopeId ?? SourcererScopeName.default}
+                  metadata={{ scopeId: defaultedScopeId ?? undefined }}
+                >
+                  <>{render ? render(value) : defaultToEmptyTag(value)}</>
+                </SecurityCellActions>
+              </EuiFlexItem>
+            );
+          }
+
+          return acc;
+        }, []),
+      [values, overflowIndexStart, idPrefix, fieldName, sourcererScopeId, defaultedScopeId, render]
+    );
+
+    return (
+      <div
+        data-test-subj="more-container"
+        className="eui-yScroll"
+        style={{
+          maxHeight: moreMaxHeight,
+          paddingRight: '2px',
+        }}
+      >
+        <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
+          {moreItemsWithHoverActions}
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+);
+MoreContainer.displayName = 'MoreContainer';
