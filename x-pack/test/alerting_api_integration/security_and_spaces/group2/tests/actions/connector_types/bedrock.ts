@@ -352,6 +352,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(145);
           });
 
           it('should overwrite the model when a model argument is provided', async () => {
@@ -382,6 +399,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(145);
           });
 
           it('should invoke AI with assistant AI body argument formatted to bedrock expectations', async () => {
@@ -431,6 +465,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               connector_id: bedrockActionId,
               data: { message: bedrockClaude2SuccessResponse.completion },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(256);
           });
 
           it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
@@ -469,13 +520,13 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                     id: bedrockActionId,
                     provider: 'actions',
                     actions: new Map([
-                      ['execute-start', { equal: 1 }],
-                      ['execute', { equal: 1 }],
+                      ['execute-start', { gte: 4 }],
+                      ['execute', { gte: 4 }],
                     ]),
                   });
                 });
 
-                const executeEvent = events[1];
+                const executeEvent = events[7];
                 expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(
                   110
                 );
