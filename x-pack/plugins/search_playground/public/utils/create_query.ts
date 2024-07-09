@@ -323,6 +323,21 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
   return indexFields;
 }
 
+export const getIndicesWithNoSourceFields = (
+  fields: IndicesQuerySourceFields
+): string | undefined => {
+  const defaultSourceFields = getDefaultSourceFields(fields);
+  const indices = Object.keys(defaultSourceFields).reduce<string[]>((result, index: string) => {
+    if (defaultSourceFields[index].length === 0) {
+      result.push(index);
+    }
+
+    return result;
+  }, []);
+
+  return indices.length === 0 ? undefined : indices.join();
+};
+
 export function getDefaultQueryFields(fieldDescriptors: IndicesQuerySourceFields): IndexFields {
   const indexFields = Object.keys(fieldDescriptors).reduce<IndexFields>(
     (acc: IndexFields, index: string) => {

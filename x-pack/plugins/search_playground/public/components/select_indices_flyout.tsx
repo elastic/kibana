@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { getIndicesWithNoSourceFields } from '../utils/create_query';
+import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 import { useQueryIndices } from '../hooks/use_query_indices';
 
@@ -100,6 +103,8 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
       ),
     },
   ];
+  const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedTempIndices);
+  const noSourceFieldsWarning = getIndicesWithNoSourceFields(fields);
 
   return (
     <EuiFlyout size="s" ownFocus onClose={onClose} data-test-subj="selectIndicesFlyout">
@@ -107,7 +112,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.searchPlayground.setupPage.addDataSource.flyout.title"
+              id="xpack.searchPlayground.addDataSource.flyout.title"
               defaultMessage="Add data to query"
             />
           </h2>
@@ -115,6 +120,17 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+        {!isFieldsLoading && !!noSourceFieldsWarning && (
+          <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
+            <p>
+              <FormattedMessage
+                id="xpack.searchPlayground.addDataSource.flyout.warningCallout"
+                defaultMessage="No fields found for {errorMessage}. Try adding data to these indices."
+                values={{ errorMessage: noSourceFieldsWarning }}
+              />
+            </p>
+          </EuiCallOut>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
