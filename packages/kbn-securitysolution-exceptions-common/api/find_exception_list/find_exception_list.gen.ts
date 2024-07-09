@@ -44,11 +44,11 @@ or available in all spaces (`agnostic` or `single`)
   /**
    * The page number to return
    */
-  page: z.coerce.number().int().min(0).optional(),
+  page: z.coerce.number().int().min(1).optional(),
   /**
    * The number of exception lists to return per page
    */
-  per_page: z.coerce.number().int().min(0).optional(),
+  per_page: z.coerce.number().int().min(1).optional(),
   /**
    * Determines which field is used to sort the results
    */
@@ -63,7 +63,7 @@ export type FindExceptionListsRequestQueryInput = z.input<typeof FindExceptionLi
 export type FindExceptionListsResponse = z.infer<typeof FindExceptionListsResponse>;
 export const FindExceptionListsResponse = z.object({
   data: z.array(ExceptionList),
-  page: z.number().int().min(0),
-  per_page: z.number().int().min(0),
+  page: z.number().int().min(1),
+  per_page: z.number().int().min(1),
   total: z.number().int().min(0),
 });

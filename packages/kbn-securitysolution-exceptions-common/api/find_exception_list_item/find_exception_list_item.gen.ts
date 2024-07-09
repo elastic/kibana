@@ -71,8 +71,8 @@ export type FindExceptionListItemsRequestQueryInput = z.input<
 export type FindExceptionListItemsResponse = z.infer<typeof FindExceptionListItemsResponse>;
 export const FindExceptionListItemsResponse = z.object({
   data: z.array(ExceptionListItem),
-  page: z.number().int().min(0),
-  per_page: z.number().int().min(0),
+  page: z.number().int().min(1),
+  per_page: z.number().int().min(1),
   total: z.number().int().min(0),
   pit: z.string().optional(),
 });
