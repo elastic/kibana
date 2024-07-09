@@ -20,9 +20,8 @@ import {
   EuiFlexGroup,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { DashboardItem } from '../../embeddable/types';
+import { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 
@@ -31,19 +30,17 @@ type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 export const DashboardLinkDestinationPicker = ({
   onDestinationPicked,
   initialSelection,
-  parentDashboard,
+  parentDashboardId,
   onUnmount,
   ...other
 }: {
   initialSelection?: string;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   onUnmount: (dashboardId?: string) => void;
   onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
-
-  const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const getDashboardItem = useCallback((dashboard: DashboardItem) => {
     return {
@@ -106,7 +103,7 @@ export const DashboardLinkDestinationPicker = ({
               <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
-          <EuiFlexItem className={'linksPanelLinkText'}>
+          <EuiFlexItem className={'linksPanelEditorLinkText'}>
             <EuiHighlight search={searchValue} className={'wrapText'}>
               {label}
             </EuiHighlight>
