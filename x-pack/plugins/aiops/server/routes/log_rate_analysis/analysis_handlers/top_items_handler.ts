@@ -33,7 +33,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const topItemsHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -64,7 +64,7 @@ export const topItemsHandlerFactory =
     if (textFieldCandidates.length > 0) {
       topCategories.push(
         ...(await fetchTopCategories(
-          client,
+          esClient,
           requestBody,
           textFieldCandidates,
           logger,
@@ -113,7 +113,7 @@ export const topItemsHandlerFactory =
 
       try {
         fetchedTopTerms = await fetchTopTerms(
-          client,
+          esClient,
           requestBody,
           [fieldCandidate],
           logger,
