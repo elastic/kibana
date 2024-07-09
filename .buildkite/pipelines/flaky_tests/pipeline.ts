@@ -7,7 +7,7 @@
  */
 
 import { groups } from './groups.json';
-import { BuildkiteStep, expandAgentQueue } from '#pipeline-utils';
+import { BuildkiteStep } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -31,6 +31,34 @@ if (Number.isNaN(concurrency)) {
 
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
+
+// TODO: remove this after https://github.com/elastic/kibana-operations/issues/15 is finalized
+/** This function bridges the agent targeting between gobld and kibana-buildkite agent targeting */
+const getAgentRule = (queueName: string = 'n2-4-spot') => {
+  if (
+    process.env.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld' ||
+    process.env.BUILDKITE_AGENT_META_DATA_PROVIDER === 'k8s'
+  ) {
+    const [kind, cores, addition] = queueName.split('-');
+    const additionalProps =
+      {
+        spot: { preemptible: true },
+        virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+      }[addition] || {};
+
+    return {
+      provider: 'gcp',
+      image: 'family/kibana-ubuntu-2004',
+      imageProject: 'elastic-images-prod',
+      machineType: `${kind}-standard-${cores}`,
+      ...additionalProps,
+    };
+  } else {
+    return {
+      queue: queueName,
+    };
+  }
+};
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
@@ -122,7 +150,7 @@ const pipeline = {
 steps.push({
   command: '.buildkite/scripts/steps/build_kibana.sh',
   label: 'Build Kibana Distribution and Plugins',
-  agents: expandAgentQueue('c2-8'),
+  agents: getAgentRule('c2-8'),
   key: 'build',
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
@@ -145,7 +173,7 @@ for (const testSuite of testSuites) {
       concurrency,
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
-      agents: expandAgentQueue('n2-4-spot'),
+      agents: getAgentRule('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
       cancel_on_build_failing: true,
@@ -169,7 +197,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: expandAgentQueue(agentQueue),
+        agents: getAgentRule(agentQueue),
         key: `cypress-suite-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
@@ -205,7 +233,7 @@ pipeline.steps.push({
 pipeline.steps.push({
   command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
-  agents: expandAgentQueue('n2-4-spot'),
+  agents: getAgentRule('n2-4-spot'),
   timeout_in_minutes: 15,
   retry: {
     automatic: [{ exit_status: '-1', limit: 3 }],
