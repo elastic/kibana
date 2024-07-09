@@ -13,7 +13,11 @@ import { BehaviorSubject, first, of, skip } from 'rxjs';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
+import {
+  ChainingContext,
+  ControlGroupApi,
+  DataControlFetchContext,
+} from '../../control_group/types';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { ControlApiRegistration } from '../../types';
@@ -31,6 +35,7 @@ describe('RangesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = {
+    chaining$: () => new BehaviorSubject<ChainingContext>({}),
     dataControlFetch$: new BehaviorSubject<DataControlFetchContext>({}),
     ignoreParentSettings$: new BehaviorSubject(undefined),
     parentApi: dashboardApi,

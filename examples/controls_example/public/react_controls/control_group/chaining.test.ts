@@ -222,7 +222,7 @@ describe('chaining$', () => {
         },
       ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
-      
+
       expect(onFireMock.mock.calls).toHaveLength(0);
       subscription.unsubscribe();
     });

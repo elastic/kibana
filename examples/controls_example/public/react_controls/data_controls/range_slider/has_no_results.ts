@@ -40,39 +40,41 @@ export function hasNoResults$({
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([chainingContext, rangeFilters, ignoreParentSettings, dataControlFetchContext]) => {
-      const dataView = dataViews$?.value?.[0];
-      const rangeFilter = rangeFilters?.[0];
-      if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
-        return false;
-      }
+    switchMap(
+      async ([chainingContext, rangeFilters, ignoreParentSettings, dataControlFetchContext]) => {
+        const dataView = dataViews$?.value?.[0];
+        const rangeFilter = rangeFilters?.[0];
+        if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
+          return false;
+        }
 
-      const filters = [];
-      if (dataControlFetchContext.unifiedSearchFilters) {
-        filters.push(...dataControlFetchContext.unifiedSearchFilters);
-      }
-      if (chainingContext.chainingFilters) {
-        filters.push(...chainingContext.chainingFilters);
-      }
+        const filters = [];
+        if (dataControlFetchContext.unifiedSearchFilters) {
+          filters.push(...dataControlFetchContext.unifiedSearchFilters);
+        }
+        if (chainingContext.chainingFilters) {
+          filters.push(...chainingContext.chainingFilters);
+        }
 
-      try {
-        setIsLoading(true);
-        const abortController = new AbortController();
-        prevRequestAbortController = abortController;
-        return await hasNoResults({
-          abortSignal: abortController.signal,
-          data,
-          dataView,
-          rangeFilter,
-          filters,
-          query: dataControlFetchContext.query,
-          timeRange: chainingContext.timeRange ?? dataControlFetchContext.timeRange,
-        });
-      } catch (error) {
-        // Ignore error, validation is not required for control to function properly
-        return false;
+        try {
+          setIsLoading(true);
+          const abortController = new AbortController();
+          prevRequestAbortController = abortController;
+          return await hasNoResults({
+            abortSignal: abortController.signal,
+            data,
+            dataView,
+            rangeFilter,
+            filters,
+            query: dataControlFetchContext.query,
+            timeRange: chainingContext.timeRange ?? dataControlFetchContext.timeRange,
+          });
+        } catch (error) {
+          // Ignore error, validation is not required for control to function properly
+          return false;
+        }
       }
-    }),
+    ),
     tap(() => {
       setIsLoading(false);
     })
