@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
-import { generateConfig } from '../../../../../edr_workflows/configs/config.base';
-import { svlServices } from '../../../../../edr_workflows/services';
+// import { FtrConfigProviderContext } from '@kbn/test';
+// import { generateConfig } from '../../../../../edr_workflows/configs/config.base';
+// import { svlServices } from '../../../../../edr_workflows/services';
+//
+// export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+//   const serverlessTestsConfig = await readConfigFile(
+//     require.resolve('../../../../../../../test_serverless/shared/config.base.ts')
+//   );
+//
+//   return generateConfig({
+//     baseConfig: serverlessTestsConfig,
+//     junitReportName:
+//       'EDR Workflows - Resolver Integration Tests - Serverless Env - Complete Licenses',
+//     target: 'serverless',
+//     kbnServerArgs: ['--serverless=security'],
+//     services: svlServices,
+//     testFiles: [require.resolve('..')],
+//   });
+// }
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const serverlessTestsConfig = await readConfigFile(
-    require.resolve('../../../../../../../test_serverless/shared/config.base.ts')
-  );
+import { createTestConfig } from '../../../../../config/serverless/config.base.edr_workflows';
 
-  return generateConfig({
-    baseConfig: serverlessTestsConfig,
-    junitReportName:
-      'EDR Workflows - Resolver Integration Tests - Serverless Env - Complete Licenses',
-    target: 'serverless',
-    kbnServerArgs: ['--serverless=security'],
-    services: svlServices,
-    testFiles: [require.resolve('..')],
-  });
-}
+export default createTestConfig({
+  testFiles: [require.resolve('..')],
+  junit: {
+    reportName: 'EDR Workflows - Resolver Integration Tests - Serverless Env - Complete Licenses',
+  },
+});
