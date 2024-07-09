@@ -51,6 +51,8 @@ export const simpleDiffAlgorithm = <TValue>(
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
     conflict:
+      // Simple Diffs algos can only results in NON_SOLVABLE conflicts
+      // if the diff outcome is a conflict
       mergeOutcome === ThreeWayMergeOutcome.Conflict
         ? ThreeWayDiffConflictResolutionResult.NON_SOLVABLE
         : ThreeWayDiffConflictResolutionResult.NO,

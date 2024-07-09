@@ -42,6 +42,7 @@ import {
   scalarArrayDiffAlgorithm,
   simpleDiffAlgorithm,
   singleLineStringDiffAlgorithm,
+  scalarArrayDiffAlgorithm,
 } from './algorithms';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;

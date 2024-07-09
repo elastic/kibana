@@ -54,7 +54,8 @@ export const scalarArrayDiffAlgorithm = <TValue>(
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
     conflict:
-      mergeOutcome === ThreeWayMergeOutcome.Conflict
+      // Scalar Arrays can only result in Merged outcomes on conflict
+      mergeOutcome === ThreeWayMergeOutcome.Merged
         ? ThreeWayDiffConflictResolutionResult.SOLVABLE
         : ThreeWayDiffConflictResolutionResult.NO,
   };
