@@ -10,9 +10,9 @@ import { Duration, duration as momentDuration, DurationInputArg2, isDuration } f
 export type { Duration };
 export { isDuration };
 
-const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
+const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)(.*)$/;
 
-function stringToDuration(text: string) {
+function stringToDuration(text: string): Duration {
   const result = timeFormatRegex.exec(text);
   if (!result) {
     const number = Number(text);
@@ -27,8 +27,14 @@ function stringToDuration(text: string) {
 
   const count = parseInt(result[1], 10);
   const unit = result[2] as DurationInputArg2;
+  const rest = result[3];
 
-  return momentDuration(count, unit);
+  const duration = momentDuration(count, unit);
+
+  if (rest) {
+    return duration.add(stringToDuration(rest));
+  }
+  return duration;
 }
 
 function numberToDuration(numberMs: number) {
