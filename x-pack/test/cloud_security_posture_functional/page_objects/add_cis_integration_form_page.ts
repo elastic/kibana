@@ -282,6 +282,11 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.find(`button-replace-${secretField}`);
   };
 
+  const getSecretComponentReplaceButton = async (secretButtonSelector: string) => {
+    const secretComponentReplaceButton = await testSubjects.find(secretButtonSelector);
+    return secretComponentReplaceButton;
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -316,5 +321,6 @@ export function AddCisIntegrationFormPageProvider({
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
     getReplaceSecretButton,
+    getSecretComponentReplaceButton,
   };
 }

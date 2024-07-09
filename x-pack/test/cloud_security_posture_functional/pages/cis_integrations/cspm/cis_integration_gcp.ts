@@ -17,7 +17,7 @@ const PRJ_ID_TEST_ID = 'project_id_test_id';
 const ORG_ID_TEST_ID = 'organization_id_test_id';
 const CREDENTIALS_TYPE_TEST_ID = 'credentials_type_test_id';
 const CREDENTIALS_FILE_TEST_ID = 'credentials_file_test_id';
-const CREDENTIALS_JSON_TEST_ID = 'credentials_json_test_id';
+const CREDENTIALS_JSON_TEST_ID = 'textAreaInput-credentials-json';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -169,6 +169,13 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        expect(
+          (await cisIntegration.getSecretComponentReplaceButton(
+            'button-replace-credentials-json'
+          )) !== undefined
+        ).to.be(true);
       });
     });
 
@@ -265,6 +272,13 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        expect(
+          (await cisIntegration.getSecretComponentReplaceButton(
+            'button-replace-credentials-json'
+          )) !== undefined
+        ).to.be(true);
       });
       it('Users are able to switch credentials_type from/to Credential File fields ', async () => {
         const credentialFileName = 'CRED_FILE_TEST_NAME';
