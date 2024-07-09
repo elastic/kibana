@@ -431,9 +431,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should navigate to alert results via view in app link', async () => {
       await testSubjects.click('selectDataViewExpression');
+      await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
       if (await testSubjects.exists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
+        await testSubjects.missingOrFail('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
@@ -441,7 +443,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await sourceDataViewOption.click();
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
+
       await testSubjects.click('saveRuleButton');
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('saveRuleButton');
+      });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -537,6 +547,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('saveRuleButton');
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('saveRuleButton');
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(ADHOC_RULE_NAME);
