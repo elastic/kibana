@@ -27,7 +27,6 @@ import {
   serializers,
   serializeComponentTemplate,
 } from '../../../shared_imports';
-import { MANAGED_BY_FLEET } from '../../../constants';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 
 const INFINITE_AS_ICON = true;
@@ -72,8 +71,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     } = serializedComponentTemplate;
 
     const areDatastreamsVisible =
-      Boolean(dataStreams?.length) &&
-      (componentTemplate._meta?.managed_by === MANAGED_BY_FLEET || canRollover);
+      Boolean(dataStreams?.length) && (componentTemplate.name.endsWith('@custom') || canRollover);
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
