@@ -139,11 +139,13 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 
   const ruleFlyoutLink = application.getUrlForApp('security', {
     path: generatePath(benchmarksNavigation.rules.path, {
-      benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
-      benchmarkId: findings.rule.benchmark.id,
-      ruleId: findings.rule.id,
+      benchmarkVersion: findings.rule?.benchmark?.version.split('v')[1] || '1', // removing the v from the version
+      benchmarkId: findings.rule?.benchmark?.id || '1',
+      ruleId: findings.rule?.id,
     }),
   });
+
+  console.log(findings);
 
   switch (tab.id) {
     case 'overview':
@@ -176,12 +178,12 @@ export const FindingsRuleFlyout = ({
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <CspEvaluationBadge type={findings.result.evaluation} />
+            <CspEvaluationBadge type={findings.result?.evaluation} />
           </EuiFlexItem>
           <EuiFlexItem grow style={{ minWidth: 0 }}>
             <EuiTitle size="m" className="eui-textTruncate">
-              <EuiTextColor color="primary" title={findings.rule.name}>
-                {findings.rule.name}
+              <EuiTextColor color="primary" title={findings.rule?.name}>
+                {findings.rule?.name}
               </EuiTextColor>
             </EuiTitle>
           </EuiFlexItem>

@@ -16,7 +16,8 @@ export interface CspFinding {
   cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
-  rule: CspBenchmarkRuleMetadata;
+  // TODO: make everything here optional
+  rule?: CspBenchmarkRuleMetadata;
   host: CspFindingHost;
   event: EcsEvent;
   agent: CspFindingAgent;

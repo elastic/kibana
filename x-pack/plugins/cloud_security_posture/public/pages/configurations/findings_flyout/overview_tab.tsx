@@ -42,7 +42,7 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: (
+    description: data.rule?.name ? (
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
@@ -51,6 +51,8 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
       >
         <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
       </EuiToolTip>
+    ) : (
+      '-'
     ),
   },
   {
@@ -63,42 +65,48 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {
       defaultMessage: 'Rule Tags',
     }),
-    description: (
+    description: data.rule?.tags?.length ? (
       <>
         {data.rule.tags.map((tag) => (
           <EuiBadge key={tag}>{tag}</EuiBadge>
         ))}
       </>
+    ) : (
+      '-'
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
       defaultMessage: 'Evaluated at',
     }),
-    description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
+    description: data['@timestamp'] ? moment(data['@timestamp']).format(CSP_MOMENT_FORMAT) : '-',
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),
-    description: (
-      <CisKubernetesIcons
-        benchmarkId={data.rule.benchmark.id}
-        benchmarkName={data.rule.benchmark.name}
-      />
-    ),
+    description:
+      data.rule?.benchmark?.id && data.rule?.benchmark?.name ? (
+        <CisKubernetesIcons
+          benchmarkId={data.rule?.benchmark?.id}
+          benchmarkName={data.rule?.benchmark?.name}
+        />
+      ) : (
+        '-'
+      ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
-      defaultMessage: 'CIS Section',
+      defaultMessage: 'Framework Section',
     }),
-    description: data.rule.section,
+    description: data.rule?.section ? data.rule?.section : '-',
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
       defaultMessage: 'Index',
     }),
     description: discoverIndexLink ? (
+      // TODO: find a way to get index name
       <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
     ) : (
       LATEST_FINDINGS_INDEX_DEFAULT_NS
@@ -109,33 +117,29 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
 export const getRemediationList = (rule: CspFinding['rule']) => [
   {
     title: '',
-    description: <CspFlyoutMarkdown>{rule.remediation}</CspFlyoutMarkdown>,
+    description: <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>,
   },
-  ...(rule.impact
-    ? [
-        {
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
-            defaultMessage: 'Impact',
-          }),
-          description: <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown>,
-        },
-      ]
-    : []),
-  ...(rule.default_value
-    ? [
-        {
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
-            defaultMessage: 'Default Value',
-          }),
-          description: <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>,
-        },
-      ]
-    : []),
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
+      defaultMessage: 'Impact',
+    }),
+    description: rule?.impact ? <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown> : '-',
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
+      defaultMessage: 'Default Value',
+    }),
+    description: rule?.default_value ? (
+      <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>
+    ) : (
+      '-'
+    ),
+  },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
       defaultMessage: 'Rationale',
     }),
-    description: <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown>,
+    description: rule?.rationale ? <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown> : '-',
   },
 ];
 
@@ -152,7 +156,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">{JSON.stringify(result.evidence, null, 2)}</CodeBlock>
+          <CodeBlock language="json">{JSON.stringify(result?.evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
@@ -176,7 +180,7 @@ export const OverviewTab = ({
     [discover.locator, latestFindingsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result.evidence);
+  const hasEvidence = !isEmpty(data.result?.evidence);
 
   const accordions: Accordion[] = useMemo(
     () =>
