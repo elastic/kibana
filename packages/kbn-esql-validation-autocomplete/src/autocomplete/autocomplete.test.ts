@@ -60,7 +60,7 @@ const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: stri
   ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
     name,
     hidden: false,
-    suggestedAs: `\`${name}\``,
+    suggestedAs: `"${name}"`,
   }))
 );
 
@@ -368,8 +368,9 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
-
+    const suggestedIndexes = indexes
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     // Monaco will filter further down here
     testSuggestions(
       'f',
@@ -397,8 +398,7 @@ describe('autocomplete', () => {
     const dataSources = indexes.concat(integrations);
     const suggestedDataSources = dataSources
       .filter(({ hidden }) => !hidden)
-      .map(({ name }) => name);
-
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     testSuggestions('from ', suggestedDataSources, '', [undefined, dataSources, undefined]);
     testSuggestions('from a,', suggestedDataSources, '', [undefined, dataSources, undefined]);
     testSuggestions('from *,', suggestedDataSources, '', [undefined, dataSources, undefined]);

@@ -37,6 +37,13 @@ function getSafeInsertText(text: string, options: { dashSupported?: boolean } = 
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
 }
+export function getQuotedText(text: string) {
+  return text.startsWith(`"`) && text.endsWith(`"`) ? text : `"${text}"`;
+}
+
+function getSafeInsertSourceText(text: string, options: { dashSupported?: boolean } = {}) {
+  return shouldBeQuotedText(text, options) ? getQuotedText(text) : text;
+}
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn);
@@ -148,7 +155,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title }) => ({
     label: title ?? name,
-    text: name,
+    text: getSafeInsertSourceText(name, { dashSupported: true }),
     isSnippet: isIntegration,
     ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Issue',
