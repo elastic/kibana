@@ -64,14 +64,16 @@ export const useSourceIndicesFields = () => {
   const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
-    if (fields && !isFieldsLoading) {
+    if (fields) {
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
+      const mergedQueryFields = merge(defaultFields, queryFields);
+      const mergedSourceFields = merge(defaultSourceFields, sourceFields);
 
-      onElasticsearchQueryChange(createQuery(defaultFields, defaultSourceFields, fields));
-      onQueryFieldsOnChange(merge(defaultFields, queryFields));
+      onElasticsearchQueryChange(createQuery(mergedQueryFields, mergedSourceFields, fields));
+      onQueryFieldsOnChange(mergedQueryFields);
 
-      onSourceFieldsChange(merge(defaultSourceFields, sourceFields));
+      onSourceFieldsChange(mergedSourceFields);
       usageTracker?.count(
         AnalyticsEvents.sourceFieldsLoaded,
         Object.values(fields)?.flat()?.length
@@ -79,7 +81,7 @@ export const useSourceIndicesFields = () => {
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fields, isFieldsLoading]);
+  }, [fields]);
 
   const addIndex = (newIndex: IndexName) => {
     const newIndices = [...selectedIndices, newIndex];
