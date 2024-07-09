@@ -70,6 +70,7 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
   buildValueDefinitions,
+  buildEcsFieldsDefinitions,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -291,7 +292,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildEcsFieldsDefinitions(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -1075,6 +1076,10 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
+  // @TODO: remove
+  console.log(`--@@filteredFieldsByType`, filteredFieldsByType);
+  // @TODO: remove
+  console.log(`--@@filteredVariablesByType`, filteredVariablesByType);
   const suggestions = filteredFieldsByType.concat(
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
@@ -1082,6 +1087,8 @@ async function getFieldsOrFunctionsSuggestions(
       : [],
     literals ? getCompatibleLiterals(commandName, types) : []
   );
+  // @TODO: remove
+  console.log(`--@@suggestions`, suggestions);
 
   return suggestions;
 }

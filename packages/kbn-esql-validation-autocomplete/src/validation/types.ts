@@ -18,6 +18,9 @@ export interface ESQLVariable {
 export interface ESQLRealField {
   name: string;
   type: string;
+  metadata?: {
+    description?: string;
+  };
 }
 
 export interface ESQLPolicy {

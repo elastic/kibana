@@ -23,6 +23,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationPopover,
@@ -123,6 +124,7 @@ interface TextBasedEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -167,8 +169,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    docLinks,
+    core,
+    fieldsMetadata,
+  } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState<string | null>(null);
@@ -416,6 +425,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+        // @TODO: remove
+        console.log(`--@@queryToExecute`, queryToExecute);
+
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
@@ -424,13 +436,40 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
           try {
+            // @TODO for @Q: Double check if adding ECS description here is appropriate
             const table = await memoizedFieldsFromESQL(
               esqlQuery,
               expressions,
               undefined,
               abortController
             ).result;
-            return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            let columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            const containsEcsFields = columns.find((c) => c.name === 'ecs.version');
+
+            if (containsEcsFields) {
+              try {
+                const fieldsMetadataClient = await fieldsMetadata?.getClient();
+                if (fieldsMetadataClient) {
+                  const fields = await fieldsMetadataClient.find({
+                    fieldNames: columns.map((c) => c.name),
+                  });
+
+                  const removeKeywordModifier = (name: string) => {
+                    return name.endsWith('.keyword') ? name.slice(0, -8) : name;
+                  };
+                  if (fields.fields) {
+                    columns = columns.map((c) => ({
+                      ...c,
+                      metadata: fields.fields[removeKeywordModifier(c.name)],
+                    }));
+                  }
+                }
+              } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Unable to fetch field metadata', error);
+              }
+            }
+            return columns;
           } catch (e) {
             // no action yet
           }
@@ -458,6 +497,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     expressions,
     abortController,
     indexManagementApiService,
+    fieldsMetadata,
   ]);
 
   const parseMessages = useCallback(async () => {
@@ -897,6 +937,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       if (isCompactFocused || !hoverProvider?.provideHover) {
                         return { contents: [] };
                       }
+                      // @TODO: remove
+                      console.log(
+                        `--@@hoverProvider?.provideHover(model, position, token)`,
+                        hoverProvider?.provideHover(model, position, token)
+                      );
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
