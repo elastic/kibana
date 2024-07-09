@@ -12,6 +12,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
 import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { mergeFetchContexts } from '../../control_group/merge_fetch_contexts';
 import { ChainingContext, ControlGroupApi } from '../../control_group/types';
 
 export function minMax$({
@@ -44,14 +45,6 @@ export function minMax$({
         return { max: undefined, min: undefined };
       }
 
-      const filters = [];
-      if (dataControlFetchContext.unifiedSearchFilters) {
-        filters.push(...dataControlFetchContext.unifiedSearchFilters);
-      }
-      if (chainingContext.chainingFilters) {
-        filters.push(...chainingContext.chainingFilters);
-      }
-
       try {
         setIsLoading(true);
         const abortController = new AbortController();
@@ -61,9 +54,7 @@ export function minMax$({
           data,
           dataView,
           field: dataViewField,
-          filters,
-          query: dataControlFetchContext.query,
-          timeRange: chainingContext.timeRange ?? dataControlFetchContext.timeRange,
+          ...mergeFetchContexts(dataControlFetchContext, chainingContext),
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };

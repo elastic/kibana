@@ -12,6 +12,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews } from '@kbn/presentation-publishing';
 import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { mergeFetchContexts } from '../../control_group/merge_fetch_contexts';
 import { ChainingContext, ControlGroupApi } from '../../control_group/types';
 import { DataControlApi } from '../types';
 
@@ -48,14 +49,6 @@ export function hasNoResults$({
           return false;
         }
 
-        const filters = [];
-        if (dataControlFetchContext.unifiedSearchFilters) {
-          filters.push(...dataControlFetchContext.unifiedSearchFilters);
-        }
-        if (chainingContext.chainingFilters) {
-          filters.push(...chainingContext.chainingFilters);
-        }
-
         try {
           setIsLoading(true);
           const abortController = new AbortController();
@@ -65,9 +58,7 @@ export function hasNoResults$({
             data,
             dataView,
             rangeFilter,
-            filters,
-            query: dataControlFetchContext.query,
-            timeRange: chainingContext.timeRange ?? dataControlFetchContext.timeRange,
+            ...mergeFetchContexts(dataControlFetchContext, chainingContext),
           });
         } catch (error) {
           // Ignore error, validation is not required for control to function properly
