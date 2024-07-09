@@ -4,6 +4,7 @@ on:
       - main
     types:
       - opened
+      - synchronize
 
 jobs:
   approve:
