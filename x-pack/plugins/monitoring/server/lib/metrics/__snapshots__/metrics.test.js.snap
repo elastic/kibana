@@ -1409,60 +1409,6 @@ Object {
     "usageField": undefined,
     "uuidField": "cluster_uuid",
   },
-  "apm_responses_errors_concurrency": ApmEventsRateClusterMetric {
-    "aggs": Object {
-      "beats_uuids": Object {
-        "aggs": Object {
-          "event_rate_per_beat": Object {
-            "max": Object {
-              "field": "beats_stats.metrics.apm-server.server.response.errors.concurrency",
-            },
-          },
-        },
-        "terms": Object {
-          "field": "beats_stats.beat.uuid",
-          "size": 10000,
-        },
-      },
-      "event_rate": Object {
-        "sum_bucket": Object {
-          "buckets_path": "beats_uuids>event_rate_per_beat",
-          "gap_policy": "skip",
-        },
-      },
-      "metric_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "event_rate",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-    },
-    "app": "apm",
-    "calculation": undefined,
-    "dateHistogramSubAggs": undefined,
-    "derivative": true,
-    "derivativeNormalizedUnits": true,
-    "description": "HTTP Requests rejected due to overall concurrency limit breach",
-    "docType": undefined,
-    "field": "beats_stats.metrics.apm-server.server.response.errors.concurrency",
-    "fieldSource": undefined,
-    "format": "0,0.[00]",
-    "getDateHistogramSubAggs": undefined,
-    "isNotSupportedInInternalCollection": undefined,
-    "label": "Concurrency",
-    "legendFormat": undefined,
-    "mbField": undefined,
-    "metricAgg": "max",
-    "periodsField": undefined,
-    "quotaField": undefined,
-    "technicalPreview": undefined,
-    "timestampField": "beats_stats.timestamp",
-    "title": "Concurrency",
-    "units": "/s",
-    "usageField": undefined,
-    "uuidField": "cluster_uuid",
-  },
   "apm_responses_errors_decode": ApmEventsRateClusterMetric {
     "aggs": Object {
       "beats_uuids": Object {
