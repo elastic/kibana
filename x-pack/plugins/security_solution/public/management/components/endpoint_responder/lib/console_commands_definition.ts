@@ -136,6 +136,16 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
+const commandCommentArgument = (): { comment: CommandDefinition['args'][string] } => {
+  return {
+    comment: {
+      required: false,
+      allowMultiples: false,
+      about: COMMENT_ARG_ABOUT,
+    },
+  };
+};
+
 export interface GetEndpointConsoleCommandsOptions {
   endpointAgentId: string;
   agentType: ResponseActionAgentType;
@@ -232,7 +242,6 @@ export const getEndpointConsoleCommands = ({
       helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
     {
-      //
       name: 'kill-process',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.killProcess.about,
@@ -585,6 +594,24 @@ const adjustCommandsForSentinelOne = ({
       )
     ) {
       disableCommand(command, 'sentinel_one');
+    }
+
+    // Kill-Process: adjust command to accept only `processName
+    if (command.name === 'kill-process') {
+      command.args = {
+        ...commandCommentArgument(),
+        processName: {
+          required: true,
+          allowMultiples: false,
+          about: CONSOLE_COMMANDS.killProcess.args.processName.about,
+          mustHaveValue: 'non-empty-string',
+        },
+      };
+      command.exampleUsage = 'kill-process --processName="notepad" --comment="kill malware"';
+      command.exampleInstruction = i18n.translate(
+        'xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions',
+        { defaultMessage: 'Enter a process name to execute' }
+      );
     }
 
     return command;
