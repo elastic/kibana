@@ -81,6 +81,9 @@ export const allowedExperimentalValues = Object.freeze({
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: true,
 
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: false,
+
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
@@ -174,6 +177,11 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
+
+  /**
+   * Enables alerts suppression for machine learning rules
+   */
+  alertSuppressionForMachineLearningRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer

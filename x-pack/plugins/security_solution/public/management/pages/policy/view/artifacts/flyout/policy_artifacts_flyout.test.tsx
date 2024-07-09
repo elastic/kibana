@@ -86,6 +86,7 @@ describe('Policy details artifacts flyout', () => {
             apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
             onClose={onCloseMock}
             searchableFields={[...SEARCHABLE_FIELDS]}
+            CardDecorator={undefined}
           />
         );
         await waitFor(mockedApi.responseProvider.eventFiltersList);

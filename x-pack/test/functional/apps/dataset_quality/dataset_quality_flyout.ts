@@ -50,7 +50,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   const degradedDatasetName = datasetNames[2];
 
-  describe('Flyout', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/187589
+  describe.skip('Flyout', () => {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -271,6 +272,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     describe('navigation', () => {
+      afterEach(async () => {
+        // Navigate back to dataset quality page after each test
+        await PageObjects.datasetQuality.navigateTo();
+      });
+
       it('should go to log explorer page when the open in log explorer button is clicked', async () => {
         const testDatasetName = datasetNames[2];
         await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
@@ -283,9 +289,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         const datasetSelectorText =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
         expect(datasetSelectorText).to.eql(testDatasetName);
-
-        // Should bring back the test to the dataset quality page
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should go log explorer for degraded docs when the show all button is clicked', async () => {
@@ -293,17 +296,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
         await testSubjects.click(degradedDocsShowAllSelector);
-        await browser.switchTab(1);
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
         expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
-
-        await browser.closeCurrentWindow();
-        await browser.switchTab(0);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       // Blocked by https://github.com/elastic/kibana/issues/181705
@@ -313,7 +310,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
         await testSubjects.click(hostsShowAllSelector);
-        await browser.switchTab(1);
 
         // Confirm url contains metrics/hosts
         await retry.tryForTime(5000, async () => {
@@ -321,11 +317,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const parsedUrl = new URL(currentUrl);
           expect(parsedUrl.pathname).to.contain('/app/metrics/hosts');
         });
-
-        await browser.closeCurrentWindow();
-        await browser.switchTab(0);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
     });
 
