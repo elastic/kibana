@@ -32,6 +32,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getTimeFilter, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
+import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_handler';
 import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { deserializeState, serializeState } from './state';
@@ -158,7 +159,9 @@ export const getVisualizeEmbeddableFactory: (
                     getTimeFilter()
                   );
                   if (!expressionVariables?.canNavigateToLens) return;
-                  return vis.type.navigateToLens;
+                  const navigateToLens: NavigateToLensFn = async (timefilter) =>
+                    vis.type.navigateToLens!(vis, timefilter);
+                  return navigateToLens;
                 })();
               })
             )

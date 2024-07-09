@@ -16,7 +16,6 @@ import type Vis from '../../../vis';
 
 export type OpenInspectorFn = () => OverlayRef | undefined;
 export type NavigateToLensFn = (
-  vis: Vis,
   timefilter: TimefilterContract
 ) => Promise<NavigateToLensContext | undefined | null> | undefined;
 export type SerializeStateFn = (

@@ -354,7 +354,6 @@ export const getTopNavConfig = (
                 eventEmitter.emit('unlinkFromSavedSearch', false);
               }
               const navigateToLensConfig = await navigateToLensFn?.(
-                vis,
                 data.query.timefilter.timefilter
               );
               const searchFilters = data.query.filterManager.getAppFilters();
