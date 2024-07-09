@@ -38,4 +38,16 @@ export const entityDefinition: SavedObjectsType = {
       return `EntityDefinition: [${savedObject.attributes.name}]`;
     },
   },
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            version: { type: 'keyword' },
+          },
+        },
+      ],
+    },
+  },
 };
