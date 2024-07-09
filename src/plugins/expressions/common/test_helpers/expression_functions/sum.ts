@@ -14,12 +14,15 @@ export const sum: ExpressionFunctionDefinition<'sum', unknown[], {}, ExpressionV
   help: 'This function summarizes the input',
   inputTypes: [],
   args: {},
-  // @ts-expect-error upgrade typescript v5.1.6
   fn: (values) => {
     return {
       type: 'num',
-      // @ts-expect-error upgrade typescript v5.1.6
-      value: Array.isArray(values) ? values.reduce((a, b) => a + b) : values,
+      value: Array.isArray(values)
+        ? values
+            .map(Number)
+            .filter(isFinite)
+            .reduce((a, b) => a + b, 0)
+        : values,
     };
   },
 };

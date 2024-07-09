@@ -60,8 +60,12 @@ function validateValueAscending(
   };
 
   const previousModel = list[index - 1];
-  // @ts-expect-error upgrade typescript v5.1.6
-  if (previousModel !== undefined && inputValue !== undefined && inputValue <= previousModel) {
+  if (
+    previousModel !== undefined &&
+    inputValue !== undefined &&
+    inputValue !== '' &&
+    inputValue <= previousModel
+  ) {
     result.isInvalidOrder = true;
     result.error = i18n.translate(
       'visDefaultEditor.controls.numberList.invalidAscOrderErrorMessage',

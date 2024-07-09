@@ -59,8 +59,7 @@ export const config: PartitionChartProps['visConfig'] = {
 export const pieConfig: PartitionVisParams = {
   ...config,
   isDonut: false,
-  // @ts-expect-error upgrade typescript v5.1.6
-  emptySizeRatio: 0,
+  emptySizeRatio: 0.3,
   distinctColors: false,
   nestedLegend: false,
   dimensions: {

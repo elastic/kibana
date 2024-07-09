@@ -13,6 +13,7 @@ import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { isSamplingEnabled } from '../aggs/utils/sampler';
 import { timeOffsetFiltersWithZeroDocCountResponse } from './fixtures/fake_timeoffset_data';
+import assert from 'node:assert';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
@@ -188,9 +189,9 @@ describe('tabifyAggResponse Integration', () => {
       ) {
         expect(typeof row).toBe('object');
 
-        asserts.forEach((assert, i: number) => {
+        asserts.forEach((a, i: number) => {
           if (row[`col-${i}`]) {
-            assert(row[`col-${i}`]);
+            a(row[`col-${i}`]);
           }
         });
       }
@@ -214,7 +215,7 @@ describe('tabifyAggResponse Integration', () => {
       // check for something like an average bytes result
       function expectAvgBytes(val: string | number) {
         expect(typeof val).toBe('number');
-        // @ts-expect-error upgrade typescript v5.1.6
+        assert(typeof val === 'number');
         expect(val === 0 || val > 1000).toBeDefined();
       }
 
