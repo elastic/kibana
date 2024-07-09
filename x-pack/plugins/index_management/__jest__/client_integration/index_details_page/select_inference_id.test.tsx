@@ -17,7 +17,7 @@ import {
 } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
 import React from 'react';
 
-const setNewInferenceEndpointMock = jest.fn();
+const createInferenceEndpointMock = jest.fn();
 const mockDispatch = jest.fn();
 
 jest.mock('../../../public/application/app_context', () => ({
@@ -72,7 +72,7 @@ describe('SelectInferenceId', () => {
   beforeAll(async () => {
     const defaultProps: SelectInferenceIdProps = {
       'data-test-subj': 'data-inference-endpoint-list',
-      setCustomInferenceEndpointConfig: setNewInferenceEndpointMock,
+      createInferenceEndpoint: createInferenceEndpointMock,
     };
     const setup = registerTestBed(getTestForm(SelectInferenceId), {
       defaultProps,
