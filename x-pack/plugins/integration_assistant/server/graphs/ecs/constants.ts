@@ -2138,15 +2138,22 @@ export const ECS_FIELDS: EcsFields = {
   'vlan.id': 'VLAN ID.',
   'vlan.name': 'VLAN name.',
   'vulnerability.category': 'Vulnerability category.',
+  'vulnerability.classification': 'Vulnerability classification.',
   'vulnerability.description': 'Vulnerability description.',
   'vulnerability.enumeration': 'Vulnerability enumeration.',
   'vulnerability.id': 'Unique vulnerability identifier.',
   'vulnerability.reference': 'Vulnerability reference URL.',
-  'vulnerability.reporter': 'Name of the vulnerability reporter.',
+  'vulnerability.report_id': 'The report or scan identification number.',
   'vulnerability.scanner.vendor': 'Name of the vulnerability scanner vendor.',
+  'vulnerability.score.base':
+    'Scores can range from 0.0 to 10.0, with 10.0 being the most severe. Base scores cover an assessment for exploitability metrics (attack vector, complexity, privileges, and user interaction), impact metrics (confidentiality, integrity, and availability), and scope..',
+  'vulnerability.score.environmental':
+    'Scores can range from 0.0 to 10.0, with 10.0 being the most severe. Environmental scores cover an assessment for any modified Base metrics, confidentiality, integrity, and availability requirements.',
+  'vulnerability.score.temporal':
+    'Scores can range from 0.0 to 10.0, with 10.0 being the most severe. Temporal scores cover an assessment for code maturity, remediation level, and confidence.',
+  'vulnerability.score.version':
+    'The National Vulnerability Database (NVD) provides qualitative severity rankings of "Low", "Medium", and "High" for CVSS v2.0 base score ranges in addition to the severity ratings for CVSS v3.0 as they are defined in the CVSS v3.0 specification.',
   'vulnerability.severity': 'Vulnerability severity.',
-  'vulnerability.title': 'Vulnerability title.',
-  'vulnerability.version': 'Vulnerability version.',
 };
 
 export const ECS_EXAMPLE_ANSWER = {
