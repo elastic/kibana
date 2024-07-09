@@ -52,13 +52,17 @@ describe('chaining$', () => {
   const getControlApi = (uuid: string) => {
     if (uuid === 'alpha') {
       return alphaControlApi;
-    } else if (uuid === 'bravo') {
+    }
+    if (uuid === 'bravo') {
       return bravoControlApi;
-    } else if (uuid === 'charlie') {
+    }
+    if (uuid === 'charlie') {
       return charlieControlApi;
-    } else if (uuid === 'delta') {
+    }
+    if (uuid === 'delta') {
       return deltaControlApi;
     }
+    return undefined;
   };
 
   beforeEach(() => {
