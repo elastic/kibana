@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -282,10 +283,10 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.find(`button-replace-${secretField}`);
   };
 
-  const inputIntegrationName = async (nameExtension: string) => {
+  const inputUniqueIntegrationName = async () => {
     const flyout = await testSubjects.find('createPackagePolicy_page');
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
-    await nameField[0].type(nameExtension);
+    await nameField[0].type(uuidv4());
   };
 
   return {
@@ -322,6 +323,6 @@ export function AddCisIntegrationFormPageProvider({
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
     getReplaceSecretButton,
-    inputIntegrationName,
+    inputUniqueIntegrationName,
   };
 }
