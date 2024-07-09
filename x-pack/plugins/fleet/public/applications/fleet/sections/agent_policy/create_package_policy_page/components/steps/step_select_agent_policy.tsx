@@ -101,6 +101,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         updateAgentPolicies([]);
       }
     };
+    if (isLoading || selectedPolicyIds.length === 0) {
+      return;
+    }
     const agentPoliciesHaveAllSelectedIds = selectedPolicyIds.every((id) =>
       agentPolicies.map((policy) => policy.id).includes(id)
     );
@@ -110,7 +113,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       setSelectedAgentPolicyError(undefined);
       updateAgentPolicies(agentPolicies.filter((policy) => selectedPolicyIds.includes(policy.id)));
     }
-  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies]);
+  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies, isLoading]);
 
   // Try to select default agent policy
   useEffect(() => {
