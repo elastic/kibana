@@ -126,8 +126,8 @@ steps:
               limit: 1
 
       - label: "Running edr_workflows:response_actions:qa:serverless"
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:response_actions:qa:serverless
-        key: edr_workflows:resolver:response_actions:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
+        key: edr_workflows:response_actions:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
