@@ -643,7 +643,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger
       ),
       endpointFleetServicesFactory,
-      security: plugins.security,
+      security: core.security,
       alerting: plugins.alerting,
       config,
       cases: plugins.cases,

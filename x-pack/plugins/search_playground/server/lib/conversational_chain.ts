@@ -37,6 +37,7 @@ interface RAGOptions {
 interface ConversationalChainOptions {
   model: BaseLanguageModel;
   prompt: string;
+  questionRewritePrompt: string;
   rag?: RAGOptions;
 }
 
@@ -45,16 +46,6 @@ interface ContextInputs {
   chat_history: string;
   question: string;
 }
-
-const CONDENSE_QUESTION_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language. Be verbose in your answer.
-
-Chat History:
-{chat_history}
-
-Follow Up Input: {question}
-Standalone question:`;
-
-const condenseQuestionPrompt = PromptTemplate.fromTemplate(CONDENSE_QUESTION_TEMPLATE);
 
 const formatVercelMessages = (chatHistory: VercelChatMessage[]) => {
   const formattedDialogueTurns = chatHistory.map((message) => {
@@ -160,11 +151,21 @@ class ConversationalChainFn {
       retrievalChain = retriever.pipe(buildContext);
     }
 
-    let standaloneQuestionChain: Runnable = RunnableLambda.from((input) => input.question);
+    let standaloneQuestionChain: Runnable = RunnableLambda.from((input) => {
+      return input.question;
+    });
 
     if (previousMessages.length > 0) {
+      const questionRewritePromptTemplate = PromptTemplate.fromTemplate(
+        this.options.questionRewritePrompt
+      );
       standaloneQuestionChain = RunnableSequence.from([
-        condenseQuestionPrompt,
+        {
+          context: () => '',
+          chat_history: (input) => input.chat_history,
+          question: (input) => input.question,
+        },
+        questionRewritePromptTemplate,
         this.options.model,
         new StringOutputParser(),
       ]).withConfig({
