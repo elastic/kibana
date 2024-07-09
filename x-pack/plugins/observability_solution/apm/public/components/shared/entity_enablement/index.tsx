@@ -97,10 +97,10 @@ export function EntityEnablement() {
         >
           {isEntityManagerEnabled
             ? i18n.translate('xpack.apm.eemEnablement.enabled.', {
-                defaultMessage: 'This is Elastic’s new experience!',
+                defaultMessage: 'Viewing our new experience',
               })
             : i18n.translate('xpack.apm.eemEnablement.tryItButton.', {
-                defaultMessage: 'Try out Elastic’s new experience!',
+                defaultMessage: 'Try our new experience!',
               })}
         </EuiLink>
       </EuiFlexItem>
@@ -108,7 +108,6 @@ export function EntityEnablement() {
         <EuiPopover
           button={
             <EuiButtonIcon
-              disabled={isEntityManagerEnabled}
               onClick={togglePopover}
               data-test-subj="apmEntityEnablementWithFooterButton"
               iconType="iInCircle"
@@ -120,22 +119,30 @@ export function EntityEnablement() {
           }
           isOpen={isPopoverOpen}
           closePopover={togglePopover}
-          anchorPosition="upCenter"
+          anchorPosition="downLeft"
         >
-          <div>
+          <div style={{ width: '300px' }}>
             <EuiText size="s">
               <p>
                 {i18n.translate('xpack.apm.entityEnablement.content', {
-                  defaultMessage: '[TBD]',
+                  defaultMessage:
+                    'Our new experience combines both APM-instrumented services with services detected from logs in a single service inventory.',
                 })}
               </p>
             </EuiText>
           </div>
           <EuiPopoverFooter>
             <EuiTextColor color="subdued">
-              {i18n.translate('xpack.apm.entityEnablement.footer', {
-                defaultMessage: '[TBD] See documentation',
-              })}
+              <EuiLink
+                data-test-subj="apmEntityEnablementLink"
+                href="https://ela.st/new-experience-services"
+                external
+                target="_blank"
+              >
+                {i18n.translate('xpack.apm.entityEnablement.footer', {
+                  defaultMessage: 'Learn more',
+                })}
+              </EuiLink>
             </EuiTextColor>
           </EuiPopoverFooter>
         </EuiPopover>
