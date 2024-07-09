@@ -41,6 +41,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
+  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
@@ -545,8 +546,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         const hasDuplicates =
           (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
           isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
+
         if (hasDuplicates) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+
+          if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
+            addedFields.push(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field);
+          }
+
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
           if (!hasFormChanged) setHasFormChanged(true);
           return;
@@ -576,7 +583,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [
+        exception,
+        hasFormChanged,
+        isFilterProcessDescendantsFeatureEnabled,
+        isFilterProcessDescendantsSelected,
+        processChanged,
+      ]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>

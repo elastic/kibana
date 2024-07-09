@@ -550,86 +550,185 @@ describe('Event filter form', () => {
       render();
     });
 
-    it('should not show warning text when unique fields are added', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: 'some value',
-        },
-        {
-          field: 'file.name',
-          operator: 'excluded',
-          type: 'match',
-          value: 'some other value',
-        },
-      ];
-      rerender();
-      expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+    describe('duplicate fields', () => {
+      it('should not show warning text when unique fields are added', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: 'some value',
+          },
+          {
+            field: 'file.name',
+            operator: 'excluded',
+            type: 'match',
+            value: 'some other value',
+          },
+        ];
+        rerender();
+        expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+      });
+
+      it('should not show warning text when field values are not added', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: '',
+          },
+          {
+            field: 'event.category',
+            operator: 'excluded',
+            type: 'match',
+            value: '',
+          },
+        ];
+        rerender();
+        expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+      });
+
+      it('should show warning text when duplicate fields are added with values', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: 'some value',
+          },
+          {
+            field: 'event.category',
+            operator: 'excluded',
+            type: 'match',
+            value: 'some other value',
+          },
+        ];
+        rerender();
+        expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
+      });
+
+      describe('in relation with Process Descendant filtering', () => {
+        it('should not show warning text when event.category is added but feature flag is disabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: false,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 1',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 1')).toBeInTheDocument();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should not show warning text when event.category is added but process descendant filter is disabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 2',
+            },
+          ];
+          formProps.item.tags = [];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 2')).toBeInTheDocument();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should not show warning text when event.category is NOT added and process descendant filter is enabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.action',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 3',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 3')).toBeInTheDocument();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should show warning text when event.category is added and process descendant filter is enabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 4',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 4')).toBeInTheDocument();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+        });
+      });
     });
 
-    it('should not show warning text when field values are not added', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: '',
-        },
-        {
-          field: 'event.category',
-          operator: 'excluded',
-          type: 'match',
-          value: '',
-        },
-      ];
-      rerender();
-      expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
-    });
+    describe('wildcard with wrong operator', () => {
+      it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'wildcard',
+            value: 'valuewithwildcard*',
+          },
+        ];
+        rerender();
+        expect(renderResult.queryByTestId('wildcardWithWrongOperatorCallout')).toBeNull();
+      });
 
-    it('should show warning text when duplicate fields are added with values', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: 'some value',
-        },
-        {
-          field: 'event.category',
-          operator: 'excluded',
-          type: 'match',
-          value: 'some other value',
-        },
-      ];
-      rerender();
-      expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
-    });
-
-    it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'wildcard',
-          value: 'valuewithwildcard*',
-        },
-      ];
-      rerender();
-      expect(renderResult.queryByTestId('wildcardWithWrongOperatorCallout')).toBeNull();
-    });
-    it('should show warning callout when wildcard is used with the "IS" operator', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: 'valuewithwildcard*',
-        },
-      ];
-      rerender();
-      await expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
+      it('should show warning callout when wildcard is used with the "IS" operator', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: 'valuewithwildcard*',
+          },
+        ];
+        rerender();
+        await expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
+      });
     });
   });
 
