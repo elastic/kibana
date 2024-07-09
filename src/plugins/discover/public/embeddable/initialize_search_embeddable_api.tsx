@@ -86,7 +86,6 @@ export const initializeSearchEmbeddableApi = async (
   const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
-  const breakdownField$ = new BehaviorSubject<string | undefined>(initialState.breakdownField);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
   /** This is the state that has to be fetched */
@@ -103,7 +102,6 @@ export const initializeSearchEmbeddableApi = async (
    * treated as the source of truth
    */
   const stateManager: SearchEmbeddableStateManager = {
-    breakdownField: breakdownField$,
     columns: columns$,
     columnsMeta: columnsMeta$,
     headerRowHeight: headerRowHeight$,
@@ -162,7 +160,6 @@ export const initializeSearchEmbeddableApi = async (
           return; // the view mode can't currently be changed from dashboard, so the setter is not necessary
         },
       ],
-      breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
       sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
       columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
       sampleSize: [

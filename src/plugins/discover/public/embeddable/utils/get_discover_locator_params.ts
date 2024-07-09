@@ -31,7 +31,6 @@ export const getDiscoverLocatorParams = (
         sort: savedSearch?.sort,
         viewMode: savedSearch?.viewMode,
         hideAggregatedPreview: savedSearch?.hideAggregatedPreview,
-        breakdownField: savedSearch?.breakdownField,
       };
 
   return locatorParams;

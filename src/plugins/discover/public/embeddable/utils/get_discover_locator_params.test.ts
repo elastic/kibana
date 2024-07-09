@@ -39,7 +39,6 @@ describe('getDiscoverLocatorParams', () => {
       sort: savedSearchMock.sort,
       viewMode: savedSearchMock.viewMode,
       hideAggregatedPreview: savedSearchMock.hideAggregatedPreview,
-      breakdownField: savedSearchMock.breakdownField,
     });
   });
 });
