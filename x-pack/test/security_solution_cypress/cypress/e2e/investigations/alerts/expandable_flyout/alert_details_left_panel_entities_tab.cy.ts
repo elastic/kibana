@@ -10,10 +10,26 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_RIGHT_SECTION,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_RIGHT_SECTION,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
+import {
+  HOST_PANEL_HEADER,
+  HOST_PREVIEW_PANEL_FOOTER,
+  OPEN_HOST_FLYOUT_LINK,
+} from '../../../../screens/hosts/flyout_host_panel';
+import {
+  USER_PANEL_HEADER,
+  USER_PREVIEW_PANEL_FOOTER,
+  OPEN_USER_FLYOUT_LINK,
+} from '../../../../screens/users/flyout_user_panel';
+import {
+  PREVIEW_SECTION,
+  PREVIEW_BANNER,
+} from '../../../../screens/expandable_flyout/alert_details_preview_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { openEntitiesTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_entities_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
@@ -52,6 +68,8 @@ describe(
         .should('have.text', 'Entities')
         .and('have.class', 'euiButtonGroupButton-isSelected');
 
+      // github.com/elastic/security-team/issues/9933
+      // Comment out when feature flag 'entityAlertPreviewEnabled' is enabled
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE).should(
         'contain.text',
         'test'
@@ -62,6 +80,8 @@ describe(
       );
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('exist');
 
+      // github.com/elastic/security-team/issues/9933
+      // Comment out when feature flag 'entityAlertPreviewEnabled' is enabled
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_TITLE).should(
         'contain.text',
         'siem-kibana'
@@ -71,6 +91,47 @@ describe(
         'Related users: 0'
       );
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('exist');
+    });
+
+    // github.com/elastic/security-team/issues/9933
+    // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
+    it.skip('should open host preview when click on host details title', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK).should(
+        'contain.text',
+        'siem-kibana'
+      );
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK).click();
+
+      cy.get(PREVIEW_SECTION).should('exist');
+      cy.get(PREVIEW_BANNER).should('have.text', 'Preview host details');
+      cy.get(HOST_PANEL_HEADER).should('exist');
+      cy.get(HOST_PREVIEW_PANEL_FOOTER).should('exist');
+
+      cy.log('click on footer link');
+
+      cy.get(OPEN_HOST_FLYOUT_LINK).click();
+      cy.get(HOST_PANEL_HEADER).should('exist');
+      cy.get(PREVIEW_SECTION).should('not.exist');
+      cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
+    });
+
+    // github.com/elastic/security-team/issues/9933
+    // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
+    it.skip('should open user preview when click on user details title', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK).should('contain.text', 'test');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK).click();
+
+      cy.get(PREVIEW_SECTION).should('exist');
+      cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+      cy.get(USER_PANEL_HEADER).should('exist');
+      cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
+
+      cy.log('click on footer link');
+
+      cy.get(OPEN_USER_FLYOUT_LINK).click();
+      cy.get(USER_PANEL_HEADER).should('exist');
+      cy.get(PREVIEW_SECTION).should('not.exist');
+      cy.get(USER_PREVIEW_PANEL_FOOTER).should('not.exist');
     });
   }
 );
