@@ -6,10 +6,12 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
+import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -30,6 +32,29 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         },
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.delete(
+    {
+      path: APIRoutes.DELETE_INFERENCE_ENDPOINT,
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const {
+        client: { asCurrentUser },
+      } = (await context.core).elasticsearch;
+
+      const { type, id } = request.params;
+
+      await deleteInferenceEndpoint(asCurrentUser, type, id);
+
+      return response.ok();
     })
   );
 }

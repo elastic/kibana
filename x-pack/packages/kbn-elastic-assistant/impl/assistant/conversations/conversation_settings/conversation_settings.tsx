@@ -49,7 +49,6 @@ export interface ConversationSettingsProps {
     React.SetStateAction<ConversationsBulkActions>
   >;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -66,7 +65,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     conversationSettings,
     http,
     isDisabled = false,
-    isFlyoutMode,
     setAssistantStreamingEnabled,
     setConversationSettings,
     conversationsSettingsBulkActions,
@@ -127,7 +125,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           conversationsSettingsBulkActions={conversationsSettingsBulkActions}
           http={http}
           isDisabled={isDisabled}
-          isFlyoutMode={isFlyoutMode}
           selectedConversation={selectedConversationWithApiConfig}
           setConversationSettings={setConversationSettings}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}

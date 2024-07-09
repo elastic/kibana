@@ -13,10 +13,12 @@ import {
   filterSchema,
   durationSchema,
   identityFieldsSchema,
+  semVerSchema,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
+  version: semVerSchema,
   name: z.string(),
   description: z.optional(z.string()),
   type: z.string(),
