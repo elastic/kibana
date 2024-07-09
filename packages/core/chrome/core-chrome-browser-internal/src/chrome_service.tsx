@@ -39,13 +39,13 @@ import type {
   SideNavComponent as ISideNavComponent,
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
+import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
-import { RecentlyAccessedService } from './recently_accessed';
 import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
@@ -252,7 +252,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
     });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http });
+    const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();

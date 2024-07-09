@@ -25,6 +25,9 @@ export function generateLatestTransform(
 ): TransformPutTransformRequest {
   return {
     transform_id: generateLatestTransformId(definition),
+    _meta: {
+      definitionVersion: definition.version,
+    },
     defer_validation: true,
     source: {
       index: `${generateHistoryIndexName(definition)}.*`,
