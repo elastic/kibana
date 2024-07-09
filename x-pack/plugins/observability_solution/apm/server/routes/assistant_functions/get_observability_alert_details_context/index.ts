@@ -22,7 +22,7 @@ import {
   APMDownstreamDependency,
   getAssistantDownstreamDependencies,
 } from '../get_apm_downstream_dependencies';
-import { getLogRateAnalysis } from '../get_log_rate_analysis';
+import { getLogRateAnalysisForAlert } from '../get_log_rate_analysis_for_alert';
 import { getLogCategories, LogCategory } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
@@ -163,13 +163,12 @@ export const getAlertDetailsContextHandler = (
 
     // log rate analysis
     dataFetchers.push(async () => {
-      const logRateAnalysis = await getLogRateAnalysis({
+      const logRateAnalysis = await getLogRateAnalysisForAlert({
         apmEventClient,
         esClient,
         coreContext,
         arguments: {
-          start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
-          end: moment(alertStartedAt).add(15, 'minute').toISOString(),
+          alertStartedAt: moment(alertStartedAt).toISOString(),
           entities: {
             'service.name': serviceName,
             'host.name': hostName,

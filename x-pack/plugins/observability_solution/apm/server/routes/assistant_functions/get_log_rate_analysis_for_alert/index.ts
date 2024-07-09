@@ -8,10 +8,10 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
-import { fetchLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis';
+import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getLogRateAnalysis({
+export async function getLogRateAnalysisForAlert({
   apmEventClient,
   esClient,
   coreContext,
@@ -21,8 +21,7 @@ export async function getLogRateAnalysis({
   esClient: ElasticsearchClient;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
-    start: string;
-    end: string;
+    alertStartedAt: string;
     entities: {
       'service.name'?: string;
       'host.name'?: string;
@@ -30,14 +29,13 @@ export async function getLogRateAnalysis({
       'kubernetes.pod.name'?: string;
     };
   };
-}): ReturnType<typeof fetchLogRateAnalysis> {
+}): ReturnType<typeof fetchLogRateAnalysisForAlert> {
   const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
-  return await fetchLogRateAnalysis({
+  return await fetchLogRateAnalysisForAlert({
     esClient,
     arguments: {
       index,
-      start: args.start,
-      end: args.end,
+      alertStartedAt: args.alertStartedAt,
       timefield: '@timestamp',
     },
   });

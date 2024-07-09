@@ -6,18 +6,16 @@
  */
 
 import { queue } from 'async';
-import { mean } from 'd3-array';
 import moment from 'moment';
 
-import dateMath from '@kbn/datemath';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
+import { getHistogramIntervalMs } from '../get_histogram_interval_ms';
 
-import { fetchChangePointDetection } from './fetch_change_point_detection';
 import { fetchIndexInfo } from './fetch_index_info';
 import { fetchSignificantCategories } from './fetch_significant_categories';
 import { fetchSignificantTermPValues } from './fetch_significant_term_p_values';
@@ -42,12 +40,9 @@ type QueueFieldCandidate = KeywordFieldCandidate | TextFieldCandidate;
 
 export interface LogRateChange {
   type: string;
-  timestamp: number;
-  logRateChangeCount: number;
   averageLogRateCount: number;
   logRateAggregationIntervalUsedForAnalysis: string;
   documentSamplingFactorForAnalysis?: number;
-  extendedChangePoint: { startTs: number; endTs: number };
 }
 
 export interface SimpleSignificantItem {
@@ -78,7 +73,7 @@ export interface SimpleSignificantItem {
  *
  * @returns {Promise<void>} A promise that resolves when the operation is complete.
  */
-export const fetchLogRateAnalysis = async ({
+export const fetchLogRateAnalysisForAlert = async ({
   esClient,
   abortSignal,
   arguments: args,
@@ -87,8 +82,7 @@ export const fetchLogRateAnalysis = async ({
   abortSignal?: AbortSignal;
   arguments: {
     index: string;
-    start: string;
-    end: string;
+    alertStartedAt: string;
     timefield: string;
     keywordFieldCandidates?: string[];
     textFieldCandidates?: string[];
@@ -96,14 +90,96 @@ export const fetchLogRateAnalysis = async ({
 }) => {
   const debugStartTime = Date.now();
 
-  const earliestMs = dateMath.parse(args.start)?.valueOf();
-  const latestMs = dateMath.parse(args.end, { roundUp: true })?.valueOf();
+  const lookbackDuration = moment.duration(1, 'm');
+  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
 
-  const { keywordFieldCandidates = [], textFieldCandidates = [] } = args;
+  const alertStart = moment(args.alertStartedAt);
+  const alertEnd: moment.Moment | undefined = undefined;
+
+  const earliestMs = alertStart
+    .clone()
+    .subtract(15 * intervalFactor, 'minutes')
+    .valueOf();
+  const latestMs = getTimeRangeEnd().valueOf();
 
   if (earliestMs === undefined || latestMs === undefined) {
     throw new Error('Could not parse time range');
   }
+
+  function getTimeRangeEnd() {
+    if (alertEnd) {
+      if (
+        alertStart
+          .clone()
+          .add(15 * intervalFactor, 'minutes')
+          .isAfter(alertEnd)
+      )
+        return alertEnd.clone().add(1 * intervalFactor, 'minutes');
+      else {
+        return alertStart.clone().add(15 * intervalFactor, 'minutes');
+      }
+    } else if (
+      alertStart
+        .clone()
+        .add(15 * intervalFactor, 'minutes')
+        .isAfter(moment(new Date()))
+    ) {
+      return moment(new Date());
+    } else {
+      return alertStart.clone().add(15 * intervalFactor, 'minutes');
+    }
+  }
+
+  function getDeviationMax() {
+    if (alertEnd) {
+      if (
+        alertStart
+          .clone()
+          .add(10 * intervalFactor, 'minutes')
+          .isAfter(alertEnd)
+      )
+        return alertEnd
+          .clone()
+          .subtract(1 * intervalFactor, 'minutes')
+          .valueOf();
+      else {
+        return alertStart
+          .clone()
+          .add(10 * intervalFactor, 'minutes')
+          .valueOf();
+      }
+    } else if (
+      alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .isAfter(moment(new Date()))
+    ) {
+      return moment(new Date()).valueOf();
+    } else {
+      return alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .valueOf();
+    }
+  }
+
+  const windowParameters = {
+    baselineMin: alertStart
+      .clone()
+      .subtract(13 * intervalFactor, 'minutes')
+      .valueOf(),
+    baselineMax: alertStart
+      .clone()
+      .subtract(2 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMin: alertStart
+      .clone()
+      .subtract(1 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMax: getDeviationMax(),
+  };
+
+  const { keywordFieldCandidates = [], textFieldCandidates = [] } = args;
 
   const searchQuery = {
     range: {
@@ -115,23 +191,7 @@ export const fetchLogRateAnalysis = async ({
     },
   };
 
-  // CHANGE POINT DETECTION
-  const [error, resp] = await fetchChangePointDetection(
-    esClient,
-    args.index,
-    earliestMs,
-    latestMs,
-    args.timefield,
-    searchQuery,
-    abortSignal
-  );
-
-  if (error !== null) {
-    throw new Error(error);
-  }
-
-  const { changePoint, changePointDocCount, dateHistogramBuckets, intervalMs, windowParameters } =
-    resp;
+  const intervalMs = getHistogramIntervalMs(earliestMs, latestMs);
 
   // FIELD CANDIDATES
 
@@ -190,9 +250,6 @@ export const fetchLogRateAnalysis = async ({
 
   // SIGNIFICANT ITEMS
 
-  // This will store the combined count of detected significant log patterns and keywords
-  let fieldValuePairsCount = 0;
-
   const significantCategories: SignificantItem[] = [];
   const significantTerms: SignificantItem[] = [];
   const fieldsToSample = new Set<string>();
@@ -249,32 +306,11 @@ export const fetchLogRateAnalysis = async ({
   );
   await pValuesQueue.drain();
 
-  fieldValuePairsCount = significantCategories.length + significantTerms.length;
-
   const debugEndTime = Date.now();
   const debugDelta = (debugEndTime - debugStartTime) / 1000;
   console.log(`Took: ${debugDelta}s`);
 
   // RETURN DATA
-
-  const logRateChange: LogRateChange = {
-    type: logRateType,
-    timestamp: changePoint.key,
-    logRateChangeCount: changePointDocCount,
-    averageLogRateCount: Math.round(mean(Object.values(dateHistogramBuckets)) ?? 0),
-    logRateAggregationIntervalUsedForAnalysis: moment
-      .duration(Math.round(intervalMs / 1000), 'seconds')
-      .humanize(),
-    ...(sampleProbability < 1 ? { documentSamplingFactorForAnalysis: sampleProbability } : {}),
-    extendedChangePoint: {
-      startTs: changePoint.startTs,
-      endTs: changePoint.endTs,
-    },
-  };
-
-  if (fieldValuePairsCount === 0) {
-    return { logRateChange, significantItems: [], dateHistogramBuckets, windowParameters };
-  }
 
   const significantItems: SimpleSignificantItem[] = [...significantTerms, ...significantCategories]
     .filter(({ bg_count: bgCount, doc_count: docCount }) => {
@@ -300,5 +336,5 @@ export const fetchLogRateAnalysis = async ({
     }))
     .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort);
 
-  return { logRateChange, significantItems, dateHistogramBuckets, windowParameters };
+  return { significantItems };
 };

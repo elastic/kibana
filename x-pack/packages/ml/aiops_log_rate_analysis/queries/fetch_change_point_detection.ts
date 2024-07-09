@@ -14,9 +14,7 @@ import { getExtendedChangePoint } from '../get_extended_change_point';
 import { getWindowParametersForTrigger } from '../get_window_parameters_for_trigger';
 import type { DocumentCountStatsChangePoint } from '../types';
 import type { WindowParameters } from '../window_parameters';
-
-// Change point detection requires a minimum of 22 buckets to be able to run.
-const CHANGE_POINT_MIN_BUCKETS = 22;
+import { getHistogramIntervalMs } from '../get_histogram_interval_ms';
 
 interface ChangePointDetectionData {
   changePoint: DocumentCountStatsChangePoint;
@@ -49,28 +47,7 @@ export const fetchChangePointDetection = async (
   searchQuery: estypes.QueryDslQueryContainer,
   abortSignal?: AbortSignal
 ): Promise<ChangePointDetectionResponse> => {
-  const barTarget = 75;
-
-  const delta = latestMs - earliestMs;
-
-  const dayMs = 86400 * 1000;
-  const dayThreshold = dayMs * CHANGE_POINT_MIN_BUCKETS;
-
-  const weekMs = dayMs * 7;
-  const weekThreshold = weekMs * CHANGE_POINT_MIN_BUCKETS;
-
-  const monthMs = dayMs * 30;
-  const monthThreshold = monthMs * CHANGE_POINT_MIN_BUCKETS;
-
-  let intervalMs = Math.round(delta / barTarget);
-
-  if (delta > monthThreshold) {
-    intervalMs = monthMs;
-  } else if (delta > weekThreshold) {
-    intervalMs = weekMs;
-  } else if (delta > dayThreshold) {
-    intervalMs = dayMs;
-  }
+  const intervalMs = getHistogramIntervalMs(earliestMs, latestMs);
 
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
     eventRate: {
