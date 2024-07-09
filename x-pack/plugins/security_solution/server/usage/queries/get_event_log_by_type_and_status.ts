@@ -107,11 +107,12 @@ const _getEventLogByTypeAndStatus = async ({
   const queryForElasticRules = getSearchForElasticRules({ eventLogIndex, aggs, elasticRuleIds });
   const queryForCustomRules = getSearchForCustomRules({ eventLogIndex, aggs, elasticRuleIds });
   logger.debug(
-    `Getting event logs by type and status with query for total: ${JSON.stringify(
-      queryForTotal
-    )}, elastic_rules: ${JSON.stringify(queryForElasticRules)} custom_rules: ${JSON.stringify(
-      queryForCustomRules
-    )}`
+    () =>
+      `Getting event logs by type and status with query for total: ${JSON.stringify(
+        queryForTotal
+      )}, elastic_rules: ${JSON.stringify(queryForElasticRules)} custom_rules: ${JSON.stringify(
+        queryForCustomRules
+      )}`
   );
 
   const [totalRules, elasticRules, customRules] = await Promise.all([
@@ -121,9 +122,12 @@ const _getEventLogByTypeAndStatus = async ({
   ]);
 
   logger.debug(
-    `Raw search results of event logs by type and status for total: ${JSON.stringify(
-      totalRules
-    )} elastic_rules: ${JSON.stringify(elasticRules)}, custom_rules: ${JSON.stringify(customRules)}`
+    () =>
+      `Raw search results of event logs by type and status for total: ${JSON.stringify(
+        totalRules
+      )} elastic_rules: ${JSON.stringify(elasticRules)}, custom_rules: ${JSON.stringify(
+        customRules
+      )}`
   );
 
   const totalRulesTransformed = transformEventLogTypeStatus({
@@ -145,7 +149,10 @@ const _getEventLogByTypeAndStatus = async ({
     custom_rules: customRulesTransformed,
   };
   logger.debug(
-    `Metrics transformed for event logs of type and status are: ${JSON.stringify(logStatusMetric)}`
+    () =>
+      `Metrics transformed for event logs of type and status are: ${JSON.stringify(
+        logStatusMetric
+      )}`
   );
 
   return logStatusMetric;
