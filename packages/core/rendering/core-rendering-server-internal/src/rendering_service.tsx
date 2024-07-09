@@ -22,6 +22,7 @@ import {
   type UserProvidedValues,
   type DarkModeValue,
   parseDarkModeValue,
+  type UiSettingsParams,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
@@ -147,17 +148,9 @@ export class RenderingService {
       globalSettingsUserValues = userValues[1];
     }
 
-    const defaultSettings = uiSettings.client?.getRegistered() ?? {};
-
-    // Load async settings values
-    await Promise.all(
-      Object.entries(defaultSettings)
-        .filter(([_, definition]) => typeof definition.getValue === 'function')
-        .map(([key, definition]) => {
-          return definition.getValue!({ request }).then((value) => {
-            defaultSettings[key].value = value;
-          });
-        })
+    const defaultSettings = await withAsyncDefaultValues(
+      request,
+      uiSettings.client?.getRegistered()
     );
 
     const settings = {
@@ -313,4 +306,30 @@ const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
   const { status: authStatus } = auth.get(request);
   // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
   return authStatus !== 'unauthenticated';
+};
+
+/**
+ * Load async values from the definitions that have a `getValue()` function
+ *
+ * @param defaultSettings The default settings to add async values to
+ * @param request The current KibanaRequest
+ * @returns The default settings with values updated with async values
+ */
+const withAsyncDefaultValues = async (
+  request: KibanaRequest,
+  defaultSettings: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>> = {}
+): Promise<Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>> => {
+  const updatedSettings = { ...defaultSettings };
+
+  await Promise.all(
+    Object.entries(defaultSettings)
+      .filter(([_, definition]) => typeof definition.getValue === 'function')
+      .map(([key, definition]) => {
+        return definition.getValue!({ request }).then((value) => {
+          updatedSettings[key] = { ...definition, value };
+        });
+      })
+  );
+
+  return updatedSettings;
 };
