@@ -50,7 +50,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       data,
     });
 
-    expect(response.status).to.eql(200, response);
+    expect(response.status).to.eql(200);
   };
 
   const findAnnotations = async (params?: { sloId?: string; sloInstanceId?: string }) => {
@@ -68,7 +68,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       method: 'GET',
     });
 
-    expect(response.status).to.eql(200, response);
+    expect(response.status).to.eql(200);
     return response.body;
   };
 
