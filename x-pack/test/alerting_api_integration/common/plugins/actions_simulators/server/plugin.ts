@@ -46,6 +46,7 @@ export enum ExternalServiceSimulator {
   TORQ = 'torq',
   TINES = 'tines',
   SENTINELONE = 'sentinelone',
+  CROWDSTRIKE = 'crowdstrike',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -65,6 +66,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SENTINELONE}/web/api/v2.1/`);
+  // allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.CROWDSTRIKE}`);
   return allPaths;
 }
 
