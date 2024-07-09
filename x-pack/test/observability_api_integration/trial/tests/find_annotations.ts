@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/utility-types';
-import { Annotation } from '@kbn/observability-plugin/common/annotations';
+import { CreateAnnotationParams } from '@kbn/observability-plugin/common/annotations';
 import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -34,8 +34,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     }
   }
 
-  const createAnnotation = async (annotation: Partial<Annotation>) => {
-    const data: Annotation = {
+  const createAnnotation = async (annotation: Partial<CreateAnnotationParams>) => {
+    const data: CreateAnnotationParams = {
       annotation: {
         type: 'slo',
       },
@@ -73,14 +73,14 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   };
 
   describe('ObservabilityFindAnnotations', () => {
-    // after(async () => {
-    //   const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
-    //   if (indexExists) {
-    //     await es.indices.delete({
-    //       index: DEFAULT_INDEX_NAME,
-    //     });
-    //   }
-    // });
+    after(async () => {
+      const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
+      if (indexExists) {
+        await es.indices.delete({
+          index: DEFAULT_INDEX_NAME,
+        });
+      }
+    });
 
     before(async () => {
       const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
