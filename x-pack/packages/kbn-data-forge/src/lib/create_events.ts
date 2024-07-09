@@ -93,31 +93,16 @@ export async function createEvents(
 
     // When --align-events-to-interval is set, we will index all the events on the same
     // timestamp. Otherwise they will be distributed across the interval randomly.
-    const pushEventsToQueue = async (events: Doc[]) => {
-      if (
-        currentTimestamp.isSameOrAfter(endTs) &&
-        continueIndexing &&
-        config.indexing.artificialIndexDelay != null &&
-        config.indexing.artificialIndexDelay > 0
-      ) {
-        logger.info(`Delaying ${events.length} by ${config.indexing.artificialIndexDelay}ms`);
-        await new Promise((resolve) =>
-          setTimeout(resolve, config.indexing.artificialIndexDelay + interval)
-        );
-      }
-      return queue.push(events);
-    };
-
+    let events: Doc[];
     if (config.indexing.alignEventsToInterval) {
-      const events = range(epc)
+      events = range(epc)
         .map((i) => {
           const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
           return generateEvent(config, schedule, i, currentTimestamp);
         })
         .flat();
-      pushEventsToQueue(events).then(() => queue.drain());
     } else {
-      const events = range(epc)
+      events = range(epc)
         .map(() =>
           moment(random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval - 1))
         )
@@ -127,7 +112,17 @@ export async function createEvents(
           return generateEvent(config, schedule, i, ts);
         })
         .flat();
-      pushEventsToQueue(events).then(() => queue.drain());
+    }
+    // Delay adding the events to the queue if we are caught up and processing current events.
+    if (
+      currentTimestamp.isSameOrAfter(endTs) &&
+      continueIndexing &&
+      config.indexing.artificialIndexDelay > 0
+    ) {
+      logger.info(`Delaying events for ${config.indexing.artificialIndexDelay}ms`);
+      setTimeout(() => queue.push(events), config.indexing.artificialIndexDelay + interval);
+    } else {
+      await queue.push(events);
     }
   } else {
     logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');
