@@ -153,8 +153,10 @@ export class RenderingService {
     await Promise.all(
       Object.entries(defaultSettings)
         .filter(([_, definition]) => typeof definition.getValue === 'function')
-        .map(async ([key, definition]) => {
-          defaultSettings[key].value = await definition.getValue!({ request });
+        .map(([key, definition]) => {
+          return definition.getValue!({ request }).then((value) => {
+            defaultSettings[key].value = value;
+          });
         })
     );
 
