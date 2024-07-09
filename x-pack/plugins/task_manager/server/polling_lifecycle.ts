@@ -34,7 +34,7 @@ import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
-import { TaskPool } from './task_pool';
+import { TaskPool } from './task_pool/task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
@@ -127,7 +127,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger,
     });
 
-    this.pool = new TaskPool({ logger, capacity$: capacityConfiguration$ });
+    this.pool = new TaskPool({
+      logger,
+      strategy: config.claim_strategy,
+      capacity$: capacityConfiguration$,
+    });
     this.pool.load.subscribe(emitEvent);
 
     this.taskClaiming = new TaskClaiming({
@@ -181,10 +185,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
           // high load causes the poller to skip work (work isn't called when there is no capacity)
-          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.capacityLoad)));
+          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
 
           // Emit event indicating task manager utilization
-          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.capacityLoad)));
+          this.emitEvent(
+            asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
+          );
         }
         return capacity;
       },
@@ -263,7 +269,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
         // Emit the load after fetching tasks, giving us a good metric for evaluating how
         // busy Task manager tends to be in this Kibana instance
-        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
         return result;
       }
     );
@@ -286,7 +292,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy
-            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+            this.emitEvent(
+              asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
+            );
           })
         )
       )
@@ -295,7 +303,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           mapOk(() => {
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // This represents the number of workers busy + number of tasks claimed in this cycle
-            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+            this.emitEvent(
+              asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
+            );
           })
         )
       )

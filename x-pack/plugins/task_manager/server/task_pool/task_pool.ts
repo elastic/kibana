@@ -13,13 +13,18 @@ import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { padStart } from 'lodash';
 import { Logger } from '@kbn/core/server';
-import { TaskRunner } from './task_running';
-import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
-import { TaskManagerStat } from './task_events';
+import { TaskRunner } from '../task_running';
+import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
+import { TaskManagerStat } from '../task_events';
+import { ICapacityCalculator } from './types';
+import { CLAIM_STRATEGY_MGET } from '../config';
+import { CapacityByWorker } from './capacity_by_worker';
+import { CapacityByCost } from './capacity_by_cost';
 
-interface Opts {
+interface TaskPoolOpts {
   capacity$: Observable<number>;
   logger: Logger;
+  strategy: string;
 }
 
 export enum TaskPoolRunResult {
@@ -40,10 +45,10 @@ const MAX_RUN_ATTEMPTS = 3;
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private capacity: number = 0;
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
+  private capacityCalculator: ICapacityCalculator;
 
   /**
    * Creates an instance of TaskPool.
@@ -53,12 +58,22 @@ export class TaskPool {
    *    (e.g. capacity is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
    * @prop {Logger} logger - The task manager logger.
    */
-  constructor(opts: Opts) {
+  constructor(opts: TaskPoolOpts) {
     this.logger = opts.logger;
-    opts.capacity$.subscribe((capacity) => {
-      this.logger.debug(`Task pool now using ${capacity} as the capacity value`);
-      this.capacity = capacity;
-    });
+
+    switch (opts.strategy) {
+      case CLAIM_STRATEGY_MGET:
+        this.capacityCalculator = new CapacityByCost({
+          capacity$: opts.capacity$,
+          logger: this.logger,
+        });
+
+      default:
+        this.capacityCalculator = new CapacityByWorker({
+          capacity$: opts.capacity$,
+          logger: this.logger,
+        });
+    }
   }
 
   public get load(): Observable<TaskManagerStat> {
@@ -69,18 +84,14 @@ export class TaskPool {
    * Gets how much capacity is currently in use.
    */
   public get usedCapacity() {
-    let result = 0;
-    this.tasksInPool.forEach((task) => {
-      result += task.definition.cost;
-    });
-    return result;
+    return this.capacityCalculator.usedCapacity(this.tasksInPool);
   }
 
   /**
-   * Gets % of capacity in use
+   * Gets how much capacity is currently in use as a percentage
    */
-  public get capacityLoad() {
-    return this.capacity ? Math.round((this.usedCapacity * 100) / this.capacity) : 100;
+  public get usedCapacityPercentage() {
+    return this.capacityCalculator.usedCapacityPercentage(this.tasksInPool);
   }
 
   /**
@@ -91,18 +102,14 @@ export class TaskPool {
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
-    return this.capacity - this.usedCapacity;
+    return this.capacityCalculator.capacity - this.usedCapacity;
   }
 
   /**
    * Gets how much capacity is currently in use by each type.
    */
   public getUsedCapacityByType(type: string) {
-    return [...this.tasksInPool.values()].reduce(
-      (count, runningTask) =>
-        runningTask.definition.type === type ? count + runningTask.definition.cost : count,
-      0
-    );
+    return this.capacityCalculator.getUsedCapacityByType([...this.tasksInPool.values()], type);
   }
 
   /**
@@ -117,7 +124,7 @@ export class TaskPool {
     // Note `this.availableCapacity` is a getter with side effects, so we just want
     // to call it once for this bit of the code.
     const availableCapacity = this.availableCapacity;
-    const [tasksToRun, leftOverTasks] = determineTasksToRunBasedOnCapacity(
+    const [tasksToRun, leftOverTasks] = this.capacityCalculator.determineTasksToRunBasedOnCapacity(
       tasks,
       availableCapacity
     );
@@ -127,9 +134,9 @@ export class TaskPool {
         `availableCapacity: ${availableCapacity}`,
         `tasksToRun: ${tasksToRun.length}`,
         `leftOverTasks: ${leftOverTasks.length}`,
-        `capacity: ${this.capacity}`,
+        `capacity: ${this.capacityCalculator.capacity}`,
         `usedCapacity: ${this.usedCapacity}`,
-        `capacityLoad: ${this.capacityLoad}`,
+        `capacityLoad: ${this.usedCapacityPercentage}`,
       ].join(', ');
       this.logger.warn(
         `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity; ${stats}`
@@ -250,31 +257,6 @@ export class TaskPool {
       }
     })().catch(() => {});
   }
-}
-
-export function determineTasksToRunBasedOnCapacity(
-  tasks: TaskRunner[],
-  availableCapacity: number
-): [TaskRunner[], TaskRunner[]] {
-  const tasksToRun: TaskRunner[] = [];
-  const leftOverTasks: TaskRunner[] = [];
-
-  let capacityAccumulator = 0;
-  for (const task of tasks) {
-    const taskCost = task.definition.cost;
-    if (capacityAccumulator + taskCost <= availableCapacity) {
-      tasksToRun.push(task);
-      capacityAccumulator += taskCost;
-    } else {
-      leftOverTasks.push(task);
-      // Don't claim further tasks even if lower cost tasks are next.
-      // It may be an extra large task and we need to make room for it
-      // for the next claiming cycle
-      capacityAccumulator = availableCapacity;
-    }
-  }
-
-  return [tasksToRun, leftOverTasks];
 }
 
 function durationAsString(duration: Duration): string {
