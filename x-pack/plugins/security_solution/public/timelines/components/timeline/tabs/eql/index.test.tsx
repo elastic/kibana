@@ -17,7 +17,7 @@ import { TestProviders } from '../../../../../common/mock/test_providers';
 import type { Props as EqlTabContentComponentProps } from '.';
 import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -84,21 +84,18 @@ describe('Timeline', () => {
       }
     );
 
+    // @ts-ignore
     props = {
       activeTab: TimelineTabs.eql,
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
-      expandedDetail: {},
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      showExpandedDetails: false,
       start: startDate,
-      timelineId: TimelineId.test,
       timerangeKind: 'absolute',
       pinnedEventIds: {},
       eventIdToNoteIds: {},

@@ -166,8 +166,8 @@ const useFieldBrowserPagination = () => {
  * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
  * attributes to every `<tr>`.
  */
-
 /** Renders a table view or JSON view of the `ECS` `data` */
+// TODO: MOVE TO FLYOUT FOLDER
 export const EventFieldsBrowser = React.memo<Props>(
   ({
     browserFields,

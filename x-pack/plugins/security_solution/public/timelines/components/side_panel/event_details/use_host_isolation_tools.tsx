@@ -51,6 +51,7 @@ function hostIsolationReducer(state: HostIsolationStateReducer, action: HostIsol
   }
 }
 
+// TODO: MOVE TO FLYOUT FOLDER
 const useHostIsolationTools = () => {
   const [
     { isolateAction, isHostIsolationPanelOpen, isIsolateActionSuccessBannerVisible },

@@ -58,6 +58,7 @@ const EmptyResponseActions = () => {
   );
 };
 
+// TODO: MOVE TO FLYOUT FOLDER
 export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,

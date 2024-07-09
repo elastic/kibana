@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { FlyoutBody } from './body';
-export { FlyoutHeader } from './header';
+// TODO: DELETE FIND WHEN FOOTER IS MOVED TO FLYOUT FOLDER
 export { FlyoutFooter } from './footer';

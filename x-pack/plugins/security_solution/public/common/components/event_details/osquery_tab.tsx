@@ -27,6 +27,7 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
+// TODO: MOVE TO FLYOUT FOLDER
 export const useOsqueryTab = ({
   rawEventData,
   ecsData,

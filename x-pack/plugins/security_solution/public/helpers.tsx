@@ -305,15 +305,8 @@ export const isAlertsPageScope = (scopeId: string) =>
     scopeId as TableId
   );
 
+// TODO OLD FLYOUT REMOVE
 export const getScopedActions = (scopeId: string) => {
-  if (isTimelineScope(scopeId)) {
-    return timelineActions;
-  } else if (isInTableScope(scopeId)) {
-    return dataTableActions;
-  }
-};
-
-export const getScopedSelectors = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {
     return timelineActions;
   } else if (isInTableScope(scopeId)) {

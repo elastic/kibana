@@ -41,6 +41,7 @@ interface AddExceptionModalWrapperData {
   ruleName: string;
 }
 
+// TODO: MOVE TO FLYOUT FOLDER
 export const FlyoutFooterComponent = ({
   detailsData,
   detailsEcsData,

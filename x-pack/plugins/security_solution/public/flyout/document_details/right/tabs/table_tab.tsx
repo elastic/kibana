@@ -70,6 +70,7 @@ export const getColumns: ColumnsProvider = ({
 /**
  * Table view displayed in the document details expandable flyout right section
  */
+// TODO: MOVE TO FLYOUT FOLDER
 export const TableTab = memo(() => {
   const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
     useDocumentDetailsContext();

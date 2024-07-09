@@ -21,6 +21,7 @@ export interface UseRefetchScopeQueryParams {
 /**
  * Hook to refetch data within specified scope
  */
+// TODO: MOVE TO FLYOUT FOLDER
 export const useRefetchByScope = ({ scopeId }: UseRefetchScopeQueryParams) => {
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
   const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);

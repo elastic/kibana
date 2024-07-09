@@ -43,6 +43,7 @@ interface InvestigationGuideViewProps {
 /**
  * Investigation guide that shows the markdown text of rule.note
  */
+// TODO: MOVE TO FLYOUT FOLDER
 const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = ({
   basicData,
   ruleNote,

@@ -109,11 +109,12 @@ describe('Timeline', () => {
       }
     );
 
+    // @ts-ignore
     props = {
+      activeTab: TimelineTabs.query,
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
       isLive: false,
@@ -122,17 +123,14 @@ describe('Timeline', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: ' ',
       kqlQueryLanguage: 'kuery',
-      onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
+      show: true,
       showCallOutUnauthorizedMsg: false,
-      showExpandedDetails: false,
-      sort,
       start: startDate,
       status: TimelineStatus.active,
+      sort,
       timerangeKind: 'absolute',
-      activeTab: TimelineTabs.query,
-      show: true,
       pinnedEventIds: {},
       eventIdToNoteIds: {},
     };

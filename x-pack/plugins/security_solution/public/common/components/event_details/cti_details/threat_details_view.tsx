@@ -72,6 +72,7 @@ const EnrichmentSection: React.FC<{
   );
 };
 
+// TODO: MOVE TO FLYOUT FOLDER
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   showInvestigationTimeEnrichments: boolean;

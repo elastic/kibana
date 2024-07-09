@@ -129,19 +129,17 @@ describe('PinnedTabContent', () => {
       }
     );
 
+    // @ts-ignore
     props = {
       columns: defaultHeaders,
       timelineId: TimelineId.test,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
+      pinnedEventIds: {},
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
       sort,
-      pinnedEventIds: {},
-      showExpandedDetails: false,
-      onEventClosed: jest.fn(),
       eventIdToNoteIds: {},
-      expandedDetail: {},
     };
   });
 
