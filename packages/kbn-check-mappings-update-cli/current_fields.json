@@ -301,8 +301,7 @@
     "metrics",
     "name",
     "staticFields",
-    "type",
-    "version"
+    "type"
   ],
   "entity-discovery-api-key": [
     "apiKey"

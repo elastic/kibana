@@ -1028,9 +1028,6 @@
       },
       "type": {
         "type": "keyword"
-      },
-      "version": {
-        "type": "keyword"
       }
     }
   },
