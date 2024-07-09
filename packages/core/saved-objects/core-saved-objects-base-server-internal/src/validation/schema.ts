@@ -20,7 +20,7 @@ type SavedObjectSanitizedDocSchema = {
 };
 
 const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
-  id: schema.string(),
+  id: schema.string({ minLength: 1 }),
   type: schema.string(),
   references: schema.arrayOf(
     schema.object({

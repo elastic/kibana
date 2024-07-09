@@ -42,6 +42,15 @@ describe('Saved Objects type validation schema', () => {
     );
   });
 
+  it('should fail if invalid id is provided', () => {
+    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const data = createMockObject({ foo: 'bar' });
+    data.id = '';
+    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+      `"[id]: value has length [0] but it must have a minimum length of [1]."`
+    );
+  });
+
   it('should validate top-level properties', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
