@@ -29,7 +29,6 @@
     "@kbn/saved-search-plugin",
     "@kbn/code-editor",
     "@kbn/embeddable-plugin",
-    "@kbn/rison",
     "@kbn/content-management-utils",
     "@kbn/presentation-publishing",
   ],
