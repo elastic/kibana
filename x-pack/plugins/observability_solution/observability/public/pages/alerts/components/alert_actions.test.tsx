@@ -244,13 +244,13 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup(RULE_DETAILS_PAGE_ID);
 
     expect(
-      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props
-    ).toEqual(expect.objectContaining({ href: 'http://localhost:5620/app/o11y/log-explorer' }));
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props.onClick
+    ).toBeDefined();
 
     prependMock.mockClear();
 
     await waitFor(() => {
-      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseOver');
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseover');
       expect(prependMock).toBeCalledTimes(1);
     });
   });

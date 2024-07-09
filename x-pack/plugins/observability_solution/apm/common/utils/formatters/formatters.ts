@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asPercent as obltAsPercent } from '@kbn/observability-plugin/common';
 import numeral from '@elastic/numeral';
 import { Maybe } from '../../../typings/common';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
@@ -82,3 +83,7 @@ export function asBigNumber(value: number): string {
 
   return `${asInteger(value / 1e12)}t`;
 }
+
+export const yLabelAsPercent = (y?: number | null) => {
+  return obltAsPercent(y || 0, 1);
+};

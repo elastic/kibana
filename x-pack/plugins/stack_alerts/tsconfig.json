@@ -51,7 +51,9 @@
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
     "@kbn/search-types",
-    "@kbn/alerting-comparators"
+    "@kbn/alerting-comparators",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": [
     "target/**/*",

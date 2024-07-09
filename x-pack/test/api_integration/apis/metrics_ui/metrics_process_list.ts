@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
             hostTerm: {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
-            indexPattern: 'metrics-*,metricbeat-*',
+            sourceId: 'default',
             to: 1564432800000,
             sortBy: {
               name: 'cpu',
