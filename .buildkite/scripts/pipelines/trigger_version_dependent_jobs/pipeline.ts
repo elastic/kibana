@@ -63,7 +63,7 @@ async function main() {
  * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch.
  * Should be triggered for combinations of (Kibana@7.17 + ES@8.x {current open branches on the same major})
  */
-function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
+export function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
   const kibanaPrevMajor = versions.prevMajors[0];
   const targetESVersions = [versions.prevMinors, versions.current].flat();
@@ -90,7 +90,7 @@ function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
  * This pipeline creates Kibana artifact snapshots for all open branches.
  * Should be triggered for all open branches in the versions.json: 7.x, 8.x
  */
-function getArtifactSnapshotPipelineTriggers() {
+export function getArtifactSnapshotPipelineTriggers() {
   // Trigger for all named branches
   const versions = getVersionsFile();
   const targetVersions = [versions.prevMajors, versions.prevMinors, versions.current].flat();
@@ -116,7 +116,7 @@ function getArtifactSnapshotPipelineTriggers() {
  * This pipeline creates Kibana artifacts for branches that are not the current main.
  * Should be triggered for all open branches in the versions.json: 7.x, 8.x, but not main.
  */
-function getArtifactStagingPipelineTriggers() {
+export function getArtifactStagingPipelineTriggers() {
   // Trigger for all branches, that are not current minor+major
   const versions = getVersionsFile();
   const targetVersions = [versions.prevMajors, versions.prevMinors].flat();
@@ -145,7 +145,7 @@ function getArtifactStagingPipelineTriggers() {
  *
  * TODO: we could basically do the check logic of .buildkite/scripts/steps/artifacts/trigger.sh in here, and remove kibana-artifacts-trigger
  */
-function getArtifactBuildTriggers() {
+export function getArtifactBuildTriggers() {
   const versions = getVersionsFile();
   const targetVersions = versions.prevMinors;
 
@@ -171,7 +171,9 @@ function emitPipeline(pipelineSteps: BuildkiteTriggerStep[]) {
   console.log(JSON.stringify(pipelineSteps, null, 2));
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
