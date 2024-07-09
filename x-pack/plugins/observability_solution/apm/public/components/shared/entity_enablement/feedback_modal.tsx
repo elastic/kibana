@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
+  useEuiTheme,
+  EuiButtonEmpty,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';
+import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
+import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 
 export function FeedbackModal({
   isFeedbackModalVisible = false,
@@ -25,6 +29,11 @@ export function FeedbackModal({
   isFeedbackModalVisible?: boolean;
   onClose: () => void;
 }) {
+  const kibanaEnvironment = useContext(KibanaEnvironmentContext);
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
+  const sanitizedPath = getPathForFeedback(window.location.pathname);
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
       {isFeedbackModalVisible && (
@@ -35,17 +44,26 @@ export function FeedbackModal({
           onCancel={onClose}
           onConfirm={onClose}
           confirmButtonText={
-            <EuiButton
+            <EuiButtonEmpty
+              css={{
+                color: euiTheme.colors.emptyShade,
+              }}
               data-test-subj="xpack.apm.eemFeedback.button.open"
-              fill
               iconType="discuss"
+              target="_blank"
               size="s"
-              href="https://ela.st/services-feedback" // FIXME update with the new one
+              href={getSurveyFeedbackURL({
+                formUrl: 'https://ela.st/new-o11y-experience',
+                kibanaVersion,
+                isCloudEnv,
+                isServerlessEnv,
+                sanitizedPath,
+              })}
             >
               {i18n.translate('xpack.apm.eemFeedback.button.openSurvey', {
                 defaultMessage: 'Tell us what you think!',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
           }
           defaultFocusedButton="confirm"
         >
