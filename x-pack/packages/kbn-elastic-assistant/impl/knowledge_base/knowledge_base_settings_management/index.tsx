@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFormRow,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiPanel,
-  EuiPopover,
-  EuiSearchBarProps,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiPanel, EuiSearchBarProps, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-
+import { FormattedMessage } from 'react-intl';
+import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
 import { useDeleteKnowledgeBase } from '../../assistant/api/knowledge_base/use_delete_knowledge_base';
@@ -29,7 +17,6 @@ import { useSetupKnowledgeBase } from '../../assistant/api/knowledge_base/use_se
 import { useAssistantContext } from '../../assistant_context';
 import { ESQL_RESOURCE } from '../const';
 import { KnowledgeBaseToggle } from '../knowledge_base_toggle';
-import * as i18n from '../translations';
 import { useKnowledgeBaseResultStatus } from '../use_knowledge_base_result_status';
 import { useKnowledgeBaseTable } from './use_knowledge_base_table';
 import { AssistantSettingsBottomBar } from '../../assistant/settings/assistant_settings_bottom_bar';
@@ -40,6 +27,11 @@ import {
 } from '../../assistant/settings/use_settings_updater/use_settings_updater';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
 import { KnowledgeBaseSettings } from '../knowledge_base_settings';
+import { EntryButton } from './entry_button';
+import { DEFAULT_FLYOUT_TITLE, SEARCH_PLACEHOLDER } from './translations';
+import { Flyout } from '../../assistant/common/components/assistant_settings_management/flyout';
+import { useFlyoutModalVisibility } from '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
+import { KNOWLEDGE_BASE_DOCUMENTATION } from '../translations';
 
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const {
@@ -78,6 +70,17 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     handleSave();
   }, [handleSave]);
 
+  const { isFlyoutOpen: isFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
+
+  const onSaveConfirmed = useCallback(() => {
+    handleSave({ callback: closeFlyout });
+  }, [handleSave, closeFlyout]);
+
+  const onSaveCancelled = useCallback(() => {
+    onCancelClick();
+    closeFlyout();
+  }, [closeFlyout, onCancelClick]);
+
   const {
     data: kbStatus,
     isLoading,
@@ -90,8 +93,10 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const columns = useMemo(
     () =>
       getColumns({
-        onEntryNameClicked: (id: string) => {},
-        onSpaceNameClicked: (namespace: string) => {},
+        onEntryNameClicked: ({ id }: KnowledgeBaseEntryResponse) => {},
+        onSpaceNameClicked: ({ namespace }: KnowledgeBaseEntryResponse) => {},
+        onDeleteActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {},
+        onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {},
       }),
     [getColumns]
   );
@@ -105,38 +110,26 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     isSettingUpKB,
     isDeletingUpKB,
   });
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const closePopover = () => setIsPopoverOpen(false);
 
-  const button = useMemo(
-    () => (
-      <EuiButton iconType="arrowDown" iconSide="right" fill>
-        <EuiIcon type="plusInCircle" />
-        {i18n.ENTRY}
-      </EuiButton>
-    ),
-    []
-  );
-  const renderToolsRight = useCallback(() => {
-    return (
-      <EuiPopover
-        initialFocus="#name"
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-      >
-        <EuiFormRow label="Enter name" id="name">
-          <EuiFieldText compressed name="input" />
-        </EuiFormRow>
-      </EuiPopover>
-    );
-  }, [button, isPopoverOpen]);
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const onDocumentClicked = useCallback(() => {
+    setSelectedType('Document');
+    openFlyout();
+  }, [openFlyout]);
+
+  const onIndexClicked = useCallback(() => {
+    setSelectedType('Index');
+    openFlyout();
+  }, [openFlyout]);
 
   const search: EuiSearchBarProps = useMemo(
     () => ({
-      toolsRight: renderToolsRight(),
+      toolsRight: (
+        <EntryButton onDocumentClicked={onDocumentClicked} onIndexClicked={onIndexClicked} />
+      ),
       box: {
         incremental: true,
+        placeholder: SEARCH_PLACEHOLDER,
       },
       filters: [
         {
@@ -150,7 +143,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         },
       ],
     }),
-    [entries.data, renderToolsRight]
+    [entries.data, onDocumentClicked, onIndexClicked]
   );
 
   if (!enableKnowledgeBaseByDefault) {
@@ -189,7 +182,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
                   href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
                   target="_blank"
                 >
-                  {i18n.KNOWLEDGE_BASE_DOCUMENTATION}
+                  {KNOWLEDGE_BASE_DOCUMENTATION}
                 </EuiLink>
               ),
             }}
@@ -208,6 +201,15 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         onCancelClick={onCancelClick}
         onSaveButtonClicked={onSaveButtonClicked}
       />
+      <Flyout
+        flyoutVisible={isFlyoutVisible}
+        title={selectedType || DEFAULT_FLYOUT_TITLE}
+        onClose={onSaveCancelled}
+        onSaveCancelled={onSaveCancelled}
+        onSaveConfirmed={onSaveConfirmed}
+      >
+        <></>
+      </Flyout>
     </>
   );
 });

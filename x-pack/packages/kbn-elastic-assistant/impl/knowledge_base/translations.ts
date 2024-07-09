@@ -165,10 +165,3 @@ export const ESQL_DESCRIPTION_INSTALLED = i18n.translate(
     defaultMessage: 'ES|QL Knowledge Base docs loaded',
   }
 );
-
-export const ENTRY = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.entryLabel',
-  {
-    defaultMessage: 'Entry',
-  }
-);

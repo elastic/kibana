@@ -5,60 +5,81 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
-import { User } from '@kbn/elastic-assistant-common';
+import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import * as i18n from './translations';
+import { RowActions } from '../../assistant/common/components/assistant_settings_management/row_actions';
+import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 
 export const useKnowledgeBaseTable = () => {
-  const getColumns = useCallback(({ onEntryNameClicked, onSpaceNameClicked }) => {
-    return [
-      {
-        name: 'Name',
-        render: ({ id }: { id: string }) => (
-          <EuiLink onClick={() => onEntryNameClicked(id)}>{id}</EuiLink>
-        ),
-      },
-      {
-        name: 'Users',
-        render: ({ users }: { users: User[] }) => (
-          <>
-            {users && users.length > 0 ? (
-              <div>
-                {users.map((c, idx) => (
-                  <EuiBadge id={`${idx}`} color="hollow">
-                    {c.name}
-                  </EuiBadge>
-                ))}
-              </div>
-            ) : null}
-          </>
-        ),
-      },
-      {
-        name: 'Space',
-        render: ({ namespace }: { namespace: string }) => (
-          <EuiLink onClick={() => onSpaceNameClicked(namespace)}>{namespace}</EuiLink>
-        ),
-      },
-      {
-        name: 'Date created',
-        render: ({ createdAt }: { createdAt: string }) => (
-          <>
-            {createdAt ? (
-              <EuiBadge color="hollow">
-                <FormattedDate
-                  value={new Date(createdAt)}
-                  year="numeric"
-                  month="2-digit"
-                  day="numeric"
-                />
-              </EuiBadge>
-            ) : null}
-          </>
-        ),
-      },
-    ];
-  }, []);
+  const getColumns = useCallback(
+    ({
+      onEntryNameClicked,
+      onSpaceNameClicked,
+      onDeleteActionClicked,
+      onEditActionClicked,
+    }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
+      return [
+        {
+          name: i18n.COLUMN_NAME,
+          render: ({ id }: KnowledgeBaseEntryResponse) => (
+            <EuiLink onClick={() => onEntryNameClicked(id)}>{id}</EuiLink>
+          ),
+          sortable: ({ id }: KnowledgeBaseEntryResponse) => id,
+        },
+        {
+          name: i18n.COLUMN_USERS,
+          render: ({ id, users }: KnowledgeBaseEntryResponse) => {
+            const items = users?.reduce<string[]>((acc, user) => {
+              if (user.name && user.name.length > 0) {
+                acc.push(user.name);
+              }
+              return acc;
+            }, []);
+            return <BadgesColumn items={items} prefix={id} />;
+          },
+        },
+        {
+          name: i18n.COLUMN_SPACE,
+          render: ({ namespace }: { namespace: string }) => (
+            <EuiLink onClick={() => onSpaceNameClicked(namespace)}>{namespace}</EuiLink>
+          ),
+          sortable: ({ namespace }: KnowledgeBaseEntryResponse) => namespace,
+        },
+        {
+          name: i18n.COLUMN_DATE_CREATED,
+          render: ({ createdAt }: { createdAt: string }) => (
+            <>
+              {createdAt ? (
+                <EuiBadge color="hollow">
+                  <FormattedDate
+                    value={new Date(createdAt)}
+                    year="numeric"
+                    month="2-digit"
+                    day="numeric"
+                  />
+                </EuiBadge>
+              ) : null}
+            </>
+          ),
+          sortable: ({ createdAt }: KnowledgeBaseEntryResponse) => createdAt,
+        },
+        {
+          name: i18n.COLUMN_ACTIONS,
+          render: (knowledgeBase: KnowledgeBaseEntryResponse) => (
+            <RowActions<KnowledgeBaseEntryResponse>
+              rowItem={knowledgeBase}
+              onDelete={onDeleteActionClicked}
+              onEdit={onEditActionClicked}
+              isDeletable
+            />
+          ),
+        },
+      ];
+    },
+    []
+  );
   return { getColumns };
 };
