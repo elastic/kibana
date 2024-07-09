@@ -34,6 +34,7 @@ import { NotesUtilityBar } from '../components/utility_bar';
 import { DeleteConfirmModal } from '../components/delete_confirm_modal';
 import * as i18n from '../components/translations';
 import type { OpenTimelineProps } from '../../timelines/components/open_timeline/types';
+import { OpenEventInTimeline } from '../components/open_event_in_timeline';
 
 const columns: (
   onOpenTimeline: OpenTimelineProps['onOpenTimeline']
@@ -53,6 +54,7 @@ const columns: (
       field: 'eventId',
       name: i18n.EVENT_ID_COLUMN,
       sortable: true,
+      render: (eventId: Note['eventId']) => <OpenEventInTimeline eventId={eventId} />,
     },
     {
       field: 'timelineId',

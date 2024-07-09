@@ -31,7 +31,7 @@ export const CREATED_BY_COLUMN = i18n.translate(
 export const EVENT_ID_COLUMN = i18n.translate(
   'xpack.securitySolution.notes.management.eventIdColumnTitle',
   {
-    defaultMessage: 'Document ID',
+    defaultMessage: 'View Document',
   }
 );
 
@@ -107,5 +107,12 @@ export const OPEN_TIMELINE = i18n.translate(
   'xpack.securitySolution.notes.management.openTimeline',
   {
     defaultMessage: 'Open timeline',
+  }
+);
+
+export const VIEW_EVENT_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.notes.management.viewEventInTimeline',
+  {
+    defaultMessage: 'View event in timeline',
   }
 );
