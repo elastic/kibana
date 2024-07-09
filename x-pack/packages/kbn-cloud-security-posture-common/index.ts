@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { useCspSetupStatusApi } from './src/use_setup_status_api';
-
-export type { CspSetupStatus } from './src/types';
+export * from './constants';

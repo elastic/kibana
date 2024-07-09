@@ -8,10 +8,8 @@
 import { UseQueryOptions, useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { STATUS_ROUTE_PATH, STATUS_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
 import { CspSetupStatus } from './types';
-
-export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
-export const STATUS_API_CURRENT_VERSION = '1';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 

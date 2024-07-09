@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { STATUS_API_CURRENT_VERSION, STATUS_ROUTE_PATH } from '@kbn/cloud-security-posture';
+import { STATUS_ROUTE_PATH, STATUS_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture';
 import { useKibana } from '../hooks/use_kibana';
 

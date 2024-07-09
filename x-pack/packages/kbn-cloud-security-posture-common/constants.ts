@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { useCspSetupStatusApi } from './src/use_setup_status_api';
-
-export type { CspSetupStatus } from './src/types';
+export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
+export const STATUS_API_CURRENT_VERSION = '1';

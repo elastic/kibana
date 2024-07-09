@@ -3537,6 +3537,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-security-posture-plugin@link:x-pack/plugins/cloud_security_posture":
   version "0.0.0"
   uid ""
