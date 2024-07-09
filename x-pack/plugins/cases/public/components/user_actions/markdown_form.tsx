@@ -12,6 +12,7 @@ import { ScrollableMarkdown, EditableMarkdown } from '../markdown_editor';
 
 interface UserActionMarkdownProps {
   content: string;
+  timestamp: string;
   id: string;
   caseId: string;
   isEditable: boolean;
@@ -26,7 +27,7 @@ export interface UserActionMarkdownRefObject {
 const UserActionMarkdownComponent = forwardRef<
   UserActionMarkdownRefObject,
   UserActionMarkdownProps
->(({ id, content, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
+>(({ id, content, timestamp, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
   const editorRef = useRef();
   const fieldName = 'content';
 
@@ -43,7 +44,7 @@ const UserActionMarkdownComponent = forwardRef<
       formSchema={schema}
     />
   ) : (
-    <ScrollableMarkdown content={content} />
+    <ScrollableMarkdown content={content} timestamp={timestamp} />
   );
 });
 

@@ -40,7 +40,9 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       astRef.current = ast;
     }, []);
 
-    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
+    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins({
+      disabledPlugins: disabledUiPlugins,
+    });
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useLensButtonToggle({

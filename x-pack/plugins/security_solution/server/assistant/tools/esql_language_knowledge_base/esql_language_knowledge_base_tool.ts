@@ -9,6 +9,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
+import type { LangchainZodAny } from '..';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
@@ -36,7 +37,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
       description: toolDetails.description,
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
-      }),
+      }) as unknown as LangchainZodAny,
       func: async (input, _, cbManager) => {
         const result = await chain.invoke(
           {

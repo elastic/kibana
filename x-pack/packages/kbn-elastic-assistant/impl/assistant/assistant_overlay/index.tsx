@@ -6,11 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiModal, EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
-
+import { EuiModal, EuiFlyoutResizable } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { css } from '@emotion/react';
 import {
   ShowAssistantOverlayProps,
@@ -37,8 +36,13 @@ export interface Props {
   currentUserAvatar?: UserAvatar;
 }
 
+export const UnifiedTimelineGlobalStyles = createGlobalStyle`
+  body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
+    z-index: 1003 !important;
+  }
+`;
+
 export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAvatar }) => {
-  const { euiTheme } = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
@@ -132,32 +136,33 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
 
   if (isFlyoutMode) {
     return (
-      <EuiFlyoutResizable
-        ref={flyoutRef}
-        css={css`
-          max-inline-size: calc(100% - 20px);
-          min-inline-size: 400px;
-          > div {
-            height: 100%;
-          }
-        `}
-        onClose={handleCloseModal}
-        data-test-subj="ai-assistant-flyout"
-        paddingSize="none"
-        hideCloseButton
-        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
-      >
-        <Assistant
-          conversationTitle={conversationTitle}
-          promptContextId={promptContextId}
-          onCloseFlyout={handleCloseModal}
-          isFlyoutMode={isFlyoutMode}
-          chatHistoryVisible={chatHistoryVisible}
-          setChatHistoryVisible={toggleChatHistory}
-          currentUserAvatar={currentUserAvatar}
-        />
-      </EuiFlyoutResizable>
+      <>
+        <EuiFlyoutResizable
+          ref={flyoutRef}
+          css={css`
+            max-inline-size: calc(100% - 20px);
+            min-inline-size: 400px;
+            > div {
+              height: 100%;
+            }
+          `}
+          onClose={handleCloseModal}
+          data-test-subj="ai-assistant-flyout"
+          paddingSize="none"
+          hideCloseButton
+        >
+          <Assistant
+            conversationTitle={conversationTitle}
+            promptContextId={promptContextId}
+            onCloseFlyout={handleCloseModal}
+            isFlyoutMode={isFlyoutMode}
+            chatHistoryVisible={chatHistoryVisible}
+            setChatHistoryVisible={toggleChatHistory}
+            currentUserAvatar={currentUserAvatar}
+          />
+        </EuiFlyoutResizable>
+        <UnifiedTimelineGlobalStyles />
+      </>
     );
   }
 

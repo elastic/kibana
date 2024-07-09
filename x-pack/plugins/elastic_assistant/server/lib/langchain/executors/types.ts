@@ -13,6 +13,8 @@ import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DataViewsService } from '@kbn/data-views-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
@@ -43,6 +45,8 @@ export interface AgentExecutorParams<T extends boolean> {
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
+  search: ReturnType<DataPluginStart['search']['asScoped']>;
+  dataViews: DataViewsService;
   esStore: ElasticsearchStore;
   langChainMessages: BaseMessage[];
   llmType?: string;

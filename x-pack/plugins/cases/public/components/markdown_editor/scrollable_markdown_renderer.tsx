@@ -20,7 +20,13 @@ export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   -webkit-box-orient: vertical;
 `;
 
-const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
+const ScrollableMarkdownRenderer = ({
+  content,
+  timestamp,
+}: {
+  content: string;
+  timestamp?: string;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -28,7 +34,7 @@ const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
       css={getContentWrapperCss(euiTheme)}
       data-test-subj="scrollable-markdown"
     >
-      <MarkdownRenderer>{content}</MarkdownRenderer>
+      <MarkdownRenderer timestamp={timestamp}>{content}</MarkdownRenderer>
     </div>
   );
 };

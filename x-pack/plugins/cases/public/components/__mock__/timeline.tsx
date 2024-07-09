@@ -12,8 +12,15 @@ const mockTimelineComponent = (name: string) => <span data-test-subj={name}>{nam
 
 export const timelineIntegrationMock = {
   editor_plugins: {
-    parsingPlugin: jest.fn(),
-    processingPluginRenderer: () => mockTimelineComponent('plugin-renderer'),
+    parsingPlugins: {
+      timeline: jest.fn(),
+      customCodeBlock: jest.fn(),
+    },
+    processingPluginRenderer: {
+      timeline: () => mockTimelineComponent('plugin-renderer'),
+      esql: () => mockTimelineComponent('esql-plugin-renderer'),
+      customCodeBlock: () => mockTimelineComponent('custom-code-block-plugin-renderer'),
+    },
     uiPlugin: {
       name: 'mock-timeline',
       button: { label: 'mock-timeline-button', iconType: 'mock-timeline-icon' },

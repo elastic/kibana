@@ -10,6 +10,7 @@
     "requiredPlugins": [
       "actions",
       "data",
+      "dataViews",
       "ml",
       "taskManager",
       "licensing",

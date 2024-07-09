@@ -17,6 +17,7 @@ import { MessageText } from './message_text';
 interface Props {
   abortStream: () => void;
   content?: string;
+  timestamp?: string;
   isEnabledLangChain: boolean;
   isError?: boolean;
   isFetching?: boolean;
@@ -33,6 +34,7 @@ interface Props {
 export const StreamComment = ({
   abortStream,
   content,
+  timestamp,
   actionTypeId,
   index,
   isControlsEnabled = false,
@@ -108,7 +110,14 @@ export const StreamComment = ({
 
   return (
     <MessagePanel
-      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
+      body={
+        <MessageText
+          content={message}
+          timestamp={timestamp}
+          index={index}
+          loading={isAnythingLoading}
+        />
+      }
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

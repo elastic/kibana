@@ -24,10 +24,14 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
+import type { CustomCodeBlockProps } from '../custom_codeblock/custom_code_block';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import type { EsqlCodeBlockProps } from '../custom_codeblock/esql_code_block';
+import { EsqlCodeBlock } from '../custom_codeblock/esql_code_block';
 
 interface Props {
   content: string;
+  timestamp?: string;
   index: number;
   loading: boolean;
 }
@@ -98,7 +102,21 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = () => {
+export const Esql = ({ timestamp, ...props }: EsqlCodeBlockProps) => (
+  <>
+    <EsqlCodeBlock {...props} timestamp={timestamp} />
+    <EuiSpacer size="m" />
+  </>
+);
+
+export const CodeBlock = (props: CustomCodeBlockProps) => (
+  <>
+    <CustomCodeBlock value={props.value} />
+    <EuiSpacer size="m" />
+  </>
+);
+
+const getPluginDependencies = (timestamp?: string) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -108,14 +126,8 @@ const getPluginDependencies = () => {
   processingPlugins[1][1].components = {
     ...components,
     cursor: Cursor,
-    customCodeBlock: (props) => {
-      return (
-        <>
-          <CustomCodeBlock value={props.value} />
-          <EuiSpacer size="m" />
-        </>
-      );
-    },
+    esql: (props) => <Esql {...props} timestamp={timestamp} />,
+    customCodeBlock: CodeBlock,
     table: (props) => (
       <>
         <EuiTable {...props} />
@@ -143,12 +155,12 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content, index }: Props) {
+export const MessageText = React.memo(({ loading, content, timestamp, index }: Props) => {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = getPluginDependencies(timestamp);
 
   return (
     <EuiText className={containerClassName}>
@@ -164,4 +176,5 @@ export function MessageText({ loading, content, index }: Props) {
       </EuiMarkdownFormat>
     </EuiText>
   );
-}
+});
+MessageText.displayName = 'MessageText';

@@ -46,6 +46,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   request,
   size,
   traceOptions,
+  search,
+  dataViews,
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
@@ -93,6 +95,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
+    esStore,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     llm,
@@ -102,6 +105,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     request,
     size,
+    search,
+    dataViews,
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
@@ -137,7 +142,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const inputs = { input: latestMessage[0]?.content as string };
 
   if (isStream) {
-    return streamGraph({ apmTracer, assistantGraph, inputs, logger, onLlmResponse, request });
+    return streamGraph({
+      apmTracer,
+      assistantGraph,
+      inputs,
+      logger,
+      onLlmResponse,
+      request,
+      traceOptions,
+    });
   }
 
   const graphResponse = await invokeGraph({

@@ -11,6 +11,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
+import type { LangchainZodAny } from '..';
 
 export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
   kbDataClient: AIAssistantKnowledgeBaseDataClient;
@@ -45,7 +46,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           .describe(
             `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
           ),
-      }),
+      }) as unknown as LangchainZodAny,
       func: async (input, _, cbManager) => {
         logger.debug(
           () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`

@@ -118,6 +118,11 @@ export const streamGraph = async ({
             handleStreamEnd(finalMessage);
           }
         }
+      } else if (event.event === 'on_llm_end') {
+        const generations = event.data.output?.generations[0];
+        if (generations?.[0]?.generationInfo?.finish_reason === 'stop') {
+          handleStreamEnd(finalMessage);
+        }
       }
 
       void processEvent();
