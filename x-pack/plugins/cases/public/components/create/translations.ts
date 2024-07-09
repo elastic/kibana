@@ -55,9 +55,16 @@ export const TEMPLATE_LABEL = i18n.translate('xpack.cases.create.templateLabel',
 });
 
 export const TEMPLATE_HELP_TEXT = i18n.translate('xpack.cases.create.templateHelpText', {
-  defaultMessage: 'Selecting a template will pre-fill certain case fields below',
+  defaultMessage: 'Select a template to use its default field values.',
 });
 
 export const SOLUTION_SELECTOR_LABEL = i18n.translate('xpack.cases.create.solutionSelectorLabel', {
   defaultMessage: 'Create case under:',
 });
+
+export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
+  'xpack.cases.create.defaultEmptyTemplateName',
+  {
+    defaultMessage: 'No template selected',
+  }
+);

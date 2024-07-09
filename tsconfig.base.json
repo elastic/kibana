@@ -50,6 +50,8 @@
       "@kbn/alerting-types/*": ["packages/kbn-alerting-types/*"],
       "@kbn/alerts-as-data-utils": ["packages/kbn-alerts-as-data-utils"],
       "@kbn/alerts-as-data-utils/*": ["packages/kbn-alerts-as-data-utils/*"],
+      "@kbn/alerts-grouping": ["packages/kbn-alerts-grouping"],
+      "@kbn/alerts-grouping/*": ["packages/kbn-alerts-grouping/*"],
       "@kbn/alerts-restricted-fixtures-plugin": ["x-pack/test/alerting_api_integration/common/plugins/alerts_restricted"],
       "@kbn/alerts-restricted-fixtures-plugin/*": ["x-pack/test/alerting_api_integration/common/plugins/alerts_restricted/*"],
       "@kbn/alerts-ui-shared": ["packages/kbn-alerts-ui-shared"],

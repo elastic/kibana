@@ -57,7 +57,7 @@ export class StatusHandler {
     const body = await this.poll();
     const code = StatusHandler.STATUS_CODE[body.status];
 
-    this.logger.debug(`Returning ${code} response with body: ${JSON.stringify(body)}`);
+    this.logger.debug(() => `Returning ${code} response with body: ${JSON.stringify(body)}`);
 
     return toolkit.response(body).type('application/json').code(code);
   }

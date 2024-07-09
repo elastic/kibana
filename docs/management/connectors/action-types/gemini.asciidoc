@@ -29,7 +29,7 @@ image::management/connectors/images/gemini-connector.png[{gemini} connector]
 
 Name::      The name of the connector.
 API URL::   The {gemini} request URL.
-PROJECT ID:: The project which has Vertex AI endpoint enabled.
+Project ID:: The project which has Vertex AI endpoint enabled.
 Region:: The GCP region where the Vertex AI endpoint enabled.
 Default model:: The GAI model for {gemini} to use. Current support is for the Google Gemini models, defaulting to gemini-1.5-pro-001. The model can be set on a per request basis by including a "model" parameter alongside the request body.
 Credentials JSON:: The GCP service account JSON file for authentication.
@@ -47,7 +47,7 @@ image::management/connectors/images/gemini-params.png[{gemini} params test]
 
 The {gemini} actions have the following configuration properties.
 
-Body::      A stringified JSON payload sent to the {gemini} Invoke Model API URL. For example:
+Body::      A stringified JSON payload sent to the {gemini} invoke model API. For example:
 +
 [source,text]
 --
@@ -65,7 +65,7 @@ Body::      A stringified JSON payload sent to the {gemini} Invoke Model API URL
   })
 }
 --
-Model::      An optional string that will overwrite the connector's default model. For 
+Model::      An optional string that overwrites the connector's default model.
 
 [float]
 [[gemini-connector-networking-configuration]]
