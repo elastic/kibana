@@ -49,18 +49,6 @@ export function generateLatestTransform(
         ['entity.id']: {
           terms: { field: 'entity.id' },
         },
-        ['entity.displayName']: {
-          terms: { field: 'entity.displayName.keyword' },
-        },
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identityFields.${id.field}`]: {
-              terms: { field: `entity.identityFields.${id.field}`, missing_bucket: id.optional },
-            },
-          }),
-          {}
-        ),
       },
       aggs: {
         ...generateLatestMetricAggregations(definition),
