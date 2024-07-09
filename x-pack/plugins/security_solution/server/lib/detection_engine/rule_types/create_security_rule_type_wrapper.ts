@@ -308,7 +308,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               newStatus: RuleExecutionStatusEnum['partial failure'],
               message: `Check privileges failed to execute ${exc}`,
             });
-            warningMessage = `Check privileges failed to execute ${exc}`;
             wroteWarningStatus = true;
           }
 
@@ -493,7 +492,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 alertsCreated: createdSignalsCount > 0,
                 disabledActions,
               });
-              result.warningMessages.push(disabledActionsWarning);
+              if (result.warningMessages.length) {
+                result.warningMessages.push(disabledActionsWarning);
+              } else {
+                warningMessage = [
+                  ...(warningMessage ? [warningMessage] : []),
+                  disabledActionsWarning,
+                ].join(', ');
+                wroteWarningStatus = true;
+              }
             }
 
             if (result.warningMessages.length) {
@@ -524,6 +531,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.succeeded,
                   message: 'Rule execution completed successfully',
+                  metrics: {
+                    searchDurations: result.searchAfterTimes,
+                    indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
+                  },
+                });
+              } else if (
+                !isEmpty(warningMessage) &&
+                wroteWarningStatus &&
+                !hasError &&
+                !result.warning
+              ) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum['partial failure'],
+                  message: warningMessage,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
