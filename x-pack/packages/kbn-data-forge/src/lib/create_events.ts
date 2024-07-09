@@ -101,7 +101,9 @@ export async function createEvents(
         config.indexing.artificialIndexDelay > 0
       ) {
         logger.info(`Delaying ${events.length} by ${config.indexing.artificialIndexDelay}ms`);
-        await new Promise((resolve) => setTimeout(resolve, config.indexing.artificialIndexDelay));
+        await new Promise((resolve) =>
+          setTimeout(resolve, config.indexing.artificialIndexDelay + interval)
+        );
       }
       return queue.push(events);
     };
