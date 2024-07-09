@@ -34,6 +34,14 @@ export const SYSTEM_PROMPTS_TABLE_COLUMN_ACTIONS = i18n.translate(
   }
 );
 
+export const SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptsTable.settingsDescription',
+  {
+    defaultMessage:
+      'Create and manage System Prompts. System Prompts are configurable chunks of context that are always sent sent as part of the conversation.',
+  }
+);
+
 export const DELETE_SYSTEM_PROMPT_MODAL_TITLE = (prompt: string) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.promptEditor.modal.deleteSystemPromptConfirmationTitle',

@@ -13,6 +13,7 @@ import {
   EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import {
   PromptResponse,
@@ -175,7 +176,10 @@ const QuickPromptSettingsManagementComponent = () => {
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton iconType="plusInCircle" onClick={onCreate}>
               {i18n.QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE}

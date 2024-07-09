@@ -611,7 +611,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         <EuiFlexItem>
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
-              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and view results in {discover} / {apm} once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
+              defaultMessage="Closing this dialog will cancel the evaluation. You can watch the Kibana server logs for progress, and view results in {discover} {apm}. Can take many minutes for large datasets."
               id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
               values={{
                 discover: (

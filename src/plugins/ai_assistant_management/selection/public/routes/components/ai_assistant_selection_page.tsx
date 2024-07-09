@@ -90,7 +90,7 @@ export function AiAssistantSelectionPage() {
                 <p>
                   {i18n.translate(
                     'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkDescription',
-                    { defaultMessage: 'For more info, see our' }
+                    { defaultMessage: 'For more info, refer to our' }
                   )}{' '}
                   <EuiLink
                     data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
@@ -155,7 +155,7 @@ export function AiAssistantSelectionPage() {
                 <p>
                   {i18n.translate(
                     'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription',
-                    { defaultMessage: 'For more info, see our' }
+                    { defaultMessage: 'For more info, refer to our' }
                   )}{' '}
                   <EuiLink
                     data-test-subj="securityAiAssistantSelectionPageDocumentationLink"

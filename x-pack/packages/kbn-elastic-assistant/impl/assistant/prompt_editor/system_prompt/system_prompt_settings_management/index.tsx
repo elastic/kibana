@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -221,7 +222,10 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton iconType="plusInCircle" onClick={onCreate}>
               {SETTINGS_TITLE}

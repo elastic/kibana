@@ -290,7 +290,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             >
               <FormattedMessage
                 id="xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle"
-                defaultMessage="Kibana Connector to make requests with"
+                defaultMessage="The default LLM connector for this conversation type."
               />
             </EuiLink>
           }

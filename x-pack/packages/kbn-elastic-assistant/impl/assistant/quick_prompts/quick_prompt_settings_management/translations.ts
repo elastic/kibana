@@ -27,6 +27,14 @@ export const QUICK_PROMPTS_TABLE_COLUMN_ACTIONS = i18n.translate(
   }
 );
 
+export const QUICK_PROMPTS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPromptsTable.description',
+  {
+    defaultMessage:
+      'Create and manage Quick Prompts. Quick Prompts are shortcuts to common actions.',
+  }
+);
+
 export const QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPromptsTable.createButtonTitle',
   {
