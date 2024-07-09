@@ -32,6 +32,8 @@ import { DEFAULT_FLYOUT_TITLE, SEARCH_PLACEHOLDER } from './translations';
 import { Flyout } from '../../assistant/common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { KNOWLEDGE_BASE_DOCUMENTATION } from '../translations';
+import { IndexEntryEditor } from './index_entry_editor';
+import { EntryEditor } from './entry_editor';
 
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const {
@@ -208,7 +210,10 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
       >
-        <></>
+        <>
+          {selectedType === 'Document' && <EntryEditor />}
+          {selectedType === 'Index' && <IndexEntryEditor />}
+        </>
       </Flyout>
     </>
   );
