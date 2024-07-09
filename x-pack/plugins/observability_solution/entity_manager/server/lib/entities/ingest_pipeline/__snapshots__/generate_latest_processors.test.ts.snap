@@ -10,8 +10,8 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.spaceId",
-      "value": "default",
+      "field": "entity.type",
+      "value": "service",
     },
   },
   Object {
@@ -34,6 +34,9 @@ if (ctx.entity?.metadata?.host?.os?.name.data != null) {
  if(ctx.host.os == null)  ctx[\\"host\\"][\\"os\\"] = new HashMap();
   ctx[\\"host\\"][\\"os\\"][\\"name\\"] = ctx.entity.metadata.host.os.name.data.keySet();
 }
+if (ctx.entity?.metadata?.sourceIndex.data != null) {
+  ctx[\\"sourceIndex\\"] = ctx.entity.metadata.sourceIndex.data.keySet();
+}
 ",
     },
   },
@@ -46,7 +49,7 @@ if (ctx.entity?.metadata?.host?.os?.name.data != null) {
   Object {
     "set": Object {
       "field": "_index",
-      "value": ".entities-observability.latest-v1.admin-console-services.default",
+      "value": ".entities.v1.latest.admin-console-services",
     },
   },
 ]

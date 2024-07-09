@@ -7,4 +7,5 @@
 
 export { numberDiffAlgorithm } from './number_diff_algorithm';
 export { singleLineStringDiffAlgorithm } from './single_line_string_diff_algorithm';
+export { scalarArrayDiffAlgorithm } from './scalar_array_diff_algorithm';
 export { simpleDiffAlgorithm } from './simple_diff_algorithm';

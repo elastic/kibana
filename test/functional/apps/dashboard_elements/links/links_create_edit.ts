@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can not add an external link that violates externalLinks.policy', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
         expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can create a new by-reference links panel', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
 
         await createSomeLinks();
         await dashboardLinks.toggleSaveByReference(true);
@@ -75,8 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('confirmSaveSavedObjectButton');
         await common.waitForSaveModalToClose();
         await testSubjects.exists('addObjectToDashboardSuccess');
+        await testSubjects.existOrFail('links--component');
+        await testSubjects.existOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
 
-        expect(await testSubjects.existOrFail('links--component'));
         expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         await dashboard.clickDiscardChanges();
       });
@@ -84,14 +85,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('by-value links panel', async () => {
         it('can create a new by-value links panel', async () => {
           await dashboardAddPanel.clickEditorMenuButton();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+          await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
           await dashboardLinks.setLayout('horizontal');
           await createSomeLinks();
           await dashboardLinks.toggleSaveByReference(false);
           await dashboardLinks.clickPanelEditorSaveButton();
           await testSubjects.exists('addObjectToDashboardSuccess');
+          await testSubjects.existOrFail('links--component');
+          await testSubjects.missingOrFail(
+            'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+          );
 
-          expect(await testSubjects.existOrFail('links--component'));
           expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         });
 
@@ -101,8 +105,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
 
           await dashboard.waitForRenderComplete();
-          await dashboardPanelActions.legacySaveToLibrary('Some more links');
+          await dashboardPanelActions.saveToLibrary('Some more links');
           await testSubjects.existOrFail('addPanelToLibrarySuccess');
+        });
+
+        it('can unlink a panel from the library', async () => {
+          const panel = await testSubjects.find('embeddablePanelHeading-Somemorelinks');
+          await dashboardPanelActions.unlinkFromLibrary(panel);
+          await testSubjects.existOrFail('unlinkPanelSuccess');
         });
 
         after(async () => {

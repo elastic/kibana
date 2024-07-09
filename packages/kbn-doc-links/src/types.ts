@@ -334,6 +334,7 @@ export interface DocLinks {
   };
   readonly securitySolution: {
     readonly artifactControl: string;
+    readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
@@ -537,6 +538,7 @@ export interface DocLinks {
     datastreamsDownsampling: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
+    grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
     learnMoreBlog: string;
