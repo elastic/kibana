@@ -43,14 +43,14 @@ export const getGridAtrrs = async (
     search: deps.data.search.search,
     signal: abortController?.signal,
     dropNullColumns: true,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
   });
 
   const dataView = dataViewSpec
     ? await deps.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview(indexPattern, deps.dataViews);
+    : await getESQLAdHocDataview(query.esql, deps.dataViews);
 
   const columns = formatESQLColumns(results.response.columns);
-
   return {
     values: results.response.values,
     dataView,

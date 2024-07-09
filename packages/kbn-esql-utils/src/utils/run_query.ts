@@ -6,11 +6,25 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { TimeRange } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
+
+export const getEarliestLatestParams = (query: string, time?: TimeRange) => {
+  const earliestNamedParams = /\?earliest/i.test(query);
+  const latestNamedParams = /\?latest/i.test(query);
+  if (time && (earliestNamedParams || latestNamedParams)) {
+    return {
+      earliest: earliestNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
+      latest: latestNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+    };
+  }
+  return undefined;
+};
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
   return columns.map(({ name, type }) => {
@@ -29,17 +43,28 @@ export async function getESQLQueryColumnsRaw({
   esqlQuery,
   search,
   signal,
+  timeRange,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  timeRange?: TimeRange;
 }): Promise<ESQLColumn[]> {
   try {
+    const timeParams = getEarliestLatestParams(esqlQuery, timeRange);
+    const namedParams = [];
+    if (timeParams?.earliest) {
+      namedParams.push({ earliest: timeParams.earliest });
+    }
+    if (timeParams?.latest) {
+      namedParams.push({ latest: timeParams.latest });
+    }
     const response = await lastValueFrom(
       search(
         {
           params: {
             query: `${esqlQuery} | limit 0`,
+            ...(namedParams.length ? { params: namedParams } : {}),
           },
         },
         {
@@ -66,13 +91,15 @@ export async function getESQLQueryColumns({
   esqlQuery,
   search,
   signal,
+  timeRange,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  timeRange?: TimeRange;
 }): Promise<DatatableColumn[]> {
   try {
-    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal });
+    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal, timeRange });
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
   } catch (error) {
@@ -93,16 +120,26 @@ export async function getESQLResults({
   signal,
   filter,
   dropNullColumns,
+  timeRange,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
   filter?: unknown;
   dropNullColumns?: boolean;
+  timeRange?: TimeRange;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
+  const timeParams = getEarliestLatestParams(esqlQuery, timeRange);
+  const namedParams = [];
+  if (timeParams?.earliest) {
+    namedParams.push({ earliest: timeParams.earliest });
+  }
+  if (timeParams?.latest) {
+    namedParams.push({ latest: timeParams.latest });
+  }
   const result = await lastValueFrom(
     search(
       {
@@ -110,6 +147,7 @@ export async function getESQLResults({
           ...(filter ? { filter } : {}),
           query: esqlQuery,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
+          ...(namedParams.length ? { params: namedParams } : {}),
         },
       },
       {

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { getEarliestLatestParams } from '@kbn/esql-utils';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
@@ -152,8 +153,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
+
+            const timeParams = getEarliestLatestParams(query, input.timeRange);
+            const namedParams = [];
+            if (timeParams?.earliest) {
+              namedParams.push({ earliest: timeParams.earliest });
+            }
+            if (timeParams?.latest) {
+              namedParams.push({ latest: timeParams.latest });
+            }
+
+            if (namedParams.length) {
+              params.params = namedParams;
+            }
+
+            // don't send the timefilter if the time filter named params are already in the query
             const timeFilter =
               input.timeRange &&
+              (!timeParams?.earliest || !timeParams?.latest) &&
               getTime(undefined, input.timeRange, {
                 fieldName: timeField,
               });

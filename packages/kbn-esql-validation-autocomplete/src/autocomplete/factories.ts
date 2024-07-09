@@ -27,6 +27,8 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
+export const TIME_SYSTEM_PARAMS = ['?earliest', '?latest'];
+
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
@@ -164,7 +166,8 @@ export const buildSourcesDefinitions = (
 
 export const buildConstantsDefinitions = (
   userConstants: string[],
-  detail?: string
+  detail?: string,
+  sortText?: string
 ): SuggestionRawDefinition[] =>
   userConstants.map((label) => ({
     label,
@@ -175,7 +178,7 @@ export const buildConstantsDefinitions = (
       i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.constantDefinition', {
         defaultMessage: `Constant`,
       }),
-    sortText: 'A',
+    sortText: sortText ?? 'A',
   }));
 
 export const buildValueDefinitions = (
@@ -388,22 +391,13 @@ export function getDateLiterals() {
     },
   } as SuggestionRawDefinition;
   suggestions.push(
-    ...['?earliest', '?latest'].map(
-      (label) =>
-        ({
-          label,
-          text: label,
-          kind: 'Constant',
-          detail: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition',
-            {
-              defaultMessage: 'Named parameter',
-            }
-          ),
-          sortText: '1A',
-        } as SuggestionRawDefinition)
+    ...buildConstantsDefinitions(
+      TIME_SYSTEM_PARAMS,
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
+        defaultMessage: 'Named parameter',
+      }),
+      '1A'
     ),
-    ...buildConstantsDefinitions(['?earliest', '?latest'], ''),
     timePickerSuggestion
   );
   return suggestions;
