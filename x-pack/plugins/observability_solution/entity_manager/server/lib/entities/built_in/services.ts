@@ -42,6 +42,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
     identityFields: ['service.name', { field: 'service.environment', optional: true }],
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
     metadata: [
+      { source: '_index', destination: 'sourceIndex' },
       'data_stream.type',
       'service.environment',
       'service.name',

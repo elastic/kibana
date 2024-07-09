@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './use_alert_data_view';
-export * from './use_rule_aad_fields';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+
+export interface ObservabilityAIAssistantService {
+  start?: ObservabilityAIAssistantPublicStart;
+}
