@@ -349,10 +349,26 @@ describe('TaskClaiming', () => {
       const taskStore = taskStoreMock.create({ taskManagerId });
       taskStore.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
       for (const docs of taskCycles) {
-        taskStore.msearch.mockResolvedValueOnce({ docs, versionMap: new Map() });
+        const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+        const docVersions = new Map<string, ConcreteTaskInstanceVersion>();
+        for (const doc of docs) {
+          const esId = `task:${doc.id}`;
+          versionMap.set(doc.id, { esId, seqNo: 42, primaryTerm: 666 });
+          docVersions.set(esId, { esId, seqNo: 42, primaryTerm: 666 });
+        }
+        taskStore.msearch.mockResolvedValueOnce({ docs, versionMap });
+        taskStore.getDocVersions.mockResolvedValueOnce(docVersions);
+        taskStore.bulkUpdate.mockResolvedValueOnce(
+          docs.map((doc) => {
+            doc = { ...doc, retryAt: null };
+            return asOk(doc);
+          })
+        );
       }
 
       taskStore.msearch.mockResolvedValue({ docs: [], versionMap: new Map() });
+      taskStore.getDocVersions.mockResolvedValue(new Map());
+      taskStore.bulkUpdate.mockResolvedValue([]);
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -406,7 +422,8 @@ describe('TaskClaiming', () => {
             retryAt: null,
             scheduledAt: new Date(),
             traceparent: 'newParent',
-          })
+          }),
+          event?.timing
         )
       );
     });

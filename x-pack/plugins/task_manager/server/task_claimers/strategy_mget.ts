@@ -20,11 +20,7 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
 import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import {
-  isLimited,
-  TASK_MANAGER_MARK_AS_CLAIMED,
-  TaskClaimingBatches,
-} from '../queries/task_claiming';
+import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
@@ -40,6 +36,7 @@ import {
 
 import { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
+import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
@@ -142,7 +139,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   }
   // apply limited concurrency limits (TODO: can currently starve other tasks)
-  const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
+  const candidateTasks = selectTasksByCapacity(currentTasks, batches);
 
   // build the updated task objects we'll claim
   const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
@@ -372,36 +369,6 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
 
     const capacity = getCapacity(definition.type);
     result.limitedTypes.set(definition.type, capacity);
-  }
-
-  return result;
-}
-
-function applyLimitedConcurrency(
-  tasks: ConcreteTaskInstance[],
-  batches: TaskClaimingBatches
-): ConcreteTaskInstance[] {
-  // create a map of task type - concurrency
-  const limitedBatches = batches.filter(isLimited);
-  const limitedMap = new Map<string, number>();
-  for (const limitedBatch of limitedBatches) {
-    const { tasksTypes, concurrency } = limitedBatch;
-    limitedMap.set(tasksTypes, concurrency);
-  }
-
-  // apply the limited concurrency
-  const result: ConcreteTaskInstance[] = [];
-  for (const task of tasks) {
-    const concurrency = limitedMap.get(task.taskType);
-    if (concurrency == null) {
-      result.push(task);
-      continue;
-    }
-
-    if (concurrency > 0) {
-      result.push(task);
-      limitedMap.set(task.taskType, concurrency - 1);
-    }
   }
 
   return result;
