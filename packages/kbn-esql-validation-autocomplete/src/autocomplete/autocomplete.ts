@@ -229,37 +229,23 @@ export async function suggest(
             suggestions.push(...getFinalSuggestions());
           } else {
             const { nodeArg } = extractArgMeta(metrics, astContext.node);
-            const isAssignmentExpression = isAssignment(nodeArg);
             let fieldsAndFunctions: SuggestionRawDefinition[] = [];
 
-            if (isInsideExpression && isFunctionItem(astContext.node!)) {
+            if (isInsideExpression && isFunctionItem(astContext.node!) && !isAssignment(nodeArg)) {
               const fields = await getFieldsMap();
               const variables = collectVariables(ast, fields, innerText);
               const references = { fields, variables };
               const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
 
-              if (isAssignmentExpression) {
-                fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
-                  ['any'],
-                  metrics.name,
-                  definition.options[0].name,
-                  getFieldsByType,
-                  {
-                    functions: true,
-                    fields: true,
-                  }
-                );
-              } else {
-                fieldsAndFunctions = await getBuiltinFunctionNextArgument(
-                  metrics,
-                  { name: 'by' },
-                  definition.options[0].signature.params[0],
-                  astContext.node,
-                  nodeArgType || 'any',
-                  references,
-                  getFieldsByType
-                );
-              }
+              fieldsAndFunctions = await getBuiltinFunctionNextArgument(
+                metrics,
+                { name: 'by' },
+                definition.options[0].signature.params[0],
+                astContext.node,
+                nodeArgType || 'any',
+                references,
+                getFieldsByType
+              );
             } else {
               fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
                 ['any'],
