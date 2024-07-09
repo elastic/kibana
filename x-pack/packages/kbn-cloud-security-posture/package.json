@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "description": "Shared components for cloud security posture",
-  "sideEffects": false,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }

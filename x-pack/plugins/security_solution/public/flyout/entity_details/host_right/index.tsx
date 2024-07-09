@@ -128,7 +128,7 @@ export const HostPanel = ({
   const observedHost = useObservedHost(hostName, scopeId);
   const getCSPSetupStatus = useCspSetupStatusApi();
   const statusCspm = getCSPSetupStatus.data?.cspm?.status;
-  const getCSPMStats = useCspmStatsApi();
+  const getCSPMStats = useCspmStatsApi({});
   const totalFailed = getCSPMStats.data?.stats?.totalFailed;
 
   if (observedHost.isLoading) {
