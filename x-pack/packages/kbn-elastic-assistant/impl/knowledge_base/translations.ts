@@ -14,6 +14,13 @@ export const ALERTS_LABEL = i18n.translate(
   }
 );
 
+export const SEND_ALERTS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.sendAlertsLabel',
+  {
+    defaultMessage: 'Send Alerts',
+  }
+);
+
 export const ASK_QUESTIONS_ABOUT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.askQuestionsAboutLabel',
   {
@@ -156,5 +163,12 @@ export const ESQL_DESCRIPTION_INSTALLED = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.esqlInstalledDescription',
   {
     defaultMessage: 'ES|QL Knowledge Base docs loaded',
+  }
+);
+
+export const ENTRY = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.entryLabel',
+  {
+    defaultMessage: 'Entry',
   }
 );
