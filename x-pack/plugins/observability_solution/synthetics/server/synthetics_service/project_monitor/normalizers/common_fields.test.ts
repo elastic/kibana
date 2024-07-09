@@ -9,8 +9,19 @@ import {
   flattenAndFormatObject,
   getNormalizeCommonFields,
   getUrlsField,
+  isValidURL,
   NormalizedProjectProps,
 } from './common_fields';
+
+describe('isValidUrl', () => {
+  it('returns false for invalid URL', () => {
+    expect(isValidURL('invalid')).toBeFalsy();
+  });
+
+  it('returns true for valid URL', () => {
+    expect(isValidURL('https://elastic.co')).toBeTruthy();
+  });
+});
 
 describe('getUrlsField', () => {
   it('supports a string value containing a comma', () => {
