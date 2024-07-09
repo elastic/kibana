@@ -27,7 +27,7 @@ import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import { ProcessListContextProvider, SortBy } from '../../hooks/use_process_list';
+import { ProcessListContextProvider, type SortBy } from '../../hooks/use_process_list';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';

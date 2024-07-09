@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TopNFunctions } from '@kbn/profiling-utils';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
