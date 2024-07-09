@@ -25,6 +25,10 @@ describe('interpreter/functions#metricVis', () => {
     progressDirection: 'horizontal',
     maxCols: 1,
     inspectorTableId: 'random-id',
+    titlesTextAlign: 'left',
+    valuesTextAlign: 'right',
+    iconAlign: 'left',
+    valueFontSize: 'default',
   };
 
   it('should pass over overrides from variables', async () => {

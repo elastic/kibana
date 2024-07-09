@@ -6,11 +6,8 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import {
-  DataQualityLocatorDependencies,
-  DataQualityLocatorParams,
-  DATA_QUALITY_LOCATOR_ID,
-} from './types';
+import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { DataQualityLocatorDependencies } from './types';
 import { constructDatasetQualityLocatorPath } from './construct_dataset_quality_locator_path';
 
 export type DatasetQualityLocator = LocatorPublic<DataQualityLocatorParams>;
