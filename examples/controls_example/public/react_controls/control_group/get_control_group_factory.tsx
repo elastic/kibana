@@ -75,7 +75,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-      function getControlApi(controlUuid) {
+      function getControlApi(controlUuid: string) {
         return children$.value[controlUuid];
       }
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
