@@ -51,3 +51,5 @@ export { DEFAULT_LANGUAGE_OPTION, LANGUAGE_OPTIONS } from './ui_settings/languag
 export { isSupportedConnectorType } from './connectors';
 
 export { ShortIdTable } from './utils/short_id_table';
+
+export { KnowledgeBaseType } from './types';

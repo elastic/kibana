@@ -478,18 +478,20 @@ export class KnowledgeBaseService {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.aliases.kb,
-        ...(query
-          ? {
-              query: {
-                wildcard: {
-                  doc_id: {
-                    value: `${query}*`,
-                  },
-                },
-              },
-            }
-          : {}),
+        query: {
+          bool: {
+            // filter by search query
+            filter: [
+              ...(query ? [{ wildcard: { doc_id: { value: `${query}*` } } }] : [{ match_all: {} }]),
+            ],
+
+            // boost score of user instruction entries
+            should: [{ term: { type: KnowledgeBaseType.UserInstruction } }],
+            minimum_should_match: 0,
+          },
+        },
         sort: [
+          { _score: { order: 'desc' } },
           {
             [String(sortBy)]: {
               order: sortDirection,
@@ -508,6 +510,7 @@ export class KnowledgeBaseService {
             '@timestamp',
             'role',
             'user.name',
+            'type',
           ],
         },
       });
@@ -528,6 +531,35 @@ export class KnowledgeBaseService {
     }
   };
 
+  getExistingUserInstructionId = async ({
+    isPublic,
+    user,
+    namespace,
+  }: {
+    isPublic: boolean;
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }) => {
+    const res = await this.dependencies.esClient.asInternalUser.search<
+      Pick<KnowledgeBaseEntry, 'doc_id'>
+    >({
+      index: resourceNames.aliases.kb,
+      query: {
+        bool: {
+          filter: [
+            { term: { type: KnowledgeBaseType.UserInstruction } },
+            { term: { public: isPublic } },
+            ...getAccessQuery({ user, namespace }),
+          ],
+        },
+      },
+      size: 1,
+      _source: ['doc_id'],
+    });
+
+    return res.hits.hits[0]?._source?.doc_id;
+  };
+
   addEntry = async ({
     entry: { id, ...document },
     user,
@@ -537,6 +569,19 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
+    if (document.type === KnowledgeBaseType.UserInstruction) {
+      const existingId = await this.getExistingUserInstructionId({
+        isPublic: document.public,
+        user,
+        namespace,
+      });
+
+      if (existingId) {
+        id = existingId;
+        document.doc_id = existingId; // this is infurating. Why the hell do we have 2 doc id fields???
+      }
+    }
+
     try {
       await this.dependencies.esClient.asInternalUser.index({
         index: resourceNames.aliases.kb,

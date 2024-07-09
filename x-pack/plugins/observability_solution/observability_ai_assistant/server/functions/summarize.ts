@@ -42,11 +42,11 @@ export function registerSummarizationFunction({
             type: 'boolean',
             description: 'Whether this is a correction for a previous learning.',
           },
-          type: {
-            type: 'string',
-            description: `The type can be: "user_instruction" or "contextual". A "user_instruction" entry will be included in the system message if it fits within the token budget and it will be marked as a user instruction. A "contextual" entry will be included as part of the context function response (and not the system message) if it semantically matches the user's prompt.`,
-            enum: [KnowledgeBaseType.UserInstruction, KnowledgeBaseType.Contextual],
-          },
+          // type: {
+          //   type: 'string',
+          //   description: `The type can be: "user_instruction" or "contextual". A "user_instruction" entry will be included in the system message if it fits within the token budget and it will be marked as a user instruction. A "contextual" entry will be included as part of the context function response (and not the system message) if it semantically matches the user's prompt.`,
+          //   enum: [KnowledgeBaseType.UserInstruction, KnowledgeBaseType.Contextual],
+          // },
           confidence: {
             type: 'string',
             description: 'How confident you are about this being a correct and useful learning',
@@ -62,14 +62,14 @@ export function registerSummarizationFunction({
           'id' as const,
           'text' as const,
           'is_correction' as const,
-          'type' as const,
+          // 'type' as const,
           'confidence' as const,
           'public' as const,
         ],
       },
     },
     (
-      { arguments: { id, text, is_correction: isCorrection, type, confidence, public: isPublic } },
+      { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
       return client
@@ -80,7 +80,7 @@ export function registerSummarizationFunction({
             id,
             text,
             is_correction: isCorrection,
-            type,
+            type: KnowledgeBaseType.Contextual,
             confidence,
             public: isPublic,
             labels: {},
