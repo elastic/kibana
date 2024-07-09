@@ -65,6 +65,7 @@ export function generateLatestTransform(
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
+        ...generateLatestIdentityFieldsAggregations(definition),
         'entity.lastSeenTimestamp': {
           max: {
             field: 'entity.lastSeenTimestamp',
@@ -78,4 +79,19 @@ export function generateLatestTransform(
       },
     },
   };
+}
+
+function generateLatestIdentityFieldsAggregations(definition: EntityDefinition) {
+  return definition.identityFields.reduce(
+    (aggs, identityField) => ({
+      ...aggs,
+      [`entity.identityFields.${identityField.field}`]: {
+        terms: {
+          field: identityField.field,
+          size: 10,
+        },
+      },
+    }),
+    {}
+  );
 }
