@@ -557,6 +557,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
           if (!hasFormChanged) setHasFormChanged(true);
           return;
+        } else {
+          setHasDuplicateFields(false);
         }
 
         // handle wildcard with wrong operator case

@@ -768,6 +768,36 @@ describe('Event filter form', () => {
             renderResult.queryByTestId('duplicate-fields-warning-message')
           ).not.toBeInTheDocument();
         });
+
+        it('should remove warning text when removing `event.category`', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 6',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+
+          // switch to classic Event filtering
+          userEvent.click(renderResult.getByTestId(`builderItemEntryDeleteButton`));
+          rerenderWithLatestProps();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
       });
     });
 
