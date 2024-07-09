@@ -49,6 +49,8 @@ export function getServiceColumns({
   timeseriesDataLoading: boolean;
   timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
+  const { isSmall, isLarge } = breakpoints;
+  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   return [
     {
       field: ServiceInventoryFieldName.ServiceName,
@@ -110,6 +112,7 @@ export function getServiceColumns({
             series={timeseriesData?.currentPeriod?.apm[serviceName]?.latency}
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(metrics.latency)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -133,6 +136,7 @@ export function getServiceColumns({
             valueLabel={asTransactionRate(metrics.throughput)}
             isLoading={timeseriesDataLoading}
             series={timeseriesData?.currentPeriod?.apm[serviceName]?.throughput}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -156,6 +160,7 @@ export function getServiceColumns({
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
             isLoading={timeseriesDataLoading}
             series={timeseriesData?.currentPeriod?.apm[serviceName]?.transactionErrorRate}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -177,6 +182,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             series={timeseriesData?.currentPeriod?.logRate[serviceName] ?? []}
             valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -198,6 +204,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             series={timeseriesData?.currentPeriod?.logErrorRate[serviceName] ?? []}
             valueLabel={asPercent(metrics.logErrorRate, 1)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
