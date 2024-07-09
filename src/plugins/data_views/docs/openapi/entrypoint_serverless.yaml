@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Data views
-  description: OpenAPI schema for data view endpoints
+  description: OpenAPI schema for serverless data view endpoints
   version: '0.1'
   contact:
     name: Kibana Core Team
@@ -32,10 +32,6 @@ paths:
     $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}@runtime_field.yaml'
   '/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
     $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
-  '/s/{spaceId}/api/data_views/swap_references':
-    $ref: 'paths/s@{spaceid}@api@data_views@swap_references.yaml'
-  '/s/{spaceId}/api/data_views/swap_references/_preview':
-    $ref: 'paths/s@{spaceid}@api@data_views@swap_references@_preview.yaml'
 # Default space
   '/api/data_views':
     $ref: 'paths/api@data_views.yaml'
@@ -51,10 +47,6 @@ paths:
     $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
   '/api/data_views/default':
     $ref: 'paths/api@data_views@default.yaml'
-  '/api/data_views/swap_references':
-    $ref: 'paths/api@data_views@swap_references.yaml'
-  '/api/data_views/swap_references/_preview':
-    $ref: 'paths/api@data_views@swap_references@_preview.yaml'
 components:
   securitySchemes:
     basicAuth:

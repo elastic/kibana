@@ -1,0 +1,7 @@
+summary: Swap references from data view ID "abcd-efg" to "xyz-123" and remove the data view that is no longer referenced.
+value:
+  {
+    "fromId" : "abcd-efg",
+    "toId" : "xyz-123",
+    "delete" : true
+  }
