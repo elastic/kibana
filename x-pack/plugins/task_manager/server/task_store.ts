@@ -39,6 +39,7 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
+import { claimSort } from './queries/mark_available_tasks_as_claimed';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -509,7 +510,9 @@ export class TaskStore {
       allTasks = allTasks.concat(this.filterTasks(tasks));
     }
 
-    return { docs: allTasks, versionMap };
+    const allSortedTasks = claimSort(this.definitions, allTasks);
+
+    return { docs: allSortedTasks, versionMap };
   }
 
   private async search(opts: SearchOpts = {}): Promise<FetchResult> {
@@ -559,7 +562,7 @@ export class TaskStore {
     tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
   ): void {
     for (const task of tasks) {
-      if (task._seq_no == null || task._primary_term == null) continue;
+      if (task._id == null || task._seq_no == null || task._primary_term == null) continue;
 
       const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
       versionMap.set(esId, {

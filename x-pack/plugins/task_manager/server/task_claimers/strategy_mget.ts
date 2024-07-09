@@ -41,19 +41,6 @@ import {
 import { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 
-interface OwnershipClaimingOpts {
-  claimOwnershipUntil: Date;
-  size: number;
-  taskTypes: Set<string>;
-  removedTypes: Set<string>;
-  excludedTypes: Set<string>;
-  getCapacity: (taskType?: string | undefined) => number;
-  taskStore: TaskStore;
-  events$: Subject<TaskClaim>;
-  definitions: TaskTypeDictionary;
-  taskMaxAttempts: Record<string, number>;
-}
-
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
 export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<ClaimOwnershipResult> {
@@ -262,6 +249,19 @@ interface SearchAvailableTasksResponse {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
+interface SearchAvailableTasksOpts {
+  claimOwnershipUntil: Date;
+  size: number;
+  taskTypes: Set<string>;
+  removedTypes: Set<string>;
+  excludedTypes: Set<string>;
+  getCapacity: (taskType?: string | undefined) => number;
+  taskStore: TaskStore;
+  events$: Subject<TaskClaim>;
+  definitions: TaskTypeDictionary;
+  taskMaxAttempts: Record<string, number>;
+}
+
 async function searchAvailableTasks({
   definitions,
   taskTypes,
@@ -271,31 +271,110 @@ async function searchAvailableTasks({
   getCapacity,
   size,
   taskMaxAttempts,
-}: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
-  const searchedTypes = Array.from(taskTypes)
-    .concat(Array.from(removedTypes))
-    .filter((type) => !excludedTypes.has(type));
-  const queryForScheduledTasks = mustBeAllOf(
-    // Task must be enabled
-    EnabledTask,
-    // a task type that's not excluded (may be removed or not)
-    OneOfTaskTypes('task.taskType', searchedTypes),
-    // Either a task with idle status and runAt <= now or
-    // status running or claiming with a retryAt <= now.
-    shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-    // must have a status that isn't 'unrecognized'
-    RecognizedTask
-  );
+}: SearchAvailableTasksOpts): Promise<SearchAvailableTasksResponse> {
+  const claimPartitions = buildClaimPartitions({
+    types: taskTypes,
+    excludedTypes,
+    removedTypes,
+    getCapacity,
+    definitions,
+  });
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
-  const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
+  const searches: SearchOpts[] = [];
 
-  return await taskStore.fetch({
-    query,
-    sort,
-    size,
-    seq_no_primary_term: true,
-  });
+  // not handling removed types yet
+
+  // add search for unlimited types
+  if (claimPartitions.unlimitedTypes.length > 0) {
+    const queryForScheduledTasks = mustBeAllOf(
+      // Task must be enabled
+      EnabledTask,
+      // a task type that's not excluded (may be removed or not)
+      OneOfTaskTypes('task.taskType', claimPartitions.unlimitedTypes),
+      // Either a task with idle status and runAt <= now or
+      // status running or claiming with a retryAt <= now.
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      // must have a status that isn't 'unrecognized'
+      RecognizedTask
+    );
+
+    const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
+    searches.push({
+      query,
+      sort,
+      size,
+      seq_no_primary_term: true,
+    });
+  }
+
+  // add searches for limited types
+  for (const [type, capacity] of claimPartitions.limitedTypes) {
+    const queryForScheduledTasks = mustBeAllOf(
+      // Task must be enabled
+      EnabledTask,
+      // Specific task type
+      OneOfTaskTypes('task.taskType', [type]),
+      // Either a task with idle status and runAt <= now or
+      // status running or claiming with a retryAt <= now.
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      // must have a status that isn't 'unrecognized'
+      RecognizedTask
+    );
+
+    const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
+    searches.push({
+      query,
+      sort,
+      size: capacity,
+      seq_no_primary_term: true,
+    });
+  }
+
+  return await taskStore.msearch(searches);
+}
+
+interface ClaimPartitions {
+  removedTypes: string[];
+  unlimitedTypes: string[];
+  limitedTypes: Map<string, number>;
+}
+
+interface BuildClaimPartitionsOpts {
+  types: Set<string>;
+  excludedTypes: Set<string>;
+  removedTypes: Set<string>;
+  getCapacity: (taskType?: string) => number;
+  definitions: TaskTypeDictionary;
+}
+
+function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
+  const result: ClaimPartitions = {
+    removedTypes: [],
+    unlimitedTypes: [],
+    limitedTypes: new Map(),
+  };
+
+  const { types, excludedTypes, removedTypes, getCapacity, definitions } = opts;
+  for (const type of types) {
+    if (excludedTypes.has(type)) continue;
+
+    if (removedTypes.has(type)) {
+      result.removedTypes.push(type);
+      continue;
+    }
+
+    const definition = definitions.get(type);
+    if (definition.maxConcurrency == null) {
+      result.unlimitedTypes.push(definition.type);
+      continue;
+    }
+
+    const capacity = getCapacity(definition.type);
+    result.limitedTypes.set(definition.type, capacity);
+  }
+
+  return result;
 }
 
 function applyLimitedConcurrency(

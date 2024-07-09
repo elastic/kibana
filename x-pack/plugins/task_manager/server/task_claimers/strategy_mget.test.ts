@@ -123,7 +123,7 @@ describe('TaskClaiming', () => {
       }
 
       for (let i = 0; i < hits.length; i++) {
-        store.fetch.mockResolvedValueOnce({ docs: hits[i], versionMap: versionMaps[i] });
+        store.msearch.mockResolvedValueOnce({ docs: hits[i], versionMap: versionMaps[i] });
         store.getDocVersions.mockResolvedValueOnce(versionMaps[i]);
         const oneBulkResult = hits[i].map((hit) => asOk(hit));
         store.bulkUpdate.mockResolvedValueOnce(oneBulkResult);
@@ -189,7 +189,7 @@ describe('TaskClaiming', () => {
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
-      expect(store.fetch.mock.calls).toMatchObject({});
+      expect(store.msearch.mock.calls).toMatchObject({});
       expect(store.getDocVersions.mock.calls).toMatchObject({});
       return results.map((result, index) => ({
         result,
@@ -223,8 +223,8 @@ describe('TaskClaiming', () => {
         },
       });
 
-      store.fetch.mockReset();
-      store.fetch.mockRejectedValue(new Error('Oh no'));
+      store.msearch.mockReset();
+      store.msearch.mockRejectedValue(new Error('Oh no'));
 
       await expect(
         getAllAsPromise(
@@ -349,24 +349,14 @@ describe('TaskClaiming', () => {
       const taskStore = taskStoreMock.create({ taskManagerId });
       taskStore.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
       for (const docs of taskCycles) {
-        taskStore.fetch.mockResolvedValueOnce({ docs, versionMap: new Map() });
-        taskStore.updateByQuery.mockResolvedValueOnce({
-          updated: docs.length,
-          version_conflicts: 0,
-          total: docs.length,
-        });
+        taskStore.msearch.mockResolvedValueOnce({ docs, versionMap: new Map() });
       }
 
-      taskStore.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
-      taskStore.updateByQuery.mockResolvedValue({
-        updated: 0,
-        version_conflicts: 0,
-        total: 0,
-      });
+      taskStore.msearch.mockResolvedValue({ docs: [], versionMap: new Map() });
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
-        strategy: 'default',
+        strategy: CLAIM_STRATEGY_MGET,
         definitions,
         excludedTaskTypes: [],
         unusedTypes: [],

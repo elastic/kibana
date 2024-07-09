@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStatus, TaskPriority } from '../task';
+import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
 import {
   ScriptBasedSortClause,
   ScriptClause,
@@ -14,23 +14,6 @@ import {
   MustCondition,
   MustNotCondition,
 } from './query_clauses';
-
-export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {
-  return {
-    bool: {
-      must: [
-        { term: { 'task.taskType': type } },
-        {
-          range: {
-            'task.attempts': {
-              lt: maxAttempts,
-            },
-          },
-        },
-      ],
-    },
-  };
-}
 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
@@ -166,10 +149,40 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
   };
 }
 
+// getClaimSort() is used to generate sort bits for the ES query
+// should align with claimSort() below
 export function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
   const sortByPriority = getSortByPriority(definitions);
   if (!sortByPriority) return [SortByRunAtAndRetryAt];
   return [sortByPriority, SortByRunAtAndRetryAt];
+}
+
+// claimSort() is used to sort tasks returned from a claimer
+// should align with getClaimSort() above
+export function claimSort(
+  definitions: TaskTypeDictionary,
+  tasks: ConcreteTaskInstance[]
+): ConcreteTaskInstance[] {
+  const priorityMap: Record<string, TaskPriority> = {};
+  tasks.forEach((task) => {
+    const taskType = task.taskType;
+    const priority = definitions.get(taskType)?.priority || TaskPriority.Normal;
+    priorityMap[taskType] = priority;
+  });
+
+  return tasks.sort(compare);
+
+  function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
+    const priorityA = priorityMap[a.taskType] || TaskPriority.Normal;
+    const priorityB = priorityMap[b.taskType] || TaskPriority.Normal;
+    if (priorityA > priorityB) return -1;
+    if (priorityA < priorityB) return 1;
+
+    const runA = a.runAt?.valueOf() || a.retryAt?.valueOf() || 0;
+    const runB = b.runAt?.valueOf() || b.retryAt?.valueOf() || 0;
+
+    return runA - runB;
+  }
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {
