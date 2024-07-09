@@ -729,7 +729,7 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(5);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Recently viewed. Checked option. ',
+        'Recently viewed. Checked option.Additional information ',
         'Name A-Z ',
         'Name Z-A ',
         'Recently updated ',

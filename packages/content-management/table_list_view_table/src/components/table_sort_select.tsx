@@ -16,6 +16,7 @@ import {
   Direction,
   EuiText,
   useEuiTheme,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -101,7 +102,28 @@ export function TableSortSelect({
           column:
             'accessedAt' /* nonexistent field, used to identify this custom type of sorting */,
           direction: 'desc',
-          append: <EuiIcon type="sortDown" />,
+          append: (
+            <EuiIconTip
+              aria-label={i18n.translate(
+                'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTipAriaLabel',
+                {
+                  defaultMessage: 'Additional information',
+                }
+              )}
+              position="right"
+              color="inherit"
+              iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
+              css={{ textWrap: 'balance' }}
+              type={'questionInCircle'}
+              content={i18n.translate(
+                'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTip',
+                {
+                  defaultMessage:
+                    'Recently viewed info is stored locally in your browser and is only visible to you.',
+                }
+              )}
+            />
+          ),
         },
         ...opts,
       ];
