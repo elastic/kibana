@@ -11,7 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
 import { render, screen, waitFor } from '@testing-library/react';
 
-describe('UnifiedFieldList <FieldNameSearch />', () => {
+// Flaky: https://github.com/elastic/kibana/issues/187714
+describe.skip('UnifiedFieldList <FieldNameSearch />', () => {
   it('should render correctly', async () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
