@@ -345,6 +345,10 @@ describe('when on integration detail', () => {
       );
     });
   });
+  describe('and package is endpoint', () => {
+    const pkgkey = 'endpoint';
+    const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
+  });
 });
 
 interface MockedApi<
