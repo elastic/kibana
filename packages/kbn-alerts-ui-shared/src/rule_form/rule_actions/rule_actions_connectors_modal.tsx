@@ -27,6 +27,7 @@ import {
   useCurrentEuiBreakpoint,
   EuiButton,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ActionType } from '@kbn/actions-types';
 import { ActionConnector } from '../../common';
@@ -39,6 +40,7 @@ import {
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
 } from '../translations';
+import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
 
@@ -61,7 +63,39 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const {
     plugins: { actionTypeRegistry },
+    formData: { actions },
   } = useRuleFormState();
+
+  const preconfiguredConnectors = useMemo(() => {
+    return connectors.filter((connector) => connector.isPreconfigured);
+  }, [connectors]);
+
+  const availableConnectors = useMemo(() => {
+    return connectors.filter(({ actionTypeId }) => {
+      const actionType = actionTypes.find(({ id }) => id === actionTypeId);
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+
+      if (!actionType) {
+        return false;
+      }
+      if (actionTypeModel.hideInUi) {
+        return false;
+      }
+      if (!actionTypeModel.actionParamsFields) {
+        return false;
+      }
+
+      const checkEnabledResult = checkActionFormActionTypeEnabled(
+        actionType,
+        preconfiguredConnectors
+      );
+
+      if (!actionType.enabledInConfig && !checkEnabledResult.isEnabled) {
+        return false;
+      }
+      return true;
+    });
+  }, [connectors, actionTypes, preconfiguredConnectors, actionTypeRegistry]);
 
   const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -85,7 +119,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
   }, []);
 
   const connectorsMap: ConnectorsMap | null = useMemo(() => {
-    return connectors.reduce<ConnectorsMap>((result, { actionTypeId }) => {
+    return availableConnectors.reduce<ConnectorsMap>((result, { actionTypeId }) => {
       if (result[actionTypeId]) {
         result[actionTypeId].total += 1;
       } else {
@@ -97,10 +131,10 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
       }
       return result;
     }, {});
-  }, [connectors, actionTypes]);
+  }, [availableConnectors, actionTypes]);
 
   const filteredConnectors = useMemo(() => {
-    return connectors
+    return availableConnectors
       .filter(({ actionTypeId }) => {
         if (selectedConnector === 'all' || selectedConnector === '') {
           return true;
@@ -125,14 +159,14 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         ];
         return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
       });
-  }, [connectors, selectedConnector, searchValue, actionTypes, actionTypeRegistry]);
+  }, [availableConnectors, selectedConnector, searchValue, actionTypes, actionTypeRegistry]);
 
   const connectorFacetButtons = useMemo(() => {
     return (
       <EuiFacetGroup>
         <EuiFacetButton
           key="all"
-          quantity={connectors.length}
+          quantity={availableConnectors.length}
           isSelected={selectedConnector === 'all'}
           onClick={onConnectorOptionSelect('all')}
         >
@@ -154,7 +188,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
           })}
       </EuiFacetGroup>
     );
-  }, [connectors, connectorsMap, selectedConnector, onConnectorOptionSelect]);
+  }, [availableConnectors, connectorsMap, selectedConnector, onConnectorOptionSelect]);
 
   const connectorCards = useMemo(() => {
     if (!filteredConnectors.length) {
@@ -182,37 +216,72 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
           const { id, actionTypeId, name } = connector;
           const actionTypeModel = actionTypeRegistry.get(actionTypeId);
           const actionType = actionTypes.find((item) => item.id === actionTypeId);
+
+          if (!actionType) {
+            return null;
+          }
+
+          const checkEnabledResult = checkActionFormActionTypeEnabled(
+            actionType,
+            preconfiguredConnectors
+          );
+
+          const isSystemActionsSelected = Boolean(
+            actionTypeModel.isSystemActionType &&
+              actions.find((action) => action.actionTypeId === actionTypeModel.id)
+          );
+
+          const isDisabled = !checkEnabledResult.isEnabled || isSystemActionsSelected;
+
+          const connectorCard = (
+            <EuiCard
+              hasBorder
+              isDisabled={isDisabled}
+              titleSize="xs"
+              layout="horizontal"
+              icon={
+                <div style={{ marginInlineEnd: `16px` }}>
+                  <Suspense fallback={<EuiLoadingSpinner />}>
+                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                  </Suspense>
+                </div>
+              }
+              title={name}
+              description={
+                <>
+                  <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
+                    <strong>{actionType?.name}</strong>
+                  </EuiText>
+                </>
+              }
+              onClick={() => onSelectConnector(connector)}
+            />
+          );
+
           return (
             <EuiFlexItem key={id} grow={false}>
-              <EuiCard
-                hasBorder
-                titleSize="xs"
-                layout="horizontal"
-                icon={
-                  <div style={{ marginInlineEnd: `16px` }}>
-                    <Suspense fallback={<EuiLoadingSpinner />}>
-                      <EuiIcon size="l" type={actionTypeModel.iconClass} />
-                    </Suspense>
-                  </div>
-                }
-                title={name}
-                description={
-                  <>
-                    <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
-                    <EuiSpacer size="s" />
-                    <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
-                      <strong>{actionType?.name}</strong>
-                    </EuiText>
-                  </>
-                }
-                onClick={() => onSelectConnector(connector)}
-              />
+              {checkEnabledResult.isEnabled && connectorCard}
+              {!checkEnabledResult.isEnabled && (
+                <EuiToolTip position="top" content={checkEnabledResult.message}>
+                  {connectorCard}
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
           );
         })}
       </EuiFlexGroup>
     );
-  }, [filteredConnectors, actionTypeRegistry, actionTypes, onSelectConnector, onClearFilters]);
+  }, [
+    actions,
+    preconfiguredConnectors,
+    filteredConnectors,
+    actionTypeRegistry,
+    actionTypes,
+    onSelectConnector,
+    onClearFilters,
+  ]);
 
   const responseiveHeight = isFullscreenPortrait ? 'initial' : '80vh';
   const responsiveOverflow = isFullscreenPortrait ? 'auto' : 'hidden';

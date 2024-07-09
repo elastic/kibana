@@ -178,7 +178,6 @@ describe('hasRuleErrors', () => {
       baseErrors: {},
       paramsErrors: {
         someValue: ['error'],
-        
       },
       actionsErrors: {},
       actionsParamsErrors: {},

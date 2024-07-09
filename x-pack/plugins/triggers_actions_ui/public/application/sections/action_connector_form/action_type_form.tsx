@@ -48,6 +48,7 @@ import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_varia
 import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
 import { RuleActionsAlertsFilterTimeframe } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter_timeframe';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import {
@@ -60,7 +61,6 @@ import {
   ActionConnectorMode,
   NotifyWhenSelectOptions,
 } from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
