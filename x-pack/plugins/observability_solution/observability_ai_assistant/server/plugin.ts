@@ -88,11 +88,14 @@ export class ObservabilityAIAssistantPlugin
         },
         read: {
           disabled: true,
+          app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
+          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant'],
+          catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: [],
+          ui: [aiAssistantCapabilities.show],
         },
       },
     });
