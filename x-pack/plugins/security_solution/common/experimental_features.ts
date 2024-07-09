@@ -103,11 +103,6 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Disables expandable flyout
-   */
-  expandableFlyoutDisabled: false,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -129,7 +124,6 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
 
