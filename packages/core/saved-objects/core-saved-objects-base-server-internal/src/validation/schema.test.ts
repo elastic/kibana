@@ -78,4 +78,31 @@ describe('Saved Objects type validation schema', () => {
       `"[id]: expected value of type [string] but got [boolean]"`
     );
   });
+
+  describe('default schema', () => {
+    it('validates a record of attributes', () => {
+      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const data = createMockObject({ foo: 'heya' });
+
+      expect(() => objectSchema.validate(data)).not.toThrowError();
+    });
+
+    it('fails validation on undefined attributes', () => {
+      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const data = createMockObject(undefined);
+
+      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+        `"[attributes]: expected value of type [object] but got [undefined]"`
+      );
+    });
+
+    it('fails validation on primitive attributes', () => {
+      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const data = createMockObject(42);
+
+      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+        `"[attributes]: expected value of type [object] but got [number]"`
+      );
+    });
+  });
 });
