@@ -7,7 +7,6 @@
 
 import type { Duration } from 'moment';
 import type {
-  RuleExecutionMetrics,
   RuleExecutionStatus,
   RuleExecutionStatusEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -67,12 +66,6 @@ export interface IRuleExecutionLogForExecutors {
    * @param args Information about the status change event.
    */
   logStatusChange(args: StatusChangeArgs): Promise<void>;
-
-  /**
-   * Writes metrics information
-   * @param metrics Metrics information
-   */
-  writeMetrics(metrics: MetricsArgs | undefined): void;
 }
 
 /**

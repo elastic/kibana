@@ -521,17 +521,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
               }
-              if (wroteWarningStatus) {
-                // it's possible we wrote a warning message prior
-                // to the rule completing, so we need to ensure
-                // we also write the metrics for that completed
-                // rule run
-                ruleExecutionLogger.writeMetrics({
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                });
-              }
             } else {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
