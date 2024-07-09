@@ -58,7 +58,7 @@ export function useUpdateAnnotation() {
                 id="xpack.observability.annotation.updated.successNotification"
                 defaultMessage="Successfully updated annotation {name}"
                 values={{
-                  name: annotation.message,
+                  name: annotation.annotation?.title ?? annotation.message,
                 }}
               />
             </RedirectAppLinks>,
@@ -73,7 +73,7 @@ export function useUpdateAnnotation() {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.update.annotation', {
             defaultMessage: 'Something went wrong while updating annotation {message}',
-            values: { message: annotation.message },
+            values: { message: annotation.annotation?.title ?? annotation.message },
           }),
         });
       },

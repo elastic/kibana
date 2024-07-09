@@ -96,8 +96,8 @@ export function AnnotationsList() {
 
   const columns: Array<EuiBasicTableColumn<Annotation>> = [
     {
-      field: 'message',
-      name: MESSAGE_LABEL,
+      field: 'annotation.title',
+      name: TITLE_LABEL,
       sortable: true,
     },
     {
@@ -110,8 +110,8 @@ export function AnnotationsList() {
       },
     },
     {
-      field: 'description',
-      name: DESCRIPTION_LABEL,
+      field: 'message',
+      name: MESSAGE_LABEL,
       sortable: true,
       truncateText: true,
     },
@@ -171,8 +171,8 @@ export function AnnotationsList() {
   );
 }
 
-const DESCRIPTION_LABEL = i18n.translate('xpack.observability.nameLabel', {
-  defaultMessage: 'Description',
+const TITLE_LABEL = i18n.translate('xpack.observability.titleLabel', {
+  defaultMessage: 'Title',
 });
 const APPLY_TO_LABEL = i18n.translate('xpack.observability.applyTo', {
   defaultMessage: 'Apply to',

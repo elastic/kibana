@@ -23,9 +23,12 @@ import { Moment } from 'moment';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 import { AnnotationForm } from '../annotation_form';
 
-export type CreateAnnotationForm = Omit<CreateAnnotationParams, '@timestamp' | '@timestampEnd'> & {
-  '@timestamp': Moment | null;
-  '@timestampEnd': Moment | null;
+export type CreateAnnotationForm = Omit<CreateAnnotationParams, '@timestamp' | 'event'> & {
+  '@timestamp': Moment;
+  event: {
+    start?: Moment | null;
+    end?: Moment | null;
+  };
 };
 
 export interface CreateAnnotationProps {
@@ -55,21 +58,28 @@ export function CreateAnnotation({
     const isValid = await trigger();
     if (!isValid) return;
     const values = getValues();
+    const timestamp = values['@timestamp'].toISOString();
     if (editAnnotation?.id) {
       await updateAnnotation({
         annotation: {
           ...values,
           id: editAnnotation.id,
-          '@timestamp': values['@timestamp']?.toISOString()!,
-          '@timestampEnd': values['@timestampEnd']?.toISOString(),
+          '@timestamp': timestamp,
+          event: {
+            start: timestamp,
+            end: values.event?.end?.toISOString(),
+          },
         },
       });
     } else {
       await createAnnotation({
         annotation: {
           ...values,
-          '@timestamp': values['@timestamp']?.toISOString()!,
-          '@timestampEnd': values['@timestampEnd']?.toISOString(),
+          '@timestamp': timestamp,
+          event: {
+            start: timestamp,
+            end: values.event?.end?.toISOString(),
+          },
         },
       });
     }

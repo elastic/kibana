@@ -23,11 +23,11 @@ const getHelpfulDateFormat = (dateFormat: string) => {
 export function AnnotationRange() {
   const { control, watch } = useFormContext<CreateAnnotationForm>();
 
-  const timestampEnd = watch('@timestampEnd');
+  const eventEnd = watch('event.end');
   const dateFormatDefault = useUiSetting<string>('dateFormat');
   const dateFormat = getHelpfulDateFormat(dateFormatDefault);
 
-  if (timestampEnd) {
+  if (eventEnd) {
     return (
       <>
         <EuiFormRow
@@ -82,7 +82,7 @@ export function AnnotationRange() {
             }
           >
             <Controller
-              name="@timestampEnd"
+              name="event.end"
               control={control}
               rules={{
                 required: true,

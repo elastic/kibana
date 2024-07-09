@@ -26,7 +26,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       <AnnotationRange />
       <EuiSpacer size="s" />
       <Controller
-        name="@timestampEnd"
+        name="event.end"
         control={control}
         render={({ field: { value, ...field } }) => (
           <Switch
@@ -47,8 +47,8 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       />
       <EuiHorizontalRule margin="s" />
       <EuiFormRow
-        label={i18n.translate('xpack.observability.annotationForm.euiFormRow.messageLabel', {
-          defaultMessage: 'Message',
+        label={i18n.translate('xpack.observability.annotationForm.euiFormRow.titleLabel', {
+          defaultMessage: 'Title',
         })}
         display="columnCompressed"
         fullWidth
@@ -57,17 +57,17 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       >
         <Controller
           defaultValue=""
-          name="message"
+          name="annotation.title"
           control={control}
           rules={{
-            required: 'message is required',
+            required: 'title is required',
           }}
           render={({ field, fieldState }) => (
             <FieldText
               {...field}
               isInvalid={fieldState.invalid}
               compressed
-              data-test-subj="annotationMessage"
+              data-test-subj="annotationTitle"
               onBlur={() => {
                 field.onBlur();
                 // this is done to avoid too many re-renders, watch on name is expensive
@@ -79,16 +79,16 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.observability.annotationForm.euiFormRow.descriptionLabel', {
-          defaultMessage: 'Description',
+          defaultMessage: 'Message',
         })}
         display="columnCompressed"
         fullWidth
-        error={formState.errors.description?.message}
-        isInvalid={Boolean(formState.errors.description?.message)}
+        error={formState.errors.message?.message}
+        isInvalid={Boolean(formState.errors.message?.message)}
       >
         <Controller
           defaultValue=""
-          name="description"
+          name="message"
           control={control}
           render={({ field, fieldState }) => (
             <TextArea
@@ -96,7 +96,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
               rows={3}
               isInvalid={fieldState.invalid}
               compressed
-              data-test-subj="annotationDescription"
+              data-test-subj="annotationMessage"
               onBlur={() => {
                 field.onBlur();
                 // this is done to avoid too many re-renders, watch on name is expensive

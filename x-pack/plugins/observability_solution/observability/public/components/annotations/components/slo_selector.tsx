@@ -19,8 +19,8 @@ export interface SloItem {
 }
 
 interface Props {
-  initialSlos?: SloItem[];
-  onSelected: (vals: { slos?: Array<{ id: string; instanceId?: string }>; all?: boolean }) => void;
+  value?: SloItem;
+  onSelected: (vals: { slo?: { id: string; instanceId?: string }; all?: boolean }) => void;
   hasError?: boolean;
 }
 
@@ -34,7 +34,7 @@ const mapSlosToOptions = (slos: SLOWithSummaryResponse[] | SloItem[] | undefined
     value: `${slo.id}-${slo.instanceId}`,
   })) ?? [];
 
-export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
+export function SloSelector({ value, onSelected, hasError }: Props) {
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -51,17 +51,17 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
   }, [isLoading, sloList]);
 
   useEffect(() => {
-    if (initialSlos?.length && sloList?.results.length) {
-      const selectedSlos = sloList.results.filter((slo) =>
-        initialSlos.find((s) => s.id === slo.id && s.instanceId === slo.instanceId)
+    if (value && sloList?.results.length) {
+      const selectedSlos = sloList.results.filter(
+        (slo) => value.id === slo.id && value.instanceId === slo.instanceId
       );
       const newOpts = mapSlosToOptions(selectedSlos);
-      if (initialSlos[0]?.id === ALL_VALUE) {
+      if (value?.id === ALL_VALUE) {
         newOpts.unshift(ALL_OPTION);
       }
       setSelectedOptions(newOpts);
     }
-  }, [initialSlos, sloList]);
+  }, [value, sloList]);
 
   const onChange = (opts: Option[]) => {
     const isAllSelected = opts.find((opt) => opt.value === ALL_VALUE);
@@ -78,15 +78,15 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
             )
           : [];
       onSelected({
-        slos: selectedSlos.map((slo) => ({ id: slo.id, instanceId: slo.instanceId })),
+        slo: selectedSlos.map((slo) => ({ id: slo.id, instanceId: slo.instanceId }))[0],
       });
     }
   };
 
   const onSearchChange = useMemo(
     () =>
-      debounce((value: string) => {
-        setSearchValue(value);
+      debounce((val: string) => {
+        setSearchValue(val);
       }, 300),
     []
   );
@@ -105,6 +105,7 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
       fullWidth
       onSearchChange={onSearchChange}
       isInvalid={hasError}
+      singleSelection={{ asPlainText: true }}
     />
   );
 }

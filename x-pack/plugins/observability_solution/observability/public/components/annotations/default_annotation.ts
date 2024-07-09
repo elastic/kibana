@@ -18,23 +18,27 @@ import type { CreateAnnotationForm } from './components/create_annotation';
 export function getDefaultAnnotation({
   slo,
   timestamp,
-  timestampEnd,
+  eventEnd,
 }: {
   timestamp?: Moment;
-  timestampEnd?: Moment;
+  eventEnd?: Moment;
   slo?: SLOWithSummaryResponse;
 }): Partial<CreateAnnotationForm> {
   const sloId = slo?.id;
   const sloInstanceId = slo?.instanceId;
 
   return {
-    message: timestampEnd ? defaultRangeAnnotationLabel : defaultAnnotationLabel,
+    message: eventEnd ? defaultRangeAnnotationLabel : defaultAnnotationLabel,
     '@timestamp': timestamp ?? moment(),
-    '@timestampEnd': timestampEnd,
+    event: {
+      start: timestamp,
+      end: eventEnd,
+    },
     annotation: {
+      title: eventEnd ? defaultRangeAnnotationLabel : defaultAnnotationLabel,
       style: {
         icon: 'triangle',
-        color: timestampEnd ? defaultAnnotationRangeColor : defaultAnnotationColor,
+        color: eventEnd ? defaultAnnotationRangeColor : defaultAnnotationColor,
         line: {
           width: 2,
           style: 'solid',

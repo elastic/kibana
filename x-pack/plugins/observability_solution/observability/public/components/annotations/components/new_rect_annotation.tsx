@@ -23,9 +23,9 @@ export function NewRectAnnotation({
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
   const timestamp = watch('@timestamp');
-  const timestampEnd = watch('@timestampEnd');
+  const eventEnd = watch('event.end');
 
-  if (!timestamp || !timestampEnd || !isCreateOpen) {
+  if (!timestamp || !eventEnd || !isCreateOpen) {
     return null;
   }
   const annotation = watch('annotation');
@@ -48,7 +48,7 @@ export function ObsRectAnnotation({
 }) {
   const message = annotation.message;
   const timestamp = annotation['@timestamp'];
-  const timestampEnd = annotation['@timestampEnd'];
+  const timestampEnd = annotation.event?.end;
   const { euiTheme } = useEuiTheme();
   const annotationStyle = annotation.annotation?.style;
 

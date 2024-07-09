@@ -16,7 +16,7 @@ export function AnnotationIcon({
 }: {
   annotation: Annotation | CreateAnnotationParams;
 }) {
-  const timestampEnd = annotation['@timestampEnd'];
+  const eventEnd = annotation.event?.end;
   const { euiTheme } = useEuiTheme();
   const annotationStyle = annotation.annotation?.style;
   const iconValue = annotation.annotation.style?.icon;
@@ -26,7 +26,7 @@ export function AnnotationIcon({
   return (
     <EuiIcon
       type={
-        timestampEnd
+        eventEnd
           ? 'stopFilled'
           : (annotationsIconSet.find((icon) => icon.value === iconValue)?.icon as IconType) ??
             (iconValue as IconType)

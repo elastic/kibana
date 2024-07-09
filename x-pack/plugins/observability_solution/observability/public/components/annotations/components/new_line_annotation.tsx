@@ -23,9 +23,9 @@ export function NewLineAnnotation({
   isCreateOpen: boolean;
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
-  const timestampEnd = watch('@timestampEnd');
+  const eventEnd = watch('event.end');
 
-  if (timestampEnd || !isCreateOpen) {
+  if (eventEnd || !isCreateOpen) {
     return null;
   }
   const values = getValues();
@@ -82,7 +82,7 @@ export function ObsLineAnnotation({
           <AnnotationIcon annotation={annotation} />
         </span>
       }
-      markerBody={<EuiText>{annotation.message}</EuiText>}
+      markerBody={<EuiText>{annotation.annotation?.title ?? annotation.message}</EuiText>}
       markerPosition={annotation.annotation.style?.line?.iconPosition ?? 'top'}
       customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />

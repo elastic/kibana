@@ -14,7 +14,7 @@ export function TimestampRangeLabel({
 }: {
   annotation: Annotation | CreateAnnotationParams;
 }) {
-  if (annotation['@timestampEnd']) {
+  if (annotation.event?.end) {
     return (
       <div>
         {formatDate(annotation['@timestamp'], 'longDateTime')}
@@ -24,7 +24,7 @@ export function TimestampRangeLabel({
             margin: '0 5px',
           }}
         />
-        {formatDate(annotation['@timestampEnd'], 'longDateTime')}
+        {formatDate(annotation.event?.end, 'longDateTime')}
       </div>
     );
   }

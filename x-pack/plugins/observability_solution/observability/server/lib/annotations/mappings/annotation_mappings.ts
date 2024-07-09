@@ -11,6 +11,14 @@ export const ANNOTATION_MAPPINGS: Mappings = {
   properties: {
     annotation: {
       properties: {
+        title: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+            },
+          },
+        },
         type: {
           type: 'keyword',
         },
@@ -28,12 +36,18 @@ export const ANNOTATION_MAPPINGS: Mappings = {
     '@timestamp': {
       type: 'date',
     },
-    '@timestampEnd': {
-      type: 'date',
-    },
     event: {
       properties: {
+        start: {
+          type: 'date',
+        },
+        end: {
+          type: 'date',
+        },
         created: {
+          type: 'date',
+        },
+        updated: {
           type: 'date',
         },
       },
@@ -51,16 +65,14 @@ export const ANNOTATION_MAPPINGS: Mappings = {
         },
       },
     },
-    hosts: {
-      type: 'nested',
+    host: {
       properties: {
         name: {
           type: 'keyword',
         },
       },
     },
-    slos: {
-      type: 'nested',
+    slo: {
       properties: {
         id: {
           type: 'keyword',
@@ -70,16 +82,14 @@ export const ANNOTATION_MAPPINGS: Mappings = {
         },
       },
     },
-    monitors: {
-      type: 'nested',
+    monitor: {
       properties: {
         id: {
           type: 'keyword',
         },
       },
     },
-    alerts: {
-      type: 'nested',
+    alert: {
       properties: {
         id: {
           type: 'keyword',

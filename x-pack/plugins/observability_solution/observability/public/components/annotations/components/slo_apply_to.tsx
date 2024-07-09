@@ -25,22 +25,20 @@ export function SLOApplyTo({ editAnnotation }: { editAnnotation?: Annotation | n
       fullWidth={true}
     >
       <Controller
-        defaultValue={editAnnotation?.slos}
-        name="slos"
+        defaultValue={editAnnotation?.slo}
+        name="slo"
         control={control}
         render={({ field }) => (
           <SloSelector
-            initialSlos={field.value ?? []}
+            value={field.value}
             onSelected={(newValue) => {
-              const { slos, all } = newValue;
+              const { slo, all } = newValue;
               if (all) {
-                field.onChange([
-                  {
-                    id: ALL_VALUE,
-                  },
-                ]);
+                field.onChange({
+                  id: ALL_VALUE,
+                });
               } else {
-                field.onChange(slos);
+                field.onChange(slo);
               }
             }}
           />

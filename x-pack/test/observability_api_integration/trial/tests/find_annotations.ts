@@ -73,14 +73,14 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   };
 
   describe('ObservabilityFindAnnotations', () => {
-    after(async () => {
-      const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
-      if (indexExists) {
-        await es.indices.delete({
-          index: DEFAULT_INDEX_NAME,
-        });
-      }
-    });
+    // after(async () => {
+    //   const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
+    //   if (indexExists) {
+    //     await es.indices.delete({
+    //       index: DEFAULT_INDEX_NAME,
+    //     });
+    //   }
+    // });
 
     before(async () => {
       const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
@@ -93,20 +93,16 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
     it('creates few SLO annotations', async () => {
       await createAnnotation({
-        slos: [
-          {
-            id: 'slo-id',
-            instanceId: 'instance-id',
-          },
-        ],
+        slo: {
+          id: 'slo-id',
+          instanceId: 'instance-id',
+        },
       });
       await createAnnotation({
-        slos: [
-          {
-            id: 'slo-id2',
-            instanceId: 'instance-id',
-          },
-        ],
+        slo: {
+          id: 'slo-id2',
+          instanceId: 'instance-id',
+        },
       });
     });
 
@@ -114,24 +110,24 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       let response = await findAnnotations();
       expect(response.items.length).to.eql(2);
       const annotation = response.items[0];
-      expect(annotation.slos[0].id).to.eql('slo-id2');
+      expect(annotation.slo.id).to.eql('slo-id2');
 
       response = await findAnnotations({ sloId: 'slo-id' });
       expect(response.items.length).to.eql(1);
-      expect(response.items[0].slos[0].id).to.eql('slo-id');
+      expect(response.items[0].slo.id).to.eql('slo-id');
     });
 
     it('can find annotation with slo instance Id', async () => {
       const response = await findAnnotations({ sloInstanceId: 'instance-id' });
       expect(response.items.length).to.eql(2);
-      expect(response.items[0].slos[0].instanceId).to.eql('instance-id');
+      expect(response.items[0].slo.instanceId).to.eql('instance-id');
     });
 
     it('can find annotation with slo instance Id and slo id', async () => {
       const response = await findAnnotations({ sloInstanceId: 'instance-id', sloId: 'slo-id' });
       expect(response.items.length).to.eql(1);
-      expect(response.items[0].slos[0].instanceId).to.eql('instance-id');
-      expect(response.items[0].slos[0].id).to.eql('slo-id');
+      expect(response.items[0].slo.instanceId).to.eql('instance-id');
+      expect(response.items[0].slo.id).to.eql('slo-id');
     });
   });
 }

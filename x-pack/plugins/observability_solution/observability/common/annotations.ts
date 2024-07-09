@@ -28,11 +28,11 @@ const dateAsStringRt = new t.Type<string, string, unknown>(
 );
 
 export const rectFill = t.union([t.literal('inside'), t.literal('outside')]);
-export const rectPosition = t.union([t.literal('top'), t.literal('bottom')]);
 
 export const createAnnotationRt = t.intersection([
   t.type({
     annotation: t.partial({
+      title: t.string,
       type: t.string,
       style: t.partial({
         icon: t.string,
@@ -49,18 +49,37 @@ export const createAnnotationRt = t.intersection([
       }),
     }),
     '@timestamp': dateAsStringRt,
-    message: t.string,
   }),
   t.partial({
-    description: t.string,
+    message: t.string,
+    event: t.intersection([
+      t.type({
+        start: dateAsStringRt,
+      }),
+      t.partial({
+        end: dateAsStringRt,
+      }),
+    ]),
     tags: t.array(t.string),
-    '@timestampEnd': dateAsStringRt,
     service: t.partial({
       name: t.string,
       environment: t.string,
       version: t.string,
     }),
-    slos: t.array(t.intersection([t.type({ id: t.string }), t.partial({ instanceId: t.string })])),
+    monitor: t.partial({
+      id: t.string,
+    }),
+    slo: t.intersection([
+      t.type({
+        id: t.string,
+      }),
+      t.partial({
+        instanceId: t.string,
+      }),
+    ]),
+    host: t.partial({
+      name: t.string,
+    }),
   }),
 ]);
 
@@ -90,7 +109,5 @@ export type CreateAnnotationParams = t.TypeOf<typeof createAnnotationRt>;
 export type DeleteAnnotationParams = t.TypeOf<typeof deleteAnnotationRt>;
 export type GetByIdAnnotationParams = t.TypeOf<typeof getAnnotationByIdRt>;
 export type FindAnnotationParams = t.TypeOf<typeof findAnnotationRt>;
-export type AnnotationRectFill = t.TypeOf<typeof rectFill>;
-export type AnnotationRectPosition = t.TypeOf<typeof rectPosition>;
 
 export type Annotation = t.TypeOf<typeof updateAnnotationRt>;

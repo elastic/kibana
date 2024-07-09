@@ -35,10 +35,10 @@ journey(`AnnotationsList`, async ({ page, params }) => {
 
   step('create an annotation', async () => {
     await page.click('text="Create annotation"');
-    await page.getByTestId('annotationMessage').fill('Test annotation');
+    await page.getByTestId('annotationTitle').fill('Test annotation');
+    await page.getByTestId('annotationTitle').blur();
+    await page.getByTestId('annotationMessage').fill('Test annotation description');
     await page.getByTestId('annotationMessage').blur();
-    await page.getByTestId('annotationDescription').fill('Test annotation description');
-    await page.getByTestId('annotationDescription').blur();
 
     await page.getByTestId('annotationTags').click();
 
@@ -75,10 +75,10 @@ journey(`AnnotationsList`, async ({ page, params }) => {
 
   step('update annotation', async () => {
     await page.locator('.echAnnotation__marker').nth(1).click();
-    await page.getByTestId('annotationMessage').fill('Updated annotation');
+    await page.getByTestId('annotationTitle').fill('Updated annotation');
+    await page.getByTestId('annotationTitle').blur();
+    await page.getByTestId('annotationMessage').fill('Updated annotation description');
     await page.getByTestId('annotationMessage').blur();
-    await page.getByTestId('annotationDescription').fill('Updated annotation description');
-    await page.getByTestId('annotationDescription').blur();
     await page.getByTestId('annotationSaveButton').click();
 
     await page.getByTestId('toastCloseButton').click();

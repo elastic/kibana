@@ -64,12 +64,20 @@ export function createAnnotationsClient(params: {
     await initIndex();
   };
 
+  const validateAnnotation = (annotation: CreateAnnotationParams | Annotation) => {
+    // make sure to check one of message of annotation.title is present
+    if (!annotation.message && !annotation.annotation.title) {
+      throw Boom.badRequest('Annotation must have a message or a annotation.title');
+    }
+  };
+
   return {
     index,
     create: ensureGoldLicense(
       async (
         createParams: CreateAnnotationParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
+        validateAnnotation(createParams);
         const indexExists = await unwrapEsResponse(
           esClient.indices.exists(
             {
@@ -88,6 +96,7 @@ export function createAnnotationsClient(params: {
         const annotation = {
           ...createParams,
           event: {
+            ...createParams.event,
             created: new Date().toISOString(),
           },
         };
@@ -118,12 +127,14 @@ export function createAnnotationsClient(params: {
       async (
         updateParams: Annotation
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
+        validateAnnotation(updateParams);
         const { id, ...rest } = updateParams;
 
         const annotation = {
           ...rest,
           event: {
-            created: new Date().toISOString(),
+            ...rest.event,
+            updated: new Date().toISOString(),
           },
         };
 
@@ -175,74 +186,81 @@ export function createAnnotationsClient(params: {
 
       const shouldClauses: QueryDslQueryContainer[] = [];
       if (sloId || sloInstanceId) {
-        const sloFilters: QueryDslQueryContainer[] = [];
-        if (sloId) {
-          sloFilters.push({
-            nested: {
-              path: 'slos',
-              query: {
-                match_phrase: {
-                  'slos.id': sloId,
-                },
-              },
-            },
-          });
-        }
-        if (sloInstanceId) {
-          sloFilters.push({
-            nested: {
-              path: 'slos',
-              query: {
-                match_phrase: {
-                  'slos.instanceId': sloInstanceId,
-                },
-              },
-            },
-          });
-        }
-        const sloFilter: QueryDslQueryContainer = {
+        const query: QueryDslQueryContainer = {
           bool: {
-            filter: sloFilters,
-          },
-        };
-
-        const allSloFilter: QueryDslQueryContainer = {
-          bool: {
-            filter: [
+            should: [
               {
-                nested: {
-                  path: 'slos',
-                  query: {
-                    bool: {
-                      should: [
-                        {
-                          term: {
-                            'slos.id': '*',
+                term: {
+                  'slo.id': '*',
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    ...(sloId
+                      ? [
+                          {
+                            match_phrase: {
+                              'slo.id': sloId,
+                            },
                           },
-                        },
-                      ],
-                    },
-                  },
+                        ]
+                      : []),
+                    ...(sloInstanceId
+                      ? [
+                          {
+                            match_phrase: {
+                              'slo.instanceId': sloInstanceId,
+                            },
+                          },
+                        ]
+                      : []),
+                  ],
                 },
               },
             ],
           },
         };
-        const query: QueryDslQueryContainer = {
-          bool: {
-            should: [allSloFilter, sloFilter],
-          },
-        };
         shouldClauses.push(query);
       }
 
-      if (serviceName) {
-        shouldClauses.push({
-          term: {
-            'service.name': serviceName,
+      console.log(
+        JSON.stringify({
+          index: readIndex,
+          size: 10000,
+          ignore_unavailable: true,
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: start ?? 'now-30d',
+                      lte: end ?? 'now',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      ...(serviceName
+                        ? [
+                            {
+                              term: {
+                                'service.name': serviceName,
+                              },
+                            },
+                          ]
+                        : []),
+                      ...shouldClauses,
+                    ],
+                  },
+                },
+              ],
+            },
           },
-        });
-      }
+        })
+      );
 
       const result = await esClient.search({
         index: readIndex,
@@ -261,8 +279,18 @@ export function createAnnotationsClient(params: {
               },
               {
                 bool: {
-                  should: shouldClauses,
-                  minimum_should_match: 1,
+                  should: [
+                    ...(serviceName
+                      ? [
+                          {
+                            term: {
+                              'service.name': serviceName,
+                            },
+                          },
+                        ]
+                      : []),
+                    ...shouldClauses,
+                  ],
                 },
               },
             ],

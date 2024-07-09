@@ -28,10 +28,10 @@ export function AnnotationTooltip({
 }) {
   const listItems = [
     {
-      title: i18n.translate('xpack.observability.annotationTooltip.message', {
-        defaultMessage: 'Message',
+      title: i18n.translate('xpack.observability.annotationTooltip.title', {
+        defaultMessage: 'Title',
       }),
-      description: annotation.message ?? '--',
+      description: annotation.annotation.title ?? '--',
     },
     {
       title: i18n.translate('xpack.observability.annotationTooltip.tags', {
@@ -43,16 +43,16 @@ export function AnnotationTooltip({
       title: i18n.translate('xpack.observability.annotationTooltip.description', {
         defaultMessage: 'Description',
       }),
-      description: annotation.description ?? '--',
+      description: annotation.message ?? '--',
     },
   ];
 
-  if (annotation.slos?.length) {
+  if (annotation.slo?.id) {
     listItems.push({
       title: i18n.translate('xpack.observability.annotationTooltip.slo', {
-        defaultMessage: 'SLOs',
+        defaultMessage: 'SLO',
       }),
-      description: annotation.slos.map((slo) => slo.id).join(', '),
+      description: annotation.slo?.id,
     });
   }
 

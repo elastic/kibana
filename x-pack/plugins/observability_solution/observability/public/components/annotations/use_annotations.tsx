@@ -66,8 +66,7 @@ export const useAnnotations = ({
   });
 
   const onCancel = useCallback(() => {
-    setValue('@timestamp', null);
-    setValue('@timestampEnd', null);
+    setValue('event.end', null);
     setIsCreateOpen(false);
     setSelectedEditAnnotation(null);
     setEditAnnotation?.(null);
@@ -117,7 +116,10 @@ export const useAnnotations = ({
           reset({
             ...editData,
             '@timestamp': moment(editData['@timestamp']),
-            '@timestampEnd': moment(editData['@timestampEnd']),
+            event: {
+              end: editData.event ? moment(editData.event.end) : undefined,
+              start: moment(editData['@timestamp']),
+            },
           });
           setIsCreateOpen(true);
           setSelectedEditAnnotation(editData);
@@ -145,7 +147,7 @@ export const useAnnotations = ({
             getDefaultAnnotation({
               slo,
               timestamp: moment(from),
-              timestampEnd: moment(to),
+              eventEnd: moment(to),
             })
           );
 
@@ -166,7 +168,7 @@ export const useAnnotations = ({
         setValue('@timestamp', moment(new Date(Number(start))));
       }
       if (end) {
-        setValue('@timestampEnd', moment(new Date(Number(end))));
+        setValue('event.end', moment(new Date(Number(end))));
       }
       if (end) {
         setValue('message', defaultRangeAnnotationLabel);

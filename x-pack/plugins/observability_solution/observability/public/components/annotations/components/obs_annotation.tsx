@@ -10,7 +10,7 @@ import { ObsLineAnnotation } from './new_line_annotation';
 import { Annotation } from '../../../../common/annotations';
 
 export function ObsAnnotation({ annotation }: { annotation: Annotation }) {
-  if (!annotation['@timestampEnd'] || annotation.annotation.type === 'line') {
+  if (!annotation.event?.end || annotation.annotation.type === 'line') {
     return <ObsLineAnnotation annotation={annotation} />;
   }
   return <ObsRectAnnotation annotation={annotation} />;

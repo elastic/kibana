@@ -58,7 +58,11 @@ export function useDeleteAnnotation() {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.delete.annotation', {
             defaultMessage: 'Something went wrong while deleting annotation {message}',
-            values: { message: annotations.map((annotation) => annotation.message).join(', ') },
+            values: {
+              message: annotations
+                .map((annotation) => annotation.annotation?.title ?? annotation.message)
+                .join(', '),
+            },
           }),
         });
       },

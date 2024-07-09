@@ -68,7 +68,7 @@ export function useCreateAnnotation() {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.create.annotation', {
             defaultMessage: 'Something went wrong while creating annotation {message}',
-            values: { message: annotation.message },
+            values: { message: annotation.annotation?.title ?? annotation.message },
           }),
         });
       },

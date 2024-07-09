@@ -12,15 +12,15 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { Annotation } from '../../../common/annotations';
 
 export function AnnotationApplyTo({ annotation }: { annotation: Annotation }) {
-  const slos = annotation.slos;
+  const slo = annotation.slo;
   const serviceName = annotation.service?.name;
-  let sloLabel = slos?.length
+  let sloLabel = slo
     ? i18n.translate('xpack.observability.columns.sloTextLabel', {
-        defaultMessage: 'SLOs: {slos}',
-        values: { slos: slos.map((slo) => slo.id).join(', ') },
+        defaultMessage: 'SLO: {slo}',
+        values: { slo: slo.id },
       })
     : '';
-  const isAllSlos = slos?.find((slo) => slo.id === ALL_VALUE);
+  const isAllSlos = slo?.id === ALL_VALUE;
   if (isAllSlos) {
     sloLabel = i18n.translate('xpack.observability.columns.sloTextLabel.all', {
       defaultMessage: 'SLOs: All',
@@ -33,7 +33,7 @@ export function AnnotationApplyTo({ annotation }: { annotation: Annotation }) {
       })
     : '';
 
-  if (!slos?.length && !serviceName) {
+  if (!slo && !serviceName) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.observability.columns.TextLabel', { defaultMessage: '--' })}

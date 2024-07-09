@@ -23,12 +23,15 @@ export const useEditAnnotationHelper = ({
   useEffect(() => {
     if (!editAnnotation) return;
 
+    const eventEnd = editAnnotation.event?.end;
+
     reset({
       ...editAnnotation,
       '@timestamp': moment(editAnnotation['@timestamp']),
-      '@timestampEnd': editAnnotation['@timestampEnd']
-        ? moment(editAnnotation['@timestampEnd'])
-        : undefined,
+      event: {
+        start: moment(editAnnotation.event?.start),
+        end: eventEnd ? moment(eventEnd) : undefined,
+      },
     });
     setIsCreateOpen(true);
   }, [editAnnotation, setIsCreateOpen, reset]);
