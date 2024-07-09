@@ -207,6 +207,26 @@ describe('chaining$', () => {
       subscription.unsubscribe();
     });
 
+    test('should not fire when unchained filter changes', async () => {
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+        .pipe(skip(1))
+        .subscribe(onFireMock);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFireMock.mock.calls).toHaveLength(0);
+
+      deltaControlApi.filters$.next([
+        {
+          meta: {
+            alias: 'filterDelta_version2',
+          },
+        },
+      ]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      
+      expect(onFireMock.mock.calls).toHaveLength(0);
+      subscription.unsubscribe();
+    });
+
     test('should fire when chained timeslice changes', async () => {
       const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
         .pipe(skip(1))
