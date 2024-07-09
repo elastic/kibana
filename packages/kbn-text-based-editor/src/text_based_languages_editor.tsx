@@ -425,9 +425,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
-        // @TODO: remove
-        console.log(`--@@queryToExecute`, queryToExecute);
-
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
@@ -937,11 +934,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       if (isCompactFocused || !hoverProvider?.provideHover) {
                         return { contents: [] };
                       }
-                      // @TODO: remove
-                      console.log(
-                        `--@@hoverProvider?.provideHover(model, position, token)`,
-                        hoverProvider?.provideHover(model, position, token)
-                      );
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}

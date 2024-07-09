@@ -119,22 +119,24 @@ export function getSuggestionCommandDefinition(
   };
 }
 
-export const buildEcsFieldsDefinitions = (fields: ESQLRealField[]): SuggestionRawDefinition[] => {
+export const buildFieldsDefinitionsWithMetadata = (
+  fields: ESQLRealField[]
+): SuggestionRawDefinition[] => {
   return fields.map((field) => {
-    const ecsDescription = field.metadata?.description;
+    const description = field.metadata?.description;
+    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
       text: getSafeInsertText(field.name),
       kind: 'Variable',
-      detail: ecsDescription
-        ? // @todo: check if this needs to be internationalized
-          // Title case the type (keyword -> Keyword)
-          `${field.type.charAt(0).toUpperCase() + field.type.slice(1)} ` +
+      detail: description
+        ? `${titleCaseType} ` +
           `
 
-${ecsDescription}`
-        : field.type,
-      sortText: 'D',
+${description}`
+        : titleCaseType,
+      // If there is a description, it is a field from ECS, so it should be sorted to the top
+      sortText: description ? '1D' : 'D',
     };
   });
 };
