@@ -217,14 +217,16 @@ export class DataVisualizer {
     samplerShardSize: number,
     runtimeMappings?: RuntimeMappings
   ): Promise<any> {
-    return await fetchHistogramsForFields(
-      this._asCurrentUser,
-      indexPattern,
-      query,
-      fields,
-      samplerShardSize,
-      runtimeMappings
-    );
+    return await fetchHistogramsForFields({
+      esClient: this._asCurrentUser,
+      arguments: {
+        indexPattern,
+        query,
+        fields,
+        samplerShardSize,
+        runtimeMappings,
+      },
+    });
   }
 
   // Obtains statistics for supplied list of fields. The statistics for each field in the

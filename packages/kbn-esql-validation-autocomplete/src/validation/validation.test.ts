@@ -1359,7 +1359,8 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy `, []);
       testErrorsAndWarnings('from a_index | enrich `this``is fine`', [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME",
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        'Unknown policy [`this``is]',
       ]);
       testErrorsAndWarnings('from a_index | enrich this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
