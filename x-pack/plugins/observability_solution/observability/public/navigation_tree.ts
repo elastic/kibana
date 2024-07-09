@@ -352,6 +352,7 @@ export const definition: AddSolutionNavigationArg = {
   id: 'oblt',
   title,
   icon: 'logoObservability',
+  homePage: 'observabilityOnboarding',
   navigationTree$: of(navTree),
   dataTestSubj: 'observabilitySideNav',
 };

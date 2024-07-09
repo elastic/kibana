@@ -8,6 +8,7 @@
 import { map } from 'rxjs';
 import produce from 'immer';
 import { i18n } from '@kbn/i18n';
+import { SecurityPageName, SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
 import type { AppDeepLinkId, GroupDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { type Services } from '../common/services';
 
@@ -46,6 +47,7 @@ export const initSideNavigation = async (services: Services) => {
 
   navigation.addSolutionNavigation({
     id: 'security',
+    homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
     title: SOLUTION_NAME,
     icon: 'logoSecurity',
     navigationTree$: essNavigationTree$,
