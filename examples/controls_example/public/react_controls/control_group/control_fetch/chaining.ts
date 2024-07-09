@@ -15,6 +15,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from 'rxjs';
 
+export interface ChainingContext {
+  chainingFilters?: Filter[] | undefined;
+  timeRange?: TimeRange | undefined;
+}
+
 export function chaining$(
   uuid: string,
   chainingSystem$: PublishingSubject<ControlGroupChainingSystem>,
