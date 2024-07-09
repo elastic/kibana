@@ -2,10 +2,7 @@ on:
   pull_request_target:
     branches-ignore:
       - main
-    types:
-      - opened
-      - synchronize
-      - reopened
+    types: [opened, synchronize, reopened]
 
 jobs:
   approve:
