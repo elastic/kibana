@@ -16,6 +16,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  Metadata,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -233,12 +234,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Adds LangChain Documents to the knowledge base
    *
-   * @param documents LangChain Documents to add to the knowledge base
+   * @param {Array<Document<Metadata>>} documents - LangChain Documents to add to the knowledge base
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
   }: {
-    documents: Document[];
+    documents: Array<Document<Metadata>>;
   }): Promise<KnowledgeBaseEntryResponse[]> => {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
@@ -252,7 +253,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) =>
         transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          // TODO: Update the LangChain Document Metadata type extension
           metadata: {
             kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
@@ -272,7 +272,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           })
         : undefined;
     this.options.logger.debug(`created: ${created?.data.hits.hits.length ?? '0'}`);
-    this.options.logger.debug(`errors: ${JSON.stringify(errors, null, 2)}`);
+    this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
   };
@@ -326,12 +326,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
 
       this.options.logger.debug(
-        `getKnowledgeBaseDocuments() - Similarity Search Query:\n ${JSON.stringify(
-          vectorSearchQuery
-        )}`
+        () =>
+          `getKnowledgeBaseDocuments() - Similarity Search Query:\n ${JSON.stringify(
+            vectorSearchQuery
+          )}`
       );
       this.options.logger.debug(
-        `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
+        () =>
+          `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
       );
 
       return results;
@@ -359,7 +361,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     this.options.logger.debug(
-      `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
+      () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );
     this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
     const esClient = await this.options.elasticsearchClientPromise;

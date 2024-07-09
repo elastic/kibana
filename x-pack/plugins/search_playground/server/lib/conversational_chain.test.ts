@@ -97,6 +97,7 @@ describe('conversational chain', () => {
         inputTokensLimit: modelLimit,
       },
       prompt: 'you are a QA bot {question} {chat_history} {context}',
+      questionRewritePrompt: 'rewrite question {question} using {chat_history}"',
     });
 
     const stream = await conversationalChain.stream(aiClient, chat);
@@ -205,6 +206,57 @@ describe('conversational chain', () => {
         },
       ],
       contentField: { index: 'field', website: 'metadata.source' },
+    });
+  }, 10000);
+
+  it('should be able to create a conversational chain with inner hit field', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      docs: [
+        {
+          _index: 'index',
+          _id: '1',
+          inner_hits: {
+            'index.field': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      text: 'value',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      expectedDocs: [
+        {
+          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'value' }],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 7 },
+        { type: 'prompt_token_count', count: 20 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+      contentField: { index: 'field' },
     });
   }, 10000);
 
@@ -391,7 +443,7 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      // Even with body_content of 1000, the token count should be below the model limit of 100
+      // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
         { type: 'context_token_count', count: 70 },
         { type: 'prompt_token_count', count: 97 },

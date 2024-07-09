@@ -19,10 +19,11 @@ import type {
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
+  SERVER_APP_ID,
 } from '../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
@@ -34,13 +35,11 @@ import { PreviewRulesSchema } from '../../../../../../common/api/detection_engin
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
-import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
 import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -65,6 +64,8 @@ import { createSecurityRuleTypeWrapper } from '../../../rule_types/create_securi
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
+import { applyRuleDefaults } from '../../../rule_management/logic/detection_rules_client/mergers/apply_rule_defaults';
+import { convertRuleResponseToAlertingRule } from '../../../rule_management/logic/detection_rules_client/converters/convert_rule_response_to_alerting_rule';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
@@ -119,7 +120,7 @@ export const previewRulesRoute = (
             });
           }
 
-          const internalRule = convertCreateAPIToInternalSchema(request.body);
+          const internalRule = convertRuleResponseToAlertingRule(applyRuleDefaults(request.body));
           const previewRuleParams = internalRule.params;
 
           const mlAuthz = buildMlAuthz({
@@ -238,6 +239,8 @@ export const previewRulesRoute = (
               createdAt: new Date(),
               createdBy: username ?? 'preview-created-by',
               producer: 'preview-producer',
+              consumer: SERVER_APP_ID,
+              enabled: true,
               revision: 0,
               ruleTypeId,
               ruleTypeName,

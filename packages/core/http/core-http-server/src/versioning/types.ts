@@ -32,7 +32,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description'>;
+  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description' | 'deprecated'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /**
@@ -82,6 +82,14 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * ```
    */
   description?: string;
+
+  /**
+   * Declares this operation to be deprecated. Consumers SHOULD refrain from usage
+   * of this route. This will be surfaced in OAS documentation.
+   *
+   * @default false
+   */
+  deprecated?: boolean;
 };
 
 /**

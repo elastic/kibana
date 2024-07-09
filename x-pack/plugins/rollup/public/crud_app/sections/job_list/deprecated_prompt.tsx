@@ -41,6 +41,7 @@ export const DeprecatedPrompt = () => {
             target="_blank"
             fill
             iconType="help"
+            data-test-subj="rollupDeprecatedPromptDocsLink"
           >
             <FormattedMessage
               id="xpack.rollupJobs.deprecatedPrompt.downsamplingDocsButtonLabel"

@@ -44,6 +44,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
+import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
@@ -249,7 +250,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
-
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
     });
@@ -552,7 +553,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      security: plugins.security,
+      security: core.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
@@ -571,6 +572,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
+      analyticsService: core.analytics,
     });
 
     taskRunnerFactory!.initialize({
@@ -645,7 +647,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       request,
       authorizationMode,
       authorization: this.security?.authz,
-      authentication: this.security?.authc,
     });
   };
 
