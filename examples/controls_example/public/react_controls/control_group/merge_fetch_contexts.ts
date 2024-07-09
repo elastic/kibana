@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ChainingContext, DataControlFetchContext } from "./types";
+import { ChainingContext, DataControlFetchContext } from './types';
 
-export function mergeFetchContexts(controlGroupFetchContext: DataControlFetchContext, chainingContext: ChainingContext) {
+export function mergeFetchContexts(
+  controlGroupFetchContext: DataControlFetchContext,
+  chainingContext: ChainingContext
+) {
   const filters = [];
   if (controlGroupFetchContext.unifiedSearchFilters) {
     filters.push(...controlGroupFetchContext.unifiedSearchFilters);
