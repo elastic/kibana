@@ -53,6 +53,13 @@ export function generateLatestTransform(
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
+        'entity.displayName': {
+          terms: {
+            field: 'entity.displayName.keyword',
+            // Field should be a single value but the exact value might change if different values are found in identity fields
+            size: 1,
+          },
+        },
         'entity.lastSeenTimestamp': {
           max: {
             field: 'entity.lastSeenTimestamp',

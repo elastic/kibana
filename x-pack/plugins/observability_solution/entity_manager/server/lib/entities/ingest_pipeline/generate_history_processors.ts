@@ -132,6 +132,18 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
       },
     },
     {
+      remove: {
+        field: 'entity.identityFields',
+        ignore_missing: true,
+      },
+    },
+    {
+      set: {
+        field: 'entity.identityFields',
+        value: definition.identityFields.map((identityField) => identityField.field),
+      },
+    },
+    {
       date_index_name: {
         field: '@timestamp',
         index_name_prefix: `${generateHistoryIndexName(definition)}.`,
