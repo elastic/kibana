@@ -54,7 +54,7 @@ export const DocViewerSource = ({
   const [jsonValue, setJsonValue] = useState<string>('');
   const { uiSettings } = getUnifiedDocViewerServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const useDocExplorer = isLegacyTableEnabled({
+  const useDocExplorer = !isLegacyTableEnabled({
     uiSettings,
     isTextBasedQueryMode: Array.isArray(textBasedHits),
   });

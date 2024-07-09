@@ -46,6 +46,7 @@
     "@kbn/rule-data-utils",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

@@ -31,6 +31,10 @@ export const executeActionRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
+      options: {
+        access: 'public',
+        description: `Run a connector`,
+      },
       validate: {
         body: bodySchema,
         params: paramSchema,

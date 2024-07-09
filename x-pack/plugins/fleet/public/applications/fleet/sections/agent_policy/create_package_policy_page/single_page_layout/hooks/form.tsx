@@ -272,7 +272,8 @@ export function useOnSubmit({
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
             const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
+            // skip preinstall of input package, to be able to rollback when package policy creation fails
+            if (packageInfo && packageInfo.type !== 'input') {
               packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {

@@ -20,7 +20,7 @@ import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
+import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
@@ -113,7 +113,7 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
+          return getApmSynthtraceEsClient(context, synthtraceKibanaClient);
         },
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({

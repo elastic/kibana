@@ -25,11 +25,11 @@ Beats integration, use the filter below the side navigation.
 A good place to start is with one of our Elastic solutions, which
 offer experiences for common use cases.
 
-* *Web site search crawler.*
-Discover, extract, and index your web content into App Search engines using the
-{app-search-ref}/web-crawler.html[Enterprise Search web site crawler].
-Search across Google Drive, GitHub, Salesforce, and many other web services using
-{workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
+* *Elastic connectors and crawler.*
+** Create searchable mirrors of your data in Sharepoint Online, S3, Google Drive, and many other web services using our open code {enterprise-search-ref}/connectors.html[Elastic connectors].
+** Discover, extract, and index your web content into {es} using the
+{enterprise-search-ref}/crawler.html[Elastic web crawler].
+
 
 * *Elastic Observability.*
 Get logs, metrics, traces, and uptime data into the Elastic Stack.

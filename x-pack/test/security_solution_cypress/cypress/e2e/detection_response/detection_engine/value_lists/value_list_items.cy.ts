@@ -79,7 +79,7 @@ describe(
       getValueListItemsTableRow().should('have.length', perPage);
       searchValueListItemsModal('keyword:not_exists');
       getValueListItemsTableRow().should('have.length', 1);
-      cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains('No items found');
+      cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains('0 list items match your search criteria.');
 
       searchValueListItemsModal('keyword:*or*');
       getValueListItemsTableRow().should('have.length', 4);

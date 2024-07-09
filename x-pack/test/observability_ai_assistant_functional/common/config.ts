@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
@@ -39,6 +40,9 @@ export interface TestConfig extends CreateTestAPI {
       >;
       kibana_ebt_server: (context: InheritedFtrProviderContext) => EBTHelpersContract;
       kibana_ebt_ui: (context: InheritedFtrProviderContext) => EBTHelpersContract;
+      apmSynthtraceEsClient: (
+        context: InheritedFtrProviderContext
+      ) => Promise<ApmSynthtraceEsClient>;
     };
 }
 

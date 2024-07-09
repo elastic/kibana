@@ -8,24 +8,21 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../types';
+import { ChatForm } from '../types';
 
 const queryClient = new QueryClient({});
 
 export interface PlaygroundProviderProps {
-  defaultValues?: Partial<Pick<ChatForm, ChatFormFields.indices>>;
+  children: React.ReactNode;
 }
 
-export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
-  children,
-  defaultValues,
-}) => {
+export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({ children }) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
       doc_size: 3,
-      source_fields: [],
-      indices: defaultValues?.indices || [],
+      source_fields: {},
+      indices: [],
     },
   });
 

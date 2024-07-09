@@ -277,6 +277,12 @@ describe('StatefulTopN', () => {
 
       expect(props.to).toEqual('2020-07-08T08:20:18.966Z');
     });
+
+    test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+
+      expect(props.applyGlobalQueriesAndFilters).toEqual(true);
+    });
   });
 
   describe('rendering in a timeline context', () => {
@@ -344,26 +350,38 @@ describe('StatefulTopN', () => {
 
       expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
     });
+
+    test(`provides 'applyGlobalQueriesAndFilters' = false`, () => {
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+
+      expect(props.applyGlobalQueriesAndFilters).toEqual(false);
+    });
   });
 
   describe('rendering in alerts context', () => {
-    detectionAlertsTables.forEach((tableId) => {
-      test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
-        const wrapper = mount(
+    describe.each(detectionAlertsTables)('tableId: %s', (tableId) => {
+      let wrapper: ReactWrapper;
+      beforeEach(() => {
+        wrapper = mount(
           <TestProviders store={store}>
-            <StatefulTopN
-              {...{
-                ...testProps,
-                scopeId: tableId,
-              }}
-            />
+            <StatefulTopN {...{ ...testProps, scopeId: tableId }} />
           </TestProviders>
         );
+      });
+      afterEach(() => {
+        wrapper.unmount();
+      });
+
+      test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
         await waitFor(() => {
           const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
           expect(props.defaultView).toEqual('alert');
         });
-        wrapper.unmount();
+      });
+
+      test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
+        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+        expect(props.applyGlobalQueriesAndFilters).toEqual(true);
       });
     });
   });

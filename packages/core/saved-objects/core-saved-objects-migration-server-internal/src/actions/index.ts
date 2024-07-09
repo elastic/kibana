@@ -27,6 +27,9 @@ export { initAction } from './initialize_action';
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
 
+export type { SafeWriteBlockParams } from './safe_write_block';
+export { safeWriteBlock } from './safe_write_block';
+
 export type { SetWriteBlockParams } from './set_write_block';
 export { setWriteBlock } from './set_write_block';
 
@@ -158,6 +161,11 @@ export interface EsResponseTooLargeError {
   contentLength: number;
 }
 
+export interface SourceEqualsTarget {
+  type: 'source_equals_target';
+  index: string;
+}
+
 /** @internal */
 export interface AcknowledgeResponse {
   acknowledged: boolean;
@@ -185,6 +193,7 @@ export interface ActionErrorTypeMap {
   index_mappings_incomplete: IndexMappingsIncomplete;
   types_changed: TypesChanged;
   operation_not_supported: OperationNotSupported;
+  source_equals_target: SourceEqualsTarget;
 }
 
 /**

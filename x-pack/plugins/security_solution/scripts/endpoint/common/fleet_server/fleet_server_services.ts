@@ -10,6 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import execa from 'execa';
 import chalk from 'chalk';
 import assert from 'assert';
+import pRetry from 'p-retry';
 import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
@@ -138,7 +139,12 @@ export const startFleetServer = async ({
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     const policyId =
       policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
-    const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
+    const serviceToken = isServerless
+      ? ''
+      : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
+          retries: 2,
+          forever: false,
+        });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,

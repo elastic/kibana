@@ -736,6 +736,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CALCULATE_EXCLUDE_FILTERS',
       };
+    } else if (isTypeof(res.left, 'source_equals_target')) {
+      // As part of a reindex-migration, we wanted to block the source index to prevent updates
+      // However, this migrator's source index matches the target index.
+      // Thus, another instance's migrator is ahead of us. We skip the clone steps and continue the flow
+      return {
+        ...stateP,
+        controlState: 'REFRESH_TARGET',
+      };
     } else if (isTypeof(res.left, 'index_not_found_exception')) {
       // We don't handle the following errors as the migration algorithm
       // will never cause them to occur:

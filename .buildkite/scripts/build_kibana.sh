@@ -20,7 +20,6 @@ echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
 
 if is_pr_with_label "ci:build-cloud-image"; then
-  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
   node scripts/build \
   --skip-initialize \
   --skip-generic-folders \
@@ -35,7 +34,6 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --skip-docker-ubuntu \
   --skip-docker-serverless \
   --skip-docker-contexts
-  docker logout docker.elastic.co
 
   CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
   cat << EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image

@@ -11,6 +11,7 @@ import { useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { SUCCESSFULLY_DELETED_ITEM } from '../translations';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -32,6 +33,7 @@ export const DeleteListItem = ({ id, value }: { id: string; value: string }) => 
   });
 
   const deleteListItem = useCallback(() => {
+    track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.DELETE_VALUE_LIST_ITEM);
     deleteListItemMutation.mutate({ id, http });
   }, [deleteListItemMutation, id, http]);
 

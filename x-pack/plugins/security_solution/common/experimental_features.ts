@@ -119,11 +119,6 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
-   * Enables the Attack discovery feature and API endpoint
-   */
-  attackDiscoveryEnabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,

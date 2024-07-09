@@ -348,13 +348,10 @@ describe('execute()', () => {
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "auth": Object {
-          "password": "123",
-          "username": "abc",
-        },
         "axios": undefined,
         "data": "some data",
         "headers": Object {
+          "Authorization": "Basic YWJjOjEyMw==",
           "aheader": "a value",
         },
         "logger": Object {

@@ -21,7 +21,15 @@ import { IndexViewLogic } from '../index_view_logic';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 
-export const SyncJobs: React.FC = () => {
+export interface SyncJobsProps {
+  errorOnAccessSync?: boolean;
+  errorOnContentSync?: boolean;
+}
+
+export const SyncJobs: React.FC<SyncJobsProps> = ({
+  errorOnAccessSync = false,
+  errorOnContentSync = false,
+}) => {
   const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { productFeatures } = useValues(KibanaLogic);
   const shouldShowAccessSyncs =
@@ -74,6 +82,7 @@ export const SyncJobs: React.FC = () => {
                 'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.content.label',
                 { defaultMessage: 'Content syncs' }
               ),
+              ...(errorOnContentSync ? { iconSide: 'right', iconType: 'warning' } : {}),
             },
 
             {
@@ -82,6 +91,7 @@ export const SyncJobs: React.FC = () => {
                 'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.accessControl.label',
                 { defaultMessage: 'Access control syncs' }
               ),
+              ...(errorOnAccessSync ? { iconSide: 'right', iconType: 'warning' } : {}),
             },
           ]}
         />

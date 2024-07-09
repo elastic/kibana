@@ -17,12 +17,13 @@ import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export const ChatPlaygroundOverview: React.FC = () => {
   return (
-    <PlaygroundProvider
-      defaultValues={{
-        indices: [],
-      }}
-    >
-      <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlPlaygroundPage">
+    <PlaygroundProvider>
+      <EuiPageTemplate
+        offset={0}
+        restrictWidth={false}
+        data-test-subj="svlPlaygroundPage"
+        grow={false}
+      >
         <EuiPageTemplate.Header
           pageTitle={
             <EuiFlexGroup>

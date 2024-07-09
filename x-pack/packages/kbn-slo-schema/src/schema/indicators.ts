@@ -10,29 +10,31 @@ import { allOrAnyString } from './common';
 
 const kqlQuerySchema = t.string;
 
+const filtersSchema = t.array(
+  t.type({
+    meta: t.partial({
+      alias: t.union([t.string, t.null]),
+      disabled: t.boolean,
+      negate: t.boolean,
+      // controlledBy is there to identify who owns the filter
+      controlledBy: t.string,
+      // allows grouping of filters
+      group: t.string,
+      // index and type are optional only because when you create a new filter, there are no defaults
+      index: t.string,
+      isMultiIndex: t.boolean,
+      type: t.string,
+      key: t.string,
+      params: t.any,
+      value: t.string,
+    }),
+    query: t.record(t.string, t.any),
+  })
+);
+
 const kqlWithFiltersSchema = t.type({
   kqlQuery: t.string,
-  filters: t.array(
-    t.type({
-      meta: t.partial({
-        alias: t.union([t.string, t.null]),
-        disabled: t.boolean,
-        negate: t.boolean,
-        // controlledBy is there to identify who owns the filter
-        controlledBy: t.string,
-        // allows grouping of filters
-        group: t.string,
-        // index and type are optional only because when you create a new filter, there are no defaults
-        index: t.string,
-        isMultiIndex: t.boolean,
-        type: t.string,
-        key: t.string,
-        params: t.any,
-        value: t.string,
-      }),
-      query: t.record(t.string, t.any),
-    })
-  ),
+  filters: filtersSchema,
 });
 
 const querySchema = t.union([kqlQuerySchema, kqlWithFiltersSchema]);
@@ -314,6 +316,7 @@ export {
   kqlQuerySchema,
   kqlWithFiltersSchema,
   querySchema,
+  filtersSchema,
   apmTransactionDurationIndicatorSchema,
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,

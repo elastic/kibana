@@ -11,6 +11,7 @@ import {
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   useAssistantContext,
+  useLoadConnectors,
 } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { uniq } from 'lodash/fp';
@@ -22,16 +23,15 @@ import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { EmptyPrompt } from './empty_prompt';
 import { Header } from './header';
 import {
   CONNECTOR_ID_LOCAL_STORAGE_KEY,
   getInitialIsOpen,
-  showEmptyPrompt,
   showLoading,
   showSummary,
 } from './helpers';
 import { AttackDiscoveryPanel } from '../attack_discovery_panel';
+import { EmptyStates } from './empty_states';
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
 import { Summary } from './summary';
@@ -44,8 +44,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const {
     assistantAvailability: { isAssistantEnabled },
+    http,
     knowledgeBase,
   } = useAssistantContext();
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+  });
 
   // for showing / hiding anonymized data:
   const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -65,6 +69,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   const [loadingConnectorId, setLoadingConnectorId] = useState<string | null>(null);
 
   const {
+    alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
     cachedAttackDiscoveries,
@@ -141,6 +146,13 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     setSelectedConnectorLastUpdated(lastUpdated);
   }, [attackDiscoveries, lastUpdated, replacements]);
 
+  useEffect(() => {
+    // If there is only one connector, set it as the selected connector
+    if (aiConnectors != null && aiConnectors.length === 1) {
+      setConnectorId(aiConnectors[0].id);
+    }
+  }, [aiConnectors, setConnectorId]);
+
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
 
   if (!isAssistantEnabled) {
@@ -168,6 +180,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         <HeaderPage border title={pageTitle}>
           <Header
             connectorId={connectorId}
+            connectorsAreConfigured={aiConnectors != null && aiConnectors.length > 0}
             isLoading={isLoading}
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
@@ -224,19 +237,17 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           gutterSize="none"
         >
           <EuiSpacer size="xxl" />
-
           <EuiFlexItem grow={false}>
-            {showEmptyPrompt({ attackDiscoveriesCount, isLoading }) && (
-              <EmptyPrompt
-                alertsCount={knowledgeBase.latestAlerts}
-                isDisabled={connectorId == null}
-                isLoading={isLoading}
-                onGenerate={onGenerate}
-              />
-            )}
+            <EmptyStates
+              aiConnectorsCount={aiConnectors?.length ?? null}
+              alertsContextCount={alertsContextCount}
+              alertsCount={knowledgeBase.latestAlerts}
+              attackDiscoveriesCount={attackDiscoveriesCount}
+              connectorId={connectorId}
+              isLoading={isLoading}
+              onGenerate={onGenerate}
+            />
           </EuiFlexItem>
-
-          <EuiFlexItem grow={true} />
         </EuiFlexGroup>
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
       </SecurityRoutePageWrapper>

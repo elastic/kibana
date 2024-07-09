@@ -36,6 +36,7 @@ export interface ConnectorSetupProps {
   isFlyoutMode?: boolean;
   onSetupComplete?: () => void;
   onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  updateConversationsOnSaveConnector?: boolean;
 }
 
 export const useConnectorSetup = ({
@@ -43,6 +44,7 @@ export const useConnectorSetup = ({
   isFlyoutMode,
   onSetupComplete,
   onConversationUpdate,
+  updateConversationsOnSaveConnector = true,
 }: ConnectorSetupProps): {
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
@@ -180,27 +182,38 @@ export const useConnectorSetup = ({
 
   const onSaveConnector = useCallback(
     async (connector: ActionConnector) => {
-      const config = getGenAiConfig(connector);
-      // persist only the active conversation
-      const updatedConversation = await setApiConfig({
-        conversation,
-        apiConfig: {
-          ...conversation.apiConfig,
-          connectorId: connector.id,
-          actionTypeId: connector.actionTypeId,
-          provider: config?.apiProvider,
-          model: config?.defaultModel,
-        },
-      });
+      if (updateConversationsOnSaveConnector) {
+        // this side effect is not required for Attack discovery, because the connector is not used in a conversation
+        const config = getGenAiConfig(connector);
+        // persist only the active conversation
+        const updatedConversation = await setApiConfig({
+          conversation,
+          apiConfig: {
+            ...conversation.apiConfig,
+            connectorId: connector.id,
+            actionTypeId: connector.actionTypeId,
+            provider: config?.apiProvider,
+            model: config?.defaultModel,
+          },
+        });
 
-      if (updatedConversation) {
-        onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
+        if (updatedConversation) {
+          onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
 
+          refetchConnectors?.();
+          setIsConnectorModalVisible(false);
+        }
+      } else {
         refetchConnectors?.();
-        setIsConnectorModalVisible(false);
       }
     },
-    [conversation, onConversationUpdate, refetchConnectors, setApiConfig]
+    [
+      conversation,
+      onConversationUpdate,
+      refetchConnectors,
+      setApiConfig,
+      updateConversationsOnSaveConnector,
+    ]
   );
 
   const handleClose = useCallback(() => {

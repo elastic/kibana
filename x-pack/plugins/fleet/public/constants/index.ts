@@ -41,3 +41,21 @@ export const DURATION_APM_SETTINGS_VARS = {
   TAIL_SAMPLING_INTERVAL: 'tail_sampling_interval',
   WRITE_TIMEOUT: 'write_timeout',
 };
+
+export const TOUR_STORAGE_KEYS = {
+  AGENT_ACTIVITY: 'fleet.agentActivityTour',
+  ADD_AGENT_POPOVER: 'fleet.addAgentPopoverTour',
+  INACTIVE_AGENTS: 'fleet.inactiveAgentsTour',
+};
+
+export interface TOUR_STORAGE_CONFIG {
+  AGENT_ACTIVITY: {
+    active: boolean;
+  };
+  ADD_AGENT_POPOVER: {
+    active: boolean;
+  };
+  INACTIVE_AGENTS: {
+    active: boolean;
+  };
+}

@@ -130,7 +130,7 @@ export const doFieldsExist = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
-    fields: '*',
+    fields,
   });
 
   const fieldsExisted: Record<string, boolean> = {};

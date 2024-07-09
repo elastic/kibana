@@ -29,6 +29,10 @@ export const createActionRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/action`,
+      options: {
+        access: 'public',
+        description: `Create a connector`,
+      },
       validate: {
         body: bodySchema,
       },

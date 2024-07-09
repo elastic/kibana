@@ -479,6 +479,8 @@ describe('fleet usage telemetry', () => {
           unhealthy: 0,
           offline: 0,
           updating: 0,
+          inactive: 0,
+          unenrolled: 0,
           num_host_urls: 0,
         },
         packages: [],

@@ -54,6 +54,12 @@ export function getAlertsForNotification<
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
+    // if alert has not reached the alertDelay threshold don't recover the alert
+    if (alert.getActiveCount() < alertDelay) {
+      // remove from recovered alerts
+      delete recoveredAlerts[id];
+      delete currentRecoveredAlerts[id];
+    }
     alert.resetActiveCount();
     if (flappingSettings.enabled) {
       const flapping = alert.getFlapping();

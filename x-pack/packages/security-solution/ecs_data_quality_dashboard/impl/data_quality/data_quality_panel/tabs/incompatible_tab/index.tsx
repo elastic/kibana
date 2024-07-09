@@ -145,18 +145,17 @@ const IncompatibleTabComponent: React.FC<Props> = ({
                 </CopyToClipboardButton>
               </EuiFlexItem>
 
-              {isAssistantEnabled && (
-                <EuiFlexItem grow={false}>
-                  <NewChat
-                    category="data-quality-dashboard"
-                    conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
-                    description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
-                    getPromptContext={getPromptContext}
-                    suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
-                    tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewChat
+                  category="data-quality-dashboard"
+                  conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
+                  description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
+                  getPromptContext={getPromptContext}
+                  suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
+                  tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
+                  isAssistantEnabled={isAssistantEnabled}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </IncompatibleCallout>
 

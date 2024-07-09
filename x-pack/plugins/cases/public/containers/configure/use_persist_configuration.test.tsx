@@ -20,7 +20,8 @@ jest.mock('../../common/lib/kibana');
 
 const useToastMock = useToasts as jest.Mock;
 
-describe('useCreateAttachments', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/181665
+describe.skip('useCreateAttachments', () => {
   const addError = jest.fn();
   const addSuccess = jest.fn();
 

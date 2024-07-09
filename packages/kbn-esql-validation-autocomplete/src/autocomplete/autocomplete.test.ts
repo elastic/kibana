@@ -732,6 +732,16 @@ describe('autocomplete', () => {
       ...allEvaFunctions,
       ...allGroupingFunctions,
     ]);
+
+    // expect "bucket" NOT to be suggested for its own parameter
+    testSuggestions(
+      'from a | stats by bucket(',
+      [
+        ...getFieldNamesByType(['number', 'date']),
+        ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
+      ].map((field) => `${field},`)
+    );
+
     testSuggestions('from a | stats avg(b) by numberField % 2 ', [',', '|']);
 
     testSuggestions(
@@ -1113,7 +1123,7 @@ describe('autocomplete', () => {
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
-      if (fn.name !== 'bucket') {
+      if (!['bucket', 'date_parse', 'date_format'].includes(fn.name)) {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
             if (i < signature.params.length) {

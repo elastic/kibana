@@ -7,10 +7,10 @@
 
 export const getESQuery = (query: any) => {
   try {
-    return JSON.stringify(query, null, 2)
-      .replace('"{query}"', 'query')
+    return JSON.stringify(query, null, 4)
+      .replace(/"{query}"/g, 'query')
       .split('\n')
-      .map((line) => `  ${line}`)
+      .map((line) => `    ${line}`)
       .join('\n')
       .trim();
   } catch (e) {

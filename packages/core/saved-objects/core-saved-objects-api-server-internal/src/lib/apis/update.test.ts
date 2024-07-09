@@ -178,6 +178,55 @@ describe('#update', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
+      it(`should use the ES index action with the merged attributes when mergeAttributes is not false`, async () => {
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, {
+          foo: 'bar',
+        });
+
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              globalType: {
+                foo: 'bar',
+                title: 'Testing',
+              },
+            }),
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it(`should use the ES index action only with the provided attributes when mergeAttributes is false`, async () => {
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          NAMESPACE_AGNOSTIC_TYPE,
+          id,
+          {
+            foo: 'bar',
+          },
+          { mergeAttributes: false }
+        );
+
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              globalType: {
+                foo: 'bar',
+              },
+            }),
+          }),
+          expect.any(Object)
+        );
+      });
+
       it(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateSuccess(
@@ -218,6 +267,7 @@ describe('#update', () => {
         };
         await test(references);
       });
+
       it(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
@@ -232,6 +282,7 @@ describe('#update', () => {
         };
         await test([{ type: 'foo', id: '42', name: 'some ref' }]);
       });
+
       it(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));

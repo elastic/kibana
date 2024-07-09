@@ -206,28 +206,31 @@ export const EmbeddableSingleMetricViewerContainer: FC<
           ref={resizeRef}
           className="ml-time-series-explorer"
         >
-          {data !== undefined && autoZoomDuration !== undefined && jobsLoaded && (
-            <TimeSeriesExplorerEmbeddableChart
-              chartWidth={chartWidth - containerPadding}
-              dataViewsService={services[1].data.dataViews}
-              toastNotificationService={toastNotificationService}
-              appStateHandler={appStateHandler}
-              autoZoomDuration={autoZoomDuration}
-              bounds={bounds}
-              dateFormatTz={moment.tz.guess()}
-              lastRefresh={lastRefresh ?? 0}
-              previousRefresh={previousRefresh}
-              selectedJobId={selectedJobId}
-              selectedDetectorIndex={data.selectedDetectorIndex}
-              selectedEntities={data.selectedEntities}
-              selectedForecastId={selectedForecastId}
-              tableInterval="auto"
-              tableSeverity={0}
-              zoom={zoom}
-              functionDescription={functionDescription}
-              selectedJob={selectedJob}
-            />
-          )}
+          {data !== undefined &&
+            autoZoomDuration !== undefined &&
+            jobsLoaded &&
+            selectedJobId === selectedJob?.job_id && (
+              <TimeSeriesExplorerEmbeddableChart
+                chartWidth={chartWidth - containerPadding}
+                dataViewsService={services[1].data.dataViews}
+                toastNotificationService={toastNotificationService}
+                appStateHandler={appStateHandler}
+                autoZoomDuration={autoZoomDuration}
+                bounds={bounds}
+                dateFormatTz={moment.tz.guess()}
+                lastRefresh={lastRefresh ?? 0}
+                previousRefresh={previousRefresh}
+                selectedJobId={selectedJobId}
+                selectedDetectorIndex={data.selectedDetectorIndex}
+                selectedEntities={data.selectedEntities}
+                selectedForecastId={selectedForecastId}
+                tableInterval="auto"
+                tableSeverity={0}
+                zoom={zoom}
+                functionDescription={functionDescription}
+                selectedJob={selectedJob}
+              />
+            )}
         </div>
       )}
     </EuiResizeObserver>

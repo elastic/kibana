@@ -39,9 +39,9 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   });
 
   // open timeline to the analyzer tab because the expandable flyout left panel Visualize => Analyzer tab is not ready
-  const goToAnalyzerTab = useCallback(() => {
+  const goToAnalyzerTab = useCallback(async () => {
     // open timeline
-    investigateInTimelineAlertClick();
+    await investigateInTimelineAlertClick();
 
     // open analyzer tab
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });

@@ -469,6 +469,16 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "goodEvents": 0,
           "isTempDoc": true,
           "kibanaUrl": "http://myhost.com/mock-server-basepath",
+          "monitor": Object {
+            "config_id": null,
+            "name": null,
+          },
+          "observer": Object {
+            "geo": Object {
+              "name": null,
+            },
+            "name": null,
+          },
           "service": Object {
             "environment": "irrelevant",
             "name": "irrelevant",

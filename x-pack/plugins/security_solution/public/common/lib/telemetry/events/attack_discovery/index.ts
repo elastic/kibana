@@ -18,6 +18,34 @@ export const insightsGeneratedEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    durationMs: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of request in ms',
+        optional: false,
+      },
+    },
+    alertsContextCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of alerts sent as context to the LLM',
+        optional: false,
+      },
+    },
+    alertsCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of unique alerts referenced in the attack discoveries',
+        optional: false,
+      },
+    },
+    configuredAlertsCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of alerts configured by the user',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {

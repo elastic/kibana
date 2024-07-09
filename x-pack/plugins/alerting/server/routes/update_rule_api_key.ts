@@ -22,6 +22,10 @@ export const updateRuleApiKeyRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_update_api_key`,
+      options: {
+        access: 'public',
+        description: `Update the API key for a rule`,
+      },
       validate: {
         params: paramSchema,
       },
