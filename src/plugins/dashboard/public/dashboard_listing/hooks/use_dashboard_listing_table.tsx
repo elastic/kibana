@@ -100,6 +100,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
+    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -302,6 +303,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
+      recentlyAccessed: dashboardRecentlyAccessed,
     }),
     [
       contentEditorValidators,
@@ -324,6 +326,7 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
+      dashboardRecentlyAccessed,
     ]
   );
 

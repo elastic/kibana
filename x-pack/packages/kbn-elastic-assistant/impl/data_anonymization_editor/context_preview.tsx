@@ -48,6 +48,7 @@ const SelectedPromptContextPreviewComponent = ({
 
   return (
     <EuiText
+      data-test-subj="selectedPromptContextPreview"
       color="subdued"
       size="xs"
       css={css`
