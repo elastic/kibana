@@ -12,6 +12,7 @@ import { type EuiFlyoutProps, EuiLoadingChart } from '@elastic/eui';
 import { type Observable } from 'rxjs';
 import orderBy from 'lodash/orderBy';
 import {
+  EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -49,10 +50,11 @@ export const DashboardPanelSelectionListFlyout: React.FC<
 > = ({ paddingSize, close, getDashboardPanels }) => {
   const { euiTheme } = useEuiTheme();
   const panels$ = getDashboardPanels(close);
-  const [{ data: panels, loading }, setPanelState] = useState<{
+  const [{ data: panels, loading, error }, setPanelState] = useState<{
     loading: boolean;
     data: GroupedAddPanelActions[] | null;
-  }>({ loading: true, data: null });
+    error: unknown | null;
+  }>({ loading: true, data: null, error: null });
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [panelsSearchResult, setPanelsSearchResult] = useState<GroupedAddPanelActions[] | null>(
@@ -61,11 +63,21 @@ export const DashboardPanelSelectionListFlyout: React.FC<
 
   useEffect(() => {
     if (loading) {
-      const subscription = panels$.subscribe((value) => {
-        setPanelState({
-          data: value,
-          loading: false,
-        });
+      const subscription = panels$.subscribe({
+        next(value) {
+          setPanelState({
+            data: value,
+            error: null,
+            loading: false,
+          });
+        },
+        error(err) {
+          setPanelState({
+            data: null,
+            error: err,
+            loading: false,
+          });
+        },
       });
 
       return () => subscription.unsubscribe();
@@ -156,7 +168,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
           <EuiFlexItem
             css={{
               minHeight: '20vh',
-              ...(loading
+              ...(loading || error
                 ? {
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -165,10 +177,9 @@ export const DashboardPanelSelectionListFlyout: React.FC<
             }}
           >
             {loading ? (
-              <EuiLoadingChart
+              <EuiEmptyPrompt
                 data-test-subj="dashboardPanelSelectionLoadingIndicator"
-                size="l"
-                mono
+                icon={<EuiLoadingChart size="l" mono />}
               />
             ) : (
               <EuiFlexGroup direction="column" gutterSize="m">
@@ -224,12 +235,30 @@ export const DashboardPanelSelectionListFlyout: React.FC<
                       ) : null
                   )
                 ) : (
-                  <EuiText size="s" textAlign="center">
-                    <FormattedMessage
-                      id="dashboard.solutionToolbar.addPanelFlyout.noResultsDescription"
-                      defaultMessage="No panel types found"
-                    />
-                  </EuiText>
+                  <>
+                    {Boolean(error) ? (
+                      <EuiEmptyPrompt
+                        iconType="warning"
+                        iconColor="danger"
+                        body={
+                          <EuiText size="s" textAlign="center">
+                            <FormattedMessage
+                              id="dashboard.solutionToolbar.addPanelFlyout.loadingErrorDescription"
+                              defaultMessage="An error occurred loading the available dashboard panels for selection"
+                            />
+                          </EuiText>
+                        }
+                        data-test-subj="dashboardPanelSelectionErrorIndicator"
+                      />
+                    ) : (
+                      <EuiText size="s" textAlign="center">
+                        <FormattedMessage
+                          id="dashboard.solutionToolbar.addPanelFlyout.noResultsDescription"
+                          defaultMessage="No panel types found"
+                        />
+                      </EuiText>
+                    )}
+                  </>
                 )}
               </EuiFlexGroup>
             )}

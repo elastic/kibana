@@ -140,7 +140,7 @@ const useGetDashboardPanels = ({
   createNewVisType,
 }: UseGetDashboardPanelsArgs) => {
   const panelsComputeResultCache = useRef(new AsyncSubject<GroupedAddPanelActions[]>());
-  const panelComputeSubscription = useRef<Subscription>();
+  const panelComputeSubscription = useRef<Subscription | null>(null);
 
   const {
     uiActions,
