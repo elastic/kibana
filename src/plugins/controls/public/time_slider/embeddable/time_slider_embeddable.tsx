@@ -26,7 +26,7 @@ import { ControlTimesliceOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsSettingsService } from '../../services/settings/types';
-import { ControlOutput, IClearableControl } from '../../types';
+import { CanClearSelections, ControlOutput } from '../../types';
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
@@ -57,7 +57,7 @@ type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class TimeSliderControlEmbeddable
   extends Embeddable<TimeSliderControlEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements CanClearSelections
 {
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;

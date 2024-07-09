@@ -11,7 +11,7 @@ import { InventoryModel } from '../types';
 
 export { containerSnapshotMetricTypes } from './metrics';
 
-export const container: InventoryModel = {
+export const container: InventoryModel<typeof metrics> = {
   id: 'container',
   displayName: i18n.translate('xpack.metricsData.inventoryModel.container.displayName', {
     defaultMessage: 'Docker Containers',

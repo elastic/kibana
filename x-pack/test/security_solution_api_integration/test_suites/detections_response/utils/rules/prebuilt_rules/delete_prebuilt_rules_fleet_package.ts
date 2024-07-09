@@ -13,9 +13,7 @@ import type SuperTest from 'supertest';
  *
  * @param supertest Supertest instance
  */
-export async function deletePrebuiltRulesFleetPackage(
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-) {
+export async function deletePrebuiltRulesFleetPackage(supertest: SuperTest.Agent) {
   const resp = await supertest
     .get(epmRouteService.getInfoPath('security_detection_engine'))
     .set('kbn-xsrf', 'true')

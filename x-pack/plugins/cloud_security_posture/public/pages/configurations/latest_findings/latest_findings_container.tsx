@@ -41,7 +41,7 @@ const SubGrouping = ({
     setActivePageIndex,
   } = useLatestFindingsGrouping({
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats: groupStatsRenderer,
     groupingLevel,
     selectedGroup,
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
@@ -75,8 +75,8 @@ const SubGrouping = ({
 };
 
 export const LatestFindingsContainer = () => {
-  const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
-    useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
+  const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
+    useLatestFindingsGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
 
   const renderChildComponent = ({
     level,
@@ -98,7 +98,6 @@ export const LatestFindingsContainer = () => {
         <LatestFindingsTable
           groupSelectorComponent={groupSelectorComponent}
           nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-          height={DEFAULT_GROUPING_TABLE_HEIGHT}
           showDistributionBar={selectedGroupOptions.includes('none')}
         />
       );
@@ -146,7 +145,7 @@ export const LatestFindingsContainer = () => {
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -156,7 +155,7 @@ export const LatestFindingsContainer = () => {
 
   return (
     <>
-      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
       <div>
         {renderChildComponent({
           level: 0,

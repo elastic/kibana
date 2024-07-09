@@ -35,7 +35,7 @@ export const getWarningFormulasToast = (
       <p>
         <FormattedMessage
           id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
-          defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
+          defaultMessage="The report ''{reportObjectTitle}'' contains characters which spreadsheet applications can interpret as formulas."
           values={{ reportObjectTitle: job.title }}
         />
       </p>

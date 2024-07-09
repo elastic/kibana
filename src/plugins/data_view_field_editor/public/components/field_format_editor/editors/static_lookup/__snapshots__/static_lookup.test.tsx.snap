@@ -7,19 +7,17 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
       Array [
         Object {
           "field": "key",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Key"
             id="indexPatternFieldEditor.staticLookup.keyLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "value",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Value"
             id="indexPatternFieldEditor.staticLookup.valueLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
@@ -77,10 +75,9 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     onClick={[Function]}
     size="s"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add entry"
       id="indexPatternFieldEditor.staticLookup.addEntryButton"
-      values={Object {}}
     />
   </EuiButton>
   <EuiSpacer
@@ -92,10 +89,9 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Value for unknown key"
         id="indexPatternFieldEditor.staticLookup.unknownKeyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -120,19 +116,17 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
       Array [
         Object {
           "field": "key",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Key"
             id="indexPatternFieldEditor.staticLookup.keyLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "value",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Value"
             id="indexPatternFieldEditor.staticLookup.valueLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
@@ -184,10 +178,9 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     onClick={[Function]}
     size="s"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add entry"
       id="indexPatternFieldEditor.staticLookup.addEntryButton"
-      values={Object {}}
     />
   </EuiButton>
   <EuiSpacer
@@ -199,10 +192,9 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Value for unknown key"
         id="indexPatternFieldEditor.staticLookup.unknownKeyLabel"
-        values={Object {}}
       />
     }
     labelType="label"

@@ -21,7 +21,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ spaceId?: string | undefined; isDeprecated?: boolean | undefined; title: string; version: string; layout?: { id?: ",
+              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -1179,6 +1179,63 @@
               {
                 "parentPluginId": "@kbn/reporting-public",
                 "id": "def-public.ReportingAPIClient.getReportingPublicJobPath.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "jobParams",
+                "description": [],
+                "signature": [
+                  "BaseParams"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.createReportingShareJob",
+            "type": "Function",
+            "tags": [],
+            "label": "createReportingShareJob",
+            "description": [],
+            "signature": [
+              "(exportType: string, jobParams: ",
+              "BaseParams",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.Job",
+                "text": "Job"
+              },
+              " | undefined>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.createReportingShareJob.$1",
+                "type": "string",
+                "tags": [],
+                "label": "exportType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.createReportingShareJob.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "jobParams",

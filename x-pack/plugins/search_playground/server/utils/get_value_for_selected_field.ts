@@ -5,7 +5,21 @@
  * 2.0.
  */
 
-// @ts-ignore
-export const getValueForSelectedField = (source, path: string): string => {
-  return path.split('.').reduce((acc, key) => acc[key], source);
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { get } from 'lodash';
+
+export const getValueForSelectedField = (hit: SearchHit, path: string): string => {
+  if (!hit) {
+    return '';
+  }
+
+  // for semantic_text matches
+  const innerHitPath = `${hit._index}.${path}`;
+  if (!!hit.inner_hits?.[innerHitPath]) {
+    return hit.inner_hits[innerHitPath].hits.hits
+      .map((innerHit) => innerHit._source.text)
+      .join('\n --- \n');
+  }
+
+  return get(hit._source, path, '');
 };

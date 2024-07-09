@@ -21,6 +21,7 @@ import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
@@ -44,6 +45,7 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
+  console?: ConsolePluginStart;
 }
 
 export interface AppServicesContext {
@@ -53,6 +55,7 @@ export interface AppServicesContext {
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  console?: ConsolePluginStart;
 }
 
 export enum ChatFormFields {
@@ -106,7 +109,7 @@ export interface AnnotationDoc {
 }
 
 export interface AnnotationTokens {
-  type: 'prompt_token_count' | 'context_token_count';
+  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped';
   count: number;
 }
 
@@ -122,6 +125,7 @@ export interface AIMessage extends Message {
   inputTokens: {
     context: number;
     total: number;
+    contextClipped?: number;
   };
 }
 

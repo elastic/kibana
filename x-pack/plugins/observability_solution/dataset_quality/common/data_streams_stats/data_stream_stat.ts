@@ -17,14 +17,17 @@ export class DataStreamStat {
   type: DataStreamType;
   name: DataStreamStatType['name'];
   namespace: string;
-  title: string;
-  size?: DataStreamStatType['size'];
-  sizeBytes?: DataStreamStatType['sizeBytes'];
+  title?: string;
+  size?: DataStreamStatType['size']; // total datastream size
+  sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
+  userPrivileges?: DataStreamStatType['userPrivileges'];
+  totalDocs?: DataStreamStatType['totalDocs']; // total datastream docs count
   integration?: Integration;
   degradedDocs: {
     percentage: number;
     count: number;
+    docsCount: number; // docs count in the filtered time range
     quality: QualityIndicators;
   };
 
@@ -37,10 +40,13 @@ export class DataStreamStat {
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
+    this.userPrivileges = dataStreamStat.userPrivileges;
+    this.totalDocs = dataStreamStat.totalDocs;
     this.integration = dataStreamStat.integration;
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
       count: dataStreamStat.degradedDocs.count,
+      docsCount: dataStreamStat.degradedDocs.docsCount,
       quality: dataStreamStat.degradedDocs.quality,
     };
   }
@@ -57,6 +63,8 @@ export class DataStreamStat {
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
+      userPrivileges: dataStreamStat.userPrivileges,
+      totalDocs: dataStreamStat.totalDocs,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
@@ -82,10 +90,16 @@ export class DataStreamStat {
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
+        docsCount: degradedDocStat.docsCount,
         quality: mapPercentageToQuality(degradedDocStat.percentage),
       },
     };
 
     return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static calculateFilteredSize({ sizeBytes, totalDocs, degradedDocs }: DataStreamStat) {
+    const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
+    return avgDocSize * degradedDocs.docsCount;
   }
 }

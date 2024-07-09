@@ -23,6 +23,7 @@ export const SuccessForm: React.FC = () => {
       apiKey={apiKey}
       format={format}
       onFormatChange={service.setApiKeyFormat}
+      onCopyClick={() => service.emitTelemetryEvent(['copy_api_key_clicked', { format }])}
     />
   );
 };

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
 
 import { useUpdateTags } from '../hooks';
 
@@ -31,7 +32,7 @@ describe('TagOptions', () => {
   });
 
   const renderComponent = () => {
-    return render(
+    return renderReactTestingLibraryWithI18n(
       <div>
         <TagOptions tagName={'agent'} isTagHovered={isTagHovered} onTagsUpdated={onTagsUpdated} />
       </div>

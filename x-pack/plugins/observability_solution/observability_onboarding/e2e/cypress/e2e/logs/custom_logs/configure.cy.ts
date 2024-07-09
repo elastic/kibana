@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Failing: See https://github.com/elastic/kibana/issues/183341
+// Failing: See https://github.com/elastic/kibana/issues/186215
 describe.skip('[Logs onboarding] Custom logs - configure step', () => {
   describe('logFilePaths', () => {
     beforeEach(() => {
@@ -20,7 +20,7 @@ describe.skip('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('navigates to observability logs onboarding page', () => {
-        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+        cy.getByTestSubj('observabilityOnboardingFlowBackToSelectionButton').click();
 
         cy.url().should('include', '/app/observabilityOnboarding');
       });

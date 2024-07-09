@@ -1,17 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`I18nProvider provides with context 1`] = `
+exports[`I18nProvider intialized provider properly when i18n.init is called 1`] = `
 Object {
-  "defaultFormats": Object {},
-  "defaultLocale": "en",
-  "formatDate": [Function],
-  "formatHTMLMessage": [Function],
-  "formatMessage": [Function],
-  "formatNumber": [Function],
-  "formatPlural": [Function],
-  "formatRelative": [Function],
-  "formatTime": [Function],
-  "formats": Object {
+  "$t": [Function],
+  "defaultFormats": Object {
     "date": Object {
       "full": Object {
         "day": "numeric",
@@ -45,22 +37,22 @@ Object {
     },
     "relative": Object {
       "days": Object {
-        "units": "day",
+        "style": "long",
       },
       "hours": Object {
-        "units": "hour",
+        "style": "long",
       },
       "minutes": Object {
-        "units": "minute",
+        "style": "long",
       },
       "months": Object {
-        "units": "month",
+        "style": "long",
       },
       "seconds": Object {
-        "units": "second",
+        "style": "long",
       },
       "years": Object {
-        "units": "year",
+        "style": "long",
       },
     },
     "time": Object {
@@ -87,24 +79,159 @@ Object {
       },
     },
   },
+  "defaultLocale": "en",
+  "defaultRichTextElements": undefined,
+  "fallbackOnEmptyString": true,
+  "formatDate": [Function],
+  "formatDateTimeRange": [Function],
+  "formatDateToParts": [Function],
+  "formatDisplayName": [Function],
+  "formatList": [Function],
+  "formatListToParts": [Function],
+  "formatMessage": [Function],
+  "formatNumber": [Function],
+  "formatNumberToParts": [Function],
+  "formatPlural": [Function],
+  "formatRelativeTime": [Function],
+  "formatTime": [Function],
+  "formatTimeToParts": [Function],
+  "formats": Object {},
   "formatters": Object {
     "getDateTimeFormat": [Function],
+    "getDisplayNames": [Function],
+    "getListFormat": [Function],
     "getMessageFormat": [Function],
     "getNumberFormat": [Function],
-    "getPluralFormat": [Function],
-    "getRelativeFormat": [Function],
+    "getPluralRules": [Function],
+    "getRelativeTimeFormat": [Function],
   },
-  "locale": "en",
-  "messages": Object {},
-  "now": [Function],
+  "locale": "en-us",
+  "messages": Object {
+    "my.id": "mock message",
+  },
   "onError": [Function],
+  "onWarn": [Function],
   "textComponent": Symbol(react.fragment),
-  "timeZone": null,
+  "timeZone": undefined,
+  "wrapRichTextChunksInFragment": undefined,
 }
 `;
 
-exports[`I18nProvider renders children 1`] = `
-<PseudoLocaleWrapper>
-  <ChildrenMock />
-</PseudoLocaleWrapper>
+exports[`I18nProvider provides with context 1`] = `
+Object {
+  "$t": [Function],
+  "defaultFormats": Object {
+    "date": Object {
+      "full": Object {
+        "day": "numeric",
+        "month": "long",
+        "weekday": "long",
+        "year": "numeric",
+      },
+      "long": Object {
+        "day": "numeric",
+        "month": "long",
+        "year": "numeric",
+      },
+      "medium": Object {
+        "day": "numeric",
+        "month": "short",
+        "year": "numeric",
+      },
+      "short": Object {
+        "day": "numeric",
+        "month": "numeric",
+        "year": "2-digit",
+      },
+    },
+    "number": Object {
+      "currency": Object {
+        "style": "currency",
+      },
+      "percent": Object {
+        "style": "percent",
+      },
+    },
+    "relative": Object {
+      "days": Object {
+        "style": "long",
+      },
+      "hours": Object {
+        "style": "long",
+      },
+      "minutes": Object {
+        "style": "long",
+      },
+      "months": Object {
+        "style": "long",
+      },
+      "seconds": Object {
+        "style": "long",
+      },
+      "years": Object {
+        "style": "long",
+      },
+    },
+    "time": Object {
+      "full": Object {
+        "hour": "numeric",
+        "minute": "numeric",
+        "second": "numeric",
+        "timeZoneName": "short",
+      },
+      "long": Object {
+        "hour": "numeric",
+        "minute": "numeric",
+        "second": "numeric",
+        "timeZoneName": "short",
+      },
+      "medium": Object {
+        "hour": "numeric",
+        "minute": "numeric",
+        "second": "numeric",
+      },
+      "short": Object {
+        "hour": "numeric",
+        "minute": "numeric",
+      },
+    },
+  },
+  "defaultLocale": "en",
+  "defaultRichTextElements": undefined,
+  "fallbackOnEmptyString": true,
+  "formatDate": [Function],
+  "formatDateTimeRange": [Function],
+  "formatDateToParts": [Function],
+  "formatDisplayName": [Function],
+  "formatList": [Function],
+  "formatListToParts": [Function],
+  "formatMessage": [Function],
+  "formatNumber": [Function],
+  "formatNumberToParts": [Function],
+  "formatPlural": [Function],
+  "formatRelativeTime": [Function],
+  "formatTime": [Function],
+  "formatTimeToParts": [Function],
+  "formats": Object {},
+  "formatters": Object {
+    "getDateTimeFormat": [Function],
+    "getDisplayNames": [Function],
+    "getListFormat": [Function],
+    "getMessageFormat": [Function],
+    "getNumberFormat": [Function],
+    "getPluralRules": [Function],
+    "getRelativeTimeFormat": [Function],
+  },
+  "locale": "en-us",
+  "messages": Object {
+    "my.id": "mock message",
+  },
+  "onError": [Function],
+  "onWarn": [Function],
+  "textComponent": Symbol(react.fragment),
+  "timeZone": undefined,
+  "wrapRichTextChunksInFragment": undefined,
+}
 `;
+
+exports[`I18nProvider renders children 1`] = `<ChildrenMock />`;

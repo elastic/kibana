@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import {
@@ -13,14 +12,15 @@ import {
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
+  NETWORK_LABEL,
+  RX_LABEL,
+  TX_LABEL,
 } from '../../../shared/charts/constants';
 
 const rxTx: LensConfigWithId = {
   id: 'rxTx',
   chartType: 'xy',
-  title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
-    defaultMessage: 'Network',
-  }),
+  title: NETWORK_LABEL,
   layers: [
     {
       seriesType: 'area',
@@ -29,15 +29,11 @@ const rxTx: LensConfigWithId = {
       yAxis: [
         {
           ...formulas.rx,
-          label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
-            defaultMessage: 'Inbound (RX)',
-          }),
+          label: RX_LABEL,
         },
         {
           ...formulas.tx,
-          label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
-            defaultMessage: 'Outbound (TX)',
-          }),
+          label: TX_LABEL,
         },
       ],
     },

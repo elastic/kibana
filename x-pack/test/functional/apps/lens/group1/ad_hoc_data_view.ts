@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'discover',
     'unifiedFieldList',
+    'share',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
@@ -169,7 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to share a URL of a visualization with adhoc dataViews', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
+      const url = await PageObjects.lens.getUrl();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();

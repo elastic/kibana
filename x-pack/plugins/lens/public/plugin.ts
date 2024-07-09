@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { take } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -47,6 +46,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
+  ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -413,14 +413,12 @@ export class LensPlugin {
           atLeastGold: () => {
             let isGold = false;
             startServices()
-              .plugins.licensing?.license$.pipe(take(1))
+              .plugins.licensing?.license$.pipe()
               .subscribe((license) => {
-                // need to make sure user has correct license and permissions to see PDF/PNG
                 isGold = license.hasAtLeast('gold');
               });
             return isGold;
           },
-          isNewVersion: share.isNewVersion(),
         })
       );
     }
@@ -651,7 +649,7 @@ export class LensPlugin {
 
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
-    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
+    startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {

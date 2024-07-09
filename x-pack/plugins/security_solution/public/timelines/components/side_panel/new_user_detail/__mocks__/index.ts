@@ -21,7 +21,7 @@ const userRiskScore = {
       rule_risks: [],
       calculated_score_norm: 70,
       multipliers: [],
-      calculated_level: RiskSeverity.high,
+      calculated_level: RiskSeverity.High,
     },
   },
   alertsCount: 0,

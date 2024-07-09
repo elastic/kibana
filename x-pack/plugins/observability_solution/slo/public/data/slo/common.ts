@@ -39,6 +39,9 @@ export const buildHealthySummary = (
       remaining: 0.93623,
       isEstimated: false,
     },
+    fiveMinuteBurnRate: 0,
+    oneHourBurnRate: 0,
+    oneDayBurnRate: 0,
     ...params,
   };
 };
@@ -55,6 +58,9 @@ export const buildViolatedSummary = (
       remaining: -3.1234,
       isEstimated: false,
     },
+    fiveMinuteBurnRate: 0,
+    oneHourBurnRate: 0,
+    oneDayBurnRate: 0,
     ...params,
   };
 };
@@ -71,6 +77,9 @@ export const buildNoDataSummary = (
       remaining: 1,
       isEstimated: false,
     },
+    fiveMinuteBurnRate: 0,
+    oneHourBurnRate: 0,
+    oneDayBurnRate: 0,
     ...params,
   };
 };
@@ -87,6 +96,9 @@ export const buildDegradingSummary = (
       remaining: 0.1244,
       isEstimated: true,
     },
+    fiveMinuteBurnRate: 0,
+    oneHourBurnRate: 0,
+    oneDayBurnRate: 0,
     ...params,
   };
 };

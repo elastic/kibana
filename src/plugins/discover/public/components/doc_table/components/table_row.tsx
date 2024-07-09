@@ -34,7 +34,7 @@ export interface TableRowProps {
   columns: string[];
   filter?: DocViewFilterFn;
   filters?: Filter[];
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
   rows: DataTableRecord[];
@@ -47,7 +47,7 @@ export interface TableRowProps {
 
 export const TableRow = ({
   filters,
-  isPlainRecord,
+  isEsqlMode,
   columns,
   filter,
   savedSearchId,
@@ -219,7 +219,7 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
-            isPlainRecord={isPlainRecord}
+            isEsqlMode={isEsqlMode}
           >
             <UnifiedDocViewer
               columns={columns}
@@ -228,7 +228,7 @@ export const TableRow = ({
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
-              textBasedHits={isPlainRecord ? rows : undefined}
+              textBasedHits={isEsqlMode ? rows : undefined}
             />
           </TableRowDetails>
         )}

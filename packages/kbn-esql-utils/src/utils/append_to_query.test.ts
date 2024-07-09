@@ -31,7 +31,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '+', 'string')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`=="tada!"`
+| WHERE \`dest\`=="tada!"`
       );
     });
     it('appends a filter out where clause in an existing query', () => {
@@ -39,7 +39,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'string')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`!="tada!"`
+| WHERE \`dest\`!="tada!"`
       );
     });
 
@@ -48,14 +48,14 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'ip')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string!="tada!"`
       );
     });
 
     it('appends a where clause in an existing query with casting to string when the type is not given', () => {
       expect(appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-')).toBe(
         `from logstash-* // meow
-| where \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string!="tada!"`
       );
     });
 
@@ -65,12 +65,27 @@ describe('appendToQuery', () => {
           'from logstash-* // meow',
           'dest',
           undefined,
-          '_exists_',
+          'is_not_null',
           'string'
         )
       ).toBe(
         `from logstash-* // meow
-| where \`dest\` is not null`
+| WHERE \`dest\` is not null`
+      );
+    });
+
+    it('appends a where clause in an existing query checking that the value is null if the user filters a null value', () => {
+      expect(
+        appendWhereClauseToESQLQuery(
+          'from logstash-* // meow',
+          'dest',
+          undefined,
+          'is_null',
+          'string'
+        )
+      ).toBe(
+        `from logstash-* // meow
+| WHERE \`dest\` is null`
       );
     });
 
@@ -85,7 +100,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* | where country == "GR"
-and \`dest\`=="Crete"`
+AND \`dest\`=="Crete"`
       );
     });
 
@@ -107,7 +122,7 @@ and \`dest\`=="Crete"`
           'from logstash-* | where country IS NOT NULL',
           'country',
           undefined,
-          '_exists_',
+          'is_not_null',
           'string'
         )
       ).toBe(`from logstash-* | where country IS NOT NULL`);

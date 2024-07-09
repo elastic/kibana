@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -46,6 +47,7 @@ export interface PluginsSetup {
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
@@ -125,7 +127,10 @@ export class SpacesPlugin
     this.hasOnlyDefaultSpace$ = this.config$.pipe(map(({ maxSpaces }) => maxSpaces === 1));
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
-    this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
+    this.spacesClientService = new SpacesClientService(
+      (message) => this.log.debug(message),
+      initializerContext.env.packageInfo.buildFlavor
+    );
   }
 
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
@@ -158,6 +163,7 @@ export class SpacesPlugin
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
+      solution: plugins.cloud?.onboarding?.defaultSolution,
     });
 
     initSpacesViewsRoutes({
@@ -168,16 +174,14 @@ export class SpacesPlugin
 
     const router = core.http.createRouter<SpacesRequestHandlerContext>();
 
-    initExternalSpacesApi(
-      {
-        router,
-        log: this.log,
-        getStartServices: core.getStartServices,
-        getSpacesService,
-        usageStatsServicePromise,
-      },
-      this.initializerContext.env.packageInfo.buildFlavor
-    );
+    initExternalSpacesApi({
+      router,
+      log: this.log,
+      getStartServices: core.getStartServices,
+      getSpacesService,
+      usageStatsServicePromise,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
+    });
 
     initInternalSpacesApi({
       router,

@@ -41,6 +41,7 @@ import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { urlTrackerMock } from './url_tracker.mock';
 import { createElement } from 'react';
+import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -137,6 +138,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ...uiSettingsMock,
   };
 
+  const { profilesManagerMock } = createContextAwarenessMocks();
   const theme = themeServiceMock.createSetupContract({ darkMode: false });
 
   corePluginMock.theme = theme;
@@ -155,6 +157,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
+    },
+    aiops: {
+      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn().mockResolvedValue(true)),
+      PatternAnalysisComponent: jest.fn(() => createElement('div')),
     },
     docLinks: docLinksServiceMock.createStartContract(),
     capabilities: {
@@ -232,6 +238,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: urlTrackerMock,
+    profilesManager: profilesManagerMock,
     setHeaderActionMenu: jest.fn(),
   } as unknown as DiscoverServices;
 }

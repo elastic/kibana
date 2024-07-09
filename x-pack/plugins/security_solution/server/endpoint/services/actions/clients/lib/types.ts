@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type {
   ActionDetails,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   SuspendProcessActionOutputContent,
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
@@ -20,6 +20,11 @@ import type {
   ResponseActionUploadParameters,
   EndpointActionData,
   LogsEndpointActionResponse,
+  UploadedFileInfo,
+  ResponseActionScanOutputContent,
+  ResponseActionScanParameters,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -28,6 +33,7 @@ import type {
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
   BaseActionRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -62,6 +68,12 @@ export interface ProcessPendingActionsMethodOptions {
   abortSignal: AbortSignal;
 }
 
+export interface GetFileDownloadMethodResponse {
+  stream: Readable;
+  fileName: string;
+  mimeType?: string;
+}
+
 /**
  * The interface required for a Response Actions provider
  */
@@ -77,17 +89,17 @@ export interface ResponseActionsClient {
   ) => Promise<ActionDetails>;
 
   killProcess: (
-    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<KillProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   >;
 
   suspendProcess: (
-    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<SuspendProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   >;
 
   runningProcesses: (
@@ -118,4 +130,28 @@ export interface ResponseActionsClient {
    * the time of this writing, is being controlled by the background task.
    */
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
+
+  /**
+   * Retrieve a file for download
+   * @param actionId
+   * @param fileId
+   */
+  getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse>;
+
+  /**
+   * Retrieve info about a file
+   * @param actionId
+   * @param fileId
+   */
+  getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo>;
+
+  /**
+   * Scan a file path/folder
+   * @param actionRequest
+   * @param options
+   */
+  scan: (
+    actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
 }

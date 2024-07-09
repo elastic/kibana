@@ -7,6 +7,7 @@
  */
 
 import { duration } from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
 import { getDefaultHeaders } from './headers';
@@ -19,12 +20,14 @@ const createConfig = (
     compression: false,
     maxSockets: Infinity,
     maxIdleSockets: 300,
+    maxResponseSize: undefined,
     idleSocketTimeout: duration(30, 'seconds'),
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
     requestHeadersWhitelist: ['authorization'],
     hosts: ['http://localhost:80'],
+    dnsCacheTtl: duration(0, 'seconds'),
     ...parts,
   };
 };
@@ -148,6 +151,28 @@ describe('parseClientOptions', () => {
           kibanaVersion
         );
         expect(options.agent).toHaveProperty('timeout', 1_000_000);
+      });
+    });
+
+    describe('`maxResponseSize` option', () => {
+      it('does not set the values on client options when undefined', () => {
+        const options = parseClientOptions(
+          createConfig({ maxResponseSize: undefined }),
+          false,
+          kibanaVersion
+        );
+        expect(options.maxResponseSize).toBe(undefined);
+        expect(options.maxCompressedResponseSize).toBe(undefined);
+      });
+
+      it('sets the right values on client options when defined', () => {
+        const options = parseClientOptions(
+          createConfig({ maxResponseSize: ByteSizeValue.parse('2kb') }),
+          false,
+          kibanaVersion
+        );
+        expect(options.maxResponseSize).toBe(2048);
+        expect(options.maxCompressedResponseSize).toBe(2048);
       });
     });
 

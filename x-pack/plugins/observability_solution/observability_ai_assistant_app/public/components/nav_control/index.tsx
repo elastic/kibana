@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
@@ -56,7 +56,7 @@ export function NavControl({}: {}) {
           })
         : undefined;
     },
-    [service, hasBeenOpened]
+    [service, hasBeenOpened, notifications.toasts]
   );
 
   const [isOpen, setIsOpen] = useState(false);
@@ -91,31 +91,46 @@ export function NavControl({}: {}) {
     }
   `;
 
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.code === 'Semicolon') {
+        service.conversations.openNewConversation({
+          messages: [],
+        });
+      }
+    };
+
+    window.addEventListener('keypress', keyboardListener);
+
+    return () => {
+      window.removeEventListener('keypress', keyboardListener);
+    };
+  }, [service.conversations]);
+
   if (!isVisible) {
     return null;
   }
 
   return (
     <>
-      <EuiButton
-        aria-label={i18n.translate(
-          'xpack.observabilityAiAssistant.navControl.euiButton.openObservabilityAIAssistantLabel',
-          { defaultMessage: 'Open Observability AI Assistant chat' }
-        )}
-        data-test-subj="observabilityAiAssistantAppNavControlButton"
-        css={buttonCss}
-        onClick={() => {
-          service.conversations.openNewConversation({
-            messages: [],
-          });
-        }}
-        color="primary"
-        size="s"
-        fullWidth={false}
-        minWidth={0}
-      >
-        {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
-      </EuiButton>
+      <EuiToolTip content={buttonLabel}>
+        <EuiButton
+          aria-label={buttonLabel}
+          data-test-subj="observabilityAiAssistantAppNavControlButton"
+          css={buttonCss}
+          onClick={() => {
+            service.conversations.openNewConversation({
+              messages: [],
+            });
+          }}
+          color="primary"
+          size="s"
+          fullWidth={false}
+          minWidth={0}
+        >
+          {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
+        </EuiButton>
+      </EuiToolTip>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
           <ChatFlyout
@@ -132,3 +147,8 @@ export function NavControl({}: {}) {
     </>
   );
 }
+
+const buttonLabel = i18n.translate(
+  'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
+  { defaultMessage: 'Open the AI Assistant' }
+);

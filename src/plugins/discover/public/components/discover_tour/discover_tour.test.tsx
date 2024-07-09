@@ -14,12 +14,16 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverTourProvider } from './discover_tour_provider';
 import { useDiscoverTourContext } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
+import { DiscoverMainProvider } from '../../application/main/state_management/discover_state_provider';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 
 describe('Discover tour', () => {
   const mountComponent = (innerContent: JSX.Element) => {
     return mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverTourProvider isPlainRecord={false}>{innerContent}</DiscoverTourProvider>
+        <DiscoverMainProvider value={getDiscoverStateMock({})}>
+          <DiscoverTourProvider>{innerContent}</DiscoverTourProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
   };

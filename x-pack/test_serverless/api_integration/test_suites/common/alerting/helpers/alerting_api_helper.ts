@@ -6,7 +6,13 @@
  */
 
 import moment from 'moment';
-import type { SuperTest, Test } from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
+import type { Agent as SuperTestAgent } from 'supertest';
+import {
+  InternalRequestHeader,
+  RoleCredentials,
+  SupertestWithoutAuthType,
+} from '../../../../../shared/services';
 
 interface CreateEsQueryRuleParams {
   size: number;
@@ -28,18 +34,22 @@ interface CreateEsQueryRuleParams {
 }
 
 export async function createIndexConnector({
-  supertest,
+  supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   name,
   indexName,
 }: {
-  supertest: SuperTest<Test>;
+  supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   name: string;
   indexName: string;
 }) {
-  const { body } = await supertest
+  const { body } = await supertestWithoutAuth
     .post(`/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .send({
       name,
       config: {
@@ -53,16 +63,20 @@ export async function createIndexConnector({
 }
 
 export async function createSlackConnector({
-  supertest,
+  supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   name,
 }: {
-  supertest: SuperTest<Test>;
+  supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   name: string;
 }) {
-  const { body } = await supertest
+  const { body } = await supertestWithoutAuth
     .post(`/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .send({
       name,
       config: {},
@@ -76,7 +90,9 @@ export async function createSlackConnector({
 }
 
 export async function createEsQueryRule({
-  supertest,
+  supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   name,
   ruleTypeId,
   params,
@@ -87,7 +103,9 @@ export async function createEsQueryRule({
   notifyWhen,
   enabled = true,
 }: {
-  supertest: SuperTest<Test>;
+  supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleTypeId: string;
   name: string;
   params: CreateEsQueryRuleParams;
@@ -98,10 +116,10 @@ export async function createEsQueryRule({
   notifyWhen?: string;
   enabled?: boolean;
 }) {
-  const { body } = await supertest
+  const { body } = await supertestWithoutAuth
     .post(`/api/alerting/rule`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .send({
       enabled,
       params,
@@ -119,7 +137,6 @@ export async function createEsQueryRule({
   return body;
 }
 
-import { v4 as uuidv4 } from 'uuid';
 export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
 export async function createAnomalyRule({
@@ -134,7 +151,7 @@ export async function createAnomalyRule({
   ruleTypeId = 'apm.anomaly',
   params,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -184,7 +201,7 @@ export async function createLatencyThresholdRule({
   ruleTypeId = 'apm.transaction_duration',
   params,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -233,7 +250,7 @@ export async function createInventoryRule({
   ruleTypeId = 'metrics.alert.inventory.threshold',
   params,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -287,7 +304,7 @@ export async function disableRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -303,7 +320,7 @@ export async function updateEsQueryRule({
   ruleId,
   updates,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
   updates: any;
 }) {
@@ -338,16 +355,20 @@ export async function updateEsQueryRule({
 }
 
 export async function runRule({
-  supertest,
+  supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
-  const response = await supertest
+  const response = await supertestWithoutAuth
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return response;
 }
@@ -356,7 +377,7 @@ export async function muteRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -371,7 +392,7 @@ export async function enableRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -387,7 +408,7 @@ export async function muteAlert({
   ruleId,
   alertId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
   alertId: string;
 }) {
@@ -403,7 +424,7 @@ export async function unmuteRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -418,7 +439,7 @@ export async function snoozeRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   const { body } = await supertest
@@ -443,7 +464,7 @@ export async function findRule({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   if (!ruleId) {

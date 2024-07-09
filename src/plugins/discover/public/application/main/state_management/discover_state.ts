@@ -54,6 +54,11 @@ import {
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
+import {
+  createDataViewDataSource,
+  DataSourceType,
+  isDataSourceType,
+} from '../../../../common/data_sources';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -303,21 +308,34 @@ export function getDiscoverStateContainer({
   const updateAdHocDataViewId = async () => {
     const prevDataView = internalStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
-    const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
+
+    const nextDataView = await services.dataViews.create({
+      ...prevDataView.toSpec(),
+      id: uuidv4(),
+    });
+
     services.dataViews.clearInstanceCache(prevDataView.id);
 
     updateFiltersReferences({
       prevDataView,
-      nextDataView: newDataView,
+      nextDataView,
       services,
     });
 
-    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
-    await appStateContainer.replaceUrlState({ index: newDataView.id });
-    const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
+    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView);
+
+    if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
+      await appStateContainer.replaceUrlState({
+        dataSource: nextDataView.id
+          ? createDataViewDataSource({ dataViewId: nextDataView.id })
+          : undefined,
+      });
+    }
+
+    const trackingEnabled = Boolean(nextDataView.isPersisted() || savedSearchContainer.getId());
     services.urlTracker.setTrackingEnabled(trackingEnabled);
 
-    return newDataView;
+    return nextDataView;
   };
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
@@ -583,7 +601,7 @@ function createUrlGeneratorState({
   const dataView = getSavedSearch().searchSource.getField('index');
   return {
     filters: data.query.filterManager.getFilters(),
-    dataViewId: appState.index,
+    dataViewId: dataView?.id,
     query: appState.query,
     savedSearchId: getSavedSearch().id,
     timeRange: shouldRestoreSearchSession

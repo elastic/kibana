@@ -15,6 +15,7 @@ import axios, {
   AxiosRequestHeaders,
   AxiosHeaders,
   AxiosHeaderValue,
+  AxiosBasicCredentials,
 } from 'axios';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -29,6 +30,7 @@ import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
+import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);
@@ -87,8 +89,17 @@ export abstract class SubActionConnector<Config, Secrets> {
     }
   }
 
-  private getHeaders(headers?: AxiosRequestHeaders): Record<string, AxiosHeaderValue> {
-    return { 'Content-Type': 'application/json', ...headers };
+  private getHeaders(
+    auth?: AxiosBasicCredentials,
+    headers?: AxiosRequestHeaders
+  ): Record<string, AxiosHeaderValue> {
+    const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+      username: auth?.username,
+      password: auth?.password,
+      headers,
+    });
+
+    return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
 
   private validateResponse(responseSchema: Type<unknown>, data: unknown) {
@@ -96,7 +107,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       responseSchema.validate(data);
     } catch (resValidationError) {
       const err = new Error(`Response validation failed (${resValidationError})`);
-      this.logger.debug(`${err.message}:\n${inspect(data, { depth: 10 })}`);
+      this.logger.debug(() => `${err.message}:\n${inspect(data, { depth: 10 })}`);
       throw err;
     }
   }
@@ -137,15 +148,17 @@ export abstract class SubActionConnector<Config, Secrets> {
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
 
+      const { auth, ...restConfig } = config;
+
       const res = await request({
-        ...config,
+        ...restConfig,
         axios: this.axiosInstance,
         url: normalizedURL,
         logger: this.logger,
         method,
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
-        headers: this.getHeaders(headers as AxiosHeaders),
+        headers: this.getHeaders(auth, headers as AxiosHeaders),
         timeout,
       });
 

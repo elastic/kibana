@@ -17,14 +17,14 @@ export const readAlertsIndexExistsRoute = (router: SecuritySolutionPluginRouter)
   router.versioned
     .get({
       path: DETECTION_ENGINE_ALERTS_INDEX_URL,
-      access: 'public',
+      access: 'internal',
       options: {
         tags: ['access:securitySolution'],
       },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: false,
       },
       async (context, _, response): Promise<IKibanaResponse<ReadAlertsIndexExistsResponse>> => {

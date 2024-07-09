@@ -15,7 +15,7 @@ import type { UseMessagesStorage } from '../../common/containers/local_storage/u
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
@@ -48,7 +48,7 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../common/containers/source');
-jest.mock('../../common/containers/sourcerer');
+jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({

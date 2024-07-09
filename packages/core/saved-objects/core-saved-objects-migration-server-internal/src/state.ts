@@ -384,6 +384,10 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
+export interface CheckClusterRoutingAllocationState extends SourceExistsState {
+  readonly controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION';
+}
+
 export interface CheckTargetTypesMappingsState extends PostInitState {
   readonly controlState: 'CHECK_TARGET_MAPPINGS';
 }
@@ -510,6 +514,10 @@ export interface LegacyBaseState extends SourceExistsState {
   readonly legacyPreMigrationDoneActions: AliasAction[];
 }
 
+export interface LegacyCheckClusterRoutingAllocationState extends LegacyBaseState {
+  readonly controlState: 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION';
+}
+
 export interface LegacySetWriteBlockState extends LegacyBaseState {
   /** Set a write block on the legacy index to prevent any further writes */
   readonly controlState: 'LEGACY_SET_WRITE_BLOCK';
@@ -549,6 +557,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
 
 export type State = Readonly<
   | CalculateExcludeFiltersState
+  | CheckClusterRoutingAllocationState
   | CheckTargetTypesMappingsState
   | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
@@ -561,6 +570,7 @@ export type State = Readonly<
   | DoneState
   | FatalState
   | InitState
+  | LegacyCheckClusterRoutingAllocationState
   | LegacyCreateReindexTargetState
   | LegacyDeleteState
   | LegacyReindexState

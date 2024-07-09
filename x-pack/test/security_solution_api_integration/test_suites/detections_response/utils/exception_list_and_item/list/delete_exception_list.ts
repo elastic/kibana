@@ -18,7 +18,7 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
  * @param log The tooling logger
  */
 export const deleteExceptionList = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   listId: string
 ): Promise<RuleResponse> => {

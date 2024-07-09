@@ -7,6 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { RiskEngineEnableResponse } from '../../../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
 import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
@@ -68,7 +69,8 @@ export const riskEngineEnableRoute = (
 
         try {
           await riskEngineClient.enableRiskEngine({ taskManager });
-          return response.ok({ body: { success: true } });
+          const body: RiskEngineEnableResponse = { success: true };
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
 

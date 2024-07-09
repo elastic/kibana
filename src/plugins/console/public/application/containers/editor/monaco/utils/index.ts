@@ -14,6 +14,7 @@ export {
   replaceRequestVariables,
   getCurlRequest,
   trackSentRequests,
+  getAutoIndentedRequests,
 } from './requests_utils';
 export {
   getDocumentationLinkFromAutocomplete,
@@ -21,5 +22,6 @@ export {
   getUrlPathCompletionItems,
   getUrlParamsCompletionItems,
   getBodyCompletionItems,
+  shouldTriggerSuggestions,
 } from './autocomplete_utils';
 export { getLineTokens, containsUrlParams } from './tokens_utils';

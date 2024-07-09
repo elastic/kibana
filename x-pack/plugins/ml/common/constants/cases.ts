@@ -7,3 +7,4 @@
 
 export const CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE = 'ml_anomaly_swimlane' as const;
 export const CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS = 'ml_anomaly_charts' as const;
+export const CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER = 'ml_single_metric_viewer' as const;

@@ -77,13 +77,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.missingOrFail('dscViewModeDocumentButton');
+        await testSubjects.existOrFail('dscViewModeToggle');
+        await testSubjects.existOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.existOrFail('shareTopNavButton');
-        await testSubjects.existOrFail('dataGridColumnSortingButton');
+        await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
         await testSubjects.click('field-@message-showDetails');
@@ -130,11 +131,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await PageObjects.discover.selectTextBaseLang();
-        const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
+        const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
         const cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
@@ -175,6 +179,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
         const brokenQueries = [
           'from logstash-* | limit 10*',
           'from logstash-* | limit A',
@@ -259,16 +266,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
       it('shows Discover and Lens requests in Inspector', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await inspector.open();
-        const requestNames = await inspector.getRequestNames();
-        expect(requestNames).to.contain('Table');
-        expect(requestNames).to.contain('Visualization');
+        let retries = 0;
+        await retry.try(async () => {
+          if (retries > 0) {
+            await inspector.close();
+            await testSubjects.click('querySubmitButton');
+            await PageObjects.header.waitUntilLoadingHasFinished();
+            await PageObjects.discover.waitUntilSearchingHasFinished();
+          }
+          await inspector.open();
+          retries = retries + 1;
+          const requestNames = await inspector.getRequestNames();
+          expect(requestNames).to.contain('Table');
+          expect(requestNames).to.contain('Visualization');
+        });
       });
     });
 
@@ -289,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 10';
+          return item[1] === 'FROM logstash-* | LIMIT 10';
         });
 
         expect(queryAdded).to.be(true);

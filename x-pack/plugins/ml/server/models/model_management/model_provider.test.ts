@@ -9,6 +9,7 @@ import { modelsProvider } from './models_provider';
 import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { MlClient } from '../../lib/ml_client';
+import downloadTasksResponse from './__mocks__/mock_download_tasks.json';
 
 describe('modelsProvider', () => {
   const mockClient = {
@@ -33,6 +34,9 @@ describe('modelsProvider', () => {
             },
           },
         }),
+      },
+      tasks: {
+        list: jest.fn().mockResolvedValue({ tasks: [] }),
       },
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
@@ -261,6 +265,23 @@ describe('modelsProvider', () => {
 
       const result = await modelService.getCuratedModelConfig('e5');
       expect(result.model_id).toEqual('.multilingual-e5-small');
+    });
+  });
+
+  describe('getModelsDownloadStatus', () => {
+    test('returns null if no model download is in progress', async () => {
+      const result = await modelService.getModelsDownloadStatus();
+      expect(result).toEqual({});
+    });
+    test('provides download status for all models', async () => {
+      (mockClient.asInternalUser.tasks.list as jest.Mock).mockResolvedValueOnce(
+        downloadTasksResponse
+      );
+      const result = await modelService.getModelsDownloadStatus();
+      expect(result).toEqual({
+        '.elser_model_2': { downloaded_parts: 0, total_parts: 418 },
+        '.elser_model_2_linux-x86_64': { downloaded_parts: 96, total_parts: 263 },
+      });
     });
   });
 });

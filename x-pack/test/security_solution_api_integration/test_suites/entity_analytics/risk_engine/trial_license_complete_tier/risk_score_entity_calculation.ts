@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 import { RISK_SCORE_ENTITY_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
     body,
   }: {
     body: object;
-  }): Promise<{ score: RiskScore; success: boolean }> => {
+  }): Promise<{ score: EntityRiskScoreRecord; success: boolean }> => {
     const { body: result } = await supertest
       .post(RISK_SCORE_ENTITY_CALCULATION_URL)
       .set('kbn-xsrf', 'true')
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('@ess @serverless Risk Scoring Entity Calculation API', () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', () => {
     before(async () => {
       enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
@@ -126,8 +126,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const expectedScore = {
           calculated_level: 'Unknown',
           calculated_score: 21,
-          calculated_score_norm: 8.039816232771823,
-          category_1_score: 8.039816232771821,
+          calculated_score_norm: 8.10060175898781,
+          category_1_score: 8.10060175898781,
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
@@ -176,8 +176,8 @@ export default ({ getService }: FtrProviderContext): void => {
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 11.59366948840633,
-            category_1_score: 8.039816232771821,
+            calculated_score_norm: 11.677912063468526,
+            category_1_score: 8.10060175898781,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',

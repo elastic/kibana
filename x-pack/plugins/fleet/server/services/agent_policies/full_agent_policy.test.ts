@@ -561,6 +561,7 @@ describe('getFullAgentPolicy', () => {
           updated_by: '',
           revision: 1,
           policy_id: '',
+          policy_ids: [''],
         },
         {
           id: 'package-policy-uuid-test-123',
@@ -598,6 +599,7 @@ describe('getFullAgentPolicy', () => {
           updated_by: '',
           revision: 1,
           policy_id: '',
+          policy_ids: [''],
         },
       ],
       is_managed: false,
@@ -815,7 +817,7 @@ ssl.test: 123
     `);
   });
 
-  it('should return placeholder ES_USERNAME and ES_PASSWORD for elasticsearch output type in standalone ', () => {
+  it('should return placeholder API_KEY for elasticsearch output type in standalone ', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
         id: 'id123',
@@ -831,18 +833,17 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
+        "api_key": "\${API_KEY}",
         "hosts": Array [
           "http://host.fr",
         ],
-        "password": "\${ES_PASSWORD}",
         "preset": "balanced",
         "type": "elasticsearch",
-        "username": "\${ES_USERNAME}",
       }
     `);
   });
 
-  it('should not return placeholder ES_USERNAME and ES_PASSWORD for logstash output type in standalone ', () => {
+  it('should not return placeholder API_KEY for logstash output type in standalone ', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
         id: 'id123',

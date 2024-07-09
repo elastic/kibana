@@ -53,8 +53,8 @@ docker pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
-  export VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-  export VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
+  export VAULT_ROLE_ID="$(get_vault_role_id)"
+  export VAULT_SECRET_ID="$(get_vault_secret_id)"
   export VAULT_ADDR="https://secrets.elastic.co:8200"
 
   download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"

@@ -8,14 +8,16 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { ConfigSchema } from '..';
+import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -38,15 +40,19 @@ export const breadcrumbsApp = {
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
-  deps,
-  corePlugins: { observability, data },
+  corePlugins,
   config,
+  context,
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
-  const i18nCore = core.i18n;
-  const plugins = { ...deps };
+  const services: ObservabilityOnboardingAppServices = {
+    ...core,
+    ...corePlugins,
+    config,
+    context,
+  };
 
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
@@ -55,31 +61,23 @@ export function ObservabilityOnboardingAppRoot({
   });
 
   return (
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application: core.application,
-        }}
-      >
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-            observability,
-            data,
-            config,
+    <KibanaRenderContextProvider {...core}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application: core.application,
           }}
         >
-          <KibanaThemeProvider
-            theme$={theme$}
-            modify={{
-              breakpoint: {
-                xxl: 1600,
-                xxxl: 2000,
-              },
-            }}
-          >
-            <i18nCore.Context>
+          <KibanaContextProvider services={services}>
+            <KibanaThemeProvider
+              theme={{ theme$ }}
+              modify={{
+                breakpoint: {
+                  xxl: 1600,
+                  xxxl: 2000,
+                },
+              }}
+            >
               <Router history={history}>
                 <EuiErrorBoundary>
                   {renderFeedbackLinkAsPortal && (
@@ -90,11 +88,11 @@ export function ObservabilityOnboardingAppRoot({
                   <ObservabilityOnboardingFlow />
                 </EuiErrorBoundary>
               </Router>
-            </i18nCore.Context>
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
-      </RedirectAppLinks>
-    </div>
+            </KibanaThemeProvider>
+          </KibanaContextProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>
   );
 }
 
@@ -108,6 +106,7 @@ interface RenderAppProps {
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
   config: ConfigSchema;
+  context: AppContext;
 }
 
 export const renderApp = (props: RenderAppProps) => {

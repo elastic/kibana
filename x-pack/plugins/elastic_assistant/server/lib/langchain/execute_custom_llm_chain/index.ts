@@ -13,34 +13,33 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
 import {
+  getDefaultArguments,
   ActionsClientChatOpenAI,
-  ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
-import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
+import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
+import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
-import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
- * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientSimpleChatModel,
  * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
  *
  */
 export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
-  actions,
+  actionsClient,
   alertsIndexPattern,
-  anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
-  elserId,
   esClient,
-  kbResource,
+  esStore,
   langChainMessages,
   llmType,
   logger,
@@ -50,17 +49,15 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
-  telemetry,
   traceOptions,
+  dataClients,
 }) => {
-  // TODO implement llmClass for bedrock streaming
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
+  const isOpenAI = llmType === 'openai';
+  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
-    actions,
+    actionsClient,
     connectorId,
-    request,
     llmType,
     logger,
     // possible client model override,
@@ -76,6 +73,16 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     maxRetries: 0,
   });
 
+  const anonymizationFieldsRes =
+    await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+      perPage: 1000,
+      page: 1,
+    });
+
+  const anonymizationFields = anonymizationFieldsRes
+    ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+    : undefined;
+
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
 
@@ -87,16 +94,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     returnMessages: true,
   });
 
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
-
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
@@ -104,12 +101,13 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
-    anonymizationFields,
     alertsIndexPattern,
-    isEnabledKnowledgeBase,
+    anonymizationFields,
     chain,
-    llm,
     esClient,
+    isEnabledKnowledgeBase,
+    llm,
+    logger,
     modelExists,
     onNewReplacements,
     replacements,
@@ -117,30 +115,36 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     size,
   };
 
-  const tools: ToolInterface[] = assistantTools
-    .filter((tool) =>
-      isStream
-        ? tool.id !== 'esql-knowledge-base-tool'
-        : tool.id !== 'esql-knowledge-base-structured-tool'
-    )
-    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
+  const tools: ToolInterface[] = assistantTools.flatMap(
+    (tool) => tool.getTool(assistantToolParams) ?? []
+  );
 
-  logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
+  logger.debug(
+    () => `applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`
+  );
 
   const executorArgs = {
     memory,
     verbose: false,
     handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
   };
-  // isStream check is not on agentType alone because typescript doesn't like
-  const executor = isStream
+  // isOpenAI check is not on agentType alone because typescript doesn't like
+  const executor = isOpenAI
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
-        agentType: 'chat-conversational-react-description',
+        agentType: 'structured-chat-zero-shot-react-description',
         ...executorArgs,
+        returnIntermediateSteps: false,
+        agentArgs: {
+          // this is important to help LangChain correctly format tool input
+          humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
+          memoryPrompts: [new MessagesPlaceholder('chat_history')],
+          suffix:
+            'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
+        },
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx

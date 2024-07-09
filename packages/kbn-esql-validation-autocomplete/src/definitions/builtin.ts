@@ -22,7 +22,7 @@ function createMathDefinition(
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row', 'stats', 'sort'],
+    supportedCommands: ['eval', 'where', 'row', 'stats', 'metrics', 'sort'],
     supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
@@ -456,27 +456,6 @@ const logicFunctions: FunctionDefinition[] = [
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        { name: 'left', type: 'null' },
-        { name: 'right', type: 'boolean' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'boolean' },
-        { name: 'right', type: 'null' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'null' },
-        { name: 'right', type: 'null' },
-      ],
-      returnType: 'boolean',
-    },
   ],
 }));
 
@@ -528,7 +507,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where', 'enrich'],
+    supportedCommands: ['eval', 'stats', 'metrics', 'row', 'dissect', 'where', 'enrich'],
     supportedOptions: ['by', 'with'],
     signatures: [
       {

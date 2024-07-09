@@ -89,8 +89,9 @@ export class Cluster {
   async installSource(options: InstallSourceOptions) {
     this.log.info(chalk.bold('Installing from source'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installSource({ log: this.log, ...options });
-      return { installPath };
+      const { installPath, disableEsTmpDir } = await installSource({ log: this.log, ...options });
+
+      return { installPath, disableEsTmpDir };
     });
   }
 
@@ -115,12 +116,12 @@ export class Cluster {
   async installSnapshot(options: InstallSnapshotOptions) {
     this.log.info(chalk.bold('Installing from snapshot'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installSnapshot({
+      const { installPath, disableEsTmpDir } = await installSnapshot({
         log: this.log,
         ...options,
       });
 
-      return { installPath };
+      return { installPath, disableEsTmpDir };
     });
   }
 
@@ -130,12 +131,12 @@ export class Cluster {
   async installArchive(archivePath: string, options?: InstallArchiveOptions) {
     this.log.info(chalk.bold('Installing from an archive'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installArchive(archivePath, {
+      const { installPath, disableEsTmpDir } = await installArchive(archivePath, {
         log: this.log,
         ...(options || {}),
       });
 
-      return { installPath };
+      return { installPath, disableEsTmpDir };
     });
   }
 
@@ -317,6 +318,7 @@ export class Cluster {
       skipReadyCheck,
       readyTimeout,
       writeLogsToPath,
+      disableEsTmpDir,
       ...options
     } = opts;
 
@@ -389,7 +391,9 @@ export class Cluster {
     this.process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...(installPath && !disableEsTmpDir
+          ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') }
+          : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ES_JAVA_OPTS: esJavaOpts,

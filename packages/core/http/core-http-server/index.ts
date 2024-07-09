@@ -105,6 +105,7 @@ export type {
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
   LazyValidator,
+  RouteAccess,
 } from './src/router';
 export {
   validBodyOutput,
@@ -141,6 +142,7 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpProtocol,
 } from './src/http_contract';
 
 export type {

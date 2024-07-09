@@ -964,6 +964,20 @@
       }
     }
   },
+  "endpoint:unified-user-artifact-manifest": {
+    "dynamic": false,
+    "properties": {
+      "artifactIds": {
+        "type": "keyword"
+      },
+      "policyId": {
+        "type": "keyword"
+      },
+      "semanticVersion": {
+        "type": "keyword"
+      }
+    }
+  },
   "endpoint:user-artifact-manifest": {
     "dynamic": false,
     "properties": {
@@ -979,8 +993,61 @@
     "dynamic": false,
     "properties": {}
   },
+  "entity-definition": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "filter": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "identityFields": {
+        "type": "object"
+      },
+      "indexPatterns": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "metadata": {
+        "type": "object"
+      },
+      "metrics": {
+        "type": "object"
+      },
+      "name": {
+        "type": "text"
+      },
+      "staticFields": {
+        "type": "object"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
+      }
+    }
+  },
+  "entity-discovery-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "epm-packages": {
     "properties": {
+      "additional_spaces_installed_kibana": {
+        "index": false,
+        "type": "flattened"
+      },
       "es_index_patterns": {
         "dynamic": false,
         "properties": {}
@@ -1532,6 +1599,19 @@
       }
     }
   },
+  "fleet-setup-lock": {
+    "properties": {
+      "started_at": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "uuid": {
+        "type": "text"
+      }
+    }
+  },
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
@@ -1663,6 +1743,10 @@
       },
       "fleet_server_host_id": {
         "type": "keyword"
+      },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2003,6 +2087,9 @@
           "name": {
             "type": "keyword"
           },
+          "requires_root": {
+            "type": "boolean"
+          },
           "title": {
             "type": "keyword"
           },
@@ -2012,6 +2099,9 @@
         }
       },
       "policy_id": {
+        "type": "keyword"
+      },
+      "policy_ids": {
         "type": "keyword"
       },
       "revision": {
@@ -3037,6 +3127,9 @@
   "space": {
     "dynamic": false,
     "properties": {
+      "disabledFeatures": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3045,10 +3138,17 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
   },
@@ -3307,6 +3407,26 @@
           }
         },
         "type": "text"
+      }
+    }
+  },
+  "usage-counter": {
+    "dynamic": false,
+    "properties": {
+      "count": {
+        "type": "integer"
+      },
+      "counterName": {
+        "type": "keyword"
+      },
+      "counterType": {
+        "type": "keyword"
+      },
+      "domainId": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
       }
     }
   },

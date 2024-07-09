@@ -8,6 +8,8 @@
 import * as rt from 'io-ts';
 import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
@@ -19,15 +21,6 @@ export const ThresholdFormatterTypeRT = rt.keyof({
   highPrecision: null,
 });
 export type ThresholdFormatterType = rt.TypeOf<typeof ThresholdFormatterTypeRT>;
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
-}
 
 export enum Aggregators {
   COUNT = 'count',
@@ -60,6 +53,7 @@ export enum AlertStates {
 // Types for the executor
 export interface CustomThresholdSearchSourceFields extends SerializedSearchSourceFields {
   query?: Query;
+  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
 }
 
 export interface ThresholdParams {
@@ -77,9 +71,7 @@ export interface BaseMetricExpressionParams {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: Comparator;
-  warningComparator?: Comparator;
-  warningThreshold?: number[];
+  comparator: COMPARATORS | LEGACY_COMPARATORS;
 }
 
 export interface CustomThresholdExpressionMetric {
@@ -114,16 +106,6 @@ export enum InfraFormatterType {
   percent = 'percent',
 }
 
-export interface Group {
-  field: string;
-  value: string;
-}
-
-export interface TimeRange {
-  from?: string;
-  to?: string;
-}
-
 export interface SearchConfigurationType {
   index: SerializedSearchSourceFields;
   query: {
@@ -142,11 +124,6 @@ export interface SearchConfigurationWithExtractedReferenceType {
   };
   filter?: Filter[];
 }
-
-// Custom threshold alert types
-
-// Alert fields['kibana.alert.group] type
-export type GroupBy = Group[];
 
 /*
  * Utils

@@ -22,7 +22,7 @@ import {
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import type { EcsBasedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 export const getSameFamilyMarkdownComment = (fieldsInSameFamily: number): string =>
   getMarkdownComment({
@@ -37,14 +37,14 @@ ${i18n.FIELDS_WITH_MAPPINGS_SAME_FAMILY}
   });
 
 export const getSameFamilyMappings = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): EnrichedFieldMetadata[] => enrichedFieldMetadata.filter((x) => x.isInSameFamily);
+  enrichedFieldMetadata: EcsBasedFieldMetadata[]
+): EcsBasedFieldMetadata[] => enrichedFieldMetadata.filter((x) => x.isInSameFamily);
 
 export const getSameFamilyMarkdownTablesComment = ({
   sameFamilyMappings,
   indexName,
 }: {
-  sameFamilyMappings: EnrichedFieldMetadata[];
+  sameFamilyMappings: EcsBasedFieldMetadata[];
   indexName: string;
 }): string => `
 ${

@@ -12,8 +12,8 @@ import {
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
-  COMPARATORS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   MAX_SELECTABLE_SOURCE_FIELDS,
   MAX_SELECTABLE_GROUP_BY_TERMS,

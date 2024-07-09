@@ -8,11 +8,10 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { DataStreamStat } from '../../../../common/api_types';
+import { Dashboard, DataStreamStat, DegradedFieldResponse } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
-  DashboardType,
   DataStreamSettings,
   DataStreamDetails,
   GetDataStreamsStatsQuery,
@@ -35,6 +34,7 @@ import {
   fetchIntegrationsFailedNotifier,
   noDatasetSelected,
   fetchNonAggregatableDatasetsFailedNotifier,
+  fetchDataStreamIntegrationFailedNotifier,
 } from './notifications';
 import {
   DatasetQualityControllerContext,
@@ -97,13 +97,20 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'loaded',
                   actions: ['storeDegradedDocStats', 'storeDatasets'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchDegradedStatsFailed'],
-                },
+                onError: [
+                  {
+                    target: 'unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchDegradedStatsFailed'],
+                  },
+                ],
               },
             },
             loaded: {},
+            unauthorized: { type: 'final' },
           },
           on: {
             UPDATE_TIME_RANGE: {
@@ -187,13 +194,20 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'loaded',
                   actions: ['storeNonAggregatableDatasets'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchNonAggregatableDatasetsFailed'],
-                },
+                onError: [
+                  {
+                    target: 'unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchNonAggregatableDatasetsFailed'],
+                  },
+                ],
               },
             },
             loaded: {},
+            unauthorized: { type: 'final' },
           },
           on: {
             UPDATE_TIME_RANGE: {
@@ -247,12 +261,68 @@ export const createPureDatasetQualityControllerStateMachine = (
                       invoke: {
                         src: 'loadDataStreamSettings',
                         onDone: {
-                          target: 'done',
+                          target: 'initializeIntegrations',
                           actions: ['storeDataStreamSettings'],
                         },
                         onError: {
                           target: 'done',
                           actions: ['notifyFetchDatasetSettingsFailed'],
+                        },
+                      },
+                    },
+                    initializeIntegrations: {
+                      type: 'parallel',
+                      states: {
+                        integrationDetails: {
+                          initial: 'fetching',
+                          states: {
+                            fetching: {
+                              invoke: {
+                                src: 'loadDataStreamIntegration',
+                                onDone: {
+                                  target: 'done',
+                                  actions: ['storeDataStreamIntegration'],
+                                },
+                                onError: {
+                                  target: 'done',
+                                  actions: ['notifyFetchDatasetIntegrationsFailed'],
+                                },
+                              },
+                            },
+                            done: {
+                              type: 'final',
+                            },
+                          },
+                        },
+                        integrationDashboards: {
+                          initial: 'fetching',
+                          states: {
+                            fetching: {
+                              invoke: {
+                                src: 'loadIntegrationDashboards',
+                                onDone: {
+                                  target: 'done',
+                                  actions: ['storeIntegrationDashboards'],
+                                },
+                                onError: [
+                                  {
+                                    target: 'unauthorized',
+                                    cond: 'checkIfActionForbidden',
+                                  },
+                                  {
+                                    target: 'done',
+                                    actions: ['notifyFetchIntegrationDashboardsFailed'],
+                                  },
+                                ],
+                              },
+                            },
+                            done: {
+                              type: 'final',
+                            },
+                            unauthorized: {
+                              type: 'final',
+                            },
+                          },
                         },
                       },
                     },
@@ -290,24 +360,32 @@ export const createPureDatasetQualityControllerStateMachine = (
                     },
                   },
                 },
-                integrationDashboards: {
+                dataStreamDegradedFields: {
                   initial: 'fetching',
                   states: {
                     fetching: {
                       invoke: {
-                        src: 'loadIntegrationDashboards',
+                        src: 'loadDegradedFieldsPerDataStream',
                         onDone: {
                           target: 'done',
-                          actions: ['storeIntegrationDashboards'],
+                          actions: ['storeDegradedFields'],
                         },
                         onError: {
                           target: 'done',
-                          actions: ['notifyFetchIntegrationDashboardsFailed'],
                         },
                       },
                     },
                     done: {
-                      type: 'final',
+                      on: {
+                        UPDATE_INSIGHTS_TIME_RANGE: {
+                          target: 'fetching',
+                          actions: ['resetDegradedFieldPage'],
+                        },
+                        UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                          target: 'done',
+                          actions: ['storeDegradedFieldTableOptions'],
+                        },
+                      },
                     },
                   },
                 },
@@ -349,9 +427,22 @@ export const createPureDatasetQualityControllerStateMachine = (
     {
       actions: {
         storeTableOptions: assign((_context, event) => {
-          return 'criteria' in event
+          return 'dataset_criteria' in event
             ? {
-                table: event.criteria,
+                table: event.dataset_criteria,
+              }
+            : {};
+        }),
+        storeDegradedFieldTableOptions: assign((context, event) => {
+          return 'degraded_field_criteria' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  degradedFields: {
+                    ...context.flyout.degradedFields,
+                    table: event.degraded_field_criteria,
+                  },
+                },
               }
             : {};
         }),
@@ -359,6 +450,19 @@ export const createPureDatasetQualityControllerStateMachine = (
           table: {
             ...context.table,
             page: 0,
+          },
+        })),
+        resetDegradedFieldPage: assign((context, _event) => ({
+          flyout: {
+            ...context.flyout,
+            degradedFields: {
+              ...context.flyout.degradedFields,
+              table: {
+                ...context.flyout.degradedFields.table,
+                page: 0,
+                rowsPerPage: 10,
+              },
+            },
           },
         })),
         storeInactiveDatasetsVisibility: assign((context, _event) => {
@@ -448,18 +552,41 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
           };
         }),
-        resetFlyoutOptions: assign((_context, _event) => ({ flyout: undefined })),
+        resetFlyoutOptions: assign((_context, _event) => ({ flyout: DEFAULT_CONTEXT.flyout })),
         storeDataStreamStats: assign((_context, event) => {
-          return 'data' in event
-            ? {
-                dataStreamStats: event.data as DataStreamStat[],
-              }
-            : {};
+          if ('data' in event && 'dataStreamsStats' in event.data) {
+            const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
+            const datasetUserPrivileges = event.data.datasetUserPrivileges;
+
+            // Check if any DataStreamStat has null; to check for serverless
+            const isSizeStatsAvailable =
+              !dataStreamStats.length || dataStreamStats.some((stat) => stat.totalDocs !== null);
+
+            return {
+              dataStreamStats,
+              isSizeStatsAvailable,
+              datasetUserPrivileges,
+            };
+          }
+          return {};
         }),
         storeDegradedDocStats: assign((_context, event) => {
           return 'data' in event
             ? {
                 degradedDocStats: event.data as DegradedDocsStat[],
+              }
+            : {};
+        }),
+        storeDegradedFields: assign((context, event: DoneInvokeEvent<DegradedFieldResponse>) => {
+          return 'data' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  degradedFields: {
+                    ...context.flyout.degradedFields,
+                    data: event.data.degradedFields,
+                  },
+                },
               }
             : {};
         }),
@@ -522,18 +649,28 @@ export const createPureDatasetQualityControllerStateMachine = (
             integrations: [],
           };
         }),
-        storeIntegrationDashboards: assign((context, event) => {
-          return 'data' in event && 'dashboards' in event.data
+        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<Integration>) => {
+          return 'data' in event
             ? {
                 flyout: {
                   ...context.flyout,
-                  dataset: {
-                    ...context.flyout.dataset,
-                    integration: {
-                      ...context.flyout.dataset?.integration,
-                      dashboards: event.data.dashboards as DashboardType[],
-                    },
-                  } as FlyoutDataset,
+                  integration: {
+                    ...context.flyout.integration,
+                    integrationDetails: event.data,
+                  },
+                },
+              }
+            : {};
+        }),
+        storeIntegrationDashboards: assign((context, event: DoneInvokeEvent<Dashboard[]>) => {
+          return 'data' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  integration: {
+                    ...context.flyout.integration,
+                    dashboards: event.data,
+                  },
                 },
               }
             : {};
@@ -549,6 +686,11 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+      },
+      guards: {
+        checkIfActionForbidden: (context, event) => {
+          return 'data' in event && 'statusCode' in event.data && event.data.statusCode === 403;
+        },
       },
     }
   );
@@ -582,6 +724,10 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationsFailedNotifier(toasts, event.data),
+      notifyFetchDatasetIntegrationsFailed: (context, event: DoneInvokeEvent<Error>) => {
+        const integrationName = context.flyout.datasetSettings?.integration;
+        return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
+      },
     },
     services: {
       loadDataStreamStats: (context) =>
@@ -595,6 +741,27 @@ export const createDatasetQualityControllerStateMachine = ({
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           type: context.type as GetDataStreamsStatsQuery['type'],
           datasetQuery: context.filters.query,
+          start,
+          end,
+        });
+      },
+
+      loadDegradedFieldsPerDataStream: (context) => {
+        if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
+          return Promise.resolve({});
+        }
+
+        const { startDate: start, endDate: end } = getDateISORange(
+          context.flyout.insightsTimeRange
+        );
+        const { type, name: dataset, namespace } = context.flyout.dataset;
+
+        return dataStreamDetailsClient.getDataStreamDegradedFields({
+          dataStream: dataStreamPartsToIndexName({
+            type: type as DataStreamType,
+            dataset,
+            namespace,
+          }),
           start,
           end,
         });
@@ -630,6 +797,16 @@ export const createDatasetQualityControllerStateMachine = ({
           }),
         });
       },
+      loadDataStreamIntegration: (context) => {
+        if (context.flyout.datasetSettings?.integration && context.flyout.dataset) {
+          const { type } = context.flyout.dataset;
+          return dataStreamDetailsClient.getDataStreamIntegration({
+            type: type as DataStreamType,
+            integrationName: context.flyout.datasetSettings.integration,
+          });
+        }
+        return Promise.resolve();
+      },
       loadDataStreamDetails: (context) => {
         if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
           fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
@@ -653,17 +830,13 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadIntegrationDashboards: (context) => {
-        if (!context.flyout.dataset) {
-          fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
-
-          return Promise.resolve({});
+        if (context.flyout.datasetSettings?.integration) {
+          return dataStreamDetailsClient.getIntegrationDashboards({
+            integration: context.flyout.datasetSettings.integration,
+          });
         }
 
-        const { integration } = context.flyout.dataset;
-
-        return integration
-          ? dataStreamDetailsClient.getIntegrationDashboards({ integration: integration.name })
-          : Promise.resolve({});
+        return Promise.resolve();
       },
       loadDatasetIsNonAggregatable: async (context) => {
         if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {

@@ -15,7 +15,7 @@ import { parseDateRange } from '../../../../utils/datemath';
 import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
-import { useMetricsDataViewContext } from './use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import {
   HostsSearchPayload,
   useHostsUrlState,
@@ -52,7 +52,7 @@ const getDefaultTimestamps = () => {
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
-  const { dataView } = useMetricsDataViewContext();
+  const { metricsView } = useMetricsDataViewContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -116,13 +116,13 @@ export const useUnifiedSearch = () => {
 
   const buildQuery = useCallback(() => {
     return buildEsQuery(
-      dataView,
+      metricsView?.dataViewReference,
       searchCriteria.query,
       [...searchCriteria.filters, ...searchCriteria.panelFilters],
       kibanaQuerySettings
     );
   }, [
-    dataView,
+    metricsView?.dataViewReference,
     searchCriteria.query,
     searchCriteria.filters,
     searchCriteria.panelFilters,

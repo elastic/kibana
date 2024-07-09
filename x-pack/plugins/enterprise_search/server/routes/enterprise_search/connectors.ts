@@ -37,6 +37,7 @@ import {
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { generateConfig } from '../../lib/connectors/generate_config';
 import { startSync } from '../../lib/connectors/start_sync';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
@@ -472,21 +473,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
       validate: {
-        body: schema.object({
-          advanced_snippet: schema.string(),
-          filtering_rules: schema.arrayOf(
-            schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
-              order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
-            })
-          ),
-        }),
+        body: schema.maybe(
+          schema.object({
+            advanced_snippet: schema.string(),
+            filtering_rules: schema.arrayOf(
+              schema.object({
+                created_at: schema.string(),
+                field: schema.string(),
+                id: schema.string(),
+                order: schema.number(),
+                policy: schema.string(),
+                rule: schema.string(),
+                updated_at: schema.string(),
+                value: schema.string(),
+              })
+            ),
+          })
+        ),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -495,13 +498,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      const { advanced_snippet, filtering_rules } = request.body;
-      const result = await updateFiltering(client.asCurrentUser, connectorId, {
-        advancedSnippet: advanced_snippet,
-        // Have to cast here because our API schema validator doesn't know how to deal with enums
-        // We're relying on the schema in the validator above to flag if something goes wrong
-        filteringRules: filtering_rules as FilteringRule[],
-      });
+      const result = await updateFiltering(client.asCurrentUser, connectorId);
       return result ? response.ok({ body: result }) : response.conflict();
     })
   );
@@ -769,6 +766,70 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               total: totalResults,
             },
           },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/generate_config',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
+
+      let associatedIndex;
+      let apiKeyResponse;
+      try {
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+
+        if (!connector) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        const configResponse = await generateConfig(client, connector);
+        associatedIndex = configResponse.associatedIndex;
+        apiKeyResponse = configResponse.apiKeyResponse;
+      } catch (error) {
+        if (error.message === ErrorCode.GENERATE_INDEX_NAME_ERROR) {
+          createError({
+            errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              {
+                defaultMessage: 'Cannot find a unique index name to generate configuration',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+          throw error;
+        }
+      }
+
+      return response.ok({
+        body: {
+          apiKey: apiKeyResponse,
+          connectorId,
+          indexName: associatedIndex,
         },
         headers: { 'content-type': 'application/json' },
       });

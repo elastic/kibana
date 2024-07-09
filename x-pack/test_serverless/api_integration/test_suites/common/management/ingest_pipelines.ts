@@ -8,24 +8,34 @@
 import expect from '@kbn/expect';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const ingestPipelines = getService('ingestPipelines');
   const log = getService('log');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Ingest Pipelines', function () {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
     after(async () => {
       await ingestPipelines.api.deletePipelines();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('Create', () => {
       it('should create a pipeline', async () => {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBody();
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send(pipelineRequestBody);
 
         expect(body).to.eql({
@@ -36,10 +46,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should create a pipeline with only required fields', async () => {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields(); // Includes name and processors[] only
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send(pipelineRequestBody)
           .expect(200);
 
@@ -56,10 +66,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ingestPipelines.api.createPipeline({ id: name, ...esPipelineRequestBody });
 
         // Then, create a pipeline with our internal API
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send(pipelineRequestBody)
           .expect(409);
 
@@ -94,10 +104,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow an existing pipeline to be updated', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .put(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             ...pipeline,
             description: 'updated test pipeline description',
@@ -116,10 +126,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow optional fields to be removed', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .put(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             // removes description, version, on_failure, and _meta
             processors: pipeline.processors,
@@ -134,10 +144,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not allow a non-existing pipeline to be updated', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/pipeline_does_not_exist`;
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .put(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             ...pipeline,
             description: 'updated test pipeline description',
@@ -179,10 +189,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('all pipelines', () => {
         it('should return an array of pipelines', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get(ingestPipelines.fixtures.apiBasePath)
-            .set('kbn-xsrf', 'xxx')
-            .set('x-elastic-internal-origin', 'xxx')
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
           expect(Array.isArray(body)).to.be(true);
@@ -202,10 +212,10 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return a single pipeline', async () => {
           const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
 
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get(uri)
-            .set('kbn-xsrf', 'xxx')
-            .set('x-elastic-internal-origin', 'xxx')
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
           expect(body).to.eql({
@@ -244,10 +254,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineA}`;
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(body).to.eql({
@@ -263,10 +273,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const {
           body: { itemsDeleted, errors },
-        } = await supertest
+        } = await supertestWithoutAuth
           .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(errors).to.eql([]);
@@ -283,10 +293,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineD},${PIPELINE_DOES_NOT_EXIST}`;
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(body).to.eql({
@@ -315,10 +325,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should successfully simulate a pipeline', async () => {
         const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBody();
         const documents = ingestPipelines.fixtures.createDocuments();
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             pipeline,
             documents,
@@ -334,10 +344,10 @@ export default function ({ getService }: FtrProviderContext) {
         const { name, ...pipeline } =
           ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
         const documents = ingestPipelines.fixtures.createDocuments();
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             pipeline,
             documents,
@@ -380,10 +390,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a document', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/${DOCUMENT_ID}`;
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .get(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(body).to.eql({
@@ -396,10 +406,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an error if the document does not exist', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/2`; // Document 2 does not exist
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .get(uri)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .expect(404);
 
         expect(body).to.eql({
@@ -415,10 +425,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should map to a pipeline', async () => {
         const validCsv =
           'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${ingestPipelines.fixtures.apiBasePath}/parse_csv`)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             copyAction: 'copy',
             file: validCsv,

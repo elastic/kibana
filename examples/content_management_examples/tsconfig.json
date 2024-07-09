@@ -29,5 +29,6 @@
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/react-kibana-context-render",
   ]
 }

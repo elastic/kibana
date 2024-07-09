@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { RouteAccess } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -22,16 +23,22 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/{type}/{id}',
+      options: {
+        summary: `Update a saved object`,
+        tags: ['oas-tag:saved objects'],
+        access,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

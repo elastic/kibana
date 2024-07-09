@@ -7,8 +7,8 @@
 
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { EntityRiskInput } from '../../../common/entity_analytics/risk_engine';
 
+import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
@@ -35,7 +35,7 @@ interface AlertHit {
 
 export interface InputAlert {
   alert: AlertData;
-  input: EntityRiskInput;
+  input: RiskScoreInput;
   _id: string;
 }
 

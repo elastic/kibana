@@ -10,27 +10,14 @@ import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import dateMath from '@kbn/datemath';
-import {
-  getExtendedChangePoint,
-  type DocumentCountStatsChangePoint,
-} from '@kbn/aiops-log-rate-analysis';
+import { getExtendedChangePoint, type DocumentCountStats } from '@kbn/aiops-log-rate-analysis';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import type { GroupTableItem } from '@kbn/aiops-components';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
-
-export interface DocumentCountStats {
-  interval?: number;
-  buckets?: { [key: string]: number };
-  changePoint?: DocumentCountStatsChangePoint;
-  timeRangeEarliest?: number;
-  timeRangeLatest?: number;
-  totalCount: number;
-  lastDocTimeStampMs?: number;
-}
 
 export interface DocumentStatsSearchStrategyParams {
   earliest?: number;

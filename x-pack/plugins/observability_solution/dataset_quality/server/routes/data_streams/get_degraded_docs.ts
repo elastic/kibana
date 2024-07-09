@@ -23,6 +23,8 @@ interface ResultBucket {
   count: number;
 }
 
+const SIZE_LIMIT = 10000;
+
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
@@ -31,9 +33,9 @@ export async function getDegradedDocsPaginated(options: {
   datasetQuery?: string;
   after?: {
     degradedDocs?: { dataset: string; namespace: string };
-    totalDocs?: { dataset: string; namespace: string };
+    docsCount?: { dataset: string; namespace: string };
   };
-  prevResults?: { degradedDocs: ResultBucket[]; totalDocs: ResultBucket[] };
+  prevResults?: { degradedDocs: ResultBucket[]; docsCount: ResultBucket[] };
 }): Promise<DegradedDocs[]> {
   const {
     esClient,
@@ -42,7 +44,7 @@ export async function getDegradedDocsPaginated(options: {
     start,
     end,
     after,
-    prevResults = { degradedDocs: [], totalDocs: [] },
+    prevResults = { degradedDocs: [], docsCount: [] },
   } = options;
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
@@ -65,7 +67,7 @@ export async function getDegradedDocsPaginated(options: {
     datasets: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
-        size: 10000,
+        size: SIZE_LIMIT,
         sources: [
           { dataset: { terms: { field: 'data_stream.dataset' } } },
           { namespace: { terms: { field: 'data_stream.namespace' } } },
@@ -74,7 +76,7 @@ export async function getDegradedDocsPaginated(options: {
     },
   });
 
-  const response = await datasetQualityESClient.msearch({ index: `${type}-*` }, [
+  const response = await datasetQualityESClient.msearch({ index: `${type}-*-*` }, [
     // degraded docs per dataset
     {
       size: 0,
@@ -96,12 +98,13 @@ export async function getDegradedDocsPaginated(options: {
           filter: otherFilters,
         },
       },
-      aggs: aggs(after?.totalDocs),
+      aggs: aggs(after?.docsCount),
     },
   ]);
+  const [degradedDocsResponse, totalDocsResponse] = response.responses;
 
   const currDegradedDocs =
-    response.responses[0].aggregations?.datasets.buckets.map((bucket) => ({
+    degradedDocsResponse.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       count: bucket.doc_count,
     })) ?? [];
@@ -109,16 +112,16 @@ export async function getDegradedDocsPaginated(options: {
   const degradedDocs = [...prevResults.degradedDocs, ...currDegradedDocs];
 
   const currTotalDocs =
-    response.responses[1].aggregations?.datasets.buckets.map((bucket) => ({
+    totalDocsResponse.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       count: bucket.doc_count,
     })) ?? [];
 
-  const totalDocs = [...prevResults.totalDocs, ...currTotalDocs];
+  const docsCount = [...prevResults.docsCount, ...currTotalDocs];
 
   if (
-    response.responses[0].aggregations?.datasets.after_key ||
-    response.responses[1].aggregations?.datasets.after_key
+    totalDocsResponse.aggregations?.datasets.after_key &&
+    totalDocsResponse.aggregations?.datasets.buckets.length === SIZE_LIMIT
   ) {
     return getDegradedDocsPaginated({
       esClient,
@@ -128,17 +131,17 @@ export async function getDegradedDocsPaginated(options: {
       datasetQuery,
       after: {
         degradedDocs:
-          (response.responses[0].aggregations?.datasets.after_key as {
+          (degradedDocsResponse.aggregations?.datasets.after_key as {
             dataset: string;
             namespace: string;
           }) || after?.degradedDocs,
-        totalDocs:
-          (response.responses[1].aggregations?.datasets.after_key as {
+        docsCount:
+          (totalDocsResponse.aggregations?.datasets.after_key as {
             dataset: string;
             namespace: string;
-          }) || after?.totalDocs,
+          }) || after?.docsCount,
       },
-      prevResults: { degradedDocs, totalDocs },
+      prevResults: { degradedDocs, docsCount },
     });
   }
 
@@ -150,12 +153,12 @@ export async function getDegradedDocsPaginated(options: {
     {}
   );
 
-  return totalDocs.map((curr) => {
+  return docsCount.map((curr) => {
     const degradedDocsCount = degradedDocsMap[curr.dataset as keyof typeof degradedDocsMap] || 0;
 
     return {
       ...curr,
-      totalDocs: curr.count,
+      docsCount: curr.count,
       count: degradedDocsCount,
       percentage: (degradedDocsCount / curr.count) * 100,
     };

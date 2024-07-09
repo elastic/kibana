@@ -17,7 +17,10 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { NormalizedExternalConnectorClient } from '../../..';
+import type {
+  NormalizedExternalConnectorClient,
+  NormalizedExternalConnectorClientExecuteOptions,
+} from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
@@ -27,11 +30,20 @@ import type {
   LogsEndpointActionResponse,
   SentinelOneActivityEsDoc,
   SentinelOneIsolationRequestMeta,
+  SentinelOneActivityDataForType80,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  SentinelOneGetFileRequestMeta,
+  KillOrSuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
-import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { Readable } from 'stream';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -47,7 +59,7 @@ const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 describe('SentinelOneActionsClient class', () => {
   let classConstructorOptions: SentinelOneActionsClientOptionsMock;
   let s1ActionsClient: ResponseActionsClient;
-  let connectorActionsMock: NormalizedExternalConnectorClient;
+  let connectorActionsMock: DeeplyMockedKeys<NormalizedExternalConnectorClient>;
 
   const createS1IsolationOptions = (
     overrides: Omit<
@@ -58,11 +70,12 @@ describe('SentinelOneActionsClient class', () => {
 
   beforeEach(() => {
     classConstructorOptions = sentinelOneMock.createConstructorOptions();
-    connectorActionsMock = classConstructorOptions.connectorActions;
+    connectorActionsMock =
+      classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
     s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
   });
 
-  it.each(['killProcess', 'suspendProcess', 'runningProcesses', 'execute', 'upload'] as Array<
+  it.each(['suspendProcess', 'runningProcesses', 'execute', 'upload', 'scan'] as Array<
     keyof ResponseActionsClient
   >)('should throw an un-supported error for %s', async (methodName) => {
     // @ts-expect-error Purposely passing in empty object for options
@@ -96,6 +109,9 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        false;
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
@@ -227,6 +243,9 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        false;
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
@@ -509,7 +528,7 @@ describe('SentinelOneActionsClient class', () => {
               ],
             },
           },
-          size: 1000,
+          size: ACTIONS_SEARCH_PAGE_SIZE,
           sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
         });
       });
@@ -549,8 +568,169 @@ describe('SentinelOneActionsClient class', () => {
               ],
             },
           },
-          size: 1000,
+          size: ACTIONS_SEARCH_PAGE_SIZE,
           sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
+        });
+      });
+    });
+
+    describe('for get-file response action', () => {
+      let actionRequestsSearchResponse: SearchResponse<
+        LogsEndpointAction<ResponseActionGetFileParameters, ResponseActionGetFileOutputContent>
+      >;
+
+      beforeEach(() => {
+        const s1DataGenerator = new SentinelOneDataGenerator('seed');
+        actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateActionEsHit<
+            ResponseActionGetFileParameters,
+            ResponseActionGetFileOutputContent,
+            SentinelOneGetFileRequestMeta
+          >({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: { data: { command: 'get-file' } },
+            meta: {
+              agentId: 's1-agent-a',
+              agentUUID: 'agent-uuid-1',
+              hostName: 's1-host-name',
+              commandBatchUuid: 'batch-111',
+              activityId: 'activity-222',
+            },
+          }),
+        ]);
+        const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+          LogsEndpointActionResponse | EndpointActionResponse
+        >([]);
+        const s1ActivitySearchResponse = s1DataGenerator.generateActivityEsSearchResponse([
+          s1DataGenerator.generateActivityEsSearchHit<SentinelOneActivityDataForType80>({
+            sentinel_one: {
+              activity: {
+                id: 'activity-222',
+                data: s1DataGenerator.generateActivityFetchFileResponseData({
+                  flattened: {
+                    commandBatchUuid: 'batch-111',
+                  },
+                }),
+                agent: {
+                  id: 's1-agent-a',
+                },
+                type: 80,
+              },
+            },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: actionRequestsSearchResponse,
+          pitUsage: true,
+        });
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          response: actionResponsesSearchResponse,
+        });
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
+          response: s1ActivitySearchResponse,
+        });
+      });
+
+      it('should search for S1 activity with correct query', async () => {
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(classConstructorOptions.esClient.search).toHaveBeenNthCalledWith(4, {
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
+          size: ACTIONS_SEARCH_PAGE_SIZE,
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              must: [
+                {
+                  term: {
+                    'sentinel_one.activity.type': 80,
+                  },
+                },
+              ],
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          'sentinel_one.activity.agent.id': 's1-agent-a',
+                        },
+                      },
+                      {
+                        term: {
+                          'sentinel_one.activity.data.flattened.commandBatchUuid': 'batch-111',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        });
+      });
+
+      it('should complete action as a failure if no S1 agentId/commandBatchUuid present in action request doc', async () => {
+        actionRequestsSearchResponse.hits.hits[0]!._source!.meta = {
+          agentId: 's1-agent-a',
+          agentUUID: 'agent-uuid-1',
+          hostName: 's1-host-name',
+        };
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              message:
+                'Unable to very if action completed. SentinelOne agent id or commandBatchUuid missing on action request document!',
+            },
+          })
+        );
+      });
+
+      it('should generate an action success response doc', async () => {
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            completed_at: expect.any(String),
+            data: {
+              command: 'get-file',
+              comment: 'Some description here',
+              output: {
+                content: {
+                  code: '',
+                  contents: [],
+                  zip_size: 0,
+                },
+                type: 'json',
+              },
+            },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+          },
+          agent: {
+            id: 'agent-uuid-1',
+          },
+          error: undefined,
+          meta: {
+            activityLogEntryId: 'activity-222',
+            downloadUrl: '/agents/5173897/uploads/40558796',
+            elasticDocId: '16ae44fc-4be7-446c-8e8f-a5c082dda918',
+            createdAt: expect.any(String),
+            filename: 'file.zip',
+          },
         });
       });
     });
@@ -587,7 +767,7 @@ describe('SentinelOneActionsClient class', () => {
           subActionParams: {
             agentUUID: '1-2-3',
             files: [getFileReqOptions.parameters.path],
-            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+            zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
           },
         },
       });
@@ -617,7 +797,8 @@ describe('SentinelOneActionsClient class', () => {
       classConstructorOptions.isAutomated = true;
       classConstructorOptions.connectorActions =
         responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
-      connectorActionsMock = classConstructorOptions.connectorActions;
+      connectorActionsMock =
+        classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
@@ -765,6 +946,350 @@ describe('SentinelOneActionsClient class', () => {
       await s1ActionsClient.getFile(
         responseActionsClientMock.createGetFileOptions({ case_ids: ['case-1'] })
       );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+  });
+
+  describe('#getFileInfo()', () => {
+    beforeEach(() => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+    });
+
+    it('should throw error if feature flag is disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
+
+      await expect(s1ActionsClient.getFileInfo('acb', '123')).rejects.toThrow(
+        'File downloads are not supported for sentinel_one agent type. Feature disabled'
+      );
+    });
+
+    it('should throw error if action id is not for an agent type of sentinelOne', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
+        'Action id [abc] not found with an agent type of [sentinel_one]'
+      );
+    });
+
+    it('should return file info with with status of AWAITING_UPLOAD if action is still pending', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).resolves.toEqual({
+        actionId: 'abc',
+        agentId: '123',
+        agentType: 'sentinel_one',
+        created: '',
+        id: '123',
+        mimeType: '',
+        name: '',
+        size: 0,
+        status: 'AWAITING_UPLOAD',
+      });
+    });
+
+    it('should return expected file information', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+    });
+  });
+
+  describe('#getFileDownload()', () => {
+    let s1DataGenerator: SentinelOneDataGenerator;
+
+    beforeEach(() => {
+      s1DataGenerator = new SentinelOneDataGenerator('seed');
+
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+
+      const esHit = s1DataGenerator.generateResponseEsHit({
+        agent: { id: '123' },
+        EndpointActions: { data: { command: 'get-file' } },
+        meta: {
+          activityLogEntryId: 'activity-1',
+          elasticDocId: 'esdoc-1',
+          downloadUrl: '/some/url',
+          createdAt: '2024-05-09',
+          filename: 'foo.zip',
+        },
+      });
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: s1DataGenerator.toEsSearchResponse([esHit]),
+      });
+
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(
+        (options: NormalizedExternalConnectorClientExecuteOptions) => {
+          if (options.params.subAction === SUB_ACTION.DOWNLOAD_AGENT_FILE) {
+            return {
+              data: Readable.from(['test']),
+            };
+          }
+        }
+      );
+    });
+
+    it('should throw error if feature flag is disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
+
+      await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
+        'File downloads are not supported for sentinel_one agent type. Feature disabled'
+      );
+    });
+
+    it('should throw error if action id is not for an agent type of sentinelOne', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Action id [abc] not found with an agent type of [sentinel_one]'
+      );
+    });
+
+    it('should throw error if action is still pending for the given agent id', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: s1DataGenerator.toEsSearchResponse([]),
+      });
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Action ID [abc] for agent ID [abc] is still pending'
+      );
+    });
+
+    it('should throw error if the action response ES Doc is missing required data', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: s1DataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateResponseEsHit({
+            agent: { id: '123' },
+            EndpointActions: { data: { command: 'get-file' } },
+            meta: { activityLogEntryId: undefined },
+          }),
+        ]),
+      });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]'
+      );
+    });
+
+    it('should call SentinelOne connector to get file download Readable stream', async () => {
+      await s1ActionsClient.getFileDownload('abc', '123');
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'downloadAgentFile',
+          subActionParams: {
+            activityId: 'activity-1',
+            agentUUID: '123',
+          },
+        },
+      });
+    });
+
+    it('should throw an error if call to SentinelOne did not return a Readable stream', async () => {
+      (connectorActionsMock.execute as jest.Mock).mockReturnValue({ data: undefined });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to establish a readable stream for file with SentinelOne'
+      );
+    });
+
+    it('should return expected data', async () => {
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).resolves.toEqual({
+        stream: expect.any(Readable),
+        fileName: 'foo.zip',
+        mimeType: undefined,
+      });
+    });
+  });
+
+  describe('#killProcess()', () => {
+    let killProcessActionRequest: KillOrSuspendProcessRequestBody;
+
+    beforeEach(() => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
+        true;
+
+      killProcessActionRequest = responseActionsClientMock.createKillProcessOptions({
+        // @ts-expect-error TS2322 due to type being overloaded to handle kill/suspend process and specific option for S1
+        parameters: { process_name: 'foo' },
+      });
+    });
+
+    it('should throw an error if feature flag is disabled', async () => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
+        false;
+
+      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
+        `kill-process not supported for sentinel_one agent type. Feature disabled`
+      );
+    });
+
+    it('should throw an error if `process_name` is not defined (manual mode)', async () => {
+      // @ts-expect-error
+      killProcessActionRequest.parameters.process_name = '';
+
+      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
+        '[body.parameters.process_name]: missing parameter or value is empty'
+      );
+    });
+
+    it('should still create action at error if something goes wrong in automated mode', async () => {
+      // @ts-expect-error
+      killProcessActionRequest.parameters.process_name = '';
+      classConstructorOptions.isAutomated = true;
+      classConstructorOptions.connectorActions =
+        responseActionsClientMock.createNormalizedExternalConnectorClient(
+          sentinelOneMock.createConnectorActionsClient()
+        );
+      s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            error: {
+              message: '[body.parameters.process_name]: missing parameter or value is empty',
+            },
+          }),
+        }),
+        { meta: true }
+      );
+    });
+
+    it('should retrieve script execution information from S1 using host OS', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+        params: {
+          subAction: SUB_ACTION.GET_REMOTE_SCRIPTS,
+          subActionParams: {
+            osTypes: 'linux',
+            query: 'terminate',
+            scriptType: 'action',
+          },
+        },
+      });
+    });
+
+    it('should throw error if unable to retrieve S1 script information', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: { data: [] },
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
+        'Unable to find a script from SentinelOne to handle [kill-process] response action for host running [linux])'
+      );
+    });
+
+    it('should send execute script request to S1 for kill-process', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'executeScript',
+          subActionParams: {
+            filter: { uuids: '1-2-3' },
+            script: {
+              inputParams: '--terminate --processes "foo" --force',
+              outputDestination: 'SentinelCloud',
+              requiresApproval: false,
+              scriptId: '1466645476786791838',
+              taskDescription: expect.stringContaining(
+                'Action triggered from Elastic Security by user [foo] for action [kill-process'
+              ),
+            },
+          },
+        },
+      });
+    });
+
+    it('should return action details on success', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should create action request doc with expected meta info', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'kill-process',
+                comment: 'test comment',
+                parameters: { process_name: 'foo' },
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+              parentTaskId: 'task-789',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+    });
+
+    it('should update cases', async () => {
+      killProcessActionRequest = {
+        ...killProcessActionRequest,
+        case_ids: ['case-1'],
+      };
+      await s1ActionsClient.killProcess(killProcessActionRequest);
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { NormalizedField } from '../../../../types';
-import { DynamicParameter, EnabledParameter } from '../../field_parameters';
+import { DynamicParameter, EnabledParameter, SubobjectsParameter } from '../../field_parameters';
 import { BasicParametersSection } from '../edit_field';
 
 interface Props {
@@ -23,6 +23,8 @@ export const ObjectType = ({ field }: Props) => {
       />
 
       <EnabledParameter />
+
+      <SubobjectsParameter />
     </BasicParametersSection>
   );
 };
