@@ -546,10 +546,6 @@ describe('Event filter form', () => {
   });
 
   describe('Warnings', () => {
-    beforeEach(() => {
-      render();
-    });
-
     describe('duplicate fields', () => {
       it('should not show warning text when unique fields are added', async () => {
         formProps.item.entries = [
@@ -566,8 +562,12 @@ describe('Event filter form', () => {
             value: 'some other value',
           },
         ];
-        rerender();
-        expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+        render();
+        expect(await renderResult.findByDisplayValue('some value')).toBeInTheDocument();
+
+        expect(
+          renderResult.queryByTestId('duplicate-fields-warning-message')
+        ).not.toBeInTheDocument();
       });
 
       it('should not show warning text when field values are not added', async () => {
@@ -585,8 +585,12 @@ describe('Event filter form', () => {
             value: '',
           },
         ];
-        rerender();
-        expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+        render();
+        expect((await renderResult.findAllByTestId('fieldAutocompleteComboBox')).length).toBe(2);
+
+        expect(
+          renderResult.queryByTestId('duplicate-fields-warning-message')
+        ).not.toBeInTheDocument();
       });
 
       it('should show warning text when duplicate fields are added with values', async () => {
@@ -604,8 +608,11 @@ describe('Event filter form', () => {
             value: 'some other value',
           },
         ];
-        rerender();
-        expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
+        render();
+
+        expect(
+          await renderResult.findByTestId('duplicate-fields-warning-message')
+        ).toBeInTheDocument();
       });
 
       describe('in relation with Process Descendant filtering', () => {
@@ -713,8 +720,12 @@ describe('Event filter form', () => {
             value: 'valuewithwildcard*',
           },
         ];
-        rerender();
-        expect(renderResult.queryByTestId('wildcardWithWrongOperatorCallout')).toBeNull();
+        render();
+        expect(await renderResult.findByDisplayValue('valuewithwildcard*')).toBeInTheDocument();
+
+        expect(
+          renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+        ).not.toBeInTheDocument();
       });
 
       it('should show warning callout when wildcard is used with the "IS" operator', async () => {
@@ -726,8 +737,11 @@ describe('Event filter form', () => {
             value: 'valuewithwildcard*',
           },
         ];
-        rerender();
-        await expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
+        render();
+
+        expect(
+          await renderResult.findByTestId('wildcardWithWrongOperatorCallout')
+        ).toBeInTheDocument();
       });
     });
   });
