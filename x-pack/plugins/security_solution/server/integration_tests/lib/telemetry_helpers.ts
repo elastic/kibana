@@ -44,6 +44,7 @@ import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
 import fleetAgents from '../__mocks__/fleet-agents.json';
 import endpointMetrics from '../__mocks__/endpoint-metrics.json';
+import prebuiltRulesEvents from '../__mocks__/prebuilt-rules-events.json';
 import endpointMetadata from '../__mocks__/endpoint-metadata.json';
 import endpointPolicy from '../__mocks__/endpoint-policy.json';
 
@@ -51,6 +52,7 @@ const fleetIndex = '.fleet-agents';
 const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';
 const endpointMetricsMetadataIndex = '.ds-metrics-endpoint.metadata-1';
 const endpointMetricsPolicyIndex = '.ds-metrics-endpoint.policy-1';
+const prebuiltRulesIndex = '.alerts-security.alerts';
 
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
@@ -182,6 +184,10 @@ export async function mockEndpointData(
   await bulkInsert(esClient, endpointMetricsPolicyIndex, updateTimestamps(endpointPolicy));
 }
 
+export async function mockPrebuiltRulesData(esClient: ElasticsearchClient) {
+  await bulkInsert(esClient, prebuiltRulesIndex, updateTimestamps(prebuiltRulesEvents));
+}
+
 export async function initEndpointIndices(esClient: ElasticsearchClient) {
   const mappings: object = {
     dynamic: false,
@@ -208,6 +214,42 @@ export async function dropEndpointIndices(esClient: ElasticsearchClient) {
   await esClient.indices.delete({ index: endpointMetricsIndex }).catch(() => {});
   await esClient.indices.delete({ index: endpointMetricsMetadataIndex }).catch(() => {});
   await esClient.indices.delete({ index: endpointMetricsPolicyIndex }).catch(() => {});
+}
+
+export async function initPrebuiltRulesIndices(esClient: ElasticsearchClient) {
+  const mappings: object = {
+    dynamic: false,
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+      kibana: {
+        properties: {
+          alert: {
+            properties: {
+              rule: {
+                properties: {
+                  parameters: {
+                    properties: {
+                      immutable: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  await esClient.indices.create({ index: prebuiltRulesIndex, mappings }).catch(() => {});
+}
+
+export async function dropPrebuiltRulesIndices(esClient: ElasticsearchClient) {
+  await esClient.indices.delete({ index: prebuiltRulesIndex }).catch(() => {});
 }
 
 export async function cleanupMockedEndpointAlerts(esClient: ElasticsearchClient) {
