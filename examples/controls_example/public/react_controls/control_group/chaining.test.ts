@@ -36,32 +36,41 @@ describe('chaining$', () => {
   const onFireMock = jest.fn();
   const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL');
   const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
+  const alphaControlApi = {
+    filters$: new BehaviorSubject<Filter[] | undefined>(undefined)
+  }
+  const bravoControlApi = {
+    filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+    timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined)
+  }
+  const charlieControlApi = {
+    filters$: new BehaviorSubject<Filter[] | undefined>(undefined)
+  }
+  const deltaControlApi = {
+    filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_DELTA])
+  }
   const getControlApi = (uuid: string) => {
     if (uuid === 'alpha') {
-      return {
-        filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_ALPHA])
-      };
+      return alphaControlApi;
     } else if (uuid === 'bravo') {
-      return {
-        filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_BRAVO]),
-        timeslice$: new BehaviorSubject<[number, number] | undefined>([
-          Date.parse('2024-06-09T06:00:00.000Z'), 
-          Date.parse('2024-06-09T12:00:00.000Z')
-        ])
-      };
+      return bravoControlApi;
     } else if (uuid === 'charlie') {
-      return {
-        filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_CHARLIE])
-      };
+      return charlieControlApi;
     } else if (uuid === 'delta') {
-      return {
-        filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_DELTA])
-      };
+      return deltaControlApi;
     }
   }
   
   beforeEach(() => {
     onFireMock.mockReset();
+    alphaControlApi.filters$.next([FILTER_ALPHA]);
+    bravoControlApi.filters$.next([FILTER_BRAVO]);
+    bravoControlApi.timeslice$.next([
+      Date.parse('2024-06-09T06:00:00.000Z'), 
+      Date.parse('2024-06-09T12:00:00.000Z')
+    ]);
+    charlieControlApi.filters$.next([FILTER_CHARLIE]);
+    deltaControlApi.filters$.next([FILTER_DELTA]);
     chainingSystem$.next('HIERARCHICAL');
     controlsInOrder$.next([
       { id: 'alpha', type: 'whatever' },
@@ -179,6 +188,61 @@ describe('chaining$', () => {
           FILTER_ALPHA,
         ],
         timeRange: undefined,
+      });
+      subscription.unsubscribe();
+    });
+
+    test('should fire when chained filter changes', async () => {
+      const subscription = chaining$(
+        'charlie',
+        chainingSystem$,
+        controlsInOrder$,
+        getControlApi
+      ).pipe(skip(1)).subscribe(onFireMock);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFireMock.mock.calls).toHaveLength(0);
+      
+      alphaControlApi.filters$.next([{
+        meta: {
+          alias: 'filterAlpha_version2'
+        }
+      }]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onFireMock.mock.calls).toHaveLength(1);
+      const chainingContext = onFireMock.mock.calls[0][0];
+      expect(chainingContext.chainingFilters).toEqual([{
+          meta: {
+            alias: 'filterAlpha_version2'
+          }
+        },
+        FILTER_BRAVO]
+      );
+      subscription.unsubscribe();
+    });
+
+    test('should fire when chained timeslice changes', async () => {
+      const subscription = chaining$(
+        'charlie',
+        chainingSystem$,
+        controlsInOrder$,
+        getControlApi
+      ).pipe(skip(1)).subscribe(onFireMock);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFireMock.mock.calls).toHaveLength(0);
+      
+      bravoControlApi.timeslice$.next([
+        Date.parse('2024-06-09T12:00:00.000Z'), 
+        Date.parse('2024-06-09T18:00:00.000Z')
+      ]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onFireMock.mock.calls).toHaveLength(1);
+      const chainingContext = onFireMock.mock.calls[0][0];
+      expect(chainingContext.timeRange).toEqual({
+        from: '2024-06-09T12:00:00.000Z',
+        to: '2024-06-09T18:00:00.000Z',
+        mode: 'absolute',
       });
       subscription.unsubscribe();
     });

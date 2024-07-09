@@ -106,18 +106,15 @@ export const getControlGroupEmbeddableFactory = (services: {
         undefined
       );
 
-      const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
-      const controlsOrderSubscription = children$.subscribe(children => {
-        const controlsInOrder = Object.keys(children)
+      const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
+        Object.keys(childControlState)
           .map((key) => ({
             id: key,
             order: childControlState[key].order,
             type: childControlState[key].type,
           }))
-          .sort((a, b) => (a.order > b.order ? 1 : -1));
-        controlsInOrder$.next(controlsInOrder);
-      });
-
+          .sort((a, b) => (a.order > b.order ? 1 : -1))
+      );
       const api = setApi({
         dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
         chaining$: (controlUuid: string) => chaining$(
@@ -250,7 +247,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               outputFiltersSubscription.unsubscribe();
               childDataViewsSubscription.unsubscribe();
               childrenTimesliceSubscription.unsubscribe();
-              controlsOrderSubscription.unsubscribe();
             };
           }, []);
 
