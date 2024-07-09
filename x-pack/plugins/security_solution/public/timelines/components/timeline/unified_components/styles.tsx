@@ -58,7 +58,7 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
 
 export const leadingActionsColumnStyles = `
   .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
-    padding: 0;
+    padding-top: 4px;
   }
 `;
 
