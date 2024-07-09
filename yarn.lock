@@ -4853,6 +4853,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql@link:src/plugins/esql":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
@@ -6661,10 +6665,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/text-based-languages@link:src/plugins/text_based_languages":
-  version "0.0.0"
-  uid ""
-
 "@kbn/third-party-lens-navigation-prompt-plugin@link:x-pack/examples/third_party_lens_navigation_prompt":
   version "0.0.0"
   uid ""
@@ -7059,10 +7059,10 @@
     "@launchdarkly/js-sdk-common" "2.5.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.4.6":
-  version "9.4.6"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.6.tgz#e1a1614e05eab2515090c7862764498a2f9b2b1e"
-  integrity sha512-IcQqiaYrAgmCvh1LsfjEVRa4Wk97PWirHnbVu6fRc97kt8WCKDlVo2O+IbOcC6scJVGDJU4aXVehTkfbhUq1Lg==
+"@launchdarkly/node-server-sdk@^9.4.7":
+  version "9.4.7"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.7.tgz#d8f923943b1750efa4c0f80baad079103ac5f700"
+  integrity sha512-9blKdS4c/ZGR0XjB8EqifDTdk08WBX/KZ91lZIc3ND3WA9D3qagysynaVkpBo3FiymHyCYyvwq4ZjiSMOIkrPw==
   dependencies:
     "@launchdarkly/js-server-sdk-common" "2.4.4"
     https-proxy-agent "^5.0.1"

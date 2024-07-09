@@ -60,7 +60,6 @@ export const getComments = ({
   refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
-  isFlyoutMode,
   currentUserAvatar,
   setIsStreaming,
 }: {
@@ -71,7 +70,6 @@ export const getComments = ({
   refetchCurrentConversation: () => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
-  isFlyoutMode: boolean;
   currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
 }): EuiCommentProps[] => {
@@ -187,7 +185,7 @@ export const getComments = ({
 
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} isFlyoutMode={isFlyoutMode} />,
+        actions: <CommentActions message={transformedMessage} />,
         children: (
           <StreamComment
             actionTypeId={actionTypeId}
