@@ -9,14 +9,16 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 
 import type { SpacesManager } from '../../../spaces_manager';
 
-interface ViewSpaceServices {
+export interface ViewSpaceServices {
   serverBasePath: string;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   spacesManager: SpacesManager;
+  getRolesAPIClient: () => Promise<RolesAPIClient>;
 }
 
 const ViewSpaceContext = createContext<ViewSpaceServices | null>(null);

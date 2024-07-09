@@ -21,7 +21,7 @@ import {
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import type { FC } from 'react';
 
-import type { ApplicationStart, Capabilities, ScopedHistory } from '@kbn/core/public';
+import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -29,37 +29,38 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
-import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
+import {
+  ViewSpaceContextProvider,
+  type ViewSpaceServices,
+} from './hooks/view_space_context_provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
-import type { SpacesManager } from '../../spaces_manager';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
 );
 
-const getSelectedTabId = (selectedTabId?: string) => {
+const getSelectedTabId = (canUserViewRoles: boolean, selectedTabId?: string) => {
   // Validation of the selectedTabId routing parameter, default to the Content tab
-  return selectedTabId && [TAB_ID_FEATURES, TAB_ID_ROLES].includes(selectedTabId)
+  return selectedTabId &&
+    [TAB_ID_FEATURES, canUserViewRoles ? TAB_ID_ROLES : null]
+      .filter(Boolean)
+      .includes(selectedTabId)
     ? selectedTabId
     : TAB_ID_CONTENT;
 };
 
-interface PageProps {
+interface PageProps extends ViewSpaceServices {
+  spaceId?: string;
+  history: ScopedHistory;
+  selectedTabId?: string;
   capabilities: Capabilities;
   allowFeatureVisibility: boolean; // FIXME: handle this
   solutionNavExperiment?: Promise<boolean>;
   getFeatures: FeaturesPluginStart['getFeatures'];
-  getUrlForApp: ApplicationStart['getUrlForApp'];
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  serverBasePath: string;
-  spacesManager: SpacesManager;
-  history: ScopedHistory;
   onLoadSpace: (space: Space) => void;
-  spaceId?: string;
-  selectedTabId?: string;
 }
 
 const handleApiError = (error: Error) => {
@@ -80,9 +81,9 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     capabilities,
     getUrlForApp,
     navigateToUrl,
+    getRolesAPIClient,
   } = props;
 
-  const selectedTabId = getSelectedTabId(_selectedTabId);
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -90,8 +91,15 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [isLoadingSpace, setIsLoadingSpace] = useState(true);
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
-  const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
   const [isSolutionNavEnabled, setIsSolutionNavEnabled] = useState(false);
+  const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
+  const [tabs, selectedTabContent] = useTabs({
+    space,
+    features,
+    roles,
+    capabilities,
+    currentSelectedTabId: selectedTabId,
+  });
 
   useEffect(() => {
     if (!spaceId) {
@@ -123,6 +131,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       setIsLoadingRoles(false);
     };
 
+    // maybe we do not make this call if user can't view roles? 🤔
     getRoles().catch(handleApiError);
   }, [spaceId, spacesManager]);
 
@@ -192,41 +201,16 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     ) : null;
   };
 
-  const SwitchButton = () => {
-    if (userActiveSpace?.id === space.id) {
-      return null;
-    }
-
-    const { serverBasePath } = props;
-
-    // use href to force full page reload (needed in order to change spaces)
-    return (
-      <EuiButton
-        iconType="merge"
-        href={addSpaceIdToPath(
-          serverBasePath,
-          space.id,
-          `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
-        )}
-        data-test-subj="spaceSwitcherButton"
-      >
-        <FormattedMessage
-          id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
-          defaultMessage="Switch to this space"
-        />
-      </EuiButton>
-    );
-  };
-
   return (
     <ViewSpaceContextProvider
+      getRolesAPIClient={getRolesAPIClient}
       spacesManager={spacesManager}
       serverBasePath={props.serverBasePath}
       navigateToUrl={navigateToUrl}
       getUrlForApp={getUrlForApp}
     >
       <EuiText>
-        <EuiFlexGroup data-test-subj="spaceDetailsHeader">
+        <EuiFlexGroup data-test-subj="spaceDetailsHeader" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <HeaderAvatar />
           </EuiFlexItem>
@@ -270,13 +254,28 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem>
                 <SettingsButton />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <SwitchButton />
-              </EuiFlexItem>
+              {userActiveSpace?.id !== space.id ? (
+                <EuiFlexItem>
+                  <EuiButton
+                    iconType="merge"
+                    href={addSpaceIdToPath(
+                      props.serverBasePath,
+                      space.id,
+                      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
+                    )}
+                    data-test-subj="spaceSwitcherButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
+                      defaultMessage="Switch to this space"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

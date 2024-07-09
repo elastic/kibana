@@ -8,6 +8,7 @@
 import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
+import type { Capabilities } from '@kbn/core/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
@@ -27,11 +28,28 @@ export interface ViewSpaceTab {
   href?: string;
 }
 
-export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]): ViewSpaceTab[] => {
+export interface GetTabsProps {
+  space: Space;
+  roles: Role[];
+  features: KibanaFeature[];
+  capabilities: Capabilities & {
+    roles?: { view: boolean; save: boolean };
+  };
+}
+
+export const getTabs = ({
+  space,
+  features,
+  capabilities,
+  ...rest
+}: GetTabsProps): ViewSpaceTab[] => {
   const enabledFeatureCount = getEnabledFeatures(features, space).length;
   const totalFeatureCount = features.length;
 
-  return [
+  const canUserViewRoles = Boolean(capabilities?.roles?.view);
+  const canUserModifyRoles = Boolean(capabilities?.roles?.save);
+
+  const tabsDefinition = [
     {
       id: TAB_ID_CONTENT,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.content.heading', {
@@ -51,17 +69,29 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
       ),
       content: <ViewSpaceEnabledFeatures features={features} space={space} />,
     },
-    {
+  ];
+
+  if (canUserViewRoles) {
+    tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
         defaultMessage: 'Assigned roles',
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {roles.length}
+          {rest.roles.length}
         </EuiNotificationBadge>
       ),
-      content: <ViewSpaceAssignedRoles space={space} roles={roles} features={features} />,
-    },
-  ];
+      content: (
+        <ViewSpaceAssignedRoles
+          space={space}
+          roles={rest.roles}
+          features={features}
+          isReadOnly={!canUserModifyRoles}
+        />
+      ),
+    });
+  }
+
+  return tabsDefinition;
 };
