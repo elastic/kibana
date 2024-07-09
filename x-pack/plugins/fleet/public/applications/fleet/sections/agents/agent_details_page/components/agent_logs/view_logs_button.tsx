@@ -9,49 +9,52 @@ import React, { useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+
 import moment from 'moment';
 
-import { useDiscoverLocator, useLogExplorerLocator } from '../../../../../hooks';
+import { useDiscoverLocator, useStartServices } from '../../../../../hooks';
 
 interface ViewLogsProps {
   logStreamQuery: string;
-  startTime: string;
-  endTime: string;
+  startTime: number;
+  endTime: number;
 }
 
+export const getFormattedRange = (date: string) => new Date(date).getTime();
+
 /*
-  Button that takes to the Logs view Ui when that is available, otherwise fallback to the Discover UI
+  Button that takes to the Logs view UI or the Discover logs, depending on what's available
   If none is available, don't display the button at all
 */
-//  TODO: check if it's possible to use `nodeLogsLocator` from `getLogsLocatorsFromUrlService` instead
 export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
   logStreamQuery,
   startTime,
   endTime,
 }) => {
   const discoverLocator = useDiscoverLocator();
-  const logsExplorerLocator = useLogExplorerLocator();
-  const defaultStartTime = moment().subtract(1, 'day').toISOString();
-  const defaultEndTime = moment().toISOString();
 
-  const redirectUrlParams = useMemo(() => {
-    return {
+  const { share } = useStartServices();
+  const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
+
+  const logsUrl = useMemo(() => {
+    const now = moment().toISOString();
+    const oneDayAgo = moment().subtract(1, 'day').toISOString();
+    const defaultStartTime = getFormattedRange(oneDayAgo);
+    const defaultEndTime = getFormattedRange(now);
+
+    return logsLocator.getRedirectUrl({
+      time: endTime ? endTime : defaultEndTime,
       timeRange: {
-        from: startTime ? startTime : defaultStartTime,
-        to: endTime ? endTime : defaultEndTime,
+        startTime: startTime ? startTime : defaultStartTime,
+        endTime: endTime ? endTime : defaultEndTime,
       },
-      query: { query: logStreamQuery, language: 'kuery' },
-    };
-  }, [defaultEndTime, defaultStartTime, endTime, logStreamQuery, startTime]);
+      filter: logStreamQuery,
+    });
+  }, [endTime, logStreamQuery, logsLocator, startTime]);
 
-  const url = useMemo(() => {
-    return logsExplorerLocator
-      ? logsExplorerLocator?.getRedirectUrl(redirectUrlParams)
-      : discoverLocator?.getRedirectUrl(redirectUrlParams);
-  }, [discoverLocator, logsExplorerLocator, redirectUrlParams]);
-
-  return logsExplorerLocator || discoverLocator ? (
-    <EuiButton href={url} iconType="popout" data-test-subj="viewInLogsBtn">
+  return logsLocator || discoverLocator ? (
+    <EuiButton href={logsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
       <FormattedMessage
         id="xpack.fleet.agentLogs.openInLogsUiLinkText"
         defaultMessage="Open in Logs"

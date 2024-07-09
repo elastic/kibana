@@ -35,7 +35,7 @@ import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
-import { ViewLogsButton } from './view_logs_button';
+import { ViewLogsButton, getFormattedRange } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -321,8 +321,8 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               >
                 <ViewLogsButton
                   logStreamQuery={logStreamQuery}
-                  startTime={state.start}
-                  endTime={state.end}
+                  startTime={getFormattedRange(state.start)}
+                  endTime={getFormattedRange(state.end)}
                 />
               </RedirectAppLinks>
             </EuiFlexItem>

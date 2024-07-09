@@ -25,7 +25,3 @@ export function useDashboardLocator() {
 export function useDiscoverLocator() {
   return useLocator(LOCATORS_IDS.DISCOVER_APP_LOCATOR);
 }
-
-export function useLogExplorerLocator() {
-  return useLocator(LOCATORS_IDS.LOGS_EXPLORER_LOCATOR_ID);
-}
