@@ -97,6 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
           await ml.singleMetricViewer.assertAnomalyActionDiscoverButtonExists();
           await ml.singleMetricViewer.assertAnomalyActionJobRulesButtonExists();
+          await ml.singleMetricViewer.ensureAnomalyActionJobRulesButtonClicked();
+          await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
+          await ml.singleMetricViewer.ensureAnomalyActionDiscoverButtonClicked();
         });
       });
     }

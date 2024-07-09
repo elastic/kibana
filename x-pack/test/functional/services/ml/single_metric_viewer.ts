@@ -98,6 +98,15 @@ export function MachineLearningSingleMetricViewerProvider(
       });
     },
 
+    async ensureAnomalyActionJobRulesButtonClicked() {
+      await retry.tryForTime(3 * 1000, async () => {
+        await testSubjects.click('mlAnomaliesListRowActionConfigureRulesButton');
+        await testSubjects.existOrFail('mlRuleEditorFlyout');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('mlRuleEditorFlyout');
+      });
+    },
+
     async assertAnnotationsExists(state: string) {
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
         timeout: 30 * 1000,
