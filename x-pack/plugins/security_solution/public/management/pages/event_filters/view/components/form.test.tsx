@@ -707,6 +707,67 @@ describe('Event filter form', () => {
             await renderResult.findByTestId('duplicate-fields-warning-message')
           ).toBeInTheDocument();
         });
+
+        it('should add warning text when switching to process descendant filtering', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 5',
+            },
+          ];
+          formProps.item.tags = [];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 5')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+
+          // switch to Process Descendant filtering
+          userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+          rerenderWithLatestProps();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+        });
+
+        it('should remove warning text when switching from process descendant filtering', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 6',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+
+          // switch to classic Event filtering
+          userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+          rerenderWithLatestProps();
+
+          expect(await renderResult.findByDisplayValue('some value 6')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
       });
     });
 
