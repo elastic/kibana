@@ -16,30 +16,37 @@ import {
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 
 export const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>
-  messages.map((message) => {
-    if (message.role === MessageRole.assistant) {
+  messages.map(({ id, content, createdAt, role, annotations = [] }) => {
+    const commonMessageProp = {
+      id,
+      content,
+      createdAt,
+      role,
+    };
+
+    if (role === MessageRole.assistant) {
       return {
-        ...message,
-        citations: message.annotations
-          ?.find((annotation): annotation is AnnotationDoc => annotation.type === 'citations')
+        ...commonMessageProp,
+        citations: annotations
+          .find((annotation): annotation is AnnotationDoc => annotation.type === 'citations')
           ?.documents?.map(transformAnnotationToDoc),
-        retrievalDocs: message.annotations
-          ?.find((annotation): annotation is AnnotationDoc => annotation.type === 'retrieved_docs')
+        retrievalDocs: annotations
+          .find((annotation): annotation is AnnotationDoc => annotation.type === 'retrieved_docs')
           ?.documents?.map(transformAnnotationToDoc),
         inputTokens: {
-          context: message.annotations?.find(
+          context: annotations?.find(
             (annotation): annotation is AnnotationTokens =>
               annotation.type === 'context_token_count'
           )?.count,
-          total: message.annotations?.find(
+          total: annotations?.find(
             (annotation): annotation is AnnotationTokens => annotation.type === 'prompt_token_count'
           )?.count,
-          contextClipped: message.annotations?.find(
+          contextClipped: annotations?.find(
             (annotation): annotation is AnnotationTokens => annotation.type === 'context_clipped'
           )?.count,
         },
       } as AIMessage;
     }
 
-    return message;
+    return commonMessageProp;
   });
