@@ -29,6 +29,7 @@ export function buildKubectlCommand({
             -e "s/%ES_HOST%/${escapedElasticsearchUrl}/g"
             -e "s/%ONBOARDING_ID%/${onboardingId}/g"
             -e "s/\\(docker.elastic.co\\/beats\\/elastic-agent\:\\).*$/\\1${elasticAgentVersion}/g"
+            -e  "/{CA_TRUSTED}/c\\ "
       |  kubectl apply -f-
   `
     .trim()
