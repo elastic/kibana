@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     method: keyof Pick<typeof supertest, 'post' | 'get'>;
     path: string;
     version?: string;
-    body: Record<string, unknown> | undefined;
+    body: Record<string, unknown> | (() => Record<string, unknown>) | undefined;
   }
 
   describe('@ess @serverless When attempting to call an endpoint api', function () {
@@ -92,13 +92,13 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: ISOLATE_HOST_ROUTE_V2,
-        body: { endpoint_ids: ['one'] },
+        body: () => ({ endpoint_ids: [agentId] }),
         version: '2023-10-31',
       },
       {
         method: 'post',
         path: UNISOLATE_HOST_ROUTE_V2,
-        body: { endpoint_ids: ['one'] },
+        body: () => ({ endpoint_ids: [agentId] }),
         version: '2023-10-31',
       },
     ];
@@ -107,19 +107,19 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: GET_PROCESSES_ROUTE,
-        body: { endpoint_ids: ['one'] },
+        body: () => ({ endpoint_ids: [agentId] }),
         version: '2023-10-31',
       },
       {
         method: 'post',
         path: KILL_PROCESS_ROUTE,
-        body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        body: () => ({ endpoint_ids: [agentId], parameters: { entity_id: 'abc123' } }),
         version: '2023-10-31',
       },
       {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
-        body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        body: () => ({ endpoint_ids: [agentId], parameters: { entity_id: 'abc123' } }),
         version: '2023-10-31',
       },
     ];
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: GET_FILE_ROUTE,
-        body: { endpoint_ids: ['one'], parameters: { path: '/opt/file/doc.txt' } },
+        body: () => ({ endpoint_ids: [agentId], parameters: { path: '/opt/file/doc.txt' } }),
         version: '2023-10-31',
       },
     ];
@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: EXECUTE_ROUTE,
         version: '2023-10-31',
-        body: { endpoint_ids: ['one'], parameters: { command: 'ls -la' } },
+        body: () => ({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } }),
       },
     ];
 
@@ -153,6 +153,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     function replacePathIds(path: string) {
       return path.replace('{action_id}', actionId).replace('{agentId}', agentId);
+    }
+
+    function getBodyPayload(apiCall: ApiCallsInterface): ApiCallsInterface['body'] {
+      return typeof apiCall.body === 'function' ? apiCall.body() : apiCall.body;
     }
 
     before(async () => {
@@ -179,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .set(apiListItem.version ? 'Elastic-Api-Version' : 'foo', '2023-10-31')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(403, {
               statusCode: 403,
               error: 'Forbidden',
@@ -196,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(200);
         });
       }
@@ -214,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.platform_engineer, 'changeme')
             .set('kbn-xsrf', 'xxx')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(403, {
               statusCode: 403,
               error: 'Forbidden',
@@ -234,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.platform_engineer, 'changeme')
             .set('kbn-xsrf', 'xxx')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(200);
         });
       }
@@ -248,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(403, {
               statusCode: 403,
               error: 'Forbidden',
@@ -270,7 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(200);
         });
       }
@@ -291,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await supertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
-            .send(apiListItem.body)
+            .send(getBodyPayload(apiListItem))
             .expect(200);
         });
       }
