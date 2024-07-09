@@ -1029,6 +1029,13 @@
     "createDate",
     "slug"
   ],
+  "usage-counter": [
+    "count",
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
+  ],
   "usage-counters": [
     "domainId"
   ],

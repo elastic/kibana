@@ -24,6 +24,7 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
 import type {
   CategorizationRequestBody,
   EcsMappingRequestBody,
@@ -87,6 +88,7 @@ export const useGeneration = ({
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: integrationSettings.logsSampleParsed ?? [],
           connectorId: connector.id,
+          langSmithOptions: getLangSmithOptions(),
         };
 
         setProgress('ecs');
