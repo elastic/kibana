@@ -8662,7 +8662,8 @@
     {
       "query": "from a_index | enrich `this``is fine`",
       "error": [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME"
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        "Unknown policy [`this``is]"
       ],
       "warning": []
     },
@@ -26377,7 +26378,7 @@
     {
       "query": "from ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26388,6 +26389,16 @@
     },
     {
       "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"index\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"\"\"index\"\"\"",
       "error": [],
       "warning": []
     },
@@ -26539,14 +26550,14 @@
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
     {
       "query": "FROM index\n, \tother_index\t,\n \t ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26561,8 +26572,7 @@
     {
       "query": "FROM `index`",
       "error": [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'"
+        "Unknown index [`index`]"
       ],
       "warning": []
     },
