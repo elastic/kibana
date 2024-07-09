@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
@@ -14,9 +21,11 @@ import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { BETA } from '../../common/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityModel } from '../common/entity_model';
 
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
+  const { initialize } = useEntityModel();
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
@@ -29,6 +38,9 @@ export const EntityAnalyticsManagementPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiBetaBadge label={BETA} size="s" />
+        <EuiButton onClick={initialize} css={{ marginLeft: 'auto' }}>
+          {'Initialize Entity Model'}
+        </EuiButton>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
