@@ -31,7 +31,7 @@ const getCustomInferenceIdMap = (
   models: InferenceAPIConfigResponse[],
   modelStatsById: Record<string, TrainedModelStat['deployment_stats'] | undefined>,
   downloadStates: Record<string, ModelDownloadState | undefined>
-) => {
+): InferenceToModelIdMap => {
   const inferenceIdMap = models.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceEntry = isLocalModel(model)
       ? {
@@ -77,7 +77,7 @@ export const useDetailsPageMappingsModelManagement = () => {
 
   const dispatch = useDispatch();
 
-  const fetchInferenceToModelIdMap = useCallback(async () => {
+  const fetchInferenceToModelIdMap = useCallback<() => Promise<InferenceToModelIdMap>>(async () => {
     const inferenceModels = await getInferenceEndpoints();
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
     const downloadStates = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
@@ -100,6 +100,7 @@ export const useDetailsPageMappingsModelManagement = () => {
       type: 'inferenceToModelIdMap.update',
       value: { inferenceToModelIdMap: modelIdMap },
     });
+    return modelIdMap;
   }, [dispatch, ml?.mlApi?.trainedModels]);
 
   return {

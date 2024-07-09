@@ -57,6 +57,7 @@ jest.mock('../../../public/application/components/mappings_editor/mappings_state
 function getTestForm(Component: React.FC<SelectInferenceIdProps>) {
   return (defaultProps: SelectInferenceIdProps) => {
     const { form } = useForm();
+    form.setFieldValue('inference_id', 'elser_model_2');
     return (
       <Form form={form}>
         <Component {...(defaultProps as any)} />

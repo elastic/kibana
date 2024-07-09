@@ -31,39 +31,72 @@ import {
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig, Service } from '@kbn/inference_integration_flyout/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
-import { UseField } from '../../../shared_imports';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
 import { useDispatch, useMappingsState } from '../../../mappings_state_context';
 import { CustomInferenceEndpointConfig } from '../../../types';
+import { UseField } from '../../../shared_imports';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, string> = {
   elser: ELSER_LINUX_OPTIMIZED_MODEL_ID,
   elasticsearch: E5_MODEL_ID,
 };
-const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
-  const checkedOption = options.find(({ checked }) => checked === 'on');
-  if (checkedOption) {
-    checkedOption.checked = undefined;
-  }
-};
+
 export interface SelectInferenceIdProps {
   createInferenceEndpoint: (
     trainedModelId: string,
     inferenceId: string,
     modelConfig: CustomInferenceEndpointConfig
-  ) => void;
+  ) => Promise<void>;
   'data-test-subj'?: string;
 }
+
+type SelectInferenceIdContentProps = SelectInferenceIdProps & {
+  setValue: (value: string) => void;
+  value: string;
+};
+
+const defaultEndpoints = [
+  {
+    model_id: 'elser_model_2',
+  },
+  {
+    model_id: 'e5',
+  },
+];
+
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   createInferenceEndpoint,
   'data-test-subj': dataTestSubj,
 }: SelectInferenceIdProps) => {
+  const config = getFieldConfig('inference_id');
+  return (
+    <UseField path="inference_id" fieldConfig={config}>
+      {(field) => {
+        return (
+          <SelectInferenceIdContent
+            createInferenceEndpoint={createInferenceEndpoint}
+            data-test-subj={dataTestSubj}
+            value={field.value as string}
+            setValue={field.setValue}
+          />
+        );
+      }}
+    </UseField>
+  );
+};
+
+const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
+  createInferenceEndpoint,
+  'data-test-subj': dataTestSubj,
+  setValue,
+  value,
+}) => {
   const {
     core: { application },
     docLinks,
@@ -71,6 +104,7 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   } = useAppContext();
   const dispatch = useDispatch();
   const { inferenceToModelIdMap } = useMappingsState();
+  const config = getFieldConfig('inference_id');
 
   const getMlTrainedModelPageUrl = useCallback(async () => {
     return await ml?.locator?.getUrl({
@@ -105,119 +139,59 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
 
     return availableTrainedModelsList;
   }, [availableTrainedModels]);
+  const [isSaveInferenceLoading, setIsSaveInferenceLoading] = useState<boolean>(false);
 
-  const fieldConfigModelId = getFieldConfig('inference_id');
-  const defaultInferenceIds: EuiSelectableOption[] = useMemo(() => {
-    return [
-      {
+  const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
+
+  const options: EuiSelectableOption[] = useMemo(() => {
+    const missingDefaultEndpoints = defaultEndpoints.filter(
+      (endpoint) => !(endpoints || []).find((e) => e.model_id === endpoint.model_id)
+    );
+    const newOptions: EuiSelectableOption[] = [
+      ...(endpoints || []),
+      ...missingDefaultEndpoints,
+    ].map((endpoint) => ({
+      label: endpoint.model_id,
+      'data-test-subj': `custom-inference_${endpoint.model_id}`,
+      checked: value === endpoint.model_id ? 'on' : undefined,
+    }));
+    if (value && !newOptions.find((option) => option.label === value)) {
+      // Sometimes we create a new endpoint but the backend is slow in updating so we need to optimistically update
+      const newOption: EuiSelectableOption = {
+        label: value,
         checked: 'on',
-        label: 'elser_model_2',
-        'data-test-subj': 'default-inference_elser_model_2',
-      },
-      {
-        label: 'e5',
-        'data-test-subj': 'default-inference_e5',
-      },
-    ];
-  }, []);
-
-  const { isLoading, data: endpoints } = useLoadInferenceEndpoints();
-
-  const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
-  const inferenceIdOptionsFromModels = useMemo(() => {
-    const inferenceIdOptions =
-      endpoints?.map((model) => ({
-        label: model.model_id,
-        'data-test-subj': `custom-inference_${model.model_id}`,
-      })) || [];
-
-    return inferenceIdOptions;
-  }, [endpoints]);
-
-  useEffect(() => {
-    const mergedOptions = {
-      ...inferenceIdOptionsFromModels.reduce(
-        (acc, option) => ({ ...acc, [option.label]: option }),
-        {}
-      ),
-      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
-    };
-    setOptions(Object.values(mergedOptions));
-  }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
+        'data-test-subj': `custom-inference_${value}`,
+      };
+      return [...newOptions, newOption];
+    }
+    return newOptions;
+  }, [endpoints, value]);
 
   const { showErrorToasts } = useMLModelNotificationToasts();
 
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
-      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
       try {
-        const isDeployable =
-          modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
-
-        const newOption: EuiSelectableOption[] = [
-          {
-            label: inferenceId,
-            checked: 'on',
-            'data-test-subj': `custom-inference_${inferenceId}`,
-          },
-        ];
-        // uncheck selected endpoint id
-        uncheckSelectedModelOption(options);
-
-        setOptions([...options, ...newOption]);
-
         const trainedModelId =
           modelConfig.service_settings.model_id ||
           inferenceServiceTypeElasticsearchModelMap[modelConfig.service] ||
           '';
-        let modelStats;
-        let isDownloading = false;
-        let isDeployed = false;
-        if (trainedModelId) {
-          // Third-party models don't have these things so only checking if there's  trained model
-          const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-          const downloadStats = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
-
-          modelStats = trainedModelStats?.trained_model_stats.find(
-            (model) => model.model_id === trainedModelId
-          );
-          isDownloading = Boolean(downloadStats?.[trainedModelId]);
-          isDeployed = modelStats?.deployment_stats?.state === 'started';
-        }
-        const inferenceModel = {
-          trainedModelId,
-          isDeployable,
-          isDeployed,
-          isDownloading,
-          modelStats,
-        };
         const customModelConfig = {
           taskType,
           modelConfig,
         };
-        createInferenceEndpoint(trainedModelId, inferenceId, customModelConfig);
-        dispatch({
-          type: 'inferenceToModelIdMap.update',
-          value: {
-            inferenceToModelIdMap: {
-              ...inferenceToModelIdMap,
-              [inferenceId]: inferenceModel,
-            },
-          },
-        });
+        setIsSaveInferenceLoading(true);
+        await createInferenceEndpoint(trainedModelId, inferenceId, customModelConfig);
+        resendRequest();
+        setValue(inferenceId);
+        setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+        setIsSaveInferenceLoading(false);
       } catch (error) {
         showErrorToasts(error);
+        setIsSaveInferenceLoading(false);
       }
     },
-    [
-      isInferenceFlyoutVisible,
-      options,
-      ml?.mlApi?.trainedModels,
-      createInferenceEndpoint,
-      dispatch,
-      inferenceToModelIdMap,
-      showErrorToasts,
-    ]
+    [createInferenceEndpoint, setValue, isInferenceFlyoutVisible, showErrorToasts, resendRequest]
   );
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
@@ -245,136 +219,128 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
 
-  const inferencePopover = () => {
-    return (
-      <UseField path="inference_id" config={fieldConfigModelId}>
-        {(field) => (
-          <EuiPopover
-            button={
-              <>
-                <EuiText size="xs">
-                  <p>
-                    <strong>{field.label}</strong>
-                  </p>
-                </EuiText>
-                <EuiSpacer size="xs" />
-                <EuiButton
-                  iconType="arrowDown"
-                  iconSide="right"
-                  color="text"
-                  data-test-subj="inferenceIdButton"
-                  onClick={() => {
-                    setIsInferencePopoverVisible(!isInferencePopoverVisible);
-                  }}
-                >
-                  {selectedOptionLabel ||
-                    i18n.translate(
-                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.alreadyExistsLabel',
-                      {
-                        defaultMessage: 'No inference endpoint selected',
-                      }
-                    )}
-                </EuiButton>
-              </>
-            }
-            isOpen={isInferencePopoverVisible}
-            panelPaddingSize="m"
-            closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
+  const inferencePopover = () => (
+    <EuiPopover
+      button={
+        <>
+          <EuiText size="xs">
+            <p>
+              <strong>{config.label}</strong>
+            </p>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiButton
+            iconType="arrowDown"
+            iconSide="right"
+            color="text"
+            data-test-subj="inferenceIdButton"
+            onClick={() => {
+              setIsInferencePopoverVisible(!isInferencePopoverVisible);
+            }}
           >
-            <EuiContextMenuPanel>
-              <EuiContextMenuItem
-                key="addInferenceEndpoint"
-                icon="plusInCircle"
-                size="s"
-                data-test-subj="addInferenceEndpointButton"
-                onClick={() => {
-                  setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-                  setInferenceEndpointError(undefined);
-                  setIsInferencePopoverVisible(!isInferencePopoverVisible);
-                }}
-              >
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.addInferenceEndpointButton',
-                  {
-                    defaultMessage: 'Add inference Endpoint',
-                  }
-                )}
-              </EuiContextMenuItem>
-              <EuiHorizontalRule margin="none" />
-              <EuiContextMenuItem
-                key="manageInferenceEndpointButton"
-                icon="gear"
-                size="s"
-                data-test-subj="manageInferenceEndpointButton"
-                onClick={async () => {
-                  const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
-                  if (typeof mlTrainedPageUrl === 'string') {
-                    application.navigateToUrl(mlTrainedPageUrl);
-                  }
-                }}
-              >
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
-                  {
-                    defaultMessage: 'Manage Inference Endpoint',
-                  }
-                )}
-              </EuiContextMenuItem>
-            </EuiContextMenuPanel>
-            <EuiHorizontalRule margin="none" />
-            <EuiPanel color="transparent" paddingSize="s">
-              <EuiTitle size="xxxs">
-                <h3>
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
-                    {
-                      defaultMessage: 'Existing endpoints',
-                    }
-                  )}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="xs" />
+            {selectedOptionLabel ||
+              i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.alreadyExistsLabel',
+                {
+                  defaultMessage: 'No inference endpoint selected',
+                }
+              )}
+          </EuiButton>
+        </>
+      }
+      isOpen={isInferencePopoverVisible}
+      panelPaddingSize="m"
+      closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
+    >
+      <EuiContextMenuPanel>
+        <EuiContextMenuItem
+          key="addInferenceEndpoint"
+          icon="plusInCircle"
+          size="s"
+          data-test-subj="addInferenceEndpointButton"
+          onClick={() => {
+            setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+            setInferenceEndpointError(undefined);
+            setIsInferencePopoverVisible(!isInferencePopoverVisible);
+          }}
+        >
+          {i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.addInferenceEndpointButton',
+            {
+              defaultMessage: 'Add Inference Endpoint',
+            }
+          )}
+        </EuiContextMenuItem>
+        <EuiHorizontalRule margin="none" />
+        <EuiContextMenuItem
+          key="manageInferenceEndpointButton"
+          icon="gear"
+          size="s"
+          data-test-subj="manageInferenceEndpointButton"
+          onClick={async () => {
+            const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
+            if (typeof mlTrainedPageUrl === 'string') {
+              application.navigateToUrl(mlTrainedPageUrl);
+            }
+          }}
+        >
+          {i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
+            {
+              defaultMessage: 'Manage Inference Endpoints',
+            }
+          )}
+        </EuiContextMenuItem>
+      </EuiContextMenuPanel>
+      <EuiHorizontalRule margin="none" />
+      <EuiPanel color="transparent" paddingSize="s">
+        <EuiTitle size="xxxs">
+          <h3>
+            {i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
+              {
+                defaultMessage: 'Existing endpoints',
+              }
+            )}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
 
-              <EuiSelectable
-                aria-label={i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
-                  {
-                    defaultMessage: 'Search',
-                  }
-                )}
-                data-test-subj={dataTestSubj}
-                searchable
-                isLoading={isLoading}
-                singleSelection="always"
-                searchProps={{
-                  compressed: true,
-                  placeholder: i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
-                    {
-                      defaultMessage: 'Search',
-                    }
-                  ),
-                }}
-                options={options}
-                onChange={(newOptions) => {
-                  setOptions(newOptions);
-                  field.setValue(newOptions.find((option) => option.checked)?.label);
-                  setIsInferencePopoverVisible(!isInferencePopoverVisible);
-                }}
-              >
-                {(list, search) => (
-                  <>
-                    {search}
-                    {list}
-                  </>
-                )}
-              </EuiSelectable>
-            </EuiPanel>
-          </EuiPopover>
-        )}
-      </UseField>
-    );
-  };
+        <EuiSelectable
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+            {
+              defaultMessage: 'Existing endpoints',
+            }
+          )}
+          data-test-subj={dataTestSubj}
+          searchable
+          isLoading={isLoading}
+          singleSelection="always"
+          searchProps={{
+            compressed: true,
+            placeholder: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
+              {
+                defaultMessage: 'Search',
+              }
+            ),
+          }}
+          options={options}
+          onChange={(newOptions) => {
+            setValue(newOptions.find((option) => option.checked)?.label || '');
+          }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </EuiPanel>
+    </EuiPopover>
+  );
   return (
     <>
       <EuiSpacer />
@@ -394,6 +360,7 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
               supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
               nlpImportModel={docLinks.links.ml.nlpImportModel}
               setInferenceEndpointError={setInferenceEndpointError}
+              isCreateInferenceApiLoading={isSaveInferenceLoading}
             />
           )}
         </EuiFlexItem>

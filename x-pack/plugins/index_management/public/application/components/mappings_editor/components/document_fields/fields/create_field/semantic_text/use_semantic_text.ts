@@ -14,6 +14,7 @@ import {
   ELSER_LINUX_OPTIMIZED_MODEL_ID,
   ELSER_MODEL_ID,
 } from '@kbn/ml-trained-models-utils';
+import { useDetailsPageMappingsModelManagement } from '../../../../../../../../hooks/use_details_page_mappings_model_management';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, Field, SemanticTextField } from '../../../../../types';
@@ -35,7 +36,8 @@ interface DefaultInferenceEndpointConfig {
 
 export function useSemanticText(props: UseSemanticTextProps) {
   const { form, setErrorsInTrainedModelDeployment, ml } = props;
-  const { fields, mappingViewFields, inferenceToModelIdMap } = useMappingsState();
+  const { fields, mappingViewFields } = useMappingsState();
+  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
   const dispatch = useDispatch();
   const { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast } =
     useMLModelNotificationToasts();
@@ -106,13 +108,14 @@ export function useSemanticText(props: UseSemanticTextProps) {
     data: SemanticTextField,
     customInferenceEndpointConfig?: CustomInferenceEndpointConfig
   ) => {
+    const modelIdMap = await fetchInferenceToModelIdMap();
     const inferenceId = data.inference_id;
     const referenceField = data.reference_field;
     const name = data.name;
     if (!inferenceId || !referenceField || !name) {
       return;
     }
-    const inferenceData = inferenceToModelIdMap?.[inferenceId];
+    const inferenceData = modelIdMap?.[inferenceId];
     if (!inferenceData) {
       return;
     }

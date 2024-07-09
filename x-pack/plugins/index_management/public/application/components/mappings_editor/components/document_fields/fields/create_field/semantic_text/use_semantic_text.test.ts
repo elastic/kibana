@@ -10,6 +10,38 @@ import { CustomInferenceEndpointConfig, SemanticTextField } from '../../../../..
 import { useSemanticText } from './use_semantic_text';
 import { act } from 'react-dom/test-utils';
 
+// jest.mock('../../../../../mappings_state_context', () => ({
+//   useMappingsState: () => ({ inferenceToModelIdMap: {} }),
+//   useDispatch: () => mockDispatch,
+// }));
+
+jest.mock('../../../../../../../../hooks/use_details_page_mappings_model_management', () => ({
+  useDetailsPageMappingsModelManagement: () => ({
+    fetchInferenceToModelIdMap: () => ({
+      e5: {
+        isDeployed: false,
+        isDeployable: true,
+        trainedModelId: '.multilingual-e5-small',
+      },
+      elser_model_2: {
+        isDeployed: false,
+        isDeployable: true,
+        trainedModelId: '.elser_model_2',
+      },
+      openai: {
+        isDeployed: false,
+        isDeployable: false,
+        trainedModelId: '',
+      },
+      my_elser_endpoint: {
+        isDeployed: false,
+        isDeployable: true,
+        trainedModelId: '.elser_model_2',
+      },
+    }),
+  }),
+}));
+
 const mlMock: any = {
   mlApi: {
     inferenceModels: {
