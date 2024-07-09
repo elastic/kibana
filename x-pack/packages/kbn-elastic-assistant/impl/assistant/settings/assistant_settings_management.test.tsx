@@ -55,7 +55,6 @@ const mockContext = {
 
 const testProps = {
   selectedConversation: welcomeConvo,
-  isFlyoutMode: false,
 };
 jest.mock('../../assistant_context');
 

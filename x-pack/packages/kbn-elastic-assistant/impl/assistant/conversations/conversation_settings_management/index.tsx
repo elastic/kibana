@@ -37,7 +37,6 @@ interface Props {
   defaultConnector?: AIConnector;
   defaultSelectedConversation: Conversation;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
 }
 
 export const DEFAULT_TABLE_OPTIONS = {
@@ -50,7 +49,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   defaultConnector,
   defaultSelectedConversation,
   isDisabled,
-  isFlyoutMode,
 }) => {
   const {
     actionTypeRegistry,
@@ -293,7 +291,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             conversationsSettingsBulkActions={conversationsSettingsBulkActions}
             http={http}
             isDisabled={isDisabled}
-            isFlyoutMode={isFlyoutMode}
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}

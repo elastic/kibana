@@ -34,7 +34,6 @@ import { EvaluationSettings } from '.';
 
 interface Props {
   selectedConversation: Conversation;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -42,7 +41,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ isFlyoutMode, selectedConversation: defaultSelectedConversation }) => {
+  ({ selectedConversation: defaultSelectedConversation }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -149,7 +148,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               connectors={connectors}
               defaultConnector={defaultConnector}
               defaultSelectedConversation={defaultSelectedConversation}
-              isFlyoutMode={isFlyoutMode}
             />
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
