@@ -6,9 +6,12 @@
  */
 
 import {
+  EuiBadge,
   type EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
@@ -278,12 +281,25 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         render: (value: string, rowRecord) => (
-          <EuiLink
-            {...reactRouterNavigate(this.props.history, this.getViewSpacePath(rowRecord))}
-            data-test-subj={`${rowRecord.id}-hyperlink`}
-          >
-            {value}
-          </EuiLink>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                {...reactRouterNavigate(this.props.history, this.getViewSpacePath(rowRecord))}
+                data-test-subj={`${rowRecord.id}-hyperlink`}
+              >
+                {value}
+              </EuiLink>
+            </EuiFlexItem>
+            {this.state.activeSpace?.name === rowRecord.name && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="primary">
+                  {i18n.translate('xpack.spaces.management.spacesGridPage.currentSpaceMarkerText', {
+                    defaultMessage: 'current',
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         ),
       },
       {

@@ -201,32 +201,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     ) : null;
   };
 
-  const SwitchButton = () => {
-    if (userActiveSpace?.id === space.id) {
-      return null;
-    }
-
-    const { serverBasePath } = props;
-
-    // use href to force full page reload (needed in order to change spaces)
-    return (
-      <EuiButton
-        iconType="merge"
-        href={addSpaceIdToPath(
-          serverBasePath,
-          space.id,
-          `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
-        )}
-        data-test-subj="spaceSwitcherButton"
-      >
-        <FormattedMessage
-          id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
-          defaultMessage="Switch to this space"
-        />
-      </EuiButton>
-    );
-  };
-
   return (
     <ViewSpaceContextProvider
       getRolesAPIClient={getRolesAPIClient}
@@ -236,7 +210,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       getUrlForApp={getUrlForApp}
     >
       <EuiText>
-        <EuiFlexGroup data-test-subj="spaceDetailsHeader">
+        <EuiFlexGroup data-test-subj="spaceDetailsHeader" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <HeaderAvatar />
           </EuiFlexItem>
@@ -280,13 +254,28 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem>
                 <SettingsButton />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <SwitchButton />
-              </EuiFlexItem>
+              {userActiveSpace?.id !== space.id ? (
+                <EuiFlexItem>
+                  <EuiButton
+                    iconType="merge"
+                    href={addSpaceIdToPath(
+                      props.serverBasePath,
+                      space.id,
+                      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
+                    )}
+                    data-test-subj="spaceSwitcherButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
+                      defaultMessage="Switch to this space"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
