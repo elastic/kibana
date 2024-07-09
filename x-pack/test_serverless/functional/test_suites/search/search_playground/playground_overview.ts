@@ -12,7 +12,6 @@ import { RoleCredentials } from '../../../../shared/services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
-const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -138,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await createConnector();
         await createIndex();
         await browser.refresh();
-        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage(indexName);
+        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
       it('loads successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
