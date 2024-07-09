@@ -83,6 +83,7 @@
     "@kbn/esql-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
+    "@kbn/recently-accessed",
   ],
   "exclude": ["target/**/*"]
 }
