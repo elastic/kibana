@@ -74,7 +74,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
-}): Promise<{ wroteWarningMessage: boolean; warningStatusMessage: string | undefined }> => {
+}): Promise<string | undefined> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -99,10 +99,9 @@ export const hasReadIndexPrivileges = async (args: {
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
-    return { wroteWarningMessage: true, warningStatusMessage };
   }
 
-  return { wroteWarningMessage: false, warningStatusMessage };
+  return warningStatusMessage;
 };
 
 export const hasTimestampFields = async (args: {
@@ -114,7 +113,6 @@ export const hasTimestampFields = async (args: {
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
-  wroteWarningStatus: boolean;
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
@@ -136,7 +134,6 @@ export const hasTimestampFields = async (args: {
     });
 
     return {
-      wroteWarningStatus: true,
       foundNoIndices: true,
       warningMessage: errorString.trimEnd(),
     };
@@ -163,10 +160,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: false, warningMessage: errorString };
+    return { foundNoIndices: false, warningMessage: errorString };
   }
 
-  return { wroteWarningStatus: false, foundNoIndices: false, warningMessage: undefined };
+  return { foundNoIndices: false, warningMessage: undefined };
 };
 
 export const checkPrivileges = async (

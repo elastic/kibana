@@ -712,7 +712,7 @@ describe('utils', () => {
         },
       };
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -722,7 +722,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -756,7 +755,7 @@ describe('utils', () => {
         },
       };
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -766,7 +765,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -789,7 +787,7 @@ describe('utils', () => {
         ruleName: 'Endpoint Security',
       });
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -799,7 +797,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -823,7 +820,7 @@ describe('utils', () => {
         ruleName: 'NOT Endpoint Security',
       });
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -833,7 +830,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],

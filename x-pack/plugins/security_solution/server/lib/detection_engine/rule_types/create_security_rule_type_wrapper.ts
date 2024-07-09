@@ -262,14 +262,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
-              const { warningStatusMessage: readIndexWarningMessage } =
-                await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                });
+              const readIndexWarningMessage = await hasReadIndexPrivileges({
+                privileges,
+                ruleExecutionLogger,
+                uiSettingsClient,
+              });
 
-              wrapperErrors.push(readIndexWarningMessage);
+              if (readIndexWarningMessage != null) wrapperErrors.push(readIndexWarningMessage);
 
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
@@ -488,8 +487,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             if (result.warningMessages.length > 0 || wrapperWarnings.length > 0) {
               // write warning messages first because if we have still have an error to write
-              // we want to write that message last, so that it is set as the current status
-              // of the rule.
+              // we want to write the error messages last, so that the errors are set
+              // as the current status of the rule.
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
                 message: truncateList([...result.warningMessages, ...wrapperWarnings]).join(', '),
