@@ -25,7 +25,8 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 export const useTabs = (
   managedUser: ManagedUserHits,
   name: string,
-  isRiskScoreExist: boolean
+  isRiskScoreExist: boolean,
+  scopeId: string
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -37,6 +38,7 @@ export const useTabs = (
         getRiskInputTab({
           entityName: name,
           entityType: RiskScoreEntity.user,
+          scopeId,
         })
       );
     }
@@ -50,7 +52,7 @@ export const useTabs = (
     }
 
     return tabs;
-  }, [isRiskScoreExist, managedUser, name]);
+  }, [isRiskScoreExist, managedUser, name, scopeId]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,
