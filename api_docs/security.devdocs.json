@@ -5313,14 +5313,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "encryptedSavedObjects",
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts"
-            },
-            {
-              "plugin": "encryptedSavedObjects",
-              "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },

@@ -39,7 +39,8 @@ export function defineKeyRotationRoutes({
         }),
       },
       options: {
-        tags: ['access:rotateEncryptionKey'],
+        tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
+        description: `Rotate a key for encrypted saved objects`,
       },
     },
     async (context, request, response) => {
