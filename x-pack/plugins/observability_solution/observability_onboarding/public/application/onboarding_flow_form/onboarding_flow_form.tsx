@@ -24,12 +24,14 @@ import {
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
 import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
+import { ObservabilityOnboardingAppServices } from '../..';
 
 interface UseCaseOption {
   id: Category;
@@ -90,6 +92,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
+  const {
+    services: {
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const customMargin = useCustomMargin();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
@@ -132,6 +139,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     searchParams.get('category') as Category | null
   );
   const virtualSearchResults = useVirtualSearchResults();
+  /**
+   * Firehose quick start flow should only be available on
+   * Serverless and it should replace the current Firehose
+   * onboarding card in the search result.
+   */
+  const searchExcludePackageIdList = isServerless ? ['epr:awsfirehose'] : [];
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 
@@ -254,6 +267,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 (card) => card.type === 'virtual' && !card.isCollectionCard
               )
               .concat(virtualSearchResults)}
+            excludePackageIdList={searchExcludePackageIdList}
             joinCardLists
           />
         </div>

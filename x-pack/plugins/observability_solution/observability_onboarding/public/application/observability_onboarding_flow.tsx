@@ -16,6 +16,7 @@ import {
   LandingPage,
   OtelLogsPage,
   SystemLogsPage,
+  FirehosePage,
 } from './pages';
 
 const queryClient = new QueryClient();
@@ -44,6 +45,9 @@ export function ObservabilityOnboardingFlow() {
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />
+        </Route>
+        <Route path="/firehose">
+          <FirehosePage />
         </Route>
         <Route>
           <LandingPage />

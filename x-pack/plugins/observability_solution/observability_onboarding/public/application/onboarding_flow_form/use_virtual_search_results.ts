@@ -6,14 +6,47 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { CustomCard } from '../packages_list/types';
+import { ObservabilityOnboardingAppServices } from '../..';
 
 export function useVirtualSearchResults(): CustomCard[] {
   const {
-    services: { application },
-  } = useKibana();
+    services: {
+      application,
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+  const history = useHistory();
+  const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const getUrlForApp = application?.getUrlForApp;
+  const firehoseQuickstartCard: CustomCard = {
+    id: 'firehose-quick-start',
+    type: 'virtual',
+    title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
+      defaultMessage: 'AWS Firehose',
+    }),
+    release: 'preview',
+    description: i18n.translate(
+      'xpack.observability_onboarding.packageList.uploadFileDescription',
+      {
+        defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
+      }
+    ),
+    name: 'firehose-quick-start',
+    categories: [],
+    icons: [
+      {
+        type: 'svg',
+        src: 'https://epr.elastic.co/package/awsfirehose/1.1.0/img/logo_firehose.svg',
+      },
+    ],
+    url: firehoseUrl,
+    version: '',
+    integration: '',
+    isCollectionCard: false,
+  };
 
   return [
     {
@@ -42,5 +75,6 @@ export function useVirtualSearchResults(): CustomCard[] {
       integration: '',
       isCollectionCard: false,
     },
+    ...(isServerless ? [firehoseQuickstartCard] : []),
   ];
 }
