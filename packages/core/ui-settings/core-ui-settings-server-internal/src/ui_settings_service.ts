@@ -213,20 +213,22 @@ export class UiSettingsService
     }
   }
 
-  private async validatesDefinitions() {
+  private validatesDefinitions() {
     for (const [key, definition] of this.uiSettingsDefaults) {
       if (!definition.schema) {
         throw new Error(`Validation schema is not provided for [${key}] UI Setting`);
       }
-      const value = definition.getValue ? await definition.getValue() : definition.value;
-      definition.schema.validate(value, {}, `ui settings defaults [${key}]`);
+      if (definition.value) {
+        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
       if (!definition.schema) {
         throw new Error(`Validation schema is not provided for [${key}] Global UI Setting`);
       }
-      const value = definition.getValue ? await definition.getValue() : definition.value;
-      definition.schema.validate(value, {});
+      if (definition.value) {
+        definition.schema.validate(definition.value, {});
+      }
     }
   }
 

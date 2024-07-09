@@ -431,7 +431,7 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   icon?: IconType;
   /** React component to render in the side nav for the navigation */
   sideNavComponent?: SideNavComponent;
-  /** The page to navigate to when switching to this solution navigation. */
+  /** The page to navigate to when clicking on the Kibana (or custom) logo. */
   homePage?: LinkId;
 }
 
