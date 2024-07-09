@@ -1,10 +1,9 @@
 get:
-  summary: Retrieves information about connectors in the default space.
+  summary: Get case connectors in the default space
   operationId: findCaseConnectorsDefaultSpace
   description: >
-    In particular, only the connectors that are supported for use in cases are
-    returned. You must have `read` privileges for the **Actions and Connectors**
-    feature in the **Management** section of the Kibana feature privileges.
+    Retrieves information about connectors that are supported for use in cases in the default space.
+    You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   tags:
     - cases
   responses:

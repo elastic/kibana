@@ -64,7 +64,7 @@ export const getRangesliderControlFactory = (
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-      const step$ = new BehaviorSubject<number | undefined>(initialState.step);
+      const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
       const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
       function setValue(nextValue: RangeValue | undefined) {
         value$.next(nextValue);
