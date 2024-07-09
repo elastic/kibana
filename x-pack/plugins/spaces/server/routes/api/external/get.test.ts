@@ -41,7 +41,7 @@ describe('GET space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -66,6 +66,7 @@ describe('GET space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     return {

@@ -65,7 +65,7 @@
               },
               "<object, unknown>, pluginsSetup: ",
               "ObservabilitySharedSetup",
-              ") => { locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              ") => { registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -376,7 +376,7 @@
         "label": "EmbeddableFlamegraph",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "({ height, ...props }: Props) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
         "deprecated": false,
@@ -387,7 +387,7 @@
             "id": "def-public.EmbeddableFlamegraph.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{ height, ...props }",
             "description": [],
             "signature": [
               "Props"
@@ -3490,6 +3490,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.INVENTORY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INVENTORY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"INVENTORY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.LazyObservabilityPageTemplateProps",
         "type": "Type",
         "tags": [],
@@ -3586,7 +3601,7 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+          "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {

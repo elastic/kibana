@@ -152,7 +152,7 @@ export const DecisionPathChart = ({
           title={i18n.translate(
             'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
             {
-              defaultMessage: "{xAxisLabel} for '{predictionFieldName}'",
+              defaultMessage: "{xAxisLabel} for ''{predictionFieldName}''",
               values: { predictionFieldName, xAxisLabel },
             }
           )}

@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Bulk Actions API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/elastic_assistant/prompts/_bulk_action:
+  /internal/elastic_assistant/prompts/_bulk_action:
     post:
       operationId: PerformBulkAction
       x-codegen-enabled: true
@@ -78,6 +78,13 @@ components:
       required:
         - id
 
+    PromptType:
+      type: string
+      description: Prompt type
+      enum:
+        - system
+        - quick
+
     NormalizedPromptError:
       type: object
       properties:
@@ -105,21 +112,27 @@ components:
         - content
       properties:
         id:
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         'timestamp':
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         name:
           type: string
         promptType:
-          type: string
+          $ref: '#/components/schemas/PromptType'
         content:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        color:
           type: string
         isNewConversationDefault:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
         updatedAt:
           type: string
         updatedBy:
@@ -131,7 +144,7 @@ components:
         users:
           type: array
           items:
-            $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/User'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
         namespace:
           type: string
           description: Kibana space
@@ -231,15 +244,21 @@ components:
         name:
           type: string
         promptType:
-          type: string
+          $ref: '#/components/schemas/PromptType'
         content:
           type: string
+        color:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
         isNewConversationDefault:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
 
     PromptUpdateProps:
       type: object
@@ -250,10 +269,15 @@ components:
           type: string
         content:
           type: string
+        color:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
         isNewConversationDefault:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
-    
+        consumer:
+          type: string

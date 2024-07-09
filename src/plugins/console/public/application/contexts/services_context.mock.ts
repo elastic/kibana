@@ -32,6 +32,7 @@ export const serviceContextMock = {
     const esHostService = createEsHostService({ api });
     (storage.keys as jest.Mock).mockImplementation(() => []);
     return {
+      ...coreStart,
       services: {
         trackUiMetric: { count: () => {}, load: () => {} },
         storage,
@@ -48,7 +49,6 @@ export const serviceContextMock = {
       config: {
         isMonacoEnabled: false,
       },
-      startServices: coreStart,
     };
   },
 };

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PlaygroundProvider } from './providers/playground_provider';
 
@@ -27,11 +27,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
   );
 
   return (
-    <PlaygroundProvider
-      defaultValues={{
-        indices: [],
-      }}
-    >
+    <PlaygroundProvider>
       <EuiPageTemplate
         offset={0}
         restrictWidth={false}
@@ -39,15 +35,21 @@ export const ChatPlaygroundOverview: React.FC = () => {
         grow={false}
       >
         <EuiPageTemplate.Header
+          css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
           pageTitle={
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <span data-test-subj="chat-playground-home-page-title">
-                  <FormattedMessage
-                    id="xpack.searchPlayground.pageTitle"
-                    defaultMessage="Playground"
-                  />
-                </span>
+                <EuiTitle
+                  css={{ whiteSpace: 'nowrap' }}
+                  data-test-subj="chat-playground-home-page-title"
+                >
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.searchPlayground.pageTitle"
+                      defaultMessage="Playground"
+                    />
+                  </h2>
+                </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge

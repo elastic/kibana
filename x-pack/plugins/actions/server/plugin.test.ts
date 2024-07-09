@@ -420,6 +420,43 @@ describe('Actions Plugin', () => {
         expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
       });
 
+      it('should set connector type enabled and check isActionTypeEnabled with plugin setup method', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.slack',
+          name: 'Slack',
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['.server-log']);
+
+        // checking isActionTypeEnabled via plugin setup, not plugin start
+        expect(pluginSetup.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginSetup.isActionTypeEnabled('.slack')).toBeFalsy();
+      });
+
       it('should set all the connector types enabled when null or ["*"] passed', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
@@ -736,6 +773,12 @@ describe('Actions Plugin', () => {
           // coreMock.createSetup doesn't support Plugin generics
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+          const platinumLicense = licensingMock.createLicense({
+            license: { status: 'active', type: 'platinum' },
+          });
+          // @ts-ignore
+          plugin.licenseState.updateInformation(platinumLicense);
 
           pluginSetup.registerType({
             id: '.cases',

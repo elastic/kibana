@@ -26,12 +26,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  name:
-                    type: string
                   status:
                     type: string
+                  id:
+                    type: string
+                    description: Fleet Server host id
                   host:
                     type: string
+                    deprecated: true
         '400':
           $ref: '#/components/responses/error'
       operationId: fleet-server-health-check
@@ -44,8 +46,13 @@ paths:
             schema:
               type: object
               properties:
+                id:
+                  type: string
                 host:
                   type: string
+                  deprecated: true
+              required:
+                - id
   /setup:
     post:
       summary: Initiate Fleet setup
@@ -391,6 +398,8 @@ paths:
                 required:
                   - items
         '400':
+          $ref: '#/components/responses/error'
+        '429':
           $ref: '#/components/responses/error'
       operationId: install-package-by-upload
       description: ''
@@ -1026,6 +1035,11 @@ paths:
         name: prerelease
         description: Specify if version is prerelease
         in: query
+      - schema:
+          type: boolean
+        name: ignoreUnverified
+        description: Ignore if the package is fails signature verification
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -1581,7 +1595,7 @@ paths:
       operationId: agent-action-cancel
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agents/files@{fileId}@{fileName}:
+  /agents/files/{fileId}/{fileName}:
     parameters:
       - schema:
           type: string
@@ -1616,6 +1630,35 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agent-upload-file
+  /agents/files/{fileId}:
+    parameters:
+      - schema:
+          type: string
+        name: fileId
+        in: path
+        required: true
+    delete:
+      summary: Delete file uploaded by agent
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      deleted:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: delete-agent-upload-file
   /agents/{agentId}/reassign:
     parameters:
       - schema:
@@ -2358,6 +2401,11 @@ paths:
               properties:
                 agentPolicyId:
                   type: string
+                force:
+                  type: boolean
+                  description: >-
+                    bypass validation checks that can prevent agent policy
+                    deletion
               required:
                 - agentPolicyId
       parameters:
@@ -4747,6 +4795,8 @@ components:
               type: string
             title:
               type: string
+            requires_root:
+              type: boolean
           required:
             - name
             - version
@@ -4780,6 +4830,11 @@ components:
               - enabled
         policy_id:
           type: string
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
         name:
           type: string
         description:
@@ -4902,6 +4957,17 @@ components:
           description: >-
             Indicates whether the agent policy supports agentless integrations.
             Only allowed in a serverless environment.
+        global_data_tags:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
       required:
         - id
         - status
@@ -4959,6 +5025,17 @@ components:
         force:
           type: boolean
           description: Force agent policy creation even if packages are not verified.
+        global_data_tags:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
       required:
         - name
         - namespace
@@ -5233,6 +5310,14 @@ components:
           type: string
           description: Agent policy ID where that package policy will be added
           example: agent-policy-id
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
+          description: Agent policy IDs where that package policy will be added
+          example:
+            - agent-policy-id
         package:
           type: object
           properties:
@@ -5314,7 +5399,6 @@ components:
             the agent policy is managed.
       required:
         - name
-        - policy_id
         - package
     upgrade_diff:
       title: Package policy Upgrade dryrun

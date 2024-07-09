@@ -25,7 +25,7 @@ export const parseLine = (line: string): ParsedLineTokens => {
   // try to parse into method and url (split on whitespace)
   const parts = line.split(whitespacesRegex);
   // 1st part is the method
-  const method = parts[0];
+  const method = parts[0].toUpperCase();
   // 2nd part is the url
   const url = parts[1];
   // try to parse into url path and url params (split on question mark)
@@ -228,7 +228,7 @@ export const parseBody = (value: string): string[] => {
         break;
       }
       case 'f': {
-        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(3) === 'e') {
+        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(4) === 'e') {
           next();
           next();
           next();
@@ -405,7 +405,24 @@ export const parseBody = (value: string): string[] => {
  * Ideally the parser would do that, but currently they are included in url.
  */
 export const removeTrailingWhitespaces = (url: string): string => {
-  return url.trim().split(whitespacesRegex)[0];
+  let index = 0;
+  let whitespaceIndex = -1;
+  let isQueryParam = false;
+  let char = url[index];
+  while (char) {
+    if (char === '"') {
+      isQueryParam = !isQueryParam;
+    } else if (char === ' ' && !isQueryParam) {
+      whitespaceIndex = index;
+      break;
+    }
+    index++;
+    char = url[index];
+  }
+  if (whitespaceIndex > 0) {
+    return url.slice(0, whitespaceIndex);
+  }
+  return url;
 };
 
 /*

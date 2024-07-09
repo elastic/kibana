@@ -36,7 +36,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
     }),
     learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#limit-cpu-usage',
+      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-limit-cpu',
     api_field: {
       name: 'agent_limits_go_max_procs',
     },
@@ -121,7 +121,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       }
     ),
     learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#override-default-monitoring-port',
+      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-http-monitoring',
     schema: z
       .object({
         // enabled: z.boolean().describe('Enabled').default(false),
@@ -146,6 +146,8 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_level',
     },
-    schema: z.nativeEnum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-log-level',
+    schema: z.enum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
   },
 ];

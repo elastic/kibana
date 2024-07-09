@@ -119,6 +119,8 @@ export enum TaskRunResult {
   RetryScheduled = 'RetryScheduled',
   // Task has failed
   Failed = 'Failed',
+  // Task deleted
+  Deleted = 'Deleted',
 }
 
 // A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
@@ -620,7 +622,13 @@ export class TaskManagerRunner implements TaskRunner {
           schedule: reschedule,
           state,
           attempts = 0,
+          shouldDeleteTask,
         }: SuccessfulRunResult & { attempts: number }) => {
+          if (shouldDeleteTask) {
+            // set the status to failed so task will get deleted
+            return asOk({ status: TaskStatus.ShouldDelete });
+          }
+
           const { startedAt, schedule } = this.instance.task;
 
           return asOk({
@@ -642,7 +650,10 @@ export class TaskManagerRunner implements TaskRunner {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
-    } else if (fieldUpdates.status === TaskStatus.Failed) {
+    } else if (
+      fieldUpdates.status === TaskStatus.Failed ||
+      fieldUpdates.status === TaskStatus.ShouldDelete
+    ) {
       // Delete the SO instead so it doesn't remain in the index forever
       this.instance = asRan(this.instance.task);
       await this.removeTask();
@@ -667,6 +678,8 @@ export class TaskManagerRunner implements TaskRunner {
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
+      : fieldUpdates.status === TaskStatus.ShouldDelete
+      ? TaskRunResult.Deleted
       : hasTaskRunFailed
       ? TaskRunResult.SuccessRescheduled
       : TaskRunResult.RetryScheduled;
@@ -693,6 +706,8 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
+    const debugLogger = this.logger.get(`metrics-debugger`);
+
     const taskHasExpired = this.isExpired;
 
     await eitherAsync(
@@ -711,8 +726,10 @@ export class TaskManagerRunner implements TaskRunner {
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
         // taskRunError contains the "source" (TaskErrorSource) data
-        const taskRunEvent = !!taskRunError
-          ? asTaskRunEvent(
+        if (!!taskRunError) {
+          debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+          this.onTaskEvent(
+            asTaskRunEvent(
               this.id,
               asErr({
                 ...processedResult,
@@ -721,14 +738,19 @@ export class TaskManagerRunner implements TaskRunner {
               }),
               taskTiming
             )
-          : asTaskRunEvent(
+          );
+        } else {
+          this.onTaskEvent(
+            asTaskRunEvent(
               this.id,
               asOk({ ...processedResult, isExpired: taskHasExpired }),
               taskTiming
-            );
-        this.onTaskEvent(taskRunEvent);
+            )
+          );
+        }
       },
       async ({ error }: FailedRunResult) => {
+        debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
         this.onTaskEvent(
           asTaskRunEvent(
             this.id,

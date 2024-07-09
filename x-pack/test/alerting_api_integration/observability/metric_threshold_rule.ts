@@ -10,10 +10,10 @@ import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
-  Comparator,
   InfraRuleType,
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
             criteria: [
               {
                 aggType: Aggregators.AVERAGE,
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [0.5],
                 timeSize: 5,
                 timeUnit: 'm',
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `system.cpu.user.pct is 90% in the last 5 mins. Alert when > 50%.`
+          `system.cpu.user.pct is 90% in the last 5 mins. Alert when above 50%.`
         );
       });
     });

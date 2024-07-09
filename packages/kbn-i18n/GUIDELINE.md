@@ -58,8 +58,8 @@ Messages can contain placeholders for embedding a value of a variable. For examp
 
 ```js
 {
-  'kbn.management.editIndexPattern.scripted.deleteFieldLabel': "Delete scripted field '{fieldName}'?"
-  'kbn.management.editIndexPattern.scripted.noFieldLabel': "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'"
+  'kbn.management.editIndexPattern.scripted.deleteFieldLabel': "Delete scripted field ''{fieldName}''?"
+  'kbn.management.editIndexPattern.scripted.noFieldLabel': "''{indexPatternTitle}'' index pattern doesn't have a scripted field called ''{fieldName}''"
 }
 ```
 

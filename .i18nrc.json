@@ -58,7 +58,8 @@
     "filesManagement": "src/plugins/files_management",
     "flot": "packages/kbn-flot-charts/lib",
     "generateCsv": "packages/kbn-generate-csv",
-    "grouping": "packages/kbn-securitysolution-grouping/src",
+    "grouping": "packages/kbn-grouping/src",
+    "alertsGrouping": "packages/kbn-alerts-grouping",
     "guidedOnboarding": "src/plugins/guided_onboarding",
     "guidedOnboardingPackage": "packages/kbn-guided-onboarding",
     "home": "src/plugins/home",
@@ -116,6 +117,7 @@
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentationPopover": "packages/kbn-language-documentation-popover/src",
     "textBasedLanguages": "src/plugins/text_based_languages",
+    "esqlDataGrid": "src/plugins/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],
@@ -147,6 +149,7 @@
     "unifiedHistogram": "src/plugins/unified_histogram",
     "unifiedDataTable": "packages/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
+    "unsavedChangesPrompt": "packages/kbn-unsaved-changes-prompt",
     "managedContentBadge": "packages/kbn-managed-content-badge"
   },
   "translations": []

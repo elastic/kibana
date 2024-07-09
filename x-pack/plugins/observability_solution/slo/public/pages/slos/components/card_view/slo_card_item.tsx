@@ -74,7 +74,6 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
@@ -108,22 +107,27 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   return (
     <>
       <EuiPanel
+        className="sloCardItem"
         panelRef={containerRef as React.Ref<HTMLDivElement>}
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
         paddingSize="none"
         css={css`
           height: 182px;
           overflow: hidden;
           position: relative;
+
+          & .sloCardItemActions_hover {
+            pointer-events: none;
+            opacity: 0;
+
+            &:focus-within {
+              pointer-events: auto;
+              opacity: 1;
+            }
+          }
+          &:hover .sloCardItemActions_hover {
+            pointer-events: auto;
+            opacity: 1;
+          }
         `}
         title={
           slo.summary.summaryUpdatedAt
@@ -150,7 +154,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             />
           }
         />
-        {(isMouseOver || isActionsPopoverOpen) && (
+        <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
           <SloCardItemActions
             slo={slo}
             rules={rules}
@@ -162,7 +166,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             setDashboardAttachmentReady={setDashboardAttachmentReady}
             setResetConfirmationModalOpen={setResetConfirmationModalOpen}
           />
-        )}
+        </div>
       </EuiPanel>
 
       <BurnRateRuleFlyout

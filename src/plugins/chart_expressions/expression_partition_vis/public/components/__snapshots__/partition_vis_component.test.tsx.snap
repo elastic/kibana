@@ -268,6 +268,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -657,6 +658,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -682,12 +684,15 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "left",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -788,7 +793,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -1198,6 +1202,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -1587,6 +1592,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -1612,12 +1618,15 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "left",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -1716,7 +1725,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -2188,6 +2196,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -2577,6 +2586,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -2602,12 +2612,15 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "left",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -2708,7 +2721,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -3180,6 +3192,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -3569,6 +3582,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -3594,12 +3608,15 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "left",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -3700,7 +3717,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -4110,6 +4126,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4499,6 +4516,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4524,12 +4542,15 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "left",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -4628,7 +4649,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -4995,6 +5015,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -5384,6 +5405,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -5409,12 +5431,15 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
                 "emptyBackground": "transparent",
+                "iconAlign": "left",
                 "minHeight": 64,
+                "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
-                "text": Object {
-                  "darkColor": "#343741",
-                  "lightColor": "#E0E5EE",
-                },
+                "textDarkColor": "#343741",
+                "textLightColor": "#E0E5EE",
+                "titlesTextAlign": "left",
+                "valueFontSize": "default",
+                "valuesTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -5505,6 +5530,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          legendValues={
+            Array [
+              "value",
+            ]
+          }
           locale="en"
           noResults={
             <VisualizationNoResults
@@ -5515,7 +5545,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={true}
           theme={
             Array [
               Object {

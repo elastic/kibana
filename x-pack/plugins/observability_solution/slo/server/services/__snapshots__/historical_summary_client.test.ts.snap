@@ -9426,6 +9426,146 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
+    "consumed": 0.55648,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.44352,
+  },
+  "sliValue": 0.972176,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 2`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.5574,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4426,
+  },
+  "sliValue": 0.97213,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 3`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.55834,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.44166,
+  },
+  "sliValue": 0.972083,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 4`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.55926,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.44074,
+  },
+  "sliValue": 0.972037,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 5`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.56018,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.43982,
+  },
+  "sliValue": 0.971991,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 6`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.56112,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.43888,
+  },
+  "sliValue": 0.971944,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 7`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.56204,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.43796,
+  },
+  "sliValue": 0.971898,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 8`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.56296,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.43704,
+  },
+  "sliValue": 0.971852,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 9`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.56388,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.43612,
+  },
+  "sliValue": 0.971806,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 10`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.56482,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.43518,
+  },
+  "sliValue": 0.971759,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 11`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
     "consumed": 0.56574,
     "initial": 0.05,
     "isEstimated": false,
@@ -9436,7 +9576,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 2`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 12`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9450,7 +9590,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 3`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 13`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9464,7 +9604,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 4`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 14`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9478,7 +9618,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 5`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 15`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9492,7 +9632,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 6`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 16`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9506,7 +9646,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 7`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 17`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9520,7 +9660,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 8`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 18`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9534,7 +9674,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 9`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 19`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9548,7 +9688,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 10`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 20`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9562,7 +9702,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 11`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 21`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9576,7 +9716,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 12`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 22`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9590,7 +9730,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 13`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 23`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9604,7 +9744,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 14`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 24`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9618,7 +9758,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 15`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 25`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9632,7 +9772,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 16`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 26`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9646,7 +9786,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 17`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 27`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9660,7 +9800,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 18`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 28`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9674,7 +9814,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 19`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 29`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9688,7 +9828,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 20`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 30`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9702,7 +9842,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 21`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 31`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9716,7 +9856,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 22`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 32`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9730,7 +9870,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 23`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 33`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9744,7 +9884,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 24`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 34`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9758,7 +9898,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 25`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 35`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9772,7 +9912,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 26`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 36`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9786,7 +9926,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 27`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 37`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9800,7 +9940,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 28`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 38`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9814,7 +9954,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 29`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 39`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9828,7 +9968,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 30`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 40`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9842,7 +9982,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 31`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 41`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9856,7 +9996,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 32`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 42`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9870,7 +10010,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 33`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 43`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9884,7 +10024,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 34`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 44`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9898,7 +10038,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 35`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 45`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9912,7 +10052,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 36`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 46`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9926,7 +10066,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 37`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 47`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9940,7 +10080,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 38`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 48`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9954,7 +10094,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 39`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 49`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9968,7 +10108,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 40`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 50`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9982,7 +10122,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 41`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 51`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -9996,7 +10136,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 42`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 52`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10010,7 +10150,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 43`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 53`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10024,7 +10164,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 44`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 54`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10038,7 +10178,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 45`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 55`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10052,7 +10192,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 46`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 56`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10066,7 +10206,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 47`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 57`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10080,7 +10220,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 48`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 58`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10094,7 +10234,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 49`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 59`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10108,7 +10248,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 50`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 60`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10122,7 +10262,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 51`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 61`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10136,7 +10276,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 52`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 62`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10150,7 +10290,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 53`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 63`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10164,7 +10304,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 54`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 64`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10178,7 +10318,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 55`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 65`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10192,7 +10332,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 56`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 66`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10206,7 +10346,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 57`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 67`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10220,7 +10360,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 58`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 68`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10234,7 +10374,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 59`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 69`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10248,7 +10388,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 60`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 70`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10262,7 +10402,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 61`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 71`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10276,7 +10416,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 62`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 72`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10290,7 +10430,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 63`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 73`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10304,7 +10444,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 64`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 74`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10318,7 +10458,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 65`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 75`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10332,7 +10472,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 66`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 76`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10346,7 +10486,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 67`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 77`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10360,7 +10500,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 68`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 78`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10374,7 +10514,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 69`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 79`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10388,7 +10528,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 70`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 80`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10402,7 +10542,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 71`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 81`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10416,7 +10556,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 72`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 82`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10430,7 +10570,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 73`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 83`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10444,7 +10584,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 74`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 84`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10458,7 +10598,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 75`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 85`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10472,7 +10612,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 76`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 86`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10486,7 +10626,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 77`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 87`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10500,7 +10640,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 78`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 88`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10514,7 +10654,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 79`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 89`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10528,7 +10668,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 80`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 90`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10542,7 +10682,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 81`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 91`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10556,7 +10696,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 82`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 92`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10570,7 +10710,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 83`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 93`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10584,7 +10724,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 84`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 94`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10598,7 +10738,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 85`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 95`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10612,7 +10752,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 86`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 96`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10626,7 +10766,7 @@ Object {
 }
 `;
 
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 87`] = `
+exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 97`] = `
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
@@ -10636,146 +10776,6 @@ Object {
     "remaining": 0.35462,
   },
   "sliValue": 0.967731,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 88`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.6463,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.3537,
-  },
-  "sliValue": 0.967685,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 89`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.64722,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.35278,
-  },
-  "sliValue": 0.967639,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 90`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.64814,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.35186,
-  },
-  "sliValue": 0.967593,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 91`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.64908,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.35092,
-  },
-  "sliValue": 0.967546,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 92`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.65,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.35,
-  },
-  "sliValue": 0.9675,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 93`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.65092,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.34908,
-  },
-  "sliValue": 0.967454,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 94`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.65186,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.34814,
-  },
-  "sliValue": 0.967407,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 95`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.65278,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.34722,
-  },
-  "sliValue": 0.967361,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 96`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.6537,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.3463,
-  },
-  "sliValue": 0.967315,
-  "status": "HEALTHY",
-}
-`;
-
-exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary using the provided date range 97`] = `
-Object {
-  "date": Any<ClockDate>,
-  "errorBudget": Object {
-    "consumed": 0.65462,
-    "initial": 0.05,
-    "isEstimated": false,
-    "remaining": 0.34538,
-  },
-  "sliValue": 0.967269,
   "status": "HEALTHY",
 }
 `;

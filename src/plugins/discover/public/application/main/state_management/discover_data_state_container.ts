@@ -5,21 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import { getDataViewByTextBasedQueryLang } from './utils/get_data_view_by_text_based_query_lang';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { getRawRecordType } from '../utils/get_raw_record_type';
+import { getEsqlDataView } from './utils/get_esql_data_view';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -34,13 +33,11 @@ export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  availableFields$: AvailableFields$;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 export type DataFetch$ = Observable<{
   options: {
     reset: boolean;
@@ -51,23 +48,11 @@ export type DataFetch$ = Observable<{
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
-export enum RecordRawType {
-  /**
-   * Documents returned Elasticsearch, nested structure
-   */
-  DOCUMENT = 'document',
-  /**
-   * Data returned e.g. ES|QL queries, flat structure
-   * */
-  PLAIN = 'plain',
-}
-
 export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
-  recordRawType?: RecordRawType;
   query?: AggregateQuery | Query | undefined;
 }
 
@@ -77,8 +62,8 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
-  textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
-  textBasedHeaderWarning?: string;
+  esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
+  esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
 
@@ -122,7 +107,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: (savedSearch: SavedSearch) => void;
+  reset: () => void;
 
   /**
    * cancels the running queries
@@ -165,11 +150,10 @@ export function getDataStateContainer({
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications } = services;
+  const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const appState = getAppState();
-  const recordRawType = getRawRecordType(appState.query);
+
   /**
    * The observable to trigger data fetching in UI
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
@@ -189,12 +173,11 @@ export function getDataStateContainer({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const initialState = { fetchStatus: getInitialFetchStatus(), recordRawType };
+  const initialState = { fetchStatus: getInitialFetchStatus() };
   const dataSubjects: SavedSearchData = {
     main$: new BehaviorSubject<DataMainMsg>(initialState),
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
-    availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>(initialState),
   };
 
   let autoRefreshDone: AutoRefreshDoneFn | undefined;
@@ -263,6 +246,12 @@ export function getDataStateContainer({
             return;
           }
 
+          await profilesManager.resolveDataSourceProfile({
+            dataSource: getAppState().dataSource,
+            dataView: getSavedSearch().searchSource.getField('index'),
+            query: getAppState().query,
+          });
+
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
 
@@ -300,8 +289,8 @@ export function getDataStateContainer({
     const query = getAppState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
-    if (isTextBasedQuery(query)) {
-      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+    if (isOfAggregateQueryType(query)) {
+      const nextDataView = await getEsqlDataView(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
         setDataView(nextDataView);
       }
@@ -320,9 +309,8 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = (savedSearch: SavedSearch) => {
-    const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
-    sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
+  const reset = () => {
+    sendResetMsg(dataSubjects, getInitialFetchStatus());
   };
 
   const cancel = () => {

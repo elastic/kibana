@@ -6,12 +6,13 @@ exports[`#start() returns \`Context\` component 1`] = `
     i18n={
       Object {
         "mapping": Object {
+          "euiAbsoluteTab.dateFormatButtonLabel": "Parse date",
           "euiAbsoluteTab.dateFormatError": [Function],
-          "euiAbsoluteTab.dateFormatHint": "Press the Enter key to parse as a date.",
           "euiAccordionChildrenLoading.message": "Loading",
           "euiAutoRefresh.autoRefreshLabel": "Auto refresh",
           "euiAutoRefresh.buttonLabelOff": "Auto refresh is off",
           "euiAutoRefresh.buttonLabelOn": [Function],
+          "euiBasicTable.deselectRows": "Deselect rows",
           "euiBasicTable.noItemsMessage": "No items found",
           "euiBasicTable.selectAllRows": "Select all rows",
           "euiBasicTable.selectThisRow": [Function],
@@ -36,6 +37,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiCodeBlockFullScreen.fullscreenExpand": "Expand",
           "euiCollapsedItemActions.allActions": "All actions",
           "euiCollapsedItemActions.allActionsDisabled": "Individual item actions are disabled when rows are being selected.",
+          "euiCollapsedNavButton.ariaLabelButtonIcon": [Function],
           "euiCollapsibleNavBeta.ariaLabel": "Site menu",
           "euiCollapsibleNavButton.ariaLabelClose": "Close navigation",
           "euiCollapsibleNavButton.ariaLabelCollapse": "Collapse navigation",

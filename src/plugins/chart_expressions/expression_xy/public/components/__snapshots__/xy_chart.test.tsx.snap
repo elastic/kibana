@@ -610,6 +610,7 @@ exports[`XYChart component it renders area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -999,6 +1000,7 @@ exports[`XYChart component it renders area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -1024,12 +1026,15 @@ exports[`XYChart component it renders area 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -1130,6 +1135,7 @@ exports[`XYChart component it renders area 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -1145,7 +1151,6 @@ exports[`XYChart component it renders area 1`] = `
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -2160,6 +2165,7 @@ exports[`XYChart component it renders bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -2549,6 +2555,7 @@ exports[`XYChart component it renders bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -2574,12 +2581,15 @@ exports[`XYChart component it renders bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -2680,6 +2690,7 @@ exports[`XYChart component it renders bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -2695,7 +2706,6 @@ exports[`XYChart component it renders bar 1`] = `
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -3710,6 +3720,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -4099,6 +4110,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -4124,12 +4136,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -4230,6 +4245,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -4245,7 +4261,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         pointerUpdateDebounce={0}
         rotation={90}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -5260,6 +5275,7 @@ exports[`XYChart component it renders line 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -5649,6 +5665,7 @@ exports[`XYChart component it renders line 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -5674,12 +5691,15 @@ exports[`XYChart component it renders line 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -5780,6 +5800,7 @@ exports[`XYChart component it renders line 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -5795,7 +5816,6 @@ exports[`XYChart component it renders line 1`] = `
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -6810,6 +6830,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -7199,6 +7220,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -7224,12 +7246,15 @@ exports[`XYChart component it renders stacked area 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -7330,6 +7355,7 @@ exports[`XYChart component it renders stacked area 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -7345,7 +7371,6 @@ exports[`XYChart component it renders stacked area 1`] = `
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -8360,6 +8385,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -8749,6 +8775,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -8774,12 +8801,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -8880,6 +8910,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -8895,7 +8926,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -9910,6 +9940,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -10299,6 +10330,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -10324,12 +10356,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -10430,6 +10465,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -10445,7 +10481,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         pointerUpdateDebounce={0}
         rotation={90}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -11490,6 +11525,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -11879,6 +11915,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -11904,12 +11941,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -12010,6 +12050,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -12025,7 +12066,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -13278,6 +13318,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -13667,6 +13708,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -13692,12 +13734,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -13798,6 +13843,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -13813,7 +13859,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -15059,6 +15104,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -15448,6 +15494,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -15473,12 +15520,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -15579,6 +15629,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -15594,7 +15645,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {

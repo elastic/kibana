@@ -5,34 +5,64 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
+import {
+  HasSerializableState,
+  HasSnapshottableState,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
-import React, { ReactElement } from 'react';
-
-export type ReactEmbeddableRegistration<
-  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
-> = (ref: React.ForwardedRef<ApiType>) => ReactElement | null;
+import {
+  HasType,
+  PublishesPhaseEvents,
+  PublishesUnsavedChanges,
+  StateComparators,
+} from '@kbn/presentation-publishing';
+import { MaybePromise } from '@kbn/utility-types';
+import React from 'react';
 
 /**
  * The default embeddable API that all Embeddables must implement.
  *
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
-export interface DefaultEmbeddableApi<SerializedState extends object = object>
-  extends DefaultPresentationPanelApi,
+export interface DefaultEmbeddableApi<
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState
+> extends DefaultPresentationPanelApi,
     HasType,
+    PublishesPhaseEvents,
     PublishesUnsavedChanges,
-    HasSerializableState<SerializedState> {}
+    HasSerializableState<SerializedState>,
+    HasSnapshottableState<RuntimeState> {}
 
 /**
- * A subset of the default embeddable API used in registration to allow implementors to omit aspects
- * of the API that will be automatically added by the system.
+ * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `setApi`.
  */
-export type ReactEmbeddableApiRegistration<
-  StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
-> = Omit<ApiType, 'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'>;
+export type SetReactEmbeddableApiRegistration<
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
+
+/**
+ * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `buildApi`.
+ */
+export type BuildReactEmbeddableApiRegistration<
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
+> = Omit<
+  SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
+  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
+>;
 
 /**
  * The React Embeddable Factory interface is used to register a series of functions that
@@ -43,8 +73,11 @@ export type ReactEmbeddableApiRegistration<
  **/
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,
-  ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
@@ -53,16 +86,16 @@ export interface ReactEmbeddableFactory<
   type: string;
 
   /**
-   * A required synchronous function that transforms serialized state into runtime state.
-   * This will be used twice - once for the parent state, and once for the last saved state
-   * for comparison.
+   * A required asynchronous function that transforms serialized state into runtime state.
    *
-   * This can also be used to:
-   *
+   * This could be used to:
+   * - Load state from some external store
    * - Inject references provided by the parent
    * - Migrate the state to a newer version (this must be undone when serializing)
    */
-  deserializeState: (state: SerializedPanelState<SerializedState>) => RuntimeState;
+  deserializeState: (
+    panelState: SerializedPanelState<SerializedState>
+  ) => MaybePromise<RuntimeState>;
 
   /**
    * A required async function that builds your embeddable component and a linked API instance. The API
@@ -74,11 +107,17 @@ export interface ReactEmbeddableFactory<
    */
   buildEmbeddable: (
     initialState: RuntimeState,
+    /**
+     * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
+     * changes logic that the dashboard expects using the provided comparators
+     */
     buildApi: (
-      apiRegistration: ReactEmbeddableApiRegistration<SerializedState, ApiType>,
+      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
       comparators: StateComparators<RuntimeState>
-    ) => ApiType,
+    ) => Api & HasSnapshottableState<RuntimeState>,
     uuid: string,
-    parentApi?: unknown
-  ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
+    parentApi: unknown | undefined,
+    /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api
+  ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

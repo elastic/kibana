@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { RightPanelTour } from './tour';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -20,9 +20,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { FLYOUT_TOUR_TEST_ID } from '../../shared/components/test_ids';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour/tour';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
+jest.mock('../../../../common/components/guided_onboarding_tour/tour');
 
 const mockedUseKibana = mockUseKibana();
 
@@ -30,16 +33,19 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 const mockStore = createMockStore(undefined, undefined, undefined, {
   ...storageMock,
 });
+const mockCasesContract = casesPluginMock.createStartContract();
+const mockUseIsAddToCaseOpen = mockCasesContract.hooks.useIsAddToCaseOpen as jest.Mock;
+mockUseIsAddToCaseOpen.mockReturnValue(false);
 
-const renderRightPanelTour = (context: RightPanelContext = mockContextValue) =>
+const renderRightPanelTour = (context: DocumentDetailsContext = mockContextValue) =>
   render(
     <TestProviders store={mockStore}>
-      <RightPanelContext.Provider value={context}>
+      <DocumentDetailsContext.Provider value={context}>
         <RightPanelTour />
         {Object.values(FLYOUT_TOUR_CONFIG_ANCHORS).map((i, idx) => (
           <div key={idx} data-test-subj={i} />
         ))}
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -50,10 +56,11 @@ describe('<RightPanelTour />', () => {
       services: {
         ...mockedUseKibana.services,
         storage: storageMock,
+        cases: mockCasesContract,
       },
     });
     (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(false);
-
+    (useTourContext as jest.Mock).mockReturnValue({ isTourShown: jest.fn(() => false) });
     storageMock.clear();
   });
 
@@ -82,7 +89,19 @@ describe('<RightPanelTour />', () => {
     expect(queryByText('Next')).not.toBeInTheDocument();
   });
 
-  it('should not render tour for non-alerts', () => {
+  it('should not render tour when guided onboarding tour is active', () => {
+    (useTourContext as jest.Mock).mockReturnValue({ isTourShown: jest.fn(() => true) });
+    const { queryByText, queryByTestId } = renderRightPanelTour({
+      ...mockContextValue,
+      getFieldsData: () => '',
+    });
+
+    expect(queryByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).not.toBeInTheDocument();
+    expect(queryByText('Next')).not.toBeInTheDocument();
+  });
+
+  it('should not render tour when case modal is open', () => {
+    mockUseIsAddToCaseOpen.mockReturnValue(true);
     const { queryByText, queryByTestId } = renderRightPanelTour({
       ...mockContextValue,
       getFieldsData: () => '',

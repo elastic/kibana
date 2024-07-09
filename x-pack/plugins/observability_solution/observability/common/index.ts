@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export type { AsDuration, AsPercent, TimeUnitChar, TimeFormatter } from './utils/formatters';
 
 export {
@@ -18,7 +17,7 @@ export {
 } from './utils/formatters';
 export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
-
+export { convertToBuiltInComparators } from './utils/convert_legacy_outside_comparator';
 export { ProcessorEvent } from './processor_event';
 
 export {
@@ -38,6 +37,7 @@ export {
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
+  apmEnableMultiSignal,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
@@ -75,7 +75,7 @@ export const observabilityFeatureId = 'observability';
 
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
-export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
+export { uptimeOverviewLocatorID } from '@kbn/deeplinks-observability';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';

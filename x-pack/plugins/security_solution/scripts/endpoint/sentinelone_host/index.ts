@@ -111,7 +111,6 @@ const runCli: RunFn = async ({ log, flags }) => {
     url: kibanaUrl,
     username,
     password,
-    noCertForSsl: true,
   });
 
   const runningS1VMs = (

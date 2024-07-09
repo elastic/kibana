@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression } from '@kbn/es-query';
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
@@ -54,7 +54,6 @@ import {
   SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
@@ -1409,11 +1408,10 @@ export const tasks: TelemetryTask[] = [
         namespaces: ['*'],
       });
 
-      const kueryNodes = response.saved_objects.map(({ attributes: { kuery } }) =>
-        fromKueryExpression(kuery)
-      );
-
-      const kueryFields = getKueryFields(kueryNodes);
+      const kueryExpressions = response.saved_objects.map(({ attributes: { kuery } }) => kuery);
+      const kueryFields = kueryExpressions
+        .map(getKqlFieldNamesFromExpression)
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         service_groups: {
@@ -1435,11 +1433,12 @@ export const tasks: TelemetryTask[] = [
         namespaces: ['*'],
       });
 
-      const kueryNodes = response.saved_objects.map(({ attributes: { kuery } }) =>
-        fromKueryExpression(kuery ?? '')
+      const kueryExpressions = response.saved_objects.map(
+        ({ attributes: { kuery } }) => kuery ?? ''
       );
-
-      const kueryFields = getKueryFields(kueryNodes);
+      const kueryFields = kueryExpressions
+        .map(getKqlFieldNamesFromExpression)
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         custom_dashboards: {

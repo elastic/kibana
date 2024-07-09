@@ -14,9 +14,9 @@ import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
-import { sourcererActions } from '../../store/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
+import { sourcererActions } from '../../../sourcerer/store';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { getSourcererDataView } from '../../../sourcerer/containers/get_sourcerer_data_view';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 

@@ -116,12 +116,31 @@
         "label": "cli",
         "description": [],
         "signature": [
-          "() => Promise<string[]>"
+          "(cliOptions: ",
+          "CliOptions",
+          " | undefined) => Promise<string[]>"
         ],
         "path": "x-pack/packages/kbn-data-forge/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.cli.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "cliOptions",
+            "description": [],
+            "signature": [
+              "CliOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-data-forge/src/cli.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -469,6 +488,274 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.DEFAULTS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULTS",
+        "description": [],
+        "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.EVENTS_PER_CYCLE",
+            "type": "number",
+            "tags": [],
+            "label": "EVENTS_PER_CYCLE",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.PAYLOAD_SIZE",
+            "type": "number",
+            "tags": [],
+            "label": "PAYLOAD_SIZE",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.CONCURRENCY",
+            "type": "number",
+            "tags": [],
+            "label": "CONCURRENCY",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.SERVERLESS",
+            "type": "boolean",
+            "tags": [],
+            "label": "SERVERLESS",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.INDEX_INTERVAL",
+            "type": "number",
+            "tags": [],
+            "label": "INDEX_INTERVAL",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.DATASET",
+            "type": "string",
+            "tags": [],
+            "label": "DATASET",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.SCENARIO",
+            "type": "string",
+            "tags": [],
+            "label": "SCENARIO",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.ELASTICSEARCH_HOST",
+            "type": "string",
+            "tags": [],
+            "label": "ELASTICSEARCH_HOST",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.ELASTICSEARCH_USERNAME",
+            "type": "string",
+            "tags": [],
+            "label": "ELASTICSEARCH_USERNAME",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.ELASTICSEARCH_PASSWORD",
+            "type": "string",
+            "tags": [],
+            "label": "ELASTICSEARCH_PASSWORD",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.ELASTICSEARCH_API_KEY",
+            "type": "string",
+            "tags": [],
+            "label": "ELASTICSEARCH_API_KEY",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.SKIP_KIBANA_USER",
+            "type": "boolean",
+            "tags": [],
+            "label": "SKIP_KIBANA_USER",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.INSTALL_KIBANA_ASSETS",
+            "type": "boolean",
+            "tags": [],
+            "label": "INSTALL_KIBANA_ASSETS",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.DELAY_IN_MINUTES",
+            "type": "number",
+            "tags": [],
+            "label": "DELAY_IN_MINUTES",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.DELAY_EVERY_MINUTES",
+            "type": "number",
+            "tags": [],
+            "label": "DELAY_EVERY_MINUTES",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.LOOKBACK",
+            "type": "string",
+            "tags": [],
+            "label": "LOOKBACK",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.KIBANA_URL",
+            "type": "string",
+            "tags": [],
+            "label": "KIBANA_URL",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.KIBANA_USERNAME",
+            "type": "string",
+            "tags": [],
+            "label": "KIBANA_USERNAME",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.KIBANA_PASSWORD",
+            "type": "string",
+            "tags": [],
+            "label": "KIBANA_PASSWORD",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.EVENT_TEMPLATE",
+            "type": "string",
+            "tags": [],
+            "label": "EVENT_TEMPLATE",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.REDUCE_WEEKEND_TRAFFIC_BY",
+            "type": "number",
+            "tags": [],
+            "label": "REDUCE_WEEKEND_TRAFFIC_BY",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.EPHEMERAL_PROJECT_IDS",
+            "type": "number",
+            "tags": [],
+            "label": "EPHEMERAL_PROJECT_IDS",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.DEFAULTS.ALIGN_EVENTS_TO_INTERVAL",
+            "type": "boolean",
+            "tags": [],
+            "label": "ALIGN_EVENTS_TO_INTERVAL",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -2603,6 +2603,17 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.HASH_TO_VERSION_MAP.endpointunifieduserartifactmanifest393c6e4f5f16288c24ef9057e4d76a4c",
+            "type": "string",
+            "tags": [],
+            "label": "'endpoint:unified-user-artifact-manifest|393c6e4f5f16288c24ef9057e4d76a4c'",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
             "id": "def-common.HASH_TO_VERSION_MAP.endpointuserartifactmanifest7502b5c5bc923abe8aa5ccfd636e8c3d",
             "type": "string",
             "tags": [],
@@ -2900,10 +2911,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestpackagepoliciesa1a074bad36e68d54f98d2158d60f879",
+            "id": "def-common.HASH_TO_VERSION_MAP.ingestpackagepoliciesaef7977b81f7930f23cbfd8711ba272e",
             "type": "string",
             "tags": [],
-            "label": "'ingest-package-policies|a1a074bad36e68d54f98d2158d60f879'",
+            "label": "'ingest-package-policies|aef7977b81f7930f23cbfd8711ba272e'",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,

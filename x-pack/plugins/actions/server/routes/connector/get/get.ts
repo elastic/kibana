@@ -23,6 +23,10 @@ export const getConnectorRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      options: {
+        access: 'public',
+        summary: `Get connector information`,
+      },
       validate: {
         params: getConnectorParamsSchemaV1,
       },

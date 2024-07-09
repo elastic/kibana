@@ -34,5 +34,14 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/kibana-utils-plugin",
+    "@kbn/core-doc-links-browser",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/search-types",
+    "@kbn/utility-types",
+    "@kbn/core-application-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
   ]
 }

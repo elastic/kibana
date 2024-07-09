@@ -16,7 +16,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import { MAX_FINDINGS_TO_LOAD, VULNERABILITY_FIELDS } from '../../../common/constants';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
   LATEST_VULNERABILITIES_INDEX_PATTERN,
@@ -25,7 +25,6 @@ import {
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
-import { VULNERABILITY_FIELDS } from '../constants';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<

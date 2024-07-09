@@ -117,6 +117,7 @@ export const Chat = () => {
       component="form"
       css={{ display: 'flex', flexGrow: 1 }}
       onSubmit={handleSubmit(onSubmit)}
+      data-test-subj="chatPage"
     >
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem
@@ -156,6 +157,7 @@ export const Chat = () => {
                     iconType="sparkles"
                     disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
+                    data-test-subj="regenerateActionButton"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.regenerateBtn"
@@ -168,6 +170,7 @@ export const Chat = () => {
                     iconType="refresh"
                     disabled={isToolBarActionsDisabled}
                     onClick={handleClearChat}
+                    data-test-subj="clearChatActionButton"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.clearChatBtn"
@@ -220,6 +223,7 @@ export const Chat = () => {
                           isLoading={isSubmitting}
                           isDisabled={!isValid}
                           iconType={TelegramIcon}
+                          data-test-subj="sendQuestionButton"
                         />
                       )
                     }

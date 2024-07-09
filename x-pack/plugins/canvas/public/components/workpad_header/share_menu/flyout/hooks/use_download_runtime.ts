@@ -26,7 +26,7 @@ const strings = {
   getShareableZipErrorTitle: (workpadName: string) =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {
       defaultMessage:
-        "Failed to create {ZIP} file for '{workpadName}'. The workpad may be too large. You'll need to download the files separately.",
+        "Failed to create {ZIP} file for ''{workpadName}''. The workpad may be too large. You'll need to download the files separately.",
       values: {
         ZIP,
         workpadName,

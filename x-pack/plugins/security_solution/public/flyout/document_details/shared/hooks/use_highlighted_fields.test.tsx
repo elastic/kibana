@@ -12,7 +12,9 @@ import {
   mockDataFormattedForFieldBrowserWithOverridenField,
 } from '../mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
+
+jest.mock('../../../../common/experimental_features_service');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
@@ -104,12 +106,33 @@ describe('useHighlightedFields', () => {
       useHighlightedFields({
         dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
           category: 'observer',
-          field: `observer.${SENTINEL_ONE_AGENT_ID_FIELD}`,
+          field: `observer.${RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one}`,
           values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
           originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
           isObjectArray: false,
         }),
         investigationFields: ['agent.status', 'observer.serial_number'],
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      'kibana.alert.rule.type': {
+        values: ['query'],
+      },
+    });
+  });
+
+  it('should omit crowdstrike agent id field if data is not crowdstrike alert', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
+          category: 'device',
+          field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
+          values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+          originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+          isObjectArray: false,
+        }),
+        investigationFields: ['agent.status', 'device.id'],
       })
     );
 
@@ -133,7 +156,7 @@ describe('useHighlightedFields', () => {
           },
           {
             category: 'observer',
-            field: SENTINEL_ONE_AGENT_ID_FIELD,
+            field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
             values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
             originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
             isObjectArray: false,
@@ -149,6 +172,39 @@ describe('useHighlightedFields', () => {
       },
       'observer.serial_number': {
         values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+      },
+    });
+  });
+
+  it('should return crowdstrike agent id field if data is crowdstrike alert', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
+          {
+            category: 'event',
+            field: 'event.module',
+            values: ['crowdstrike'],
+            originalValue: ['crowdstrike'],
+            isObjectArray: false,
+          },
+          {
+            category: 'device',
+            field: 'device.id',
+            values: ['expectedCrowdstrikeAgentId'],
+            originalValue: ['expectedCrowdstrikeAgentId'],
+            isObjectArray: false,
+          },
+        ]),
+        investigationFields: ['agent.status', 'device.id'],
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      'kibana.alert.rule.type': {
+        values: ['query'],
+      },
+      'device.id': {
+        values: ['expectedCrowdstrikeAgentId'],
       },
     });
   });

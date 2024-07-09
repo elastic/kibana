@@ -51,6 +51,8 @@ export interface BulkCreateSuppressedAlertsParams
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
+  mergeSourceAndFields?: boolean;
+  maxNumberOfAlertsMultiplier?: number;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -70,6 +72,8 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   alertWithSuppression,
   alertTimestampOverride,
   experimentalFeatures,
+  mergeSourceAndFields = false,
+  maxNumberOfAlertsMultiplier,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
@@ -81,7 +85,9 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
-      alertSuppression?.groupBy || []
+      alertSuppression?.groupBy || [],
+      ['fields'],
+      mergeSourceAndFields
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);
@@ -102,6 +108,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     alertWithSuppression,
     alertTimestampOverride,
     experimentalFeatures,
+    maxNumberOfAlertsMultiplier,
   });
 };
 
@@ -120,6 +127,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
   suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
+  maxNumberOfAlertsMultiplier?: number;
 }
 
 /**
@@ -139,11 +147,12 @@ export const executeBulkCreateAlerts = async <
   alertWithSuppression,
   alertTimestampOverride,
   experimentalFeatures,
+  maxNumberOfAlertsMultiplier = MAX_SIGNALS_SUPPRESSION_MULTIPLIER,
 }: ExecuteBulkCreateAlertsParams<T>) => {
   // max signals for suppression includes suppressed and created alerts
   // this allows to lift max signals limitation to higher value
   // and can detects events beyond default max_signals value
-  const suppressionMaxSignals = MAX_SIGNALS_SUPPRESSION_MULTIPLIER * tuple.maxSignals;
+  const suppressionMaxSignals = maxNumberOfAlertsMultiplier * tuple.maxSignals;
   const suppressionDuration = alertSuppression?.duration;
 
   const suppressionWindow = suppressionDuration

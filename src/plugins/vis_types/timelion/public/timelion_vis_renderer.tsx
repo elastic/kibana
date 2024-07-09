@@ -85,12 +85,12 @@ export const getTimelionVisRenderer: (
     };
 
     render(
-      <VisualizationContainer
-        renderComplete={renderComplete}
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <KibanaRenderContextProvider {...getCoreStart()}>
+      <KibanaRenderContextProvider {...getCoreStart()}>
+        <VisualizationContainer
+          renderComplete={renderComplete}
+          handlers={handlers}
+          showNoResult={showNoResult}
+        >
           <KibanaContextProvider services={{ ...deps }}>
             {seriesList && (
               <LazyTimelionVisComponent
@@ -104,8 +104,9 @@ export const getTimelionVisRenderer: (
               />
             )}
           </KibanaContextProvider>
-        </KibanaRenderContextProvider>
-      </VisualizationContainer>,
+        </VisualizationContainer>
+      </KibanaRenderContextProvider>,
+
       domNode
     );
   },

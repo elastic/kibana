@@ -7,22 +7,31 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { camelCase } from 'lodash';
 import { join } from 'path';
 import * as recast from 'recast';
+import { camelCase } from 'lodash';
+import { getParamAtPosition } from '../src/autocomplete/helper';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
-import { evalFunctionsDefinitions } from '../src/definitions/functions';
+import { evalFunctionDefinitions } from '../src/definitions/functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../src/definitions/literals';
-import { FunctionDefinition } from '../src/definitions/types';
+import { timeUnits, chronoLiterals } from '../src/definitions/literals';
 import { nonNullable } from '../src/shared/helpers';
+import {
+  SupportedFieldType,
+  FunctionDefinition,
+  supportedFieldTypes,
+  isSupportedFieldType,
+} from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
+import { getMaxMinNumberOfParams } from '../src/validation/helpers';
+
+export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
 
 function main() {
   const testCasesByFunction: Map<string, Map<string, string[]>> = new Map();
 
-  for (const definition of evalFunctionsDefinitions) {
+  for (const definition of evalFunctionDefinitions) {
     testCasesByFunction.set(definition.name, generateTestsForEvalFunction(definition));
   }
 
@@ -43,6 +52,8 @@ function generateTestsForEvalFunction(definition: FunctionDefinition) {
   generateWhereCommandTestsForEvalFunction(definition, testCases);
   generateEvalCommandTestsForEvalFunction(definition, testCases);
   generateSortCommandTestsForEvalFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -52,6 +63,8 @@ function generateTestsForAggFunction(definition: FunctionDefinition) {
   generateSortCommandTestsForAggFunction(definition, testCases);
   generateWhereCommandTestsForAggFunction(definition, testCases);
   generateEvalCommandTestsForAggFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -59,7 +72,132 @@ function generateTestsForGroupingFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
   generateStatsCommandTestsForGroupingFunction(definition, testCases);
   generateSortCommandTestsForGroupingFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
+}
+
+function generateNullAcceptanceTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const { max, min } = getMaxMinNumberOfParams(definition);
+  const numberOfArgsToTest = max === Infinity ? min : max;
+  const signatureWithGreatestNumberOfParams = definition.signatures.find(
+    (signature) => signature.params.length === numberOfArgsToTest
+  )!;
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  // test that the function accepts nulls
+  testCases.set(
+    `from a_index | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'null' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+
+  testCases.set(
+    `row nullVar = null | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'nullVar' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+}
+
+/**
+ * Tests for strings being casted to dates
+ *
+ * @param definition
+ * @param testCases
+ * @returns
+ */
+function generateImplicitDateCastingTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
+    signature.params.some(
+      (param, i) =>
+        param.type === 'date' &&
+        !definition.signatures.some((def) => getParamAtPosition(def, i)?.type === 'string') // don't count parameters that already accept a string
+    )
+  );
+
+  if (!allSignaturesWithDateParams.length) {
+    // no signatures contain date params
+    return;
+  }
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  for (const signature of allSignaturesWithDateParams) {
+    const mappedParams = getFieldMapping(signature.params);
+
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: '"2022"' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+  }
 }
 
 function generateRowCommandTestsForEvalFunction(
@@ -131,26 +269,27 @@ function generateRowCommandTestsForEvalFunction(
       );
 
       testCases.set(`row var = ${signatureString}`, []);
-
-      const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
-        name,
-        signatures,
-        params,
-        {
-          stringField: '"a"',
-          numberField: '5',
-          booleanField: 'true',
-        }
-      );
-      const wrongSignatureString = tweakSignatureForRowCommand(
-        getFunctionSignatures(
-          { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
-          { withTypes: false }
-        )[0].declaration
-      );
-      testCases.set(`row var = ${wrongSignatureString}`, expectedErrors);
     }
   }
+
+  // Test the parameter type checking
+  const signatureWithMostParams = signatures.reduce((acc, curr) =>
+    acc.params.length > curr.params.length ? acc : curr
+  );
+
+  const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
+    name,
+    signatures,
+    signatureWithMostParams.params,
+    supportedTypesAndConstants
+  );
+  const wrongSignatureString = tweakSignatureForRowCommand(
+    getFunctionSignatures(
+      { name, ...defRest, signatures: [{ ...signatureWithMostParams, params: wrongFieldMapping }] },
+      { withTypes: false }
+    )[0].declaration
+  );
+  testCases.set(`row var = ${wrongSignatureString}`, expectedErrors);
 }
 
 function generateWhereCommandTestsForEvalFunction(
@@ -195,7 +334,7 @@ function generateWhereCommandTestsForEvalFunction(
       name,
       signatures,
       params,
-      { stringField: 'stringField', numberField: 'numberField', booleanField: 'booleanField' }
+      supportedTypesAndFieldNames
     );
     testCases.set(
       `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
@@ -253,9 +392,11 @@ function generateWhereCommandTestsForAggFunction(
 }
 
 function generateEvalCommandTestsForEvalFunction(
-  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  definition: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
+  const { name, signatures, alias, ...defRest } = definition;
+
   for (const { params, ...signRest } of signatures) {
     const fieldMapping = getFieldMapping(params);
     testCases.set(
@@ -349,11 +490,7 @@ function generateEvalCommandTestsForEvalFunction(
         name,
         signatures,
         params,
-        {
-          stringField: 'stringField',
-          numberField: 'numberField',
-          booleanField: 'booleanField',
-        }
+        supportedTypesAndFieldNames
       );
       testCases.set(
         `from a_index | eval ${
@@ -364,50 +501,6 @@ function generateEvalCommandTestsForEvalFunction(
         }`,
         expectedErrors
       );
-
-      if (!signRest.minParams) {
-        // test that additional args are spotted
-        const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
-          name: 'extraArg',
-          type: 'number',
-        });
-        const refSignature = signatures[0];
-        // get the expected args from the first signature in case of errors
-        const minNumberOfArgs = refSignature.params.filter(({ optional }) => !optional).length;
-        const fullNumberOfArgs = refSignature.params.length;
-        const hasOptionalArgs = minNumberOfArgs < fullNumberOfArgs;
-        const hasTooManyArgs = fieldMappingWithOneExtraArg.length > fullNumberOfArgs;
-
-        // the validation engine tries to be smart about signatures with optional args
-        let messageQuantifier = 'exactly ';
-        if (hasOptionalArgs && hasTooManyArgs) {
-          messageQuantifier = 'no more than ';
-        }
-        if (!hasOptionalArgs && !hasTooManyArgs) {
-          messageQuantifier = 'at least ';
-        }
-        testCases.set(
-          `from a_index | eval ${
-            getFunctionSignatures(
-              {
-                name,
-                ...defRest,
-                signatures: [{ params: fieldMappingWithOneExtraArg, ...signRest }],
-              },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          [
-            `Error: [${name}] function expects ${messageQuantifier}${
-              fullNumberOfArgs === 1
-                ? 'one argument'
-                : fullNumberOfArgs === 0
-                ? '0 arguments'
-                : `${fullNumberOfArgs} arguments`
-            }, got ${fieldMappingWithOneExtraArg.length}.`,
-          ]
-        );
-      }
     }
 
     // test that wildcard won't work as arg
@@ -430,6 +523,63 @@ function generateEvalCommandTestsForEvalFunction(
       );
     }
   }
+
+  // test that the function can have too many args
+  if (signatures.some(({ minParams }) => minParams)) {
+    // at least one signature is variadic, so no way
+    // to have too many arguments
+    return;
+  }
+
+  // test that additional args are spotted
+
+  const { max: maxNumberOfArgs, min: minNumberOfArgs } = getMaxMinNumberOfParams(definition);
+  const signatureWithGreatestNumberOfParams = signatures.find(
+    (signature) => signature.params.length === maxNumberOfArgs
+  )!;
+
+  const fieldMappingWithOneExtraArg = getFieldMapping(
+    signatureWithGreatestNumberOfParams.params
+  ).concat({
+    name: 'extraArg',
+    type: 'number',
+  });
+
+  // get the expected args from the first signature in case of errors
+  const hasOptionalArgs = minNumberOfArgs < maxNumberOfArgs;
+  const hasTooManyArgs = fieldMappingWithOneExtraArg.length > maxNumberOfArgs;
+
+  // the validation engine tries to be smart about signatures with optional args
+  let messageQuantifier = 'exactly ';
+  if (hasOptionalArgs && hasTooManyArgs) {
+    messageQuantifier = 'no more than ';
+  }
+  if (!hasOptionalArgs && !hasTooManyArgs) {
+    messageQuantifier = 'at least ';
+  }
+  testCases.set(
+    `from a_index | eval ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [
+            { ...signatureWithGreatestNumberOfParams, params: fieldMappingWithOneExtraArg },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    [
+      `Error: [${name}] function expects ${messageQuantifier}${
+        maxNumberOfArgs === 1
+          ? 'one argument'
+          : maxNumberOfArgs === 0
+          ? '0 arguments'
+          : `${maxNumberOfArgs} arguments`
+      }, got ${fieldMappingWithOneExtraArg.length}.`,
+    ]
+  );
 }
 
 function generateEvalCommandTestsForAggFunction(
@@ -680,11 +830,7 @@ function generateStatsCommandTestsForAggFunction(
         name,
         signatures,
         params,
-        {
-          stringField: 'stringField',
-          numberField: 'numberField',
-          booleanField: 'booleanField',
-        }
+        supportedTypesAndFieldNames
       );
       // and the message is case of wrong argument type is passed
       testCases.set(
@@ -818,18 +964,28 @@ function generateSortCommandTestsForAggFunction(
 
 const generateSortCommandTestsForGroupingFunction = generateSortCommandTestsForAggFunction;
 
-const fieldTypes = [
-  'number',
-  'date',
-  'boolean',
-  'version',
-  'ip',
-  'string',
-  'cartesian_point',
-  'cartesian_shape',
-  'geo_point',
-  'geo_shape',
-];
+const fieldTypesToConstants: Record<SupportedFieldType, string> = {
+  string: '"a"',
+  number: '5',
+  date: 'now()',
+  boolean: 'true',
+  version: 'to_version("1.0.0")',
+  ip: 'to_ip("127.0.0.1")',
+  geo_point: 'to_geopoint("POINT (30 10)")',
+  geo_shape: 'to_geoshape("POINT (30 10)")',
+  cartesian_point: 'to_cartesianpoint("POINT (30 10)")',
+  cartesian_shape: 'to_cartesianshape("POINT (30 10)")',
+};
+
+const supportedTypesAndFieldNames = supportedFieldTypes.map((type) => ({
+  name: fieldNameFromType(type),
+  type,
+}));
+
+const supportedTypesAndConstants = supportedFieldTypes.map((type) => ({
+  name: fieldTypesToConstants[type],
+  type,
+}));
 
 function prepareNestedFunction(fnSignature: FunctionDefinition): string {
   return getFunctionSignatures(
@@ -848,28 +1004,36 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
 
-const toInteger = evalFunctionsDefinitions.find(({ name }) => name === 'to_integer')!;
-const toStringSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_string')!;
-const toDateSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toBooleanSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_boolean')!;
-const toIpSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_ip')!;
-const toGeoPointSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_geopoint')!;
-const toCartesianPointSignature = evalFunctionsDefinitions.find(
+const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
+const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
+const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toGeoShapeSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geoshape')!;
+const toCartesianPointSignature = evalFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianpoint'
 )!;
+const toCartesianShapeSignature = evalFunctionDefinitions.find(
+  ({ name }) => name === 'to_cartesianshape'
+)!;
+const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
-const nestedFunctions = {
+const nestedFunctions: Record<SupportedFieldType, string> = {
   number: prepareNestedFunction(toInteger),
   string: prepareNestedFunction(toStringSignature),
   date: prepareNestedFunction(toDateSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
   ip: prepareNestedFunction(toIpSignature),
+  version: prepareNestedFunction(toVersionSignature),
   geo_point: prepareNestedFunction(toGeoPointSignature),
+  geo_shape: prepareNestedFunction(toGeoShapeSignature),
   cartesian_point: prepareNestedFunction(toCartesianPointSignature),
+  cartesian_shape: prepareNestedFunction(toCartesianShapeSignature),
 };
 
 function getFieldName(
-  typeString: string,
+  typeString: SupportedFieldType,
   { useNestedFunction, isStats }: { useNestedFunction: boolean; isStats: boolean }
 ) {
   if (useNestedFunction && isStats) {
@@ -877,12 +1041,12 @@ function getFieldName(
   }
   return useNestedFunction && typeString in nestedFunctions
     ? nestedFunctions[typeString as keyof typeof nestedFunctions]
-    : `${camelCase(typeString)}Field`;
+    : fieldNameFromType(typeString);
 }
 
 const literals = {
   chrono_literal: chronoLiterals[0].name,
-  time_literal: timeLiterals[0].name,
+  time_literal: timeUnits[0],
 };
 
 function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
@@ -902,21 +1066,16 @@ function getMultiValue(type: string) {
   return `[true, false]`;
 }
 
-function tweakSignatureForRowCommand(signature: string) {
+function tweakSignatureForRowCommand(signature: string): string {
   /**
    * row has no access to any field, so replace it with literal
    * or functions (for dates)
    */
-  return signature
-    .replace(/numberField/g, '5')
-    .replace(/stringField/g, '"a"')
-    .replace(/dateField/g, 'now()')
-    .replace(/booleanField/g, 'true')
-    .replace(/ipField/g, 'to_ip("127.0.0.1")')
-    .replace(/geoPointField/g, 'to_geopoint("POINT (30 10)")')
-    .replace(/geoShapeField/g, 'to_geoshape("POINT (30 10)")')
-    .replace(/cartesianPointField/g, 'to_cartesianpoint("POINT (30 10)")')
-    .replace(/cartesianShapeField/g, 'to_cartesianshape("POINT (30 10)")');
+  let ret = signature;
+  for (const [type, value] of Object.entries(fieldTypesToConstants)) {
+    ret = ret.replace(new RegExp(fieldNameFromType(type as SupportedFieldType), 'g'), value);
+  }
+  return ret;
 }
 
 function getFieldMapping(
@@ -933,7 +1092,7 @@ function getFieldMapping(
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
-    if (fieldTypes.includes(typeString)) {
+    if (isSupportedFieldType(typeString)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -977,47 +1136,67 @@ function generateIncorrectlyTypedParameters(
   name: string,
   signatures: FunctionDefinition['signatures'],
   currentParams: FunctionDefinition['signatures'][number]['params'],
-  values: { stringField: string; numberField: string; booleanField: string }
+  availableFields: Array<{ name: string; type: SupportedFieldType }>
 ) {
   const literalValues = {
     string: `"a"`,
     number: '5',
   };
   const wrongFieldMapping = currentParams.map(
-    ({ name: _name, constantOnly, literalOptions, type, ...rest }, i) => {
+    ({ name: paramName, constantOnly, literalOptions, type, ...rest }, i) => {
       // this thing is complex enough, let's not make it harder for constants
       if (constantOnly) {
         return {
           name: literalValues[type as keyof typeof literalValues],
           type,
+          actualType: type,
           wrong: false,
           ...rest,
         };
       }
-      const canBeFieldButNotString = Boolean(
-        fieldTypes.filter((t) => t !== 'string').includes(type) &&
-          signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
-      );
-      const canBeFieldButNotNumber =
-        fieldTypes.filter((t) => t !== 'number').includes(type) &&
-        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
-      const isLiteralType = /literal$/.test(type);
-      // pick a field name purposely wrong
-      const nameValue =
-        canBeFieldButNotString || isLiteralType
-          ? values.stringField
-          : canBeFieldButNotNumber
-          ? values.numberField
-          : values.booleanField;
-      return { name: nameValue, type, wrong: true, ...rest };
+
+      if (type !== 'any') {
+        // try to find an unacceptable field
+        const unacceptableField: { name: string; type: SupportedFieldType } | undefined =
+          availableFields
+            // sort to make the test deterministic
+            .sort((a, b) => a.type.localeCompare(b.type))
+            .find(({ type: fieldType }) =>
+              signatures.every((signature) => getParamAtPosition(signature, i)?.type !== fieldType)
+            );
+
+        if (unacceptableField) {
+          return {
+            name: unacceptableField.name,
+            type,
+            actualType: unacceptableField.type,
+            wrong: true,
+            ...rest,
+          };
+        }
+      }
+
+      // failed to find a bad field... they must all be acceptable
+      const acceptableField: { name: string; type: SupportedFieldType } | undefined =
+        type === 'any'
+          ? availableFields[0]
+          : availableFields.find(({ type: fieldType }) => fieldType === type);
+
+      if (!acceptableField) {
+        throw new Error(
+          `Unable to find an acceptable field for type ${type}... this should never happen`
+        );
+      }
+
+      return {
+        name: acceptableField.name,
+        type: acceptableField.type,
+        actualType: acceptableField.type,
+        wrong: false,
+        ...rest,
+      };
     }
   );
-
-  const generatedFieldTypes = {
-    [values.stringField]: 'string',
-    [values.numberField]: 'number',
-    [values.booleanField]: 'boolean',
-  };
 
   // Try to predict which signature will be used to generate the errors
   // in the validation engine. The validator currently uses the signature
@@ -1027,12 +1206,15 @@ function generateIncorrectlyTypedParameters(
   //
   // This is not future-proof...
   const misMatchesBySignature = signatures.map(({ params: fnParams }) => {
+    if (fnParams.length !== wrongFieldMapping.length) {
+      return Infinity;
+    }
     const typeMatches = fnParams.map(({ type }, i) => {
       if (wrongFieldMapping[i].wrong) {
-        const typeFromIncorrectMapping = generatedFieldTypes[wrongFieldMapping[i].name];
+        const typeFromIncorrectMapping = wrongFieldMapping[i].actualType;
         return type === typeFromIncorrectMapping;
       }
-      return type === wrongFieldMapping[i].type;
+      return type === wrongFieldMapping[i].actualType;
     });
     return typeMatches.filter((t) => !t).length;
   })!;
@@ -1042,14 +1224,17 @@ function generateIncorrectlyTypedParameters(
   const expectedErrors = signatureToUse.params
     .filter(({ constantOnly }) => !constantOnly)
     .map(({ type }, i) => {
+      if (!wrongFieldMapping[i].wrong) {
+        return;
+      }
       const fieldName = wrongFieldMapping[i].name;
       if (
         fieldName === 'numberField' &&
-        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+        signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'string')
       ) {
         return;
       }
-      return `Argument of [${name}] must be [${type}], found value [${fieldName}] type [${generatedFieldTypes[fieldName]}]`;
+      return `Argument of [${name}] must be [${type}], found value [${fieldName}] type [${wrongFieldMapping[i].actualType}]`;
     })
     .filter(nonNullable);
 

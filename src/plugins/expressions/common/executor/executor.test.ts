@@ -9,7 +9,7 @@
 import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
-import { Execution } from '../execution';
+import { Execution, FunctionCacheItem } from '../execution';
 import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { SavedObjectReference } from '@kbn/core/types';
@@ -309,6 +309,94 @@ describe('Executor', () => {
             { type: 'function', function: 'fnMigrateTo', arguments: {} },
           ],
         });
+      });
+    });
+  });
+
+  describe('caching', () => {
+    const functionCache: Map<string, FunctionCacheItem> = new Map();
+    const fakeCacheEntry = { time: Date.now(), value: 'test' };
+    let executor: Executor;
+
+    beforeAll(() => {
+      executor = new Executor(undefined, undefined, functionCache);
+      executor.registerFunction(expressionFunctions.variable);
+      expressionFunctions.theme.allowCache = true;
+      executor.registerFunction(expressionFunctions.theme);
+    });
+
+    afterEach(() => {
+      functionCache.clear();
+    });
+
+    it('caches the result of function', async () => {
+      await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
+      expect(functionCache.size).toEqual(1);
+      const entry = functionCache.keys().next().value;
+      functionCache.set(entry, fakeCacheEntry);
+      const result = await executor
+        .run('theme size default=12', null, { allowCache: true })
+        .toPromise();
+      expect(functionCache.size).toEqual(1);
+      expect(result?.result).toEqual(fakeCacheEntry.value);
+    });
+
+    it('doesnt cache if allowCache flag is false', async () => {
+      await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
+      expect(functionCache.size).toEqual(1);
+      const entry = functionCache.keys().next().value;
+      functionCache.set(entry, fakeCacheEntry);
+      const result = await executor
+        .run('theme size default=12', null, { allowCache: false })
+        .toPromise();
+      expect(functionCache.size).toEqual(1);
+      expect(result?.result).not.toEqual(fakeCacheEntry.value);
+    });
+
+    it('doesnt cache results of functions that have allowCache property set to false', async () => {
+      await executor.run('var name="test"', null, { allowCache: true }).toPromise();
+      expect(functionCache.size).toEqual(0);
+    });
+
+    describe('doesnt use cached version', () => {
+      const cachedVersion = { time: Date.now(), value: 'value' };
+
+      beforeAll(async () => {
+        await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
+        expect(functionCache.size).toEqual(1);
+        const entry: string = Object.keys(functionCache)[0];
+        functionCache.set(entry, cachedVersion);
+      });
+
+      it('input changed', async () => {
+        const result = await executor
+          .run(
+            'theme size default=12',
+            {
+              type: 'kibana_context',
+              value: 'test',
+            },
+            { allowCache: true }
+          )
+          .toPromise();
+        expect(result).not.toEqual(cachedVersion);
+      });
+
+      it('arguments changed', async () => {
+        const result = await executor
+          .run('theme size default=14', null, { allowCache: true })
+          .toPromise();
+        expect(result).not.toEqual(cachedVersion);
+      });
+
+      it('search context changed', async () => {
+        const result = await executor
+          .run('theme size default=12', null, {
+            searchContext: { filters: [] },
+            allowCache: true,
+          })
+          .toPromise();
+        expect(result).not.toEqual(cachedVersion);
       });
     });
   });

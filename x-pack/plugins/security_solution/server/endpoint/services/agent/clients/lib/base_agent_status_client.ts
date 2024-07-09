@@ -7,6 +7,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
@@ -17,6 +18,7 @@ export interface AgentStatusClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  connectorActionsClient?: ActionsClient;
 }
 
 export abstract class AgentStatusClient implements AgentStatusClientInterface {

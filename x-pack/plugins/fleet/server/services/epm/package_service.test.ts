@@ -44,6 +44,7 @@ const testKeys = [
   'ensureInstalledPackage',
   'fetchFindLatestPackage',
   'getPackage',
+  'getPackageFieldsMetadata',
   'reinstallEsAssets',
   'readBundledPackage',
 ];
@@ -127,6 +128,20 @@ function getTest(
       };
       break;
     case testKeys[4]:
+      test = {
+        method: mocks.packageClient.getPackageFieldsMetadata.bind(mocks.packageClient),
+        args: [{ packageName: 'package_name', datasetName: 'dataset_name' }],
+        spy: jest.spyOn(epmRegistry, 'getPackageFieldsMetadata'),
+        spyArgs: [{ packageName: 'package_name', datasetName: 'dataset_name' }, undefined],
+        spyResponse: {
+          dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
+        },
+        expectedReturnValue: {
+          dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
+        },
+      };
+      break;
+    case testKeys[5]:
       const pkg: InstallablePackage = {
         format_version: '1.0.0',
         name: 'package name',
@@ -172,7 +187,7 @@ function getTest(
         ],
       };
       break;
-    case testKeys[5]:
+    case testKeys[6]:
       const bundledPackage = {
         name: 'package name',
         version: '8.0.0',

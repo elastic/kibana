@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { DataViewBase } from '@kbn/es-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
-
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
@@ -18,14 +16,17 @@ import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-export function useMetricsExplorerData(
-  options: MetricsExplorerOptions,
-  source: MetricsSourceConfigurationProperties | undefined,
-  derivedIndexPattern: DataViewBase,
-  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestamp,
-  enabled = true
-) {
+export function useMetricsExplorerData({
+  options,
+  timestamps: { fromTimestamp, toTimestamp, interval },
+  enabled = true,
+}: {
+  options: MetricsExplorerOptions;
+  timestamps: MetricsExplorerTimestamp;
+  enabled?: boolean;
+}) {
   const { http } = useKibana().services;
+  const { metricsView } = useMetricsDataViewContext();
 
   const { isLoading, data, error, refetch, fetchNextPage } = useInfiniteQuery<
     MetricsExplorerResponse,
@@ -39,8 +40,8 @@ export function useMetricsExplorerData(
       if (!http) {
         throw new Error('HTTP service is unavailable');
       }
-      if (!source) {
-        throw new Error('Source is unavailable');
+      if (!metricsView?.dataViewReference) {
+        throw new Error('DataView is unavailable');
       }
 
       const { afterKey } = pageParam;
@@ -54,10 +55,13 @@ export function useMetricsExplorerData(
           groupInstance: options.groupInstance,
           afterKey,
           limit: options.limit,
-          indexPattern: source.metricAlias,
+          indexPattern: metricsView.indices,
           filterQuery:
             (options.filterQuery &&
-              convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
+              convertKueryToElasticSearchQuery(
+                options.filterQuery,
+                metricsView.dataViewReference
+              )) ||
             void 0,
           timerange: {
             interval,
@@ -71,7 +75,7 @@ export function useMetricsExplorerData(
       return decodeOrThrow(metricsExplorerResponseRT)(response);
     },
     getNextPageParam: (lastPage) => lastPage.pageInfo,
-    enabled: enabled && !!fromTimestamp && !!toTimestamp && !!http && !!source,
+    enabled: enabled && !!fromTimestamp && !!toTimestamp && !!http && !!metricsView,
     refetchOnWindowFocus: false,
   });
 

@@ -20,6 +20,9 @@ export const setupStackServicesUsingCypressConfig = async (
     return RUNTIME_SERVICES_CACHE.get(config)!;
   }
 
+  const isServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = config.env.CLOUD_SERVERLESS;
+
   const stackServices = await createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
@@ -28,7 +31,8 @@ export const setupStackServicesUsingCypressConfig = async (
     password: config.env.KIBANA_PASSWORD,
     esUsername: config.env.ELASTICSEARCH_USERNAME,
     esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: !config.env.CLOUD_SERVERLESS,
+    asSuperuser: !isCloudServerless,
+    useCertForSsl: !isCloudServerless && isServerless,
   }).then(({ log, ...others }) => {
     return {
       ...others,

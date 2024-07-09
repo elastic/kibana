@@ -27,6 +27,7 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'get-file',
   'execute',
   'upload',
+  'scan',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
@@ -52,6 +53,7 @@ export const ENDPOINT_CAPABILITIES = [
   'get_file',
   'execute',
   'upload_file',
+  'scan',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
@@ -63,12 +65,13 @@ export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
 export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'release',
+  'processes',
   'kill-process',
   'suspend-process',
-  'processes',
   'get-file',
   'execute',
   'upload',
+  'scan',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
@@ -78,7 +81,8 @@ export type ResponseConsoleRbacControls =
   | 'writeHostIsolationRelease'
   | 'writeProcessOperations'
   | 'writeFileOperations'
-  | 'writeExecuteOperations';
+  | 'writeExecuteOperations'
+  | 'writeScanOperations';
 
 /**
  * maps the console command to the RBAC control (kibana feature control) that is required to access it via console
@@ -95,6 +99,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   'get-file': 'writeFileOperations',
   execute: 'writeExecuteOperations',
   upload: 'writeFileOperations',
+  scan: 'writeScanOperations',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -108,6 +113,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   'kill-process': 'kill-process',
   'suspend-process': 'suspend-process',
   upload: 'upload',
+  scan: 'scan',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
@@ -121,6 +127,7 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   'kill-process': 'kill-process',
   'suspend-process': 'suspend-process',
   upload: 'upload',
+  scan: 'scan',
 });
 
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
@@ -134,6 +141,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   'kill-process': 'kill_process',
   'suspend-process': 'suspend_process',
   upload: 'upload_file',
+  scan: 'scan',
 });
 
 /**
@@ -150,6 +158,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   processes: 'canGetRunningProcesses',
   'kill-process': 'canKillProcess',
   'suspend-process': 'canSuspendProcess',
+  scan: 'canWriteScanOperations',
 });
 
 // 4 hrs in seconds
@@ -165,3 +174,14 @@ export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentT
     sentinel_one: 'Elastic@123',
     crowdstrike: 'tbd..',
   });
+
+/**
+ * Map of Agent Type to alert field that holds the Agent ID for that agent type
+ */
+export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
+  Record<ResponseActionAgentType, string>
+> = Object.freeze({
+  endpoint: 'agent.id',
+  sentinel_one: 'observer.serial_number',
+  crowdstrike: 'device.id',
+});

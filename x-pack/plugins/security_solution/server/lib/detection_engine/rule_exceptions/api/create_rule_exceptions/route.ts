@@ -26,7 +26,6 @@ import {
 import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
   CreateRuleExceptionsRequestBodyDecoded,
@@ -38,13 +37,13 @@ import {
   CreateRuleExceptionsRequestParams,
 } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
-import { readRules } from '../../../rule_management/logic/crud/read_rules';
-import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
+import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';
 import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -84,6 +83,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           ]);
           const rulesClient = ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { items } = request.body;
           const { id: ruleId } = request.params;
@@ -106,7 +106,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             items,
             rule,
             listsClient,
-            rulesClient,
+            detectionRulesClient,
           });
 
           const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
@@ -130,11 +130,11 @@ export const createRuleExceptions = async ({
   items,
   rule,
   listsClient,
-  rulesClient,
+  detectionRulesClient,
 }: {
   items: CreateRuleExceptionListItemSchemaDecoded[];
   listsClient: ExceptionListClient | null;
-  rulesClient: RulesClient;
+  detectionRulesClient: IDetectionRulesClient;
   rule: SanitizedRule<RuleParams>;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
@@ -168,8 +168,8 @@ export const createRuleExceptions = async ({
       // and update the rule's exceptions lists to include newly created default list.
       const defaultList = await createAndAssociateDefaultExceptionList({
         rule,
-        rulesClient,
         listsClient,
+        detectionRulesClient,
         removeOldAssociation: true,
       });
 
@@ -178,8 +178,8 @@ export const createRuleExceptions = async ({
   } else {
     const defaultList = await createAndAssociateDefaultExceptionList({
       rule,
-      rulesClient,
       listsClient,
+      detectionRulesClient,
       removeOldAssociation: false,
     });
 
@@ -272,12 +272,12 @@ export const createExceptionList = async ({
 export const createAndAssociateDefaultExceptionList = async ({
   rule,
   listsClient,
-  rulesClient,
+  detectionRulesClient,
   removeOldAssociation,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  rulesClient: RulesClient;
+  detectionRulesClient: IDetectionRulesClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
@@ -294,10 +294,9 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
 
-  await patchRules({
-    rulesClient,
-    existingRule: rule,
-    nextParams: {
+  await detectionRulesClient.patchRule({
+    rulePatch: {
+      rule_id: rule.params.ruleId,
       ...rule.params,
       exceptions_list: [
         ...ruleExceptionLists,

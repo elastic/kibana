@@ -10,23 +10,16 @@ import { navTabsUsers } from './nav_tabs';
 
 describe('navTabsUsers', () => {
   test('it should display all tabs', () => {
-    const tabs = navTabsUsers(true, true);
+    const tabs = navTabsUsers(true);
     expect(tabs).toHaveProperty(UsersTableType.allUsers);
     expect(tabs).toHaveProperty(UsersTableType.anomalies);
     expect(tabs).toHaveProperty(UsersTableType.risk);
   });
 
   test('it should not display anomalies tab if user has no ml permission', () => {
-    const tabs = navTabsUsers(false, true);
+    const tabs = navTabsUsers(false);
     expect(tabs).toHaveProperty(UsersTableType.allUsers);
     expect(tabs).not.toHaveProperty(UsersTableType.anomalies);
     expect(tabs).toHaveProperty(UsersTableType.risk);
-  });
-
-  test('it should not display risk tab if isRiskyUserEnabled disabled', () => {
-    const tabs = navTabsUsers(true, false);
-    expect(tabs).toHaveProperty(UsersTableType.allUsers);
-    expect(tabs).toHaveProperty(UsersTableType.anomalies);
-    expect(tabs).not.toHaveProperty(UsersTableType.risk);
   });
 });

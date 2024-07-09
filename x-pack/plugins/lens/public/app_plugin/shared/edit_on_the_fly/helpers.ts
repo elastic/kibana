@@ -36,17 +36,13 @@ export const getSuggestions = async (
       ? await deps.dataViews.create(dataViewSpec)
       : await getESQLAdHocDataview(indexPattern, deps.dataViews);
 
-    if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
-      dataView.timeFieldName = '@timestamp';
-    }
-
     const columns = await getESQLQueryColumns({
       esqlQuery: 'esql' in query ? query.esql : '',
       search: deps.data.search.search,
       signal: abortController?.signal,
     });
     const context = {
-      dataViewSpec: dataView?.toSpec(),
+      dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
       textBasedColumns: columns,
       query,

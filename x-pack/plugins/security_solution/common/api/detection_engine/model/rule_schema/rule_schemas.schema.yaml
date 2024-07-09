@@ -686,18 +686,27 @@ components:
         - machine_learning_job_id
         - anomaly_threshold
 
+    MachineLearningRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
     MachineLearningRulePatchFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
           x-modify: partial
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRuleResponseFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRuleCreateFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRule:
       allOf:
@@ -826,17 +835,26 @@ components:
         - language
         - query
 
+    EsqlRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
     EsqlRulePatchFields:
       allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
         - $ref: '#/components/schemas/EsqlRuleRequiredFields'
           x-modify: partial
 
     EsqlRuleResponseFields:
       allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
         - $ref: '#/components/schemas/EsqlRuleRequiredFields'
 
     EsqlRuleCreateFields:
       allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
         - $ref: '#/components/schemas/EsqlRuleRequiredFields'
 
     EsqlRule:

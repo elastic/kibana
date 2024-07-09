@@ -7,3 +7,4 @@
 
 export { useEsqlIndex } from './use_esql_index';
 export { useEsqlQueryForAboutStep } from './use_esql_query_for_about_step';
+export { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
