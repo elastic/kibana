@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -12,6 +11,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
+import axios from 'axios';
 
 import {
   PackagePolicyRestrictionRelatedError,
@@ -77,6 +78,8 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
 
   return mock;
 }
+
+jest.mock('axios', () => jest.fn());
 jest.mock('./fleet_server_host');
 jest.mock('./api_keys');
 jest.mock('./output');
@@ -125,6 +128,12 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
+
+jest.mock('@kbn/server-http-tools', () => ({
+  ...jest.requireActual('@kbn/server-http-tools'),
+  SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
+}));
+
 describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
@@ -137,6 +146,11 @@ describe('Agent policy', () => {
   });
 
   describe('createAgentlessAgent', () => {
+    beforeEach(() => {
+      (axios as jest.MockedFunction<typeof axios>).mockReset();
+      jest.clearAllMocks();
+    });
+
     it('should throw AgentlessAgentCreateError if agentless policy does not support_agentless', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
@@ -265,6 +279,15 @@ describe('Agent policy', () => {
     });
 
     it('should create agentless agent', async () => {
+      const returnValue = {
+        data: {
+          id: 'mocked',
+          regional_id: 'mocked',
+        },
+        status: 200,
+      };
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -275,33 +298,66 @@ describe('Agent policy', () => {
             tls: {
               certificate: '/path/to/cert',
               key: '/path/to/key',
+              ca: '/path/to/ca',
             },
           },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest
+        .spyOn(appContextService, 'getKibanaVersion')
+        .mockReturnValue('mocked-kibana-version-infinite');
       mockedListFleetServerHosts.mockResolvedValue({
         items: [
           {
-            id: 'mocked',
+            id: 'mocked-fleet-server-id',
             host: 'http://fleetserver:8220',
             active: true,
             is_default: true,
+            host_urls: ['http://fleetserver:8220'],
           },
         ],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
-        items: [],
+        items: [
+          {
+            id: 'mocked-fleet-enrollment-token-id',
+            policy_id: 'mocked-fleet-enrollment-policy-id',
+            api_key: 'mocked-fleet-enrollment-api-key',
+          },
+        ],
       } as any);
 
-      await expect(
-        agentPolicyService.createAgentlessAgent(esClient, soClient, {
-          id: 'mocked',
+      const createAgentlessAgentReturnValue = await agentPolicyService.createAgentlessAgent(
+        esClient,
+        soClient,
+        {
+          id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
           supports_agentless: true,
-        } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet enrollment token'));
+        } as AgentPolicy
+      );
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+      // expect(axios).toHaveBeenCalledWith({
+      //   method: 'post',
+      //   url: 'http://api.agentless.com/api/v1/ess/agents',
+      //   data: {
+      //     policy_id: 'mocked-agentless-agent-policy-id',
+      //     fleet_enrollment_token: 'mocked-fleet-enrollment-api-key',
+      //     fleet_server_hosts: ['http://fleetserver:8220'],
+      //     kibana: {
+      //       version: 'mocked-kibana-version-infinite',
+      //     },
+      //   },
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   httpsAgent: expect.any(Object),
+      //   timeout: 10000,
+      // });
     });
   });
 

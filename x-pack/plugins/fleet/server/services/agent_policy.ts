@@ -1124,15 +1124,16 @@ class AgentPolicyService {
     );
 
     try {
-      const { data, status, statusText } = await axios.post<AgentlessApiResponse>(
+      const { data, status, statusText } = await axios<AgentlessApiResponse>(
         `${agentlessConfig.api.url}/deployments`,
         {
-          policy_id: policyId,
-          fleet_url: fleetUrl,
-          fleet_token: fleetToken,
-          stack_version: appContextService.getKibanaVersion(),
-        },
-        {
+          data: {
+            policy_id: policyId,
+            fleet_url: fleetUrl,
+            fleet_token: fleetToken,
+            stack_version: appContextService.getKibanaVersion(),
+          },
+          method: 'POST',
           headers: {
             'Content-type': 'application/json',
           },
