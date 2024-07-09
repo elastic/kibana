@@ -39,7 +39,12 @@ export default function ({ getService }: FtrProviderContext) {
       await logFile.isWritten();
       const content = await logFile.readJSON();
 
-      const httpEvent = content.find((c) => c.event.action === 'http_request');
+      const httpEvent = content.find(
+        (c) =>
+          c.event.action === 'http_request' &&
+          c.url.path === '/audit_log' &&
+          c.url.query === 'query=param'
+      );
       expect(httpEvent).to.be.ok();
       expect(httpEvent.trace.id).to.be.ok();
 
