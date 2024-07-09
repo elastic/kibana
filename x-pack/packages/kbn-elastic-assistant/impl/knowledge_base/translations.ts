@@ -66,11 +66,10 @@ export const SETTINGS_BADGE = i18n.translate(
   }
 );
 
-export const SETTINGS_DESCRIPTION = i18n.translate(
+export const KNOWLEDGE_BASE_DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.settingsDescription',
   {
-    defaultMessage:
-      'Powered by ELSER, the knowledge base enables the AI Assistant to recall documents and other relevant context within your conversation. For more information about user access refer to our documentation or visit the Roles based access control settings.',
+    defaultMessage: 'documentation',
   }
 );
 

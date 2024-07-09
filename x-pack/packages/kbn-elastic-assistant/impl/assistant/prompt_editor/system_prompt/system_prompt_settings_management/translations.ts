@@ -38,7 +38,7 @@ export const SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.promptsTable.settingsDescription',
   {
     defaultMessage:
-      'Create and manage System Prompts. System Prompts are configurable chunks of context that are always sent sent as part of the conversation.',
+      'Create and manage System Prompts. System Prompts are configurable chunks of context that are always sent as part of the conversation.',
   }
 );
 

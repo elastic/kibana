@@ -268,7 +268,23 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         </h2>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
+      <EuiText size={'s'}>
+        <FormattedMessage
+          id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription"
+          defaultMessage="Powered by ELSER, the knowledge base enables the AI Assistant to recall documents and other relevant context within your conversation. For more information about user access refer to our {documentation}."
+          values={{
+            documentation: (
+              <EuiLink
+                external
+                href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                target="_blank"
+              >
+                {i18n.KNOWLEDGE_BASE_DOCUMENTATION}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
       <EuiHorizontalRule margin={'s'} />
 
       <EuiFormRow
