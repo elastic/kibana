@@ -119,7 +119,12 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+          autoFocus="selected"
+          data-test-subj="indicesTable"
+        />
         {!isFieldsLoading && !!noSourceFieldsWarning && (
           <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
             <p>
@@ -135,7 +140,12 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+              data-test-subj="closeButton"
+            >
               <FormattedMessage
                 id="xpack.searchPlayground.addDataSource.flyout.closeButton"
                 defaultMessage="Close"

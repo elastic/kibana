@@ -14,6 +14,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../hooks/use_source_indices_field');
 jest.mock('../hooks/use_query_indices');
+jest.mock('../hooks/use_indices_fields', () => ({
+  useIndicesFields: () => ({ fields: {} }),
+}));
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
@@ -51,14 +54,13 @@ describe('SelectIndicesFlyout', () => {
   });
 
   it('renders correctly', () => {
-    const { getByText } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
+    const { getByTestId } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
       wrapper: Wrapper,
     });
 
-    expect(getByText('Add data to query')).toBeInTheDocument();
-    expect(getByText('Available indices')).toBeInTheDocument();
-    expect(getByText('Save and continue')).toBeInTheDocument();
-    expect(getByText('Close')).toBeInTheDocument();
+    expect(getByTestId('indicesTable')).toBeInTheDocument();
+    expect(getByTestId('saveButton')).toBeInTheDocument();
+    expect(getByTestId('closeButton')).toBeInTheDocument();
   });
 
   it('selecting indices and saving', async () => {
@@ -80,11 +82,11 @@ describe('SelectIndicesFlyout', () => {
   });
 
   it('closing flyout without saving', () => {
-    const { getByText } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
+    const { getByTestId } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
       wrapper: Wrapper,
     });
 
-    fireEvent.click(getByText('Close'));
+    fireEvent.click(getByTestId('closeButton'));
 
     expect(onCloseMock).toHaveBeenCalled();
   });
