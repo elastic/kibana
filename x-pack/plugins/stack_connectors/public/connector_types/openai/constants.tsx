@@ -8,7 +8,7 @@
 import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 
@@ -63,6 +63,48 @@ export const openAiConfig: ConfigFieldSchema[] = [
       />
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
+  },
+  {
+    id: 'organizationId',
+    label: i18n.ORG_ID_LABEL,
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="For users who belong to multiple organizations. Organization IDs can be found on your Organization settings page."
+        id="xpack.stackConnectors.components.genAi.openAiOrgId"
+      />
+    ),
+    euiFieldProps: {
+      append: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
+  },
+  {
+    id: 'projectId',
+    label: i18n.PROJECT_ID_LABEL,
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="For users who are accessing their projects through their legacy user API key. Project IDs can be found on your General settings page by selecting the specific project."
+        id="xpack.stackConnectors.components.genAi.openAiProjectId"
+      />
+    ),
+    euiFieldProps: {
+      autocomplete: 'new-password',
+      autoComplete: 'new-password',
+      onFocus: (event) => {
+        event.target.setAttribute('autocomplete', 'new-password');
+        console.log(event.target.autocomplete);
+      },
+      append: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
   },
 ];
 
