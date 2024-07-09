@@ -270,14 +270,14 @@ describe('autocomplete.suggest', () => {
         ]);
       });
 
-      test.skip('on space before expression right hand side operand', async () => {
+      test('on space before expression right hand side operand', async () => {
         const { assertSuggestions } = await setup();
 
-        // await assertSuggestions('METRICS a avg(b) by var0 = /', [
-        //   ...getFieldNamesByType('any'),
-        //   ...allEvaFunctions,
-        //   ...allGroupingFunctions,
-        // ]);
+        await assertSuggestions('METRICS a avg(b) by var0 = /', [
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
         // await assertSuggestions('METRICS a avg(b) by c, var0 = /', [
         //   ...getFieldNamesByType('any'),
         //   ...allEvaFunctions,

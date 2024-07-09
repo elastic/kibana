@@ -238,16 +238,16 @@ export async function suggest(
                 variables: anyVariables,
               };
 
-              fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
-                ['number'],
-                metrics.name,
-                'by',
-                getFieldsByType,
-                {
-                  functions: true,
-                  fields: true,
-                  variables: references.variables,
-                }
+              const { nodeArg } = extractArgMeta(metrics, astContext.node);
+              const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+              fieldsAndFunctions = await getBuiltinFunctionNextArgument(
+                metrics,
+                { name: 'by' },
+                definition.options[0].signature.params[0],
+                astContext.node,
+                nodeArgType || 'any',
+                references,
+                getFieldsByType
               );
             } else {
               fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
@@ -976,7 +976,7 @@ async function getExpressionSuggestionsByType(
 
 async function getBuiltinFunctionNextArgument(
   command: ESQLCommand,
-  option: ESQLCommandOption | undefined,
+  option: Pick<ESQLCommandOption, 'name'> | undefined,
   argDef: { type: string },
   nodeArg: ESQLFunction,
   nodeArgType: string,
