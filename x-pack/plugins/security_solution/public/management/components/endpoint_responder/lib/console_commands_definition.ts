@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
@@ -136,7 +137,7 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-const commandCommentArgument = (): { comment: CommandDefinition['args'][string] } => {
+const commandCommentArgument = (): { comment: CommandArgDefinition } => {
   return {
     comment: {
       required: false,
@@ -552,18 +553,6 @@ const adjustCommandsForSentinelOne = ({
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
 
   return commandList.map((command) => {
-    if (
-      command.name === 'status' ||
-      (command.name === 'kill-process' && !isKillProcessEnabled) ||
-      !isAgentTypeAndActionSupported(
-        'sentinel_one',
-        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
-        'manual'
-      )
-    ) {
-      disableCommand(command, 'sentinel_one');
-    }
-
     // Kill-Process: adjust command to accept only `processName
     if (command.name === 'kill-process') {
       command.args = {
@@ -580,6 +569,18 @@ const adjustCommandsForSentinelOne = ({
         'xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions',
         { defaultMessage: 'Enter a process name to execute' }
       );
+    }
+
+    if (
+      command.name === 'status' ||
+      (command.name === 'kill-process' && !isKillProcessEnabled) ||
+      !isAgentTypeAndActionSupported(
+        'sentinel_one',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
+    ) {
+      disableCommand(command, 'sentinel_one');
     }
 
     return command;
