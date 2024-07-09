@@ -5,6 +5,7 @@ on:
     types:
       - opened
       - synchronize
+      - reopened
 
 jobs:
   approve:
