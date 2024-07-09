@@ -114,13 +114,9 @@ describe('updateRule', () => {
         },
       ],
     });
-    expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "/api/alerting/rule/12%2F3",
-        Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"alert_delay\\":{\\"active\\":10}}",
-        },
-      ]
-    `);
+
+    expect(http.put).toHaveBeenCalledWith('/api/alerting/rule/12%2F3', {
+      body: '{"name":"test","tags":["foo"],"schedule":{"interval":"1m"},"params":{},"actions":[{"group":"default","id":"2","params":{},"frequency":{"notify_when":"onActionGroupChange","throttle":null,"summary":false},"use_alert_data_for_template":false},{"id":".test-system-action","params":{}}],"alert_delay":{"active":10}}',
+    });
   });
 });

@@ -162,7 +162,10 @@ export const SentinelOneIsolateHostResponseSchema = schema.object({
 
 export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   query: schema.nullable(schema.string()),
+  // Possible values (multiples comma delimiter): `linux` or `macos` or `windows`
   osTypes: schema.nullable(schema.string()),
+  // possible values (multiples comma delimiter): `action` or `artifactCollection` or `dataCollection`
+  scriptType: schema.nullable(schema.string()),
 });
 
 export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
