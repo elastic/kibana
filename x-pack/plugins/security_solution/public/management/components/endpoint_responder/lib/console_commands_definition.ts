@@ -199,11 +199,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -229,11 +225,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -259,11 +251,7 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
         pid: {
           required: false,
           allowMultiples: false,
@@ -303,11 +291,7 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
         pid: {
           required: false,
           allowMultiples: false,
@@ -360,11 +344,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -398,11 +378,7 @@ export const getEndpointConsoleCommands = ({
             return emptyArgumentValidator(argData);
           },
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -444,11 +420,7 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'non-empty-string',
           validate: executeTimeoutValidator,
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -538,11 +510,7 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.scan.args.path.about,
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
