@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { RecentlyAccessedService } from './recently_accessed_service';
+import { RecentlyAccessed } from '@kbn/recently-accessed';
+
+export type DashboardRecentlyAccessedService = RecentlyAccessed;

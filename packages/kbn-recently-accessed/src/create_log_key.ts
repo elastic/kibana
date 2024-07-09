@@ -8,7 +8,7 @@
 
 import { Sha256 } from '@kbn/crypto-browser';
 
-export async function createLogKey(type: string, optionalIdentifier?: string) {
+export function createLogKey(type: string, optionalIdentifier?: string) {
   const baseKey = `kibana.history.${type}`;
 
   if (!optionalIdentifier) {
