@@ -4853,6 +4853,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql@link:src/plugins/esql":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
@@ -6658,10 +6662,6 @@
   uid ""
 
 "@kbn/text-based-editor@link:packages/kbn-text-based-editor":
-  version "0.0.0"
-  uid ""
-
-"@kbn/text-based-languages@link:src/plugins/text_based_languages":
   version "0.0.0"
   uid ""
 
