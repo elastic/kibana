@@ -238,7 +238,6 @@ describe('Integration package with fixed dataset create and edit package policy'
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
 
     cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('not.contain', 'Pipeline not found');
     cy.get('body').should('contain', '"managed_by": "fleet"');
   });
@@ -248,7 +247,6 @@ describe('Integration package with fixed dataset create and edit package policy'
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
 
     cy.getBySel(POLICY_EDITOR.CREATE_MAPPINGS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('contain', `Create component template`);
   });
 });

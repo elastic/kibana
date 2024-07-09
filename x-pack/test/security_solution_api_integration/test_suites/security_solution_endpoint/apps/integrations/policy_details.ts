@@ -446,7 +446,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(card);
               await (await testSubjects.find(`${cardName}-link-to-exceptions`)).click();
 
-              await (await testSubjects.find('confirmModalConfirmButton')).click();
               await testSubjects.existOrFail('policyDetailsPage');
 
               await (await testSubjects.find('policyDetailsBackLink')).click();
