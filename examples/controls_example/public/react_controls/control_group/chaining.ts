@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem } from "@kbn/controls-plugin/common";
-import { Filter, TimeRange } from "@kbn/es-query";
-import { apiPublishesFilters, apiPublishesTimeslice, PublishingSubject } from "@kbn/presentation-publishing";
-import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from "rxjs";
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
+import { Filter, TimeRange } from '@kbn/es-query';
+import {
+  apiPublishesFilters,
+  apiPublishesTimeslice,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from 'rxjs';
 
 export function chaining$(
   uuid: string,
@@ -29,13 +33,17 @@ export function chaining$(
           const chainedControlApi = getControlApi(controlsInOrder[i].id);
 
           const chainedControl$ = combineLatest([
-            apiPublishesFilters(chainedControlApi) ? chainedControlApi.filters$ : new BehaviorSubject(undefined),
-            apiPublishesTimeslice(chainedControlApi) ? chainedControlApi.timeslice$ : new BehaviorSubject(undefined),
+            apiPublishesFilters(chainedControlApi)
+              ? chainedControlApi.filters$
+              : new BehaviorSubject(undefined),
+            apiPublishesTimeslice(chainedControlApi)
+              ? chainedControlApi.timeslice$
+              : new BehaviorSubject(undefined),
           ]).pipe(
             map(([filters, timeslice]) => {
               return {
                 filters,
-                timeslice
+                timeslice,
               };
             })
           );
@@ -49,7 +57,12 @@ export function chaining$(
     map((chainedControlValues) => {
       const chainingFilters: Filter[] = [];
       let timeRange: undefined | TimeRange;
-      (chainedControlValues as Array<{ filters: undefined | Filter[], timeslice: undefined | [number, number] }>).forEach(chainedControlValue => {
+      (
+        chainedControlValues as Array<{
+          filters: undefined | Filter[];
+          timeslice: undefined | [number, number];
+        }>
+      ).forEach((chainedControlValue) => {
         if (chainedControlValue.filters && chainedControlValue.filters.length) {
           chainingFilters.push(...chainedControlValue.filters);
         }
@@ -60,7 +73,7 @@ export function chaining$(
             mode: 'absolute' as 'absolute',
           };
         }
-      })
+      });
       return {
         chainingFilters,
         timeRange,

@@ -13,23 +13,23 @@ import { chaining$ } from './chaining';
 
 const FILTER_ALPHA = {
   meta: {
-    alias: 'filterAlpha'
-  }
+    alias: 'filterAlpha',
+  },
 };
 const FILTER_BRAVO = {
   meta: {
-    alias: 'filterBravo'
-  }
+    alias: 'filterBravo',
+  },
 };
 const FILTER_CHARLIE = {
   meta: {
-    alias: 'filterCharlie'
-  }
+    alias: 'filterCharlie',
+  },
 };
 const FILTER_DELTA = {
   meta: {
-    alias: 'filterDelta'
-  }
+    alias: 'filterDelta',
+  },
 };
 
 describe('chaining$', () => {
@@ -37,18 +37,18 @@ describe('chaining$', () => {
   const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL');
   const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
   const alphaControlApi = {
-    filters$: new BehaviorSubject<Filter[] | undefined>(undefined)
-  }
+    filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+  };
   const bravoControlApi = {
     filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-    timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined)
-  }
+    timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
+  };
   const charlieControlApi = {
-    filters$: new BehaviorSubject<Filter[] | undefined>(undefined)
-  }
+    filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+  };
   const deltaControlApi = {
-    filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_DELTA])
-  }
+    filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_DELTA]),
+  };
   const getControlApi = (uuid: string) => {
     if (uuid === 'alpha') {
       return alphaControlApi;
@@ -59,15 +59,15 @@ describe('chaining$', () => {
     } else if (uuid === 'delta') {
       return deltaControlApi;
     }
-  }
-  
+  };
+
   beforeEach(() => {
     onFireMock.mockReset();
     alphaControlApi.filters$.next([FILTER_ALPHA]);
     bravoControlApi.filters$.next([FILTER_BRAVO]);
     bravoControlApi.timeslice$.next([
-      Date.parse('2024-06-09T06:00:00.000Z'), 
-      Date.parse('2024-06-09T12:00:00.000Z')
+      Date.parse('2024-06-09T06:00:00.000Z'),
+      Date.parse('2024-06-09T12:00:00.000Z'),
     ]);
     charlieControlApi.filters$.next([FILTER_CHARLIE]);
     deltaControlApi.filters$.next([FILTER_DELTA]);
@@ -92,10 +92,7 @@ describe('chaining$', () => {
       expect(onFireMock.mock.calls).toHaveLength(1);
       const chainingContext = onFireMock.mock.calls[0][0];
       expect(chainingContext).toEqual({
-        chainingFilters: [
-          FILTER_ALPHA,
-          FILTER_BRAVO
-        ],
+        chainingFilters: [FILTER_ALPHA, FILTER_BRAVO],
         timeRange: {
           from: '2024-06-09T06:00:00.000Z',
           to: '2024-06-09T12:00:00.000Z',
@@ -106,15 +103,12 @@ describe('chaining$', () => {
     });
 
     test('should fire on chaining system change', async () => {
-      const subscription = chaining$(
-        'charlie',
-        chainingSystem$,
-        controlsInOrder$,
-        getControlApi
-      ).pipe(skip(1)).subscribe(onFireMock);
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+        .pipe(skip(1))
+        .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(onFireMock.mock.calls).toHaveLength(0);
-      
+
       chainingSystem$.next('NONE');
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -128,15 +122,12 @@ describe('chaining$', () => {
     });
 
     test('should fire when controls are moved', async () => {
-      const subscription = chaining$(
-        'charlie',
-        chainingSystem$,
-        controlsInOrder$,
-        getControlApi
-      ).pipe(skip(1)).subscribe(onFireMock);
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+        .pipe(skip(1))
+        .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(onFireMock.mock.calls).toHaveLength(0);
-      
+
       // Move control to right of 'delta' control
       controlsInOrder$.next([
         { id: 'alpha', type: 'whatever' },
@@ -149,11 +140,7 @@ describe('chaining$', () => {
       expect(onFireMock.mock.calls).toHaveLength(1);
       const chainingContext = onFireMock.mock.calls[0][0];
       expect(chainingContext).toEqual({
-        chainingFilters: [
-          FILTER_ALPHA,
-          FILTER_BRAVO,
-          FILTER_DELTA,
-        ],
+        chainingFilters: [FILTER_ALPHA, FILTER_BRAVO, FILTER_DELTA],
         timeRange: {
           from: '2024-06-09T06:00:00.000Z',
           to: '2024-06-09T12:00:00.000Z',
@@ -164,15 +151,12 @@ describe('chaining$', () => {
     });
 
     test('should fire when controls are removed', async () => {
-      const subscription = chaining$(
-        'charlie',
-        chainingSystem$,
-        controlsInOrder$,
-        getControlApi
-      ).pipe(skip(1)).subscribe(onFireMock);
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+        .pipe(skip(1))
+        .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(onFireMock.mock.calls).toHaveLength(0);
-      
+
       // remove 'bravo' control
       controlsInOrder$.next([
         { id: 'alpha', type: 'whatever' },
@@ -184,56 +168,51 @@ describe('chaining$', () => {
       expect(onFireMock.mock.calls).toHaveLength(1);
       const chainingContext = onFireMock.mock.calls[0][0];
       expect(chainingContext).toEqual({
-        chainingFilters: [
-          FILTER_ALPHA,
-        ],
+        chainingFilters: [FILTER_ALPHA],
         timeRange: undefined,
       });
       subscription.unsubscribe();
     });
 
     test('should fire when chained filter changes', async () => {
-      const subscription = chaining$(
-        'charlie',
-        chainingSystem$,
-        controlsInOrder$,
-        getControlApi
-      ).pipe(skip(1)).subscribe(onFireMock);
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+        .pipe(skip(1))
+        .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(onFireMock.mock.calls).toHaveLength(0);
-      
-      alphaControlApi.filters$.next([{
-        meta: {
-          alias: 'filterAlpha_version2'
-        }
-      }]);
+
+      alphaControlApi.filters$.next([
+        {
+          meta: {
+            alias: 'filterAlpha_version2',
+          },
+        },
+      ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(onFireMock.mock.calls).toHaveLength(1);
       const chainingContext = onFireMock.mock.calls[0][0];
-      expect(chainingContext.chainingFilters).toEqual([{
+      expect(chainingContext.chainingFilters).toEqual([
+        {
           meta: {
-            alias: 'filterAlpha_version2'
-          }
+            alias: 'filterAlpha_version2',
+          },
         },
-        FILTER_BRAVO]
-      );
+        FILTER_BRAVO,
+      ]);
       subscription.unsubscribe();
     });
 
     test('should fire when chained timeslice changes', async () => {
-      const subscription = chaining$(
-        'charlie',
-        chainingSystem$,
-        controlsInOrder$,
-        getControlApi
-      ).pipe(skip(1)).subscribe(onFireMock);
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+        .pipe(skip(1))
+        .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(onFireMock.mock.calls).toHaveLength(0);
-      
+
       bravoControlApi.timeslice$.next([
-        Date.parse('2024-06-09T12:00:00.000Z'), 
-        Date.parse('2024-06-09T18:00:00.000Z')
+        Date.parse('2024-06-09T12:00:00.000Z'),
+        Date.parse('2024-06-09T18:00:00.000Z'),
       ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
 

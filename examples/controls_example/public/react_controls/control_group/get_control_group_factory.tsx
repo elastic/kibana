@@ -117,14 +117,10 @@ export const getControlGroupEmbeddableFactory = (services: {
       );
       const api = setApi({
         dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
-        chaining$: (controlUuid: string) => chaining$(
-          controlUuid,
-          chainingSystem$,
-          controlsInOrder$,
-          (uuid: string) => {
-            return children$.value[uuid];
-          }
-        ),
+        chaining$: (controlUuid: string) =>
+          chaining$(controlUuid, chainingSystem$, controlsInOrder$, (getControlUuid: string) => {
+            return children$.value[getControlUuid];
+          }),
         ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
