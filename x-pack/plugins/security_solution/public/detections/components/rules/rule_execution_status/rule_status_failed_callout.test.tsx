@@ -64,6 +64,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       http={mockHttp}
       navigateToApp={mockNavigationToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
+      currentAppId={'security'}
     >
       {children}
     </AssistantProvider>

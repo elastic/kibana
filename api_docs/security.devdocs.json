@@ -5313,20 +5313,8 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "encryptedSavedObjects",
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts"
-            },
-            {
-              "plugin": "encryptedSavedObjects",
-              "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
-            },
-            {
-              "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
             },
             {
               "plugin": "securitySolution",
@@ -5347,10 +5335,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
-            },
-            {
-              "plugin": "cloudChat",
-              "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.ts"
             },
             {
               "plugin": "securitySolution",

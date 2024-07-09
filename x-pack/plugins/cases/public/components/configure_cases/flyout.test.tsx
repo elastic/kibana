@@ -766,7 +766,7 @@ describe('CommonFlyout ', () => {
         expect(props.onSaveField).not.toHaveBeenCalled();
       });
 
-      expect(await screen.findByText('A Template name is required.')).toBeInTheDocument();
+      expect(await screen.findByText('Template name is required.')).toBeInTheDocument();
     });
 
     it('shows error if template name is too long', async () => {
