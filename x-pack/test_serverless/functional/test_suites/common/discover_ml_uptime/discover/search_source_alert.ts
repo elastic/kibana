@@ -202,6 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return await testSubjects.exists('alertActionAccordion-0');
     });
 
+    await monacoEditor.waitCodeEditorReady('kibanaCodeEditor');
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
