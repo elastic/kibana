@@ -11,16 +11,18 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
-import { ControlGroupApi } from '../../control_group/types';
+import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { ChainingContext, ControlGroupApi } from '../../control_group/types';
 
 export function minMax$({
+  chaining$,
   data,
   dataControlFetch$,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
+  chaining$: Observable<ChainingContext>;
   data: DataPublicPluginStart;
   dataControlFetch$: ControlGroupApi['dataControlFetch$'];
   dataViews$: PublishesDataViews['dataViews'];
@@ -28,18 +30,26 @@ export function minMax$({
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([dataViews$, fieldName$, dataControlFetch$]).pipe(
+  return combineLatest([chaining$, dataViews$, fieldName$, dataControlFetch$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
+    switchMap(async ([chainingContext, dataViews, fieldName, dataControlFetchContext]) => {
       const dataView = dataViews?.[0];
       const dataViewField = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
       if (!dataView || !dataViewField) {
         return { max: undefined, min: undefined };
+      }
+
+      const filters = [];
+      if (dataControlFetchContext.unifiedSearchFilters) {
+        filters.push(...dataControlFetchContext.unifiedSearchFilters);
+      }
+      if (chainingContext.chainingFilters) {
+        filters.push(...chainingContext.chainingFilters);
       }
 
       try {
@@ -51,7 +61,9 @@ export function minMax$({
           data,
           dataView,
           field: dataViewField,
-          ...dataControlFetchContext,
+          filters,
+          query: dataControlFetchContext.query,
+          timeRange: chainingContext.timeRange ?? dataControlFetchContext.timeRange,
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };
@@ -68,7 +80,7 @@ export async function getMinMax({
   data,
   dataView,
   field,
-  unifiedSearchFilters,
+  filters,
   query,
   timeRange,
 }: {
@@ -76,7 +88,7 @@ export async function getMinMax({
   data: DataPublicPluginStart;
   dataView: DataView;
   field: DataViewField;
-  unifiedSearchFilters?: Filter[];
+  filters: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
@@ -84,7 +96,7 @@ export async function getMinMax({
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);
 
-  const allFilters = unifiedSearchFilters ? unifiedSearchFilters : [];
+  const allFilters = [...filters];
   if (timeRange) {
     const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
     if (timeFilter) allFilters.push(timeFilter);

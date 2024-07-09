@@ -61,6 +61,7 @@ export const getRangesliderControlFactory = (
       );
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+      const chaining$ = controlGroupApi.chaining$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -138,6 +139,7 @@ export const getRangesliderControlFactory = (
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
+        chaining$,
         data: services.data,
         dataControlFetch$: controlGroupApi.dataControlFetch$,
         dataViews$: dataControl.api.dataViews,
@@ -195,9 +197,10 @@ export const getRangesliderControlFactory = (
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
+        chaining$,
         data: services.data,
         dataViews$: dataControl.api.dataViews,
-        filters$: dataControl.api.filters$,
+        rangeFilters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
         dataControlFetch$: controlGroupApi.dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
