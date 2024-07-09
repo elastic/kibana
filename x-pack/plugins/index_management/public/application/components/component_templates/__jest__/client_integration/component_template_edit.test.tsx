@@ -78,7 +78,6 @@ describe('<ComponentTemplateEdit />', () => {
     template: {
       settings: { number_of_shards: 1 },
     },
-    _kbnMeta: { usedBy: [], isManaged: false },
   };
 
   beforeEach(async () => {
@@ -173,20 +172,23 @@ describe('<ComponentTemplateEdit />', () => {
 
   describe('can rollover linked datastreams', () => {
     const DATASTREAM_NAME = 'logs-test-default';
+    const CUSTOM_COMPONENT_TEMPLATE = 'comp-1@custom';
+    const ENCODED_CUSTOM_COMPONENT_TEMPLATE = encodeURIComponent(CUSTOM_COMPONENT_TEMPLATE);
+
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplateResponse(
-        COMPONENT_TEMPLATE_TO_EDIT.name,
+        ENCODED_CUSTOM_COMPONENT_TEMPLATE,
         Object.assign({}, COMPONENT_TEMPLATE_TO_EDIT, {
-          _meta: { managed_by: 'fleet' },
+          name: CUSTOM_COMPONENT_TEMPLATE,
         })
       );
 
-      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(ENCODED_CUSTOM_COMPONENT_TEMPLATE, {
         data_streams: [DATASTREAM_NAME],
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup(httpSetup, '@custom');
       });
 
       testBed.component.update();
@@ -221,7 +223,7 @@ describe('<ComponentTemplateEdit />', () => {
       component.update();
 
       expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
         expect.anything()
       );
       expect(httpSetup.post).toHaveBeenLastCalledWith(
@@ -259,7 +261,7 @@ describe('<ComponentTemplateEdit />', () => {
       component.update();
 
       expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
         expect.anything()
       );
       expect(httpSetup.post).toHaveBeenLastCalledWith(
