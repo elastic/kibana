@@ -60,21 +60,25 @@ export const alertsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.agent_id_status': {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.category': {
     type: 'keyword',
     array: true,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.code': {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.created': {
     type: 'date',
@@ -85,11 +89,13 @@ export const alertsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.duration': {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.end': {
     type: 'date',
@@ -100,11 +106,13 @@ export const alertsFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.id': {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.ingested': {
     type: 'date',
@@ -115,36 +123,43 @@ export const alertsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.module': {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.original': {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.outcome': {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.provider': {
     type: 'keyword',
     array: false,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.reason': {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.reference': {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.risk_score': {
     type: 'float',
@@ -175,16 +190,19 @@ export const alertsFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.type': {
     type: 'keyword',
     array: true,
     required: true,
+    ignore_above: 1024,
   },
   'kibana.alert.original_event.url': {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   'kibana.alert.original_time': {
     type: 'date',
