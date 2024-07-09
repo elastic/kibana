@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
 import {
