@@ -13,8 +13,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { QueryInput } from '@kbn/visualization-ui-components';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,
@@ -27,26 +26,9 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
   },
 }));
 
-// jest.mock('lodash', () => {
-//   const original = jest.requireActual('lodash');
-
-//   return {
-//     ...original,
-//     debounce: (fn: unknown) => fn,
-//   };
-// });
-
 describe('filter popover', () => {
   let defaultProps: Parameters<typeof FilterPopover>[0];
   let mockOnClick: jest.Mock;
-
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
 
   beforeEach(() => {
     mockOnClick = jest.fn();
@@ -106,50 +88,40 @@ describe('filter popover', () => {
     });
   });
 
-  it.only('correctly renders QueryStringInput', () => {
-    render(<FilterPopover {...defaultProps} />);
-    userEvent.click(screen.getByRole('button'));
-    screen.debug();
-    expect(screen.getByRole('textbox')).toHaveValue('More than one');
-    // const instance = mount(<FilterPopover {...defaultProps} />);
-    // instance.update();
-    // expect(instance.find(QueryStringInput).props()).toEqual(
-    //   expect.objectContaining({
-    //     dataTestSubj: 'indexPattern-filters-queryStringInput',
-    //     indexPatterns: [{ type: 'id', value: '1' }],
-    //     isInvalid: false,
-    //     query: { language: 'kuery', query: 'bytes >= 1' },
-    //   })
-    // );
+  it('passes correct props to QueryStringInput', () => {
+    const instance = mount(<FilterPopover {...defaultProps} />);
+    instance.update();
+    expect(instance.find(QueryStringInput).props()).toEqual(
+      expect.objectContaining({
+        dataTestSubj: 'indexPattern-filters-queryStringInput',
+        indexPatterns: [{ type: 'id', value: '1' }],
+        isInvalid: false,
+        query: { language: 'kuery', query: 'bytes >= 1' },
+      })
+    );
   });
 
   it('should call setFilter when modifying QueryInput', () => {
     const setFilter = jest.fn();
-    render(<FilterPopover {...defaultProps} setFilter={setFilter} />);
-    userEvent.click(screen.getByRole('button'));
-
-    screen.debug();
-    // const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
-    // instance.find(QueryInput).prop('onChange')!({
-    //   query: 'modified : query',
-    //   language: 'lucene',
-    // });
-    // expect(setFilter).toHaveBeenCalledWith({
-    //   input: {
-    //     language: 'lucene',
-    //     query: 'modified : query',
-    //   },
-    //   label: 'More than one',
-    //   id: '1',
-    // });
+    const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
+    instance.find(QueryInput).prop('onChange')!({
+      query: 'modified : query',
+      language: 'lucene',
+    });
+    expect(setFilter).toHaveBeenCalledWith({
+      input: {
+        language: 'lucene',
+        query: 'modified : query',
+      },
+      label: 'More than one',
+      id: '1',
+    });
   });
 
   it('should call setFilter when modifying LabelInput', () => {
     const setFilter = jest.fn();
-    render(<FilterPopover {...defaultProps} setFilter={setFilter} />);
-    userEvent.click(screen.getByRole('button'));
-    userEvent.type(screen.getByRole('textbox'), `${'{backspace}'.repeat(13)}Modified label`);
-    jest.advanceTimersByTime(256);
+    const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
+    instance.find(LabelInput).prop('onChange')!('Modified label');
     expect(setFilter).toHaveBeenCalledWith({
       input: {
         language: 'kuery',
