@@ -7,7 +7,7 @@
 
 import { useController } from 'react-hook-form';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { merge } from 'lodash';
 import { useIndicesFields } from './use_indices_fields';
 import { ChatForm, ChatFormFields } from '../types';
@@ -83,25 +83,34 @@ export const useSourceIndicesFields = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
-  const addIndex = (newIndex: IndexName) => {
-    const newIndices = [...selectedIndices, newIndex];
-    setLoading(true);
-    onIndicesChange(newIndices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
-  };
+  const addIndex = useCallback(
+    (newIndex: IndexName) => {
+      const newIndices = [...selectedIndices, newIndex];
+      setLoading(true);
+      onIndicesChange(newIndices);
+      usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
+    },
+    [onIndicesChange, selectedIndices, usageTracker]
+  );
 
-  const removeIndex = (index: IndexName) => {
-    const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
-    setLoading(true);
-    onIndicesChange(newIndices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
-  };
+  const removeIndex = useCallback(
+    (index: IndexName) => {
+      const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
+      setLoading(true);
+      onIndicesChange(newIndices);
+      usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
+    },
+    [onIndicesChange, selectedIndices, usageTracker]
+  );
 
-  const setIndices = (indices: IndexName[]) => {
-    setLoading(true);
-    onIndicesChange(indices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
-  };
+  const setIndices = useCallback(
+    (indices: IndexName[]) => {
+      setLoading(true);
+      onIndicesChange(indices);
+      usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
+    },
+    [onIndicesChange, usageTracker]
+  );
 
   return {
     indices: selectedIndices,

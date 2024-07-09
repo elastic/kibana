@@ -36,8 +36,7 @@ export const SetupPage: React.FC = () => {
     if (index) {
       addIndex(index);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+  }, [index, addIndex]);
 
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.setupChatPageLoaded);
