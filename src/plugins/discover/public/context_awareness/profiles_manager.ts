@@ -12,6 +12,7 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
+import type { ProfilesAdapter } from './inspector';
 import type {
   RootProfileService,
   DataSourceProfileService,
@@ -24,6 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
+import { recordHasContext } from './record_has_context';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -34,15 +36,12 @@ interface SerializedDataSourceProfileParams {
   esqlQuery: string | undefined;
 }
 
-interface DataTableRecordWithContext extends DataTableRecord {
-  context: ContextWithProfileId<DocumentContext>;
-}
-
 export interface GetProfilesOptions {
   record?: DataTableRecord;
 }
 
 export class ProfilesManager {
+  private readonly profilesEnabled$ = new BehaviorSubject(true);
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
 
@@ -52,12 +51,25 @@ export class ProfilesManager {
   private dataSourceProfileAbortController?: AbortController;
 
   constructor(
+    private readonly profilesAdapter: ProfilesAdapter,
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+  }
+
+  public setProfilesEnabled(enabled: boolean) {
+    this.profilesEnabled$.next(enabled);
+  }
+
+  public getProfilesEnabled() {
+    return this.profilesEnabled$.getValue();
+  }
+
+  public getProfilesEnabled$() {
+    return this.profilesEnabled$.asObservable();
   }
 
   public async resolveRootProfile(params: RootProfileProviderParams) {
@@ -83,6 +95,7 @@ export class ProfilesManager {
       return;
     }
 
+    this.profilesAdapter.setRootContext(context);
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
   }
@@ -110,6 +123,7 @@ export class ProfilesManager {
       return;
     }
 
+    this.profilesAdapter.setDataSourceContext(context);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
   }
@@ -139,6 +153,10 @@ export class ProfilesManager {
   }
 
   public getProfiles({ record }: GetProfilesOptions = {}) {
+    if (!this.profilesEnabled$.getValue()) {
+      return [];
+    }
+
     return [
       this.rootProfileService.getProfile(this.rootContext$.getValue()),
       this.dataSourceProfileService.getProfile(this.dataSourceContext$.getValue()),
@@ -149,7 +167,7 @@ export class ProfilesManager {
   }
 
   public getProfiles$(options: GetProfilesOptions = {}) {
-    return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
+    return combineLatest([this.profilesEnabled$, this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
     );
   }
@@ -176,12 +194,6 @@ const serializeDataSourceProfileParams = (
         ? params.query.esql
         : undefined,
   };
-};
-
-const recordHasContext = (
-  record: DataTableRecord | undefined
-): record is DataTableRecordWithContext => {
-  return Boolean(record && 'context' in record);
 };
 
 enum ContextType {

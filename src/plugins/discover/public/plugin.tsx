@@ -54,6 +54,8 @@ import { ConfigSchema, ExperimentalFeatures } from '../common/config';
 import {
   DataSourceProfileService,
   DocumentProfileService,
+  getProfilesInspectorViewDescription,
+  ProfilesAdapter,
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
@@ -171,6 +173,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        const profilesAdapter = new ProfilesAdapter();
         const services = buildServices({
           core: coreStart,
           plugins: discoverStartPlugins,
@@ -181,7 +184,8 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager(),
+          profilesAdapter,
+          profilesManager: await this.createProfilesManager(profilesAdapter),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -249,6 +253,8 @@ export class DiscoverPlugin
 
     this.registerEmbeddable(core, plugins);
 
+    plugins.inspector.registerView(getProfilesInspectorViewDescription());
+
     return {
       locator: this.locator,
       showInlineTopNav: () => {
@@ -282,7 +288,10 @@ export class DiscoverPlugin
     }
 
     const getDiscoverServicesInternal = () => {
-      return this.getDiscoverServices(core, plugins, this.createEmptyProfilesManager());
+      const profilesAdapter = new ProfilesAdapter();
+      const profilesManager = this.createEmptyProfilesManager(profilesAdapter);
+
+      return this.getDiscoverServices({ core, plugins, profilesAdapter, profilesManager });
     };
 
     return {
@@ -316,30 +325,38 @@ export class DiscoverPlugin
     return { rootProfileService, dataSourceProfileService, documentProfileService };
   });
 
-  private async createProfilesManager() {
+  private async createProfilesManager(profilesAdapter: ProfilesAdapter) {
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
       await this.createProfileServices();
 
     return new ProfilesManager(
+      profilesAdapter,
       rootProfileService,
       dataSourceProfileService,
       documentProfileService
     );
   }
 
-  private createEmptyProfilesManager() {
+  private createEmptyProfilesManager(profilesAdapter: ProfilesAdapter) {
     return new ProfilesManager(
+      profilesAdapter,
       new RootProfileService(),
       new DataSourceProfileService(),
       new DocumentProfileService()
     );
   }
 
-  private getDiscoverServices = (
-    core: CoreStart,
-    plugins: DiscoverStartPlugins,
-    profilesManager: ProfilesManager
-  ) => {
+  private getDiscoverServices = ({
+    core,
+    plugins,
+    profilesAdapter,
+    profilesManager,
+  }: {
+    core: CoreStart;
+    plugins: DiscoverStartPlugins;
+    profilesAdapter: ProfilesAdapter;
+    profilesManager: ProfilesManager;
+  }) => {
     return buildServices({
       core,
       plugins,
@@ -349,6 +366,7 @@ export class DiscoverPlugin
       singleDocLocator: this.singleDocLocator!,
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
+      profilesAdapter,
       profilesManager,
     });
   };
@@ -364,8 +382,15 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const profilesManager = await this.createProfilesManager();
-      return this.getDiscoverServices(coreStart, deps, profilesManager);
+      const profilesAdapter = new ProfilesAdapter();
+      const profilesManager = await this.createProfilesManager(profilesAdapter);
+
+      return this.getDiscoverServices({
+        core: coreStart,
+        plugins: deps,
+        profilesAdapter,
+        profilesManager,
+      });
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);

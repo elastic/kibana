@@ -49,6 +49,7 @@ export const convertValueToString = ({
   const disableMultiline = options?.compatibleWithCSV ?? false;
   const enableEscapingForValue = options?.compatibleWithCSV ?? false;
 
+  // TODO
   if (field?.type === '_source') {
     return {
       formattedString: stringify(rowFlattened, disableMultiline),

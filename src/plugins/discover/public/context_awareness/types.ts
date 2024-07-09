@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldsSubgroup, GetFieldSubgroupId } from '@kbn/unified-field-list';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -19,7 +21,27 @@ export interface DocViewerExtensionParams {
   record: DataTableRecord;
 }
 
+export interface DefaultAppStateColumns {
+  name: string;
+  width?: number;
+}
+
+export interface DefaultAppStateExtensionParams {
+  dataView: DataView;
+}
+
+export interface DefaultAppStateExtension {
+  columns?: DefaultAppStateColumns[];
+  rowHeight?: number;
+}
+
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+  getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
+  getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'];
+  getFieldListSubgroups: () => {
+    subgroups: FieldsSubgroup[];
+    getSubgroupId: GetFieldSubgroupId;
+  };
 }

@@ -36,6 +36,7 @@ import {
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useProfileAccessor } from '../../../../context_awareness';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -359,6 +360,21 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
+  const getFieldListSubgroupsAccessor = useProfileAccessor('getFieldListSubgroups');
+  const fieldListSubgroups = useMemo(() => {
+    const getFieldListSubgroups = getFieldListSubgroupsAccessor(() => ({
+      subgroups: [],
+      getSubgroupId: () => undefined,
+    }));
+
+    return getFieldListSubgroups();
+  }, [getFieldListSubgroupsAccessor]);
+
+  const filteredColumns = useMemo(
+    () => columns.filter((column) => column !== '_source'),
+    [columns]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -378,7 +394,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             trackUiMetric={trackUiMetric}
             allFields={sidebarState.allFields}
             showFieldList={showFieldList}
-            workspaceSelectedFieldNames={columns}
+            workspaceSelectedFieldNames={filteredColumns}
             fullWidth
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
@@ -386,6 +402,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onFieldEdited={onFieldEdited}
             prependInFlyout={prependDataViewPickerForMobile}
             additionalFieldGroups={additionalFieldGroups}
+            fieldsSubgroups={fieldListSubgroups.subgroups}
+            getFieldSubgroupId={fieldListSubgroups.getSubgroupId}
           />
         ) : null}
       </EuiFlexItem>

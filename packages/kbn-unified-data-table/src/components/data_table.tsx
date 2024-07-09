@@ -55,7 +55,7 @@ import {
   CustomGridColumnsConfiguration,
   CustomControlColumnConfiguration,
 } from '../types';
-import { getDisplayedColumns } from '../utils/columns';
+import { getDisplayedColumns, hasOnlySourceColumn, SOURCE_COLUMN } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
@@ -86,6 +86,10 @@ import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
+import {
+  getColorIndicatorControlColumn,
+  type ColorIndicatorControlColumnParams,
+} from './custom_control_columns';
 
 export type SortOrder = [string, string];
 
@@ -387,6 +391,11 @@ export interface UnifiedDataTableProps {
    *
    */
   renderCellPopover?: EuiDataGridProps['renderCellPopover'];
+  /**
+   * When specified, this function will be called to determine the color of the row indicator.
+   * @param row
+   */
+  getRowIndicatorColor?: ColorIndicatorControlColumnParams['getRowIndicatorColor'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -457,6 +466,7 @@ export const UnifiedDataTable = ({
   enableComparisonMode,
   cellContext,
   renderCellPopover,
+  getRowIndicatorColor,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -466,7 +476,7 @@ export const UnifiedDataTable = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
-  const defaultColumns = displayedColumns.includes('_source');
+  const defaultColumns = hasOnlySourceColumn(displayedColumns);
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const usedSelectedDocs = useMemo(() => {
@@ -851,10 +861,19 @@ export const UnifiedDataTable = ({
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
-    return externalControlColumns
+    const leadingColumns = externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
-  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
+
+    if (getRowIndicatorColor) {
+      const colorIndicatorControlColumn = getColorIndicatorControlColumn({
+        getRowIndicatorColor,
+      });
+      leadingColumns.unshift(colorIndicatorControlColumn);
+    }
+
+    return leadingColumns;
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicatorColor]);
 
   const controlColumnsConfig = customControlColumnsConfiguration?.({
     controlColumns: getAllControlColumns(),
@@ -943,12 +962,34 @@ export const UnifiedDataTable = ({
           maxAllowedSampleSize={maxAllowedSampleSize}
           sampleSize={sampleSizeState}
           onChangeSampleSize={onUpdateSampleSize}
+          showSummaryColumn={displayedColumns.some((column) => column === SOURCE_COLUMN)}
+          onChangeShowSummaryColumn={
+            defaultColumns
+              ? undefined
+              : (showSummaryColumn) => {
+                  const filteredColumns = visibleColumns.filter(
+                    (column) => column !== SOURCE_COLUMN
+                  );
+                  const dontModifyColumns = !shouldPrependTimeFieldColumn(filteredColumns);
+                  const insertIndex = timeFieldName
+                    ? filteredColumns.indexOf(timeFieldName) + 1
+                    : 0;
+
+                  if (showSummaryColumn) {
+                    filteredColumns.splice(insertIndex, 0, SOURCE_COLUMN);
+                  }
+
+                  onSetColumns(filteredColumns, dontModifyColumns);
+                }
+          }
         />
       );
     }
 
     return Object.keys(options).length ? options : undefined;
   }, [
+    defaultColumns,
+    displayedColumns,
     headerRowHeight,
     headerRowHeightLines,
     maxAllowedSampleSize,
@@ -956,12 +997,16 @@ export const UnifiedDataTable = ({
     onChangeHeaderRowHeightLines,
     onChangeRowHeight,
     onChangeRowHeightLines,
+    onSetColumns,
     onUpdateHeaderRowHeight,
     onUpdateRowHeight,
     onUpdateSampleSize,
     rowHeight,
     rowHeightLines,
     sampleSizeState,
+    shouldPrependTimeFieldColumn,
+    timeFieldName,
+    visibleColumns,
   ]);
 
   const inMemory = useMemo(() => {
@@ -1071,6 +1116,15 @@ export const UnifiedDataTable = ({
           ) : (
             <EuiDataGridMemoized
               id={dataGridId}
+              css={
+                getRowIndicatorColor
+                  ? {
+                      '.euiDataGridRowCell--firstColumn .euiDataGridRowCell__content': {
+                        borderBottomWidth: '0 !important',
+                      },
+                    }
+                  : undefined
+              }
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
               columns={euiGridColumns}

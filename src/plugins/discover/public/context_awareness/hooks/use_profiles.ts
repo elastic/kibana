@@ -21,7 +21,8 @@ export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   useEffect(() => {
     const subscription = profiles$.subscribe((newProfiles) => {
       setProfiles((currentProfiles) => {
-        return currentProfiles.every((profile, i) => profile === newProfiles[i])
+        return currentProfiles.length === newProfiles.length &&
+          currentProfiles.every((profile, i) => profile === newProfiles[i])
           ? currentProfiles
           : newProfiles;
       });

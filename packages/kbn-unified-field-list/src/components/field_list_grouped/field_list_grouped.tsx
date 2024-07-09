@@ -14,7 +14,12 @@ import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
-import type { FieldListGroups, FieldListItem } from '../../types';
+import type {
+  FieldListGroups,
+  FieldListItem,
+  FieldsSubgroup,
+  GetFieldSubgroupId,
+} from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
 
@@ -41,6 +46,8 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
   'data-test-subj'?: string;
+  fieldsSubgroups?: FieldsSubgroup[];
+  getFieldSubgroupId?: GetFieldSubgroupId;
 }
 
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
@@ -52,6 +59,8 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   screenReaderDescriptionId,
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
+  fieldsSubgroups,
+  getFieldSubgroupId,
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
@@ -295,6 +304,12 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                   />
                 )}
                 renderFieldItem={renderFieldItem}
+                fieldsSubgroups={
+                  key === FieldsGroupNames.AvailableFields ? fieldsSubgroups : undefined
+                }
+                getFieldSubgroupId={
+                  key === FieldsGroupNames.AvailableFields ? getFieldSubgroupId : undefined
+                }
               />
               <EuiSpacer size="m" />
             </Fragment>

@@ -8,10 +8,12 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+export const SOURCE_COLUMN = '_source';
+
 // We store this outside the function as a constant, so we're not creating a new array every time
 // the function is returning this. A changing array might cause the data grid to think it got
 // new columns, and thus performing worse than using the same array over multiple renders.
-const SOURCE_ONLY = ['_source'];
+const SOURCE_ONLY = [SOURCE_COLUMN];
 
 /**
  * Function to provide fallback when
@@ -19,8 +21,7 @@ const SOURCE_ONLY = ['_source'];
  * 2) Just one column is given, which is the configured timefields
  */
 export function getDisplayedColumns(stateColumns: string[] = [], dataView: DataView) {
-  return stateColumns &&
-    stateColumns.length > 0 &&
+  return stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)
     !(stateColumns.length === 1 && stateColumns[0] === dataView.timeFieldName)
     ? stateColumns
@@ -33,4 +34,8 @@ export function getInnerColumns(fields: Record<string, unknown[]>, columnId: str
       return key.startsWith(`${columnId}.`);
     })
   );
+}
+
+export function hasOnlySourceColumn(columns: string[]) {
+  return columns.length === 1 && columns[0] === SOURCE_COLUMN;
 }

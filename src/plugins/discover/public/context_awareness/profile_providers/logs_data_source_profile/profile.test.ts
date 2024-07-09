@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 import { DataSourceCategory } from '../../profiles';
@@ -74,5 +76,23 @@ describe('logsDataSourceProfileProvider', () => {
         dataView: createStubIndexPattern({ spec: { title: MIXED_INDEX_PATTERN } }),
       })
     ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  describe('getRowIndicatorColor', () => {
+    it('should return the correct color for a given log level', () => {
+      const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
+      const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
+      expect(
+        logsDataSourceProfileProvider.profile.getRowIndicatorColor?.(undefined)?.(row, euiTheme)
+      ).toBe('#6092C0');
+    });
+
+    it('should not return a color for a missing log level', () => {
+      const row = buildDataTableRecord({ fields: { other: 'info' } });
+      const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
+      expect(
+        logsDataSourceProfileProvider.profile.getRowIndicatorColor?.(undefined)?.(row, euiTheme)
+      ).toBe(undefined);
+    });
   });
 });

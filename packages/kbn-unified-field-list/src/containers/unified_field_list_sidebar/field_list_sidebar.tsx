@@ -28,7 +28,7 @@ import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-u
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames } from '../../types';
+import { FieldsGroupNames, FieldsSubgroup, GetFieldSubgroupId } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
@@ -79,6 +79,9 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Prop to pass additional field groups to the field list
    */
   additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
+
+  fieldsSubgroups?: FieldsSubgroup[];
+  getFieldSubgroupId?: GetFieldSubgroupId;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -167,6 +170,8 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onDeleteField,
   onToggleSidebar,
   additionalFieldGroups,
+  fieldsSubgroups,
+  getFieldSubgroupId,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
@@ -401,6 +406,8 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
+                fieldsSubgroups={fieldsSubgroups}
+                getFieldSubgroupId={getFieldSubgroupId}
               />
             ) : (
               <EuiFlexItem grow />
