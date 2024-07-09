@@ -70,7 +70,7 @@ export function getStoredAnnotations({
           type: AnnotationType.VERSION,
           id: hit._id as string,
           '@timestamp': new Date(hit._source['@timestamp']).getTime(),
-          text: hit._source.message! ?? hit._source.annotation.title,
+          text: hit._source.message,
         };
       });
     } catch (error) {

@@ -49,9 +49,9 @@ export const createAnnotationRt = t.intersection([
       }),
     }),
     '@timestamp': dateAsStringRt,
+    message: t.string,
   }),
   t.partial({
-    message: t.string,
     event: t.intersection([
       t.type({
         start: dateAsStringRt,
