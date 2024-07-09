@@ -201,6 +201,7 @@ const includedHiddenTypes = [
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  'notification_policy',
 ];
 
 export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {

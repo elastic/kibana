@@ -42,6 +42,17 @@ export const getAlertingSectionBreadcrumb = (
             }
           : {}),
       };
+    case 'policies':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.policies.breadcrumbTitle', {
+          defaultMessage: 'Notification Policies',
+        }),
+        ...(returnHref
+          ? {
+              href: `/policies`,
+            }
+          : {}),
+      };
     case 'rules':
       return {
         text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {

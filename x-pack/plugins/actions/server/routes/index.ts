@@ -23,6 +23,8 @@ import { defineLegacyRoutes } from './legacy';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
+import { createNotificationRoute } from './notification/create';
+import { getAllNotificationRoute } from './notification/get_all';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -49,4 +51,7 @@ export function defineRoutes(opts: RouteOptions) {
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
+
+  createNotificationRoute(router, licenseState);
+  getAllNotificationRoute(router, licenseState);
 }

@@ -6,6 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -148,6 +150,29 @@ export interface ActionsClientContext {
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
 }
+
+export const notificationPolicySchema = schema.object({
+  name: schema.string(),
+  alertType: schema.arrayOf(schema.string()),
+  connectors: schema.arrayOf(
+    schema.object({
+      actionTypeId: schema.string(),
+      id: schema.string(),
+      params: schema.any(),
+    })
+  ),
+  frequency: schema.string(),
+  throttle: schema.maybe(schema.string()),
+  conditions: schema.arrayOf(
+    schema.object({
+      type: schema.string(),
+      value: schema.arrayOf(schema.string()),
+    })
+  ),
+});
+export type NotificationPolicy = TypeOf<typeof notificationPolicySchema>;
+
+export type NotificationPolicyWithId = NotificationPolicy & { id: string };
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -939,5 +964,28 @@ export class ActionsClient {
       );
       throw err;
     }
+  }
+
+  public async createNotificationPolicy(
+    policy: NotificationPolicy
+  ): Promise<NotificationPolicyWithId> {
+    const id = SavedObjectsUtils.generateId();
+
+    const result = await this.context.unsecuredSavedObjectsClient.create(
+      'notification_policy',
+      policy,
+      { id }
+    );
+
+    return { id: result.id, ...result.attributes };
+  }
+
+  public async getNotificationPolicies(): Promise<NotificationPolicyWithId[]> {
+    const policies = await this.context.unsecuredSavedObjectsClient.find<NotificationPolicy>({
+      perPage: 1000,
+      type: 'notification_policy',
+    });
+
+    return policies.saved_objects.map(({ id, attributes }) => ({ id, ...attributes }));
   }
 }
