@@ -8,6 +8,8 @@
 import { queue } from 'async';
 import moment from 'moment';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
@@ -83,12 +85,15 @@ export const fetchLogRateAnalysisForAlert = async ({
   arguments: {
     index: string;
     alertStartedAt: string;
-    timefield: string;
+    timefield?: string;
+    searchQuery?: estypes.QueryDslQueryContainer;
     keywordFieldCandidates?: string[];
     textFieldCandidates?: string[];
   };
 }) => {
   const debugStartTime = Date.now();
+
+  const { timefield = '@timestamp' } = args;
 
   const lookbackDuration = moment.duration(1, 'm');
   const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
@@ -179,17 +184,21 @@ export const fetchLogRateAnalysisForAlert = async ({
     deviationMax: getDeviationMax(),
   };
 
-  const { keywordFieldCandidates = [], textFieldCandidates = [] } = args;
-
-  const searchQuery = {
+  const rangeQuery: estypes.QueryDslQueryContainer = {
     range: {
-      [args.timefield]: {
+      [timefield]: {
         gte: earliestMs,
         lte: latestMs,
         format: 'epoch_millis',
       },
     },
   };
+
+  const { keywordFieldCandidates = [], textFieldCandidates = [], searchQuery = rangeQuery } = args;
+
+  if (searchQuery.bool && Array.isArray(searchQuery.bool.filter)) {
+    searchQuery.bool.filter.push(rangeQuery);
+  }
 
   const intervalMs = getHistogramIntervalMs(earliestMs, latestMs);
 
@@ -203,7 +212,7 @@ export const fetchLogRateAnalysisForAlert = async ({
     start: earliestMs,
     end: latestMs,
     searchQuery: JSON.stringify(searchQuery),
-    timeFieldName: args.timefield,
+    timeFieldName: timefield,
     ...windowParameters,
   };
 

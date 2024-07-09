@@ -10,6 +10,8 @@ import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
+import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
 export async function getLogRateAnalysisForAlert({
   apmEventClient,
@@ -31,12 +33,27 @@ export async function getLogRateAnalysisForAlert({
   };
 }): ReturnType<typeof fetchLogRateAnalysisForAlert> {
   const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+
+  const keyValueFilters = getShouldMatchOrNotExistFilter(
+    Object.entries(args.entities).map(([key, value]) => ({ field: key, value }))
+  );
+
+  const searchQuery = {
+    bool: {
+      must_not: [
+        // exclude APM errors
+        { term: { [PROCESSOR_EVENT]: 'error' } },
+      ],
+      filter: [...keyValueFilters],
+    },
+  };
+
   return await fetchLogRateAnalysisForAlert({
     esClient,
     arguments: {
       index,
       alertStartedAt: args.alertStartedAt,
-      timefield: '@timestamp',
+      searchQuery,
     },
   });
 }
