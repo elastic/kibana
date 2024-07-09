@@ -6,6 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCallback } from 'react';
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
@@ -16,10 +17,10 @@ export const useEntityModel = () => {
 
   const http = useKibana().services.http;
 
-  const initialize = () => {
-    if (!http) return;
+  const initialize = useCallback(() => {
+    if (!http) return Promise.resolve();
 
-    http
+    return http
       .fetch('/internal/api/entities/definition', {
         version: '1',
         method: 'POST',
@@ -28,9 +29,34 @@ export const useEntityModel = () => {
       .then((response) => {
         console.log(response);
       });
-  };
+  }, [http]);
 
-  return { initialize };
+  const get = useCallback(() => {
+    console.log('Getting entity model');
+
+    if (!http) return Promise.resolve([]);
+
+    return http.fetch('/internal/api/entities/definition', {
+      version: '1',
+      method: 'GET',
+      query: {
+        id: 'secsol-ea-entity-store',
+      },
+    });
+  }, [http]);
+
+  const deleteAPI = useCallback(() => {
+    console.log('Deleting entity model');
+
+    if (!http) return Promise.resolve([]);
+
+    return http.fetch('/internal/api/entities/definition/secsol-ea-entity-store', {
+      version: '1',
+      method: 'DELETE',
+    });
+  }, [http]);
+
+  return { initialize, get, deleteAPI };
 };
 
 const entityDefinition = {

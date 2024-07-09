@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
@@ -25,7 +26,34 @@ import { useEntityModel } from '../common/entity_model';
 
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
-  const { initialize } = useEntityModel();
+  const { initialize, get, deleteAPI } = useEntityModel();
+  const [state, setState] = useState('loading');
+
+  useEffect(() => {
+    get()
+      ?.then((models) => {
+        setState('installed');
+      })
+      .catch((error) => {
+        // 404 means the model is not installed
+        setState('uninstalled');
+      });
+  }, [get]);
+
+  const handleInitialize = () => {
+    setState('loading');
+    initialize().then((response) => {
+      setState('installed');
+    });
+  };
+
+  const handleDelete = () => {
+    setState('loading');
+    deleteAPI().then((response) => {
+      setState('uninstalled');
+    });
+  };
+
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
@@ -38,9 +66,17 @@ export const EntityAnalyticsManagementPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiBetaBadge label={BETA} size="s" />
-        <EuiButton onClick={initialize} css={{ marginLeft: 'auto' }}>
-          {'Initialize Entity Model'}
-        </EuiButton>
+        {state === 'loading' && <EuiLoadingSpinner size="m" css={{ marginLeft: 'auto' }} />}
+        {state === 'uninstalled' && (
+          <EuiButton onClick={handleInitialize} css={{ marginLeft: 'auto' }}>
+            {'Initialize Entity Model'}
+          </EuiButton>
+        )}
+        {state === 'installed' && (
+          <EuiButton onClick={handleDelete} css={{ marginLeft: 'auto' }}>
+            {'Delete Entity Model'}
+          </EuiButton>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
