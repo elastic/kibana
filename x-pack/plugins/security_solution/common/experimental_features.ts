@@ -90,7 +90,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scan response action on Endpoint
    */
-  responseActionScanEnabled: true,
+  responseActionScanEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
