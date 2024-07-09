@@ -278,11 +278,11 @@ describe('autocomplete.suggest', () => {
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
-        // await assertSuggestions('METRICS a avg(b) by c, var0 = /', [
-        //   ...getFieldNamesByType('any'),
-        //   ...allEvaFunctions,
-        //   ...allGroupingFunctions,
-        // ]);
+        await assertSuggestions('METRICS a avg(b) by c, var0 = /', [
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
       });
 
       test('on space after expression right hand side operand', async () => {

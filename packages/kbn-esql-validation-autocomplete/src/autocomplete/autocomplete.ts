@@ -228,27 +228,38 @@ export async function suggest(
           } else if (!isInsideExpression && !hasCommaBeforeCaret && hasFields) {
             suggestions.push(...getFinalSuggestions());
           } else {
+            const { nodeArg } = extractArgMeta(metrics, astContext.node);
+            const isAssignmentExpression = isAssignment(nodeArg);
             let fieldsAndFunctions: SuggestionRawDefinition[] = [];
 
             if (isInsideExpression && isFunctionItem(astContext.node!)) {
-              const fieldsMap = await getFieldsMap();
-              const anyVariables = collectVariables(ast, fieldsMap, innerText);
-              const references = {
-                fields: fieldsMap,
-                variables: anyVariables,
-              };
-
-              const { nodeArg } = extractArgMeta(metrics, astContext.node);
+              const fields = await getFieldsMap();
+              const variables = collectVariables(ast, fields, innerText);
+              const references = { fields, variables };
               const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
-              fieldsAndFunctions = await getBuiltinFunctionNextArgument(
-                metrics,
-                { name: 'by' },
-                definition.options[0].signature.params[0],
-                astContext.node,
-                nodeArgType || 'any',
-                references,
-                getFieldsByType
-              );
+
+              if (isAssignmentExpression) {
+                fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
+                  ['any'],
+                  metrics.name,
+                  definition.options[0].name,
+                  getFieldsByType,
+                  {
+                    functions: true,
+                    fields: true,
+                  }
+                );
+              } else {
+                fieldsAndFunctions = await getBuiltinFunctionNextArgument(
+                  metrics,
+                  { name: 'by' },
+                  definition.options[0].signature.params[0],
+                  astContext.node,
+                  nodeArgType || 'any',
+                  references,
+                  getFieldsByType
+                );
+              }
             } else {
               fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
                 ['any'],
