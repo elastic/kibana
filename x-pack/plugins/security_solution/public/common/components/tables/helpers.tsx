@@ -6,13 +6,13 @@
  */
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiToolTip, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
+import { MoreContainer } from '../../../timelines/components/field_renderers/more_container';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -24,7 +24,6 @@ interface GetRowItemsWithActionsParams {
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
-  maxOverflow?: number;
 }
 
 export const getRowItemsWithActions = ({
@@ -33,7 +32,6 @@ export const getRowItemsWithActions = ({
   idPrefix,
   render,
   displayCount = 5,
-  maxOverflow = 5,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
@@ -62,7 +60,6 @@ export const getRowItemsWithActions = ({
           fieldName={fieldName}
           values={values}
           idPrefix={idPrefix}
-          maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
         />
       </>
@@ -78,7 +75,6 @@ interface RowItemOverflowProps {
   fieldName: string;
   values: string[];
   idPrefix: string;
-  maxOverflowItems: number;
   overflowIndexStart: number;
 }
 
@@ -86,7 +82,6 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   fieldName,
   values,
   idPrefix,
-  maxOverflowItems = 5,
   overflowIndexStart = 5,
 }) => {
   return (
@@ -99,20 +94,8 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               idPrefix={idPrefix}
               values={values}
               overflowIndexStart={overflowIndexStart}
-              moreMaxHeight="none"
+              moreMaxHeight="200px"
             />
-
-            {values.length > overflowIndexStart + maxOverflowItems && (
-              <p data-test-subj="popover-additional-overflow">
-                <EuiTextColor color="subdued">
-                  {values.length - overflowIndexStart - maxOverflowItems}{' '}
-                  <FormattedMessage
-                    id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-                    defaultMessage="more not shown"
-                  />
-                </EuiTextColor>
-              </p>
-            )}
           </EuiText>
         </Popover>
       )}

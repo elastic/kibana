@@ -12,7 +12,7 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
       <MoreContainer
         fieldName="attrName"
         idPrefix="idPrefix"
-        moreMaxHeight="none"
+        moreMaxHeight="200px"
         overflowIndexStart={1}
         values={
           Array [
@@ -22,20 +22,6 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
           ]
         }
       />
-      <p
-        data-test-subj="popover-additional-overflow"
-      >
-        <EuiTextColor
-          color="subdued"
-        >
-          1
-           
-          <MemoizedFormattedMessage
-            defaultMessage="more not shown"
-            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-          />
-        </EuiTextColor>
-      </p>
     </EuiText>
   </Popover>
 </Fragment>
