@@ -55,6 +55,12 @@ Object {
           "size": 1000,
         },
       },
+      "entity.metadata.sourceIndex": Object {
+        "terms": Object {
+          "field": "_index",
+          "size": 1000,
+        },
+      },
       "entity.metadata.tags": Object {
         "terms": Object {
           "field": "tags",
