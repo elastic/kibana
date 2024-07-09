@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../../../common';
+import type {
+  RuleCreateProps,
+  RuleResponse,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { MlAuthz } from '../../../../../machine_learning/authz';
+import type { RuleParams } from '../../../../rule_schema';
+import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
+import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
+import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
+import { validateMlAuth } from '../utils';
+
+interface CreateRuleOptions {
+  rulesClient: RulesClient;
+  mlAuthz: MlAuthz;
+  rule: RuleCreateProps & { immutable: boolean };
+  id?: string;
+  allowMissingConnectorSecrets?: boolean;
+}
+
+export const createRule = async ({
+  rulesClient,
+  mlAuthz,
+  rule,
+  id,
+  allowMissingConnectorSecrets,
+}: CreateRuleOptions): Promise<RuleResponse> => {
+  await validateMlAuth(mlAuthz, rule.type);
+
+  const ruleWithDefaults = applyRuleDefaults(rule);
+
+  const payload = {
+    ...convertRuleResponseToAlertingRule(ruleWithDefaults),
+    alertTypeId: ruleTypeMappings[rule.type],
+    consumer: SERVER_APP_ID,
+    enabled: rule.enabled ?? false,
+  };
+
+  const createdRule = await rulesClient.create<RuleParams>({
+    data: payload,
+    options: { id },
+    allowMissingConnectorSecrets,
+  });
+
+  return convertAlertingRuleToRuleResponse(createdRule);
+};

@@ -34,6 +34,7 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   SentinelOneGetFileRequestMeta,
+  KillOrSuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
@@ -42,6 +43,7 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Readable } from 'stream';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -57,7 +59,7 @@ const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 describe('SentinelOneActionsClient class', () => {
   let classConstructorOptions: SentinelOneActionsClientOptionsMock;
   let s1ActionsClient: ResponseActionsClient;
-  let connectorActionsMock: NormalizedExternalConnectorClient;
+  let connectorActionsMock: DeeplyMockedKeys<NormalizedExternalConnectorClient>;
 
   const createS1IsolationOptions = (
     overrides: Omit<
@@ -68,11 +70,12 @@ describe('SentinelOneActionsClient class', () => {
 
   beforeEach(() => {
     classConstructorOptions = sentinelOneMock.createConstructorOptions();
-    connectorActionsMock = classConstructorOptions.connectorActions;
+    connectorActionsMock =
+      classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
     s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
   });
 
-  it.each(['killProcess', 'suspendProcess', 'runningProcesses', 'execute', 'upload'] as Array<
+  it.each(['suspendProcess', 'runningProcesses', 'execute', 'upload', 'scan'] as Array<
     keyof ResponseActionsClient
   >)('should throw an un-supported error for %s', async (methodName) => {
     // @ts-expect-error Purposely passing in empty object for options
@@ -794,7 +797,8 @@ describe('SentinelOneActionsClient class', () => {
       classConstructorOptions.isAutomated = true;
       classConstructorOptions.connectorActions =
         responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
-      connectorActionsMock = classConstructorOptions.connectorActions;
+      connectorActionsMock =
+        classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
@@ -1123,6 +1127,171 @@ describe('SentinelOneActionsClient class', () => {
         fileName: 'foo.zip',
         mimeType: undefined,
       });
+    });
+  });
+
+  describe('#killProcess()', () => {
+    let killProcessActionRequest: KillOrSuspendProcessRequestBody;
+
+    beforeEach(() => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
+        true;
+
+      killProcessActionRequest = responseActionsClientMock.createKillProcessOptions({
+        // @ts-expect-error TS2322 due to type being overloaded to handle kill/suspend process and specific option for S1
+        parameters: { process_name: 'foo' },
+      });
+    });
+
+    it('should throw an error if feature flag is disabled', async () => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
+        false;
+
+      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
+        `kill-process not supported for sentinel_one agent type. Feature disabled`
+      );
+    });
+
+    it('should throw an error if `process_name` is not defined (manual mode)', async () => {
+      // @ts-expect-error
+      killProcessActionRequest.parameters.process_name = '';
+
+      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
+        '[body.parameters.process_name]: missing parameter or value is empty'
+      );
+    });
+
+    it('should still create action at error if something goes wrong in automated mode', async () => {
+      // @ts-expect-error
+      killProcessActionRequest.parameters.process_name = '';
+      classConstructorOptions.isAutomated = true;
+      classConstructorOptions.connectorActions =
+        responseActionsClientMock.createNormalizedExternalConnectorClient(
+          sentinelOneMock.createConnectorActionsClient()
+        );
+      s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            error: {
+              message: '[body.parameters.process_name]: missing parameter or value is empty',
+            },
+          }),
+        }),
+        { meta: true }
+      );
+    });
+
+    it('should retrieve script execution information from S1 using host OS', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+        params: {
+          subAction: SUB_ACTION.GET_REMOTE_SCRIPTS,
+          subActionParams: {
+            osTypes: 'linux',
+            query: 'terminate',
+            scriptType: 'action',
+          },
+        },
+      });
+    });
+
+    it('should throw error if unable to retrieve S1 script information', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: { data: [] },
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
+        'Unable to find a script from SentinelOne to handle [kill-process] response action for host running [linux])'
+      );
+    });
+
+    it('should send execute script request to S1 for kill-process', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'executeScript',
+          subActionParams: {
+            filter: { uuids: '1-2-3' },
+            script: {
+              inputParams: '--terminate --processes "foo" --force',
+              outputDestination: 'SentinelCloud',
+              requiresApproval: false,
+              scriptId: '1466645476786791838',
+              taskDescription: expect.stringContaining(
+                'Action triggered from Elastic Security by user [foo] for action [kill-process'
+              ),
+            },
+          },
+        },
+      });
+    });
+
+    it('should return action details on success', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should create action request doc with expected meta info', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'kill-process',
+                comment: 'test comment',
+                parameters: { process_name: 'foo' },
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+              parentTaskId: 'task-789',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+    });
+
+    it('should update cases', async () => {
+      killProcessActionRequest = {
+        ...killProcessActionRequest,
+        case_ids: ['case-1'],
+      };
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
   });
 });
