@@ -26,7 +26,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         700
       );
       await testSubjects.setValue('custom-field-label-input', 'my-field');
-      await testSubjects.click('custom-field-flyout-save');
+      await testSubjects.click('common-flyout-save');
       await commonScreenshots.takeScreenshot(
         'cases-custom-fields-view',
         screenshotDirectories,
