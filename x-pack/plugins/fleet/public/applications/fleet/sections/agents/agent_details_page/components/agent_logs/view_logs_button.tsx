@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import url from 'url';
-import { stringify } from 'querystring';
-
 import React, { useMemo } from 'react';
-import { encode } from '@kbn/rison';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices } from '../../../../../hooks';
+import moment from 'moment';
+
+import { useDiscoverLocator, useLogExplorerLocator } from '../../../../../hooks';
 
 interface ViewLogsProps {
-  viewInLogs: boolean;
   logStreamQuery: string;
   startTime: string;
   endTime: string;
@@ -24,62 +21,41 @@ interface ViewLogsProps {
 
 /*
   Button that takes to the Logs view Ui when that is available, otherwise fallback to the Discover UI
-  The urls are built using same logStreamQuery (provided by a prop), startTime and endTime, ensuring that they'll both will target same log lines
+  If none is available, don't display the button at all
 */
+//  TODO: check if it's possible to use `nodeLogsLocator` from `getLogsLocatorsFromUrlService` instead
 export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
-  viewInLogs,
   logStreamQuery,
   startTime,
   endTime,
 }) => {
-  const { http } = useStartServices();
+  const discoverLocator = useDiscoverLocator();
+  const logsExplorerLocator = useLogExplorerLocator();
+  const defaultStartTime = moment().subtract(1, 'day').toISOString();
+  const defaultEndTime = moment().toISOString();
 
-  // Generate URL to pass page state to Logs UI
-  const viewInLogsUrl = useMemo(
-    () =>
-      http.basePath.prepend(
-        url.format({
-          pathname: '/app/logs/stream',
-          search: stringify({
-            logPosition: encode({
-              start: startTime,
-              end: endTime,
-              streamLive: false,
-            }),
-            logFilter: encode({
-              expression: logStreamQuery,
-              kind: 'kuery',
-            }),
-          }),
-        })
-      ),
-    [http.basePath, startTime, endTime, logStreamQuery]
-  );
+  const redirectUrlParams = useMemo(() => {
+    return {
+      timeRange: {
+        from: startTime ? startTime : defaultStartTime,
+        to: endTime ? endTime : defaultEndTime,
+      },
+      query: { query: logStreamQuery, language: 'kuery' },
+    };
+  }, [defaultEndTime, defaultStartTime, endTime, logStreamQuery, startTime]);
 
-  const viewInDiscoverUrl = useMemo(() => {
-    const index = 'logs-*';
-    const query = encode({
-      query: logStreamQuery,
-      language: 'kuery',
-    });
-    return http.basePath.prepend(
-      `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'${startTime}',to:'${endTime}'))&_a=(columns:!(event.dataset,message),index:'${index}',query:${query})`
-    );
-  }, [logStreamQuery, http.basePath, startTime, endTime]);
+  const url = useMemo(() => {
+    return logsExplorerLocator
+      ? logsExplorerLocator?.getRedirectUrl(redirectUrlParams)
+      : discoverLocator?.getRedirectUrl(redirectUrlParams);
+  }, [discoverLocator, logsExplorerLocator, redirectUrlParams]);
 
-  return viewInLogs ? (
-    <EuiButton href={viewInLogsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
+  return logsExplorerLocator || discoverLocator ? (
+    <EuiButton href={url} iconType="popout" data-test-subj="viewInLogsBtn">
       <FormattedMessage
         id="xpack.fleet.agentLogs.openInLogsUiLinkText"
         defaultMessage="Open in Logs"
       />
     </EuiButton>
-  ) : (
-    <EuiButton href={viewInDiscoverUrl} iconType="popout" data-test-subj="viewInDiscoverBtn">
-      <FormattedMessage
-        id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
-        defaultMessage="Open in Discover"
-      />
-    </EuiButton>
-  );
+  ) : null;
 };

@@ -112,9 +112,8 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, cloud } = useStartServices();
+    const { data, application } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
-    const isLogsUIAvailable = !cloud?.isServerlessEnabled;
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
@@ -321,7 +320,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                 }}
               >
                 <ViewLogsButton
-                  viewInLogs={isLogsUIAvailable}
                   logStreamQuery={logStreamQuery}
                   startTime={state.start}
                   endTime={state.end}
