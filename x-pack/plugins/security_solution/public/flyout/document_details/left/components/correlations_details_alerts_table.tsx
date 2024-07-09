@@ -24,7 +24,7 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import { AlertPreviewButton } from '../../alert_preview_button';
+import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;

@@ -14,7 +14,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
-import { AlertPreviewButton } from '../../../../../flyout/document_details/alert_preview_button';
+import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';

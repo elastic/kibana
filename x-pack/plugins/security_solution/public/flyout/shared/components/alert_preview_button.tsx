@@ -10,19 +10,31 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import React, { useCallback } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ALERT_PREVIEW_BANNER } from './preview/constants';
-import { DocumentDetailsPreviewPanelKey } from './shared/constants/panel_keys';
+import { ALERT_PREVIEW_BANNER } from '../../document_details/preview/constants';
+import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 
 interface AlertPreviewButtonProps {
   /**
    * Name of the index used in the parent's page
    */
   indexName: string;
+  /**
+   * Id of the alert to preview
+   */
   id: string;
+  /**
+   * Data attribute used for testing.
+   */
   'data-test-subj'?: string;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
   scopeId: string;
 }
 
+/**
+ * Icon button showed on tables to launch a preview of the alert details panel.
+ */
 export const AlertPreviewButton: FC<AlertPreviewButtonProps> = ({
   id,
   indexName,
