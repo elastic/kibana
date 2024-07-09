@@ -207,7 +207,7 @@ class VisEditorVisualizationUI extends Component {
               }),
             })}
             onApiAvailable={(api) => {
-              this.updateVis = () => api.setVis(this.getSavedVis());
+              this.updateVis = () => api.updateVis(this.getSavedVis());
               api.subscribeToInitialRender(() =>
                 this.props.eventEmitter.emit('embeddableRendered')
               );
