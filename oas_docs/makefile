@@ -15,7 +15,7 @@
 
 .PHONY: api-docs
 api-docs: ## Generate kibana.serverless.yaml
-	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
+	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
 
 .PHONY: api-docs-lint
 api-docs-lint: ## Run spectral API docs linter
