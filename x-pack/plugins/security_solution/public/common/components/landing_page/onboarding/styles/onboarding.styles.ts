@@ -25,6 +25,9 @@ export const useOnboardingStyles = () => {
         padding: `0 ${euiTheme.size.xxl} ${euiTheme.size.xxxl}`,
         backgroundColor: euiTheme.colors.lightestShade,
       }),
+      bannerStyles: css({
+        margin: `-${euiTheme.size.l} 0`,
+      }),
     }),
     [
       euiTheme.colors.lightestShade,

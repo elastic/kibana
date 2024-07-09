@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsDataAccessPluginSetupDeps {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsDataAccessPluginStartDeps {}
+export { APMTracer } from './apm_tracer';
