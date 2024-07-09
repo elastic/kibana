@@ -6486,6 +6486,10 @@
               },
               {
                 "plugin": "ruleRegistry",
+                "path": "x-pack/plugins/rule_registry/server/routes/get_alerts_group_aggregations.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/update_alert_by_id.ts"
               },
               {
@@ -14829,6 +14833,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/list.ts"
               },
               {
                 "plugin": "securitySolution",
