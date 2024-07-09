@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -24,6 +24,7 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
+import { AVCResultsBanner2024 } from '../../avc_banner/avc_results_banner_2024';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -55,8 +56,9 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const { wrapperStyles, progressSectionStyles, stepsSectionStyles } = useOnboardingStyles();
-  const { telemetry } = useKibana().services;
+  const { wrapperStyles, progressSectionStyles, stepsSectionStyles, bannerStyles } =
+    useOnboardingStyles();
+  const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(
     (params: OnboardingHubStepLinkClickedParams) => {
       telemetry.reportOnboardingHubStepLinkClicked(params);
@@ -64,10 +66,23 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     [telemetry]
   );
 
+  const [showAVCBanner, setShowAVCBanner] = useState(
+    storage.get('securitySolution.showAvcBanner') ?? true
+  );
+  const onBannerDismiss = useCallback(() => {
+    setShowAVCBanner(false);
+    storage.set('securitySolution.showAvcBanner', false);
+  }, [storage]);
+
   useScrollToHash();
 
   return (
     <div className={wrapperStyles}>
+      {showAVCBanner && (
+        <KibanaPageTemplate.Section paddingSize="none" className={bannerStyles}>
+          <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+        </KibanaPageTemplate.Section>
+      )}
       <KibanaPageTemplate.Section restrictWidth={CONTENT_WIDTH} paddingSize="xl">
         <WelcomeHeader productTier={productTier} />
       </KibanaPageTemplate.Section>
