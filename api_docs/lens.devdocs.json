@@ -11091,7 +11091,15 @@
           },
           " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
           "ViewUnderlyingDataArgs",
-          "; } & ",
+          "; getFullAttributes: () => ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensSavedObjectAttributes",
+            "text": "LensSavedObjectAttributes"
+          },
+          " | undefined; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -11147,7 +11155,15 @@
             "section": "def-common.HasParentApi",
             "text": "HasParentApi"
           },
-          "<unknown>>"
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnifiedSearch",
+            "text": "PublishesUnifiedSearch"
+          },
+          ">>>"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
         "deprecated": false,
