@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      await panelActions.legacyUnlinkFromLibrary(originalPanel);
+      await panelActions.unlinkFromLibrary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save visualize panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      await panelActions.legacySaveToLibrary('Rendering Test: heatmap - copy', originalPanel);
+      await panelActions.saveToLibrary('Rendering Test: heatmap - copy', originalPanel);
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
 
       const updatedPanel = await testSubjects.find(

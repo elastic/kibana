@@ -531,7 +531,6 @@ export const getTopNavConfig = (
                 returnToOrigin,
                 dashboardId,
                 addToLibrary,
-                ...rest
               }: OnSaveProps & { returnToOrigin?: boolean } & {
                 dashboardId?: string | null;
                 addToLibrary?: boolean;

@@ -69,11 +69,11 @@ export type VisualizeApi = HasEditCapabilities &
     subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
     subscribeToNavigateToLens: (listener: (navigateFn: NavigateToLensFn) => void) => void;
     openInspector: () => OverlayRef | undefined;
-    saveToLibrary: (title: string) => string;
+    saveToLibrary: (title: string) => Promise<string>;
     canLinkToLibrary: () => boolean;
     canUnlinkFromLibrary: () => boolean;
     checkForDuplicateTitle: (title: string) => boolean;
     getByValueState: () => VisualizeSerializedState;
-    getByReferenceState: (id: string) => Promise<VisualizeRuntimeState>;
+    getByReferenceState: (id: string) => VisualizeSerializedState;
     getTitles: () => SerializedTitles;
   };

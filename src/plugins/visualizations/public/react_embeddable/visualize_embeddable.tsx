@@ -35,10 +35,12 @@ import type { SerializedVis, Vis } from '../vis';
 import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_handler';
 import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
+import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import {
   ExtraSavedObjectProperties,
   VisualizeApi,
+  VisualizeOutputState,
   VisualizeRuntimeState,
   VisualizeSerializedState,
 } from './types';
@@ -184,7 +186,20 @@ export const getVisualizeEmbeddableFactory: (
         // library transforms
         saveToLibrary: (newTitle: string) => {
           titlesApi.setPanelTitle(newTitle);
-          return uuid;
+          const { rawState, references } = serializeState({
+            serializedVis: vis$.getValue().serialize(),
+            titles: {
+              ...serializeTitles(),
+              title: newTitle,
+            },
+            id: uuid,
+          });
+          return saveToLibrary({
+            id: uuid,
+            uiState: vis$.getValue().uiState,
+            rawState: rawState as VisualizeOutputState,
+            references,
+          });
         },
         canLinkToLibrary: () => !state.savedObjectId,
         canUnlinkFromLibrary: () => !!state.savedObjectId,
@@ -194,8 +209,12 @@ export const getVisualizeEmbeddableFactory: (
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
           }).rawState,
-        getByReferenceState: async (libraryId) =>
-          await deserializeState({ rawState: { savedObjectId: libraryId } }),
+        getByReferenceState: (libraryId) =>
+          serializeState({
+            serializedVis: vis$.getValue().serialize(),
+            titles: serializeTitles(),
+            id: libraryId,
+          }).rawState,
       },
       {
         ...titleComparators,
