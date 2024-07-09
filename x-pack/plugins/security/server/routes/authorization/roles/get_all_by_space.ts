@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
-import { ALL_SPACES_ID } from '../../../../common/constants';
+import { ALL_SPACES_ID, ApiActionPermission } from '../../../../common/constants';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -23,8 +23,15 @@ export function defineGetAllRolesBySpaceRoutes({
   router.get(
     {
       path: '/internal/security/roles/{spaceId}',
-      options: {
-        tags: ['access:manageSpaces'],
+      authz: {
+        requiredPrivileges: [
+          ApiActionPermission.ManageSpaces,
+          {
+            tier: 'serverless',
+            privileges: [ApiActionPermission.TaskManager],
+          },
+        ],
+        passThrough: true,
       },
       validate: {
         params: schema.object({ spaceId: schema.string({ minLength: 1 }) }),

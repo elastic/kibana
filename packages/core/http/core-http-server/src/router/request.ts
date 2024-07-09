@@ -21,6 +21,12 @@ import type { Headers } from './headers';
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
   access: 'internal' | 'public';
+  authz?:
+    | false
+    | {
+        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
+        passThrough?: boolean;
+      };
 }
 
 /**
@@ -135,6 +141,8 @@ export interface KibanaRequest<
    * Even if the API facade is the same, fake requests have some stubbed functionalities.
    */
   readonly isFakeRequest: boolean;
+
+  authzResponse?: any;
 
   /**
    * An internal request has access to internal routes.

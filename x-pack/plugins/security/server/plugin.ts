@@ -284,6 +284,7 @@ export class SecurityPlugin
       features,
       getCurrentUser,
       customBranding: core.customBranding,
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });

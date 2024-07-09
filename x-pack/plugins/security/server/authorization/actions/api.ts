@@ -16,6 +16,7 @@ export class ApiActions implements ApiActionsType {
     this.prefix = `api:`;
   }
 
+  // From this
   public get(operation: string) {
     if (!operation || !isString(operation)) {
       throw new Error('operation is required and must be a string');

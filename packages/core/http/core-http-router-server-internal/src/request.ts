@@ -255,6 +255,7 @@ export class CoreKibanaRequest<
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
+      authz: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.authz,
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,

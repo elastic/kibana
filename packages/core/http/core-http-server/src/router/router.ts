@@ -124,6 +124,12 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
+  authz?:
+    | false
+    | {
+        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
+        passThrough?: boolean;
+      };
   /**
    * @note if providing a function to lazily load your validation schemas assume
    *       that the function will only be called once.

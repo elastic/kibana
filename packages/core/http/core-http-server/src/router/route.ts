@@ -206,6 +206,16 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @remarks This will be surfaced in OAS documentation.
    */
   deprecated?: boolean;
+
+  /**
+   * The required capabilities to access this route.
+   */
+  authz?:
+    | false
+    | {
+        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
+        passThrough?: boolean;
+      };
 }
 
 /**
@@ -285,6 +295,16 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * ```
    */
   validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
+
+  authz?:
+    | false
+    | {
+        /**
+         * The required capabilities to access this route.
+         */
+        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
+        passThrough?: boolean;
+      };
 
   /**
    * Additional route options {@link RouteConfigOptions}.
