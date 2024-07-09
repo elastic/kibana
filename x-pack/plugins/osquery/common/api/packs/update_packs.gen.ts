@@ -39,6 +39,3 @@ export const UpdatePacksRequestBody = z.object({
   shards: Shards.optional(),
   queries: ObjectQueries.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});
