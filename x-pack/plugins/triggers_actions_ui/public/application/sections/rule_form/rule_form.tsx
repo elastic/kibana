@@ -794,7 +794,6 @@ export const RuleForm = ({
               data-test-subj="intervalFormRow"
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
-              /* @ts-expect-error upgrade typescript v5.1.6 */
               isInvalid={!!errors['schedule.interval'].length}
               error={errors['schedule.interval']}
             >
@@ -804,10 +803,7 @@ export const RuleForm = ({
                     prepend={labelForRuleChecked}
                     fullWidth
                     min={1}
-                    isInvalid={
-                      /* @ts-expect-error upgrade typescript v5.1.6 */
-                      !!errors['schedule.interval'].length
-                    }
+                    isInvalid={!!errors['schedule.interval'].length}
                     value={ruleInterval || ''}
                     name="interval"
                     data-test-subj="intervalInput"
