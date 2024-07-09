@@ -9,9 +9,9 @@ import { EndpointTestResources } from '../../test_suites/security_solution_endpo
 import { EndpointArtifactsTestResources } from '../../test_suites/security_solution_endpoint/services/endpoint_artifacts';
 import { EndpointPolicyTestResourcesProvider } from '../../test_suites/security_solution_endpoint/services/endpoint_policy';
 
-import { ResolverGeneratorProvider } from '../../edr_workflows/services/resolver';
-import { RolesUsersProvider } from '../../edr_workflows/services/roles_users';
 import { services as xPackAPIServices } from '../../../api_integration/services';
+import { ResolverGeneratorProvider } from '../services/security_solution_edr_workflows_resolver';
+import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';
 
 export const services = {
   ...xPackAPIServices,
