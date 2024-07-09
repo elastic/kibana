@@ -23,6 +23,7 @@ import { TRANSFORM_HEALTH_RESULTS } from '@kbn/transform-plugin/common/constants
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
+import { runSoon } from '../../../group3/test_helpers';
 
 const CONNECTOR_TYPE_ID = '.index';
 const RULE_TYPE_ID = 'transform_health';
@@ -30,7 +31,7 @@ const ES_TEST_INDEX_SOURCE = 'transform-alert:transform-health';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
 
-const RULE_INTERVAL_SECONDS = 3;
+const RULE_INTERVAL_SECONDS = 10000;
 
 interface CreateRuleParams {
   name: string;
@@ -80,8 +81,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     `.internal.alerts-transform.health.alerts-default-000001`
   );
 
-  // Failing: See https://github.com/elastic/kibana/issues/177215
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
     let connectorId: string;
     const transformId = 'test_transform_01';
@@ -120,6 +120,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       await stopTransform(transformId);
+
+      await runSoon({ id: ruleId, supertest, retry });
 
       log.debug('Checking created alerts...');
 
