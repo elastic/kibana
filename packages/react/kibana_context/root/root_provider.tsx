@@ -46,7 +46,13 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
-
+  const overrides = JSON.parse(localStorage.getItem("kbn-theme-overrides") || "{}");
+  const { modify } = props;
+  props.modify = {
+    ...modify,
+    ...overrides,
+  }
+  
   if (hasEuiProvider) {
     emitEuiProviderWarning(
       'KibanaRootContextProvider has likely been nested in this React tree, either by direct reference or by KibanaRenderContextProvider.  The result of this nesting is a nesting of EuiProvider, which has negative effects.  Check your React tree for nested Kibana context providers.'
@@ -56,7 +62,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
     return (
       <KibanaEuiProvider {...props}>
         <i18n.Context>{children}</i18n.Context>
-      </KibanaEuiProvider>
+      </KibanaEuiProvider >
     );
   }
 };
