@@ -6,7 +6,7 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [analyze]
 
-To perform these tasks, you must have <<setup-cases,full access>> to the case feature privileges in {kib}.
+To perform these tasks, you must have <<setup-cases,full access>> to the appropriate case features in {kib}.
 
 [[open-case]]
 === Open a new case
