@@ -140,6 +140,42 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
 
       expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
+
+    it('should only render integers when a decimal value is provided', async () => {
+      const invalidDecimalValue = 6.11;
+      const validIntegerValue = 6;
+
+      const onChangeSampleSizeMock = jest.fn();
+
+      const component = mountWithIntl(
+        <UnifiedDataTableAdditionalDisplaySettings
+          maxAllowedSampleSize={500}
+          sampleSize={50}
+          onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight={RowHeightMode.custom}
+          rowHeightLines={10}
+          headerRowHeight={RowHeightMode.custom}
+          headerRowHeightLines={5}
+        />
+      );
+      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(50);
+
+      await act(async () => {
+        input.simulate('change', {
+          target: {
+            value: invalidDecimalValue,
+          },
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      component.update();
+
+      expect(
+        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
+      ).toBe(validIntegerValue);
+    });
   });
 
   describe('rowHeight', () => {

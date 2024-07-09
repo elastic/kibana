@@ -178,6 +178,45 @@ export const getSLOSummaryMappingsTemplate = (
         spaceId: {
           type: 'keyword',
         },
+        fiveMinuteBurnRate: {
+          properties: {
+            goodEvents: {
+              type: 'long',
+            },
+            totalEvents: {
+              type: 'long',
+            },
+            value: {
+              type: 'double',
+            },
+          },
+        },
+        oneHourBurnRate: {
+          properties: {
+            goodEvents: {
+              type: 'long',
+            },
+            totalEvents: {
+              type: 'long',
+            },
+            value: {
+              type: 'double',
+            },
+          },
+        },
+        oneDayBurnRate: {
+          properties: {
+            goodEvents: {
+              type: 'long',
+            },
+            totalEvents: {
+              type: 'long',
+            },
+            value: {
+              type: 'double',
+            },
+          },
+        },
       },
     },
   },

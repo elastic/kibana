@@ -186,7 +186,7 @@
           },
           "<string | undefined>; }>"
         ],
-        "path": "x-pack/plugins/stack_connectors/server/connector_types/webhook/index.ts",
+        "path": "x-pack/plugins/stack_connectors/server/connector_types/webhook/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

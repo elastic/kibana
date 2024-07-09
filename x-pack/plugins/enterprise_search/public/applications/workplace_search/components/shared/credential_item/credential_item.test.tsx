@@ -61,8 +61,7 @@ describe('CredentialItem', () => {
       preventDefault: jest.fn(),
     };
 
-    const input = wrapper.find(EuiFieldText).dive().find('input');
-    input.simulate('click', simulatedEvent);
+    wrapper.find(EuiFieldText).simulate('click', simulatedEvent);
 
     expect(simulatedEvent.currentTarget.select).toHaveBeenCalled();
   });

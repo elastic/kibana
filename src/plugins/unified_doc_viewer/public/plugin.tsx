@@ -19,6 +19,7 @@ import { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -52,6 +53,7 @@ export interface UnifiedDocViewerStartDeps {
   discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  share: SharePluginStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -99,7 +101,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -107,6 +109,7 @@ export class UnifiedDocViewerPublicPlugin
             dataView={dataView}
             textBasedHits={textBasedHits}
             hasLineNumbers
+            decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />
         );
@@ -120,7 +123,7 @@ export class UnifiedDocViewerPublicPlugin
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, discoverShared, fieldFormats, fieldsMetadata } = deps;
+    const { data, discoverShared, fieldFormats, fieldsMetadata, share } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -134,6 +137,7 @@ export class UnifiedDocViewerPublicPlugin
       storage,
       uiSettings,
       unifiedDocViewer,
+      share,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

@@ -111,8 +111,14 @@ export const hostDetailsTabs: Tab[] = [
 export const hostDetailsFlyoutTabs: Tab[] = [...hostDetailsTabs, linkToApmTab];
 
 // The profiling tab would be added in next iteration
-export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab, logsTab];
-export const containerDetailsFlyoutTabs: Tab[] = [overviewTab, metadataTab, logsTab, linkToApmTab];
+export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab, metricsTab, logsTab];
+export const containerDetailsFlyoutTabs: Tab[] = [
+  overviewTab,
+  metadataTab,
+  metricsTab,
+  logsTab,
+  linkToApmTab,
+];
 
 export const getAssetDetailsTabs = (type: string): Tab[] => {
   switch (type) {

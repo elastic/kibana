@@ -297,6 +297,32 @@ describe('When the edit exception modal is opened', () => {
       it('should NOT display the eql sequence callout', () => {
         expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
       });
+
+      it('should show a warning callout if wildcard is used', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  {
+                    field: 'event.category',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'wildcardvalue?',
+                  },
+                ],
+              },
+            ],
+          })
+        );
+
+        wrapper.update();
+        expect(
+          wrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
+        ).toBeTruthy();
+      });
     });
 
     describe('when exception entry fields and index allow user to bulk close', () => {
