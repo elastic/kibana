@@ -54,7 +54,10 @@ describe('RecentlyAccessed#start()', () => {
 
   const getStart = async () => {
     const http = httpServiceMock.createStartContract();
-    const recentlyAccessed = await new RecentlyAccessedService().start({ http });
+    const recentlyAccessed = await new RecentlyAccessedService().start({
+      http,
+      key: 'recentlyAccessed',
+    });
     return { http, recentlyAccessed };
   };
 
