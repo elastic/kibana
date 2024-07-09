@@ -427,7 +427,6 @@ export const initializeDashboard = async ({
       dashboardContainer.controlGroup = controlGroup;
       startSyncingDashboardControlGroup.bind(dashboardContainer)();
     });
-    await controlGroup.untilInitialized();
   }
 
   // --------------------------------------------------------------------------------------
