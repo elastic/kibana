@@ -53,7 +53,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
         await rolesUsersProvider.deleteRoles(roles);
       }
     });
-
+    // Remember to make sure the suite is enabled in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml when adding new tests without @skipInServerlessMKI
     loadTestFile(require.resolve('./endpoint_authz'));
   });
 }

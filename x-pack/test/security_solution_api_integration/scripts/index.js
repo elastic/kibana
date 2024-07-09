@@ -36,7 +36,7 @@ let grepArgs = [];
 if (type !== 'server') {
   switch (environment) {
     case 'serverlessEnv':
-      grepArgs = ['--grep', '/^(?!.*@skipInServerless).*@serverless.*/'];
+      grepArgs = ['--grep', '/^(?!.*\\b@skipInServerless\\b).*@serverless.*/'];
       break;
 
     case 'essEnv':

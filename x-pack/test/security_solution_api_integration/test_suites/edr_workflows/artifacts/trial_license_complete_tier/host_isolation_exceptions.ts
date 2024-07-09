@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
+  // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   describe('@ess @serverless @skipInServerlessMKI Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
