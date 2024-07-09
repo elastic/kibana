@@ -3,6 +3,7 @@ on:
     branches-ignore:
       - main
     types: [opened, synchronize, reopened]
+  workflow_dispatch: # Add this line to enable manual triggers
 
 jobs:
   approve:
