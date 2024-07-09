@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('crowdstrike connector', function () {
     before(async () => {
       simulatorUrl = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.CROWDSTRIKE)
       );
       editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
     });
