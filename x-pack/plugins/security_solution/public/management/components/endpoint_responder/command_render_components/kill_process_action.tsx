@@ -13,22 +13,28 @@ import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter
 import type { KillProcessRequestBody } from '../../../../../common/endpoint/types';
 
 export const KillProcessActionResult = memo<
-  ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>
+  ActionRequestComponentProps<{ pid?: string[]; entityId?: string[]; processName?: string[] }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendKillProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
+    const agentType = command.commandDefinition?.meta?.agentType;
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
     return endpointId
       ? {
+          agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [
+    command.args.args,
+    command.commandDefinition?.meta?.agentType,
+    command.commandDefinition?.meta?.endpointId,
+  ]);
 
   return useConsoleActionSubmitter<KillProcessRequestBody>({
     ResultComponent,
