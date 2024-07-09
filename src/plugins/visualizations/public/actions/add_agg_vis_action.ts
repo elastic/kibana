@@ -38,10 +38,9 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
   public readonly order = 20;
 
   constructor(visTypes: TypesStart) {
-    this.aggVisualizationCreationEnabled =
-      visTypes.all().filter((type) => {
-        return !type.disableCreate && type.group === VisGroups.AGGBASED;
-      }).length > 0;
+    this.aggVisualizationCreationEnabled = visTypes.all().some((type) => {
+      return !type.disableCreate && type.group === VisGroups.AGGBASED;
+    });
   }
 
   public getIconType() {
