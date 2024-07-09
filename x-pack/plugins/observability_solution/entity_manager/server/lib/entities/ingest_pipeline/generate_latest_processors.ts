@@ -6,15 +6,15 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateLatestIndexName } from '../helpers/generate_index_name';
+import { generateLatestIndexName } from '../helpers/generate_component_id';
 
-function mapDestinationToPainless(destination: string, source: string) {
+function mapDestinationToPainless(destination: string) {
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
     if (currentIndex + 1 === parts.length) {
       return `${acc}\n  ctx${parts
         .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${source}.data.keySet();`;
+        .join('')} = ctx.entity.metadata.${destination}.data.keySet();`;
     }
     return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
       .slice(0, currentIndex + 1)
@@ -28,12 +28,11 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return '';
   }
   return definition.metadata.reduce((script, def) => {
-    const source = def.source;
     const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
+    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
       '.',
       '?.'
-    )}.data != null) {${mapDestinationToPainless(destination, source)}\n}\n`;
+    )}.data != null) {${mapDestinationToPainless(destination)}\n}\n`;
   }, '');
 }
 

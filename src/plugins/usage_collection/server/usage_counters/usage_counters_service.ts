@@ -8,18 +8,18 @@
 
 import * as Rx from 'rxjs';
 import * as rxOp from 'rxjs';
-import {
+import moment from 'moment';
+import type {
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { Logger, LogMeta } from '@kbn/core/server';
 
-import moment from 'moment';
-import { UsageCounter } from './usage_counter';
-import { UsageCounters } from '../../common/types';
+import { type IUsageCounter, UsageCounter } from './usage_counter';
+import type { UsageCounters } from '../../common';
 import {
-  registerUsageCountersSavedObjectType,
+  registerUsageCountersSavedObjectTypes,
   storeCounter,
   serializeCounterKey,
 } from './saved_objects';
@@ -35,8 +35,8 @@ export interface UsageCountersServiceDeps {
 }
 
 export interface UsageCountersServiceSetup {
-  createUsageCounter: (type: string) => UsageCounter;
-  getUsageCounterByType: (type: string) => UsageCounter | undefined;
+  createUsageCounter: (domainId: string) => IUsageCounter;
+  getUsageCounterByDomainId: (domainId: string) => IUsageCounter | undefined;
 }
 
 /* internal */
@@ -95,11 +95,11 @@ export class UsageCountersService {
         storingCache$.next(false);
       });
 
-    registerUsageCountersSavedObjectType(core.savedObjects);
+    registerUsageCountersSavedObjectTypes(core.savedObjects);
 
     return {
       createUsageCounter: this.createUsageCounter,
-      getUsageCounterByType: this.getUsageCounterByType,
+      getUsageCounterByDomainId: this.getUsageCounterByDomainId,
     };
   };
 
@@ -137,11 +137,11 @@ export class UsageCountersService {
 
   private storeDate$(
     counters: UsageCounters.v1.CounterMetric[],
-    internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
+    soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
   ) {
     return Rx.forkJoin(
-      counters.map((counter) =>
-        Rx.defer(() => storeCounter(counter, internalRepository)).pipe(
+      counters.map((metric) =>
+        Rx.defer(() => storeCounter({ metric, soRepository })).pipe(
           rxOp.retry(this.retryCount),
           rxOp.catchError((error) => {
             this.logger.warn(error);
@@ -152,22 +152,17 @@ export class UsageCountersService {
     );
   }
 
-  private createUsageCounter = (type: string): UsageCounter => {
-    if (this.counterSets.get(type)) {
-      throw new Error(`Usage counter set "${type}" already exists.`);
+  private createUsageCounter = (domainId: string): IUsageCounter => {
+    if (this.counterSets.get(domainId)) {
+      throw new Error(`Usage counter set "${domainId}" already exists.`);
     }
 
-    const counterSet = new UsageCounter({
-      domainId: type,
-      counter$: this.source$,
-    });
-
-    this.counterSets.set(type, counterSet);
-
+    const counterSet = new UsageCounter({ domainId, counter$: this.source$ });
+    this.counterSets.set(domainId, counterSet);
     return counterSet;
   };
 
-  private getUsageCounterByType = (type: string): UsageCounter | undefined => {
+  private getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
     return this.counterSets.get(type);
   };
 
@@ -176,8 +171,15 @@ export class UsageCountersService {
   ): Record<string, UsageCounters.v1.CounterMetric> => {
     const date = moment.now();
     return counters.reduce((acc, counter) => {
-      const { counterName, domainId, counterType } = counter;
-      const key = serializeCounterKey({ domainId, counterName, counterType, date });
+      const { domainId, counterName, counterType, namespace, source } = counter;
+      const key = serializeCounterKey({
+        domainId,
+        counterName,
+        counterType,
+        namespace,
+        source,
+        date,
+      });
       const existingCounter = acc[key];
       if (!existingCounter) {
         acc[key] = counter;
