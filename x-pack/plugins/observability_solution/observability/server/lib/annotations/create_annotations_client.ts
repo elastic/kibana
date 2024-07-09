@@ -224,44 +224,6 @@ export function createAnnotationsClient(params: {
         shouldClauses.push(query);
       }
 
-      console.log(
-        JSON.stringify({
-          index: readIndex,
-          size: 10000,
-          ignore_unavailable: true,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: start ?? 'now-30d',
-                      lte: end ?? 'now',
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      ...(serviceName
-                        ? [
-                            {
-                              term: {
-                                'service.name': serviceName,
-                              },
-                            },
-                          ]
-                        : []),
-                      ...shouldClauses,
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
-
       const result = await esClient.search({
         index: readIndex,
         size: 10000,
