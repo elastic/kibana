@@ -85,6 +85,23 @@ Object {
           },
         },
       },
+      "entity.metadata.sourceIndex": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "sourceIndex",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "event.ingested": Object {
+              "gte": "now-1m",
+            },
+          },
+        },
+      },
       "entity.metadata.tags": Object {
         "aggs": Object {
           "data": Object {
