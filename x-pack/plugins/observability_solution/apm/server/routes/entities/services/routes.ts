@@ -109,27 +109,21 @@ const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
       throw Boom.badRequest(`serviceNames cannot be empty`);
     }
 
+    const logsParams = {
+      esClient: coreContext.elasticsearch.client.asCurrentUser,
+      identifyingMetadata: 'service.name',
+      timeFrom: start,
+      timeTo: end,
+      kuery,
+      serviceEnvironmentQuery: environmentQuery(environment),
+      serviceNames,
+    };
+
     const currentPeriodLogsRateTimeseries =
-      await logsDataAccessStart.services.getLogsRateTimeseries({
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-        identifyingMetadata: 'service.name',
-        timeFrom: start,
-        timeTo: end,
-        kuery,
-        serviceEnvironmentQuery: environmentQuery(environment),
-        serviceNames,
-      });
+      await logsDataAccessStart.services.getLogsRateTimeseries(logsParams);
 
     const currentPeriodLogsErrorRateTimeseries =
-      await logsDataAccessStart.services.getLogsErrorRateTimeseries({
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-        identifyingMetadata: 'service.name',
-        timeFrom: start,
-        timeTo: end,
-        kuery,
-        serviceEnvironmentQuery: environmentQuery(environment),
-        serviceNames,
-      });
+      await logsDataAccessStart.services.getLogsErrorRateTimeseries(logsParams);
 
     const apmServiceTransactionDetailedStatsPeriods =
       await getServiceTransactionDetailedStatsPeriods({
