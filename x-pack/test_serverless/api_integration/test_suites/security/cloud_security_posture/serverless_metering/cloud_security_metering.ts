@@ -10,6 +10,7 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import * as http from 'http';
 import { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,7 +20,6 @@ import {
   createPackagePolicy,
   createCloudDefendPackagePolicy,
 } from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import * as http from 'http';
 import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 const CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS = 'metrics-cloud_defend.heartbeat-default';
