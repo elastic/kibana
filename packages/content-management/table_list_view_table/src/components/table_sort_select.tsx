@@ -193,7 +193,10 @@ export function TableSortSelect({
         <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>
         <EuiSelectable<SortItem>
           singleSelection={'always'}
-          aria-label="Sorting options"
+          aria-label={i18n.translate(
+            'contentManagement.tableList.listing.tableSortSelect.sortingOptionsAriaLabel',
+            { defaultMessage: 'Sorting options' }
+          )}
           options={options}
           onChange={onSelectChange}
           data-test-subj="sortSelect"

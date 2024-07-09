@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiInMemoryTable,
   CriteriaWithPagination,
-  PropertySort,
   SearchFilterConfig,
   Direction,
   Query,
@@ -281,6 +280,11 @@ export function Table<T extends UserContentCommonSchema>({
     return { allUsers: Array.from(users), showNoUserOption: _showNoUserOption };
   }, [createdByEnabled, items]);
 
+  const sorting =
+    tableSort.field === 'accessedAt' // "accessedAt" is a special case with a custom sorting
+      ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
+      : { sort: tableSort };
+
   return (
     <UserFilterContextProvider
       enabled={createdByEnabled}
@@ -301,14 +305,7 @@ export function Table<T extends UserContentCommonSchema>({
         selection={selection}
         search={search}
         executeQueryOptions={{ enabled: false }}
-        sorting={
-          tableSort
-            ? tableSort.field ===
-              'accessedAt' /* "accessedAt" is a special case with a custom sorting */
-              ? true /* by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves */
-              : { sort: tableSort as PropertySort }
-            : undefined
-        }
+        sorting={sorting}
         onChange={onTableChange}
         data-test-subj="itemsInMemTable"
         rowHeader="attributes.title"
