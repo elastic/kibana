@@ -28,7 +28,6 @@ import {
 } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
-import { createVisInstance } from './create_vis_instance';
 import {
   isVisualizeSavedObjectState,
   VisualizeSavedObjectInputState,
@@ -43,12 +42,11 @@ export const deserializeState = async (
 ) => {
   if (!state.rawState)
     return {
-      vis: {
+      serializedVis: {
         data: {},
       },
     } as VisualizeRuntimeState;
   let serializedState = cloneDeep(state.rawState);
-  console.error('DESERIALIZE', serializedState, state.references);
   if (isVisualizeSavedObjectState(serializedState)) {
     serializedState = await deserializeSavedObjectState(serializedState);
   }
@@ -56,10 +54,10 @@ export const deserializeState = async (
   const references: Reference[] = state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
-  const vis = await createVisInstance(deserializedSavedVis);
+
   return {
     ...serializedState,
-    vis,
+    serializedVis: deserializedSavedVis,
   } as VisualizeRuntimeState;
 };
 

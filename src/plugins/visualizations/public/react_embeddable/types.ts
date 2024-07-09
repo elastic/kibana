@@ -26,7 +26,7 @@ export type ExtraSavedObjectProperties = Pick<
 >;
 
 export type VisualizeRuntimeState = SerializedTitles & {
-  vis: Vis<VisParams>;
+  serializedVis: SerializedVis<VisParams>;
   savedObjectId?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
 };

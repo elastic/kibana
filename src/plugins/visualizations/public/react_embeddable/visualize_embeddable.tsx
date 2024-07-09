@@ -58,7 +58,15 @@ export const getVisualizeEmbeddableFactory: (
     const renderCount$ = new BehaviorSubject<number>(0);
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
-    const vis$ = new BehaviorSubject<Vis>(state.vis);
+    const serializedVis$ = new BehaviorSubject<SerializedVis>(state.serializedVis);
+    const initialVisInstance = await createVisInstance(state.serializedVis);
+    const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
+
+    // when the serialized vis changes, update the vis instance
+    serializedVis$.subscribe(async (serializedVis) => {
+      vis$.next(await createVisInstance(serializedVis));
+    });
+
     const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
     const savedObjectProperties$ = new BehaviorSubject<ExtraSavedObjectProperties | undefined>(
       undefined
@@ -131,7 +139,7 @@ export const getVisualizeEmbeddableFactory: (
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
         updateVis: async (visUpdates) => {
           const currentSerializedVis = vis$.getValue().serialize();
-          const newSerializedVis = {
+          serializedVis$.next({
             ...currentSerializedVis,
             ...visUpdates,
             params: {
@@ -142,8 +150,7 @@ export const getVisualizeEmbeddableFactory: (
               ...currentSerializedVis.data,
               ...visUpdates.data,
             },
-          } as SerializedVis;
-          vis$.next(await createVisInstance(newSerializedVis));
+          } as SerializedVis);
           await updateExpressionParams();
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
@@ -218,10 +225,10 @@ export const getVisualizeEmbeddableFactory: (
       },
       {
         ...titleComparators,
-        vis: [
-          vis$,
+        serializedVis: [
+          serializedVis$,
           async (value) => {
-            vis$.next(value);
+            serializedVis$.next(value);
           },
           (a, b) => isEqual(a, b),
         ],
