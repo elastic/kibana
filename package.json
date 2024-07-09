@@ -1738,7 +1738,7 @@
     "tough-cookie": "^4.1.4",
     "tree-kill": "^1.2.2",
     "ts-morph": "^15.1.0",
-    "tsd": "^0.20.0",
+    "tsd": "^0.31.1",
     "typescript": "5.1.6",
     "url-loader": "^2.2.0",
     "val-loader": "^1.1.1",
