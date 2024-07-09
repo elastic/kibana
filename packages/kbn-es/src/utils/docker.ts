@@ -767,14 +767,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
     SYSTEM_INDICES_SUPERUSER
   )} and password ${chalk.bold.magenta(ELASTIC_SERVERLESS_SUPERUSER_PASSWORD)}
+  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
   Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
-
-  if (options.ssl) {
-    log.warning(`SSL has been enabled for ES. Kibana should be started with the SSL flag so that it can authenticate with ES.
-  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
-    `);
-  }
 
   if (!options.skipTeardown) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)

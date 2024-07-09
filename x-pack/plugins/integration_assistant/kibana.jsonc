@@ -13,9 +13,13 @@
     ],
     "requiredPlugins": [
       "kibanaReact",
+      "licensing",
       "triggersActionsUi",
       "actions",
       "stackConnectors",
     ],
+    "requiredBundles": [
+      "kibanaUtils",
+    ]
   }
 }
