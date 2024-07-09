@@ -153,6 +153,7 @@ RUN fc-cache -v
 {{/serverless}}
 WORKDIR /usr/share/kibana
 {{#fips}}
+
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
 RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
 RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
