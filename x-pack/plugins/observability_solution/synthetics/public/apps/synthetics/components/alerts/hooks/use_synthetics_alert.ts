@@ -8,6 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { selectDynamicSettings } from '../../../state/settings';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
@@ -33,12 +34,14 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   const loading = useSelector(selectSyntheticsAlertsLoading);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewrule);
+  const { settings } = useSelector(selectDynamicSettings);
 
   const { canSave } = useSyntheticsSettingsContext();
 
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
+  const defaultRulesEnabled = settings && (settings?.defaultRulesEnabled ?? true);
 
   const getOrCreateAlerts = useCallback(() => {
     if (canSave) {
@@ -49,7 +52,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   }, [canSave, dispatch]);
 
   useEffect(() => {
-    if (hasMonitors) {
+    if (hasMonitors && defaultRulesEnabled) {
       if (!defaultRules) {
         // on initial load we prioritize loading the app
         setTimeout(() => {
@@ -61,7 +64,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
     }
     // we don't want to run this on defaultRules change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, isOpen, hasMonitors]);
+  }, [dispatch, isOpen, hasMonitors, defaultRulesEnabled]);
 
   const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
 

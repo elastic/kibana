@@ -40,7 +40,10 @@ export class DefaultAlertService {
 
   async setupDefaultAlerts() {
     this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
-    if ((this.settings?.defaultConnectors ?? []).length === 0) {
+    if (
+      (this.settings?.defaultConnectors ?? []).length === 0 ||
+      !(this.settings?.defaultRulesEnabled ?? true)
+    ) {
       // we skip created default rules if user hasn't configured it
       return;
     }

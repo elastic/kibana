@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -80,6 +81,36 @@ export const AlertDefaultsForm = () => {
 
   return (
     <EuiForm>
+      <EuiSpacer size="m" />
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.synthetics.settings.defaultConnectors"
+              defaultMessage="Default rules"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.synthetics.settings.defaultConnectors.description"
+            defaultMessage="Default rules are automatically created. You can disable creation of default rules here."
+          />
+        }
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.synthetics.alertDefaultsForm.euiSwitch.enabledLabel', {
+            defaultMessage: 'Enabled',
+          })}
+          checked={formFields?.defaultRulesEnabled ?? true}
+          onChange={() => {
+            setFormFields({
+              ...formFields,
+              defaultRulesEnabled: !(formFields.defaultRulesEnabled ?? true),
+            });
+          }}
+        />
+      </EuiDescribedFormGroup>
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={

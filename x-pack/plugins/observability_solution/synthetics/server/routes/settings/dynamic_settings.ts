@@ -52,6 +52,7 @@ const fromAttribute = (attr: DynamicSettingsAttributes) => {
     certAgeThreshold: attr.certAgeThreshold,
     defaultConnectors: attr.defaultConnectors,
     defaultEmail: attr.defaultEmail,
+    defaultRulesEnabled: attr.defaultRulesEnabled ?? true,
   };
 };
 
@@ -72,6 +73,7 @@ export const DynamicSettingsSchema = schema.object({
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultRulesEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string()),

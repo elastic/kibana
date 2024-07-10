@@ -25,6 +25,7 @@ export const DynamicSettingsAttributesCodec = t.intersection([
   }),
   t.partial({
     defaultEmail: DefaultEmailCodec,
+    defaultRulesEnabled: t.boolean,
   }),
 ]);
 

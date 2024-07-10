@@ -34,6 +34,7 @@ export const DynamicSettingsCodec = t.intersection([
   }),
   t.partial({
     defaultEmail: DefaultEmailCodec,
+    defaultRulesEnabled: t.boolean,
   }),
 ]);
 
