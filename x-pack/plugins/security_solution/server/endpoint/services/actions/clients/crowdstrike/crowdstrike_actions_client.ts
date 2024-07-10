@@ -12,6 +12,7 @@ import {
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import { v4 as uuidv4 } from 'uuid';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -37,7 +38,6 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
-import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -190,19 +190,15 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
-      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        this.options.username,
-        reqIndexOptions.actionId
-      );
       if (!error) {
+        if (!reqIndexOptions.actionId) {
+          reqIndexOptions.actionId = uuidv4();
+        }
+
         try {
           actionResponse = (await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
-            actionParameters: {
-              comment: reqIndexOptions.comment
-                ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-                : actionCommentMessage,
-            },
+            actionParameters: { comment: this.buildExternalComment(reqIndexOptions) },
             command: 'contain',
           })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
         } catch (err) {
@@ -254,18 +250,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
-      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        this.options.username,
-        reqIndexOptions.actionId
-      );
+
       if (!error) {
         try {
           actionResponse = (await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
             command: 'lift_containment',
-            comment: reqIndexOptions.comment
-              ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-              : actionCommentMessage,
+            comment: this.buildExternalComment(reqIndexOptions),
           })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
         } catch (err) {
           error = err;
