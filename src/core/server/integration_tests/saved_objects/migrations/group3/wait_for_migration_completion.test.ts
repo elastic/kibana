@@ -40,8 +40,6 @@ describe('migration with waitForCompletion=true', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('waits for another instance to complete the migration', async () => {
