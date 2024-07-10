@@ -94,17 +94,20 @@ export async function createEvents(
     // When --align-events-to-interval is set, we will index all the events on the same
     // timestamp. Otherwise they will be distributed across the interval randomly.
     let events: Doc[];
+    const eventTimestamp = currentTimestamp
+      .clone()
+      .subtract(config.indexing.artificialIndexDelay + interval);
     if (config.indexing.alignEventsToInterval) {
       events = range(epc)
         .map((i) => {
           const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
-          return generateEvent(config, schedule, i, currentTimestamp);
+          return generateEvent(config, schedule, i, eventTimestamp);
         })
         .flat();
     } else {
       events = range(epc)
         .map(() =>
-          moment(random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval - 1))
+          moment(random(eventTimestamp.valueOf(), eventTimestamp.valueOf() + interval - 1))
         )
         .sort()
         .map((ts, i) => {
@@ -113,17 +116,7 @@ export async function createEvents(
         })
         .flat();
     }
-    // Delay adding the events to the queue if we are caught up and processing current events.
-    if (
-      currentTimestamp.isSameOrAfter(endTs) &&
-      continueIndexing &&
-      config.indexing.artificialIndexDelay > 0
-    ) {
-      logger.info(`Delaying events for ${config.indexing.artificialIndexDelay}ms`);
-      setTimeout(() => queue.push(events), config.indexing.artificialIndexDelay + interval);
-    } else {
-      await queue.push(events);
-    }
+    await queue.push(events);
   } else {
     logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');
   }
