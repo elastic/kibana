@@ -36,6 +36,7 @@
 }
 
 .TextBasedLangEditor .monaco-editor .suggest-details>.monaco-scrollable-element>.body>.header>.type {
+  // Wrap the content so that text does not get truncated, and fill the container
   @include euiTextBreakWord;
   height: fit-content;
   white-space: pre-wrap;

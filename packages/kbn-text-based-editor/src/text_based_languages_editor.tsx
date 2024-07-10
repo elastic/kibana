@@ -57,6 +57,7 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
+import { getColumnsWithMetadata } from './ecs_metadata_helper';
 
 import './overwrite.scss';
 
@@ -433,40 +434,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
           try {
-            // @TODO for @Q: Double check if adding ECS description here is appropriate
             const table = await memoizedFieldsFromESQL(
               esqlQuery,
               expressions,
               undefined,
               abortController
             ).result;
-            let columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
-            const containsEcsFields = columns.find((c) => c.name === 'ecs.version');
-
-            if (containsEcsFields) {
-              try {
-                const fieldsMetadataClient = await fieldsMetadata?.getClient();
-                if (fieldsMetadataClient) {
-                  const fields = await fieldsMetadataClient.find({
-                    fieldNames: columns.map((c) => c.name),
-                  });
-
-                  const removeKeywordModifier = (name: string) => {
-                    return name.endsWith('.keyword') ? name.slice(0, -8) : name;
-                  };
-                  if (fields.fields) {
-                    columns = columns.map((c) => ({
-                      ...c,
-                      metadata: fields.fields[removeKeywordModifier(c.name)],
-                    }));
-                  }
-                }
-              } catch (error) {
-                // eslint-disable-next-line no-console
-                console.error('Unable to fetch field metadata', error);
-              }
-            }
-            return columns;
+            const columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            return await getColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
           }
