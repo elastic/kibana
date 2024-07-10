@@ -97,6 +97,7 @@ describe('conversational chain', () => {
         inputTokensLimit: modelLimit,
       },
       prompt: 'you are a QA bot {question} {chat_history} {context}',
+      questionRewritePrompt: 'rewrite question {question} using {chat_history}"',
     });
 
     const stream = await conversationalChain.stream(aiClient, chat);
@@ -445,7 +446,7 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      // Even with body_content of 1000, the token count should be below the model limit of 100
+      // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
         { type: 'context_token_count', count: 73 },
         { type: 'prompt_token_count', count: 100 },

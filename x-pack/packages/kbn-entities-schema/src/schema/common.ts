@@ -96,3 +96,9 @@ export const identityFieldsSchema = z
     optional: z.boolean(),
   })
   .or(z.string().transform((value) => ({ field: value, optional: false })));
+
+const semVerRegex = new RegExp(/^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$/);
+export const semVerSchema = z.string().refine((maybeSemVer) => semVerRegex.test(maybeSemVer), {
+  message:
+    'The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.',
+});

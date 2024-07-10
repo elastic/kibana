@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2024-07-08
+date: 2024-07-10
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -17,8 +17,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Referencing plugin(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibAlertingPluginApi" section="def-public.PluginSetupContract.registerNavigation" text="registerNavigation"/> | ml, stackAlerts | - |
-| <DocLink id="kibDataViewsPluginApi" section="def-common.AbstractDataView.title" text="title"/> | data, @kbn/search-errors, savedObjectsManagement, unifiedSearch, @kbn/unified-field-list, lens, controls, triggersActionsUi, dataVisualizer, canvas, presentationUtil, logsShared, fleet, ml, @kbn/lens-embeddable-utils, @kbn/ml-data-view-utils, enterpriseSearch, graph, visTypeTimeseries, exploratoryView, stackAlerts, infra, securitySolution, timelines, transform, upgradeAssistant, uptime, ux, maps, dataViewManagement, eventAnnotationListing, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega | - |
-| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, ml, securitySolution | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-common.AbstractDataView.title" text="title"/> | data, @kbn/search-errors, savedObjectsManagement, unifiedSearch, @kbn/unified-field-list, lens, controls, @kbn/lens-embeddable-utils, triggersActionsUi, dataVisualizer, canvas, presentationUtil, logsShared, fleet, ml, @kbn/ml-data-view-utils, enterpriseSearch, graph, visTypeTimeseries, exploratoryView, stackAlerts, infra, securitySolution, timelines, transform, upgradeAssistant, uptime, ux, maps, dataViewManagement, eventAnnotationListing, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega | - |
+| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | ml, securitySolution | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, savedObjectsTagging, ml, enterpriseSearch | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-common.SimpleSavedObject" text="SimpleSavedObject"/> | @kbn/core-saved-objects-browser-internal, @kbn/core, savedObjects, visualizations, aiops, dataVisualizer, ml, dashboardEnhanced, graph, lens, securitySolution, eventAnnotation, @kbn/core-saved-objects-browser-mocks | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, savedObjects, embeddable, visualizations, canvas, graph, ml, @kbn/core-saved-objects-common, @kbn/core-saved-objects-server, actions, @kbn/alerting-types, alerting, savedSearch, enterpriseSearch, securitySolution, taskManager, @kbn/core-saved-objects-server-internal, @kbn/core-saved-objects-api-server | - |
@@ -39,7 +39,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataPluginApi" section="def-common.EqlSearchStrategyRequest.options" text="options"/> | securitySolution | - |
 | <DocLink id="kibFleetPluginApi" section="def-public.NewPackagePolicy.policy_id" text="policy_id"/> | cloudDefend, osquery, securitySolution, synthetics | - |
 | <DocLink id="kibFleetPluginApi" section="def-common.NewPackagePolicy.policy_id" text="policy_id"/> | cloudDefend, osquery, securitySolution, synthetics | - |
-| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.authc" text="authc"/> | alerting, observabilityAIAssistant, fleet, cloudSecurityPosture, enterpriseSearch, securitySolution, serverlessSearch, transform, upgradeAssistant, apm, entityManager, observabilityOnboarding, synthetics, security | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.userProfiles" text="userProfiles"/> | cases, securitySolution, security | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-common.DeprecatedCellValueElementProps" text="DeprecatedCellValueElementProps"/> | @kbn/securitysolution-data-table, securitySolution | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-common.DeprecatedRowRenderer" text="DeprecatedRowRenderer"/> | @kbn/securitysolution-data-table, securitySolution | - |
@@ -66,6 +65,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION" text="ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION"/> | securitySolution | - |
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.darkMode" text="darkMode"/> | @kbn/monaco, securitySolution | - |
 | <DocLink id="kibDiscoverPluginApi" section="def-common.DiscoverAppLocatorParams.indexPatternId" text="indexPatternId"/> | fleet, cloudSecurityPosture, exploratoryView, osquery, synthetics | - |
+| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.authc" text="authc"/> | alerting, observabilityAIAssistant, fleet, cloudSecurityPosture, enterpriseSearch, serverlessSearch, transform, upgradeAssistant, apm, entityManager, observabilityOnboarding, synthetics, security | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddableSetup.registerEmbeddableFactory" text="registerEmbeddableFactory"/> | visualizations, lens, controls, dashboard, discover | - |
 | <DocLink id="kibSharePluginApi" section="def-public.ShareContext.shareableUrlForSavedObject" text="shareableUrlForSavedObject"/> | discover, @kbn/reporting-public | - |
@@ -153,13 +153,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginSetup.authc" text="authc"/> | security | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.toMountPoint" text="toMountPoint"/> | observabilityShared | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-common.KibanaStyledComponentsThemeProviderDecorator" text="KibanaStyledComponentsThemeProviderDecorator"/> | @kbn/react-kibana-context-styled, kibanaReact | - |
-| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-common.SavedObjectMigrationContext.convertToMultiNamespaceTypeVersion" text="convertToMultiNamespaceTypeVersion"/> | encryptedSavedObjects | - |
 | <DocLink id="kibKbnContentManagementTableListViewTablePluginApi" section="def-public.TableListViewTableProps.withoutPageTemplateWrapper" text="withoutPageTemplateWrapper"/> | @kbn/content-management-table-list-view, filesManagement | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-common.SavedObjectsBulkUpdateOptions" text="SavedObjectsBulkUpdateOptions"/> | @kbn/core | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-common.SavedObjectsBulkResolveResponse" text="SavedObjectsBulkResolveResponse"/> | @kbn/core | - |
 | <DocLink id="kibKbnCoreSavedObjectsBrowserMocksPluginApi" section="def-common.savedObjectsServiceMock" text="savedObjectsServiceMock"/> | @kbn/core-lifecycle-browser-mocks, @kbn/core, @kbn/core-plugins-browser-internal | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributeSingle" text="SavedObjectAttributeSingle"/> | @kbn/core | - |
 | <DocLink id="kibKbnCorePluginsServerPluginApi" section="def-common.PluginManifest.extraPublicDirs" text="extraPublicDirs"/> | @kbn/core-plugins-server-internal | - |
+| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-common.SavedObjectMigrationContext.convertToMultiNamespaceTypeVersion" text="convertToMultiNamespaceTypeVersion"/> | encryptedSavedObjects | - |
 | <DocLink id="kibKbnReportingExportTypesCsvPluginApi" section="def-server.CsvSearchSourceImmediateExportType" text="CsvSearchSourceImmediateExportType"/> | reporting | - |
 | <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.JobParamsDownloadCSV" text="JobParamsDownloadCSV"/> | @kbn/reporting-export-types-csv, reporting | - |
 | <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.CSV_SEARCHSOURCE_IMMEDIATE_TYPE" text="CSV_SEARCHSOURCE_IMMEDIATE_TYPE"/> | @kbn/reporting-export-types-csv, reporting | - |
