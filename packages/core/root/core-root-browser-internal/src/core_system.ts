@@ -15,7 +15,6 @@ import {
 import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
@@ -25,7 +24,6 @@ import { HttpService } from '@kbn/core-http-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
@@ -39,15 +37,13 @@ import { CustomBrandingService } from '@kbn/core-custom-branding-browser-interna
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
-import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
   LOAD_SETUP_DONE,
   LOAD_START_DONE,
-  KIBANA_LOADED_EVENT,
   LOAD_CORE_CREATED,
   LOAD_FIRST_NAV,
-  LOAD_BOOTSTRAP_START,
-  LOAD_START,
+  registerRootEvents,
+  reportKibanaLoadedEvent,
 } from './events';
 
 import './core_system.scss';
@@ -59,17 +55,6 @@ export interface CoreSystemParams {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-}
-
-// Expands the definition of navigator to include experimental features
-interface ExtendedNavigator {
-  connection?: {
-    effectiveType?: string;
-  };
-  // Estimated RAM
-  deviceMemory?: number;
-  // Number of cores
-  hardwareConcurrency?: number;
 }
 
 /**
@@ -160,61 +145,6 @@ export class CoreSystem {
     });
   }
 
-  private getLoadMarksInfo(): Record<string, number> {
-    if (!performance) return {};
-    const reportData: Record<string, number> = {};
-    const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
-    for (const mark of marks) {
-      reportData[(mark as PerformanceMark).detail] = mark.startTime;
-    }
-
-    return reportData;
-  }
-
-  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
-    /**
-     * @deprecated here for backwards compatibility in FullStory
-     **/
-    analytics.reportEvent('Loaded Kibana', {
-      kibana_version: this.coreContext.env.packageInfo.version,
-      protocol: window.location.protocol,
-    });
-
-    const timing = this.getLoadMarksInfo();
-
-    const navigatorExt = navigator as ExtendedNavigator;
-    const navigatorInfo: Record<string, string> = {};
-    if (navigatorExt.deviceMemory) {
-      navigatorInfo.deviceMemory = String(navigatorExt.deviceMemory);
-    }
-    if (navigatorExt.hardwareConcurrency) {
-      navigatorInfo.hardwareConcurrency = String(navigatorExt.hardwareConcurrency);
-    }
-
-    reportPerformanceMetricEvent(analytics, {
-      eventName: KIBANA_LOADED_EVENT,
-      meta: {
-        kibana_version: this.coreContext.env.packageInfo.version,
-        protocol: window.location.protocol,
-        ...fetchOptionalMemoryInfo(),
-        // Report some hardware metrics for bucketing
-        ...navigatorInfo,
-      },
-      duration: timing[LOAD_FIRST_NAV],
-      key1: LOAD_START,
-      value1: timing[LOAD_START],
-      key2: LOAD_BOOTSTRAP_START,
-      value2: timing[LOAD_BOOTSTRAP_START],
-      key3: LOAD_CORE_CREATED,
-      value3: timing[LOAD_CORE_CREATED],
-      key4: LOAD_SETUP_DONE,
-      value4: timing[LOAD_SETUP_DONE],
-      key5: LOAD_START_DONE,
-      value5: timing[LOAD_START_DONE],
-    });
-    performance.clearMarks(KBN_LOAD_MARKS);
-  }
-
   public async setup() {
     try {
       // Setup FatalErrorsService and it's dependencies first so that we're
@@ -232,7 +162,7 @@ export class CoreSystem {
       await this.integrations.setup();
       this.docLinks.setup();
 
-      this.registerLoadedKibanaEventType(analytics);
+      registerRootEvents(analytics);
 
       const executionContext = this.executionContext.setup({ analytics });
       const http = this.http.setup({
@@ -406,7 +336,7 @@ export class CoreSystem {
         performance.mark(KBN_LOAD_MARKS, {
           detail: LOAD_FIRST_NAV,
         });
-        this.reportKibanaLoadedEvent(analytics);
+        reportKibanaLoadedEvent(analytics, this.coreContext);
       });
 
       return {
@@ -441,26 +371,5 @@ export class CoreSystem {
     this.security.stop();
     this.userProfile.stop();
     this.rootDomElement.textContent = '';
-  }
-
-  /**
-   * @deprecated
-   */
-  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
-    analytics.registerEventType({
-      eventType: 'Loaded Kibana',
-      schema: {
-        kibana_version: {
-          type: 'keyword',
-          _meta: { description: 'The version of Kibana' },
-        },
-        protocol: {
-          type: 'keyword',
-          _meta: {
-            description: 'Value from window.location.protocol',
-          },
-        },
-      },
-    });
   }
 }

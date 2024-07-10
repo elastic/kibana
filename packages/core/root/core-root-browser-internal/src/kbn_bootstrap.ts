@@ -47,4 +47,12 @@ export async function __kbnBootstrap__() {
 
   const start = await coreSystem.start();
   await apmSystem.start(start);
+
+  window.addEventListener('unload', () => {
+    try {
+      coreSystem.stop();
+    } catch (e) {
+      // trap
+    }
+  });
 }

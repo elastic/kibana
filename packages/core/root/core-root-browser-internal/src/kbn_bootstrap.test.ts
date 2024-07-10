@@ -20,9 +20,15 @@ describe('kbn_bootstrap', () => {
 </kbn-injected-metadata>`;
   });
 
+  let addListenerSpy: jest.SpyInstance;
+
   beforeEach(() => {
-    jest.clearAllMocks();
     window.performance.mark = jest.fn();
+    addListenerSpy = jest.spyOn(window, 'addEventListener');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('does not report a fatal error if apm load fails', async () => {
@@ -41,5 +47,12 @@ describe('kbn_bootstrap', () => {
     await __kbnBootstrap__();
 
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds a handler to the `unload` event', async () => {
+    await __kbnBootstrap__();
+
+    expect(addListenerSpy).toHaveBeenCalledTimes(1);
+    expect(addListenerSpy).toHaveBeenCalledWith('unload', expect.any(Function));
   });
 });
