@@ -27,7 +27,6 @@ interface Props {
   onConversationDeleted: (conversationTitle: string) => void;
   onConversationSelectionChange: (conversation?: Conversation | string) => void;
   selectedConversationTitle: string;
-  shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
 }
 
@@ -62,7 +61,6 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
     onConversationSelectionChange,
     selectedConversationTitle,
     isDisabled,
-    shouldDisableKeyboardShortcut = () => false,
   }) => {
     const conversationTitles = useMemo(
       () => Object.values(conversations).map((c) => c.title),

@@ -42,7 +42,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /usr/share/elastic-agent/state/inputs.d &&
-      #        curl -sL https://github.com/elastic/elastic-agent/archive/8.15.tar.gz | tar xz -C /usr/share/elastic-agent/state/inputs.d --strip=5 "elastic-agent-8.15/deploy/kubernetes/elastic-agent/templates.d"
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/8.16.tar.gz | tar xz -C /usr/share/elastic-agent/state/inputs.d --strip=5 "elastic-agent-8.16/deploy/kubernetes/elastic-agent/templates.d"
       #    securityContext:
       #      runAsUser: 0
       #    volumeMounts:
@@ -351,9 +351,6 @@ spec:
           effect: NoSchedule
       serviceAccountName: elastic-agent
       hostNetwork: true
-      # 'hostPID: true' enables the Elastic Security integration to observe all process exec events on the host.
-      # Sharing the host process ID namespace gives visibility of all processes running on the same host.
-      hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
@@ -469,7 +466,7 @@ spec:
           hostPath:
             path: /var/lib
         # Mount /etc/machine-id from the host to determine host ID
-        # Needed for Elastic Security integration
+        # Needed for Kubernetes node autodiscovery
         - name: etc-mid
           hostPath:
             path: /etc/machine-id

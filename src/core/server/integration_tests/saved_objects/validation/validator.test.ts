@@ -164,8 +164,6 @@ describe.skip('validates saved object types when a schema is provided', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('does nothing when no schema is provided', async () => {

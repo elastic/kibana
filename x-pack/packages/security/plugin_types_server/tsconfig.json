@@ -10,11 +10,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/security-plugin-types-common",
     "@kbn/core-user-profile-server",
     "@kbn/core-security-server",
-    "@kbn/core-security-common"
+    "@kbn/config-schema",
   ]
 }
