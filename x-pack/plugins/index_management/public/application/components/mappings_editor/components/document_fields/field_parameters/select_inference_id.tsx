@@ -38,7 +38,6 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
-import { useDispatch, useMappingsState } from '../../../mappings_state_context';
 import { CustomInferenceEndpointConfig } from '../../../types';
 import { UseField } from '../../../shared_imports';
 
@@ -102,8 +101,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     docLinks,
     plugins: { ml },
   } = useAppContext();
-  const dispatch = useDispatch();
-  const { inferenceToModelIdMap } = useMappingsState();
   const config = getFieldConfig('inference_id');
 
   const getMlTrainedModelPageUrl = useCallback(async () => {
