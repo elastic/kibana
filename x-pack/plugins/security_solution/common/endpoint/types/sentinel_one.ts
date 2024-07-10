@@ -123,3 +123,8 @@ export interface SentinelOneKillProcessRequestMeta extends SentinelOneIsolationR
    */
   parentTaskId: string;
 }
+
+export interface SentinelOneKillProcessResponseMeta {
+  /** The SentinelOne task ID associated with the completion of the kill-process action */
+  taskId: string;
+}
