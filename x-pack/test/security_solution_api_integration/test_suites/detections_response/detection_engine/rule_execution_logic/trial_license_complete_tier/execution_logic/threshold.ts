@@ -6,7 +6,8 @@
  */
 
 import expect from 'expect';
-
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
@@ -25,12 +26,20 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { createRule } from '../../../../../../../common/utils/security_solution';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import {
   getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
+  dataGeneratorFactory,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -458,6 +467,126 @@ export default ({ getService }: FtrProviderContext) => {
         const fullAlert = previewAlerts[0]?._source;
 
         expect(fullAlert?.['host.asset.criticality']).toEqual('high_impact');
+      });
+    });
+
+    describe('manual rule run', () => {
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      const createEvent = ({
+        id,
+        timestamp,
+        name = 'agent-1',
+      }: {
+        id: string;
+        timestamp: string;
+        name?: string;
+      }) => ({
+        id,
+        '@timestamp': timestamp,
+        agent: {
+          name,
+        },
+      });
+
+      it('should run rule in the past and generate alert, without duplicates', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        const secondTimestamp = moment(new Date()).subtract(1, 'm');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: firstTimestamp.subtract(1, 'm').toISOString() }),
+          createEvent({ id, timestamp: secondTimestamp.toISOString() }),
+          createEvent({ id, timestamp: secondTimestamp.subtract(5, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+      });
+
+      it("should run rule in the past and don't generate duplicate alert", async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(1, 'm');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: firstTimestamp.subtract(1, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(1);
       });
     });
   });
