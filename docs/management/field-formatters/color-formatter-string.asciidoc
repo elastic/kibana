@@ -1,0 +1,3 @@
+The *Color* field formatter enables you to view values as badges in UI.
+
+When you select the *Color* formatter, click *Add Color*, then specify what value should it match, then pick *Text color* and *Background color* for the badge.
