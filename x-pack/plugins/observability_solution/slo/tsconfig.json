@@ -96,6 +96,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/core-application-browser",
-    "@kbn/core-theme-browser"
+    "@kbn/core-theme-browser",
+    "@kbn/ebt-tools"
   ]
 }

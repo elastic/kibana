@@ -14,6 +14,10 @@ export const INFERENCE_ENDPOINT_LABEL = i18n.translate(
   }
 );
 
+export const CANCEL = i18n.translate('xpack.searchInferenceEndpoints.cancel', {
+  defaultMessage: 'Cancel',
+});
+
 export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
@@ -92,5 +96,65 @@ export const FORBIDDEN_TO_ACCESS_TRAINED_MODELS = i18n.translate(
   'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.forbiddenToAccessTrainedModelsError',
   {
     defaultMessage: 'Forbidden to access trained models',
+  }
+);
+
+export const COPY_ID_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.copyID',
+  {
+    defaultMessage: 'Copy endpoint ID',
+  }
+);
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.copyIDSuccess',
+  {
+    defaultMessage: 'Inference endpoint ID copied!',
+  }
+);
+
+export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.endpointAddedSuccess',
+  {
+    defaultMessage: 'Endpoint added',
+  }
+);
+
+export const ENDPOINT_CREATION_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.endpointAddedFailure',
+  {
+    defaultMessage: 'Endpoint creation failed',
+  }
+);
+
+export const ENDPOINT_ADDED_SUCCESS_DESCRIPTION = (endpointId: string) =>
+  i18n.translate('xpack.searchInferenceEndpoints.actions.endpointAddedSuccessDescription', {
+    defaultMessage: 'The inference endpoint "{endpointId}" was added.',
+    values: { endpointId },
+  });
+
+export const DELETE_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint',
+  {
+    defaultMessage: 'Delete endpoint',
+  }
+);
+
+export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint', {
+  defaultMessage: 'Endpoint',
+});
+
+export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
+  defaultMessage: 'Service',
+});
+
+export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {
+  defaultMessage: 'Type',
+});
+
+export const TRAINED_MODELS_STAT_GATHER_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.trainedModelsStatGatherFailed',
+  {
+    defaultMessage: 'Failed to retrieve trained model statistics',
   }
 );

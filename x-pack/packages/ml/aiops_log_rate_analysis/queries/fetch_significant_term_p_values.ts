@@ -111,16 +111,25 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
   buckets: estypes.AggregationsSignificantLongTermsBucket[];
 }
 
-export const fetchSignificantTermPValues = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  fieldNames: string[],
-  logger: Logger,
+export const fetchSignificantTermPValues = async ({
+  esClient,
+  abortSignal,
+  logger,
+  emitError,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  logger?: Logger;
+  emitError?: (m: string) => void;
+  arguments: AiopsLogRateAnalysisSchema & {
+    fieldNames: string[];
+    sampleProbability?: number;
+  };
+}): Promise<SignificantItem[]> => {
   // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1,
-  emitError: (m: string) => void,
-  abortSignal?: AbortSignal
-): Promise<SignificantItem[]> => {
+  const { fieldNames, sampleProbability = 1, ...params } = args;
+
   const randomSamplerWrapper = createRandomSamplerWrapper({
     probability: sampleProbability,
     seed: RANDOM_SAMPLER_SEED,
@@ -139,14 +148,19 @@ export const fetchSignificantTermPValues = async (
 
   function reportError(fieldName: string, error: unknown) {
     if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      if (logger) {
+        logger.error(
+          `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+            error,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      }
     }
   }
 

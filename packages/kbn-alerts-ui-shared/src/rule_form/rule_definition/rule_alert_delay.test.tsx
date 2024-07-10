@@ -12,45 +12,56 @@ import { RuleAlertDelay } from './rule_alert_delay';
 
 const mockOnChange = jest.fn();
 
+jest.mock('../hooks', () => ({
+  useRuleFormState: jest.fn(),
+  useRuleFormDispatch: jest.fn(),
+}));
+
+const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+
 describe('RuleAlertDelay', () => {
+  beforeEach(() => {
+    useRuleFormState.mockReturnValue({
+      formData: {
+        alertDelay: {
+          active: 5,
+        },
+      },
+    });
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   test('Renders correctly', () => {
-    render(
-      <RuleAlertDelay
-        alertDelay={{
-          active: 5,
-        }}
-        onChange={mockOnChange}
-      />
-    );
-
+    render(<RuleAlertDelay />);
     expect(screen.getByTestId('alertDelay')).toBeInTheDocument();
   });
 
   test('Should handle input change', () => {
-    render(
-      <RuleAlertDelay
-        alertDelay={{
-          active: 5,
-        }}
-        onChange={mockOnChange}
-      />
-    );
-
+    render(<RuleAlertDelay />);
     fireEvent.change(screen.getByTestId('alertDelayInput'), {
       target: {
         value: '3',
       },
     });
 
-    expect(mockOnChange).toHaveBeenCalledWith('alertDelay', { active: 3 });
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setAlertDelay',
+      payload: { active: 3 },
+    });
   });
 
   test('Should only allow integers as inputs', async () => {
-    render(<RuleAlertDelay onChange={mockOnChange} />);
+    useRuleFormState.mockReturnValue({
+      formData: {
+        alertDelay: null,
+      },
+    });
+
+    render(<RuleAlertDelay />);
 
     ['-', '+', 'e', 'E', '.', 'a', '01'].forEach((char) => {
       fireEvent.change(screen.getByTestId('alertDelayInput'), {
@@ -63,36 +74,33 @@ describe('RuleAlertDelay', () => {
   });
 
   test('Should call onChange with null if empty string is typed', () => {
-    render(
-      <RuleAlertDelay
-        alertDelay={{
-          active: 5,
-        }}
-        onChange={mockOnChange}
-      />
-    );
-
+    render(<RuleAlertDelay />);
     fireEvent.change(screen.getByTestId('alertDelayInput'), {
       target: {
         value: '',
       },
     });
-    expect(mockOnChange).toHaveBeenCalledWith('alertDelay', null);
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setAlertDelay',
+      payload: null,
+    });
   });
 
   test('Should display error when input is invalid', () => {
-    render(
-      <RuleAlertDelay
-        alertDelay={{
+    useRuleFormState.mockReturnValue({
+      formData: {
+        alertDelay: {
           active: -5,
-        }}
-        errors={{
-          alertDelay: 'Alert delay must be greater than 1.',
-        }}
-        onChange={mockOnChange}
-      />
-    );
+        },
+      },
+      baseErrors: {
+        alertDelay: 'Alert delay must be greater than 1.',
+      },
+    });
 
+    render(<RuleAlertDelay />);
+
+    expect(screen.getByTestId('alertDelayInput')).toBeInvalid();
     expect(screen.getByText('Alert delay must be greater than 1.')).toBeInTheDocument();
   });
 });

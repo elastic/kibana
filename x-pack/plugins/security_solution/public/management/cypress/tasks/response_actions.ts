@@ -16,6 +16,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
@@ -241,6 +242,11 @@ export const ensureResponseActionAuthzAccess = (
 
         apiPayload = formData;
       }
+      break;
+
+    case 'scan':
+      url = SCAN_ROUTE;
+      Object.assign(apiPayload, { parameters: { path: 'scan/two' } });
       break;
 
     default:

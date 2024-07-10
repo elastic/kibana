@@ -11,10 +11,10 @@ import type {
   Logger,
   LoggerFactory,
   SavedObjectsClientContract,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
   FleetStartContract,
@@ -68,7 +68,7 @@ export interface EndpointAppContextServiceStartContract {
   endpointMetadataService: EndpointMetadataService;
   endpointFleetServicesFactory: EndpointFleetServicesFactoryInterface;
   manifestManager?: ManifestManager;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
@@ -93,7 +93,7 @@ export class EndpointAppContextService {
   private setupDependencies: EndpointAppContextServiceSetupContract | null = null;
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
-  public security: SecurityPluginStart | undefined;
+  public security: SecurityServiceStart | undefined;
 
   public setup(dependencies: EndpointAppContextServiceSetupContract) {
     this.setupDependencies = dependencies;

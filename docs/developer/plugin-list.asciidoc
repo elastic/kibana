@@ -102,6 +102,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 
+|{kib-repo}blob/{branch}/src/plugins/esql/README.md[esql]
+|The editor accepts the following properties:
+
+
 |{kib-repo}blob/{branch}/src/plugins/esql_datagrid/README.md[esqlDataGrid]
 |Contains a Discover-like table specifically for ES|QL queries:
 
@@ -328,10 +332,6 @@ generating deep links to other apps using locators, and creating short URLs.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
-|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
-|The editor accepts the following properties:
-
-
 |<<uiactions-plugin>>
 |UI Actions plugins provides API to manage *triggers* and *actions*.
 
@@ -470,10 +470,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/asset_manager/README.md[assetManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
 |WARNING: Missing README.
 
@@ -571,6 +567,10 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
+|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]

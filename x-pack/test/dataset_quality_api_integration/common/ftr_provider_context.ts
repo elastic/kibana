@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { DatasetQualityServices } from './config';
 
@@ -18,3 +18,4 @@ export type InheritedServices = InheritedFtrProviderContext extends GenericFtrPr
 
 export type { InheritedFtrProviderContext };
 export type FtrProviderContext = GenericFtrProviderContext<DatasetQualityServices, {}>;
+export class FtrService extends GenericFtrService<FtrProviderContext> {}
