@@ -18,12 +18,20 @@ export const getEarliestLatestParams = (query: string, time?: TimeRange) => {
   const earliestNamedParams = /\?earliest/i.test(query);
   const latestNamedParams = /\?latest/i.test(query);
   if (time && (earliestNamedParams || latestNamedParams)) {
-    return {
+    const timeParams = {
       earliest: earliestNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
       latest: latestNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
     };
+    const namedParams = [];
+    if (timeParams?.earliest) {
+      namedParams.push({ earliest: timeParams.earliest });
+    }
+    if (timeParams?.latest) {
+      namedParams.push({ latest: timeParams.latest });
+    }
+    return namedParams;
   }
-  return undefined;
+  return [];
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
@@ -51,14 +59,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange?: TimeRange;
 }): Promise<ESQLColumn[]> {
   try {
-    const timeParams = getEarliestLatestParams(esqlQuery, timeRange);
-    const namedParams = [];
-    if (timeParams?.earliest) {
-      namedParams.push({ earliest: timeParams.earliest });
-    }
-    if (timeParams?.latest) {
-      namedParams.push({ latest: timeParams.latest });
-    }
+    const namedParams = getEarliestLatestParams(esqlQuery, timeRange);
     const response = await lastValueFrom(
       search(
         {
@@ -132,14 +133,7 @@ export async function getESQLResults({
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
-  const timeParams = getEarliestLatestParams(esqlQuery, timeRange);
-  const namedParams = [];
-  if (timeParams?.earliest) {
-    namedParams.push({ earliest: timeParams.earliest });
-  }
-  if (timeParams?.latest) {
-    namedParams.push({ latest: timeParams.latest });
-  }
+  const namedParams = getEarliestLatestParams(esqlQuery, timeRange);
   const result = await lastValueFrom(
     search(
       {

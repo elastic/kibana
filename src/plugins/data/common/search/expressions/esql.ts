@@ -154,14 +154,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const timeParams = getEarliestLatestParams(query, input.timeRange);
-            const namedParams = [];
-            if (timeParams?.earliest) {
-              namedParams.push({ earliest: timeParams.earliest });
-            }
-            if (timeParams?.latest) {
-              namedParams.push({ latest: timeParams.latest });
-            }
+            const namedParams = getEarliestLatestParams(query, input.timeRange);
 
             if (namedParams.length) {
               params.params = namedParams;
