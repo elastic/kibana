@@ -132,9 +132,11 @@ function DefaultEditor({
                     openInspector: [, setOpenInspector],
                     navigateToLens: [, setNavigateToLens],
                     serializeState: [, setSerializeState],
+                    snapshotState: [, setSnapshotState],
                     getVis: [, setGetVis],
                   } = embeddableApiHandler;
                   setSerializeState(() => api.serializeState as SerializeStateFn);
+                  setSnapshotState(() => api.snapshotRuntimeState);
                   setGetVis(() => api.getVis);
                   setOnUpdateVis(() => api.updateVis);
                   setTitles(api.getTitles());

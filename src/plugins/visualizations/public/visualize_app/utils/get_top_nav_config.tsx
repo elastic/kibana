@@ -44,6 +44,7 @@ import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { NavigateToLensFn, SerializeStateFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
+import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -75,6 +76,7 @@ export interface TopNavConfigParams {
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
   serializeState: SerializeStateFn;
+  snapshotState: () => VisualizeRuntimeState;
   navigateToLensFn?: NavigateToLensFn;
   showBadge: boolean;
   eventEmitter?: EventEmitter;
@@ -109,6 +111,7 @@ export const getTopNavConfig = (
     setNavigateToLens,
     navigateToLensFn,
     serializeState,
+    snapshotState,
     showBadge,
     eventEmitter,
     hasInspector,
@@ -293,17 +296,14 @@ export const getTopNavConfig = (
       return;
     }
 
-    const { rawState, references } = serializeState(true);
-
-    const state = {
-      input: rawState,
-      embeddableId,
-      type: VISUALIZE_EMBEDDABLE_TYPE,
-      references,
-    };
-    console.log('STATE', state);
-
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+      state: {
+        input: snapshotState(),
+        embeddableId,
+        type: VISUALIZE_EMBEDDABLE_TYPE,
+      },
+      path: originatingPath,
+    });
   };
 
   const navigateToOriginatingApp = () => {
@@ -564,17 +564,15 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  const state = {
-                    input: rawState,
-                    embeddableId,
-                    type: VISUALIZE_EMBEDDABLE_TYPE,
-                    searchSessionId: data.search.session.getSessionId(),
-                  };
-
                   const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
                   stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-                    state,
+                    state: {
+                      input: snapshotState(),
+                      embeddableId,
+                      type: VISUALIZE_EMBEDDABLE_TYPE,
+                      searchSessionId: data.search.session.getSessionId(),
+                    },
                     path,
                   });
 

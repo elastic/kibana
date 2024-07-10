@@ -10,7 +10,7 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SerializedPanelState } from '@kbn/presentation-containers';
 import { useState } from 'react';
-import type { VisualizeOutputState } from '../../../react_embeddable/types';
+import type { VisualizeOutputState, VisualizeRuntimeState } from '../../../react_embeddable/types';
 import { NavigateToLensContext } from '../../../../common';
 import type Vis from '../../../vis';
 
@@ -27,6 +27,7 @@ export interface EmbeddableApiHandler {
   openInspector: ReturnType<typeof useState<OpenInspectorFn>>;
   navigateToLens: ReturnType<typeof useState<NavigateToLensFn>>;
   serializeState: ReturnType<typeof useState<SerializeStateFn>>;
+  snapshotState: ReturnType<typeof useState<() => VisualizeRuntimeState>>;
   getVis: ReturnType<typeof useState<GetVisFn>>;
 }
 
@@ -34,7 +35,14 @@ export const useEmbeddableApiHandler = () => {
   const openInspector = useState();
   const navigateToLens = useState();
   const serializeState = useState();
+  const snapshotState = useState();
   const getVis = useState();
 
-  return { openInspector, navigateToLens, serializeState, getVis } as EmbeddableApiHandler;
+  return {
+    openInspector,
+    navigateToLens,
+    serializeState,
+    snapshotState,
+    getVis,
+  } as EmbeddableApiHandler;
 };

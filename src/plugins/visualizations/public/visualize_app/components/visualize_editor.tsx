@@ -51,6 +51,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     openInspector: [openInspectorFn],
     navigateToLens: [navigateToLensFn],
     serializeState: [serializeStateFn],
+    snapshotState: [snapshotStateFn],
     getVis: [getVis],
   } = embeddableApiHandler;
 
@@ -146,6 +147,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       openInspectorFn={openInspectorFn}
       navigateToLensFn={navigateToLensFn}
       serializeStateFn={serializeStateFn}
+      snapshotStateFn={snapshotStateFn}
     >
       <EuiErrorBoundary>
         <DefaultEditor
