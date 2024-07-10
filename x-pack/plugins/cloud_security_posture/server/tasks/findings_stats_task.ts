@@ -23,7 +23,7 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  CDR_LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_SEVERITY,
   VULN_MGMT_POLICY_TEMPLATE,
@@ -128,7 +128,7 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
 }
 
 const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },

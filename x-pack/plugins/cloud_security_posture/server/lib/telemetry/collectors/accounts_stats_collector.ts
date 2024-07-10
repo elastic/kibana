@@ -13,7 +13,7 @@ import type {
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import { CDR_LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 
 interface Value {
   value: number;
@@ -57,7 +57,7 @@ interface AccountEntity {
 }
 
 const getAccountsStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
   runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
@@ -234,7 +234,7 @@ export const getAccountsStats = async (
 ): Promise<CspmAccountsStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
     });
 
     if (isIndexExists) {

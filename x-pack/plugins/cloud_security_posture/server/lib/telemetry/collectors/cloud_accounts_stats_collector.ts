@@ -19,7 +19,7 @@ import type {
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  CDR_LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
@@ -410,7 +410,7 @@ export const getIndexAccountStats = async (
     ? getCloudAccountsStats(accountsStatsResponse.aggregations, logger)
     : [];
 
-  if (index === LATEST_FINDINGS_INDEX_DEFAULT_NS) {
+  if (index === CDR_LATEST_FINDINGS_INDEX_PATTERN) {
     const cloudAccountsStatsForEnabledRules = await getAccountStatsBasedOnEnablesRule(
       esClient,
       encryptedSoClient,
@@ -439,7 +439,7 @@ export const getAllCloudAccountsStats = async (
   logger: Logger
 ): Promise<CloudSecurityAccountsStats[]> => {
   try {
-    const indices = [LATEST_FINDINGS_INDEX_DEFAULT_NS, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS];
+    const indices = [CDR_LATEST_FINDINGS_INDEX_PATTERN, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS];
     const [findingIndex, vulnerabilitiesIndex] = await Promise.all(
       indices.map(async (index) => ({
         exists: await esClient.indices.exists({

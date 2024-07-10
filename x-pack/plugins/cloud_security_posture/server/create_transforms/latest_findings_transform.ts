@@ -8,7 +8,7 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   FINDINGS_INDEX_PATTERN,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  CDR_LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../common/constants';
 
@@ -31,7 +31,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
     index: FINDINGS_INDEX_PATTERN,
   },
   dest: {
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
   },
   frequency: '5m',
   sync: {

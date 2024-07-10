@@ -11,7 +11,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  CDR_LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../common/constants';
 
 import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
@@ -58,7 +58,7 @@ export const getBenchmarksData = async (
   const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
   const { id: pitId } = await esClient.openPointInTime({
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
     keep_alive: '30s',
   });
   // Transform response to a benchmark row: {id, name, version}

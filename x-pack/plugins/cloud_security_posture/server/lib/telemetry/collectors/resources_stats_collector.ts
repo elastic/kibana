@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmResourcesStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import { CDR_LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 
 interface ResourcesStats {
   accounts: {
@@ -144,12 +144,12 @@ export const getResourcesStats = async (
 ): Promise<CspmResourcesStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
     });
 
     if (isIndexExists) {
       const resourcesStatsResponse = await esClient.search<unknown, ResourcesStats>(
-        getResourcesStatsQuery(LATEST_FINDINGS_INDEX_DEFAULT_NS)
+        getResourcesStatsQuery(CDR_LATEST_FINDINGS_INDEX_PATTERN)
       );
 
       const cspmResourcesStats = resourcesStatsResponse.aggregations

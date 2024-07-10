@@ -40,21 +40,15 @@ export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
-// TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
 
-export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-wiz.cloud_configuration_finding_latest-default';
-// export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-*.finding*_latest-*';
+export const CDR_LATEST_FINDINGS_INDEX_PATTERN = 'logs-*finding*_latest-*';
+export const CDR_FINDINGS_DATA_VIEW_NAME = 'cloud-security-data-view';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_PATTERN = 'cloud-security-data-view';
-
-// export const LATEST_FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings_latest-*';
-export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
-  'logs-wiz.cloud_configuration_finding_latest-default';
 
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 

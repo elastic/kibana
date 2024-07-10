@@ -20,7 +20,7 @@ import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   STATUS_ROUTE_PATH,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  CDR_LATEST_FINDINGS_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
@@ -171,7 +171,7 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_FINDINGS_INDEX_PATTERN, logger, {
       postureType: POSTURE_TYPE_ALL,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -184,7 +184,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_FINDINGS_INDEX_PATTERN, logger, {
       postureType: CSPM_POLICY_TEMPLATE,
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
@@ -197,7 +197,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_FINDINGS_INDEX_PATTERN, logger, {
       postureType: KSPM_POLICY_TEMPLATE,
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
@@ -283,7 +283,7 @@ export const getCspStatus = async ({
   const MIN_DATE = 0;
   const indicesDetails = [
     {
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
       status: findingsLatestIndexStatus,
     },
     {

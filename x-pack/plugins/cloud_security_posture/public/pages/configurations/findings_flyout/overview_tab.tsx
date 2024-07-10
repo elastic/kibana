@@ -25,8 +25,8 @@ import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_FINDINGS_INDEX_PATTERN,
+  CDR_FINDINGS_DATA_VIEW_NAME,
 } from '../../../../common/constants';
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -99,9 +99,9 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
       defaultMessage: 'Index',
     }),
     description: discoverIndexLink ? (
-      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+      <EuiLink href={discoverIndexLink}>{CDR_LATEST_FINDINGS_INDEX_PATTERN}</EuiLink>
     ) : (
-      LATEST_FINDINGS_INDEX_DEFAULT_NS
+      CDR_LATEST_FINDINGS_INDEX_PATTERN
     ),
   },
 ];
@@ -166,7 +166,7 @@ export const OverviewTab = ({
   ruleFlyoutLink: string;
 }) => {
   const { discover } = useKibana().services;
-  const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const latestFindingsDataView = useDataView(CDR_FINDINGS_DATA_VIEW_NAME);
 
   const discoverIndexLink = useMemo(
     () =>

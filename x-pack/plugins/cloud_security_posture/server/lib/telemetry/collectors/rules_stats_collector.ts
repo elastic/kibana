@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmRulesStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import { CDR_LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 
 interface BenchmarkName {
   metrics: { 'rule.benchmark.name': string };
@@ -69,7 +69,7 @@ interface RuleEntity {
 }
 
 const getRulesStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
   query: {
     match_all: {},
   },
@@ -264,7 +264,7 @@ export const getRulesStats = async (
 ): Promise<CspmRulesStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_FINDINGS_INDEX_PATTERN,
     });
 
     if (isIndexExists) {
