@@ -13,7 +13,7 @@ import type { CreateAPIKeyParams } from '@kbn/security-plugin/server';
  */
 export function createInstallApiKey(name: string): CreateAPIKeyParams {
   return {
-    name: `onboarding_install_${name}`,
+    name,
     expiration: '1h', // This API key is only used for initial setup and should be short lived
     metadata: {
       managed: true,

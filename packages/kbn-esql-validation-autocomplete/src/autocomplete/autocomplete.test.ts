@@ -10,7 +10,7 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
+import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
@@ -206,9 +206,6 @@ function getLiteralsByType(_type: string | string[]) {
   if (type.includes('time_literal')) {
     // return only singular
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
-  }
-  if (type.includes('chrono_literal')) {
-    return chronoLiterals.map(({ name }) => name);
   }
   return [];
 }
