@@ -26,7 +26,8 @@
     "@kbn/index-management",
     "@kbn/code-editor",
     "@kbn/shared-ux-markdown",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/esql-validation-autocomplete"
   ],
   "exclude": [
     "target/**/*",
