@@ -44,14 +44,10 @@ const DEFAULT_EVAL_TYPES_OPTIONS = [
 ];
 const DEFAULT_OUTPUT_INDEX = '.kibana-elastic-ai-assistant-evaluation-results';
 
-interface Props {
-  onEvaluationSettingsChange?: () => void;
-}
-
 /**
  * Evaluation Settings -- development-only feature for evaluating models
  */
-export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
+export const EvaluationSettings: React.FC = React.memo(() => {
   const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
     useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
