@@ -22,6 +22,18 @@ Array [
   },
   Object {
     "set": Object {
+      "field": "entity.definitionVersion",
+      "value": "999.999.999",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schemaVersion",
+      "value": "v1",
+    },
+  },
+  Object {
+    "set": Object {
       "field": "entity.displayName",
       "value": "{{entity.identityFields.log.logger}}{{#entity.identityFields.event.category}}:{{.}}{{/entity.identityFields.event.category}}",
     },
@@ -90,6 +102,9 @@ if (ctx.entity?.metadata?.host?.os?.name != null) {
  if(ctx.host == null)  ctx[\\"host\\"] = new HashMap();
  if(ctx.host.os == null)  ctx[\\"host\\"][\\"os\\"] = new HashMap();
   ctx[\\"host\\"][\\"os\\"][\\"name\\"] = ctx.entity.metadata.host.os.name.keySet();
+}
+if (ctx.entity?.metadata?.sourceIndex != null) {
+  ctx[\\"sourceIndex\\"] = ctx.entity.metadata.sourceIndex.keySet();
 }
 ",
     },
