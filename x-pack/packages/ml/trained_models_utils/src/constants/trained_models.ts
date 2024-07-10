@@ -13,9 +13,9 @@ export const E5_MODEL_ID = '.multilingual-e5-small';
 export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
 export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
 export const ELSER_ID_V1 = '.elser_model_1' as const;
-
-export const getLatestElserModel = () => ELSER_LINUX_OPTIMIZED_MODEL_ID;
-export const getLatestE5Model = () => E5_LINUX_OPTIMIZED_MODEL_ID;
+export const LATEST_ELSER_VERSION: ElserVersion = 2;
+export const LATEST_ELSER_MODEL_ID = ELSER_LINUX_OPTIMIZED_MODEL_ID;
+export const LATEST_E5_MODEL_ID = E5_LINUX_OPTIMIZED_MODEL_ID;
 
 export const ElserModels = [ELSER_MODEL_ID, ELSER_LINUX_OPTIMIZED_MODEL_ID, ELSER_ID_V1];
 
@@ -59,7 +59,7 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 export const ELASTIC_MODEL_TAG = 'elastic';
 
 export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
-  '.elser_model_1': {
+  [ELSER_ID_V1]: {
     modelName: 'elser',
     hidden: true,
     version: 1,
@@ -73,7 +73,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     }),
     type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.elser_model_2': {
+  [ELSER_MODEL_ID]: {
     modelName: 'elser',
     version: 2,
     default: true,
@@ -87,7 +87,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     }),
     type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.elser_model_2_linux-x86_64': {
+  [ELSER_LINUX_OPTIMIZED_MODEL_ID]: {
     modelName: 'elser',
     version: 2,
     os: 'Linux',
@@ -102,7 +102,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     }),
     type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.multilingual-e5-small': {
+  [E5_MODEL_ID]: {
     modelName: 'e5',
     version: 1,
     default: true,
@@ -118,7 +118,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
     type: ['pytorch', 'text_embedding'],
   },
-  '.multilingual-e5-small_linux-x86_64': {
+  [E5_LINUX_OPTIMIZED_MODEL_ID]: {
     modelName: 'e5',
     version: 1,
     os: 'Linux',

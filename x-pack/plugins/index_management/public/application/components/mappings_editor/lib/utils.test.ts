@@ -445,26 +445,6 @@ describe('utils', () => {
       });
     });
     describe('getStateWithCopyToFields', () => {
-      const fields: Fields = {
-        nested_field: {
-          properties: {
-            flag: { type: 'boolean' },
-            points: {
-              properties: {
-                name: { type: 'text' },
-                entity: {
-                  type: 'object',
-                  properties: {
-                    entity_1: { type: 'keyword' },
-                  },
-                },
-              },
-              type: 'object',
-            },
-          },
-          type: 'object',
-        },
-      };
       test('returns state if there is no semantic text field', () => {
         const state = {
           fields: {

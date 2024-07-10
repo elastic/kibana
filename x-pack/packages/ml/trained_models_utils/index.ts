@@ -32,7 +32,8 @@ export {
   E5_LINUX_OPTIMIZED_MODEL_ID,
   E5_MODEL_ID,
   LANG_IDENT_MODEL_ID,
-  getLatestE5Model,
-  getLatestElserModel,
+  LATEST_ELSER_VERSION,
+  LATEST_ELSER_MODEL_ID,
+  LATEST_E5_MODEL_ID,
   ElserModels,
 } from './src/constants/trained_models';

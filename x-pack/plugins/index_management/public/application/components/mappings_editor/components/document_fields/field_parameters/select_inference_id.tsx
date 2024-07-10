@@ -24,12 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
-import {
-  getLatestElserModel,
-  getLatestE5Model,
-  SUPPORTED_PYTORCH_TASKS,
-  TRAINED_MODEL_TYPE,
-} from '@kbn/ml-trained-models-utils';
+import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
@@ -40,11 +35,6 @@ import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
 import { CustomInferenceEndpointConfig } from '../../../types';
 import { UseField } from '../../../shared_imports';
-
-const inferenceServiceTypeElasticsearchModelMap: Record<string, string> = {
-  elser: getLatestElserModel(),
-  elasticsearch: getLatestE5Model(),
-};
 
 export interface SelectInferenceIdProps {
   createInferenceEndpoint: (
@@ -169,10 +159,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       try {
-        const trainedModelId =
-          modelConfig.service_settings.model_id ||
-          inferenceServiceTypeElasticsearchModelMap[modelConfig.service] ||
-          '';
+        const trainedModelId = modelConfig.service_settings.model_id || '';
         const customModelConfig = {
           taskType,
           modelConfig,

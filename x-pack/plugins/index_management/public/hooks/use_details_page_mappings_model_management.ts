@@ -9,13 +9,15 @@ import { Service } from '@kbn/inference_integration_flyout/types';
 import { ModelDownloadState, TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  getLatestE5Model,
-  getLatestElserModel,
+  LATEST_ELSER_VERSION,
   InferenceServiceSettings,
   LocalInferenceServiceSettings,
+  LATEST_ELSER_MODEL_ID,
+  LATEST_E5_MODEL_ID,
+  ElserVersion,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useCallback } from 'react';
-import { useAppContext } from '../application/app_context';
+import { AppDependencies, useAppContext } from '../application/app_context';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
 import { DefaultInferenceModels } from '../application/components/mappings_editor/types';
@@ -28,7 +30,9 @@ function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceS
 const getCustomInferenceIdMap = (
   models: InferenceAPIConfigResponse[],
   modelStatsById: Record<string, TrainedModelStat['deployment_stats'] | undefined>,
-  downloadStates: Record<string, ModelDownloadState | undefined>
+  downloadStates: Record<string, ModelDownloadState | undefined>,
+  elser: string,
+  e5: string
 ): InferenceToModelIdMap => {
   const inferenceIdMap = models.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceEntry = isLocalModel(model)
@@ -49,8 +53,6 @@ const getCustomInferenceIdMap = (
     inferenceMap[model.model_id] = inferenceEntry;
     return inferenceMap;
   }, {});
-  const elser = getLatestElserModel();
-  const e5 = getLatestE5Model();
   const defaultInferenceIds = {
     [DefaultInferenceModels.elser_model_2]: {
       trainedModelId: elser,
@@ -70,6 +72,25 @@ const getCustomInferenceIdMap = (
   return { ...defaultInferenceIds, ...inferenceIdMap };
 };
 
+async function getCuratedModelConfig(
+  ml: AppDependencies['plugins']['ml'] | undefined,
+  model: string,
+  version?: ElserVersion
+) {
+  if (ml?.mlApi) {
+    try {
+      const result = await ml.mlApi.trainedModels.getCuratedModelConfig(
+        model,
+        version ? { version } : undefined
+      );
+      return result.model_id;
+    } catch (e) {
+      // pass through and return default models below
+    }
+  }
+  return model === 'elser' ? LATEST_ELSER_MODEL_ID : LATEST_E5_MODEL_ID;
+}
+
 export const useDetailsPageMappingsModelManagement = () => {
   const {
     plugins: { ml },
@@ -81,6 +102,8 @@ export const useDetailsPageMappingsModelManagement = () => {
     const inferenceModels = await getInferenceEndpoints();
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
     const downloadStates = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
+    const elser = await getCuratedModelConfig(ml, 'elser', LATEST_ELSER_VERSION);
+    const e5 = await getCuratedModelConfig(ml, 'e5');
     const modelStatsById =
       trainedModelStats?.trained_model_stats.reduce<
         Record<string, TrainedModelStat['deployment_stats'] | undefined>
@@ -93,7 +116,9 @@ export const useDetailsPageMappingsModelManagement = () => {
     const modelIdMap = getCustomInferenceIdMap(
       inferenceModels.data || [],
       modelStatsById,
-      downloadStates || {}
+      downloadStates || {},
+      elser,
+      e5
     );
 
     dispatch({
@@ -101,7 +126,7 @@ export const useDetailsPageMappingsModelManagement = () => {
       value: { inferenceToModelIdMap: modelIdMap },
     });
     return modelIdMap;
-  }, [dispatch, ml?.mlApi?.trainedModels]);
+  }, [dispatch, ml]);
 
   return {
     fetchInferenceToModelIdMap,
