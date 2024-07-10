@@ -7,6 +7,8 @@
 import { createContext, useContext } from 'react';
 import type { Pipeline, Docs } from '../../../../common';
 import type { AIConnector, IntegrationSettings } from './types';
+// import { mockState } from './mocks/state';
+// export const initialState = mockState;
 
 export interface State {
   step: number;

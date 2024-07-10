@@ -12,6 +12,10 @@ import { DataStreamStep } from './data_stream_step';
 import { ActionsProvider } from '../../state';
 import { mockActions, mockState } from '../../mocks/state';
 
+jest.mock('./generation_modal', () => ({
+  GenerationModal: jest.fn(() => <div data-test-subj="generationModal" />),
+}));
+
 const duplicatePackageName = 'valid_but_duplicate_package_name';
 jest.mock('./use_load_package_names', () => {
   return {
@@ -203,6 +207,24 @@ describe('DataStreamStep', () => {
           inputType: dataCollectionMethod,
         });
       });
+    });
+  });
+
+  describe('when is generating', () => {
+    let result: RenderResult;
+    beforeEach(() => {
+      result = render(
+        <DataStreamStep
+          integrationSettings={mockState.integrationSettings}
+          connector={mockState.connector}
+          isGenerating={true}
+        />,
+        { wrapper }
+      );
+    });
+
+    it('should render generation modal', () => {
+      expect(result.queryByTestId('generationModal')).toBeInTheDocument();
     });
   });
 });
