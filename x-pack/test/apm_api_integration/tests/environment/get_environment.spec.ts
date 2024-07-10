@@ -28,9 +28,7 @@ export default function environmentsAPITests({ getService }: FtrProviderContext)
       })
     );
 
-    after(async () => {
-      await apmSynthtraceEsClient.clean();
-    });
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('get environments', () => {
       describe('when service name is not specified', () => {
