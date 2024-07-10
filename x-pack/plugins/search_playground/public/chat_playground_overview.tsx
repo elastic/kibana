@@ -32,6 +32,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
           restrictWidth={false}
           data-test-subj="svlPlaygroundPage"
           grow={false}
+          panelled={false}
         >
           <App showDocs />
           {embeddableConsole}
