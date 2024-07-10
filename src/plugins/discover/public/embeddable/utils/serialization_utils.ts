@@ -19,7 +19,6 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
-import { SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { DiscoverServices } from '../../build_services';
 import {
@@ -41,7 +40,7 @@ export const deserializeState = async ({
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId);
+    const so = await get(savedObjectId, true);
 
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
     return {
@@ -95,11 +94,11 @@ export const serializeState = async ({
 
   if (savedObjectId) {
     const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId, true);
+    const so = await get(savedObjectId);
 
     // only save the current state that is **different** than the saved object state
     const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-      if (deepEqual(savedSearchAttributes[key], so[key as keyof SerializableSavedSearch])) {
+      if (deepEqual(savedSearchAttributes[key], so[key as keyof SavedSearch])) {
         return prev;
       }
       return { ...prev, [key]: savedSearchAttributes[key] };
