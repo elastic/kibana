@@ -321,7 +321,7 @@ describe('AlertsTable', () => {
     oldAlertsData,
     ecsAlertsData,
     querySnapshot: { request: [], response: [] },
-    refetch: () => {},
+    refetchAlerts: () => {},
     alertsCount: alerts.length,
     onSortChange: jest.fn(),
     onPageChange: jest.fn(),

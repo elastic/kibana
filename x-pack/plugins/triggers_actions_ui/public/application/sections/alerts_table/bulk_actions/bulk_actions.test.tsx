@@ -253,7 +253,7 @@ describe('AlertsTable.BulkActions', () => {
     oldAlertsData,
     ecsAlertsData,
     querySnapshot: { request: [], response: [] },
-    refetch: refreshMockFn,
+    refetchAlerts: refreshMockFn,
     alertsCount: alerts.length,
     onSortChange: () => {},
     onPageChange: () => {},
