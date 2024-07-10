@@ -13,7 +13,7 @@ import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 
 import moment from 'moment';
 
-import { useDiscoverLocator, useStartServices } from '../../../../../hooks';
+import { useDiscoverLocator, useStartServices, useAuthz } from '../../../../../hooks';
 
 interface ViewLogsProps {
   logStreamQuery: string;
@@ -36,6 +36,7 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
 
   const { share } = useStartServices();
   const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
+  const authz = useAuthz();
 
   const logsUrl = useMemo(() => {
     const now = moment().toISOString();
@@ -53,7 +54,7 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
     });
   }, [endTime, logStreamQuery, logsLocator, startTime]);
 
-  return logsLocator || discoverLocator ? (
+  return authz.fleet.readAgents && (logsLocator || discoverLocator) ? (
     <EuiButton href={logsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
       <FormattedMessage
         id="xpack.fleet.agentLogs.openInLogsUiLinkText"
