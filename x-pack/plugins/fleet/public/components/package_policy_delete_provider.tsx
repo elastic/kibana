@@ -43,6 +43,16 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
+  const isShared = useMemo(() => {
+    if (agentPolicies?.length !== 1) {
+      return false;
+    }
+    const packagePolicy = agentPolicies[0].package_policies?.find(
+      (policy) => policy.id === packagePolicies[0]
+    );
+    return (packagePolicy?.policy_ids?.length ?? 0) > 1;
+  }, [agentPolicies, packagePolicies]);
+
   const hasMultipleAgentPolicies =
     canUseMultipleAgentPolicies && agentPolicies && agentPolicies.length > 1;
 
@@ -59,7 +69,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
       const request = await sendGetAgents({
         kuery,
-        showInactive: false,
+        showInactive: true,
       });
       setAgentsCount(request.data?.total || 0);
       setIsLoadingAgentsCount(false);
@@ -194,9 +204,9 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
             defaultMessage="Checking affected agents…"
           />
-        ) : agentsCount ? (
+        ) : agentsCount && agentPolicies ? (
           <>
-            {hasMultipleAgentPolicies && (
+            {(hasMultipleAgentPolicies || isShared) && (
               <>
                 <EuiCallOut
                   color="warning"
@@ -244,7 +254,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                     ),
                   }}
                 />
-              ) : agentPolicies && agentPolicies.length > 0 ? (
+              ) : (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
                   defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
@@ -252,7 +262,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                     agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
                   }}
                 />
-              ) : null}
+              )}
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>
