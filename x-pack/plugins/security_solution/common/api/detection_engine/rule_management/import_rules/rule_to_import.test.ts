@@ -392,7 +392,7 @@ describe('RuleToImport', () => {
   });
 
   test('language does not validate with something made up', () => {
-    // @ts-expect-error upgrade typescript v5.1.6
+    // @ts-expect-error assign unsupported value
     const payload = getImportRulesSchemaMock({
       language: 'something-made-up',
     });

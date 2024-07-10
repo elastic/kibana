@@ -317,7 +317,7 @@ ${JSON.stringify(
               };
 
               // Setup fleet if Cypress config requires it
-              let fleetServer: void | StartedFleetServer;
+              let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
               try {
@@ -461,7 +461,6 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                 log.error(error);
               }
 
-              // @ts-expect-error upgrade typescript v5.1.6
               if (fleetServer) {
                 await fleetServer.stop();
               }
