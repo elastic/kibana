@@ -4853,6 +4853,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql@link:src/plugins/esql":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
@@ -5833,6 +5837,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/recently-accessed@link:packages/kbn-recently-accessed":
+  version "0.0.0"
+  uid ""
+
 "@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
   version "0.0.0"
   uid ""
@@ -6661,10 +6669,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/text-based-languages@link:src/plugins/text_based_languages":
-  version "0.0.0"
-  uid ""
-
 "@kbn/third-party-lens-navigation-prompt-plugin@link:x-pack/examples/third_party_lens_navigation_prompt":
   version "0.0.0"
   uid ""
@@ -7401,6 +7405,14 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@mswjs/cookies/-/cookies-1.1.0.tgz#1528eb43630caf83a1d75d5332b30e75e9bb1b5b"
   integrity sha512-0ZcCVQxifZmhwNBoQIrystCb+2sWBY2Zw8lpfJBPCHGCA/HWqehITeCRVIv4VMy8MPlaHo2w2pTHFV2pFfqKPw==
+
+"@mswjs/http-middleware@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.1.tgz#7ff38c5398ba01efe98e16a0da24d612ffd69ccc"
+  integrity sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==
+  dependencies:
+    express "^4.18.2"
+    strict-event-emitter "^0.5.1"
 
 "@mswjs/interceptors@^0.29.0":
   version "0.29.1"
@@ -10374,11 +10386,6 @@
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/@types/js-cookie/-/js-cookie-2.2.6.tgz#f1a1cb35aff47bc5cfb05cb0c441ca91e914c26f"
   integrity sha512-+oY0FDTO2GYKEV0YPvSshGq9t7YozVkgvXLty7zogQNuCxBhT9/3INX9Q7H1aRZ4SUDRXAKlJuA4EA5nTt7SNw==
-
-"@types/js-levenshtein@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@types/js-levenshtein/-/js-levenshtein-1.1.0.tgz#9541eec4ad6e3ec5633270a3a2b55d981edc44a9"
-  integrity sha512-14t0v1ICYRtRVcHASzes0v/O+TIeASb8aD55cWF1PidtInhFWSXcmhzhHqGjUWf9SUq1w70cvd1cWKUULubAfQ==
 
 "@types/js-search@^1.4.0":
   version "1.4.0"
@@ -17508,7 +17515,7 @@ expr-eval@^2.0.2:
   resolved "https://registry.yarnpkg.com/expr-eval/-/expr-eval-2.0.2.tgz#fa6f044a7b0c93fde830954eb9c5b0f7fbc7e201"
   integrity sha512-4EMSHGOPSwAfBiibw3ndnP0AvjDWLsMvGOvWEZ2F96IGk0bIVdjQisOHxReSkE13mHcfbuCiXw+G4y0zv6N8Eg==
 
-express@^4.17.1, express@^4.17.3:
+express@^4.17.1, express@^4.17.3, express@^4.18.2:
   version "4.19.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.19.2.tgz#e25437827a3aa7f2a827bc8171bbbb664a356465"
   integrity sha512-5T6nhjsT+EOMzuck8JjBHARTHfMht0POzlA60WV2pMD3gyXw2LZnZ+ueGdNxG+0calOJcWKbpFcuzLZ91YWq9Q==
