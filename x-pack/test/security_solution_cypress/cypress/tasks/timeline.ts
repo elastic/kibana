@@ -36,7 +36,6 @@ import {
   SAVE_FILTER_BTN,
   SEARCH_OR_FILTER_CONTAINER,
   SELECT_CASE,
-  SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
   TIMELINE_DESCRIPTION_INPUT,
   TIMELINE_FIELDS_BUTTON,
@@ -91,6 +90,7 @@ import {
   BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
   TIMELINE_FLYOUT,
   TIMELINE_FULL_SCREEN_BUTTON,
+  QUERY_EVENT_COUNT,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -419,7 +419,7 @@ export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
+  cy.get(QUERY_EVENT_COUNT).should('not.have.text', '0');
 };
 
 const clickTimestampHoverActionOverflowButton = () => {

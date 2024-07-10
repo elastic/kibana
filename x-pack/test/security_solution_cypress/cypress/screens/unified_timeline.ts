@@ -54,3 +54,12 @@ export const GET_UNIFIED_DATA_GRID_CELL = (columnId: string, rowIndex: number) =
 
 export const GET_UNIFIED_FIELD_LIST_FIELD = (columnId: string) =>
   `${getDataTestSubjectSelector(`field-${columnId}`)}`;
+
+export const UNIFIED_TABLE_HOVER_ACTIONS = {
+  ADD_TO_TIMELINE:
+    '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-showTopN"]',
+};
