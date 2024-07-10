@@ -28,6 +28,7 @@
     "@kbn/utility-types",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/search-types",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }
