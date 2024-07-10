@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { type Subscription, AsyncSubject, from, defer, map, forkJoin } from 'rxjs';
+import { type Subscription, AsyncSubject, from, defer, map, forkJoin, Observable } from 'rxjs';
 import type { IconType } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
@@ -48,21 +48,15 @@ interface UnwrappedEmbeddableFactory {
 
 export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
 
-interface UseGetDashboardPanelsArgs {
-  embeddableAPI: PresentationContainer;
-  dashboardAPI: ReturnType<typeof useDashboardAPI>;
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-}
-
-interface OpenDashboardPanelSelectionFlyoutArgs {
-  getDashboardPanels: ReturnType<typeof useGetDashboardPanels>;
-  flyoutPanelPaddingSize?: DashboardPanelSelectionListFlyoutProps['paddingSize'];
-}
-
 interface EditorMenuProps {
   api: PresentationContainer;
   isDisabled?: boolean;
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
+}
+
+interface UseGetDashboardPanelsArgs extends Pick<EditorMenuProps, 'createNewVisType'> {
+  embeddableAPI: EditorMenuProps['api'];
+  dashboardAPI: ReturnType<typeof useDashboardAPI>;
 }
 
 export const getEmbeddableFactoryMenuItemProvider =
@@ -134,13 +128,13 @@ export const mergeGroupedItemsProvider =
     return panelGroups;
   };
 
-const useGetDashboardPanels = ({
+export const useGetDashboardPanels = ({
   dashboardAPI,
   embeddableAPI,
   createNewVisType,
 }: UseGetDashboardPanelsArgs) => {
   const panelsComputeResultCache = useRef(new AsyncSubject<GroupedAddPanelActions[]>());
-  const panelComputeSubscription = useRef<Subscription | null>(null);
+  const panelsComputeSubscription = useRef<Subscription | null>(null);
 
   const {
     uiActions,
@@ -293,34 +287,36 @@ const useGetDashboardPanels = ({
     [dashboardAPI, embeddable]
   );
 
-  const groupedAddPanelAction$ = useMemo(
+  const addPanelAction$ = useMemo(
     () =>
       defer(() => {
         return from(
           uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
             embeddable: embeddableAPI,
           }) ?? []
-        ).pipe(
-          map((addPanelActions) =>
-            getAddPanelActionMenuItemsGroup(embeddableAPI, addPanelActions, close)
-          )
         );
       }),
     [embeddableAPI, uiActions]
   );
 
   const computeAvailablePanels = useCallback(
-    (close: () => void) => {
-      if (!panelComputeSubscription.current) {
-        panelComputeSubscription.current = forkJoin([
+    (closeFlyout: () => void) => {
+      if (!panelsComputeSubscription.current) {
+        panelsComputeSubscription.current = forkJoin([
           groupUnwrappedEmbeddableFactoriesMap$,
-          groupedAddPanelAction$,
+          addPanelAction$,
         ])
           .pipe(
-            map(([factoryGroupMap, groupedAddPanelAction]) => {
+            map(([factoryGroupMap, addPanelActions]) => {
+              const groupedAddPanelAction = getAddPanelActionMenuItemsGroup(
+                embeddableAPI,
+                addPanelActions,
+                closeFlyout
+              );
+
               const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(
                 embeddableAPI,
-                close
+                closeFlyout
               );
 
               return mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
@@ -338,8 +334,8 @@ const useGetDashboardPanels = ({
                         items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
                           (panelGroup.items ?? []).concat(
                             // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
-                            visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, close)),
-                            promotedVisTypes.map(getVisTypeMenuItem.bind(null, close))
+                            visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout)),
+                            promotedVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
                           )
                         ),
                       };
@@ -349,7 +345,7 @@ const useGetDashboardPanels = ({
                         ...panelGroup,
                         items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
                           (panelGroup.items ?? []).concat(
-                            legacyVisTypes.map(getVisTypeMenuItem.bind(null, close))
+                            legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
                           )
                         ),
                       };
@@ -359,7 +355,7 @@ const useGetDashboardPanels = ({
                         ...panelGroup,
                         items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
                           (panelGroup.items ?? []).concat(
-                            toolVisTypes.map(getVisTypeMenuItem.bind(null, close))
+                            toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
                           )
                         ),
                       };
@@ -377,12 +373,10 @@ const useGetDashboardPanels = ({
           )
           .subscribe(panelsComputeResultCache.current);
       }
-
-      return panelsComputeResultCache.current.asObservable();
     },
     [
       embeddableAPI,
-      groupedAddPanelAction$,
+      addPanelAction$,
       groupUnwrappedEmbeddableFactoriesMap$,
       getVisTypeMenuItem,
       getVisTypeAliasMenuItem,
@@ -393,12 +387,27 @@ const useGetDashboardPanels = ({
     ]
   );
 
-  return computeAvailablePanels;
+  return useMemo<[Observable<GroupedAddPanelActions[]>, typeof computeAvailablePanels]>(
+    () => [panelsComputeResultCache.current.asObservable(), computeAvailablePanels],
+    [computeAvailablePanels]
+  );
 };
 
 export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
   const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
   const dashboardAPI = useDashboardAPI();
+
+  const {
+    overlays,
+    analytics,
+    settings: { i18n: i18nStart, theme },
+  } = pluginServices.getServices();
+
+  const [panels$, fetchDashboardPanels] = useGetDashboardPanels({
+    dashboardAPI,
+    createNewVisType,
+    embeddableAPI: api,
+  });
 
   useEffect(() => {
     // ensure opened dashboard is closed if a navigation event happens;
@@ -407,32 +416,23 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
     };
   }, []);
 
-  const {
-    overlays,
-    analytics,
-    settings: { i18n: i18nStart, theme },
-  } = pluginServices.getServices();
-
-  const _getDashboardPanels = useGetDashboardPanels({
-    dashboardAPI,
-    createNewVisType,
-    embeddableAPI: api,
-  });
-
   const openDashboardPanelSelectionFlyout = useCallback(
-    function openDashboardPanelSelectionFlyout({
-      getDashboardPanels,
-      flyoutPanelPaddingSize = 'l',
-    }: OpenDashboardPanelSelectionFlyoutArgs) {
+    function openDashboardPanelSelectionFlyout() {
+      const flyoutPanelPaddingSize: DashboardPanelSelectionListFlyoutProps['paddingSize'] = 'l';
+
       const mount = toMountPoint(
         React.createElement(function () {
           const closeFlyout = () => flyoutRef.current?.close();
+
+          // kick off dashboard panel fetch
+          fetchDashboardPanels(closeFlyout);
+
           return (
             <DashboardPanelSelectionListFlyout
               close={closeFlyout}
               {...{
-                paddingSize: flyoutPanelPaddingSize!,
-                getDashboardPanels,
+                paddingSize: flyoutPanelPaddingSize,
+                dashboardPanels$: panels$,
               }}
             />
           );
@@ -448,7 +448,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         'data-test-subj': 'dashboardPanelSelectionFlyout',
       });
     },
-    [analytics, theme, i18nStart, overlays]
+    [analytics, theme, i18nStart, overlays, fetchDashboardPanels, panels$]
   );
 
   return (
@@ -459,11 +459,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
-      onClick={() =>
-        openDashboardPanelSelectionFlyout({
-          getDashboardPanels: _getDashboardPanels,
-        })
-      }
+      onClick={openDashboardPanelSelectionFlyout}
       size="s"
     />
   );

@@ -16,16 +16,20 @@ import type { GroupedAddPanelActions } from './add_panel_action_menu_items';
 
 let panels$: Subject<GroupedAddPanelActions[]>;
 
-const defaultProps: ComponentProps<typeof DashboardPanelSelectionListFlyout> = {
+const defaultProps: Omit<
+  ComponentProps<typeof DashboardPanelSelectionListFlyout>,
+  'dashboardPanels$'
+> = {
   close: jest.fn(),
   paddingSize: 's',
-  getDashboardPanels: jest.fn(() => panels$.asObservable()),
 };
 
-const renderComponent = (props?: Partial<Omit<typeof defaultProps, 'close'>>) =>
+const renderComponent = ({
+  dashboardPanels$,
+}: Pick<ComponentProps<typeof DashboardPanelSelectionListFlyout>, 'dashboardPanels$'>) =>
   render(
     <IntlProvider locale="en">
-      <DashboardPanelSelectionListFlyout {...defaultProps} {...props} />
+      <DashboardPanelSelectionListFlyout {...defaultProps} dashboardPanels$={dashboardPanels$} />
     </IntlProvider>
   );
 
@@ -55,7 +59,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
   });
 
   it('renders a loading indicator when the panels observable has not yielded any value', async () => {
-    renderComponent();
+    renderComponent({ dashboardPanels$: panels$.asObservable() });
 
     expect(
       await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
@@ -63,7 +67,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
   });
 
   it('renders a error indicator when the panels observable yields an error', async () => {
-    renderComponent();
+    renderComponent({ dashboardPanels$: panels$.asObservable() });
 
     expect(
       await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
@@ -77,7 +81,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
   });
 
   it('renders the list of available panels when the panels observable yields its value', async () => {
-    renderComponent();
+    renderComponent({ dashboardPanels$: panels$.asObservable() });
 
     expect(
       await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
@@ -93,7 +97,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
   });
 
   it('renders a not found message when a user searches for an item that is not in the selection list', async () => {
-    renderComponent();
+    renderComponent({ dashboardPanels$: panels$.asObservable() });
 
     expect(
       await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
@@ -114,7 +118,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
   });
 
   it('invokes the close method when the flyout close btn is clicked', async () => {
-    renderComponent();
+    renderComponent({ dashboardPanels$: panels$.asObservable() });
 
     act(() => {
       panels$.next(panelConfiguration);

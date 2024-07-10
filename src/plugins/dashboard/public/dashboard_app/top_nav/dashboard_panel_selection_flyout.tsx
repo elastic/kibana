@@ -42,14 +42,13 @@ export interface DashboardPanelSelectionListFlyoutProps {
   /** Padding for flyout  */
   paddingSize: Exclude<EuiFlyoutProps['paddingSize'], 'none' | undefined>;
   /** Handler for creating new visualization of a specified type */
-  getDashboardPanels: (close: () => void) => Observable<GroupedAddPanelActions[]>;
+  dashboardPanels$: Observable<GroupedAddPanelActions[]>;
 }
 
 export const DashboardPanelSelectionListFlyout: React.FC<
   DashboardPanelSelectionListFlyoutProps
-> = ({ paddingSize, close, getDashboardPanels }) => {
+> = ({ paddingSize, close, dashboardPanels$ }) => {
   const { euiTheme } = useEuiTheme();
-  const panels$ = getDashboardPanels(close);
   const [{ data: panels, loading, error }, setPanelState] = useState<{
     loading: boolean;
     data: GroupedAddPanelActions[] | null;
@@ -63,7 +62,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
 
   useEffect(() => {
     if (loading) {
-      const subscription = panels$.subscribe({
+      const subscription = dashboardPanels$.subscribe({
         next(value) {
           setPanelState({
             data: value,
@@ -82,7 +81,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
 
       return () => subscription.unsubscribe();
     }
-  }, [getDashboardPanels, panels$, loading]);
+  }, [dashboardPanels$, loading]);
 
   useEffect(() => {
     const _panels = (panels ?? []).slice(0);
