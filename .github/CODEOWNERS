@@ -28,6 +28,7 @@ x-pack/plugins/alerting @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 packages/kbn-alerting-types @elastic/response-ops
 packages/kbn-alerts-as-data-utils @elastic/response-ops
+packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
@@ -406,6 +407,7 @@ packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+src/plugins/esql @elastic/kibana-esql
 packages/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
 src/plugins/esql_datagrid @elastic/kibana-esql
@@ -421,7 +423,7 @@ x-pack/plugins/event_log @elastic/response-ops
 packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/exploratory_view @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/exploratory_view @elastic/obs-ux-management-team
 src/plugins/expression_error @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
@@ -504,7 +506,7 @@ x-pack/plugins/integration_assistant @elastic/security-solution
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
-x-pack/plugins/observability_solution/investigate @elastic/obs-ai-assistant
+x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-jest-serializers @elastic/kibana-operations
@@ -657,6 +659,7 @@ packages/react/kibana_context/root @elastic/appex-sharedux
 packages/react/kibana_context/styled @elastic/appex-sharedux
 packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
+packages/kbn-recently-accessed @elastic/appex-sharedux
 x-pack/plugins/remote_clusters @elastic/kibana-management
 test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
@@ -847,7 +850,7 @@ test/server_integration/plugins/status_plugin_b @elastic/kibana-core
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
-x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-management-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/plugins/task_manager @elastic/response-ops
@@ -864,7 +867,6 @@ packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 packages/kbn-text-based-editor @elastic/kibana-esql
-src/plugins/text_based_languages @elastic/kibana-esql
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -903,7 +905,7 @@ src/plugins/unified_search @elastic/kibana-visualizations
 packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 packages/kbn-unsaved-changes-prompt @elastic/kibana-management
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
-x-pack/plugins/observability_solution/uptime @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/uptime @elastic/obs-ux-management-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
@@ -1141,15 +1143,15 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/uptime/ @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/uptime @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/es_archives/uptime @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/services/uptime @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/apis/uptime @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-infra_services-team
-/x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/uptime/ @elastic/obs-ux-management-team
+/x-pack/test/functional/apps/uptime @elastic/obs-ux-management-team
+/x-pack/test/functional/es_archives/uptime @elastic/obs-ux-management-team
+/x-pack/test/functional/services/uptime @elastic/obs-ux-management-team
+/x-pack/test/api_integration/apis/uptime @elastic/obs-ux-management-team
+/x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
+/x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
-/x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-infra_services-team
+/x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
@@ -1424,7 +1426,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
+/x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Threat Hunting Investigations
 
@@ -1733,9 +1735,9 @@ packages/react @elastic/appex-sharedux
 x-pack/plugins/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/plugins/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/plugins/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
-x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
-x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
-x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
+x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-management-team @elastic/kibana-security
+x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security
+x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-management-team @elastic/kibana-security
 
 # Specialised GitHub workflows for the Observability robots
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
