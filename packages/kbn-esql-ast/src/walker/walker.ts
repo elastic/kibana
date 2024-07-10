@@ -54,6 +54,42 @@ export class Walker {
     return params;
   };
 
+  /**
+   * Returns the first function that matches the predicate.
+   *
+   * @param node AST subtree to search in.
+   * @param predicate Function to test each function with.
+   * @returns The first function that matches the predicate.
+   */
+  public static readonly findFunction = (
+    node: ESQLAstNode | ESQLAstNode[],
+    predicate: (fn: ESQLFunction) => boolean
+  ): ESQLFunction | undefined => {
+    let found: ESQLFunction | undefined;
+    Walker.walk(node, {
+      visitFunction: (fn) => {
+        if (!found && predicate(fn)) {
+          found = fn;
+        }
+      },
+    });
+    return found;
+  };
+
+  /**
+   * Searches for at least one occurrence of a function or expression in the AST.
+   *
+   * @param node AST subtree to search in.
+   * @param name Function or expression name to search for.
+   * @returns True if the function or expression is found in the AST.
+   */
+  public static readonly hasFunction = (
+    node: ESQLAstNode | ESQLAstNode[],
+    name: string
+  ): boolean => {
+    return !!Walker.findFunction(node, (fn) => fn.name === name);
+  };
+
   constructor(protected readonly options: WalkerOptions) {}
 
   public walk(node: undefined | ESQLAstNode | ESQLAstNode[]): void {

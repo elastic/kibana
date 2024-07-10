@@ -108,14 +108,11 @@ export const commandDefinitions: CommandDefinition[] = [
       'metrics <sources> [ <aggregates> [ by <grouping> ]]',
       'metrics src1, src2 agg1, agg2 by field1, field2',
     ],
-    options: [],
+    options: [byOption],
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'index', type: 'source', wildcards: true },
-        { name: 'expression', type: 'function', optional: true },
-      ],
+      params: [{ name: 'index', type: 'source', wildcards: true }],
     },
   },
   {

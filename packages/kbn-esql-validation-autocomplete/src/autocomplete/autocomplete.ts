@@ -7,13 +7,15 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import type {
+import {
   AstProviderFn,
   ESQLAstItem,
+  ESQLAstMetricsCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
+  Walker,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
@@ -27,11 +29,9 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
-  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
-  isMathFunction,
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
@@ -81,6 +81,7 @@ import {
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import {
+  fixupQuery,
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
   getQueryForFields,
@@ -137,28 +138,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   return finalSuggestions;
 }
 
-/**
- * This function count the number of unclosed brackets in order to
- * locally fix the queryString to generate a valid AST
- * A known limitation of this is that is not aware of commas "," or pipes "|"
- * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
- * @param bracketType
- * @param text
- * @returns
- */
-function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
-  const stack = [];
-  const closingBrackets = { '(': ')', '[': ']' };
-  for (const char of text) {
-    if (char === bracketType) {
-      stack.push(bracketType);
-    } else if (char === closingBrackets[bracketType]) {
-      stack.pop();
-    }
-  }
-  return stack.length;
-}
-
 export async function suggest(
   fullText: string,
   offset: number,
@@ -167,45 +146,12 @@ export async function suggest(
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   const innerText = fullText.substring(0, offset);
-
-  let finalText = innerText;
-
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
-  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    (context.triggerKind === 0 &&
-      unclosedRoundBrackets === 0 &&
-      getLastCharFromTrimmed(innerText) !== '_') ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) ||
-        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
-  ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
-  }
-  // if there are unclosed brackets, close them
-  if (unclosedBrackets) {
-    for (const [char, count] of [
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        finalText += Array(count).fill(char).join('');
-      }
-    }
-  }
-
-  const { ast } = await astProvider(finalText);
-
+  const fixedQuery = fixupQuery(fullText, offset, context);
+  const { ast } = await astProvider(fixedQuery);
   const astContext = getAstContext(innerText, ast, offset);
+
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
+  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, fixedQuery), ast);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -227,6 +173,109 @@ export async function suggest(
   if (astContext.type === 'expression') {
     // suggest next possible argument, or option
     // otherwise a variable
+
+    if (astContext.command.name === 'metrics') {
+      const metrics = astContext.command as ESQLAstMetricsCommand;
+      switch (astContext.commandPosition) {
+        case 'aggregates': {
+          const { nodeArg } = extractArgMeta(metrics, astContext.node);
+          const fieldsMap: Map<string, ESQLRealField> = await new Map();
+          const anyVariables = collectVariables(ast, fieldsMap, innerText);
+          const field = metrics.aggregates?.find((f) => {
+            return f.location.min <= offset && offset <= f.location.max;
+          });
+          const hasAssignmentExpression = field ? Walker.hasFunction(field, '=') : false;
+
+          const suggestions = [
+            // varX =
+            ...(hasAssignmentExpression
+              ? []
+              : [buildNewVarDefinition(findNewVariable(anyVariables))]),
+
+            // functions
+            ...(await getFieldsOrFunctionsSuggestions(
+              ['any'],
+              astContext.command.name,
+              '',
+              getFieldsByType,
+              {
+                functions: true,
+                fields: false,
+                variables: nodeArg ? undefined : anyVariables,
+              }
+            )),
+          ];
+
+          return suggestions;
+        }
+        case 'grouping': {
+          const definition = getCommandDefinition(metrics.name);
+          const suggestions: SuggestionRawDefinition[] = [];
+          const theByKeywordMissing = !/^\s*metrics\s+.+by\s*/i.test(innerText);
+          const hasCommaBeforeCaret = /^\s*metrics.+,\s*$/i.test(innerText);
+
+          if (!metrics.grouping || !metrics.grouping.length) {
+            if (theByKeywordMissing) {
+              suggestions.push(buildOptionDefinition(definition.options[0], false));
+            }
+          }
+
+          const hasFields = !!metrics.grouping && !!metrics.grouping.length;
+          const isInsideExpression = !!astContext.node && astContext.node.type === 'function';
+
+          if (theByKeywordMissing) {
+            suggestions.push(...getFinalSuggestions());
+          } else if (!isInsideExpression && !hasCommaBeforeCaret && hasFields) {
+            suggestions.push(...getFinalSuggestions());
+          } else {
+            const { nodeArg } = extractArgMeta(metrics, astContext.node);
+            let fieldsAndFunctions: SuggestionRawDefinition[] = [];
+
+            if (isInsideExpression && isFunctionItem(astContext.node!) && !isAssignment(nodeArg)) {
+              const fields = await getFieldsMap();
+              const variables = collectVariables(ast, fields, innerText);
+              const references = { fields, variables };
+              const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+
+              fieldsAndFunctions = await getBuiltinFunctionNextArgument(
+                metrics,
+                { name: 'by' },
+                definition.options[0].signature.params[0],
+                astContext.node,
+                nodeArgType || 'any',
+                references,
+                getFieldsByType
+              );
+            } else {
+              fieldsAndFunctions = await getFieldsOrFunctionsSuggestions(
+                ['any'],
+                metrics.name,
+                definition.options[0].name,
+                getFieldsByType,
+                {
+                  functions: true,
+                  fields: true,
+                }
+              );
+            }
+
+            suggestions.push(...fieldsAndFunctions);
+
+            const fieldsMap: Map<string, ESQLRealField> = await new Map();
+            const anyVariables = collectVariables(ast, fieldsMap, innerText);
+
+            if (!isInsideExpression) {
+              const variableSuggestion = buildNewVarDefinition(findNewVariable(anyVariables));
+
+              suggestions.push(variableSuggestion);
+            }
+          }
+
+          return suggestions;
+        }
+      }
+    }
+
     return getExpressionSuggestionsByType(
       innerText,
       ast,
@@ -580,7 +629,7 @@ async function getExpressionSuggestionsByType(
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   // enrich with assignment has some special rules who are handled somewhere else
-  const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveAssignments = ['eval', 'stats', 'row', 'metrics'].includes(command.name);
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
@@ -914,14 +963,17 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...finalSuggestions);
     }
   }
+
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on text string (it can differ from name)
-  return uniqBy(suggestions, (suggestion) => suggestion.text);
+  const result = uniqBy(suggestions, (suggestion) => suggestion.text);
+
+  return result;
 }
 
 async function getBuiltinFunctionNextArgument(
   command: ESQLCommand,
-  option: ESQLCommandOption | undefined,
+  option: Pick<ESQLCommandOption, 'name'> | undefined,
   argDef: { type: string },
   nodeArg: ESQLFunction,
   nodeArgType: string,
@@ -1180,7 +1232,7 @@ async function getFunctionArgsSuggestions(
       (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
-      command.name !== 'stats'
+      command.name !== 'stats' && command.name !== 'metrics'
         ? -1
         : commandArgIndex < 0
         ? Math.max(command.args.length - 1, 0)
@@ -1191,7 +1243,7 @@ async function getFunctionArgsSuggestions(
     const fnToIgnore = [];
     // just ignore the current function
     if (
-      command.name !== 'stats' ||
+      (command.name !== 'stats' && command.name !== 'metrics') ||
       (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       fnToIgnore.push(node.name);

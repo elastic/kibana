@@ -17,7 +17,7 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
+import { ESQLAstMetricsCommand, ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW'].includes(label);
+  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -196,13 +196,11 @@ const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
 function buildCommandLookup() {
   if (!commandLookups) {
-    commandLookups = commandDefinitions.reduce((memo, def) => {
-      memo.set(def.name, def);
-      if (def.alias) {
-        memo.set(def.alias, def);
-      }
-      return memo;
-    }, new Map<string, CommandDefinition>());
+    commandLookups = new Map();
+    for (const command of commandDefinitions) {
+      commandLookups.set(command.name, command);
+      if (command.alias) commandLookups.set(command.alias, command);
+    }
   }
   return commandLookups;
 }
@@ -575,6 +573,12 @@ export function shouldBeQuotedText(
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
   getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isMetricsCommand = (x: unknown): x is ESQLAstMetricsCommand =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLAstMetricsCommand).type === 'command' &&
+  (x as ESQLAstMetricsCommand).name === 'metrics';
 
 export const isParam = (x: unknown): x is ESQLParamLiteral =>
   !!x &&
