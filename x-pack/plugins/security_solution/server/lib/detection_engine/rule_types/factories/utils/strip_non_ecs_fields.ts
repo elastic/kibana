@@ -15,7 +15,7 @@ import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type';
 import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
 import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
-import { isValidKeyword } from './ecs_types_validators/is_valid_keyword';
+// import { isValidKeyword } from './ecs_types_validators/is_valid_keyword';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;
@@ -120,9 +120,9 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   const isEcsFieldObject = getIsEcsFieldObject(path);
 
   // validate if value is a keyword type
-  if (ecsField?.type === 'keyword') {
-    return isValidKeyword(value, ecsField.ignore_above);
-  }
+  // if (ecsField?.type === 'keyword') {
+  //   return isValidKeyword(value, ecsField.ignore_above);
+  // }
 
   // do not validate geo_point, since it's very complex type that can be string/array/object
   if (ecsField?.type === 'geo_point') {
