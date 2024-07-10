@@ -349,6 +349,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     updateAgentPolicies,
     setSelectedPolicyTab,
     packageInfo,
+    packagePolicy,
   });
 
   const replaceStepConfigurePackagePolicy =

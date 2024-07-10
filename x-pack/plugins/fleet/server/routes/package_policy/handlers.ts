@@ -66,6 +66,7 @@ import {
   canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
+  renameAgentlessAgentPolicy,
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -420,6 +421,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
       throw new PackagePolicyRequestError(errorMessage);
     }
+
+    await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
