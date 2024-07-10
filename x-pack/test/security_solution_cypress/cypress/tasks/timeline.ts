@@ -90,6 +90,7 @@ import {
   BOTTOM_BAR_CREATE_NEW_TIMELINE,
   BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
   TIMELINE_FLYOUT,
+  TIMELINE_FULL_SCREEN_BUTTON,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -526,4 +527,8 @@ export const openTimelineEventContextMenu = (rowIndex: number = 0) => {
 
     togglePopover();
   });
+};
+
+export const toggleFullScreen = () => {
+  cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click();
 };

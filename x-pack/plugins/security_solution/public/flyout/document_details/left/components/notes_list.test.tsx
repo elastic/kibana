@@ -250,7 +250,7 @@ describe('NotesList', () => {
       onOpenTimeline: undefined,
       timelineId: 'timeline-1',
       timelineType: undefined,
-      unifiedComponentsInTimelineDisabled: true,
+      unifiedComponentsInTimelineDisabled: false,
     });
   });
 

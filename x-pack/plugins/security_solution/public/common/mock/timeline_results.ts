@@ -2020,22 +2020,6 @@ export const mockTimelineResult = {
   stale: false,
 };
 
-const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
-  {
-    columnHeaderType: 'not-filtered',
-    id: '@timestamp',
-    type: 'date',
-    esTypes: ['date'],
-    initialWidth: 190,
-  },
-  { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
-];
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
