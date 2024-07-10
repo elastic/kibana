@@ -628,7 +628,13 @@
           " | ",
           "ESQLStringLiteral",
           " | ",
-          "ESQLParamLiteral",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
           "<string> | ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -740,7 +746,13 @@
           " | ",
           "ESQLStringLiteral",
           " | ",
-          "ESQLParamLiteral",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
           "<string> | ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -836,7 +848,13 @@
           " | ",
           "ESQLStringLiteral",
           " | ",
-          "ESQLParamLiteral",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
           "<string> | ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -940,7 +958,13 @@
           " | ",
           "ESQLStringLiteral",
           " | ",
-          "ESQLParamLiteral",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
           "<string> | ",
           {
             "pluginId": "@kbn/esql-ast",
