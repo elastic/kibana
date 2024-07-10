@@ -9,7 +9,7 @@ import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/be
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { Logger } from '@kbn/logging';
-import { Readable } from 'stream';
+// import { Readable } from 'stream';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
@@ -37,27 +37,28 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
       fetchFn: async (url, options) => {
         const inputBody = JSON.parse(options?.body as string);
 
-        if (this.streaming && graph) {
-          const data = (await actionsClient.execute({
-            actionId: connectorId,
-            params: {
-              subAction: 'invokeStream',
-              subActionParams: {
-                messages: inputBody.messages,
-                temperature: inputBody.temperature,
-                stopSequences: inputBody.stopSequences,
-                system: inputBody.system,
-                maxTokens: inputBody.maxTokens,
-                tools: inputBody.tools,
-                anthropicVersion: inputBody.anthropic_version,
-              },
-            },
-          })) as { data: Readable };
+        // if (this.streaming && graph) {
+        //   const data = (await actionsClient.execute({
+        //     actionId: connectorId,
+        //     params: {
+        //       subAction: 'invokeStream',
+        //       subActionParams: {
+        //         messages: inputBody.messages,
+        //         temperature: inputBody.temperature,
+        //         stopSequences: inputBody.stopSequences,
+        //         system: inputBody.system,
+        //         maxTokens: inputBody.maxTokens,
+        //         tools: inputBody.tools,
+        //         anthropicVersion: inputBody.anthropic_version,
+        //       },
+        //     },
+        //   })) as { data: Readable };
 
-          return {
-            body: Readable.toWeb(data.data),
-          } as unknown as Response;
-        }
+        //   return {
+        //     body: Readable.toWeb(data.data),
+        //     json: () => Readable.toWeb(data.data),
+        //   } as unknown as Response;
+        // }
 
         const data = (await actionsClient.execute({
           actionId: connectorId,

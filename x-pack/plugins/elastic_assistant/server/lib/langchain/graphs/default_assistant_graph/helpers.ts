@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import agent, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
@@ -88,11 +86,6 @@ export const streamGraph = async ({
     version: 'v1',
   });
 
-  let message = '';
-  let finalOutputIndex = -1;
-  const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
-  const finalOutputStopRegex = /(?<!\\)\"/;
-
   const processEvent = async () => {
     try {
       const { value, done } = await stream.next();
@@ -119,40 +112,6 @@ export const streamGraph = async ({
               }
             }
           }
-
-          if (event.name === 'ActionsClientBedrockChatModel') {
-            const msg = chunk;
-
-            if (msg) {
-              if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
-                /* empty */
-              } else if (!didEnd) {
-                if (msg.response_metadata.finish_reason === 'stop') {
-                  handleStreamEnd(finalMessage);
-                } else {
-                  const finalOutputEndIndex = msg.content.search(finalOutputStopRegex);
-                  const currentOutput = message.replace(/\s/g, '');
-
-                  if (currentOutput.includes(finalOutputStartToken)) {
-                    finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
-                  }
-
-                  if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
-                    didEnd = true;
-                    handleStreamEnd(finalMessage);
-                    return;
-                  }
-
-                  if (finalOutputIndex > -1) {
-                    finalMessage += msg.content;
-                    push({ payload: msg.content, type: 'content' });
-                  }
-
-                  message += msg.content;
-                }
-              }
-            }
-          }
         } else if (event.event === 'on_llm_end') {
           if (event.name === 'ActionsClientChatOpenAI') {
             const generations = event.data.output?.generations[0];
@@ -168,7 +127,7 @@ export const streamGraph = async ({
               (generations && generations[0]?.generationInfo?.stop_reason === 'end_turn') ||
               generations?.[0]?.text
             ) {
-              handleStreamEnd(finalMessage);
+              handleStreamEnd(generations?.[0]?.text);
             }
           }
         }
