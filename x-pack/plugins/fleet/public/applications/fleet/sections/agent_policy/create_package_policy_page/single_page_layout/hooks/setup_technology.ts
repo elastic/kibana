@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -98,8 +98,9 @@ export function useSetupTechnology({
     isAgentlessCloudEnabled,
     isAgentlessServerlessEnabled,
   } = useAgentless();
+
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
-  const [newAgentBasedPolicy] = useState<NewAgentPolicy | undefined>({ ...newAgentPolicy });
+  const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
@@ -113,7 +114,7 @@ export function useSetupTechnology({
     if (isEditPage) {
       return;
     }
-    if (isAgentlessCloudEnabled) {
+    if (isAgentlessCloudEnabled && selectedSetupTechnology === SetupTechnology.AGENTLESS) {
       const nextNewAgentlessPolicy = {
         ...newAgentlessPolicy,
         name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
@@ -129,6 +130,7 @@ export function useSetupTechnology({
     isEditPage,
     newAgentlessPolicy,
     packagePolicy.name,
+    selectedSetupTechnology,
     updateAgentPolicies,
     updateNewAgentPolicy,
   ]);
@@ -179,12 +181,12 @@ export function useSetupTechnology({
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy({
-          ...newAgentBasedPolicy,
+          ...newAgentBasedPolicy.current,
           supports_agentless: false,
           is_managed: false,
         } as NewAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
-        updateAgentPolicies([]);
+        updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);
       }
       setSelectedSetupTechnology(setupTechnology);
     },
@@ -197,7 +199,6 @@ export function useSetupTechnology({
       newAgentlessPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,
-      newAgentBasedPolicy,
     ]
   );
 
