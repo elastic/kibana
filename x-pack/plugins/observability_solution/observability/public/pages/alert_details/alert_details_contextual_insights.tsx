@@ -35,6 +35,12 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         query: {
           alert_started_at: new Date(alert.formatted.start).toISOString(),
 
+          // alert fields used for log rate analysis
+          alert_rule_parameter_time_size: alert.formatted.fields['kibana.alert.rule.parameters']
+            ?.timeSize as string | undefined,
+          alert_rule_parameter_time_unit: alert.formatted.fields['kibana.alert.rule.parameters']
+            ?.timeUnit as string | undefined,
+
           // service fields
           'service.name': fields['service.name'],
           'service.environment': fields['service.environment'],

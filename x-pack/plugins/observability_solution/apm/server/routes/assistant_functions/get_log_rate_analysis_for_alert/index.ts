@@ -24,6 +24,8 @@ export async function getLogRateAnalysisForAlert({
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
     alertStartedAt: string;
+    alertRuleParameterTimeSize?: number;
+    alertRuleParameterTimeUnit?: string;
     entities: {
       'service.name'?: string;
       'host.name'?: string;
@@ -53,6 +55,8 @@ export async function getLogRateAnalysisForAlert({
     arguments: {
       index,
       alertStartedAt: args.alertStartedAt,
+      alertRuleParameterTimeSize: args.alertRuleParameterTimeSize,
+      alertRuleParameterTimeUnit: args.alertRuleParameterTimeUnit,
       searchQuery,
     },
   });

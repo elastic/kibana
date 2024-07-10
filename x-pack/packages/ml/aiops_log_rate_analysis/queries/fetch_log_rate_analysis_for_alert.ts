@@ -6,7 +6,6 @@
  */
 
 import { queue } from 'async';
-import moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -17,6 +16,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 import { getHistogramIntervalMs } from '../get_histogram_interval_ms';
+import { getLogRateAnalysisParametersFromAlert } from '../get_log_rate_analysis_parameters_from_alert';
 
 import { fetchIndexInfo } from './fetch_index_info';
 import { fetchSignificantCategories } from './fetch_significant_categories';
@@ -85,6 +85,8 @@ export const fetchLogRateAnalysisForAlert = async ({
   arguments: {
     index: string;
     alertStartedAt: string;
+    alertRuleParameterTimeSize?: number;
+    alertRuleParameterTimeUnit?: string;
     timefield?: string;
     searchQuery?: estypes.QueryDslQueryContainer;
     keywordFieldCandidates?: string[];
@@ -93,102 +95,21 @@ export const fetchLogRateAnalysisForAlert = async ({
 }) => {
   const debugStartTime = Date.now();
 
-  const { timefield = '@timestamp' } = args;
+  const { alertStartedAt, timefield = '@timestamp' } = args;
 
-  const lookbackDuration = moment.duration(1, 'm');
-  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
-
-  const alertStart = moment(args.alertStartedAt);
-  const alertEnd: moment.Moment | undefined = undefined;
-
-  const earliestMs = alertStart
-    .clone()
-    .subtract(15 * intervalFactor, 'minutes')
-    .valueOf();
-  const latestMs = getTimeRangeEnd().valueOf();
-
-  if (earliestMs === undefined || latestMs === undefined) {
-    throw new Error('Could not parse time range');
-  }
-
-  function getTimeRangeEnd() {
-    if (alertEnd) {
-      if (
-        alertStart
-          .clone()
-          .add(15 * intervalFactor, 'minutes')
-          .isAfter(alertEnd)
-      )
-        return alertEnd.clone().add(1 * intervalFactor, 'minutes');
-      else {
-        return alertStart.clone().add(15 * intervalFactor, 'minutes');
-      }
-    } else if (
-      alertStart
-        .clone()
-        .add(15 * intervalFactor, 'minutes')
-        .isAfter(moment(new Date()))
-    ) {
-      return moment(new Date());
-    } else {
-      return alertStart.clone().add(15 * intervalFactor, 'minutes');
-    }
-  }
-
-  function getDeviationMax() {
-    if (alertEnd) {
-      if (
-        alertStart
-          .clone()
-          .add(10 * intervalFactor, 'minutes')
-          .isAfter(alertEnd)
-      )
-        return alertEnd
-          .clone()
-          .subtract(1 * intervalFactor, 'minutes')
-          .valueOf();
-      else {
-        return alertStart
-          .clone()
-          .add(10 * intervalFactor, 'minutes')
-          .valueOf();
-      }
-    } else if (
-      alertStart
-        .clone()
-        .add(10 * intervalFactor, 'minutes')
-        .isAfter(moment(new Date()))
-    ) {
-      return moment(new Date()).valueOf();
-    } else {
-      return alertStart
-        .clone()
-        .add(10 * intervalFactor, 'minutes')
-        .valueOf();
-    }
-  }
-
-  const windowParameters = {
-    baselineMin: alertStart
-      .clone()
-      .subtract(13 * intervalFactor, 'minutes')
-      .valueOf(),
-    baselineMax: alertStart
-      .clone()
-      .subtract(2 * intervalFactor, 'minutes')
-      .valueOf(),
-    deviationMin: alertStart
-      .clone()
-      .subtract(1 * intervalFactor, 'minutes')
-      .valueOf(),
-    deviationMax: getDeviationMax(),
-  };
+  const { timeRange, windowParameters } = getLogRateAnalysisParametersFromAlert({
+    alertStartedAt,
+    timeSize: args.alertRuleParameterTimeSize,
+    timeUnit: args.alertRuleParameterTimeUnit as any,
+  });
+  const earliestMs = timeRange.min.valueOf();
+  const latestMs = timeRange.max.valueOf();
 
   const rangeQuery: estypes.QueryDslQueryContainer = {
     range: {
       [timefield]: {
-        gte: earliestMs,
-        lte: latestMs,
+        gte: timeRange.min.valueOf(),
+        lte: timeRange.max.valueOf(),
         format: 'epoch_millis',
       },
     },
