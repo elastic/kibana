@@ -506,7 +506,7 @@ x-pack/plugins/integration_assistant @elastic/security-solution
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
-x-pack/plugins/observability_solution/investigate @elastic/obs-ai-assistant
+x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-jest-serializers @elastic/kibana-operations
