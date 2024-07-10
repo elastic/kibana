@@ -36,6 +36,7 @@ export const StepNumberNav = ({
               onClick={handlePreviousStep}
               disabled={!hasPreviousStep}
               iconType="arrowLeft"
+              aria-label={PREVIOUS_STEP_BUTTON_ARIA_LABEL}
             >
               {PREVIOUS_STEP_BUTTON_TEXT}
             </EuiButtonEmpty>
@@ -59,6 +60,7 @@ export const StepNumberNav = ({
               disabled={!hasNextStep}
               iconType="arrowRight"
               iconSide="right"
+              aria-label={NEXT_STEP_BUTTON_ARIA_LABEL}
             >
               {NEXT_STEP_BUTTON_TEXT}
             </EuiButtonEmpty>
@@ -76,9 +78,23 @@ export const PREVIOUS_STEP_BUTTON_TEXT = i18n.translate(
   }
 );
 
+export const PREVIOUS_STEP_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.synthetics.stepDetail.previousStepButtonAriaLabel',
+  {
+    defaultMessage: 'Previous step',
+  }
+);
+
 export const NEXT_STEP_BUTTON_TEXT = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.nextStepButtonText',
   {
     defaultMessage: 'Next',
+  }
+);
+
+export const NEXT_STEP_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.synthetics.stepDetail.nextStepButtonAriaLabel',
+  {
+    defaultMessage: 'Next step',
   }
 );
