@@ -44,32 +44,6 @@ export type UpdateExceptionListItemCommentArray = z.infer<
 >;
 export const UpdateExceptionListItemCommentArray = z.array(UpdateExceptionListItemComment);
 
-export type UpdateExceptionListItemRequestBodyCamelCase = z.infer<
-  typeof UpdateExceptionListItemRequestBodyCamelCase
->;
-export const UpdateExceptionListItemRequestBodyCamelCase = z.object({
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  id: ExceptionListItemId.optional(),
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  itemId: ExceptionListItemHumanId.optional(),
-  listId: ExceptionListHumanId.optional(),
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
-  namespaceType: ExceptionNamespaceType.optional().default('single'),
-  osTypes: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional(),
-  meta: ExceptionListItemMeta.optional(),
-  expireTime: z.string().datetime().optional(),
-  comments: UpdateExceptionListItemCommentArray.optional().default([]),
-  _version: z.string().optional(),
-});
-
 export type UpdateExceptionListItemRequestBody = z.infer<typeof UpdateExceptionListItemRequestBody>;
 export const UpdateExceptionListItemRequestBody = z.object({
   /**
