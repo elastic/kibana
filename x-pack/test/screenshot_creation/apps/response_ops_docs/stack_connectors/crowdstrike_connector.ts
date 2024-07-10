@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('crowdstrike');
       await testSubjects.setValue('nameInput', 'Crowdstrike test connector');
-      await testSubjects.setValue('config.url-input', 'https://api.crowdstrike.com');
+      await testSubjects.setValue('config.url-input', editSimulatorUrl);
       await testSubjects.setValue('secrets.clientId-input', 'test');
       await testSubjects.setValue('secrets.clientSecret-input', 'secret');
       await commonScreenshots.takeScreenshot('crowdstrike-connector', screenshotDirectories);
