@@ -40,7 +40,7 @@ const ScheduleCodec = t.interface({
 
 // TLSFields
 export const TLSFieldsCodec = t.partial({
-  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.string,
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.union([t.string, t.array(t.string)]),
   [ConfigKey.TLS_CERTIFICATE]: t.string,
   [ConfigKey.TLS_VERIFICATION_MODE]: VerificationModeCodec,
   [ConfigKey.TLS_VERSION]: t.array(TLSVersionCodec),
