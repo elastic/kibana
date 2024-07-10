@@ -19,7 +19,7 @@ export function processVertexStream() {
     new Observable<ChatCompletionChunkEvent | TokenCountEvent>((subscriber) => {
       const id = v4();
 
-      async function handleNext(value: GoogleGenerateContentResponseChunk) {
+      function handleNext(value: GoogleGenerateContentResponseChunk) {
         // completion: what we eventually want to emit
         if (value.usageMetadata) {
           subscriber.next({
@@ -47,7 +47,11 @@ export function processVertexStream() {
 
       source.subscribe({
         next: (value) => {
-          handleNext(value).catch((error) => subscriber.error(error));
+          try {
+            handleNext(value);
+          } catch (error) {
+            subscriber.error(error);
+          }
         },
         error: (err) => {
           subscriber.error(err);
