@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleAction } from '../../types';
 import {
   generateActionHash,
@@ -14,6 +15,7 @@ import {
   isSummaryAction,
   isSummaryActionThrottled,
   getSummaryActionTimeBounds,
+  logNumberOfFilteredAlerts,
 } from './rule_action_helper';
 
 const now = '2021-05-13T12:33:37.000Z';
@@ -343,6 +345,32 @@ describe('rule_action_helper', () => {
       expect(start).toEqual(1620909157000);
       // start is end - schedule interval (1m)
       expect(start).toEqual(new Date('2021-05-13T12:32:37.000Z').valueOf());
+    });
+  });
+
+  describe('logNumberOfFilteredAlerts', () => {
+    test('should log when the number of alerts is different than the number of summarized alerts', () => {
+      const logger = loggingSystemMock.create().get();
+      logNumberOfFilteredAlerts({
+        logger,
+        numberOfAlerts: 10,
+        numberOfSummarizedAlerts: 5,
+        action: mockSummaryAction,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        '(5) alerts have been filtered out for: slack:111-111'
+      );
+    });
+
+    test('should not log when the number of alerts is the same as the number of summarized alerts', () => {
+      const logger = loggingSystemMock.create().get();
+      logNumberOfFilteredAlerts({
+        logger,
+        numberOfAlerts: 10,
+        numberOfSummarizedAlerts: 10,
+        action: mockSummaryAction,
+      });
+      expect(logger.debug).not.toHaveBeenCalled();
     });
   });
 });
