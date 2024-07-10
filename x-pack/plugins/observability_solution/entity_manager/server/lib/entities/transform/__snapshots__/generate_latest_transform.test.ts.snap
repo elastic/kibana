@@ -2,6 +2,9 @@
 
 exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
 Object {
+  "_meta": Object {
+    "definitionVersion": "999.999.999",
+  },
   "defer_validation": true,
   "dest": Object {
     "index": ".entities.v1.latest.noop",
@@ -70,6 +73,23 @@ Object {
           "data": Object {
             "terms": Object {
               "field": "host.os.name",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "event.ingested": Object {
+              "gte": "now-1m",
+            },
+          },
+        },
+      },
+      "entity.metadata.sourceIndex": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "sourceIndex",
               "size": 1000,
             },
           },

@@ -17,14 +17,14 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLInlineCast } from '@kbn/esql-ast/src/types';
+import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, chronoLiterals } from '../definitions/literals';
+import { timeUnits } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -233,9 +233,6 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return false;
   }
 
-  if (argType === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
-  }
   // date-type parameters accept string literals because of ES auto-casting
   return ['string', 'date'].includes(argType);
 }
@@ -407,7 +404,7 @@ export function checkFunctionArgMatchesDefinition(
   parentCommand?: string
 ) {
   const argType = parameterDefinition.type;
-  if (argType === 'any') {
+  if (argType === 'any' || isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
@@ -575,3 +572,9 @@ export function shouldBeQuotedText(
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
   getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';
