@@ -69,11 +69,11 @@ export function useFetchAgentsData() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive');
+    return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
   }, [selectedStatus]);
 
   const includeUnenrolled = useMemo(() => {
-    return selectedStatus.some((status) => status === 'unenrolled');
+    return selectedStatus.some((status) => status === 'unenrolled') || selectedStatus.length === 0;
   }, [selectedStatus]);
 
   const setSearch = useCallback(
