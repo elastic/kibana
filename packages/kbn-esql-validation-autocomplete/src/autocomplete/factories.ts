@@ -130,8 +130,7 @@ export const buildFieldsDefinitionsWithMetadata = (
       text: getSafeInsertText(field.name),
       kind: 'Variable',
       detail: description
-        ? `${titleCaseType} ` +
-          `
+        ? `${titleCaseType}${' '}
 
 ${description}`
         : titleCaseType,

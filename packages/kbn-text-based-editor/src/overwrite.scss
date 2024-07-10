@@ -31,6 +31,16 @@
   line-height: 1.5rem;
 }
 
+.TextBasedLangEditor .monaco-editor .suggest-details {
+  height: fit-content !important;
+}
+
+.TextBasedLangEditor .monaco-editor .suggest-details>.monaco-scrollable-element>.body>.header>.type {
+  @include euiTextBreakWord;
+  height: fit-content;
+  white-space: pre-wrap;
+}
+
 .TextBasedLangEditor_errorMessage {
   @include euiTextBreakWord;
 }
