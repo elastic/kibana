@@ -19,12 +19,13 @@ import {
   XYChartElementEvent,
   BarSeries,
 } from '@elastic/charts';
-import { EuiButton, EuiHorizontalRule, formatDate } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiToolTip, formatDate } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
 import { TooltipValue } from '@elastic/charts/dist/specs';
 import moment from 'moment';
+import { AnnotationsPermissions } from '../../components/annotations/hooks/use_annotation_permissions';
 import { createAnnotationPortal } from './create_annotation_btn';
 import { useAnnotations } from '../../components/annotations/use_annotations';
 import { Annotation } from '../../../common/annotations';
@@ -35,11 +36,13 @@ export function AnnotationsListChart({
   end,
   isEditing,
   setIsEditing,
+  permissions,
 }: {
   data: Annotation[];
   start: string;
   end: string;
   isEditing: Annotation | null;
+  permissions?: AnnotationsPermissions;
   setIsEditing: (annotation: Annotation | null) => void;
 }) {
   const { ObservabilityAnnotations, createAnnotation, onAnnotationClick } = useAnnotations({
@@ -76,18 +79,29 @@ export function AnnotationsListChart({
   return (
     <>
       <InPortal node={createAnnotationPortal}>
-        <EuiButton
-          data-test-subj="o11yRenderToolsRightCreateAnnotationButton"
-          key="createAnnotation"
-          onClick={() => {
-            createAnnotation(moment().subtract(1, 'day').toISOString());
-          }}
-          fill={true}
+        <EuiToolTip
+          content={
+            !permissions?.write
+              ? i18n.translate('xpack.observability.createAnnotation.missingPermissions', {
+                  defaultMessage: 'You do not have permission to create annotations',
+                })
+              : ''
+          }
         >
-          {i18n.translate('xpack.observability.renderToolsRight.createAnnotationButtonLabel', {
-            defaultMessage: 'Create annotation',
-          })}
-        </EuiButton>
+          <EuiButton
+            isDisabled={!permissions?.write}
+            data-test-subj="o11yRenderToolsRightCreateAnnotationButton"
+            key="createAnnotation"
+            onClick={() => {
+              createAnnotation(moment().subtract(1, 'day').toISOString());
+            }}
+            fill={true}
+          >
+            {i18n.translate('xpack.observability.renderToolsRight.createAnnotationButtonLabel', {
+              defaultMessage: 'Create annotation',
+            })}
+          </EuiButton>
+        </EuiToolTip>
       </InPortal>
       <Chart size={{ height: 300 }}>
         <Settings

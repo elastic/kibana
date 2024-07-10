@@ -151,4 +151,16 @@ export function registerAnnotationAPIs({
       return client.find(data.query);
     })
   );
+
+  router.get(
+    {
+      path: '/api/observability/annotation/permissions',
+      validate: {
+        query: unknowns,
+      },
+    },
+    wrapRouteHandler(t.type({}), ({ client }) => {
+      return client.permissions();
+    })
+  );
 }

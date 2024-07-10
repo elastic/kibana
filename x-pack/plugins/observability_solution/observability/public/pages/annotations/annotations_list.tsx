@@ -12,19 +12,23 @@ import {
   EuiBasicTableColumn,
   EuiTableSelectionType,
   EuiSearchBarProps,
-  EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { DeleteAnnotationsModal } from '../../components/annotations/components/common/delete_annotations_modal';
+import { useDeleteAnnotation } from '../../components/annotations/hooks/use_delete_annotation';
+import { DeleteAnnotations } from '../../components/annotations/components/common/delete_annotations';
+import { useAnnotationPermissions } from '../../components/annotations/hooks/use_annotation_permissions';
 import { AnnotationApplyTo } from './annotation_apply_to';
 import { TimestampRangeLabel } from '../../components/annotations/components/timestamp_range_label';
 import { DatePicker } from './date_picker';
-import { useDeleteAnnotation } from '../../components/annotations/hooks/use_delete_annotation';
 import { AnnotationsListChart } from './annotations_list_chart';
 import { Annotation } from '../../../common/annotations';
 import { useFetchAnnotations } from '../../components/annotations/hooks/use_fetch_annotations';
 
 export function AnnotationsList() {
+  const { data: permissions } = useAnnotationPermissions();
+
   const [selection, setSelection] = useState<Annotation[]>([]);
 
   const [isEditing, setIsEditing] = useState<Annotation | null>(null);
@@ -36,30 +40,27 @@ export function AnnotationsList() {
     end,
   });
 
-  const { mutateAsync: deleteAnnotation, isLoading: isDeleteLoading } = useDeleteAnnotation();
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const renderToolsLeft = () => {
-    if (selection.length === 0) {
-      return;
-    }
-    const onClick = async () => {
+  const { mutateAsync: deleteAnnotation, isLoading: isDeleteLoading } = useDeleteAnnotation();
+  const onDelete = async (deleteSelection?: Annotation) => {
+    if (deleteSelection) {
+      await deleteAnnotation({ annotations: [deleteSelection] });
+    } else {
       await deleteAnnotation({ annotations: selection });
       setSelection([]);
-      refetch();
-    };
+    }
+    refetch();
+  };
+
+  const renderToolsLeft = () => {
     return (
-      <EuiButton
-        data-test-subj="o11yRenderToolsLeftUsersButton"
-        color="danger"
-        iconType="trash"
-        onClick={onClick}
+      <DeleteAnnotations
+        selection={selection}
         isLoading={isDeleteLoading}
-      >
-        {i18n.translate('xpack.observability.renderToolsLeft.deleteButtonLabel', {
-          defaultMessage: 'Delete {no} annotations',
-          values: { no: selection.length },
-        })}
-      </EuiButton>
+        permissions={permissions}
+        setIsDeleteModalVisible={setIsDeleteModalVisible}
+      />
     );
   };
   const renderToolsRight = () => {
@@ -136,6 +137,19 @@ export function AnnotationsList() {
           onClick: (annotation) => {
             setIsEditing(annotation);
           },
+          enabled: () => permissions?.write ?? false,
+        },
+        {
+          name: DELETE_LABEL,
+          description: DELETE_LABEL,
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          onClick: (annotation) => {
+            setSelection([annotation]);
+            setIsDeleteModalVisible(true);
+          },
+          enabled: () => permissions?.write ?? false,
         },
       ],
     },
@@ -152,6 +166,7 @@ export function AnnotationsList() {
             end={end}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
+            permissions={permissions}
           />
         }
         tableCaption={i18n.translate('xpack.observability.annotationsTableCaption', {
@@ -167,6 +182,13 @@ export function AnnotationsList() {
         selection={selectionValue}
         tableLayout="auto"
       />
+      <DeleteAnnotationsModal
+        selection={selection}
+        isDeleteModalVisible={isDeleteModalVisible}
+        setSelection={setSelection}
+        onDelete={onDelete}
+        setIsDeleteModalVisible={setIsDeleteModalVisible}
+      />
     </>
   );
 }
@@ -174,10 +196,16 @@ export function AnnotationsList() {
 const TITLE_LABEL = i18n.translate('xpack.observability.titleLabel', {
   defaultMessage: 'Title',
 });
+
 const APPLY_TO_LABEL = i18n.translate('xpack.observability.applyTo', {
   defaultMessage: 'Apply to',
 });
+
 const EDIT_LABEL = i18n.translate('xpack.observability.editAnnotation', { defaultMessage: 'Edit' });
+
+const DELETE_LABEL = i18n.translate('xpack.observability.deleteAnnotation', {
+  defaultMessage: 'Delete',
+});
 
 const TAGS_LABEL = i18n.translate('xpack.observability.tagsAnnotations', {
   defaultMessage: 'Tags',

@@ -9,14 +9,15 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { checkAnnotationsPermissions } from './permissions';
 import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
   Annotation,
   CreateAnnotationParams,
-  DeleteAnnotationParams,
-  GetByIdAnnotationParams,
-  FindAnnotationParams,
   DEFAULT_ANNOTATION_INDEX,
+  DeleteAnnotationParams,
+  FindAnnotationParams,
+  GetByIdAnnotationParams,
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
@@ -30,7 +31,7 @@ export function createAnnotationsClient(params: {
   const { index, esClient, logger, license } = params;
 
   const readIndex =
-    index === DEFAULT_ANNOTATION_INDEX ? index : `${index}*,${DEFAULT_ANNOTATION_INDEX}`;
+    index === DEFAULT_ANNOTATION_INDEX ? index : `${index},${DEFAULT_ANNOTATION_INDEX}`;
 
   const initIndex = () =>
     createOrUpdateIndex({
@@ -284,5 +285,11 @@ export function createAnnotationsClient(params: {
         refresh: true,
       });
     }),
+    permissions: async () => {
+      const permissions = await checkAnnotationsPermissions({ index, esClient });
+      const hasGoldLicense = license?.hasAtLeast('gold') ?? false;
+
+      return { index, hasGoldLicense, ...permissions.index[index] };
+    },
   };
 }

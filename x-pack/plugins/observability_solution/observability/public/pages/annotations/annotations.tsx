@@ -9,6 +9,7 @@ import React from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { useAnnotationsPrivileges } from './annotations_privileges';
 import { CreateAnnotationBtn } from './create_annotation_btn';
 import { AnnotationsList } from './annotations_list';
 import { useKibana } from '../../utils/kibana_react';
@@ -23,6 +24,8 @@ export function AnnotationsPage() {
     http: { basePath },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
+
+  const checkPrivileges = useAnnotationsPrivileges();
 
   useBreadcrumbs([
     {
@@ -45,7 +48,7 @@ export function AnnotationsPage() {
       }}
     >
       <HeaderMenu />
-      <AnnotationsList />
+      {checkPrivileges ? checkPrivileges : <AnnotationsList />}
     </ObservabilityPageTemplate>
   );
 }
