@@ -23,6 +23,7 @@ import type {
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
@@ -32,7 +33,6 @@ import {
   ExternalReferenceStorageType,
   PersistableStateAttachmentPayloadRt,
   UserCommentAttachmentPayloadRt,
-  CustomFieldTypes,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
@@ -643,7 +643,8 @@ export const transformTemplateCustomFields = ({
             (templateCustomField) => templateCustomField.key === field.key
           )
         ) {
-          const value = field.type === CustomFieldTypes.TOGGLE ? false : null;
+          const { getDefaultValue } = casesCustomFields.get(field.type) ?? {};
+          const value = getDefaultValue ? getDefaultValue() : null;
 
           transformedTemplateCustomFields.push({
             key: field.key,

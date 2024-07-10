@@ -17,9 +17,8 @@ import {
 import { css } from '@emotion/react';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import type { CasePostRequest } from '../../../common';
+import type { CasePostRequest, CaseUI } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
@@ -29,6 +28,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { TemplateSelector } from './templates';
 import { getInitialCaseValue } from './utils';
 import { CaseFormFields } from '../case_form_fields';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -44,20 +44,20 @@ const transformTemplateCaseFieldsToCaseFormFields = (
 ): CasePostRequest => {
   const caseFields = removeEmptyFields(caseTemplateFields ?? {});
   const transFormedCustomFields = caseFields?.customFields?.map((customField) => {
-    if (customField.type === CustomFieldTypes.TEXT && customField.value == null) {
-      return {
-        ...customField,
-        value: '',
-      };
-    }
+    const customFieldFactory = customFieldsBuilderMap[customField.type];
+    const { convertNullToEmpty } = customFieldFactory();
+    const value = convertNullToEmpty ? convertNullToEmpty(customField.value) : customField.value;
 
-    return customField;
+    return {
+      ...customField,
+      value,
+    };
   });
 
   return getInitialCaseValue({
     owner,
     ...caseFields,
-    customFields: transFormedCustomFields,
+    customFields: transFormedCustomFields as CaseUI['customFields'],
   });
 };
 

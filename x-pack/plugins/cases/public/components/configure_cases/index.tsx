@@ -24,8 +24,11 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { CustomFieldConfiguration, TemplateConfiguration } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import type {
+  CustomFieldConfiguration,
+  TemplateConfiguration,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -50,6 +53,7 @@ import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
 import type { CaseUI } from '../../containers/types';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -347,7 +351,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
               (templateCustomField) => templateCustomField.key === field.key
             )
           ) {
-            const value = field.type === CustomFieldTypes.TOGGLE ? false : null;
+            const customFieldFactory = customFieldsBuilderMap[field.type];
+            const { getDefaultValue } = customFieldFactory();
+            const value = getDefaultValue ? getDefaultValue() : null;
 
             templateCustomFields.push({
               key: field.key,
