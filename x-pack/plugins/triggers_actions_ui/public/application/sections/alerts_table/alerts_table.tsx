@@ -304,7 +304,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     onSortChange,
     onPageChange,
     sort: sortingFields,
-    refetch: alertsRefresh,
+    refetchAlerts,
     rowHeightsOptions,
     dynamicRowHeight,
     query,
@@ -343,7 +343,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       casesConfig: alertsTableConfiguration.cases,
       query,
       useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
-      refresh: alertsRefresh,
+      refresh: refetchAlerts,
       featureIds,
       hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
     };
@@ -353,7 +353,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     alertsTableConfiguration.useBulkActions,
     alertsTableConfiguration.hideBulkActions,
     query,
-    alertsRefresh,
+    refetchAlerts,
     featureIds,
   ]);
 
@@ -367,11 +367,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
   } = useBulkActions(bulkActionArgs);
 
   const refreshData = useCallback(() => {
-    alertsRefresh();
+    refetchAlerts();
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
-  }, [alertsRefresh, queryClient]);
+  }, [refetchAlerts, queryClient]);
 
   const refresh = useCallback(() => {
     refreshData();

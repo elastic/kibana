@@ -8,7 +8,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { fireEvent, render, waitFor, screen } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import {
   AlertConsumers,
   ALERT_CASE_IDS,
@@ -22,11 +22,13 @@ import {
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
+  AlertsTableProps,
   FetchAlertData,
   RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
+import { AlertsTable } from './alerts_table';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { DefaultSort } from './hooks';
@@ -40,6 +42,13 @@ import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query');
+
+jest.mock('./alerts_table', () => {
+  return {
+    AlertsTable: jest.fn(),
+  };
+});
+const MockAlertsTable = AlertsTable as jest.Mock;
 
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('./hooks/use_bulk_get_cases');
@@ -365,6 +374,16 @@ describe('AlertsTableState', () => {
       alertsTableConfigurationRegistry: alertsTableConfigurationRegistryWithPersistentControlsMock,
     };
   };
+
+  let onPageChange: AlertsTableProps['onPageChange'];
+  let refetchAlerts: AlertsTableProps['refetchAlerts'];
+
+  MockAlertsTable.mockImplementation((props) => {
+    const { AlertsTable: AlertsTableComponent } = jest.requireActual('./alerts_table');
+    onPageChange = props.onPageChange;
+    refetchAlerts = props.refetchAlerts;
+    return <AlertsTableComponent {...props} />;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -978,6 +997,45 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...customTableProps} />);
 
       expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Pagination', () => {
+    it('resets the page index when any query parameter changes', () => {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        alerts: Array.from({ length: 100 }).map((_, i) => ({ [AlertsField.uuid]: `alert-${i}` })),
+      });
+      const { rerender } = render(<AlertsTableWithLocale {...tableProps} />);
+      act(() => {
+        onPageChange({ pageIndex: 1, pageSize: 50 });
+      });
+      rerender(
+        <AlertsTableWithLocale
+          {...tableProps}
+          query={{ bool: { filter: [{ term: { 'kibana.alert.rule.name': 'test' } }] } }}
+        />
+      );
+      expect(mockUseSearchAlertsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ pageIndex: 0 })
+      );
+    });
+
+    it('resets the page index when refetching alerts', () => {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        alerts: Array.from({ length: 100 }).map((_, i) => ({ [AlertsField.uuid]: `alert-${i}` })),
+      });
+      render(<AlertsTableWithLocale {...tableProps} />);
+      act(() => {
+        onPageChange({ pageIndex: 1, pageSize: 50 });
+      });
+      act(() => {
+        refetchAlerts();
+      });
+      expect(mockUseSearchAlertsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ pageIndex: 0 })
+      );
     });
   });
 });

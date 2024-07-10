@@ -498,7 +498,7 @@ export type AlertsTableProps = {
   oldAlertsData: FetchAlertData['oldAlertsData'];
   ecsAlertsData: FetchAlertData['ecsAlertsData'];
   querySnapshot?: EsQuerySnapshot;
-  refetch: () => void;
+  refetchAlerts: () => void;
   alertsCount: number;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;

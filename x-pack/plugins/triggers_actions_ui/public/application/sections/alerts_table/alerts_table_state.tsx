@@ -35,6 +35,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
 import { AlertsTable } from './alerts_table';
@@ -272,12 +273,13 @@ const AlertsTableStateWithQueryProvider = memo(
     storageAlertsTable.current = getStorageConfig();
 
     const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
-    const [pageIndex, setPageIndex] = useState(0);
-    const [pageSize, setPageSize] = useState(initialPageSize);
 
     const onPageChange = useCallback((pagination: RuleRegistrySearchRequestPagination) => {
-      setPageIndex(pagination.pageIndex);
-      setPageSize(pagination.pageSize);
+      setQueryParams((prevQueryParams) => ({
+        ...prevQueryParams,
+        pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
+      }));
     }, []);
 
     const {
@@ -299,6 +301,37 @@ const AlertsTableStateWithQueryProvider = memo(
       initialBrowserFields: propBrowserFields,
     });
 
+    const [queryParams, setQueryParams] = useState({
+      featureIds,
+      fields,
+      query,
+      sort,
+      runtimeMappings,
+      pageIndex: 0,
+      pageSize: initialPageSize,
+    });
+
+    useEffect(() => {
+      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
+        featureIds,
+        fields,
+        query,
+        sort,
+        runtimeMappings,
+        // Go back to the first page if the query changes
+        pageIndex: !deepEqual(prevQueryParams, {
+          featureIds,
+          fields,
+          query,
+          sort,
+          runtimeMappings,
+        })
+          ? 0
+          : oldPageIndex,
+        pageSize: oldPageSize,
+      }));
+    }, [featureIds, fields, query, runtimeMappings, sort]);
+
     const {
       data: alertsData,
       isLoading,
@@ -307,13 +340,7 @@ const AlertsTableStateWithQueryProvider = memo(
       isSuccess,
     } = useSearchAlertsQuery({
       data,
-      featureIds,
-      fields,
-      query,
-      sort,
-      runtimeMappings,
-      pageIndex,
-      pageSize,
+      ...queryParams,
     });
     const {
       alerts = [],
@@ -322,6 +349,14 @@ const AlertsTableStateWithQueryProvider = memo(
       total: alertsCount = -1,
       querySnapshot,
     } = alertsData ?? {};
+
+    const refetchAlerts = useCallback(() => {
+      if (queryParams.pageIndex !== 0) {
+        // Refetch from the first page
+        setQueryParams((prevQueryParams) => ({ ...prevQueryParams, pageIndex: 0 }));
+      }
+      refetch();
+    }, [queryParams.pageIndex, refetch]);
 
     useEffect(() => {
       if (onLoaded && isInitialLoading && !isLoading && isSuccess) {
@@ -469,14 +504,14 @@ const AlertsTableStateWithQueryProvider = memo(
         dynamicRowHeight,
         featureIds,
         querySnapshot,
-        pageIndex,
-        pageSize,
+        pageIndex: queryParams.pageIndex,
+        pageSize: queryParams.pageSize,
         sort,
         isLoading,
         alerts,
         oldAlertsData,
         ecsAlertsData,
-        refetch,
+        refetchAlerts,
         alertsCount,
         onSortChange,
         onPageChange,
@@ -508,14 +543,14 @@ const AlertsTableStateWithQueryProvider = memo(
         dynamicRowHeight,
         featureIds,
         querySnapshot,
-        pageIndex,
-        pageSize,
+        queryParams.pageIndex,
+        queryParams.pageSize,
         sort,
         isLoading,
         alerts,
         oldAlertsData,
         ecsAlertsData,
-        refetch,
+        refetchAlerts,
         alertsCount,
         onSortChange,
         onPageChange,
