@@ -195,7 +195,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 <h3>
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupTitle"
-                    defaultMessage="Agent policy"
+                    defaultMessage="Agent policies"
                   />
                 </h3>
               </EuiTitle>
@@ -218,7 +218,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   <EuiFlexItem>
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
-                      defaultMessage="Agent policy"
+                      defaultMessage="Agent policies"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

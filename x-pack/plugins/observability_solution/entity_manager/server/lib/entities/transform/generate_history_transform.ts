@@ -34,6 +34,9 @@ export function generateHistoryTransform(
 
   return {
     transform_id: generateHistoryTransformId(definition),
+    _meta: {
+      definitionVersion: definition.version,
+    },
     defer_validation: true,
     source: {
       index: definition.indexPatterns,

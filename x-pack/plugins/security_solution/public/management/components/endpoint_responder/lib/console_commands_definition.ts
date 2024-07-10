@@ -571,9 +571,13 @@ const adjustCommandsForSentinelOne = ({
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
+  const featureFlags = ExperimentalFeaturesService.get();
+  const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
+
   return commandList.map((command) => {
     if (
       command.name === 'status' ||
+      (command.name === 'kill-process' && !isKillProcessEnabled) ||
       !isAgentTypeAndActionSupported(
         'sentinel_one',
         RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
