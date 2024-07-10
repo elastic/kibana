@@ -40,10 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       const content = await logFile.readJSON();
 
       const httpEvent = content.find(
-        (c) =>
-          c.event.action === 'http_request' &&
-          c.url.path === '/audit_log' &&
-          c.url.query === 'query=param'
+        (c) => c.event.action === 'http_request' && c.url.path === '/audit_log'
       );
       expect(httpEvent).to.be.ok();
       expect(httpEvent.trace.id).to.be.ok();
@@ -54,7 +51,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(httpEvent.url.path).to.be('/audit_log');
       expect(httpEvent.url.query).to.be('query=param');
 
-      const createEvent = content.find((c) => c.event.action === 'saved_object_create');
+      const createEvent = content.find(
+        (c) =>
+          c.event.action === 'saved_object_create' && c.kibana.saved_object.type === 'dashboard'
+      );
+
       expect(createEvent).to.be.ok();
       expect(createEvent.trace.id).to.be.ok();
       expect(createEvent.user.name).to.be(username);
