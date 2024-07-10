@@ -22,6 +22,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -266,12 +267,19 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, []);
 
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
   const onLoaded = useCallback(
     (alerts: Alerts) => {
+      if (!securitySolutionNotesEnabled || expandableFlyoutDisabled || alerts.length === 0) return;
+
       const alertIds = alerts.map((alert: Alert) => alert._id);
       dispatch(fetchNotesByDocumentIds({ documentIds: alertIds }));
     },
-    [dispatch]
+    [dispatch, expandableFlyoutDisabled, securitySolutionNotesEnabled]
   );
 
   const alertStateProps: AlertsTableStateProps = useMemo(

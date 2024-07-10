@@ -29,6 +29,7 @@ import type {
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
@@ -436,6 +437,10 @@ export const useTimelineEvents = ({
   data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
 
   const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     alertConsumers,
@@ -463,9 +468,22 @@ export const useTimelineEvents = ({
     timelineSearchHandler();
 
     // fetch notes for the events
-    const events = timelineResponse.events.map((event: TimelineItem) => event._id);
-    dispatch(fetchNotesByDocumentIds({ documentIds: events }));
-  }, [dispatch, timelineResponse.events, timelineSearchHandler]);
+    if (
+      !securitySolutionNotesEnabled ||
+      expandableFlyoutDisabled ||
+      timelineResponse.events.length === 0
+    )
+      return;
+
+    const eventIds = timelineResponse.events.map((event: TimelineItem) => event._id);
+    dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
+  }, [
+    dispatch,
+    expandableFlyoutDisabled,
+    securitySolutionNotesEnabled,
+    timelineResponse.events,
+    timelineSearchHandler,
+  ]);
 
   return [loading, timelineResponse];
 };

@@ -6,15 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useEffect } from 'react';
 import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { fetchNotesByDocumentIds } from '../../../../../notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -22,7 +23,7 @@ import {
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineActions, timelineSelectors } from '../../../../store';
-import type { Direction } from '../../../../../../common/search_strategy';
+import type { Direction, TimelineItem } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { StatefulBody } from '../../body';
@@ -96,6 +97,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const { telemetry } = useKibana().services;
+  const dispatch = useDispatch();
   const {
     browserFields,
     dataViewId,
@@ -186,6 +188,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  useEffect(() => {
+    if (!securitySolutionNotesEnabled || expandableFlyoutDisabled || events.length === 0) return;
+
+    const eventIds = events.map((event: TimelineItem) => event._id);
+    dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
+  }, [dispatch, events, expandableFlyoutDisabled, securitySolutionNotesEnabled]);
 
   const {
     associateNote,

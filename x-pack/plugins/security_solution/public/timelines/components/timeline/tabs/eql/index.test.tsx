@@ -8,12 +8,10 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-
 import type { Props as EqlTabContentComponentProps } from '.';
 import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
@@ -22,7 +20,10 @@ import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import * as notesThunks from '../../../../../notes/store/notes.slice';
 
+jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -218,6 +219,90 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('fetch notes', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should fetch notes for all documents in the table if the right feature flags are on', async () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return false;
+        if (feature === 'securitySolutionNotesEnabled') return true;
+      });
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <EqlTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).toHaveBeenCalled();
+    });
+
+    it('should not fetch notes if the securitySolutionNotesEnabled feature flag is off', () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return false;
+        if (feature === 'securitySolutionNotesEnabled') return false;
+      });
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <EqlTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).not.toHaveBeenCalled();
+    });
+
+    it('should not fetch notes if the expandableFlyoutDisabled feature flag is on', () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return true;
+        if (feature === 'securitySolutionNotesEnabled') return true;
+      });
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <EqlTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).not.toHaveBeenCalled();
+    });
+
+    it(`should not fetch notes if there aren't any alerts`, () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return false;
+        if (feature === 'securitySolutionNotesEnabled') return true;
+      });
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: [],
+          pageInfo: {
+            activePage: 0,
+            totalPages: 10,
+          },
+        },
+      ]);
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <EqlTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).not.toHaveBeenCalled();
     });
   });
 });

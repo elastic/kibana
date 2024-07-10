@@ -17,7 +17,9 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { fetchNotesByDocumentIds } from '../../../../../notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -150,6 +152,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  useEffect(() => {
+    if (!securitySolutionNotesEnabled || expandableFlyoutDisabled || events.length === 0) return;
+
+    const eventIds = events.map((event: TimelineItem) => event._id);
+    dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
+  }, [dispatch, events, expandableFlyoutDisabled, securitySolutionNotesEnabled]);
 
   const {
     associateNote,

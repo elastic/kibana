@@ -15,6 +15,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { fetchNotesByDocumentIds } from '../../../../../notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -26,7 +27,7 @@ import { useTimelineDataFilters } from '../../../../containers/use_timeline_data
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../../store';
-import type { Direction } from '../../../../../../common/search_strategy';
+import type { Direction, TimelineItem } from '../../../../../../common/search_strategy';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { useTimelineEvents } from '../../../../containers';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -216,6 +217,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  useEffect(() => {
+    if (!securitySolutionNotesEnabled || expandableFlyoutDisabled || events.length === 0) return;
+
+    const eventIds = events.map((event: TimelineItem) => event._id);
+    dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
+  }, [dispatch, events, expandableFlyoutDisabled, securitySolutionNotesEnabled]);
 
   const {
     associateNote,

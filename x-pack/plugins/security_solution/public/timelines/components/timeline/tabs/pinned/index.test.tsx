@@ -24,6 +24,9 @@ import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import * as notesThunks from '../../../../../notes/store/notes.slice';
+jest.mock('../../../../../common/hooks/use_experimental_features');
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -161,6 +164,90 @@ describe('PinnedTabContent', () => {
       );
 
       expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('fetch notes', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should fetch notes for all documents in the table if the right feature flags are on', async () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return false;
+        if (feature === 'securitySolutionNotesEnabled') return true;
+      });
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <PinnedTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).toHaveBeenCalled();
+    });
+
+    it('should not fetch notes if the securitySolutionNotesEnabled feature flag is off', () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return false;
+        if (feature === 'securitySolutionNotesEnabled') return false;
+      });
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <PinnedTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).not.toHaveBeenCalled();
+    });
+
+    it('should not fetch notes if the expandableFlyoutDisabled feature flag is on', () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return true;
+        if (feature === 'securitySolutionNotesEnabled') return true;
+      });
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <PinnedTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).not.toHaveBeenCalled();
+    });
+
+    it(`should not fetch notes if there aren't any alerts`, () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+        if (feature === 'expandableFlyoutDisabled') return false;
+        if (feature === 'securitySolutionNotesEnabled') return true;
+      });
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: [],
+          pageInfo: {
+            activePage: 0,
+            totalPages: 10,
+          },
+        },
+      ]);
+
+      const fetchNotesByDocumentIds = jest.spyOn(notesThunks, 'fetchNotesByDocumentIds');
+
+      mount(
+        <TestProviders>
+          <PinnedTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(fetchNotesByDocumentIds).not.toHaveBeenCalled();
     });
   });
 });

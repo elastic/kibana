@@ -18,6 +18,8 @@ import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
 } from '@kbn/timelines-plugin/common/api/search_strategy';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { fetchNotesByDocumentIds } from '../../notes';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
@@ -483,6 +485,12 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const dispatch = useDispatch();
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -503,7 +511,24 @@ export const useTimelineEvents = ({
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
-  }, [timelineSearchHandler]);
+
+    // fetch notes for the events
+    if (
+      !securitySolutionNotesEnabled ||
+      expandableFlyoutDisabled ||
+      timelineResponse.events.length === 0
+    )
+      return;
+
+    const eventIds = timelineResponse.events.map((event: TimelineItem) => event._id);
+    dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
+  }, [
+    dispatch,
+    expandableFlyoutDisabled,
+    securitySolutionNotesEnabled,
+    timelineResponse.events,
+    timelineSearchHandler,
+  ]);
 
   return [dataLoadingState, timelineResponse];
 };
