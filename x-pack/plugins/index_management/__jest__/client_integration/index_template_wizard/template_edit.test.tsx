@@ -357,6 +357,44 @@ describe('<TemplateEdit />', () => {
       expect(exists('componentTemplatesSelection.emptyPrompt')).toBe(false);
       expect(getComponentTemplatesSelected()).toEqual([NONEXISTENT_COMPONENT_TEMPLATE.name]);
     });
+
+    it('the composedOf and ignoreMissingComponentTemplates fields should be included in the final payload', async () => {
+      const { component, actions, find } = testBed;
+
+      // Complete step 1: Logistics
+      await actions.completeStepOne();
+      // Complete step 2: Component templates
+      await actions.completeStepTwo();
+      // Complete step 3: Index settings
+      await actions.completeStepThree();
+      // Complete step 4: Mappings
+      await actions.completeStepFour();
+      // Complete step 5: Aliases
+      await actions.completeStepFive();
+
+      expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: TEMPLATE_NAME,
+            indexPatterns: INDEX_PATTERNS,
+            version: templateToEdit.version,
+            allowAutoCreate: templateToEdit.allowAutoCreate,
+            _kbnMeta: templateToEdit._kbnMeta,
+            composedOf: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+            template: {},
+            ignoreMissingComponentTemplates: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+          }),
+        })
+      );
+    });
   });
 
   if (kibanaVersion.major < 8) {
