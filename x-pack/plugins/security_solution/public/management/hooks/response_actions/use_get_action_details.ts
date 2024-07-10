@@ -19,7 +19,7 @@ import type {
 
 export const useGetActionDetails = <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 >(
   actionId: string,
   options: UseQueryOptions<

@@ -128,7 +128,7 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
           exists: dataView.id ? hasFieldData(dataView.id, field.name) : false,
           compatible: true,
           'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
-        } as FieldOption<FieldOptionValue>)
+        }) as FieldOption<FieldOptionValue>
     )
     .sort((a, b) => a.label.localeCompare(b.label));
 

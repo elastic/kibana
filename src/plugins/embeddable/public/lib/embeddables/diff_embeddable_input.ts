@@ -42,11 +42,11 @@ const genericInputKeysToCompare = [
 // type used to ensure that only keys present in EmbeddableInput are extracted
 type GenericEmbedableInputToCompare = Pick<
   EmbeddableInput,
-  typeof genericInputKeysToCompare[number]
+  (typeof genericInputKeysToCompare)[number]
 >;
 
 export const omitGenericEmbeddableInput = <
-  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>
+  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>,
 >(
   input: I
 ): Omit<I, keyof EmbeddableInput> => omit(input, allGenericInputKeys);

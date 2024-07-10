@@ -33,7 +33,7 @@ interface CommandType<
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
-    | 'setAlertDelayProperty'
+    | 'setAlertDelayProperty',
 > {
   type: T;
 }

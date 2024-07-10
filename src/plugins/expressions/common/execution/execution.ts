@@ -194,7 +194,7 @@ export class Execution<
   Output = unknown,
   InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object
     ? ExpressionExecutionParams['inspectorAdapters']
-    : DefaultInspectorAdapters
+    : DefaultInspectorAdapters,
 > {
   /**
    * Dynamic state of the execution.

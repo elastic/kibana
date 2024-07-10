@@ -51,7 +51,7 @@ const kibanaVersion = '1.0.0';
 const defaultHeaders = getDefaultHeaders(kibanaVersion);
 
 const createClient = () =>
-  ({ close: jest.fn(), child: jest.fn() } as unknown as jest.Mocked<Client>);
+  ({ close: jest.fn(), child: jest.fn() }) as unknown as jest.Mocked<Client>;
 
 describe('ClusterClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

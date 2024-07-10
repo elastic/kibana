@@ -14,7 +14,7 @@ export function getAlertsForNotification<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   actionGroupId: string,

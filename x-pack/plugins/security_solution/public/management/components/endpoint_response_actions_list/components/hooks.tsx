@@ -306,52 +306,52 @@ export const useActionsLogFilter = ({
     isTypesFilter
       ? typesFilterInitialState
       : isStatusesFilter
-      ? RESPONSE_ACTION_STATUS.map((statusName) => ({
-          key: statusName,
-          label: (
-            <ResponseActionStatusBadge
-              color={
-                statusName === 'successful'
-                  ? 'success'
-                  : statusName === 'failed'
-                  ? 'danger'
-                  : 'warning'
+        ? RESPONSE_ACTION_STATUS.map((statusName) => ({
+            key: statusName,
+            label: (
+              <ResponseActionStatusBadge
+                color={
+                  statusName === 'successful'
+                    ? 'success'
+                    : statusName === 'failed'
+                      ? 'danger'
+                      : 'warning'
+                }
+                status={getActionStatus(statusName)}
+              />
+            ) as unknown as string,
+            searchableLabel: statusName,
+            checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
+            'data-test-subj': `${filterName}-filter-option`,
+          }))
+        : isHostsFilter
+          ? []
+          : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+              const featureFlags = ExperimentalFeaturesService.get();
+
+              // upload - v8.9
+              if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
+                return false;
               }
-              status={getActionStatus(statusName)}
-            />
-          ) as unknown as string,
-          searchableLabel: statusName,
-          checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      : isHostsFilter
-      ? []
-      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
-          const featureFlags = ExperimentalFeaturesService.get();
 
-          // upload - v8.9
-          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
-            return false;
-          }
+              // `scan` - v8.15
+              if (commandName === 'scan' && !featureFlags.responseActionScanEnabled) {
+                return false;
+              }
 
-          // `scan` - v8.15
-          if (commandName === 'scan' && !featureFlags.responseActionScanEnabled) {
-            return false;
-          }
-
-          return true;
-        }).map((commandName) => ({
-          key: commandName,
-          label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
-          checked:
-            !isFlyout &&
-            commands
-              ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
-              .includes(commandName)
-              ? 'on'
-              : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
+              return true;
+            }).map((commandName) => ({
+              key: commandName,
+              label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
+              checked:
+                !isFlyout &&
+                commands
+                  ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
+                  .includes(commandName)
+                  ? 'on'
+                  : undefined,
+              'data-test-subj': `${filterName}-filter-option`,
+            }))
   );
 
   useEffect(() => {

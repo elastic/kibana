@@ -40,7 +40,7 @@ import { modelsProvider } from '../models/model_management';
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
 export function filterForEnabledFeatureModels<
-  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
+  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig,
 >(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {
@@ -154,17 +154,20 @@ export function trainedModelsRoutes(
                 size: 10000,
               });
 
-              const modelDeploymentsMap = stats.trained_model_stats.reduce((acc, curr) => {
-                if (!curr.deployment_stats) return acc;
-                // @ts-ignore elasticsearch-js client is missing deployment_id
-                const deploymentId = curr.deployment_stats.deployment_id;
-                if (acc[curr.model_id]) {
-                  acc[curr.model_id].push(deploymentId);
-                } else {
-                  acc[curr.model_id] = [deploymentId];
-                }
-                return acc;
-              }, {} as Record<string, string[]>);
+              const modelDeploymentsMap = stats.trained_model_stats.reduce(
+                (acc, curr) => {
+                  if (!curr.deployment_stats) return acc;
+                  // @ts-ignore elasticsearch-js client is missing deployment_id
+                  const deploymentId = curr.deployment_stats.deployment_id;
+                  if (acc[curr.model_id]) {
+                    acc[curr.model_id].push(deploymentId);
+                  } else {
+                    acc[curr.model_id] = [deploymentId];
+                  }
+                  return acc;
+                },
+                {} as Record<string, string[]>
+              );
 
               const modelIdsAndAliases: string[] = Array.from(
                 new Set([

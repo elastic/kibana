@@ -75,5 +75,5 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
  */
 export type StartServicesAccessor<
   TPluginsStart extends object = object,
-  TStart = unknown
+  TStart = unknown,
 > = () => Promise<[CoreStart, TPluginsStart, TStart]>;

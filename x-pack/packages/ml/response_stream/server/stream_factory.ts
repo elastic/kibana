@@ -30,8 +30,8 @@ type StreamTypeUnion = string | object;
 type StreamType<T extends StreamTypeUnion> = T extends string
   ? string
   : T extends object
-  ? T
-  : never;
+    ? T
+    : never;
 
 export interface StreamResponseWithHeaders {
   body: zlib.Gzip | UncompressedResponseStream;

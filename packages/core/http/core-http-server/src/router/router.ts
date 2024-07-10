@@ -22,7 +22,7 @@ import { RouteValidator } from './route_validator';
  */
 export type RouteRegistrar<
   Method extends RouteMethod,
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
 > = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Context, Method>

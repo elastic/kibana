@@ -175,10 +175,10 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             until: recurrenceEndDate,
           }
         : recurrenceEnds === 'afterx'
-        ? {
-            count: occurrences,
-          }
-        : {};
+          ? {
+              count: occurrences,
+            }
+          : {};
     if (frequency === 'CUSTOM') {
       return { ...rewriteCustomFrequency(customFrequency), ...recurrenceEndProps };
     }

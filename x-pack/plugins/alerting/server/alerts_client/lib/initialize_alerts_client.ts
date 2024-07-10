@@ -45,7 +45,7 @@ export const initializeAlertsClient = async <
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   alertsService,
   context,

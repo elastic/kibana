@@ -120,10 +120,13 @@ export async function getFullAgentPolicy(
     agentPolicy.namespace,
     agentPolicy.global_data_tags
   );
-  const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
-    acc[name] = featureConfig;
-    return acc;
-  }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
+  const features = (agentPolicy.agent_features || []).reduce(
+    (acc, { name, ...featureConfig }) => {
+      acc[name] = featureConfig;
+      return acc;
+    },
+    {} as NonNullable<FullAgentPolicy['agent']>['features']
+  );
 
   const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(

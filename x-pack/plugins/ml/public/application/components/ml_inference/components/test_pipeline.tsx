@@ -418,8 +418,8 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
                       {simulatePipelineError
                         ? JSON.stringify(simulatePipelineError, null, 2)
                         : simulatePipelineResult
-                        ? JSON.stringify(simulatePipelineResult, null, 2)
-                        : '{}'}
+                          ? JSON.stringify(simulatePipelineResult, null, 2)
+                          : '{}'}
                     </EuiCodeBlock>
                   </EuiResizablePanel>
                 </>

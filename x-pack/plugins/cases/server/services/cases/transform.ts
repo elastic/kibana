@@ -114,8 +114,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     ...(external_service
       ? { external_service: restExternalService }
       : external_service === null
-      ? { external_service: null }
-      : {}),
+        ? { external_service: null }
+        : {}),
   };
 
   return {

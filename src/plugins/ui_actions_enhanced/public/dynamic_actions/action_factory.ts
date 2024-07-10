@@ -35,10 +35,11 @@ export interface ActionFactoryDeps {
 }
 
 export class ActionFactory<
-  Config extends BaseActionConfig = BaseActionConfig,
-  ExecutionContext extends object = object,
-  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
-> implements
+    Config extends BaseActionConfig = BaseActionConfig,
+    ExecutionContext extends object = object,
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
+  >
+  implements
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
     PersistableState<SerializedEvent>

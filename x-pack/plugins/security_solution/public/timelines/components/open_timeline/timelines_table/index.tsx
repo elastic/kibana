@@ -216,8 +216,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       isLoading || searchResults == null
         ? i18n.LOADING
         : timelineType === TimelineType.template
-        ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
-        : i18n.ZERO_TIMELINES_MATCH;
+          ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
+          : i18n.ZERO_TIMELINES_MATCH;
 
     return (
       <EuiBasicTable

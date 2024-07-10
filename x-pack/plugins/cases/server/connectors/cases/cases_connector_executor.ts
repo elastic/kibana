@@ -233,11 +233,14 @@ export class CasesConnectorExecutor {
   }
 
   private generateNoGroupAlertGrouping = (groupingBy: string[]) => {
-    const noGroupedGrouping = groupingBy.reduce((acc, field) => {
-      acc[field] = 'unknown';
+    const noGroupedGrouping = groupingBy.reduce(
+      (acc, field) => {
+        acc[field] = 'unknown';
 
-      return acc;
-    }, {} as Record<string, string>);
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
     return noGroupedGrouping;
   };

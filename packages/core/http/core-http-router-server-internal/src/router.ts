@@ -42,7 +42,7 @@ export type ContextEnhancer<
   Q,
   B,
   Method extends RouteMethod,
-  Context extends RequestHandlerContextBase
+  Context extends RequestHandlerContextBase,
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {

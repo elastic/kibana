@@ -16,10 +16,10 @@ export const useGetEventTypeRowClassName = (ecsData: TimelineItem['ecs']) => {
       eventType === 'raw'
         ? 'rawEvent'
         : eventType === 'eql'
-        ? isEvenEqlSequence(ecsData)
-          ? 'eqlSequence'
-          : 'eqlNonSequence'
-        : 'nonRawEvent',
+          ? isEvenEqlSequence(ecsData)
+            ? 'eqlSequence'
+            : 'eqlNonSequence'
+          : 'nonRawEvent',
     [ecsData, eventType]
   );
   const buildingBlockTypeClassName = useMemo(

@@ -133,15 +133,15 @@ const buildQueryMatch = (
             browserFields
           )
         : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
-        ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
-        : `${dataProvider.queryMatch.field} : ${
-            Array.isArray(dataProvider.queryMatch.value)
-              ? `(${dataProvider.queryMatch.value.join(' OR ')})`
-              : prepareKQLParam(dataProvider.queryMatch.value)
-          }`
+          ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
+          : `${dataProvider.queryMatch.field} : ${
+              Array.isArray(dataProvider.queryMatch.value)
+                ? `(${dataProvider.queryMatch.value.join(' OR ')})`
+                : prepareKQLParam(dataProvider.queryMatch.value)
+            }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
-      : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
+        ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
+        : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
@@ -193,7 +193,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter =>
     $state: {
       store: FilterStateStore.APP_STATE,
     },
-  } as Filter);
+  }) as Filter;
 
 export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));

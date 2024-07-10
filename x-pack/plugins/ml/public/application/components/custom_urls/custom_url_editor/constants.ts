@@ -16,4 +16,4 @@ export const TIME_RANGE_TYPE = {
   INTERVAL: 'interval',
 } as const;
 
-export type TimeRangeType = typeof TIME_RANGE_TYPE[keyof typeof TIME_RANGE_TYPE];
+export type TimeRangeType = (typeof TIME_RANGE_TYPE)[keyof typeof TIME_RANGE_TYPE];

@@ -51,7 +51,7 @@ export class UiActionsServiceEnhancements
   public readonly registerActionFactory = <
     Config extends BaseActionConfig = BaseActionConfig,
     ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
   >(
     definition: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>
   ) => {
@@ -102,7 +102,7 @@ export class UiActionsServiceEnhancements
   public readonly registerDrilldown = <
     Config extends BaseActionConfig = BaseActionConfig,
     ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
   >({
     id: factoryId,
     isBeta,

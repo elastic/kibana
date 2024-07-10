@@ -259,8 +259,8 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
               webhookUrl
                 ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER
                 : selectedStoryOption
-                ? i18n.WEBHOOK_PLACEHOLDER
-                : i18n.WEBHOOK_DISABLED_PLACEHOLDER
+                  ? i18n.WEBHOOK_PLACEHOLDER
+                  : i18n.WEBHOOK_DISABLED_PLACEHOLDER
             }
             singleSelection={{ asPlainText: true }}
             options={webhooksOptions}

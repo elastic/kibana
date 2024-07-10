@@ -255,7 +255,7 @@ const getCombinedIndexInfos = async (
               isCritical: level === 'critical',
               correctiveAction: getCorrectiveAction(message, metadata, indexName),
               resolveDuringUpgrade,
-            } as EnrichedDeprecationInfo)
+            }) as EnrichedDeprecationInfo
         )
       );
     },

@@ -44,8 +44,8 @@ export const useJsonEditorModel = ({
     const initialJsonString = initialJsonValue
       ? JSON.stringify(safeJsonParse(initialJsonValue), null, 4) // prettify the json
       : functionDefinition.parameters.properties
-      ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
-      : '';
+        ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
+        : '';
 
     languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,

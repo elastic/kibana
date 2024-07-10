@@ -267,7 +267,7 @@ export async function getHighLevelStats(
 }
 
 export async function fetchHighLevelStats<
-  T extends { cluster_uuid?: string } = { cluster_uuid?: string }
+  T extends { cluster_uuid?: string } = { cluster_uuid?: string },
 >(
   callCluster: ElasticsearchClient,
   clusterUuids: string[],

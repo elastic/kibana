@@ -53,7 +53,7 @@ export const toSanitizedFieldType = (fields: FieldSpec[]) =>
           name: field.name,
           label: field.customLabel ?? field.name,
           type: field.type,
-        } as SanitizedFieldType)
+        }) as SanitizedFieldType
     );
 
 export const getFieldsForTerms = (fields: string | Array<string | null> | undefined): string[] => {

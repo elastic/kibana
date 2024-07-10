@@ -105,7 +105,7 @@ export class ModelsProvider {
 
   private getNodeId(
     elementOriginalId: string,
-    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
+    nodeType: (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES]
   ): string {
     return `${elementOriginalId}-${nodeType}`;
   }
@@ -633,14 +633,17 @@ export class ModelsProvider {
     }
 
     // Groups results by model id
-    const byModelId = (result.tasks as TasksTaskInfo[]).reduce((acc, task) => {
-      const modelId = task.description!.replace(`model_id-`, '');
-      acc[modelId] = {
-        downloaded_parts: task.status.downloaded_parts,
-        total_parts: task.status.total_parts,
-      };
-      return acc;
-    }, {} as Record<string, ModelDownloadState>);
+    const byModelId = (result.tasks as TasksTaskInfo[]).reduce(
+      (acc, task) => {
+        const modelId = task.description!.replace(`model_id-`, '');
+        acc[modelId] = {
+          downloaded_parts: task.status.downloaded_parts,
+          total_parts: task.status.total_parts,
+        };
+        return acc;
+      },
+      {} as Record<string, ModelDownloadState>
+    );
 
     return byModelId;
   }

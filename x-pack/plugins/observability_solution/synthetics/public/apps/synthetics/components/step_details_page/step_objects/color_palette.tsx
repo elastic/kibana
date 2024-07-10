@@ -49,14 +49,14 @@ export const ColorPalette = ({
                 defaultMessage: 'same',
               })
             : delta > 0
-            ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
-                defaultMessage: '{delta}% higher',
-                values: { delta },
-              })
-            : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
-                defaultMessage: '{delta}% lower',
-                values: { delta },
-              }),
+              ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
+                  defaultMessage: '{delta}% higher',
+                  values: { delta },
+                })
+              : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
+                  defaultMessage: '{delta}% lower',
+                  values: { delta },
+                }),
       },
     });
   };

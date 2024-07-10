@@ -87,7 +87,7 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 };
 
 interface FetchScriptInfoResponse<
-  TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+  TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs,
 > {
   scriptId: string;
   scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number];
@@ -108,7 +108,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async handleResponseActionCreation<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -150,7 +150,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -727,7 +727,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * @private
    */
   private async fetchScriptInfo<
-    TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+    TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs,
   >(
     scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process'>,
     osType: string | 'linux' | 'macos' | 'windows'

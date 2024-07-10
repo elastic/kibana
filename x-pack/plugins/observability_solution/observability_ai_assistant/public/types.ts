@@ -106,7 +106,7 @@ export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (op
 
 export type RegisterRenderFunctionDefinition<
   TFunctionArguments = any,
-  TFunctionResponse extends FunctionResponse = any
+  TFunctionResponse extends FunctionResponse = any,
 > = (name: string, render: RenderFunction<TFunctionArguments, TFunctionResponse>) => void;
 
 export type ChatRegistrationRenderFunction = ({}: {

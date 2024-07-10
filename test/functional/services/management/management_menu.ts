@@ -23,9 +23,9 @@ export class ManagementMenuService extends FtrService {
         await el.findByClassName('euiSideNavItemButton')
       ).getAttribute('data-test-subj');
       const sectionLinks = await Promise.all(
-        (
-          await el.findAllByCssSelector('.euiSideNavItem > a.euiSideNavItemButton')
-        ).map((item) => item.getAttribute('data-test-subj'))
+        (await el.findAllByCssSelector('.euiSideNavItem > a.euiSideNavItemButton')).map((item) =>
+          item.getAttribute('data-test-subj')
+        )
       );
 
       sections.push({ sectionId, sectionLinks });

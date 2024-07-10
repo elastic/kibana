@@ -63,8 +63,8 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
         currentStep === 'link'
           ? 'current'
           : connector.status === ConnectorStatus.CREATED
-          ? 'incomplete'
-          : 'complete',
+            ? 'incomplete'
+            : 'complete',
       onClick: () => setCurrentStep('link'),
       size: 's',
     },
@@ -76,9 +76,9 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
         currentStep === 'configure'
           ? 'current'
           : connector.status === ConnectorStatus.CONFIGURED ||
-            connector.status === ConnectorStatus.CONNECTED
-          ? 'complete'
-          : 'incomplete',
+              connector.status === ConnectorStatus.CONNECTED
+            ? 'complete'
+            : 'incomplete',
       onClick: () => setCurrentStep('configure'),
       size: 's',
     },
@@ -90,8 +90,8 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
         currentStep === 'connect'
           ? 'current'
           : connector.status === ConnectorStatus.CONNECTED && connector.index_name
-          ? 'complete'
-          : 'incomplete',
+            ? 'complete'
+            : 'incomplete',
       onClick: () => setCurrentStep('connect'),
       size: 's',
     },

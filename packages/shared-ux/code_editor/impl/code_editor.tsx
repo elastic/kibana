@@ -482,8 +482,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         ? CODE_EDITOR_DARK_THEME_TRANSPARENT_ID
         : CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID
       : useDarkTheme
-      ? CODE_EDITOR_DARK_THEME_ID
-      : CODE_EDITOR_LIGHT_THEME_ID);
+        ? CODE_EDITOR_DARK_THEME_ID
+        : CODE_EDITOR_LIGHT_THEME_ID);
 
   return (
     <div

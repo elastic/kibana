@@ -280,22 +280,22 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             }
           : item.update?.error
-          ? {
-              message: item.update.error?.reason,
-              status: item.update.status,
-              document: {
-                id: item.update._id,
-              },
-            }
-          : item.delete?.error
-          ? {
-              message: item.delete?.error?.reason,
-              status: item.delete?.status,
-              document: {
-                id: item.delete?._id,
-              },
-            }
-          : undefined
+            ? {
+                message: item.update.error?.reason,
+                status: item.update.status,
+                document: {
+                  id: item.update._id,
+                },
+              }
+            : item.delete?.error
+              ? {
+                  message: item.delete?.error?.reason,
+                  status: item.delete?.status,
+                  document: {
+                    id: item.delete?._id,
+                  },
+                }
+              : undefined
       )
       .filter((e) => e !== undefined);
   };

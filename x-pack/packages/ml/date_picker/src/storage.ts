@@ -17,4 +17,4 @@ export const FROZEN_TIER_PREFERENCE = {
  * Union type of `FROZEN_TIER_PREFERENCE` options.
  */
 export type FrozenTierPreference =
-  typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
+  (typeof FROZEN_TIER_PREFERENCE)[keyof typeof FROZEN_TIER_PREFERENCE];

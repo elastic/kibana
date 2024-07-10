@@ -185,8 +185,8 @@ export function ChatItem({
         actions.length === 0 && !content
           ? noPanelMessageClassName
           : collapsed
-          ? noBodyMessageClassName
-          : normalMessageClassName
+            ? noBodyMessageClassName
+            : normalMessageClassName
       }
     >
       <EuiPanel hasShadow={false} paddingSize="s">

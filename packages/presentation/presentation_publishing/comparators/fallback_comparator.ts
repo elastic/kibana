@@ -17,7 +17,7 @@ import { ComparatorDefinition } from './types';
  */
 export const getUnchangingComparator = <
   State extends object,
-  Key extends keyof State
+  Key extends keyof State,
 >(): ComparatorDefinition<State, Key> => {
   const subj = new BehaviorSubject<never>(null as never);
   return [subj as unknown as PublishingSubject<State[Key]>, () => {}, () => true];

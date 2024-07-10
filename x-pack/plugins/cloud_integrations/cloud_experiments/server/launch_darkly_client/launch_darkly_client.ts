@@ -44,7 +44,10 @@ export class LaunchDarklyClient {
   private readonly launchDarklyClient: LDClient;
   private launchDarklyUser?: LDSingleKindContext;
 
-  constructor(ldConfig: LaunchDarklyClientConfig, private readonly logger: Logger) {
+  constructor(
+    ldConfig: LaunchDarklyClientConfig,
+    private readonly logger: Logger
+  ) {
     this.launchDarklyClient = init(ldConfig.sdk_key, {
       application: { id: `kibana-server`, version: ldConfig.kibana_version },
       logger: basicLogger({ level: ldConfig.client_log_level }),

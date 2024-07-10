@@ -1556,9 +1556,8 @@ class AgentPolicyService {
     if (agentPolicy?.is_protected) {
       const uninstallTokenService = appContextService.getUninstallTokenService();
 
-      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
-        policyId
-      );
+      const uninstallTokenError =
+        await uninstallTokenService?.checkTokenValidityForPolicy(policyId);
 
       if (uninstallTokenError) {
         throw new FleetError(

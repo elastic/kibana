@@ -51,8 +51,8 @@ const CallOutComponent = ({
         isCaseClosed
           ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE
           : hasLicenseError
-          ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
-          : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
+            ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
+            : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
       }
       color={type}
       iconType="gear"

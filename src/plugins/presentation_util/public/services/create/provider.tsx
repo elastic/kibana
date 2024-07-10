@@ -18,7 +18,7 @@ import { PluginServiceFactory } from './factory';
  */
 export type PluginServiceProviders<
   Services extends Record<keyof Services, {}>,
-  StartParameters = {}
+  StartParameters = {},
 > = {
   [K in keyof Services]: PluginServiceProvider<
     Services[K],
@@ -28,15 +28,12 @@ export type PluginServiceProviders<
   >;
 };
 
-type ElementOfArray<ArrayType extends readonly unknown[]> = ArrayType extends Array<
-  infer ElementType
->
-  ? ElementType
-  : never;
+type ElementOfArray<ArrayType extends readonly unknown[]> =
+  ArrayType extends Array<infer ElementType> ? ElementType : never;
 
 export type PluginServiceRequiredServices<
   RequiredServices extends Array<keyof AvailableServices>,
-  AvailableServices
+  AvailableServices,
 > = {
   [K in ElementOfArray<RequiredServices>]: AvailableServices[K];
 };
@@ -52,7 +49,7 @@ export class PluginServiceProvider<
   Service extends {},
   StartParameters = {},
   Services = {},
-  RequiredServices extends Array<keyof Services> = []
+  RequiredServices extends Array<keyof Services> = [],
 > {
   private factory: PluginServiceFactory<
     Service,

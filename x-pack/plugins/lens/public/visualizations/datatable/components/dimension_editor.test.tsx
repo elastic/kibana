@@ -204,7 +204,7 @@ describe('data table dimension editor', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
     datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true } as OperationDescriptor)
+      () => ({ isBucketed: true }) as OperationDescriptor
     );
     state.columns[0].colorMode = 'cell';
 

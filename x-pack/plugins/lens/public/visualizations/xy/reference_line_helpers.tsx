@@ -359,8 +359,8 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
       groupId === 'xReferenceLine'
         ? 'bottom'
         : groupId === 'yReferenceLineRight'
-        ? 'right'
-        : 'left';
+          ? 'right'
+          : 'left';
 
     newLayer.yConfig = [
       ...(newLayer.yConfig || []),

@@ -83,20 +83,23 @@ export function transformRawCounter(
 }
 
 function mergeCounters(counters: CounterEvent[]): CounterEvent[] {
-  const mergedCounters = counters.reduce((acc, counter) => {
-    const { domainId, counterType, counterName, fromTimestamp } = counter;
-    const key = `${domainId}:${counterType}:${counterName}:${fromTimestamp}`;
+  const mergedCounters = counters.reduce(
+    (acc, counter) => {
+      const { domainId, counterType, counterName, fromTimestamp } = counter;
+      const key = `${domainId}:${counterType}:${counterName}:${fromTimestamp}`;
 
-    const existingCounter = acc[key];
-    if (!existingCounter) {
-      acc[key] = counter;
+      const existingCounter = acc[key];
+      if (!existingCounter) {
+        acc[key] = counter;
+        return acc;
+      } else {
+        acc[key].total = existingCounter.total + counter.total;
+        acc[key].lastUpdatedAt = counter.lastUpdatedAt;
+      }
       return acc;
-    } else {
-      acc[key].total = existingCounter.total + counter.total;
-      acc[key].lastUpdatedAt = counter.lastUpdatedAt;
-    }
-    return acc;
-  }, {} as Record<string, CounterEvent>);
+    },
+    {} as Record<string, CounterEvent>
+  );
 
   return Object.values(mergedCounters);
 }

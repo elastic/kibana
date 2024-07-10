@@ -12,7 +12,10 @@ export class WildcardMatcher {
   pattern: string;
   matcher: IMinimatch;
 
-  constructor(private readonly wildcardPattern: string, private readonly emptyVal?: string) {
+  constructor(
+    private readonly wildcardPattern: string,
+    private readonly emptyVal?: string
+  ) {
     this.pattern = String(this.wildcardPattern || '*');
     this.matcher = new Minimatch(this.pattern, {
       noglobstar: true,

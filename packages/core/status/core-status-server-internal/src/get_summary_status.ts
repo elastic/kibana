@@ -39,8 +39,8 @@ export const getSummaryStatus = ({
         serviceStatuses && pluginStatuses
           ? 'All services and plugins are available'
           : serviceStatuses
-          ? 'All services are available'
-          : 'All plugins are available',
+            ? 'All services are available'
+            : 'All plugins are available',
     };
   } else {
     const failingPlugins = highestLevelPlugins?.filter(({ reported }) => reported);

@@ -119,10 +119,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         direction: 'desc',
       },
       savedObjects: [],
-      savedObjectCounts: props.allowedTypes.reduce((typeToCountMap, type) => {
-        typeToCountMap[type.name] = 0;
-        return typeToCountMap;
-      }, {} as Record<string, number>),
+      savedObjectCounts: props.allowedTypes.reduce(
+        (typeToCountMap, type) => {
+          typeToCountMap[type.name] = 0;
+          return typeToCountMap;
+        },
+        {} as Record<string, number>
+      ),
       activeQuery: props.initialQuery ?? Query.parse(''),
       selectedSavedObjects: [],
       isShowingImportFlyout: false,

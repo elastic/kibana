@@ -22,8 +22,8 @@ export function IntegrationStatusBadge({
   const statusText = isEnabled
     ? i18n.INTEGRATION_INSTALLED_AND_ENABLED
     : isInstalled
-    ? i18n.INTEGRATION_INSTALLED_AND_DISABLED
-    : i18n.INTEGRATION_NOT_INSTALLED;
+      ? i18n.INTEGRATION_INSTALLED_AND_DISABLED
+      : i18n.INTEGRATION_NOT_INSTALLED;
 
   return (
     <EuiBadge color={color} data-test-subj="statusBadge">

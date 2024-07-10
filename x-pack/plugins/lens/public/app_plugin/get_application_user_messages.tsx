@@ -209,8 +209,8 @@ export const filterAndSortUserMessages = (
   const locationIds = Array.isArray(locationId)
     ? locationId
     : typeof locationId === 'string'
-    ? [locationId]
-    : [];
+      ? [locationId]
+      : [];
 
   const filteredMessages = userMessages.filter((message) => {
     if (locationIds.length) {

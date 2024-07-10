@@ -73,7 +73,7 @@ export interface Chart<TVisualizationState extends LensVisualizationState> {
 
 // Chart
 export interface ChartConfig<
-  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
+  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>,
 > {
   formulaAPI: FormulaPublicApi;
   dataView: DataView;

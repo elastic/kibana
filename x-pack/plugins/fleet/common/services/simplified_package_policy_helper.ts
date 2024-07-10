@@ -69,19 +69,22 @@ export function generateInputId(input: NewPackagePolicyInput) {
 }
 
 export function formatInputs(inputs: NewPackagePolicy['inputs']) {
-  return inputs.reduce((acc, input) => {
-    const inputId = generateInputId(input);
-    if (!acc) {
-      acc = {};
-    }
-    acc[inputId] = {
-      enabled: input.enabled,
-      vars: formatVars(input.vars),
-      streams: formatStreams(input.streams),
-    };
+  return inputs.reduce(
+    (acc, input) => {
+      const inputId = generateInputId(input);
+      if (!acc) {
+        acc = {};
+      }
+      acc[inputId] = {
+        enabled: input.enabled,
+        vars: formatVars(input.vars),
+        streams: formatStreams(input.streams),
+      };
 
-    return acc;
-  }, {} as SimplifiedPackagePolicy['inputs']);
+      return acc;
+    },
+    {} as SimplifiedPackagePolicy['inputs']
+  );
 }
 
 export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {

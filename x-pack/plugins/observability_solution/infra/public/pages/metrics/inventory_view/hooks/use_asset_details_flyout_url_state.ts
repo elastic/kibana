@@ -20,7 +20,7 @@ const ASSET_DETAILS_FLYOUT_URL_STATE_KEY = 'assetDetailsFlyout';
 
 export const useAssetDetailsFlyoutState = (): [
   AssetDetailsFlyoutProperties,
-  AssetDetailsFlyoutPropertiesUpdater
+  AssetDetailsFlyoutPropertiesUpdater,
 ] => {
   const [urlState, setUrlState] = useUrlState<AssetDetailsFlyoutProperties>({
     defaultState: {

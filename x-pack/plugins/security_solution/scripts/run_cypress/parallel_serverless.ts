@@ -298,15 +298,18 @@ export const cli = () => {
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
-          arg.split(',').reduce((acc, curr) => {
-            const [key, value] = curr.split('=');
-            if (key === 'burn') {
-              acc[key] = parseInt(value, 10);
-            } else {
-              acc[key] = value;
-            }
-            return acc;
-          }, {} as Record<string, string | number>)
+          arg.split(',').reduce(
+            (acc, curr) => {
+              const [key, value] = curr.split('=');
+              if (key === 'burn') {
+                acc[key] = parseInt(value, 10);
+              } else {
+                acc[key] = value;
+              }
+              return acc;
+            },
+            {} as Record<string, string | number>
+          )
         )
         .option('tier', {
           alias: 't',

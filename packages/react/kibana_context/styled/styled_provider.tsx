@@ -28,7 +28,7 @@ export interface EuiTheme {
  * A `styled-components` `ThemeProvider` that incorporates EUI dark mode.
  */
 const KibanaStyledComponentsThemeProvider = <
-  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
+  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme,
 >({
   darkMode = false,
   ...otherProps

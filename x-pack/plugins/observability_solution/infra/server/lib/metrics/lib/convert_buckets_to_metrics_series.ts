@@ -74,11 +74,14 @@ export const convertBucketsToRows = (
 ): MetricsAPIRow[] => {
   return buckets.map((bucket) => {
     const ids = options.metrics.map((metric) => metric.id);
-    const metrics = ids.reduce((acc, id) => {
-      const valueObject = get(bucket, [id]);
-      acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
-      return acc;
-    }, {} as Record<string, number | null | object[]>);
+    const metrics = ids.reduce(
+      (acc, id) => {
+        const valueObject = get(bucket, [id]);
+        acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
+        return acc;
+      },
+      {} as Record<string, number | null | object[]>
+    );
 
     return { timestamp: bucket.key as number, ...metrics };
   });

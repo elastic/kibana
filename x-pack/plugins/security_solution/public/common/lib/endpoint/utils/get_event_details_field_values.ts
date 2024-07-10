@@ -31,8 +31,8 @@ const getEventDetailsFieldValues = (
     category === 'signal'
       ? field.replace('signal', 'kibana.alert').replace('rule.id', 'rule.uuid')
       : category === 'kibana'
-      ? field.replace('kibana.alert', 'signal').replace('rule.uuid', 'rule.id')
-      : field;
+        ? field.replace('kibana.alert', 'signal').replace('rule.uuid', 'rule.id')
+        : field;
   return (
     find({ category, field }, data)?.values ??
     find({ category: categoryCompat, field: fieldCompat }, data)?.values ??

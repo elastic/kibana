@@ -13,7 +13,7 @@ import { ApmMainTemplate } from '../templates/apm_main_template';
 export function page<
   TPath extends string,
   TChildren extends Record<string, Route> | undefined = undefined,
-  TParams extends t.Type<any> | undefined = undefined
+  TParams extends t.Type<any> | undefined = undefined,
 >({
   path,
   element,

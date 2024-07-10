@@ -49,8 +49,8 @@ export function getOptsForChild(node: Node, parentOpts: BuildApiDecOpts): BuildA
   const name = Node.isConstructSignatureDeclaration(node)
     ? 'new'
     : isNamedNode(node)
-    ? node.getName()
-    : 'Unnamed';
+      ? node.getName()
+      : 'Unnamed';
   return getOptsForChildWithName(name, parentOpts);
 }
 

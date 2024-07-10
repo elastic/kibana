@@ -169,7 +169,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   isCompatible(context?: object): Promise<boolean> {
     return Promise.resolve(true);
   },
-  create: () => ({} as ActionDefinition),
+  create: () => ({}) as ActionDefinition,
   supportedTriggers(): string[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   },

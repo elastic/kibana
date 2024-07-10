@@ -20,7 +20,7 @@ export enum StreamingChatResponseEventType {
 
 type StreamingChatResponseEventBase<
   TEventType extends StreamingChatResponseEventType,
-  TData extends {}
+  TData extends {},
 > = {
   type: TEventType;
 } & TData;

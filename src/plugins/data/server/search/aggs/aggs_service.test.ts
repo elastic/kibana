@@ -90,11 +90,11 @@ describe('AggsService - server', () => {
       const setup = service.setup(setupDeps);
       setup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
       );
       setup.types.registerMetric(
         'bar',
-        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
+        () => ({ name: 'bar', type: 'metrics' }) as MetricAggType<any>
       );
 
       const start = await service

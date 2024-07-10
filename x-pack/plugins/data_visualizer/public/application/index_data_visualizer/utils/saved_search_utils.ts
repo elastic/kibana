@@ -32,8 +32,7 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
     return savedSearch.searchSource.getSerializedFields();
   }
   const search =
-    savedSearch?.attributes?.kibanaSavedObjectMeta ?? // @ts-ignore
-    savedSearch?.kibanaSavedObjectMeta;
+    savedSearch?.attributes?.kibanaSavedObjectMeta ?? savedSearch?.kibanaSavedObjectMeta; // @ts-ignore
 
   const parsed =
     typeof search?.searchSourceJSON === 'string'

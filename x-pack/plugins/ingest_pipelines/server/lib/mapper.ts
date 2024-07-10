@@ -23,7 +23,7 @@ const FORMAT_ACTIONS = [
   'parse_timestamp',
 ] as const;
 
-type FormatAction = typeof FORMAT_ACTIONS[number];
+type FormatAction = (typeof FORMAT_ACTIONS)[number];
 type TimeStampFormat = 'UNIX' | 'UNIX_MS' | 'ISO8601' | 'TAI64N';
 
 interface Mapping {

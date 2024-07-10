@@ -11,7 +11,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 
 export class User {
-  constructor(private log: ToolingLog, private kbnClient: KbnClient) {}
+  constructor(
+    private log: ToolingLog,
+    private kbnClient: KbnClient
+  ) {}
 
   public async create(username: string, user: any) {
     this.log.debug(`creating user ${username}`);

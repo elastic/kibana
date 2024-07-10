@@ -575,8 +575,8 @@ function generateEvalCommandTestsForEvalFunction(
         maxNumberOfArgs === 1
           ? 'one argument'
           : maxNumberOfArgs === 0
-          ? '0 arguments'
-          : `${maxNumberOfArgs} arguments`
+            ? '0 arguments'
+            : `${maxNumberOfArgs} arguments`
       }, got ${fieldMappingWithOneExtraArg.length}.`,
     ]
   );

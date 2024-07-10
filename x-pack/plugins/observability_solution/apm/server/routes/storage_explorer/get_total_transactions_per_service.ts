@@ -74,9 +74,12 @@ export async function getTotalTransactionsPerService({
   });
 
   return (
-    response.aggregations?.sample.services.buckets.reduce((transactionsPerService, bucket) => {
-      transactionsPerService[bucket.key as string] = bucket.doc_count;
-      return transactionsPerService;
-    }, {} as Record<string, number>) ?? {}
+    response.aggregations?.sample.services.buckets.reduce(
+      (transactionsPerService, bucket) => {
+        transactionsPerService[bucket.key as string] = bucket.doc_count;
+        return transactionsPerService;
+      },
+      {} as Record<string, number>
+    ) ?? {}
   );
 }

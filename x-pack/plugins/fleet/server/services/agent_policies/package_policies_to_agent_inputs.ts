@@ -74,10 +74,13 @@ export const storedPackagePolicyToAgentInputs = (
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
-      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, unknown>)
+      Object.entries(input.config || {}).reduce(
+        (acc, [key, { value }]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, unknown>
+      )
     );
     if (packagePolicy.package) {
       fullInput.meta = {
@@ -125,10 +128,13 @@ export const getFullInputStreams = (
                 id: stream.id,
                 data_stream: stream.data_stream,
                 ...stream.compiled_stream,
-                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [k: string]: any }),
+                ...Object.entries(stream.config || {}).reduce(
+                  (acc, [key, { value }]) => {
+                    acc[key] = value;
+                    return acc;
+                  },
+                  {} as { [k: string]: any }
+                ),
               };
               return fullStream;
             }),

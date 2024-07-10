@@ -204,8 +204,8 @@ export function PromptEditor({
                 ? 'fill'
                 : 'base'
               : innerMessage?.content
-              ? 'fill'
-              : 'base'
+                ? 'fill'
+                : 'base'
           }
           iconType="kqlFunction"
           isLoading={loading}

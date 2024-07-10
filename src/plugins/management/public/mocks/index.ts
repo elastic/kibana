@@ -17,7 +17,7 @@ export const createManagementSectionMock = () =>
     registerApp: jest.fn(),
     getApp: jest.fn(),
     getEnabledItems: jest.fn().mockReturnValue([]),
-  } as unknown as ManagementSection);
+  }) as unknown as ManagementSection;
 
 const createSetupContract = (): ManagementSetup => ({
   sections: {

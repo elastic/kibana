@@ -21,21 +21,21 @@ function getCallbackMocks() {
             { name: 'yetAnotherField', type: 'number' },
           ]
         : /unsupported_index/.test(query)
-        ? [{ name: 'unsupported_field', type: 'unsupported' }]
-        : [
-            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-              name: `${type}Field`,
-              type,
-            })),
-            { name: 'geoPointField', type: 'geo_point' },
-            { name: 'any#Char$Field', type: 'number' },
-            { name: 'kubernetes.something.something', type: 'number' },
-            {
-              name: `listField`,
-              type: `list`,
-            },
-            { name: '@timestamp', type: 'date' },
-          ]
+          ? [{ name: 'unsupported_field', type: 'unsupported' }]
+          : [
+              ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
+                name: `${type}Field`,
+                type,
+              })),
+              { name: 'geoPointField', type: 'geo_point' },
+              { name: 'any#Char$Field', type: 'number' },
+              { name: 'kubernetes.something.something', type: 'number' },
+              {
+                name: `listField`,
+                type: `list`,
+              },
+              { name: '@timestamp', type: 'date' },
+            ]
     ),
     getSources: jest.fn(async () =>
       ['index', '.secretIndex', 'my-index'].map((name) => ({

@@ -16,7 +16,7 @@ import type {
  */
 export const createEnabledProductFeaturesConfigMap = <
   K extends ProductFeatureKeyType,
-  T extends string = string
+  T extends string = string,
 >(
   productFeatures: Record<K, ProductFeatureKibanaConfig<T>>,
   enabledProductFeaturesKeys: ProductFeatureKeys

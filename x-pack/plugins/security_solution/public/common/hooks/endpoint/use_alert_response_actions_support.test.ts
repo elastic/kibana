@@ -46,12 +46,15 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         details: {
           agentId: 'abfe4a35-d5b4-42a0-a539-bd054c791769',
           agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType],
-          agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce((acc, commandName) => {
-            acc[commandName] = options.noAgentSupport
-              ? false
-              : isAgentTypeAndActionSupported(agentType, commandName);
-            return acc;
-          }, {} as AlertResponseActionsSupport['details']['agentSupport']),
+          agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce(
+            (acc, commandName) => {
+              acc[commandName] = options.noAgentSupport
+                ? false
+                : isAgentTypeAndActionSupported(agentType, commandName);
+              return acc;
+            },
+            {} as AlertResponseActionsSupport['details']['agentSupport']
+          ),
           agentType,
           hostName: 'elastic-host-win',
           platform: 'windows',

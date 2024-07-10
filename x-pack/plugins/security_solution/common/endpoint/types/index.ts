@@ -63,14 +63,14 @@ export interface AppLocation {
 export type Immutable<T> = T extends undefined | null | boolean | string | number
   ? T
   : unknown extends T
-  ? unknown
-  : T extends Array<infer U>
-  ? ImmutableArray<U>
-  : T extends Map<infer K, infer V>
-  ? ImmutableMap<K, V>
-  : T extends Set<infer M>
-  ? ImmutableSet<M>
-  : ImmutableObject<T>;
+    ? unknown
+    : T extends Array<infer U>
+      ? ImmutableArray<U>
+      : T extends Map<infer K, infer V>
+        ? ImmutableMap<K, V>
+        : T extends Set<infer M>
+          ? ImmutableSet<M>
+          : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
 export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
@@ -911,11 +911,12 @@ export type ResolverEntityIndex = Array<{
  * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
-export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
-  ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
-  : number extends T
-  ? T | string
-  : T;
+export type KbnConfigSchemaInputTypeOf<T> =
+  T extends Record<string, unknown>
+    ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
+    : number extends T
+      ? T | string
+      : T;
 
 /**
  * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
@@ -944,8 +945,8 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
     [Key in keyof Props]: undefined extends Props[Key]
       ? never
       : null extends Props[Key]
-      ? never
-      : Key;
+        ? never
+        : Key;
   }[keyof Props]
 >;
 
@@ -1173,7 +1174,7 @@ export type NewPolicyData = UpdatePackagePolicy & {
           value: PolicyConfig;
         };
       };
-    }
+    },
   ];
 };
 

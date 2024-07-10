@@ -35,8 +35,8 @@ export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => 
     'model_id' in serviceSettings
       ? serviceSettings.model_id
       : 'model' in serviceSettings
-      ? serviceSettings.model
-      : undefined;
+        ? serviceSettings.model
+        : undefined;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">

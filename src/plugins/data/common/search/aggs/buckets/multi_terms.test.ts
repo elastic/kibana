@@ -53,7 +53,7 @@ describe('Multi Terms Agg', () => {
       ],
     } as DataView;
 
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
+    indexPattern.fields.getByName = (name) => ({ name }) as unknown as DataViewField;
     indexPattern.fields.filter = () => indexPattern.fields;
 
     return new AggConfigs(
@@ -163,7 +163,7 @@ describe('Multi Terms Agg', () => {
       ],
     } as DataView;
 
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
+    indexPattern.fields.getByName = (name) => ({ name }) as unknown as DataViewField;
     indexPattern.fields.filter = () => indexPattern.fields;
 
     const aggConfigs = new AggConfigs(

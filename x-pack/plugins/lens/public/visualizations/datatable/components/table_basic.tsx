@@ -482,10 +482,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
             defaultHeight: props.args.fitRowToContent
               ? RowHeightMode.auto
               : props.args.rowHeightLines && props.args.rowHeightLines !== 1
-              ? {
-                  lineCount: props.args.rowHeightLines,
-                }
-              : undefined,
+                ? {
+                    lineCount: props.args.rowHeightLines,
+                  }
+                : undefined,
           }}
           inMemory={{ level: 'sorting' }}
           columns={columns}

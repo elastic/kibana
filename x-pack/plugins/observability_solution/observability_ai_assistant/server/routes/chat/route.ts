@@ -148,9 +148,8 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
-    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
-      resources
-    );
+    const { client, simulateFunctionCalling, signal, isCloudEnabled } =
+      await initializeChatRequest(resources);
 
     const response$ = client.chat(name, {
       messages,
@@ -183,9 +182,8 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     }),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
-      resources
-    );
+    const { client, simulateFunctionCalling, signal, isCloudEnabled } =
+      await initializeChatRequest(resources);
 
     const { connectorId, prompt, context } = resources.params.body;
 
@@ -249,9 +247,8 @@ async function chatComplete(
     },
   } = params;
 
-  const { client, isCloudEnabled, signal, simulateFunctionCalling } = await initializeChatRequest(
-    resources
-  );
+  const { client, isCloudEnabled, signal, simulateFunctionCalling } =
+    await initializeChatRequest(resources);
 
   const functionClient = await service.getFunctionClient({
     signal,

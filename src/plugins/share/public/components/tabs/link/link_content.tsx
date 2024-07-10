@@ -104,8 +104,8 @@ export const LinkContent = ({
       urlToCopy = delegatedShareUrlHandler
         ? delegatedShareUrlHandler?.()
         : allowShortUrl
-        ? await createShortUrl()
-        : getSnapshotUrl();
+          ? await createShortUrl()
+          : getSnapshotUrl();
     }
 
     copyToClipboard(urlToCopy);

@@ -34,10 +34,10 @@ describe('open in discover drilldown', () => {
 
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
-      locator: () => ({} as DiscoverAppLocator),
-      dataViews: () => ({} as DataViewsService),
+      locator: () => ({}) as DiscoverAppLocator,
+      dataViews: () => ({}) as DataViewsService,
       hasDiscoverAccess: () => true,
-      application: () => ({} as ApplicationStart),
+      application: () => ({}) as ApplicationStart,
     });
   });
 

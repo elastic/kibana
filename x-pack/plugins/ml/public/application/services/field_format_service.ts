@@ -19,7 +19,10 @@ export class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
-  constructor(private mlApiServices: MlApiServices, private mlIndexUtils: MlIndexUtils) {}
+  constructor(
+    private mlApiServices: MlApiServices,
+    private mlIndexUtils: MlIndexUtils
+  ) {}
 
   // Populate the service with the FieldFormats for the list of jobs with the
   // specified IDs. List of Kibana data views is passed, with a title

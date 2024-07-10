@@ -77,7 +77,7 @@ export interface LogstashStats {
         queue?: {
           type: string;
         };
-      }
+      },
     ];
     logstash?: {
       version?: string;
@@ -96,7 +96,7 @@ export interface LogstashStats {
             queue?: {
               type: string;
             };
-          }
+          },
         ];
         logstash?: {
           version?: string;
@@ -133,7 +133,7 @@ export interface LogstashState {
                   protocol?: string;
                 };
               };
-            }
+            },
           ];
         };
       };
@@ -157,7 +157,7 @@ export interface LogstashState {
                       protocol?: string;
                     };
                   };
-                }
+                },
               ];
             };
           };

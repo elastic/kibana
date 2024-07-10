@@ -22,9 +22,8 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
     requestContext: InfraPluginRequestHandlerContext,
     indices: string
   ): Promise<IndexFieldDescriptor[]> {
-    const indexPatternsService = await this.framework.getIndexPatternsServiceWithRequestContext(
-      requestContext
-    );
+    const indexPatternsService =
+      await this.framework.getIndexPatternsServiceWithRequestContext(requestContext);
 
     try {
       // NOTE: Unfortunately getFieldsForWildcard is typed to "any" here in the data plugin, FieldSpec is used below in the map.

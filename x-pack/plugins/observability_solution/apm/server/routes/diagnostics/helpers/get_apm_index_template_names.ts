@@ -29,10 +29,13 @@ export function getApmIndexTemplateNames() {
   });
 
   // For retrocompatibility, it returns index template names both pre and post APM integration package v8.15.0
-  return [...indexTemplateNames, ...rollupIndexTemplateNames].reduce((acc, indexTemplateName) => {
-    acc[indexTemplateName] = [indexTemplateName, `${indexTemplateName}@${suffix}`];
-    return acc;
-  }, {} as Record<string, string[]>);
+  return [...indexTemplateNames, ...rollupIndexTemplateNames].reduce(
+    (acc, indexTemplateName) => {
+      acc[indexTemplateName] = [indexTemplateName, `${indexTemplateName}@${suffix}`];
+      return acc;
+    },
+    {} as Record<string, string[]>
+  );
 }
 
 export function getApmIndexTemplates(

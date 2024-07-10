@@ -20,7 +20,7 @@ import { PluginServiceProvidersMediator } from './providers_mediator';
  */
 export class PluginServiceRegistry<
   Services extends Record<keyof Services, {}>,
-  StartParameters = {}
+  StartParameters = {},
 > {
   private providers: PluginServiceProviders<Services, StartParameters>;
   private providersMediator: PluginServiceProvidersMediator<Services, StartParameters>;

@@ -52,10 +52,10 @@ export interface RouteMatch<TRoute extends Route = Route> {
 type ToRouteMatch<TRoutes extends Route[]> = TRoutes extends [Route]
   ? [RouteMatch<TRoutes[0]>]
   : TRoutes extends [Route, ...infer TNextRoutes]
-  ? [RouteMatch<TRoutes[0]>, ...(TNextRoutes extends Route[] ? ToRouteMatch<TNextRoutes> : [])]
-  : TRoutes extends []
-  ? []
-  : never;
+    ? [RouteMatch<TRoutes[0]>, ...(TNextRoutes extends Route[] ? ToRouteMatch<TNextRoutes> : [])]
+    : TRoutes extends []
+      ? []
+      : never;
 
 export type Match<TRoutes extends RouteMap, TPath extends string> = MapRoutes<TRoutes>[TPath];
 
@@ -73,8 +73,8 @@ type OutputOfRoute<TRoute extends Route> = TRoute extends {
 type OutputOfRoutes<TRoutes extends Route[]> = TRoutes extends [Route]
   ? OutputOfRoute<TRoutes[0]>
   : TRoutes extends [Route, ...infer TNextRoutes]
-  ? OutputOfRoute<TRoutes[0]> & (TNextRoutes extends Route[] ? OutputOfRoutes<TNextRoutes> : {})
-  : {};
+    ? OutputOfRoute<TRoutes[0]> & (TNextRoutes extends Route[] ? OutputOfRoutes<TNextRoutes> : {})
+    : {};
 
 export type OutputOf<TRoutes extends RouteMap, TPath extends PathsOf<TRoutes>> = OutputOfRoutes<
   Match<TRoutes, TPath>
@@ -90,20 +90,20 @@ type TypeOfRoute<TRoute extends Route> = TRoute extends {
 type TypeOfRoutes<TRoutes extends Route[]> = TRoutes extends [Route]
   ? TypeOfRoute<TRoutes[0]>
   : TRoutes extends [Route, ...infer TNextRoutes]
-  ? TypeOfRoute<TRoutes[0]> & (TNextRoutes extends Route[] ? TypeOfRoutes<TNextRoutes> : {})
-  : {};
+    ? TypeOfRoute<TRoutes[0]> & (TNextRoutes extends Route[] ? TypeOfRoutes<TNextRoutes> : {})
+    : {};
 
 export type TypeOf<
   TRoutes extends RouteMap,
   TPath extends PathsOf<TRoutes>,
-  TWithDefaultOutput extends boolean = true
+  TWithDefaultOutput extends boolean = true,
 > = TypeOfRoutes<Match<TRoutes, TPath>> & (TWithDefaultOutput extends true ? DefaultOutput : {});
 
 export type TypeAsArgs<TObject> = keyof TObject extends never
   ? []
   : RequiredKeys<TObject> extends never
-  ? [TObject] | []
-  : [TObject];
+    ? [TObject] | []
+    : [TObject];
 
 export type FlattenRoutesOf<TRoutes extends RouteMap> = Array<
   ValuesType<{
@@ -152,7 +152,7 @@ export interface Router<TRoutes extends RouteMap> {
 
 type AppendPath<
   TPrefix extends string,
-  TPath extends string
+  TPath extends string,
 > = NormalizePath<`${TPrefix}${NormalizePath<`/${TPath}`>}`>;
 
 type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> & {
@@ -177,19 +177,17 @@ type MapRoute<TRoute extends RouteWithPath, TParents extends RouteWithPath[] = [
 
 type FromRouteMap<
   TRouteMap extends RouteMap,
-  TParents extends RouteWithPath[] = []
+  TParents extends RouteWithPath[] = [],
 > = UnionToIntersection<
   ValuesType<{
     [key in keyof TRouteMap]: MapRoute<TRouteMap[key] & { path: key & string }, TParents>;
   }>
 >;
 
-type MapRoutes<TRouteMap extends RouteMap, TParents extends RouteWithPath[] = []> = FromRouteMap<
-  TRouteMap,
-  TParents
-> extends Record<string, Route[]>
-  ? FromRouteMap<TRouteMap, TParents>
-  : never;
+type MapRoutes<TRouteMap extends RouteMap, TParents extends RouteWithPath[] = []> =
+  FromRouteMap<TRouteMap, TParents> extends Record<string, Route[]>
+    ? FromRouteMap<TRouteMap, TParents>
+    : never;
 
 // const element = null as any;
 

@@ -100,9 +100,8 @@ export const GroupPreview = ({
   // we don't use currentDataView directly to hide/show the missing prompt because we want to delay
   // the embeddable render until the lensAttributes have been updated in useDebounce
   // in the case that the user selects a new data view
-  const [showMissingDataViewPrompt, setShowMissingDataViewPrompt] = useState<boolean>(
-    !currentDataView
-  );
+  const [showMissingDataViewPrompt, setShowMissingDataViewPrompt] =
+    useState<boolean>(!currentDataView);
 
   useEffect(() => {
     setCurrentTimeFieldName(defaultTimeFieldName);

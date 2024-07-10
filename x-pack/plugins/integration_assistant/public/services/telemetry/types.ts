@@ -64,11 +64,11 @@ export type TelemetryEventTypeData<T extends TelemetryEventType> =
   T extends TelemetryEventType.UploadIntegrationZipComplete
     ? UploadIntegrationZipCompleteData
     : T extends TelemetryEventType.IntegrationAssistantOpen
-    ? IntegrationAssistantOpenData
-    : T extends TelemetryEventType.IntegrationAssistantStepComplete
-    ? IntegrationAssistantStepCompleteData
-    : T extends TelemetryEventType.IntegrationAssistantGenerationComplete
-    ? IntegrationAssistantGenerationCompleteData
-    : T extends TelemetryEventType.IntegrationAssistantComplete
-    ? IntegrationAssistantCompleteData
-    : never;
+      ? IntegrationAssistantOpenData
+      : T extends TelemetryEventType.IntegrationAssistantStepComplete
+        ? IntegrationAssistantStepCompleteData
+        : T extends TelemetryEventType.IntegrationAssistantGenerationComplete
+          ? IntegrationAssistantGenerationCompleteData
+          : T extends TelemetryEventType.IntegrationAssistantComplete
+            ? IntegrationAssistantCompleteData
+            : never;

@@ -316,8 +316,8 @@ export class SavedSearchEmbeddable
         dataSource: isOfAggregateQueryType(query)
           ? createEsqlDataSource()
           : dataView.id
-          ? createDataViewDataSource({ dataViewId: dataView.id })
-          : undefined,
+            ? createDataViewDataSource({ dataViewId: dataView.id })
+            : undefined,
         dataView,
         query,
       });

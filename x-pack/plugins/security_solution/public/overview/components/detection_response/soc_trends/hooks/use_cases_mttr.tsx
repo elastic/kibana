@@ -103,8 +103,8 @@ export const useCasesMttr = ({
               color: isZero
                 ? 'hollow'
                 : isNegative
-                ? 'success' // a negative change is good
-                : 'danger',
+                  ? 'success' // a negative change is good
+                  : 'danger',
               note: isZero
                 ? i18n.NO_CHANGE('case resolution time')
                 : i18n.STAT_DIFFERENCE({
@@ -122,8 +122,8 @@ export const useCasesMttr = ({
             badCurrent && badCompare
               ? i18n.NO_DATA('case')
               : badCurrent
-              ? i18n.NO_DATA_CURRENT('case')
-              : i18n.NO_DATA_COMPARE('case');
+                ? i18n.NO_DATA_CURRENT('case')
+                : i18n.NO_DATA_COMPARE('case');
 
           dispatch({
             type: 'setPercentage',

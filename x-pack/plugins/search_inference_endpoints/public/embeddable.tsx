@@ -21,9 +21,8 @@ export const InferenceEndpointsProvider = dynamic(async () => ({
 
 export const getInferenceEndpointsProvider =
   (core: CoreStart, services: AppPluginStartDependencies) =>
-  (props: React.ComponentProps<typeof InferenceEndpointsProvider>) =>
-    (
-      <KibanaContextProvider services={{ ...core, ...services }}>
-        <InferenceEndpointsProvider {...props} />
-      </KibanaContextProvider>
-    );
+  (props: React.ComponentProps<typeof InferenceEndpointsProvider>) => (
+    <KibanaContextProvider services={{ ...core, ...services }}>
+      <InferenceEndpointsProvider {...props} />
+    </KibanaContextProvider>
+  );

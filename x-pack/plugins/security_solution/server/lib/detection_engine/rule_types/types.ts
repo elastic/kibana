@@ -108,7 +108,7 @@ export type SecurityAlertType<
   TParams extends RuleParams,
   TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
+  TActionGroupIds extends string = never,
 > = Omit<
   RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
@@ -259,7 +259,7 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 export type WrappedEventHit = BaseHit<EventHit>;
 
 export type SignalSearchResponse<
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;

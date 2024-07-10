@@ -24,13 +24,13 @@ const OTHER_TYPE = 'other';
 describe('checkReferenceOrigins', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-  let find: typeof savedObjectsClient['find'];
+  let find: (typeof savedObjectsClient)['find'];
 
   const getResultMock = (...objectIds: string[]) => ({
     page: 1,
     per_page: 1,
     total: objectIds.length,
-    saved_objects: objectIds.map((id) => ({ id, score: 0 } as unknown as SavedObjectsFindResult)),
+    saved_objects: objectIds.map((id) => ({ id, score: 0 }) as unknown as SavedObjectsFindResult),
   });
 
   const setupParams = (partial: {

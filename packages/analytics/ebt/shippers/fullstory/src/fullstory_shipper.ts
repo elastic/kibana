@@ -65,7 +65,7 @@ interface FullStoryUserVars {
   cloudTrialEndDate?: string;
 }
 
-type FullStoryPageContext = Pick<EventContext, typeof PAGE_VARS_KEYS[number]>;
+type FullStoryPageContext = Pick<EventContext, (typeof PAGE_VARS_KEYS)[number]>;
 
 /**
  * FullStory shipper.
@@ -112,12 +112,15 @@ export class FullStoryShipper implements IShipper {
             // > Note: You can capture up to 20 unique page properties (exclusive of pageName) for any given page
             // > and up to 500 unique page properties across all pages.
             // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
-            return PAGE_VARS_KEYS.reduce((acc, key) => {
-              if (has(newContext, key)) {
-                set(acc, key, get(newContext, key));
-              }
-              return acc;
-            }, {} as Partial<FullStoryPageContext> & Record<string, unknown>);
+            return PAGE_VARS_KEYS.reduce(
+              (acc, key) => {
+                if (has(newContext, key)) {
+                  set(acc, key, get(newContext, key));
+                }
+                return acc;
+              },
+              {} as Partial<FullStoryPageContext> & Record<string, unknown>
+            );
           }),
           filter((pageVars) => Object.keys(pageVars).length > 0),
           // Wait for anything to actually change.

@@ -92,7 +92,7 @@ export interface UserProfileUserInfoWithSecurity extends UserProfileUserInfo {
  */
 export interface UserProfileWithSecurity<
   D extends UserProfileData = UserProfileData,
-  L extends UserProfileLabels = UserProfileLabels
+  L extends UserProfileLabels = UserProfileLabels,
 > extends UserProfile<D> {
   /**
    * Information about the user that owns profile.

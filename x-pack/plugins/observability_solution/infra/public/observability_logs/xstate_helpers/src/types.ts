@@ -14,30 +14,31 @@ export type OmitDeprecatedState<T extends ActorRefWithDeprecatedState<any, any, 
 
 export type MatchedState<
   TState extends State<any, any, any, any, any>,
-  TStateValue extends StateValue
-> = TState extends State<
-  any,
-  infer TEvent,
-  infer TStateSchema,
-  infer TTypestate,
-  infer TResolvedTypesMeta
->
-  ? State<
-      (TTypestate extends any
-        ? { value: TStateValue; context: any } extends TTypestate
-          ? TTypestate
-          : never
-        : never)['context'],
-      TEvent,
-      TStateSchema,
-      TTypestate,
-      TResolvedTypesMeta
-    > & {
-      value: TStateValue;
-    }
-  : never;
+  TStateValue extends StateValue,
+> =
+  TState extends State<
+    any,
+    infer TEvent,
+    infer TStateSchema,
+    infer TTypestate,
+    infer TResolvedTypesMeta
+  >
+    ? State<
+        (TTypestate extends any
+          ? { value: TStateValue; context: any } extends TTypestate
+            ? TTypestate
+            : never
+          : never)['context'],
+        TEvent,
+        TStateSchema,
+        TTypestate,
+        TResolvedTypesMeta
+      > & {
+        value: TStateValue;
+      }
+    : never;
 
 export type MatchedStateFromActor<
   TActorRef extends ActorRef<any, any>,
-  TStateValue extends StateValue
+  TStateValue extends StateValue,
 > = MatchedState<EmittedFrom<TActorRef>, TStateValue>;

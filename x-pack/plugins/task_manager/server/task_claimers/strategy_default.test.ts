@@ -198,7 +198,7 @@ describe('TaskClaiming', () => {
           },
           updateByQuery: store.updateByQuery.mock.calls[index] as [
             UpdateByQuerySearchOpts,
-            UpdateByQueryOpts
+            UpdateByQueryOpts,
           ],
         },
       }));

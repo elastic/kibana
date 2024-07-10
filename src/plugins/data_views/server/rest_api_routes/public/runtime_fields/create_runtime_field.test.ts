@@ -25,7 +25,7 @@ describe('create runtime field', () => {
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce({}),
-        } as unknown as DataViewLazy)
+        }) as unknown as DataViewLazy
     );
 
     await createRuntimeField({

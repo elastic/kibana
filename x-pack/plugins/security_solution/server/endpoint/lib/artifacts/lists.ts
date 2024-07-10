@@ -252,10 +252,10 @@ function getMatcherFunction({
         : 'exact_caseless_any'
       : 'exact_cased_any'
     : doesFieldEndWith
-    ? os === 'linux'
-      ? 'exact_cased'
-      : 'exact_caseless'
-    : 'exact_cased';
+      ? os === 'linux'
+        ? 'exact_cased'
+        : 'exact_caseless'
+      : 'exact_cased';
 }
 
 function getMatcherWildcardFunction({

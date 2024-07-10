@@ -10,11 +10,8 @@ import { IKibanaResponse } from '@kbn/core-http-server';
 import * as t from 'io-ts';
 import { RequiredKeys } from 'utility-types';
 
-type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
-  T['params']
-> extends never
-  ? { params?: T['params'] }
-  : { params: T['params'] };
+type MaybeOptional<T extends { params: Record<string, any> }> =
+  RequiredKeys<T['params']> extends never ? { params?: T['params'] } : { params: T['params'] };
 
 type WithoutIncompatibleMethods<T extends t.Any> = Omit<T, 'encode' | 'asEncoder'> & {
   encode: t.Encode<any, any>;
@@ -39,29 +36,30 @@ export type ServerRouteCreateOptions = Record<string, any>;
 type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
   ? true
   : TEndpoint extends `${string} ${string} ${string}`
-  ? true
-  : TEndpoint extends `${string} ${infer TPathname}`
-  ? TPathname extends `/internal/${string}`
     ? true
-    : false
-  : false;
+    : TEndpoint extends `${string} ${infer TPathname}`
+      ? TPathname extends `/internal/${string}`
+        ? true
+        : false
+      : false;
 
 export type ServerRoute<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType,
-  TRouteCreateOptions extends ServerRouteCreateOptions
-> = ValidateEndpoint<TEndpoint> extends true
-  ? {
-      endpoint: TEndpoint;
-      params?: TRouteParamsRT;
-      handler: ({}: TRouteHandlerResources &
-        (TRouteParamsRT extends RouteParamsRT
-          ? DecodedRequestParamsOfType<TRouteParamsRT>
-          : {})) => Promise<TReturnType>;
-    } & TRouteCreateOptions
-  : never;
+  TRouteCreateOptions extends ServerRouteCreateOptions,
+> =
+  ValidateEndpoint<TEndpoint> extends true
+    ? {
+        endpoint: TEndpoint;
+        params?: TRouteParamsRT;
+        handler: ({}: TRouteHandlerResources &
+          (TRouteParamsRT extends RouteParamsRT
+            ? DecodedRequestParamsOfType<TRouteParamsRT>
+            : {})) => Promise<TReturnType>;
+      } & TRouteCreateOptions
+    : never;
 
 export type ServerRouteRepository = Record<
   string,
@@ -87,56 +85,58 @@ export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
 
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends keyof TServerRouteRepository
-> = TServerRouteRepository[TEndpoint] extends ServerRoute<
-  any,
-  any,
-  any,
-  infer TReturnType,
-  ServerRouteCreateOptions
->
-  ? TReturnType extends IKibanaResponse<infer TWrappedResponseType>
-    ? TWrappedResponseType
-    : TReturnType
-  : never;
+  TEndpoint extends keyof TServerRouteRepository,
+> =
+  TServerRouteRepository[TEndpoint] extends ServerRoute<
+    any,
+    any,
+    any,
+    infer TReturnType,
+    ServerRouteCreateOptions
+  >
+    ? TReturnType extends IKibanaResponse<infer TWrappedResponseType>
+      ? TWrappedResponseType
+      : TReturnType
+    : never;
 
 export type DecodedRequestParamsOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends keyof TServerRouteRepository
-> = TServerRouteRepository[TEndpoint] extends ServerRoute<
-  any,
-  infer TRouteParamsRT,
-  any,
-  any,
-  ServerRouteCreateOptions
->
-  ? TRouteParamsRT extends RouteParamsRT
-    ? DecodedRequestParamsOfType<TRouteParamsRT>
-    : {}
-  : never;
+  TEndpoint extends keyof TServerRouteRepository,
+> =
+  TServerRouteRepository[TEndpoint] extends ServerRoute<
+    any,
+    infer TRouteParamsRT,
+    any,
+    any,
+    ServerRouteCreateOptions
+  >
+    ? TRouteParamsRT extends RouteParamsRT
+      ? DecodedRequestParamsOfType<TRouteParamsRT>
+      : {}
+    : never;
 
 export type ClientRequestParamsOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends keyof TServerRouteRepository
-> = TServerRouteRepository[TEndpoint] extends ServerRoute<
-  any,
-  infer TRouteParamsRT,
-  any,
-  any,
-  ServerRouteCreateOptions
->
-  ? TRouteParamsRT extends RouteParamsRT
-    ? ClientRequestParamsOfType<TRouteParamsRT>
-    : {}
-  : never;
+  TEndpoint extends keyof TServerRouteRepository,
+> =
+  TServerRouteRepository[TEndpoint] extends ServerRoute<
+    any,
+    infer TRouteParamsRT,
+    any,
+    any,
+    ServerRouteCreateOptions
+  >
+    ? TRouteParamsRT extends RouteParamsRT
+      ? ClientRequestParamsOfType<TRouteParamsRT>
+      : {}
+    : never;
 
-type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends never
-  ? [T] | []
-  : [T];
+type MaybeOptionalArgs<T extends Record<string, any>> =
+  RequiredKeys<T> extends never ? [T] | [] : [T];
 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends Record<string, any>
+  TAdditionalClientOptions extends Record<string, any>,
 > = <TEndpoint extends keyof TServerRouteRepository>(
   endpoint: TEndpoint,
   ...args: MaybeOptionalArgs<

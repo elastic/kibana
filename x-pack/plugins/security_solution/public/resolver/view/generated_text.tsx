@@ -26,11 +26,12 @@ export const GeneratedText = React.memo(function ({ children }) {
 
         return [
           valueSplitByWordBoundaries[0],
-          ...valueSplitByWordBoundaries
-            .splice(1)
-            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value) {
-              return [...generatedTextMemo, value, <wbr />];
-            }, []),
+          ...valueSplitByWordBoundaries.splice(1).reduce(function (
+            generatedTextMemo: Array<string | JSX.Element>,
+            value
+          ) {
+            return [...generatedTextMemo, value, <wbr />];
+          }, []),
         ];
       } else {
         return child;

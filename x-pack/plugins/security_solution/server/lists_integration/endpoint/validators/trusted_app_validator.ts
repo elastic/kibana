@@ -46,7 +46,7 @@ type ConditionEntryFieldAllowedType =
   | TypeOf<typeof ProcessCodeSigner>;
 
 type TrustedAppConditionEntry<
-  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
+  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType,
 > =
   | {
       field: T;

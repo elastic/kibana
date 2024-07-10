@@ -196,8 +196,8 @@ export function InstallElasticAgent() {
         stepStatus === 'loading'
           ? CHECK_LOGS_LABELS.loading
           : stepStatus === 'complete'
-          ? CHECK_LOGS_LABELS.completed
-          : CHECK_LOGS_LABELS.incomplete;
+            ? CHECK_LOGS_LABELS.completed
+            : CHECK_LOGS_LABELS.incomplete;
       return {
         title,
         status: stepStatus,
@@ -322,8 +322,8 @@ export function InstallElasticAgent() {
           installShipperSetupStatus === FETCH_STATUS.LOADING
             ? 'loading'
             : isInstallCompleted
-            ? 'complete'
-            : 'current'
+              ? 'complete'
+              : 'current'
         }
         showInstallProgressSteps={isInstallStarted}
         installProgressSteps={

@@ -208,18 +208,18 @@ export const EditorFooter = memo(function EditorFooter({
                           {isSpaceReduced
                             ? '@timestamp'
                             : detectTimestamp
-                            ? i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
-                                {
-                                  defaultMessage: '@timestamp found',
-                                }
-                              )
-                            : i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
-                                {
-                                  defaultMessage: '@timestamp not found',
-                                }
-                              )}
+                              ? i18n.translate(
+                                  'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
+                                  {
+                                    defaultMessage: '@timestamp found',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
+                                  {
+                                    defaultMessage: '@timestamp not found',
+                                  }
+                                )}
                         </p>
                       </EuiText>
                     </EuiFlexItem>
@@ -331,8 +331,8 @@ export const EditorFooter = memo(function EditorFooter({
                           allowQueryCancellation && isLoading
                             ? 'cross'
                             : queryHasChanged
-                            ? 'play'
-                            : 'refresh'
+                              ? 'play'
+                              : 'refresh'
                         }
                         size="s"
                         isLoading={isLoading && !allowQueryCancellation}

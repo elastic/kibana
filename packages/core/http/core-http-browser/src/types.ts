@@ -351,9 +351,9 @@ export interface HttpHandler {
     options: HttpFetchOptions & { asResponse: true }
   ): Promise<HttpResponse<TResponseBody>>;
 
-  <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
-    HttpResponse<TResponseBody>
-  >;
+  <TResponseBody = unknown>(
+    options: HttpFetchOptionsWithPath & { asResponse: true }
+  ): Promise<HttpResponse<TResponseBody>>;
 
   <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
 

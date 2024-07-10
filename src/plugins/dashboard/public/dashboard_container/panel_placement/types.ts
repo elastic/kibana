@@ -31,7 +31,7 @@ export interface PanelPlacementProps {
 
 export interface IProvidesLegacyPanelPlacementSettings<
   InputType extends EmbeddableInput = EmbeddableInput,
-  AttributesType = unknown
+  AttributesType = unknown,
 > {
   getLegacyPanelPlacementSettings: (
     input: InputType,

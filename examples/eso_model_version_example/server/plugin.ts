@@ -400,9 +400,8 @@ export class EsoModelVersionExample implements Plugin<void, void> {
             return { type: parts[0], id: parts[1] };
           });
 
-          const result: SavedObjectsBulkResponse = await savedObjects.client.bulkGet(
-            bulkGetObjects
-          );
+          const result: SavedObjectsBulkResponse =
+            await savedObjects.client.bulkGet(bulkGetObjects);
           return response.ok({
             body: result,
           });

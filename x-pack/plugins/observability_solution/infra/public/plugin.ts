@@ -364,7 +364,7 @@ export class Plugin implements InfraClientPluginClass {
     startDep$AndHostViewFlag$.subscribe(
       ([_startServices, isInfrastructureHostsViewEnabled]: [
         [CoreStart, InfraClientStartDeps, InfraClientStartExports],
-        boolean
+        boolean,
       ]) => {
         this.appUpdater$.next(() => ({
           deepLinks: getInfraDeepLinks({

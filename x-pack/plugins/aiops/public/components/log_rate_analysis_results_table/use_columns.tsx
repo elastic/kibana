@@ -91,7 +91,7 @@ export const LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE = {
   SIGNIFICANT_ITEMS: 'significantItems',
 } as const;
 export type LogRateAnalysisResultsTableType =
-  typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
+  (typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE)[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
 
 export type ColumnNames = keyof typeof significantItemColumns | 'unique';
 

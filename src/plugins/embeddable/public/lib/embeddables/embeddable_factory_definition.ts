@@ -15,7 +15,7 @@ export type EmbeddableFactoryDefinition<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends FinderAttributes = FinderAttributes
+  T extends FinderAttributes = FinderAttributes,
 > =
   // Required parameters
   Pick<

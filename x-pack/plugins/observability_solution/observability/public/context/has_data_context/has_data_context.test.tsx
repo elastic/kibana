@@ -47,7 +47,7 @@ function registerApps<T extends ObservabilityFetchDataPlugins>(
   apps.forEach(({ appName, hasData }) => {
     registerDataHandler({
       appName,
-      fetchData: () => ({} as any),
+      fetchData: () => ({}) as any,
       hasData,
     });
   });

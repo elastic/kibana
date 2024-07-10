@@ -343,33 +343,38 @@ export class AggConfig {
     }
 
     // Go through each of the params and convert to an array of expression args.
-    const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
-      const deserializedParam = this.getAggParams().find((p) => p.name === key);
+    const params = Object.entries(rest.params).reduce(
+      (acc, [key, value]) => {
+        const deserializedParam = this.getAggParams().find((p) => p.name === key);
 
-      if (deserializedParam && deserializedParam.toExpressionAst) {
-        // If the param provides `toExpressionAst`, we call it with the value
-        const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
-        if (paramExpressionAst) {
-          acc[key] = Array.isArray(paramExpressionAst) ? paramExpressionAst : [paramExpressionAst];
+        if (deserializedParam && deserializedParam.toExpressionAst) {
+          // If the param provides `toExpressionAst`, we call it with the value
+          const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
+          if (paramExpressionAst) {
+            acc[key] = Array.isArray(paramExpressionAst)
+              ? paramExpressionAst
+              : [paramExpressionAst];
+          }
+        } else if (value && Array.isArray(value)) {
+          // For array params which don't provide `toExpressionAst`, we stringify
+          // if it's an array of objects, otherwise we keep it as-is
+          const definedValues = value.filter(
+            (v) => typeof v !== 'undefined' && v !== null
+          ) as ExpressionAstArgument[];
+          acc[key] =
+            typeof definedValues[0] === 'object' ? [JSON.stringify(definedValues)] : definedValues;
+        } else if (typeof value === 'object') {
+          // For object params which don't provide `toExpressionAst`, we stringify
+          acc[key] = [JSON.stringify(value)];
+        } else if (typeof value !== 'undefined') {
+          // Everything else just gets stored in an array if it is defined
+          acc[key] = [value];
         }
-      } else if (value && Array.isArray(value)) {
-        // For array params which don't provide `toExpressionAst`, we stringify
-        // if it's an array of objects, otherwise we keep it as-is
-        const definedValues = value.filter(
-          (v) => typeof v !== 'undefined' && v !== null
-        ) as ExpressionAstArgument[];
-        acc[key] =
-          typeof definedValues[0] === 'object' ? [JSON.stringify(definedValues)] : definedValues;
-      } else if (typeof value === 'object') {
-        // For object params which don't provide `toExpressionAst`, we stringify
-        acc[key] = [JSON.stringify(value)];
-      } else if (typeof value !== 'undefined') {
-        // Everything else just gets stored in an array if it is defined
-        acc[key] = [value];
-      }
 
-      return acc;
-    }, {} as Record<string, ExpressionAstArgument[]>);
+        return acc;
+      },
+      {} as Record<string, ExpressionAstArgument[]>
+    );
 
     return {
       type: 'expression',

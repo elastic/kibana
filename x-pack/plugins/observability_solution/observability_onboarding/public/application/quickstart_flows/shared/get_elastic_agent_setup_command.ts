@@ -29,8 +29,8 @@ export function getElasticAgentSetupCommand({
   const LINUX_MACOS_COMMAND = oneLine`
       curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
       sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint} ${elasticAgentVersion} ${onboardingId} ${
-    autoDownloadConfig ? `autoDownloadConfig=1` : ''
-  }
+        autoDownloadConfig ? `autoDownloadConfig=1` : ''
+      }
     `;
   const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
     'linux-tar': LINUX_MACOS_COMMAND,

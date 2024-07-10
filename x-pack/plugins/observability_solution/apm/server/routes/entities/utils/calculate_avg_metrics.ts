@@ -26,20 +26,23 @@ export function calculateAvgMetrics(entities: MergedServiceEntities[]) {
 type MetricsKey = keyof EntityMetrics;
 
 export function mergeMetrics(metrics: EntityMetrics[]) {
-  return metrics.reduce((acc, metric) => {
-    for (const key in metric) {
-      if (metric.hasOwnProperty(key)) {
-        const metricsKey = key as MetricsKey;
+  return metrics.reduce(
+    (acc, metric) => {
+      for (const key in metric) {
+        if (metric.hasOwnProperty(key)) {
+          const metricsKey = key as MetricsKey;
 
-        const value = metric[metricsKey];
-        if (value) {
-          if (!acc[metricsKey]) {
-            acc[metricsKey] = [];
+          const value = metric[metricsKey];
+          if (value) {
+            if (!acc[metricsKey]) {
+              acc[metricsKey] = [];
+            }
+            acc[metricsKey].push(value);
           }
-          acc[metricsKey].push(value);
         }
       }
-    }
-    return acc;
-  }, {} as { [key in MetricsKey]: number[] });
+      return acc;
+    },
+    {} as { [key in MetricsKey]: number[] }
+  );
 }

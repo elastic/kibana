@@ -48,8 +48,8 @@ export const textBasedLanguageEditorStyles = (
       borderBottom: isCodeEditorExpanded
         ? 'none'
         : isCompactFocused
-        ? euiTheme.border.thin
-        : 'none',
+          ? euiTheme.border.thin
+          : 'none',
     },
     resizableContainer: {
       display: 'flex',

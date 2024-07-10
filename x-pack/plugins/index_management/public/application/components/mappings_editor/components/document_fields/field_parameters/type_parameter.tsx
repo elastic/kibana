@@ -36,8 +36,8 @@ export const TypeParameter = ({
     let options = isMultiField
       ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
       : isRootLevelField
-      ? FIELD_TYPES_OPTIONS
-      : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS);
+        ? FIELD_TYPES_OPTIONS
+        : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS);
 
     if (!isSemanticTextEnabled) {
       options = options.filter((option) => option.value !== 'semantic_text');

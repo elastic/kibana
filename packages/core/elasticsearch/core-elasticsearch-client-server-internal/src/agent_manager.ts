@@ -56,7 +56,10 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private readonly agents: Set<HttpAgent>;
   private readonly cacheableLookup?: CacheableLookup;
 
-  constructor(private readonly logger: Logger, options: AgentManagerOptions) {
+  constructor(
+    private readonly logger: Logger,
+    options: AgentManagerOptions
+  ) {
     this.agents = new Set();
     // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
     if (options.dnsCacheTtlInSeconds > 0) {

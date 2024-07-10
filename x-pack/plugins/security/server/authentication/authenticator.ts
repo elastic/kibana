@@ -301,10 +301,10 @@ export class Authenticator {
       isLoginAttemptWithProviderName(attempt) && this.providers.has(attempt.provider.name)
         ? [[attempt.provider.name, this.providers.get(attempt.provider.name)!]]
         : isLoginAttemptWithProviderType(attempt)
-        ? [...this.providerIterator(existingSessionValue?.provider.name)].filter(
-            ([, { type }]) => type === attempt.provider.type
-          )
-        : [];
+          ? [...this.providerIterator(existingSessionValue?.provider.name)].filter(
+              ([, { type }]) => type === attempt.provider.type
+            )
+          : [];
 
     if (providers.length === 0) {
       this.logger.warn(
@@ -1040,8 +1040,8 @@ export class Authenticator {
       (providerType
         ? shouldProviderUseLoginForm(providerType)
         : this.options.config.authc.sortedProviders.length > 0
-        ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
-        : false)
+          ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
+          : false)
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }

@@ -172,12 +172,12 @@ export interface PackagePolicyClient {
     packagePolicy: A extends 'packagePolicyDelete'
       ? DeletePackagePoliciesResponse
       : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyUpdate'
-      ? UpdatePackagePolicy
-      : NewPackagePolicy,
+        ? PostDeletePackagePoliciesResponse
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyUpdate'
+            ? UpdatePackagePolicy
+            : NewPackagePolicy,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
@@ -186,12 +186,12 @@ export interface PackagePolicyClient {
     A extends 'packagePolicyDelete'
       ? void
       : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyUpdate'
-      ? UpdatePackagePolicy
-      : NewPackagePolicy
+        ? void
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyUpdate'
+            ? UpdatePackagePolicy
+            : NewPackagePolicy
   >;
 
   runDeleteExternalCallbacks(

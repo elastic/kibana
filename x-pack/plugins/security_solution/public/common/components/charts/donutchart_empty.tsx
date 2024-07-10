@@ -35,7 +35,10 @@ const SmallRing = styled.div<DonutChartEmptyProps>`
     vertical-align: middle;`}
 `;
 
-const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({ size = 90, donutWidth = 20 }) =>
+const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({
+  size = 90,
+  donutWidth = 20,
+}) =>
   size - donutWidth > 0 ? (
     <BigRing size={size} data-test-subj="empty-donut">
       <SmallRing size={size - donutWidth} data-test-subj="empty-donut-small" />

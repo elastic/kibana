@@ -81,11 +81,11 @@ const getUnassignedTermsType = (
         specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'colorCode'
           ? 'custom'
           : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'loop'
-          ? 'loop'
-          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
-            NeutralPalette.id
-          ? NeutralPalette.id
-          : 'palette'
+            ? 'loop'
+            : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
+                NeutralPalette.id
+              ? NeutralPalette.id
+              : 'palette'
       }`
     : undefined;
 };

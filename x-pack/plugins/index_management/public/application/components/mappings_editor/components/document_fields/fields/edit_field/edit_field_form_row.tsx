@@ -65,10 +65,10 @@ export const EditFieldFormRow = React.memo(
       withToggle === false
         ? true
         : defaultToggleValue !== undefined
-        ? defaultToggleValue
-        : formFieldPath !== undefined
-        ? (getFieldConfig(configPath ? configPath : formFieldPath).defaultValue! as boolean)
-        : false;
+          ? defaultToggleValue
+          : formFieldPath !== undefined
+            ? (getFieldConfig(configPath ? configPath : formFieldPath).defaultValue! as boolean)
+            : false;
 
     const [isContentVisible, setIsContentVisible] = useState<boolean>(initialVisibleState);
 

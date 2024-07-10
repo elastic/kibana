@@ -44,7 +44,7 @@ export function mockHandlerArguments(
 ): [
   AlertingRequestHandlerContext,
   KibanaRequest<unknown, unknown, unknown>,
-  KibanaResponseFactory
+  KibanaResponseFactory,
 ] {
   const listTypes = jest.fn(() => listTypesRes);
   const actionsClientMocked = actionsClient || actionsClientMock.create();

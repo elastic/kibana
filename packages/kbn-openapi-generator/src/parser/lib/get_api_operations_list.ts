@@ -107,10 +107,13 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
   );
 
   // Check that all operation IDs are unique
-  const operationIdOccurrences = operations.reduce((acc, operation) => {
-    acc[operation.operationId] = (acc[operation.operationId] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const operationIdOccurrences = operations.reduce(
+    (acc, operation) => {
+      acc[operation.operationId] = (acc[operation.operationId] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
   const duplicateOperationIds = Object.entries(operationIdOccurrences).filter(
     ([, count]) => count > 1
   );

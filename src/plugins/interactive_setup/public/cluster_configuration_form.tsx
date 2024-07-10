@@ -341,15 +341,15 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
                         defaultMessage: 'Root CA',
                       })
                     : type === 'intermediate'
-                    ? i18n.translate(
-                        'interactiveSetup.certificatePanel.intermediateCertificateAuthority',
-                        {
-                          defaultMessage: 'Intermediate CA',
-                        }
-                      )
-                    : i18n.translate('interactiveSetup.certificatePanel.serverCertificate', {
-                        defaultMessage: 'Server certificate',
-                      })}
+                      ? i18n.translate(
+                          'interactiveSetup.certificatePanel.intermediateCertificateAuthority',
+                          {
+                            defaultMessage: 'Intermediate CA',
+                          }
+                        )
+                      : i18n.translate('interactiveSetup.certificatePanel.serverCertificate', {
+                          defaultMessage: 'Server certificate',
+                        })}
                 </EuiBadge>
               </EuiFlexItem>
             )}
@@ -454,8 +454,8 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
                       i === 0
                         ? 'root'
                         : i < certificateChain.length - 1
-                        ? 'intermediate'
-                        : undefined
+                          ? 'intermediate'
+                          : undefined
                     }
                   />
                 </>

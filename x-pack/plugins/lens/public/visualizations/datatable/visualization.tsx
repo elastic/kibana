@@ -168,8 +168,8 @@ export const getDatatableVisualization = ({
       changeType === 'reduced' || changeType === 'layers'
         ? 0.3
         : changeType === 'unchanged'
-        ? 0.5
-        : 1;
+          ? 0.5
+          : 1;
 
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
@@ -250,8 +250,8 @@ export const getDatatableVisualization = ({
               triggerIconType: columnMap[accessor].hidden
                 ? 'invisible'
                 : columnMap[accessor].collapseFn
-                ? 'aggregate'
-                : undefined,
+                  ? 'aggregate'
+                  : undefined,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
@@ -331,8 +331,8 @@ export const getDatatableVisualization = ({
                 triggerIconType: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring && isNumeric
-                  ? 'colorBy'
-                  : undefined,
+                    ? 'colorBy'
+                    : undefined,
                 palette:
                   hasColoring && isNumeric && stops ? stops.map(({ color }) => color) : undefined,
               };

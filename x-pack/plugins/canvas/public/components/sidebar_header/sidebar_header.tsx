@@ -40,10 +40,13 @@ const createHandlers = function <T>(
   handlers: Record<keyof T, (...args: any[]) => any>,
   context: Record<string, unknown>
 ) {
-  return Object.keys(handlers).reduce<Record<keyof T, (...args: any[]) => any>>((acc, val) => {
-    acc[val as keyof T] = handlers[val as keyof T](context);
-    return acc;
-  }, {} as Record<keyof T, (...args: any[]) => any>);
+  return Object.keys(handlers).reduce<Record<keyof T, (...args: any[]) => any>>(
+    (acc, val) => {
+      acc[val as keyof T] = handlers[val as keyof T](context);
+      return acc;
+    },
+    {} as Record<keyof T, (...args: any[]) => any>
+  );
 };
 
 interface Props {

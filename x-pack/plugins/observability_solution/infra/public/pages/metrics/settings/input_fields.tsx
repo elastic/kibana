@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface InputFieldProps<
   Value extends string = string,
-  FieldElement extends HTMLInputElement = HTMLInputElement
+  FieldElement extends HTMLInputElement = HTMLInputElement,
 > {
   error: React.ReactNode[];
   isInvalid: boolean;
@@ -28,7 +28,7 @@ export type ValidationHandlerList<ValueType> = Array<
 
 export const createInputFieldProps = <
   Value extends string = string,
-  FieldElement extends HTMLInputElement = HTMLInputElement
+  FieldElement extends HTMLInputElement = HTMLInputElement,
 >({
   errors,
   name,
@@ -50,7 +50,7 @@ export const createInputFieldProps = <
 export interface InputRangeFieldProps<
   Value extends ReactText = ReactText,
   FieldElement extends HTMLInputElement = HTMLInputElement,
-  ButtonElement extends HTMLButtonElement = HTMLButtonElement
+  ButtonElement extends HTMLButtonElement = HTMLButtonElement,
 > {
   error: React.ReactNode[];
   isInvalid: boolean;
@@ -68,7 +68,7 @@ export interface InputRangeFieldProps<
 export const createInputRangeFieldProps = <
   Value extends ReactText = ReactText,
   FieldElement extends HTMLInputElement = HTMLInputElement,
-  ButtonElement extends HTMLButtonElement = HTMLButtonElement
+  ButtonElement extends HTMLButtonElement = HTMLButtonElement,
 >({
   errors,
   name,

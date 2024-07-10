@@ -88,7 +88,7 @@ export type HttpResourcesRequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Context extends RequestHandlerContext = RequestHandlerContext
+  Context extends RequestHandlerContext = RequestHandlerContext,
 > = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 /**

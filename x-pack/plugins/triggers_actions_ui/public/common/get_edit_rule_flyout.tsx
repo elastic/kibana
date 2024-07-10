@@ -14,7 +14,7 @@ import { queryClient } from '../application/query_client';
 
 export const getEditRuleFlyoutLazy = <
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 >(
   props: RuleEditProps<Params, MetaData> & { connectorServices: ConnectorServices }
 ) => {

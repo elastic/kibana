@@ -57,10 +57,10 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
       });
       // return observable directly, any extra subscription causes duplicate requests
       return data.search
-        .search<StrategyRequestInputType<QueryType>, StrategyResponseType<QueryType>>(
-          { ...request, factoryQueryType } as StrategyRequestInputType<QueryType>,
-          { strategy: 'securitySolutionSearchStrategy', abortSignal }
-        )
+        .search<
+          StrategyRequestInputType<QueryType>,
+          StrategyResponseType<QueryType>
+        >({ ...request, factoryQueryType } as StrategyRequestInputType<QueryType>, { strategy: 'securitySolutionSearchStrategy', abortSignal })
         .pipe(
           filter((response) => !isRunningResponse(response)),
           catchError((error) => {

@@ -88,8 +88,8 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
         ? search
         : `?${parameterPath}${isEmpty(search) ? '' : `&${search}`}`
       : isEmpty(parameterPath)
-      ? ''
-      : `?${parameterPath}`
+        ? ''
+        : `?${parameterPath}`
   }`;
   return formattedPath;
 }

@@ -14,5 +14,6 @@ const TagCloudOptionsLazy = lazy(() => import('./tag_cloud_options'));
 
 export const getTagCloudOptions =
   ({ palettes }: TagCloudTypeProps) =>
-  (props: VisEditorOptionsProps<TagCloudVisParams>) =>
-    <TagCloudOptionsLazy {...props} palettes={palettes} />;
+  (props: VisEditorOptionsProps<TagCloudVisParams>) => (
+    <TagCloudOptionsLazy {...props} palettes={palettes} />
+  );

@@ -44,7 +44,8 @@ export const ReactEmbeddableRenderer = <
     SerializedState,
     RuntimeState
   >,
-  ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
+  ParentApi extends
+    HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>,
 >({
   type,
   maybeId,

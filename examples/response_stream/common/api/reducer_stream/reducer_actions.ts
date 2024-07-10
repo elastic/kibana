@@ -12,7 +12,7 @@ export const API_ACTION_NAME = {
   DELETE_ENTITY: 'delete_entity',
   ERROR: 'error',
 } as const;
-export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
+export type ApiActionName = (typeof API_ACTION_NAME)[keyof typeof API_ACTION_NAME];
 
 interface ApiActionUpdateProgress {
   type: typeof API_ACTION_NAME.UPDATE_PROGRESS;

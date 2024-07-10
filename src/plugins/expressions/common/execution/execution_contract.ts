@@ -20,7 +20,7 @@ import { ExpressionAstExpression } from '../ast';
 export class ExecutionContract<
   Input = unknown,
   Output = unknown,
-  InspectorAdapters extends Adapters = object
+  InspectorAdapters extends Adapters = object,
 > {
   public get isPending(): boolean {
     const { state, result } = this.execution.state.get();

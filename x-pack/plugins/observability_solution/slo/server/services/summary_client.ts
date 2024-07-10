@@ -48,7 +48,10 @@ export interface SummaryClient {
 }
 
 export class DefaultSummaryClient implements SummaryClient {
-  constructor(private esClient: ElasticsearchClient, private burnRatesClient: BurnRatesClient) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private burnRatesClient: BurnRatesClient
+  ) {}
 
   async computeSummary({ slo, instanceId, remoteName }: Params): Promise<SummaryResult> {
     const dateRange = toDateRange(slo.timeWindow);

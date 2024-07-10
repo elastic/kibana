@@ -79,9 +79,8 @@ export const getKnowledgeBaseStatusRoute = (
           // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
           let isSetupInProgress = false;
           if (enableKnowledgeBaseByDefault) {
-            const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient(
-              false
-            );
+            const kbDataClient =
+              await assistantContext.getAIAssistantKnowledgeBaseDataClient(false);
             if (!kbDataClient) {
               return response.custom({ body: { success: false }, statusCode: 500 });
             }

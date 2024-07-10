@@ -36,10 +36,13 @@ export type DatafeedsService = ReturnType<typeof datafeedsProvider>;
 export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
-    const doStartsCalled = datafeedIds.reduce((acc, cur) => {
-      acc[cur] = false;
-      return acc;
-    }, {} as { [id: string]: boolean });
+    const doStartsCalled = datafeedIds.reduce(
+      (acc, cur) => {
+        acc[cur] = false;
+        return acc;
+      },
+      {} as { [id: string]: boolean }
+    );
 
     const results: Results = {};
 
@@ -148,19 +151,25 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   async function getDatafeedIdsByJobId() {
     const { datafeeds } = await mlClient.getDatafeeds();
 
-    return datafeeds.reduce((acc, cur) => {
-      acc[cur.job_id] = cur.datafeed_id;
-      return acc;
-    }, {} as { [id: string]: string });
+    return datafeeds.reduce(
+      (acc, cur) => {
+        acc[cur.job_id] = cur.datafeed_id;
+        return acc;
+      },
+      {} as { [id: string]: string }
+    );
   }
 
   async function getJobIdsByDatafeedId() {
     const { datafeeds } = await mlClient.getDatafeeds();
 
-    return datafeeds.reduce((acc, cur) => {
-      acc[cur.datafeed_id] = cur.job_id;
-      return acc;
-    }, {} as { [id: string]: string });
+    return datafeeds.reduce(
+      (acc, cur) => {
+        acc[cur.datafeed_id] = cur.job_id;
+        return acc;
+      },
+      {} as { [id: string]: string }
+    );
   }
 
   async function getDatafeedByJobId(

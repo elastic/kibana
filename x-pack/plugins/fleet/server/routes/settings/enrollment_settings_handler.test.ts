@@ -122,18 +122,16 @@ describe('EnrollmentSettingsHandler utils', () => {
   describe('getFleetServerOrAgentPolicies', () => {
     it('returns only fleet server policies if there are any when no agent policy ID is provided', async () => {
       (getFleetServerPolicies as jest.Mock).mockResolvedValueOnce(mockFleetServerPolicies);
-      const { fleetServerPolicies, scopedAgentPolicy } = await getFleetServerOrAgentPolicies(
-        mockSoClient
-      );
+      const { fleetServerPolicies, scopedAgentPolicy } =
+        await getFleetServerOrAgentPolicies(mockSoClient);
       expect(fleetServerPolicies).toEqual(mockFleetServerPolicies);
       expect(scopedAgentPolicy).toBeUndefined();
     });
 
     it('returns no fleet server policies when there are none and no agent policy ID is provided', async () => {
       (getFleetServerPolicies as jest.Mock).mockResolvedValueOnce([]);
-      const { fleetServerPolicies, scopedAgentPolicy } = await getFleetServerOrAgentPolicies(
-        mockSoClient
-      );
+      const { fleetServerPolicies, scopedAgentPolicy } =
+        await getFleetServerOrAgentPolicies(mockSoClient);
       expect(fleetServerPolicies).toEqual([]);
       expect(scopedAgentPolicy).toBeUndefined();
     });

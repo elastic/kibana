@@ -83,11 +83,14 @@ export const expandDottedObject = (dottedObj: object = {}) => {
 };
 
 export const expandDottedEntries = (obj: object) => {
-  return Object.entries<any>(obj).reduce<any>((acc, [key, value]) => {
-    acc[key] = expandDottedObject(value);
+  return Object.entries<any>(obj).reduce<any>(
+    (acc, [key, value]) => {
+      acc[key] = expandDottedObject(value);
 
-    return acc;
-  }, {} as Record<string, any>);
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 };
 
 type AssetsBufferMap = Record<string, Buffer>;

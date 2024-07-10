@@ -107,7 +107,10 @@ const jobDebugMessage = (report: Report) =>
 export class ReportingStore {
   private client?: ElasticsearchClient;
 
-  constructor(private reportingCore: ReportingCore, private logger: Logger) {
+  constructor(
+    private reportingCore: ReportingCore,
+    private logger: Logger
+  ) {
     this.logger = logger.get('store');
   }
 

@@ -18,7 +18,7 @@ import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError 
 
 export interface NormalizedExternalConnectorClientExecuteOptions<
   TParams extends Record<string, any> = Record<string, any>,
-  TSubAction = unknown
+  TSubAction = unknown,
 > {
   params: {
     subAction: TSubAction;
@@ -107,7 +107,7 @@ export class NormalizedExternalConnectorClient {
 
   public async execute<
     TResponse = unknown,
-    TParams extends Record<string, any> = Record<string, any>
+    TParams extends Record<string, any> = Record<string, any>,
   >({
     spaceId = 'default',
     params,

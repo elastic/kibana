@@ -282,7 +282,7 @@ export class AnomalyTimelineStateService extends StateService {
           AppStateSelectedCells,
           TimeBucketsInterval,
           TimeRangeBounds,
-          Refresh
+          Refresh,
         ]
       >
     )

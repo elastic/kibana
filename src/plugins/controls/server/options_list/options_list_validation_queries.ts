@@ -20,10 +20,13 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
     buildAggregation: ({ selectedOptions, fieldName, fieldSpec }: OptionsListRequestBody) => {
       let selectedOptionsFilters;
       if (selectedOptions) {
-        selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
-          acc[currentOption] = { match: { [fieldName]: String(currentOption) } };
-          return acc;
-        }, {} as { [key: string]: { match: { [key: string]: string } } });
+        selectedOptionsFilters = selectedOptions.reduce(
+          (acc, currentOption) => {
+            acc[currentOption] = { match: { [fieldName]: String(currentOption) } };
+            return acc;
+          },
+          {} as { [key: string]: { match: { [key: string]: string } } }
+        );
       }
 
       if (isEmpty(selectedOptionsFilters ?? [])) {

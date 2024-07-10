@@ -26,7 +26,10 @@ export class SearchResponseCache {
   private responseCache: Map<string, ResponseCacheItemInternal>;
   private cacheSize = 0;
 
-  constructor(private maxItems: number, private maxCacheSizeMB: number) {
+  constructor(
+    private maxItems: number,
+    private maxCacheSizeMB: number
+  ) {
     this.responseCache = new Map();
   }
 

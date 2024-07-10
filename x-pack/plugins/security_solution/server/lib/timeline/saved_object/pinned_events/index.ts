@@ -185,9 +185,8 @@ const getAllSavedPinnedEvents = async (
   options: SavedObjectsFindOptions
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObjects = await savedObjectsClient.find<SavedObjectPinnedEventWithoutExternalRefs>(
-    options
-  );
+  const savedObjects =
+    await savedObjectsClient.find<SavedObjectPinnedEventWithoutExternalRefs>(options);
 
   return savedObjects.saved_objects.map((savedObject) => {
     const populatedPinnedEvent =

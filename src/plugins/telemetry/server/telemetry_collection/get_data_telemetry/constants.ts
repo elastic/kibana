@@ -10,9 +10,9 @@ export const DATA_TELEMETRY_ID = 'data';
 
 export const DATA_KNOWN_TYPES = ['logs', 'traces', 'metrics'] as const;
 
-export type DataTelemetryType = typeof DATA_KNOWN_TYPES[number];
+export type DataTelemetryType = (typeof DATA_KNOWN_TYPES)[number];
 
-export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patternName'];
+export type DataPatternName = (typeof DATA_DATASETS_INDEX_PATTERNS)[number]['patternName'];
 
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.

@@ -50,7 +50,8 @@ jest.mock('../common/hooks', () => ({
 }));
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const getMockUseIsExperimentalFeatureEnabled =
-  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
+  (mockMapping?: Partial<ExperimentalFeatures>) =>
+  (flag: keyof typeof allowedExperimentalValues) =>
     mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
 jest.mock('../../../../common/hooks/use_experimental_features');
 

@@ -672,8 +672,8 @@ export const getMetricVisualization = ({
           palette: (hasDynamicColoring
             ? stops.map(({ color }) => color)
             : hasStaticColoring
-            ? [state.color]
-            : [getDefaultColor(state, isMetricNumeric)]
+              ? [state.color]
+              : [getDefaultColor(state, isMetricNumeric)]
           ).filter(nonNullable),
         },
       ],

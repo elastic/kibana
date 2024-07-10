@@ -43,7 +43,7 @@ export const createMatchPhraseFilter = (field: DefaultAlertFieldName, value: unk
         [field]: value,
       },
     },
-  } as PhraseFilter);
+  }) as PhraseFilter;
 
 /**
  * Creates a match_phrases filter without an index pattern
@@ -76,7 +76,7 @@ export const createMatchPhrasesFilter = (
         })),
       },
     },
-  } as PhrasesFilter);
+  }) as PhrasesFilter;
 
 /**
  * Creates a match_phrase filter targeted to filtering alerts by producer

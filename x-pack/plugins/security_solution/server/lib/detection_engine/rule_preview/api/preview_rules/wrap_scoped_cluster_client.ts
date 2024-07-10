@@ -91,28 +91,28 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
   // A bunch of overloads to make TypeScript happy
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptionsWithOutMeta
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptionsWithMeta
   ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions

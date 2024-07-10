@@ -18,7 +18,7 @@ type SOToEmbeddable<TSavedObjectAttributes extends FinderAttributes = FinderAttr
 ) => void;
 
 export type ReactEmbeddableSavedObject<
-  TSavedObjectAttributes extends FinderAttributes = FinderAttributes
+  TSavedObjectAttributes extends FinderAttributes = FinderAttributes,
 > = {
   onAdd: SOToEmbeddable<TSavedObjectAttributes>;
   savedObjectMetaData: SavedObjectMetaData;
@@ -27,7 +27,7 @@ export type ReactEmbeddableSavedObject<
 const registry: Map<string, ReactEmbeddableSavedObject<any>> = new Map();
 
 export const registerReactEmbeddableSavedObject = <
-  TSavedObjectAttributes extends FinderAttributes
+  TSavedObjectAttributes extends FinderAttributes,
 >({
   onAdd,
   embeddableType,
@@ -67,7 +67,7 @@ export const registerReactEmbeddableSavedObject = <
 };
 
 export const getReactEmbeddableSavedObjects = <
-  TSavedObjectAttributes extends FinderAttributes
+  TSavedObjectAttributes extends FinderAttributes,
 >() => {
   return registry.entries() as IterableIterator<
     [string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]

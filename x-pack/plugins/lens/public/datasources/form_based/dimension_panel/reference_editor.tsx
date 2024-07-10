@@ -191,8 +191,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   const selectedOption = incompleteOperation
     ? [functionOptions?.find(({ value }) => value === incompleteOperation)!]
     : column
-    ? [functionOptions?.find(({ value }) => value === column.operationType)!]
-    : [];
+      ? [functionOptions?.find(({ value }) => value === column.operationType)!]
+      : [];
 
   // what about a field changing type and becoming invalid?
   // Let's say this change makes the indexpattern without any number field but the operation was set to a numeric operation.
@@ -275,8 +275,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
                     ? currentIndexPattern.getFieldByName(column.sourceField)
                     : possibleFieldNames?.size === 1
-                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
-                    : undefined;
+                      ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
+                      : undefined;
 
                 onChooseFunction(operationType, field);
                 return;

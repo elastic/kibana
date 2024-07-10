@@ -204,9 +204,8 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
       layerIndex !== undefined ? chartInfo.layers[layerIndex] : compatibleLayers[0];
 
     const visExtractor = new VisualizationExtractor();
-    const { fields, timeField, splitField, dataView } = await visExtractor.extractFields(
-      selectedLayer
-    );
+    const { fields, timeField, splitField, dataView } =
+      await visExtractor.extractFields(selectedLayer);
 
     const jobConfig = createEmptyJob();
     const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());

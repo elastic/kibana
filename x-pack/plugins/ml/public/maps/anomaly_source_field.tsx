@@ -117,7 +117,10 @@ function roundCoordinate(coordinate: number) {
 }
 
 export class AnomalySourceTooltipProperty implements ITooltipProperty {
-  constructor(private readonly _field: string, private readonly _value: string) {}
+  constructor(
+    private readonly _field: string,
+    private readonly _value: string
+  ) {}
 
   async getESFilters(): Promise<Filter[]> {
     return [];

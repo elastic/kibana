@@ -23,7 +23,7 @@ import { DefaultDataControlState } from './types';
 import { ControlStateManager } from '../types';
 
 export const openDataControlEditor = async <
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultDataControlState = DefaultDataControlState,
 >(
   stateManager: ControlStateManager<State>,
   controlGroupApi: ControlGroupApi,

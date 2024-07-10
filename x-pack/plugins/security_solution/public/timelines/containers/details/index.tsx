@@ -49,7 +49,7 @@ export const useTimelineEventsDetails = ({
   EventsArgs['detailsData'],
   SearchHit | undefined,
   EventsArgs['ecs'],
-  () => Promise<void>
+  () => Promise<void>,
 ] => {
   const asyncNoop = () => Promise.resolve();
   const { data } = useKibana().services;

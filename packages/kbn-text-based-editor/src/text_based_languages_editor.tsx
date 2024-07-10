@@ -473,8 +473,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const clientParserStatus = clientParserMessages.errors?.length
     ? 'error'
     : clientParserMessages.warnings.length
-    ? 'warning'
-    : 'success';
+      ? 'warning'
+      : 'success';
 
   useEffect(() => {
     const validateQuery = async () => {

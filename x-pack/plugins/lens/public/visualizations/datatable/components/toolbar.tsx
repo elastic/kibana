@@ -33,8 +33,8 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         newHeightMode === RowHeightMode.single
           ? 1
           : newHeightMode !== RowHeightMode.auto
-          ? defaultRowHeight
-          : undefined;
+            ? defaultRowHeight
+            : undefined;
       setState({
         ...state,
         [heightProperty]: newHeightMode,

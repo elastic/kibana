@@ -287,10 +287,10 @@ export const createMetricThresholdExecutor =
       const nextState = isNoData
         ? AlertStates.NO_DATA
         : shouldAlertFire
-        ? AlertStates.ALERT
-        : shouldAlertWarn
-        ? AlertStates.WARNING
-        : AlertStates.OK;
+          ? AlertStates.ALERT
+          : shouldAlertWarn
+            ? AlertStates.WARNING
+            : AlertStates.OK;
 
       let reason;
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
@@ -346,10 +346,10 @@ export const createMetricThresholdExecutor =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
-            ? NO_DATA_ACTIONS_ID
-            : nextState === AlertStates.WARNING
-            ? WARNING_ACTIONS_ID
-            : FIRED_ACTIONS_ID;
+              ? NO_DATA_ACTIONS_ID
+              : nextState === AlertStates.WARNING
+                ? WARNING_ACTIONS_ID
+                : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
@@ -530,10 +530,13 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list.map(mapFn).reduce((result: Record<string, any>, value, i) => {
-    result[`condition${i}`] = value;
-    return result;
-  }, {} as Record<string, unknown>);
+  list.map(mapFn).reduce(
+    (result: Record<string, any>, value, i) => {
+      result[`condition${i}`] = value;
+      return result;
+    },
+    {} as Record<string, unknown>
+  );
 
 const formatAlertResult = <AlertResult>(
   alertResult: {

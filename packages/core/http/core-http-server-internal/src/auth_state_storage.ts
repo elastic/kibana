@@ -27,8 +27,8 @@ export class AuthStateStorage {
     const status: AuthStatus = this.storage.has(key)
       ? AuthStatus.authenticated
       : this.canBeAuthenticated()
-      ? AuthStatus.unauthenticated
-      : AuthStatus.unknown;
+        ? AuthStatus.unauthenticated
+        : AuthStatus.unknown;
 
     return { status, state };
   };

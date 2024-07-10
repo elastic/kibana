@@ -40,18 +40,21 @@ async function takeSnapshot({ log, outputPath }: { log: ToolingLog; outputPath: 
     const typeRegistry = serverHandles.coreStart.savedObjects.getTypeRegistry();
     const allTypes = typeRegistry.getAllTypes();
 
-    const migrationInfoMap = allTypes.reduce((map, type) => {
-      const migrationInfo = extractMigrationInfo(type);
-      map[type.name] = {
-        name: migrationInfo.name,
-        migrationVersions: migrationInfo.migrationVersions,
-        hash: getMigrationHash(type),
-        modelVersions: migrationInfo.modelVersions,
-        schemaVersions: migrationInfo.schemaVersions,
-        mappings: migrationInfo.mappings,
-      };
-      return map;
-    }, {} as Record<string, MigrationInfoRecord>);
+    const migrationInfoMap = allTypes.reduce(
+      (map, type) => {
+        const migrationInfo = extractMigrationInfo(type);
+        map[type.name] = {
+          name: migrationInfo.name,
+          migrationVersions: migrationInfo.migrationVersions,
+          hash: getMigrationHash(type),
+          modelVersions: migrationInfo.modelVersions,
+          schemaVersions: migrationInfo.schemaVersions,
+          mappings: migrationInfo.mappings,
+        };
+        return map;
+      },
+      {} as Record<string, MigrationInfoRecord>
+    );
 
     const payload: MigrationSnapshot = {
       meta: collectSOSnapshotMeta(),

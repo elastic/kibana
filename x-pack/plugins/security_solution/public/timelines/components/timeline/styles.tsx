@@ -229,10 +229,10 @@ export const EventsTrGroup = styled.div.attrs(
       eventType === 'raw'
         ? theme.eui.euiColorLightShade
         : eventType === 'eql' && isEvenEqlSequence
-        ? theme.eui.euiColorPrimary
-        : eventType === 'eql' && !isEvenEqlSequence
-        ? theme.eui.euiColorAccent
-        : theme.eui.euiColorWarning
+          ? theme.eui.euiColorPrimary
+          : eventType === 'eql' && !isEvenEqlSequence
+            ? theme.eui.euiColorAccent
+            : theme.eui.euiColorWarning
     }`
       : ''};
   ${({ isBuildingBlockType }) =>

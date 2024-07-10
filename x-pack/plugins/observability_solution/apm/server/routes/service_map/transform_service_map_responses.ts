@@ -118,62 +118,67 @@ export function transformServiceMapResponses({
   // 1. Map external nodes to internal services
   // 2. Collapse external nodes into one node based on span.destination.service.resource
   // 3. Pick the first available span.type/span.subtype in an alphabetically sorted list
-  const nodeMap = allNodes.reduce((map, node) => {
-    if (!node.id || map[node.id]) {
-      return map;
-    }
-    const outboundConnectionExists = allConnections.some(
-      (con) =>
-        SPAN_DESTINATION_SERVICE_RESOURCE in con.source &&
-        con.source[SPAN_DESTINATION_SERVICE_RESOURCE] === node[SPAN_DESTINATION_SERVICE_RESOURCE]
-    );
-    const matchedService = discoveredServices.find(({ from }) => {
-      if (!outboundConnectionExists && SPAN_DESTINATION_SERVICE_RESOURCE in node) {
-        return node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE];
+  const nodeMap = allNodes.reduce(
+    (map, node) => {
+      if (!node.id || map[node.id]) {
+        return map;
       }
-      return false;
-    })?.to;
+      const outboundConnectionExists = allConnections.some(
+        (con) =>
+          SPAN_DESTINATION_SERVICE_RESOURCE in con.source &&
+          con.source[SPAN_DESTINATION_SERVICE_RESOURCE] === node[SPAN_DESTINATION_SERVICE_RESOURCE]
+      );
+      const matchedService = discoveredServices.find(({ from }) => {
+        if (!outboundConnectionExists && SPAN_DESTINATION_SERVICE_RESOURCE in node) {
+          return (
+            node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE]
+          );
+        }
+        return false;
+      })?.to;
 
-    let serviceName: string | undefined = matchedService?.[SERVICE_NAME];
+      let serviceName: string | undefined = matchedService?.[SERVICE_NAME];
 
-    if (!serviceName && 'service.name' in node) {
-      serviceName = node[SERVICE_NAME];
-    }
+      if (!serviceName && 'service.name' in node) {
+        serviceName = node[SERVICE_NAME];
+      }
 
-    const matchedServiceNodes = serviceNodes
-      .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
-      .map((serviceNode) => pickBy(serviceNode, identity));
-    const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
+      const matchedServiceNodes = serviceNodes
+        .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
+        .map((serviceNode) => pickBy(serviceNode, identity));
+      const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
 
-    const serviceAnomalyStats = serviceName
-      ? anomalies.serviceAnomalies.find((item) => item.serviceName === serviceName)
-      : undefined;
+      const serviceAnomalyStats = serviceName
+        ? anomalies.serviceAnomalies.find((item) => item.serviceName === serviceName)
+        : undefined;
 
-    if (matchedServiceNodes.length) {
+      if (matchedServiceNodes.length) {
+        return {
+          ...map,
+          [node.id]: {
+            id: matchedServiceNodes[0][SERVICE_NAME],
+            ...mergedServiceNode,
+            ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+          },
+        };
+      }
+
+      const allMatchedExternalNodes = externalNodes.filter((n) => n.id === node.id);
+
+      const firstMatchedNode = allMatchedExternalNodes[0];
+
       return {
         ...map,
         [node.id]: {
-          id: matchedServiceNodes[0][SERVICE_NAME],
-          ...mergedServiceNode,
-          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+          ...firstMatchedNode,
+          label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
+          [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
+          [SPAN_SUBTYPE]: allMatchedExternalNodes.map((n) => n[SPAN_SUBTYPE]).sort()[0],
         },
       };
-    }
-
-    const allMatchedExternalNodes = externalNodes.filter((n) => n.id === node.id);
-
-    const firstMatchedNode = allMatchedExternalNodes[0];
-
-    return {
-      ...map,
-      [node.id]: {
-        ...firstMatchedNode,
-        label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
-        [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
-        [SPAN_SUBTYPE]: allMatchedExternalNodes.map((n) => n[SPAN_SUBTYPE]).sort()[0],
-      },
-    };
-  }, {} as Record<string, ConnectionNode>);
+    },
+    {} as Record<string, ConnectionNode>
+  );
 
   // Map destination.address to service.name if possible
   function getConnectionNode(node: ConnectionNode) {
@@ -216,10 +221,13 @@ export function transformServiceMapResponses({
 
   type ConnectionWithId = ValuesType<typeof mappedConnections>;
 
-  const connectionsById = mappedConnections.reduce((connectionMap, connection) => {
-    connectionMap[connection.id] = connection;
-    return connectionMap;
-  }, {} as Record<string, ConnectionWithId>);
+  const connectionsById = mappedConnections.reduce(
+    (connectionMap, connection) => {
+      connectionMap[connection.id] = connection;
+      return connectionMap;
+    },
+    {} as Record<string, ConnectionWithId>
+  );
 
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling

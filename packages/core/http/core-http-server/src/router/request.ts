@@ -90,7 +90,7 @@ export interface KibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > {
   /**
    * A identifier to identify this request.

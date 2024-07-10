@@ -34,8 +34,8 @@ export const handleStreamStorage = async ({
       actionTypeId === '.bedrock'
         ? parseBedrockStream
         : actionTypeId === '.gemini'
-        ? parseGeminiStream
-        : parseOpenAIStream;
+          ? parseGeminiStream
+          : parseOpenAIStream;
     const parsedResponse = await parser(responseStream, logger, abortSignal);
     if (onMessageSent) {
       onMessageSent(parsedResponse);

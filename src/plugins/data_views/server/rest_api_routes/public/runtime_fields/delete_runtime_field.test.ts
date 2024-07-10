@@ -20,7 +20,7 @@ describe('delete runtime field', () => {
         ({
           removeRuntimeField: jest.fn(),
           getRuntimeField: jest.fn().mockReturnValueOnce({}),
-        } as unknown as DataViewLazy)
+        }) as unknown as DataViewLazy
     );
 
     await deleteRuntimeField({

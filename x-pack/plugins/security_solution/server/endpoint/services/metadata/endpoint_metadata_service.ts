@@ -383,9 +383,8 @@ export class EndpointMetadataService {
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
     try {
-      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadataPersistedData>(
-        unitedIndexQuery
-      );
+      unitedMetadataQueryResponse =
+        await esClient.search<UnitedAgentMetadataPersistedData>(unitedIndexQuery);
     } catch (error) {
       const errorType = error?.meta?.body?.error?.type ?? '';
       if (errorType === 'index_not_found_exception') {

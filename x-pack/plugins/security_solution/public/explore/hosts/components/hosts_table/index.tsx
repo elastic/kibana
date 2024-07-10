@@ -59,7 +59,7 @@ export type HostsTableColumns = [
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
   Columns<RiskSeverity>?,
-  Columns<CriticalityLevelWithUnassigned>?
+  Columns<CriticalityLevelWithUnassigned>?,
 ];
 
 const rowItems: ItemsPerRow[] = [

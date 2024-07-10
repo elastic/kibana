@@ -133,8 +133,8 @@ export const pagePathGetters: {
       category && subCategory
         ? `/${category}/${subCategory} `
         : category && !subCategory
-        ? `/${category}`
-        : ``;
+          ? `/${category}`
+          : ``;
     const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
   },

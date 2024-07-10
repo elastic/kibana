@@ -372,8 +372,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         metaKey === 'shift'
           ? browser.keys.SHIFT
           : metaKey === 'alt'
-          ? browser.keys.ALT
-          : browser.keys.COMMAND;
+            ? browser.keys.ALT
+            : browser.keys.COMMAND;
       log.debug(`Press ${metaKey} with keyboard`);
       await retry.try(async () => {
         await browser.pressKeys(browserKey);

@@ -52,7 +52,7 @@ type MaybeSchemaFrom<TSchema extends CompatibleJSONSchema | undefined> =
 
 type GenerateCallback<
   TSchema extends CompatibleJSONSchema | undefined,
-  TData extends Record<string, any> | undefined
+  TData extends Record<string, any> | undefined,
 > = (options: {
   parameters: MaybeSchemaFrom<TSchema> & GlobalWidgetParameters;
   signal: AbortSignal;
@@ -60,7 +60,7 @@ type GenerateCallback<
 
 export type RegisterWidget = <
   TSchema extends CompatibleJSONSchema,
-  TData extends Record<string, any>
+  TData extends Record<string, any>,
 >(
   definition: Omit<RegisterWidgetOptions, 'schema'> & { schema: TSchema },
   generateCallback: GenerateCallback<TSchema, TData>,

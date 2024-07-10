@@ -308,7 +308,7 @@ export const UserAtSpaceScenarios: [
   Space1AllAtSpace1,
   Space1AllAtSpace2,
   Space1AllWithRestrictedFixtureAtSpace1,
-  Space1AllAlertingNoneActionsAtSpace1
+  Space1AllAlertingNoneActionsAtSpace1,
 ] = [
   NoKibanaPrivilegesAtSpace1,
   SuperuserAtSpace1,

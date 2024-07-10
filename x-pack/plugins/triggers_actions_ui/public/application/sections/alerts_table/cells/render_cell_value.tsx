@@ -139,8 +139,8 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
           ? 'observability'
           : producer && (value === 'alerts' || value === 'stackAlerts')
-          ? producer
-          : value;
+            ? producer
+            : value;
         const consumerData = alertProducersData[consumer];
         if (!consumerData) {
           return <>{value}</>;

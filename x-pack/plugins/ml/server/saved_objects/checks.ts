@@ -401,14 +401,17 @@ export function checksFactory(
         .flat() as JobSavedObjectStatus[]
     )
       .filter((s) => s.checks.jobExists)
-      .reduce((acc, cur) => {
-        const type = cur.type;
-        if (acc[type] === undefined) {
-          acc[type] = {};
-        }
-        acc[type][cur.jobId] = cur.namespaces;
-        return acc;
-      }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+      .reduce(
+        (acc, cur) => {
+          const type = cur.type;
+          if (acc[type] === undefined) {
+            acc[type] = {};
+          }
+          acc[type][cur.jobId] = cur.namespaces;
+          return acc;
+        },
+        {} as { [id: string]: { [id: string]: string[] | undefined } }
+      );
   }
 
   async function trainedModelsSpaces() {

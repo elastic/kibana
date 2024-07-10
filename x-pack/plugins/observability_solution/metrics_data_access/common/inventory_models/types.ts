@@ -391,7 +391,7 @@ export interface InventoryMetrics {
 
 export interface InventoryMetricsWithCharts<
   TFormula extends Record<string, LensBaseLayer>,
-  TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>
+  TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>,
 > extends InventoryMetrics {
   getFormulas: () => Promise<TFormula>;
   getCharts: () => Promise<TChart>;

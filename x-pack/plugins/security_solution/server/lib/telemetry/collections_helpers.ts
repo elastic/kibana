@@ -53,7 +53,10 @@ export const chunkedBy = function <T>(list: T[], size: number, weight: (v: T) =>
 class Chunked<T> {
   public weight: number = 0;
 
-  constructor(public chunks: T[][] = [], public current: T[] = []) {}
+  constructor(
+    public chunks: T[][] = [],
+    public current: T[] = []
+  ) {}
 
   public flush(): T[][] {
     if (this.current.length !== 0) {

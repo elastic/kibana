@@ -86,7 +86,7 @@ async function removeAssetsFromVersion(
 
   for await (const assets of finder.find()) {
     const refs = assets.saved_objects.map(
-      (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE } as PackageAssetReference)
+      (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE }) as PackageAssetReference
     );
     // only delete epm-packages-assets that are not referenced by epm-packages
     const unusedRefs = refs.filter((ref) => !packageAssetRefs.includes(ref.id));

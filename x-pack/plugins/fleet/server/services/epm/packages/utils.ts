@@ -57,10 +57,13 @@ export const resolveDataStreamsMap = (
 ): Map<string, RegistryDataStream> => {
   if (!dataStreams) return new Map();
 
-  return dataStreams.reduce((dataStreamsMap, dataStream) => {
-    dataStreamsMap.set(dataStream.dataset, dataStream);
-    return dataStreamsMap;
-  }, new Map() as Map<string, RegistryDataStream>);
+  return dataStreams.reduce(
+    (dataStreamsMap, dataStream) => {
+      dataStreamsMap.set(dataStream.dataset, dataStream);
+      return dataStreamsMap;
+    },
+    new Map() as Map<string, RegistryDataStream>
+  );
 };
 
 export const resolveDataStreamFields = ({

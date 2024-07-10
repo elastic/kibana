@@ -39,7 +39,7 @@ export interface ValidatedEmail {
 
 // the result returned from an action type executor function
 const ActionTypeExecutorResultStatusValues = ['ok', 'error'] as const;
-type ActionTypeExecutorResultStatus = typeof ActionTypeExecutorResultStatusValues[number];
+type ActionTypeExecutorResultStatus = (typeof ActionTypeExecutorResultStatusValues)[number];
 
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;

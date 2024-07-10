@@ -22,7 +22,7 @@ import { UserConfiguredActionConnector } from '../../../types';
 
 export type ConnectorFormSchema<
   Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>
+  Secrets = Record<string, unknown>,
 > = Pick<
   UserConfiguredActionConnector<Config, Secrets>,
   'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'

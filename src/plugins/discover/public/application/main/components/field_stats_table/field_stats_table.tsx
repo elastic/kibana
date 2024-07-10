@@ -136,7 +136,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         mode: 'normal_sampling',
         shardSize: 5000,
         seed: searchSessionId,
-      } as NormalSamplingOption),
+      }) as NormalSamplingOption,
     [searchSessionId]
   );
 

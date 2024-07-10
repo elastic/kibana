@@ -192,10 +192,13 @@ export function registerErrorCountRuleType({
 
       const errorCountResults =
         response.aggregations?.error_counts.buckets.map((bucket) => {
-          const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
-            obj[allGroupByFields[bucketIndex]] = bucketKey;
-            return obj;
-          }, {} as Record<string, string>);
+          const groupByFields = bucket.key.reduce(
+            (obj, bucketKey, bucketIndex) => {
+              obj[allGroupByFields[bucketIndex]] = bucketKey;
+              return obj;
+            },
+            {} as Record<string, string>
+          );
 
           const bucketKey = bucket.key;
 

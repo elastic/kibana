@@ -270,7 +270,7 @@ export async function installKibanaAssetsAndReferences({
           id: destinationId ?? id,
           originId: id,
           type,
-        } as KibanaAssetReference)
+        }) as KibanaAssetReference
     );
     installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
       savedObjectsClient,

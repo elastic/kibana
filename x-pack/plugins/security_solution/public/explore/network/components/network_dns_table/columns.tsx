@@ -27,7 +27,7 @@ export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['queryCount']>,
   Columns<NetworkDnsItem['uniqueDomains']>,
   Columns<NetworkDnsItem['dnsBytesIn']>,
-  Columns<NetworkDnsItem['dnsBytesOut']>
+  Columns<NetworkDnsItem['dnsBytesOut']>,
 ];
 
 export const getNetworkDnsColumns = (): NetworkDnsColumns => [

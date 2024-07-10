@@ -355,8 +355,11 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
   const totals = !riskScore
     ? { count: 0, score: 0 }
     : isUserRiskScore(riskScore)
-    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
-    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+      ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
+      : {
+          count: riskScore.host.risk.category_1_count,
+          score: riskScore.host.risk.category_1_score,
+        };
 
   const displayed = {
     count: alerts.data?.length || 0,

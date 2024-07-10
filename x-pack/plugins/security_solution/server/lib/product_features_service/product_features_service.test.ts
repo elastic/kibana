@@ -173,7 +173,7 @@ describe('ProductFeaturesService', () => {
       ({
         route: { options: { tags } },
         url: { pathname: '', search: '' },
-      } as unknown as KibanaRequest);
+      }) as unknown as KibanaRequest;
     const res = { notFound: jest.fn() } as unknown as LifecycleResponseFactory;
     const toolkit = { next: jest.fn() };
 

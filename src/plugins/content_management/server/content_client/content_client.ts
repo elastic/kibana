@@ -21,7 +21,11 @@ export class ContentClient<T = unknown> implements IContentClient<T> {
     return new ContentClient<T>(secretToken, contentTypeId, ctx);
   }
 
-  constructor(token: symbol, public contentTypeId: string, private readonly ctx: Context<T>) {
+  constructor(
+    token: symbol,
+    public contentTypeId: string,
+    private readonly ctx: Context<T>
+  ) {
     if (token !== secretToken) {
       throw new Error('Use ContentClient.create() instead');
     }

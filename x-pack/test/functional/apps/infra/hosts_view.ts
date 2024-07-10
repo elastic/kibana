@@ -284,9 +284,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
-                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                  metric
-                );
+                const tileValue =
+                  await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                 expect(tileValue).to.eql(value);
               });
             });

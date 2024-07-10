@@ -98,7 +98,7 @@ interface RunActionArgs<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   action: RuleAction;
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
@@ -127,7 +127,7 @@ export class ExecutionHandler<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;

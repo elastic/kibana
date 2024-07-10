@@ -77,7 +77,7 @@ import {
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
-type TimeRange = typeof TIME_RANGES[number];
+type TimeRange = (typeof TIME_RANGES)[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
@@ -476,73 +476,78 @@ export const tasks: TelemetryTask[] = [
         TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
       );
 
-      const allData = await jobs.reduce((prevJob, current) => {
-        return prevJob.then(async (data) => {
-          const { processorEvent, timeRange } = current;
+      const allData = await jobs.reduce(
+        (prevJob, current) => {
+          return prevJob.then(async (data) => {
+            const { processorEvent, timeRange } = current;
 
-          const totalHitsResponse = await telemetryClient.search({
-            index: indicesByProcessorEvent[processorEvent],
-            body: {
-              size: 0,
-              track_total_hits: true,
-              timeout,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { [PROCESSOR_EVENT]: processorEvent } },
-                    ...(timeRange === '1d' ? [range1d] : []),
-                  ],
+            const totalHitsResponse = await telemetryClient.search({
+              index: indicesByProcessorEvent[processorEvent],
+              body: {
+                size: 0,
+                track_total_hits: true,
+                timeout,
+                query: {
+                  bool: {
+                    filter: [
+                      { term: { [PROCESSOR_EVENT]: processorEvent } },
+                      ...(timeRange === '1d' ? [range1d] : []),
+                    ],
+                  },
                 },
               },
-            },
-          });
+            });
 
-          const retainmentResponse =
-            timeRange === 'all'
-              ? await telemetryClient.search({
-                  index: indicesByProcessorEvent[processorEvent],
-                  size: 10,
-                  body: {
-                    track_total_hits: false,
-                    size: 0,
-                    timeout,
-                    query: {
-                      bool: {
-                        filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
+            const retainmentResponse =
+              timeRange === 'all'
+                ? await telemetryClient.search({
+                    index: indicesByProcessorEvent[processorEvent],
+                    size: 10,
+                    body: {
+                      track_total_hits: false,
+                      size: 0,
+                      timeout,
+                      query: {
+                        bool: {
+                          filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
+                        },
+                      },
+                      sort: {
+                        '@timestamp': 'asc',
+                      },
+                      _source: ['@timestamp'],
+                    },
+                  })
+                : null;
+
+            const event = retainmentResponse?.hits.hits[0]?._source as
+              | {
+                  '@timestamp': number;
+                }
+              | undefined;
+
+            return merge({}, data, {
+              counts: {
+                [processorEvent]: {
+                  [timeRange]: totalHitsResponse.hits.total.value,
+                },
+              },
+              ...(event
+                ? {
+                    retainment: {
+                      [processorEvent]: {
+                        ms: new Date().getTime() - new Date(event['@timestamp']).getTime(),
                       },
                     },
-                    sort: {
-                      '@timestamp': 'asc',
-                    },
-                    _source: ['@timestamp'],
-                  },
-                })
-              : null;
-
-          const event = retainmentResponse?.hits.hits[0]?._source as
-            | {
-                '@timestamp': number;
-              }
-            | undefined;
-
-          return merge({}, data, {
-            counts: {
-              [processorEvent]: {
-                [timeRange]: totalHitsResponse.hits.total.value,
-              },
-            },
-            ...(event
-              ? {
-                  retainment: {
-                    [processorEvent]: {
-                      ms: new Date().getTime() - new Date(event['@timestamp']).getTime(),
-                    },
-                  },
-                }
-              : {}),
+                  }
+                : {}),
+            });
           });
-        });
-      }, Promise.resolve({} as Record<string, { counts: Record<ProcessorEvent, Record<TimeRange, number>> }>));
+        },
+        Promise.resolve(
+          {} as Record<string, { counts: Record<ProcessorEvent, Record<TimeRange, number>> }>
+        )
+      );
 
       return allData;
     },
@@ -606,42 +611,45 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'services',
     executor: async ({ indices, telemetryClient }) => {
-      const servicesPerAgent = await AGENT_NAMES.reduce((prevJob, agentName) => {
-        return prevJob.then(async (data) => {
-          const response = await telemetryClient.search({
-            index: [indices.error, indices.span, indices.metric, indices.transaction],
-            body: {
-              size: 0,
-              track_total_hits: false,
-              timeout,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      term: {
-                        [AGENT_NAME]: agentName,
+      const servicesPerAgent = await AGENT_NAMES.reduce(
+        (prevJob, agentName) => {
+          return prevJob.then(async (data) => {
+            const response = await telemetryClient.search({
+              index: [indices.error, indices.span, indices.metric, indices.transaction],
+              body: {
+                size: 0,
+                track_total_hits: false,
+                timeout,
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          [AGENT_NAME]: agentName,
+                        },
                       },
-                    },
-                    range1d,
-                  ],
+                      range1d,
+                    ],
+                  },
                 },
-              },
-              aggs: {
-                services: {
-                  cardinality: {
-                    field: SERVICE_NAME,
+                aggs: {
+                  services: {
+                    cardinality: {
+                      field: SERVICE_NAME,
+                    },
                   },
                 },
               },
-            },
-          });
+            });
 
-          return {
-            ...data,
-            [agentName]: response.aggregations?.services.value || 0,
-          };
-        });
-      }, Promise.resolve({} as Record<AgentName, number>));
+            return {
+              ...data,
+              [agentName]: response.aggregations?.services.value || 0,
+            };
+          });
+        },
+        Promise.resolve({} as Record<AgentName, number>)
+      );
 
       const services = await telemetryClient.search({
         index: [indices.error, indices.span, indices.metric, indices.transaction],
@@ -899,189 +907,192 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ indices, telemetryClient }) => {
       const size = 3;
 
-      const agentData = await AGENT_NAMES.reduce(async (prevJob, agentName) => {
-        const data = await prevJob;
+      const agentData = await AGENT_NAMES.reduce(
+        async (prevJob, agentName) => {
+          const data = await prevJob;
 
-        const response = await telemetryClient.search({
-          index: [indices.error, indices.metric, indices.transaction],
-          body: {
-            track_total_hits: false,
-            size: 0,
-            timeout,
-            query: {
-              bool: {
-                filter: [{ term: { [AGENT_NAME]: agentName } }, range1d],
-              },
-            },
-            sort: {
-              '@timestamp': 'desc',
-            },
-            aggs: {
-              [AGENT_ACTIVATION_METHOD]: {
-                terms: {
-                  field: AGENT_ACTIVATION_METHOD,
-                  size,
+          const response = await telemetryClient.search({
+            index: [indices.error, indices.metric, indices.transaction],
+            body: {
+              track_total_hits: false,
+              size: 0,
+              timeout,
+              query: {
+                bool: {
+                  filter: [{ term: { [AGENT_NAME]: agentName } }, range1d],
                 },
               },
-              [AGENT_VERSION]: {
-                terms: {
-                  field: AGENT_VERSION,
-                  size,
-                },
+              sort: {
+                '@timestamp': 'desc',
               },
-              [SERVICE_FRAMEWORK_NAME]: {
-                terms: {
-                  field: SERVICE_FRAMEWORK_NAME,
-                  size,
+              aggs: {
+                [AGENT_ACTIVATION_METHOD]: {
+                  terms: {
+                    field: AGENT_ACTIVATION_METHOD,
+                    size,
+                  },
                 },
-                aggs: {
-                  [SERVICE_FRAMEWORK_VERSION]: {
-                    terms: {
-                      field: SERVICE_FRAMEWORK_VERSION,
-                      size,
+                [AGENT_VERSION]: {
+                  terms: {
+                    field: AGENT_VERSION,
+                    size,
+                  },
+                },
+                [SERVICE_FRAMEWORK_NAME]: {
+                  terms: {
+                    field: SERVICE_FRAMEWORK_NAME,
+                    size,
+                  },
+                  aggs: {
+                    [SERVICE_FRAMEWORK_VERSION]: {
+                      terms: {
+                        field: SERVICE_FRAMEWORK_VERSION,
+                        size,
+                      },
                     },
                   },
                 },
-              },
-              [SERVICE_FRAMEWORK_VERSION]: {
-                terms: {
-                  field: SERVICE_FRAMEWORK_VERSION,
-                  size,
+                [SERVICE_FRAMEWORK_VERSION]: {
+                  terms: {
+                    field: SERVICE_FRAMEWORK_VERSION,
+                    size,
+                  },
                 },
-              },
-              [SERVICE_LANGUAGE_NAME]: {
-                terms: {
-                  field: SERVICE_LANGUAGE_NAME,
-                  size,
-                },
-                aggs: {
-                  [SERVICE_LANGUAGE_VERSION]: {
-                    terms: {
-                      field: SERVICE_LANGUAGE_VERSION,
-                      size,
+                [SERVICE_LANGUAGE_NAME]: {
+                  terms: {
+                    field: SERVICE_LANGUAGE_NAME,
+                    size,
+                  },
+                  aggs: {
+                    [SERVICE_LANGUAGE_VERSION]: {
+                      terms: {
+                        field: SERVICE_LANGUAGE_VERSION,
+                        size,
+                      },
                     },
                   },
                 },
-              },
-              [SERVICE_LANGUAGE_VERSION]: {
-                terms: {
-                  field: SERVICE_LANGUAGE_VERSION,
-                  size,
+                [SERVICE_LANGUAGE_VERSION]: {
+                  terms: {
+                    field: SERVICE_LANGUAGE_VERSION,
+                    size,
+                  },
                 },
-              },
-              [SERVICE_RUNTIME_NAME]: {
-                terms: {
-                  field: SERVICE_RUNTIME_NAME,
-                  size,
-                },
-                aggs: {
-                  [SERVICE_RUNTIME_VERSION]: {
-                    terms: {
-                      field: SERVICE_RUNTIME_VERSION,
-                      size,
+                [SERVICE_RUNTIME_NAME]: {
+                  terms: {
+                    field: SERVICE_RUNTIME_NAME,
+                    size,
+                  },
+                  aggs: {
+                    [SERVICE_RUNTIME_VERSION]: {
+                      terms: {
+                        field: SERVICE_RUNTIME_VERSION,
+                        size,
+                      },
                     },
                   },
                 },
-              },
-              [SERVICE_RUNTIME_VERSION]: {
-                terms: {
-                  field: SERVICE_RUNTIME_VERSION,
-                  size,
+                [SERVICE_RUNTIME_VERSION]: {
+                  terms: {
+                    field: SERVICE_RUNTIME_VERSION,
+                    size,
+                  },
                 },
               },
             },
-          },
-        });
+          });
 
-        const { aggregations } = response;
+          const { aggregations } = response;
 
-        if (!aggregations) {
-          return data;
-        }
+          if (!aggregations) {
+            return data;
+          }
 
-        const toComposite = (outerKey: string | number, innerKey: string | number) =>
-          `${outerKey}/${innerKey}`;
+          const toComposite = (outerKey: string | number, innerKey: string | number) =>
+            `${outerKey}/${innerKey}`;
 
-        return {
-          ...data,
-          [agentName]: {
-            agent: {
-              activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
-                .map((bucket) => bucket.key as string)
-                .slice(0, size),
-              version: aggregations[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
+          return {
+            ...data,
+            [agentName]: {
+              agent: {
+                activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                version: aggregations[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
+              },
+              service: {
+                framework: {
+                  name: aggregations[SERVICE_FRAMEWORK_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: aggregations[SERVICE_FRAMEWORK_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      aggregations[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+                language: {
+                  name: aggregations[SERVICE_LANGUAGE_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: aggregations[SERVICE_LANGUAGE_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      aggregations[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+                runtime: {
+                  name: aggregations[SERVICE_RUNTIME_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: aggregations[SERVICE_RUNTIME_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      aggregations[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+              },
             },
-            service: {
-              framework: {
-                name: aggregations[SERVICE_FRAMEWORK_NAME].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
-                version: aggregations[SERVICE_FRAMEWORK_VERSION].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
-                composite: sortBy(
-                  flatten(
-                    aggregations[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
-                      bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
-                        doc_count: versionBucket.doc_count,
-                        name: toComposite(bucket.key, versionBucket.key),
-                      }))
-                    )
-                  ),
-                  'doc_count'
-                )
-                  .reverse()
-                  .slice(0, size)
-                  .map((composite) => composite.name),
-              },
-              language: {
-                name: aggregations[SERVICE_LANGUAGE_NAME].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
-                version: aggregations[SERVICE_LANGUAGE_VERSION].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
-                composite: sortBy(
-                  flatten(
-                    aggregations[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
-                      bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
-                        doc_count: versionBucket.doc_count,
-                        name: toComposite(bucket.key, versionBucket.key),
-                      }))
-                    )
-                  ),
-                  'doc_count'
-                )
-                  .reverse()
-                  .slice(0, size)
-                  .map((composite) => composite.name),
-              },
-              runtime: {
-                name: aggregations[SERVICE_RUNTIME_NAME].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
-                version: aggregations[SERVICE_RUNTIME_VERSION].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
-                composite: sortBy(
-                  flatten(
-                    aggregations[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
-                      bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
-                        doc_count: versionBucket.doc_count,
-                        name: toComposite(bucket.key, versionBucket.key),
-                      }))
-                    )
-                  ),
-                  'doc_count'
-                )
-                  .reverse()
-                  .slice(0, size)
-                  .map((composite) => composite.name),
-              },
-            },
-          },
-        };
-      }, Promise.resolve({} as APMTelemetry['agents']));
+          };
+        },
+        Promise.resolve({} as APMTelemetry['agents'])
+      );
 
       return {
         agents: agentData,

@@ -24,7 +24,7 @@ describe('put runtime field', () => {
             runtimeField: {},
           }),
           getRuntimeField: jest.fn(),
-        } as unknown as DataViewLazy)
+        }) as unknown as DataViewLazy
     );
 
     await putRuntimeField({

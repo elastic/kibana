@@ -59,7 +59,7 @@ const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
   ({
     name: 'annotations',
     ...props,
-  } as CollectionActionsProps<Panel>);
+  }) as CollectionActionsProps<Panel>;
 
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;

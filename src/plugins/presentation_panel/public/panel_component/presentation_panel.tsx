@@ -20,7 +20,7 @@ import { getErrorLoadingPanel } from './presentation_panel_strings';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
+  PropsType extends {} = {},
 >(
   props: PresentationPanelProps<ApiType, PropsType> & {
     hidePanelChrome?: boolean;

@@ -328,9 +328,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           );
         }
 
-        const [foregroundResp, backgroundResp] = await Promise.all<estypes.SearchResponse>(
-          promises
-        );
+        const [foregroundResp, backgroundResp] =
+          await Promise.all<estypes.SearchResponse>(promises);
 
         if (!options.didCancel) {
           const items = filterChartableItems(foregroundResp.hits.hits, resultsField);

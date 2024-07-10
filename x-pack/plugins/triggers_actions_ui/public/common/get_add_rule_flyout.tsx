@@ -14,7 +14,7 @@ import { queryClient } from '../application/query_client';
 
 export const getAddRuleFlyoutLazy = <
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 >(
   props: RuleAddProps<Params, MetaData> & { connectorServices: ConnectorServices }
 ) => {

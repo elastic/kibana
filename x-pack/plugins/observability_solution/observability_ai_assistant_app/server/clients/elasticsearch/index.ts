@@ -18,7 +18,7 @@ type AIAssistantSearchRequest = ESSearchRequest & {
 export interface ObservabilityAIAssistantElasticsearchClient {
   search<
     TDocument = unknown,
-    TSearchRequest extends AIAssistantSearchRequest = AIAssistantSearchRequest
+    TSearchRequest extends AIAssistantSearchRequest = AIAssistantSearchRequest,
   >(
     operationName: string,
     parameters: TSearchRequest
@@ -37,7 +37,7 @@ export function createElasticsearchClient({
   return {
     search<
       TDocument = unknown,
-      TSearchRequest extends AIAssistantSearchRequest = AIAssistantSearchRequest
+      TSearchRequest extends AIAssistantSearchRequest = AIAssistantSearchRequest,
     >(operationName: string, parameters: AIAssistantSearchRequest) {
       if (inspect) {
         logger.info(`Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);

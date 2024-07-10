@@ -200,7 +200,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         setSelectedRuleIds(selected.map(({ id }) => id));
         setIsAllSelected(false);
       },
-      selected: selectedRuleIds.map((id) => ({ id } as Rule)), // EuiBasicTable only needs the itemId
+      selected: selectedRuleIds.map((id) => ({ id }) as Rule), // EuiBasicTable only needs the itemId
     }),
     [loadingRuleIds, setIsAllSelected, setSelectedRuleIds, selectedRuleIds]
   );

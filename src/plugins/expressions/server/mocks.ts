@@ -35,7 +35,7 @@ const createStartContract = (): Start =>
     extract: jest.fn(),
     inject: jest.fn(),
     getAllMigrations: jest.fn(),
-  } as unknown as Start);
+  }) as unknown as Start;
 
 const createPlugin = async () => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();

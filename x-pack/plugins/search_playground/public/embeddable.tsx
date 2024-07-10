@@ -28,11 +28,10 @@ export const PlaygroundHeaderDocs = dynamic(async () => ({
 
 export const getPlaygroundProvider =
   (core: CoreStart, services: AppPluginStartDependencies) =>
-  (props: React.ComponentProps<typeof PlaygroundProvider>) =>
-    (
-      <KibanaContextProvider services={{ ...core, ...services }}>
-        <QueryClientProvider client={queryClient}>
-          <PlaygroundProvider {...props} />
-        </QueryClientProvider>
-      </KibanaContextProvider>
-    );
+  (props: React.ComponentProps<typeof PlaygroundProvider>) => (
+    <KibanaContextProvider services={{ ...core, ...services }}>
+      <QueryClientProvider client={queryClient}>
+        <PlaygroundProvider {...props} />
+      </QueryClientProvider>
+    </KibanaContextProvider>
+  );

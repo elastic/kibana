@@ -22,7 +22,7 @@ import { ReduxTools, ReduxToolsReducers, ReduxToolsSetters } from './types';
 
 export const createReduxTools = <
   ReduxStateType extends unknown,
-  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>
+  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>,
 >({
   reducers,
   additionalMiddleware,

@@ -36,7 +36,7 @@ export interface ConnectionDetailsOptsApiKeys {
 
 export type ConnectionDetailsTelemetryEvent<EventId extends string, EventPayload = void> = [
   id: EventId,
-  payload?: EventPayload
+  payload?: EventPayload,
 ];
 
 export type ConnectionDetailsTelemetryEvents =

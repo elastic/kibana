@@ -72,7 +72,7 @@ export type ControlApiInitialization<ControlApi extends DefaultControlApi = Defa
 // TODO: Move this to the Control plugin's setup contract
 export interface ControlFactory<
   State extends DefaultControlState = DefaultControlState,
-  ControlApi extends DefaultControlApi = DefaultControlApi
+  ControlApi extends DefaultControlApi = DefaultControlApi,
 > {
   type: string;
   getIconType: () => string;
@@ -94,7 +94,7 @@ export type ControlStateManager<State extends object = object> = {
 
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
-  PropsType extends {} = { className: string }
+  PropsType extends {} = { className: string },
 > {
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }

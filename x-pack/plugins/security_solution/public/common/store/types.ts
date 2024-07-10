@@ -113,16 +113,18 @@ export type ImmutableCombineReducers = <M extends ImmutableReducersMapObject<unk
 /**
  * Helper type for `ImmutableCombineReducers`. Infers the combined state type from an immutable reducer map.
  */
-type StateFromImmutableReducersMapObject<M> = M extends ImmutableReducersMapObject<unknown, never>
-  ? { [P in keyof M]: M[P] extends ImmutableReducer<infer S, infer _A> ? S : never }
-  : never;
+type StateFromImmutableReducersMapObject<M> =
+  M extends ImmutableReducersMapObject<unknown, never>
+    ? { [P in keyof M]: M[P] extends ImmutableReducer<infer S, infer _A> ? S : never }
+    : never;
 
 /**
  * Helper type for `ImmutableCombineReducers`. Infers the combined action type from an immutable reducer map.
  */
-type ActionFromImmutableReducersMapObject<M> = M extends ImmutableReducersMapObject<unknown, never>
-  ? ActionFromImmutableReducer<ImmutableReducerFromImmutableReducersMapObject<M>>
-  : never;
+type ActionFromImmutableReducersMapObject<M> =
+  M extends ImmutableReducersMapObject<unknown, never>
+    ? ActionFromImmutableReducer<ImmutableReducerFromImmutableReducersMapObject<M>>
+    : never;
 
 /**
  * Helper type for `ImmutableCombineReducers`. Infers the combined reducer type from an immutable reducer map.
@@ -154,7 +156,7 @@ type ImmutableReducersMapObject<S, A extends Action = Action> = {
  * https://github.com/reduxjs/reselect/pull/454
  */
 export type CreateStructuredSelector = <
-  SelectorMap extends { [key: string]: (...args: never[]) => unknown }
+  SelectorMap extends { [key: string]: (...args: never[]) => unknown },
 >(
   selectorMap: SelectorMap
 ) => (state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never) => {

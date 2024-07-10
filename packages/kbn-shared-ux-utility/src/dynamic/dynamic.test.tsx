@@ -12,9 +12,8 @@ import { dynamic } from './dynamic';
 
 export type ExpectTrue<T extends true> = T;
 
-export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-  ? true
-  : false;
+export type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 type MatchesProperty<T, K extends keyof T> = K extends keyof T ? true : false;
 
@@ -93,7 +92,7 @@ describe('dynamic', () => {
         ExpectTrue<MatchesProperty<LazyTestComponentProps, 'customProp'>>,
         ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'children'>>,
         ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'ref'>>,
-        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'customProp'>>
+        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'customProp'>>,
       ];
     });
   });

@@ -297,7 +297,7 @@ export async function deleteKibanaSavedObjectsAssets({
   const logger = appContextService.getLogger();
   const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
-    .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
+    .map(({ id, type }) => ({ id, type }) as KibanaAssetReference);
 
   try {
     await deleteKibanaAssets(assetsToDelete, spaceIdToDelete);

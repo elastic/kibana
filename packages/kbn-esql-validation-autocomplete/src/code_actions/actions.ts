@@ -169,10 +169,10 @@ async function getQuotableActionForColumns(
     /[()]/.test(remainingCommandText)
       ? remainingCommandText.indexOf(')')
       : /,/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(',') - 1
-      : /\s/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(' ')
-      : remainingCommandText.length,
+        ? remainingCommandText.indexOf(',') - 1
+        : /\s/.test(remainingCommandText)
+          ? remainingCommandText.indexOf(' ')
+          : remainingCommandText.length,
     0
   );
   const possibleUnquotedText = queryString.substring(

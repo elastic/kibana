@@ -613,7 +613,7 @@ function isReturnedError(arg: unknown): arg is ReturnedError {
  * @param asyncFetchFn - callback function with the divided fields
  */
 export const fetchInParallelChunks = async <
-  ReturnedRespFromFetchFn extends { aggregations: Record<string, AggregationsAggregate> }
+  ReturnedRespFromFetchFn extends { aggregations: Record<string, AggregationsAggregate> },
 >({
   fields,
   randomSamplerWrapper,

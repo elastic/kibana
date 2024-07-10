@@ -43,7 +43,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
     hidden: false,
     mappings: { properties: {} },
     migrations: {
-      '0.1.2': () => ({} as SavedObjectUnsanitizedDoc), // the migration version is non-existent and the result doesn't matter, this migration function is never applied, we just want to assert that aliases are marked as "up-to-date"
+      '0.1.2': () => ({}) as SavedObjectUnsanitizedDoc, // the migration version is non-existent and the result doesn't matter, this migration function is never applied, we just want to assert that aliases are marked as "up-to-date"
     },
   });
   return registry;

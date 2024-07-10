@@ -57,12 +57,12 @@ export function dataControlFetch$(
           parentIgnoreSettings?.ignoreTimerange || !parentApi.timeRange$
             ? undefined
             : parentApi.timeslice$?.value
-            ? {
-                from: new Date(parentApi.timeslice$?.value[0]).toISOString(),
-                to: new Date(parentApi.timeslice$?.value[1]).toISOString(),
-                mode: 'absolute' as 'absolute',
-              }
-            : (parentApi as PublishesUnifiedSearch).timeRange$.value,
+              ? {
+                  from: new Date(parentApi.timeslice$?.value[0]).toISOString(),
+                  to: new Date(parentApi.timeslice$?.value[1]).toISOString(),
+                  mode: 'absolute' as 'absolute',
+                }
+              : (parentApi as PublishesUnifiedSearch).timeRange$.value,
       };
     })
   );

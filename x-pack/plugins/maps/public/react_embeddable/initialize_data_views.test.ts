@@ -40,7 +40,7 @@ jest.mock('../index_pattern_util', () => {
             (id) =>
               ({
                 id,
-              } as unknown as DataView)
+              }) as unknown as DataView
           )
         : [];
     },

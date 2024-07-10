@@ -33,7 +33,10 @@ export class LegacyCoreEditor implements CoreEditor {
   $actions: JQuery<HTMLElement>;
   resize: () => void;
 
-  constructor(private readonly editor: IAceEditor, actions: HTMLElement) {
+  constructor(
+    private readonly editor: IAceEditor,
+    actions: HTMLElement
+  ) {
     this.$actions = $(actions);
     this.editor.setShowPrintMargin(false);
 

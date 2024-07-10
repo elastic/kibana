@@ -781,8 +781,8 @@ export const QueryBarTopRow = React.memo(
                 {!isQueryLangSelected
                   ? renderQueryInput()
                   : !codeEditorIsExpanded
-                  ? renderTextLangEditor()
-                  : null}
+                    ? renderTextLangEditor()
+                    : null}
               </EuiFlexItem>
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}

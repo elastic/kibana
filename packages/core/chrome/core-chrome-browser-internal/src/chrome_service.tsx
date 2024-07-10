@@ -290,7 +290,7 @@ export class ChromeService {
     function initProjectNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
-      ChildrenId extends string = Id
+      ChildrenId extends string = Id,
     >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
       projectNavigation.initNavigation(id, navigationTree$);

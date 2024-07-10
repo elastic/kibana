@@ -164,9 +164,12 @@ export class CrowdstrikeConnector extends SubActionConnector<
       clearTimeout(CrowdstrikeConnector.tokenExpiryTimeout);
 
       // Set a timeout to reset the token after 29 minutes (it expires after 30 minutes)
-      CrowdstrikeConnector.tokenExpiryTimeout = setTimeout(() => {
-        CrowdstrikeConnector.token = null;
-      }, 29 * 60 * 1000);
+      CrowdstrikeConnector.tokenExpiryTimeout = setTimeout(
+        () => {
+          CrowdstrikeConnector.token = null;
+        },
+        29 * 60 * 1000
+      );
     }
     return token;
   }

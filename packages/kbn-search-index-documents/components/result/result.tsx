@@ -31,14 +31,14 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
           defaultMessage: 'All fields are visible',
         })
       : isExpanded
-      ? i18n.translate('searchIndexDocuments.result.expandTooltip.showFewer', {
-          defaultMessage: 'Show {amount} fewer fields',
-          values: { amount: fields.length - 3 },
-        })
-      : i18n.translate('searchIndexDocuments.result.expandTooltip.showMore', {
-          defaultMessage: 'Show {amount} more fields',
-          values: { amount: fields.length - 3 },
-        });
+        ? i18n.translate('searchIndexDocuments.result.expandTooltip.showFewer', {
+            defaultMessage: 'Show {amount} fewer fields',
+            values: { amount: fields.length - 3 },
+          })
+        : i18n.translate('searchIndexDocuments.result.expandTooltip.showMore', {
+            defaultMessage: 'Show {amount} more fields',
+            values: { amount: fields.length - 3 },
+          });
   const toolTipContent = <>{tooltipText}</>;
 
   return (

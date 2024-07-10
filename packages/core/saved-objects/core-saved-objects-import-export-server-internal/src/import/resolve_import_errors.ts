@@ -221,9 +221,8 @@ export async function resolveSavedObjectsImportErrors({
       compatibilityMode,
       managed,
     };
-    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
-      createSavedObjectsParams
-    );
+    const { createdObjects, errors: bulkCreateErrors } =
+      await createSavedObjects(createSavedObjectsParams);
     successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;

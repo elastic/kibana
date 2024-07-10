@@ -572,7 +572,7 @@ export enum INSTALL_STATES {
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;
-export type StateNames = typeof INSTALL_STATES[StatesKeys];
+export type StateNames = (typeof INSTALL_STATES)[StatesKeys];
 
 export interface LatestExecutedState<T> {
   name: T;

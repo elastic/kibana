@@ -53,11 +53,11 @@ export const getSplitByTermsColor = ({
           gradient: true,
         }
       : seriesPalette.name === PALETTES.RAINBOW
-      ? {
-          ...seriesPalette.params,
-          colors: rainbowColors,
-        }
-      : seriesPalette.params;
+        ? {
+            ...seriesPalette.params,
+            colors: rainbowColors,
+          }
+        : seriesPalette.params;
 
   const outputColor = palettesRegistry?.get(paletteName || 'default').getCategoricalColor(
     [

@@ -568,11 +568,14 @@ export const getLatestAgentDownloadVersion = async (
 
   const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
     .filter(isValidArtifactVersion)
-    .reduce((acc, artifactVersion) => {
-      const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
-      acc[stackVersion] = artifactVersion;
-      return acc;
-    }, {} as Record<string, string>);
+    .reduce(
+      (acc, artifactVersion) => {
+        const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
+        acc[stackVersion] = artifactVersion;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
   log?.verbose(
     `Versions found from [${artifactsUrl}]:\n${JSON.stringify(

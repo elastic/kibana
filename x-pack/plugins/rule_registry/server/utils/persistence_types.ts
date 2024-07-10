@@ -76,7 +76,7 @@ export type PersistenceAlertType<
   TParams extends RuleTypeParams,
   TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
+  TActionGroupIds extends string = never,
 > = Omit<
   RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'

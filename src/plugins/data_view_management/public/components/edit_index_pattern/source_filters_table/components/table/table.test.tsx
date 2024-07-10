@@ -17,7 +17,7 @@ import { SourceFiltersTableFilter } from '../../types';
 const indexPattern = {} as DataView;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as DataView;
 
 const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,

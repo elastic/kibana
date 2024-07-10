@@ -387,4 +387,4 @@ export const getMockRuleSearchResponse = (
       },
     ],
     // NOTE: We have to cast as "unknown" and then back to "RuleSearchResult" because "RuleSearchResult" isn't an exact type. See notes in the JSDocs fo that type.
-  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+  }) as unknown as SavedObjectsFindResponse<RuleSearchResult, never>;

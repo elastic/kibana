@@ -35,8 +35,8 @@ export interface RuleTagBadgeCommonProps {
 export type RuleTagBadgeProps<T extends RuleTagBadgeOptions = 'default'> = T extends 'default'
   ? RuleTagBadgeBasicOptions & RuleTagBadgeCommonProps
   : T extends 'tagsOutPopover'
-  ? RuleTagBadgeCommonProps
-  : never;
+    ? RuleTagBadgeCommonProps
+    : never;
 
 const containerStyle = {
   width: '300px',

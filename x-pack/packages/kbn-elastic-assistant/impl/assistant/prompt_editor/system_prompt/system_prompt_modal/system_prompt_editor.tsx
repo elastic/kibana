@@ -177,12 +177,12 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
         currentPromptConversationTitles.includes(convo.title)
           ? selectedSystemPrompt?.id
           : convo.apiConfig && convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-          ? // remove the default System Prompt if it is assigned to a conversation
-            // but that conversation is not in the currentPromptConversationList
-            // This means conversation was removed in the current transaction
-            systemPromptSettings?.[0].id
-          : //  leave it as it is .. if that conversation was neither added nor removed.
-            convo.apiConfig?.defaultSystemPromptId;
+            ? // remove the default System Prompt if it is assigned to a conversation
+              // but that conversation is not in the currentPromptConversationList
+              // This means conversation was removed in the current transaction
+              systemPromptSettings?.[0].id
+            : //  leave it as it is .. if that conversation was neither added nor removed.
+              convo.apiConfig?.defaultSystemPromptId;
 
       if (selectedSystemPrompt != null) {
         setConversationSettings((prev) =>

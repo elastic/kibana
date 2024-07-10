@@ -55,7 +55,7 @@ describe('getDeprecations', () => {
                 ({
                   id: 'foo',
                   package_policies: [{ package: { name: 'system' } }],
-                } as AgentPolicy),
+                }) as AgentPolicy,
             },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],
@@ -84,7 +84,7 @@ describe('getDeprecations', () => {
                 ({
                   id: 'foo',
                   package_policies: [{ package: { name: 'apm' } }],
-                } as AgentPolicy),
+                }) as AgentPolicy,
             },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],

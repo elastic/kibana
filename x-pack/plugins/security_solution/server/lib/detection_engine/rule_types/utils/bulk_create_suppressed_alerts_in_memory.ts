@@ -134,7 +134,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
  * creates alerts in ES, both suppressed and unsuppressed
  */
 export const executeBulkCreateAlerts = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & BaseFieldsLatest,
 >({
   unsuppressibleWrappedDocs,
   suppressibleWrappedDocs,

@@ -177,27 +177,30 @@ const recursiveRewrite = (
   context: ValidationContext,
   parents: string[]
 ): Record<string, any> => {
-  return Object.entries(currentLevel).reduce((memo, [key, value]) => {
-    const rewriteKey = isAttributeKey(parents);
-    const rewriteValue = isAttributeValue(key, value);
+  return Object.entries(currentLevel).reduce(
+    (memo, [key, value]) => {
+      const rewriteKey = isAttributeKey(parents);
+      const rewriteValue = isAttributeValue(key, value);
 
-    const nestedContext = childContext(context, key);
-    const newKey = rewriteKey ? validateAndRewriteAttributePath(key, nestedContext) : key;
+      const nestedContext = childContext(context, key);
+      const newKey = rewriteKey ? validateAndRewriteAttributePath(key, nestedContext) : key;
 
-    let newValue = value;
-    if (rewriteValue) {
-      newValue = validateAndRewriteAttributePath(value, nestedContext);
-    } else if (isArray(value)) {
-      newValue = value.map((v) =>
-        isPlainObject(v) ? recursiveRewrite(v, nestedContext, parents) : v
-      );
-    } else if (isPlainObject(value)) {
-      newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
-    }
+      let newValue = value;
+      if (rewriteValue) {
+        newValue = validateAndRewriteAttributePath(value, nestedContext);
+      } else if (isArray(value)) {
+        newValue = value.map((v) =>
+          isPlainObject(v) ? recursiveRewrite(v, nestedContext, parents) : v
+        );
+      } else if (isPlainObject(value)) {
+        newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
+      }
 
-    memo[newKey] = newValue;
-    return memo;
-  }, {} as Record<string, unknown>);
+      memo[newKey] = newValue;
+      return memo;
+    },
+    {} as Record<string, unknown>
+  );
 };
 
 const childContext = (context: ValidationContext, path: string): ValidationContext => {

@@ -145,9 +145,9 @@ export const useInitSourcerer = (
           id === scopeDataViewId
             ? selectedPatterns.length === 0 && missingPatterns.length === 0
             : timelineDataViewId === id
-            ? timelineMissingPatterns.length === 0 &&
-              timelineSelectedDataView?.patternList.length === 0
-            : false;
+              ? timelineMissingPatterns.length === 0 &&
+                timelineSelectedDataView?.patternList.length === 0
+              : false;
 
         indexFieldsSearch({
           dataViewId: id,

@@ -32,13 +32,16 @@ export function mappingFromFieldMap(
     const mapped = multi_fields
       ? {
           ...rest,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          fields: multi_fields.reduce((acc, multi_field: MultiField) => {
-            acc[multi_field.name] = {
-              type: multi_field.type,
-            };
-            return acc;
-          }, {} as Record<string, unknown>),
+
+          fields: multi_fields.reduce(
+            (acc, multi_field: MultiField) => {
+              acc[multi_field.name] = {
+                type: multi_field.type,
+              };
+              return acc;
+            },
+            {} as Record<string, unknown>
+          ),
         }
       : rest;
 

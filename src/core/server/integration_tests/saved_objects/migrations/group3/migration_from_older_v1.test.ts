@@ -125,35 +125,38 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
     coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
-      .reduce((versionMap, type) => {
-        const { name, migrations, convertToMultiNamespaceTypeVersion, modelVersions } = type;
-        if (migrations || convertToMultiNamespaceTypeVersion) {
-          const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
-          const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
-          if (convertToMultiNamespaceTypeVersion) {
-            // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
-            migrationsKeys.push(convertToMultiNamespaceTypeVersion);
+      .reduce(
+        (versionMap, type) => {
+          const { name, migrations, convertToMultiNamespaceTypeVersion, modelVersions } = type;
+          if (migrations || convertToMultiNamespaceTypeVersion) {
+            const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
+            const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
+            if (convertToMultiNamespaceTypeVersion) {
+              // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
+              migrationsKeys.push(convertToMultiNamespaceTypeVersion);
+            }
+
+            const modelVersionCreateSchemas =
+              typeof modelVersions === 'function' ? modelVersions() : modelVersions ?? {};
+
+            Object.entries(modelVersionCreateSchemas).forEach(([key, modelVersion]) => {
+              migrationsKeys.push(modelVersionToVirtualVersion(key));
+            });
+
+            const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
+            return {
+              ...versionMap,
+              [name]: highestVersion,
+            };
+          } else {
+            return {
+              ...versionMap,
+              [name]: undefined,
+            };
           }
-
-          const modelVersionCreateSchemas =
-            typeof modelVersions === 'function' ? modelVersions() : modelVersions ?? {};
-
-          Object.entries(modelVersionCreateSchemas).forEach(([key, modelVersion]) => {
-            migrationsKeys.push(modelVersionToVirtualVersion(key));
-          });
-
-          const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
-          return {
-            ...versionMap,
-            [name]: highestVersion,
-          };
-        } else {
-          return {
-            ...versionMap,
-            [name]: undefined,
-          };
-        }
-      }, {} as Record<string, string | undefined>);
+        },
+        {} as Record<string, string | undefined>
+      );
 
   const assertMigrationVersion = (
     doc: SavedObjectsRawDoc,

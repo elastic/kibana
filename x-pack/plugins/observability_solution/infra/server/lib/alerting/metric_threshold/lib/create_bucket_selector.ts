@@ -30,12 +30,12 @@ export const createBucketSelector = (
   const bucketPath = isCount
     ? "currentPeriod['all']>_count"
     : isRate
-    ? `aggregatedValue`
-    : isPercentile
-    ? `currentPeriod[\'all\']>aggregatedValue[${
-        condition.aggType === Aggregators.P95 ? '95' : '99'
-      }]`
-    : "currentPeriod['all']>aggregatedValue";
+      ? `aggregatedValue`
+      : isPercentile
+        ? `currentPeriod[\'all\']>aggregatedValue[${
+            condition.aggType === Aggregators.P95 ? '95' : '99'
+          }]`
+        : "currentPeriod['all']>aggregatedValue";
 
   const shouldWarn = hasWarn
     ? {

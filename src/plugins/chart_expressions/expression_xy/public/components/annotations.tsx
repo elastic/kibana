@@ -341,8 +341,8 @@ export const Annotations = ({
                   annotation.lineStyle === 'dashed'
                     ? [strokeWidth * 3, strokeWidth]
                     : annotation.lineStyle === 'dotted'
-                    ? [strokeWidth, strokeWidth]
-                    : undefined,
+                      ? [strokeWidth, strokeWidth]
+                      : undefined,
                 opacity: 1,
               },
             }}

@@ -27,7 +27,7 @@ import React from 'react';
  */
 export interface DefaultEmbeddableApi<
   SerializedState extends object = object,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
 > extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
@@ -45,7 +45,7 @@ export type SetReactEmbeddableApiRegistration<
   Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
     SerializedState,
     RuntimeState
-  >
+  >,
 > = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
 
 /**
@@ -58,7 +58,7 @@ export type BuildReactEmbeddableApiRegistration<
   Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
     SerializedState,
     RuntimeState
-  >
+  >,
 > = Omit<
   SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
   'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
@@ -77,7 +77,7 @@ export interface ReactEmbeddableFactory<
   Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
     SerializedState,
     RuntimeState
-  >
+  >,
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type

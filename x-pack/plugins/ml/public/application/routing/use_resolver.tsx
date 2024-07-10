@@ -115,10 +115,13 @@ export const useRouteResolver = (
 
     const funcNames = Object.keys(customResolversRef.current); // Object.entries gets this wrong?!
     const funcs = Object.values(customResolversRef.current); // Object.entries gets this wrong?!
-    const tempResults = funcNames.reduce((p, c) => {
-      p[c] = {};
-      return p;
-    }, {} as Exclude<ResolverResults, undefined>);
+    const tempResults = funcNames.reduce(
+      (p, c) => {
+        p[c] = {};
+        return p;
+      },
+      {} as Exclude<ResolverResults, undefined>
+    );
     const res = await Promise.all(funcs.map((r) => r()));
     res.forEach((r, i) => (tempResults[funcNames[i]] = r));
 

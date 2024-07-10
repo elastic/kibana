@@ -31,10 +31,13 @@ const DFA_EXTRA_MEMORY = numeral('5MB').value();
 
 const NODE_FIELDS = ['attributes', 'name', 'roles'] as const;
 
-export type RequiredNodeFields = Pick<estypes.NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
+export type RequiredNodeFields = Pick<estypes.NodesInfoNodeInfo, (typeof NODE_FIELDS)[number]>;
 
 export class MemoryUsageService {
-  constructor(private readonly mlClient: MlClient, private readonly mlFeatures: MlFeatures) {}
+  constructor(
+    private readonly mlClient: MlClient,
+    private readonly mlFeatures: MlFeatures
+  ) {}
 
   public async getMemorySizes(itemType?: MlSavedObjectType, node?: string, showClosedJobs = false) {
     let memories: MemoryUsageInfo[] = [];

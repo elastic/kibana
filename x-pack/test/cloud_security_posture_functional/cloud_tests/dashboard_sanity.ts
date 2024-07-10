@@ -106,9 +106,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Compliance By CIS sections have non empty values', async () => {
-        const complianceScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection(
-          'Kubernetes'
-        );
+        const complianceScoresChartPanel =
+          await dashboard.getAllComplianceScoresByCisSection('Kubernetes');
         expect(complianceScoresChartPanel.length).to.be.greaterThan(0);
         for (const score of complianceScoresChartPanel) {
           const scoreValue = await score.getVisibleText();

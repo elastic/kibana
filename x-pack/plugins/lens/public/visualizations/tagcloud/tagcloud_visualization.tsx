@@ -97,8 +97,8 @@ export const getTagcloudVisualization = ({
     return state.colorMapping
       ? { type: 'colorMapping', value: state.colorMapping }
       : state.palette
-      ? { type: 'legacyPalette', value: state.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: state.palette }
+        : undefined;
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],

@@ -251,7 +251,7 @@ export const flattenAdditionalContext = (
 };
 
 export const getContextForRecoveredAlerts = <
-  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields),
 >(
   alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {

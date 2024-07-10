@@ -30,8 +30,8 @@ export function getOnboardingStatus(
   return data.progress['logs-ingest']?.status === 'complete'
     ? 'dataReceived'
     : data.progress['logs-ingest']?.status === 'loading'
-    ? 'awaitingData'
-    : Object.values(data.progress).some((step) => step.status !== 'incomplete')
-    ? 'inProgress'
-    : 'notStarted';
+      ? 'awaitingData'
+      : Object.values(data.progress).some((step) => step.status !== 'incomplete')
+        ? 'inProgress'
+        : 'notStarted';
 }

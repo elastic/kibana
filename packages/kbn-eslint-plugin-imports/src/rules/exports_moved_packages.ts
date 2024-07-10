@@ -145,10 +145,10 @@ function inspectImports(
           ? 'export type'
           : 'export'
         : (T.isImportDeclaration(importer) ||
-            importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) &&
-          importer.importKind === 'type'
-        ? 'import type'
-        : 'import';
+              importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) &&
+            importer.importKind === 'type'
+          ? 'import type'
+          : 'import';
 
     return {
       importCount: importer.specifiers.length,

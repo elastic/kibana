@@ -268,7 +268,7 @@ export function createTaskRunAggregator(
       ([taskRun, load, polling]: [
         Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>,
         Pick<TaskRunStat, 'load'>,
-        Pick<TaskRunStat, 'polling'>
+        Pick<TaskRunStat, 'polling'>,
       ]) => {
         return {
           key: 'runtime',

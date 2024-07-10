@@ -78,8 +78,8 @@ export function parseFlags(flags: FlagsReader) {
   const logsDir = flags.path('writeLogsToPath')
     ? Path.resolve(REPO_ROOT, flags.path('writeLogsToPath')!)
     : flags.boolean('logToFile')
-    ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-    : undefined;
+      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+      : undefined;
 
   return {
     configs,

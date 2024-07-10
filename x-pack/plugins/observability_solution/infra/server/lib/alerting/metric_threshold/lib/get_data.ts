@@ -168,10 +168,10 @@ export const getData = async (
             params.aggType === Aggregators.COUNT
               ? docCount
               : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
-              ? aggregatedValueForRate.value
-              : aggregatedValue != null
-              ? getValue(aggregatedValue, params)
-              : null;
+                ? aggregatedValueForRate.value
+                : aggregatedValue != null
+                  ? getValue(aggregatedValue, params)
+                  : null;
 
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
@@ -215,10 +215,10 @@ export const getData = async (
         params.aggType === Aggregators.COUNT
           ? docCount
           : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
-          ? aggregatedValueForRate.value
-          : aggregatedValue != null
-          ? getValue(aggregatedValue, params)
-          : null;
+            ? aggregatedValueForRate.value
+            : aggregatedValue != null
+              ? getValue(aggregatedValue, params)
+              : null;
       // There is an edge case where there is no results and the shouldWarn/shouldTrigger
       // bucket scripts will be missing. This is only an issue for document count because
       // the value will end up being ZERO, for other metrics it will be null. In this case

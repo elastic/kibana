@@ -486,14 +486,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const suppressionGroupByDisabledText = areSuppressionFieldsDisabledBySequence
     ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
     : isMlRule(ruleType) && noMlJobsStarted
-    ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
-    : alertSuppressionUpsellingMessage;
+      ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
+      : alertSuppressionUpsellingMessage;
 
   const suppressionGroupByFields = isEsqlRule(ruleType)
     ? esqlSuppressionFields
     : isMlRule(ruleType)
-    ? mlSuppressionFields
-    : termsAggregationFields;
+      ? mlSuppressionFields
+      : termsAggregationFields;
 
   /**
    * Component that allows selection of suppression intervals disabled:
@@ -762,7 +762,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         isLoading,
         dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
         onValidityChange: setIsQueryBarValid,
-      } as QueryBarDefineRuleProps),
+      }) as QueryBarDefineRuleProps,
     [indexPattern, isLoading, setIsQueryBarValid]
   );
 

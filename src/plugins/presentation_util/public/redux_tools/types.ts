@@ -22,7 +22,7 @@ export type ReduxToolsSelect<ReduxStateType extends unknown> = <Selected extends
  */
 export type ReduxToolsSetters<
   ReduxStateType extends unknown,
-  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>
+  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>,
 > = {
   [ReducerKey in keyof ReducerType]: (
     payload: Parameters<ReducerType[ReducerKey]>[1]['payload']
@@ -35,7 +35,7 @@ export type ReduxToolsSetters<
  */
 export interface ReduxTools<
   ReduxStateType extends unknown,
-  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>
+  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>,
 > {
   store: EnhancedStore<ReduxStateType>;
   select: ReduxToolsSelect<ReduxStateType>;
@@ -60,6 +60,6 @@ export interface ReduxToolsReducers<ReduxStateType extends unknown> {
  * The package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools.
  */
 export interface ReduxToolsPackage {
-  createReduxTools: typeof import('./create_redux_tools')['createReduxTools'];
-  createReduxEmbeddableTools: typeof import('./redux_embeddables/create_redux_embeddable_tools')['createReduxEmbeddableTools'];
+  createReduxTools: (typeof import('./create_redux_tools'))['createReduxTools'];
+  createReduxEmbeddableTools: (typeof import('./redux_embeddables/create_redux_embeddable_tools'))['createReduxEmbeddableTools'];
 }

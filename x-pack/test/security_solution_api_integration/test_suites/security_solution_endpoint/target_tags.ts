@@ -15,7 +15,7 @@ const TARGET_TAGS = [
   '@brokenInServerless',
 ] as const;
 
-export type TargetTags = typeof TARGET_TAGS[number];
+export type TargetTags = (typeof TARGET_TAGS)[number];
 
 export function targetTags(thisSuite: Mocha.Suite, tags: TargetTags[]) {
   // @ts-ignore: _tags is not publicly visible

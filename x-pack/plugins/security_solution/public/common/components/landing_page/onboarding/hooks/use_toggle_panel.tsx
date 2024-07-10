@@ -112,8 +112,8 @@ export const useTogglePanel = ({
     return activeProductsFromStorage.size > 0
       ? activeProductsFromStorage
       : productTypes && productTypes.length > 0
-      ? new Set(productTypes.map(({ product_line: productLine }) => ProductLine[productLine]))
-      : new Set(ALL_PRODUCT_LINES);
+        ? new Set(productTypes.map(({ product_line: productLine }) => ProductLine[productLine]))
+        : new Set(ALL_PRODUCT_LINES);
   }, [getActiveProductsFromStorage, productTypes]);
 
   const {

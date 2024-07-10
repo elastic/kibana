@@ -177,24 +177,24 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
           }
         )
       : selectedModel.deploymentState === MlModelDeploymentState.NotDeployed
-      ? i18n.translate(
-          'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelNotStartedAnnouncement',
-          {
-            defaultMessage: '{modelId} model selected but not started',
-            values: {
-              modelId: selectedModel.modelId,
-            },
-          }
-        )
-      : i18n.translate(
-          'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelAnnouncement',
-          {
-            defaultMessage: '{modelId} model selected',
-            values: {
-              modelId: selectedModel.modelId,
-            },
-          }
-        );
+        ? i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelNotStartedAnnouncement',
+            {
+              defaultMessage: '{modelId} model selected but not started',
+              values: {
+                modelId: selectedModel.modelId,
+              },
+            }
+          )
+        : i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelAnnouncement',
+            {
+              defaultMessage: '{modelId} model selected',
+              values: {
+                modelId: selectedModel.modelId,
+              },
+            }
+          );
 
   return (
     <EuiPanel color="subdued" title="Selected model">

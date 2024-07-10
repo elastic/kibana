@@ -242,7 +242,7 @@ const AnnotationEditorControls = ({
                         exists: hasFieldData(dataView.id!, field.name),
                         compatible: true,
                         'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
-                      } as FieldOption<FieldOptionValue>)
+                      }) as FieldOption<FieldOptionValue>
                   );
                 const selectedField = (currentAnnotation as QueryPointEventAnnotationConfig)
                   .textField;

@@ -32,8 +32,8 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 1
         ? 'selected'
         : maxCompletedStep >= 1
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: !isFormValid && currentStep !== 1,
       onClick: () => updateCurrentStep(1),
     },
@@ -44,8 +44,8 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 2
         ? 'selected'
         : maxCompletedStep >= 2
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 1 || (!isFormValid && currentStep !== 2),
       onClick: () => updateCurrentStep(2),
     },
@@ -56,8 +56,8 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 3
         ? 'selected'
         : maxCompletedStep >= 3
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 2 || (!isFormValid && currentStep !== 3),
       onClick: () => updateCurrentStep(3),
     },
@@ -68,8 +68,8 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 4
         ? 'selected'
         : maxCompletedStep >= 3
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 3 || (!isFormValid && currentStep !== 4),
       onClick: () => updateCurrentStep(4),
     },

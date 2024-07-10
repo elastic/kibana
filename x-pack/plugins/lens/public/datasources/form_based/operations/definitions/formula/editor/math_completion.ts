@@ -473,8 +473,8 @@ export function getSuggestion(
     typeof suggestion === 'string'
       ? suggestion
       : 'label' in suggestion
-      ? suggestion.label
-      : suggestion.text;
+        ? suggestion.label
+        : suggestion.text;
   let insertText: string | undefined;
   let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';

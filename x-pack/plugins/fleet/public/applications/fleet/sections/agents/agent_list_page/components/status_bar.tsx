@@ -26,14 +26,17 @@ export const AgentStatusBar: React.FC<{
   agentStatus: { [k in SimplifiedAgentStatus]: number };
 }> = ({ agentStatus }) => {
   const palette = useMemo(() => {
-    return AGENT_STATUSES.reduce((acc, status) => {
-      const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
-      acc.push({
-        stop: previousStop + (agentStatus[status] || 0),
-        color: getColorForAgentStatus(status),
-      });
-      return acc;
-    }, [] as Array<{ stop: number; color: string }>);
+    return AGENT_STATUSES.reduce(
+      (acc, status) => {
+        const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
+        acc.push({
+          stop: previousStop + (agentStatus[status] || 0),
+          color: getColorForAgentStatus(status),
+        });
+        return acc;
+      },
+      [] as Array<{ stop: number; color: string }>
+    );
   }, [agentStatus]);
 
   const hasNoAgent = palette[palette.length - 1].stop === 0;

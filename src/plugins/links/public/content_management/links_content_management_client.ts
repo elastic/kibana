@@ -68,7 +68,7 @@ export const linksClient = {
 };
 
 export function getLinksClient<
-  Attr extends SerializableAttributes = SerializableAttributes
+  Attr extends SerializableAttributes = SerializableAttributes,
 >(): VisualizationClient<typeof CONTENT_ID, Attr> {
   return linksClient as unknown as VisualizationClient<typeof CONTENT_ID, Attr>;
 }

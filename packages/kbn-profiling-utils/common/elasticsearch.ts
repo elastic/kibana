@@ -34,7 +34,7 @@ export enum ProfilingESField {
 
 type DedotKey<
   TKey extends string | number | symbol,
-  TValue
+  TValue,
 > = TKey extends `${infer THead}.${infer TTail}`
   ? {
       [key in THead]: DedotKey<TTail, TValue>;
@@ -49,7 +49,7 @@ export type DedotObject<TObject extends Record<string, any>> = UnionToIntersecti
 
 export type FlattenObject<
   TObject extends Record<string, any>,
-  TPrefix extends string = ''
+  TPrefix extends string = '',
 > = UnionToIntersection<
   ValuesType<{
     [TKey in keyof TObject & string]: TObject[TKey] extends Record<string, any>
@@ -62,7 +62,7 @@ type FlattenedKeysOf<TObject extends Record<string, any>> = keyof FlattenObject<
 
 export type PickFlattened<
   TObject extends Record<string, any>,
-  TPickKey extends FlattenedKeysOf<TObject>
+  TPickKey extends FlattenedKeysOf<TObject>,
 > = DedotObject<Pick<FlattenObject<TObject>, TPickKey>>;
 
 export type ProfilingESEvent = DedotObject<{

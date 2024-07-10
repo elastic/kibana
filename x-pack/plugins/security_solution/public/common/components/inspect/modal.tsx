@@ -188,8 +188,8 @@ export const ModalInspectQuery = ({
             {inspectResponses[0]?.took === 0
               ? '0ms'
               : inspectResponses[0]?.took
-              ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
-              : i18n.SOMETHING_WENT_WRONG}
+                ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
+                : i18n.SOMETHING_WENT_WRONG}
           </span>
         ),
       },

@@ -348,7 +348,7 @@ describe('when on integration detail', () => {
 });
 
 interface MockedApi<
-  R extends Record<string, jest.MockedFunction<any>> = Record<string, jest.MockedFunction<any>>
+  R extends Record<string, jest.MockedFunction<any>> = Record<string, jest.MockedFunction<any>>,
 > {
   /** Will return a promise that resolves when triggered APIs are complete */
   waitForApi: () => Promise<void>;

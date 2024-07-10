@@ -159,9 +159,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const toastMessageElement = await toasts.getElementByIndex();
         expect(toastMessageElement).to.be.ok();
 
-        const toastMessageTitle = await toastMessageElement.findByTestSubject(
-          'csp:toast-success-title'
-        );
+        const toastMessageTitle =
+          await toastMessageElement.findByTestSubject('csp:toast-success-title');
         expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
         await testSubjects.click('csp:toast-success-link');

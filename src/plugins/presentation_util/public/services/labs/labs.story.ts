@@ -17,16 +17,19 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   const storage = window.sessionStorage;
 
   const getProjects = (solutions: SolutionName[] = []) =>
-    projectIDs.reduce((acc, id) => {
-      const project = getProject(id);
-      if (
-        solutions.length === 0 ||
-        solutions.some((solution) => project.solutions.includes(solution))
-      ) {
-        acc[id] = project;
-      }
-      return acc;
-    }, {} as { [id in ProjectID]: Project });
+    projectIDs.reduce(
+      (acc, id) => {
+        const project = getProject(id);
+        if (
+          solutions.length === 0 ||
+          solutions.some((solution) => project.solutions.includes(solution))
+        ) {
+          acc[id] = project;
+        }
+        return acc;
+      },
+      {} as { [id in ProjectID]: Project }
+    );
 
   const getProject = (id: ProjectID) => {
     const project = projects[id];

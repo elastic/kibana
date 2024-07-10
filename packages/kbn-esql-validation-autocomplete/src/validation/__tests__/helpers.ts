@@ -39,8 +39,8 @@ export const setup = async () => {
           typeof (error as ESQLMessage).text === 'string'
             ? (error as ESQLMessage).text
             : typeof (error as EditorError).message === 'string'
-            ? (error as EditorError).message
-            : String(error);
+              ? (error as EditorError).message
+              : String(error);
         errorMessages.push(message);
       } else {
         errorMessages.push(String(error));

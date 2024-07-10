@@ -101,9 +101,9 @@ describe('DatatableComponent', () => {
     const props = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convert: (x) => x }) as IFieldFormat,
       dispatchEvent: onDispatchEvent,
-      getType: jest.fn(() => ({ type: 'buckets' } as IAggType)),
+      getType: jest.fn(() => ({ type: 'buckets' }) as IAggType),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
       renderMode: 'edit' as const,

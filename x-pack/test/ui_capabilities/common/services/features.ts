@@ -15,7 +15,10 @@ import { Features } from '../features';
 export class FeaturesService {
   private readonly axios: AxiosInstance;
 
-  constructor(url: string, private readonly log: ToolingLog) {
+  constructor(
+    url: string,
+    private readonly log: ToolingLog
+  ) {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/features' },
       baseURL: url,

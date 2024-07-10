@@ -21,8 +21,8 @@ export const AssertPathLength: Task = {
     const buildRoot = process.env.CI
       ? build.resolvePath()
       : win
-      ? build.resolvePathForPlatform(win)
-      : undefined;
+        ? build.resolvePathForPlatform(win)
+        : undefined;
 
     if (!buildRoot) {
       return;

@@ -46,7 +46,7 @@ export abstract class ExportType<
   JobParamsType extends object = any,
   TaskPayloadType extends object = any,
   SetupDepsType extends BaseExportTypeSetupDeps = BaseExportTypeSetupDeps,
-  StartDepsType extends BaseExportTypeStartDeps = BaseExportTypeStartDeps
+  StartDepsType extends BaseExportTypeStartDeps = BaseExportTypeStartDeps,
 > {
   abstract id: string; // ID for exportTypesRegistry.getById()
   abstract name: string; // user-facing string

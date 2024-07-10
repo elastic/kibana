@@ -33,20 +33,20 @@ export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
   T extends TimelineEventsQueries.all
     ? TimelineEventsAllStrategyResponse
     : T extends TimelineEventsQueries.details
-    ? TimelineEventsDetailsStrategyResponse
-    : T extends TimelineEventsQueries.kpi
-    ? TimelineKpiStrategyResponse
-    : T extends TimelineEventsQueries.lastEventTime
-    ? TimelineEventsLastEventTimeStrategyResponse
-    : never;
+      ? TimelineEventsDetailsStrategyResponse
+      : T extends TimelineEventsQueries.kpi
+        ? TimelineKpiStrategyResponse
+        : T extends TimelineEventsQueries.lastEventTime
+          ? TimelineEventsLastEventTimeStrategyResponse
+          : never;
 
 export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
   T extends TimelineEventsQueries.all
     ? TimelineEventsAllOptionsInput
     : T extends TimelineEventsQueries.details
-    ? TimelineEventsDetailsRequestOptionsInput
-    : T extends TimelineEventsQueries.kpi
-    ? TimelineKpiRequestOptionsInput
-    : T extends TimelineEventsQueries.lastEventTime
-    ? TimelineEventsLastEventTimeRequestOptionsInput
-    : never;
+      ? TimelineEventsDetailsRequestOptionsInput
+      : T extends TimelineEventsQueries.kpi
+        ? TimelineKpiRequestOptionsInput
+        : T extends TimelineEventsQueries.lastEventTime
+          ? TimelineEventsLastEventTimeRequestOptionsInput
+          : never;

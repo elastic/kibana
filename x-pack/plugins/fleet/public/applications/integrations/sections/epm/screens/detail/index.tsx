@@ -312,8 +312,8 @@ export function Detail() {
     fromIntegrations === 'updates_available'
       ? getHref('integrations_installed_updates_available')
       : fromIntegrations === 'installed'
-      ? getHref('integrations_installed')
-      : getHref('integrations_all');
+        ? getHref('integrations_installed')
+        : getHref('integrations_all');
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),

@@ -11,7 +11,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 
 export class Role {
-  constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
+  constructor(
+    private log: ToolingLog,
+    private kibanaServer: KbnClient
+  ) {}
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);

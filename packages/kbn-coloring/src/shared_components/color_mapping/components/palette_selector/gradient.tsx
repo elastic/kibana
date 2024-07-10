@@ -54,8 +54,8 @@ export function Gradient({
     colorMode.sort === 'asc'
       ? colorMode.steps.at(0)
       : colorMode.steps.length === 1
-      ? undefined
-      : colorMode.steps.at(-1);
+        ? undefined
+        : colorMode.steps.at(-1);
   const endStepIndex =
     colorMode.sort === 'asc' ? 0 : colorMode.steps.length === 1 ? NaN : colorMode.steps.length - 1;
 

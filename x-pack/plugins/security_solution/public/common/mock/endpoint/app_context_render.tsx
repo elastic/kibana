@@ -109,7 +109,7 @@ type HookRendererFunction<TProps, TResult> = (props: TProps) => TResult;
 export type ReactQueryHookRenderer<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TProps = any,
-  TResult extends UseBaseQueryResult = UseBaseQueryResult
+  TResult extends UseBaseQueryResult = UseBaseQueryResult,
 > = (
   hookFn: HookRendererFunction<TProps, TResult>,
   /**
@@ -317,7 +317,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const renderReactQueryHook: ReactQueryHookRenderer = async <
     TProps,
-    TResult extends UseBaseQueryResult = UseBaseQueryResult
+    TResult extends UseBaseQueryResult = UseBaseQueryResult,
   >(
     hookFn: HookRendererFunction<TProps, TResult>,
     waitForHook: WaitForReactHookState = 'isSuccess',

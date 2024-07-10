@@ -244,10 +244,13 @@ export const UnifiedHistogramLayout = ({
       return undefined;
     }
 
-    return columns.reduce((acc, column) => {
-      acc[column.id] = column;
-      return acc;
-    }, {} as Record<string, DatatableColumn>);
+    return columns.reduce(
+      (acc, column) => {
+        acc[column.id] = column;
+        return acc;
+      },
+      {} as Record<string, DatatableColumn>
+    );
   }, [columns]);
 
   const requestParams = useRequestParams({

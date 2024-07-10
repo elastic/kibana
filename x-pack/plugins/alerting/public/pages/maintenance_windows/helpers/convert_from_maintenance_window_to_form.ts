@@ -37,8 +37,8 @@ export const convertFromMaintenanceWindowToForm = (
   const ends = rRule.until
     ? EndsOptions.ON_DATE
     : rRule.count
-    ? EndsOptions.AFTER_X
-    : EndsOptions.NEVER;
+      ? EndsOptions.AFTER_X
+      : EndsOptions.NEVER;
 
   const recurringSchedule: RecurringScheduleFormProps = {
     frequency: isCustomFrequency ? 'CUSTOM' : frequency,

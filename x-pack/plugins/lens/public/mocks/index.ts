@@ -73,19 +73,22 @@ export function generateActiveData(
     rows: Array<Record<string, number | null>>;
   }>
 ) {
-  return json.reduce((memo, { id, rows }) => {
-    const columns = Object.keys(rows[0]).map((columnId) => ({
-      id: columnId,
-      name: columnId,
-      meta: {
-        type: typeof rows[0][columnId]! as DatatableColumnType,
-      },
-    }));
-    memo[id] = {
-      type: 'datatable' as const,
-      columns,
-      rows,
-    };
-    return memo;
-  }, {} as NonNullable<FramePublicAPI['activeData']>);
+  return json.reduce(
+    (memo, { id, rows }) => {
+      const columns = Object.keys(rows[0]).map((columnId) => ({
+        id: columnId,
+        name: columnId,
+        meta: {
+          type: typeof rows[0][columnId]! as DatatableColumnType,
+        },
+      }));
+      memo[id] = {
+        type: 'datatable' as const,
+        columns,
+        rows,
+      };
+      return memo;
+    },
+    {} as NonNullable<FramePublicAPI['activeData']>
+  );
 }

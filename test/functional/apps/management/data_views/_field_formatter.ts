@@ -480,20 +480,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         body: {
           mappings: {
             // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
-            properties: specs.reduce((properties, spec, index) => {
-              properties[`${index}`] = { type: spec.fieldType };
-              return properties;
-            }, {} as Record<string, { type: ES_FIELD_TYPES }>),
+            properties: specs.reduce(
+              (properties, spec, index) => {
+                properties[`${index}`] = { type: spec.fieldType };
+                return properties;
+              },
+              {} as Record<string, { type: ES_FIELD_TYPES }>
+            ),
           },
         },
       });
 
       const docResult = await es.index({
         index: indexTitle,
-        body: specs.reduce((properties, spec, index) => {
-          properties[`${index}`] = spec.fieldValue;
-          return properties;
-        }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),
+        body: specs.reduce(
+          (properties, spec, index) => {
+            properties[`${index}`] = spec.fieldValue;
+            return properties;
+          },
+          {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>
+        ),
         refresh: 'wait_for',
       });
       testDocumentId = docResult._id;

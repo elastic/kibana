@@ -11,7 +11,7 @@ import { validate } from '../utils';
 export interface ProcedureDefinition<
   Context extends object | void = void,
   I extends object | void = void,
-  O = any
+  O = any,
 > {
   fn: (context: Context, input: I extends void ? undefined : I) => Promise<O>;
   schemas?: ProcedureSchemas;

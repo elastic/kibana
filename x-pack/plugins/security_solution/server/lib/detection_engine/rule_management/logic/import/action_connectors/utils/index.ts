@@ -79,8 +79,8 @@ export const handleActionConnectorsErrors = (error: ErrorType, id?: string): Bul
           (error as ConflictError)?.type === 'conflict'
             ? 'There is a conflict'
             : (error as Error).message
-            ? (error as Error).message
-            : '',
+              ? (error as Error).message
+              : '',
       });
 
     case 403:

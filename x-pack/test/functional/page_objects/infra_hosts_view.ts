@@ -169,9 +169,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getLogsTableColumnHeaders() {
-      const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
-        '~logColumnHeader'
-      );
+      const columnHeaderElements: WebElementWrapper[] =
+        await testSubjects.findAll('~logColumnHeader');
       return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 

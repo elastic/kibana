@@ -45,7 +45,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
   private logger: Logger;
 
-  constructor(loggerFactory: LoggerFactory, private esoClient: EncryptedSavedObjectsClient) {
+  constructor(
+    loggerFactory: LoggerFactory,
+    private esoClient: EncryptedSavedObjectsClient
+  ) {
     this.logger = loggerFactory.get('messageSigningService');
   }
 

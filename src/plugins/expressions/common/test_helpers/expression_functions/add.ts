@@ -30,8 +30,8 @@ export const add: ExpressionFunctionDefinition<
     const value2 = !input2
       ? 0
       : typeof input2 === 'object'
-      ? (input2 as ExpressionValueNum).value
-      : Number(input2);
+        ? (input2 as ExpressionValueNum).value
+        : Number(input2);
 
     return {
       type: 'num',

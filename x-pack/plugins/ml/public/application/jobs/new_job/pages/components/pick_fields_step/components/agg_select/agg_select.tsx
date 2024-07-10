@@ -76,7 +76,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
                   label: `${a.title}(${f.name})`,
                   agg: a,
                   field: f,
-                } as DropDownLabel)
+                }) as DropDownLabel
             )
             .filter((o) => removeLabels.includes(o.label) === false);
         }

@@ -19,7 +19,7 @@ export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends FinderAttributes = SavedObjectAttributes
+  T extends FinderAttributes = SavedObjectAttributes,
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ): EmbeddableFactory<I, O, E, T> => {

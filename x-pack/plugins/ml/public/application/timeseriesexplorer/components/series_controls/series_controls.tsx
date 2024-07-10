@@ -230,10 +230,13 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     fieldValue
   ) => {
     const resultEntities = {
-      ...entityControls.reduce((appStateEntities, appStateEntity) => {
-        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
-        return appStateEntities;
-      }, {} as Record<string, any>),
+      ...entityControls.reduce(
+        (appStateEntities, appStateEntity) => {
+          appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
+          return appStateEntities;
+        },
+        {} as Record<string, any>
+      ),
       [entity.fieldName]: fieldValue,
     };
 

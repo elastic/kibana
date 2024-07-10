@@ -53,8 +53,8 @@ export const MuteAlertAction = memo(({ alert, refresh, onActionExecuted }: Alert
             defaultMessage: 'Loading muted state',
           })
         : isMuted
-        ? UNMUTE
-        : MUTE}
+          ? UNMUTE
+          : MUTE}
     </EuiContextMenuItem>
   );
 });

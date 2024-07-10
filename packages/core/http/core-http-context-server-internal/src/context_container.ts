@@ -47,7 +47,7 @@ export class ContextContainer implements IContextContainer {
 
   public registerContext = <
     Context extends RequestHandlerContextBase,
-    ContextName extends keyof Context
+    ContextName extends keyof Context,
   >(
     source: symbol,
     name: ContextName,

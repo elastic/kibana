@@ -115,8 +115,8 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery, title }: Moda
           {parsedResponse.took === 0
             ? '0ms'
             : parsedResponse.took
-            ? `${numeral(parsedResponse.took).format('0,0')}ms`
-            : i18n.SOMETHING_WENT_WRONG}
+              ? `${numeral(parsedResponse.took).format('0,0')}ms`
+              : i18n.SOMETHING_WENT_WRONG}
         </span>
       ),
     },

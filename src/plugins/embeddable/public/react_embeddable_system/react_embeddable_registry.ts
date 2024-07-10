@@ -24,7 +24,7 @@ export const registerReactEmbeddableFactory = <
   Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
     SerializedState,
     RuntimeState
-  >
+  >,
 >(
   type: string,
   getFactory: () => Promise<ReactEmbeddableFactory<SerializedState, RuntimeState, Api>>
@@ -47,7 +47,7 @@ export const getReactEmbeddableFactory = async <
   Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
     SerializedState,
     RuntimeState
-  >
+  >,
 >(
   key: string
 ): Promise<ReactEmbeddableFactory<SerializedState, RuntimeState, Api>> => {

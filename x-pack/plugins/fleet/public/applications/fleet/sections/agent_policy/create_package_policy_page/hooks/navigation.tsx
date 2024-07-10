@@ -92,7 +92,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
 
       const [onSaveNavigateTo, onSaveQueryParams]: [
         Parameters<ApplicationStart['navigateToApp']>,
-        CreatePackagePolicyRouteState['onSaveQueryParams']
+        CreatePackagePolicyRouteState['onSaveQueryParams'],
       ] = routeState?.onSaveNavigateTo
         ? [routeState.onSaveNavigateTo, routeState?.onSaveQueryParams]
         : [

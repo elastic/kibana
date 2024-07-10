@@ -203,7 +203,7 @@ describe('Task Runner', () => {
       nameExtension: string,
       customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
       enqueueFunction: unknown,
-      isBulk: boolean
+      isBulk: boolean,
     ]
   > = [
     ['', taskRunnerFactoryInitializerParams, actionsClient.bulkEnqueueExecution, true],
@@ -535,7 +535,7 @@ describe('Task Runner', () => {
   type SnoozeTestParams = [
     muteAll: boolean,
     snoozeEndTime: string | undefined | null,
-    shouldBeSnoozed: boolean
+    shouldBeSnoozed: boolean,
   ];
 
   const snoozeTestParams: SnoozeTestParams[] = [

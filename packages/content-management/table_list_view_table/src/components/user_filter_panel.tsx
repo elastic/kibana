@@ -49,10 +49,13 @@ export const UserFilterPanel: FC<{}> = () => {
 
   const usersMap = React.useMemo(() => {
     if (!query.data) return {};
-    return query.data.reduce((acc, user) => {
-      acc[user.uid] = user;
-      return acc;
-    }, {} as Record<string, UserProfile>);
+    return query.data.reduce(
+      (acc, user) => {
+        acc[user.uid] = user;
+        return acc;
+      },
+      {} as Record<string, UserProfile>
+    );
   }, [query.data]);
 
   const visibleOptions = React.useMemo(() => {

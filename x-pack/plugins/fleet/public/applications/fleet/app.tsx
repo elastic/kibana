@@ -411,8 +411,8 @@ export const AppRoutes = memo(
                 const redirectTo = authz.fleet.readAgents
                   ? FLEET_ROUTING_PATHS.agents
                   : authz.fleet.readAgentPolicies
-                  ? FLEET_ROUTING_PATHS.policies
-                  : FLEET_ROUTING_PATHS.settings;
+                    ? FLEET_ROUTING_PATHS.policies
+                    : FLEET_ROUTING_PATHS.settings;
 
                 return <Redirect to={redirectTo} />;
               }

@@ -54,7 +54,7 @@ export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{
 export class ProfileService<
   TProfile extends PartialProfile,
   TParams,
-  TContext
+  TContext,
 > extends BaseProfileService<ProfileProvider<TProfile, TParams, TContext>, TContext> {
   public resolve(params: TParams) {
     for (const provider of this.providers) {
@@ -75,7 +75,7 @@ export class ProfileService<
 export class AsyncProfileService<
   TProfile extends PartialProfile,
   TParams,
-  TContext
+  TContext,
 > extends BaseProfileService<AsyncProfileProvider<TProfile, TParams, TContext>, TContext> {
   public async resolve(params: TParams) {
     for (const provider of this.providers) {

@@ -102,7 +102,7 @@ export const getVersionedHeaderParam = (
 });
 
 export const prepareRoutes = <
-  R extends { path: string; options: { access?: 'public' | 'internal' } }
+  R extends { path: string; options: { access?: 'public' | 'internal' } },
 >(
   routes: R[],
   filters: GenerateOpenApiDocumentOptionsFilters = {}

@@ -163,7 +163,7 @@ export function getArtifactBuildTriggers() {
             DRY_RUN: process.env.DRY_RUN,
           },
         },
-      } as BuildkiteTriggerStep)
+      }) as BuildkiteTriggerStep
   );
 }
 

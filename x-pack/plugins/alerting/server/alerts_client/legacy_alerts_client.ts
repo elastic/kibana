@@ -46,7 +46,7 @@ export class LegacyAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;

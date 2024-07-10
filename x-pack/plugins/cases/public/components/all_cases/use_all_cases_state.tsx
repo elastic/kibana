@@ -114,7 +114,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
 
 const useAllCasesUrlState = (): [
   AllCasesURLState,
-  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void
+  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void,
 ] => {
   const history = useHistory();
   const location = useLocation();
@@ -175,7 +175,7 @@ const isURLStateEmpty = (urlState: AllCasesURLState) => {
 
 const useAllCasesLocalStorage = (): [
   AllCasesTableState | undefined,
-  (item: AllCasesTableState | undefined) => void
+  (item: AllCasesTableState | undefined) => void,
 ] => {
   const [state, setState] = useCasesLocalStorage<AllCasesTableState | undefined>(
     LOCAL_STORAGE_KEYS.casesTableState,

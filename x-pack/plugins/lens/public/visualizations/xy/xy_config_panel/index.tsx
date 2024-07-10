@@ -416,8 +416,8 @@ export const XyToolbar = memo(function XyToolbar(
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
       : !state?.legend.isVisible
-      ? 'hide'
-      : 'show';
+        ? 'hide'
+        : 'show';
   const hasBarOrAreaOnLeftAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'left')

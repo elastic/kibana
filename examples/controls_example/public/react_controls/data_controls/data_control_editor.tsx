@@ -54,7 +54,7 @@ import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
 
 export interface ControlEditorProps<
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultDataControlState = DefaultDataControlState,
 > {
   controlId?: string; // if provided, then editing existing control; otherwise, creating a new control
   controlType?: string;

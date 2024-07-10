@@ -585,8 +585,8 @@ export class DataGridService extends FtrService {
           decoration: decoration.includes('underline')
             ? 'added'
             : decoration.includes('line-through')
-            ? 'removed'
-            : undefined,
+              ? 'removed'
+              : undefined,
           value: await segment.getVisibleText(),
         };
       })

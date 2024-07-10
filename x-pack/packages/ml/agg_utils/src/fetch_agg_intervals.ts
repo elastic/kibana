@@ -83,15 +83,18 @@ export const fetchAggIntervals = async (
     return {};
   }
 
-  const minMaxAggs = numericColumns.reduce((aggs, c) => {
-    const id = stringHash(c.fieldName);
-    aggs[id] = {
-      stats: {
-        field: c.fieldName,
-      },
-    };
-    return aggs;
-  }, {} as Record<string, object>);
+  const minMaxAggs = numericColumns.reduce(
+    (aggs, c) => {
+      const id = stringHash(c.fieldName);
+      aggs[id] = {
+        stats: {
+          field: c.fieldName,
+        },
+      };
+      return aggs;
+    },
+    {} as Record<string, object>
+  );
 
   const { wrap, unwrap } = createRandomSamplerWrapper({
     probability: randomSamplerProbability ?? 1,
@@ -123,8 +126,8 @@ export const fetchAggIntervals = async (
     aggsPath.length > 0
       ? get(body.aggregations, aggsPath)
       : randomSamplerProbability !== undefined && body.aggregations !== undefined
-      ? unwrap(body.aggregations)
-      : body.aggregations;
+        ? unwrap(body.aggregations)
+        : body.aggregations;
 
   return Object.keys(aggregations).reduce((p, aggName) => {
     if (aggregations === undefined) {

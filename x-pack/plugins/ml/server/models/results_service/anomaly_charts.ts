@@ -1191,10 +1191,13 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     data.seriesToPlot = seriesToPlot;
 
     data.errorMessages = errorMessages
-      ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
-          acc[errorMessage] = Array.from(jobs);
-          return acc;
-        }, {} as Record<string, string[]>)
+      ? Object.entries(errorMessages!).reduce(
+          (acc, [errorMessage, jobs]) => {
+            acc[errorMessage] = Array.from(jobs);
+            return acc;
+          },
+          {} as Record<string, string[]>
+        )
       : undefined;
 
     return data;

@@ -138,9 +138,8 @@ describe('ActionsClientChatOpenAI', () => {
     it('returns the expected data', async () => {
       const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
 
-      const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
-        defaultNonStreamingArgs
-      );
+      const result: OpenAI.ChatCompletion =
+        await actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs);
       expect(mockExecute).toHaveBeenCalledWith({
         actionId: connectorId,
         params: {

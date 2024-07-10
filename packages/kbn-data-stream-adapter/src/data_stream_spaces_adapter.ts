@@ -18,7 +18,10 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
   private installedSpaceDataStreamName: Map<string, Promise<string>>;
   private _installSpace?: (spaceId: string) => Promise<string>;
 
-  constructor(private readonly prefix: string, options: DataStreamAdapterParams) {
+  constructor(
+    private readonly prefix: string,
+    options: DataStreamAdapterParams
+  ) {
     super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all data stream space names
     this.installedSpaceDataStreamName = new Map();
   }

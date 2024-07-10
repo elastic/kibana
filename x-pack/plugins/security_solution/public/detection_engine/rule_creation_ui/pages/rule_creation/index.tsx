@@ -444,8 +444,8 @@ const CreateRulePageComponent: React.FC = () => {
     activeStep === RuleStep.scheduleRule
       ? 'active'
       : scheduleStepForm.isValid
-      ? 'valid'
-      : 'passive';
+        ? 'valid'
+        : 'passive';
   const scheduleRuleButton = useMemo(
     () => <AccordionTitle name="3" title={RuleI18n.SCHEDULE_RULE} type={scheduleRuleButtonType} />,
     [scheduleRuleButtonType]

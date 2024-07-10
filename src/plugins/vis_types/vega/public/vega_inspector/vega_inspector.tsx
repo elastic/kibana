@@ -44,7 +44,7 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
         </Suspense>
       </KibanaContextProvider>
     ),
-  } as InspectorViewDescription);
+  }) as InspectorViewDescription;
 
 export const createInspectorAdapters = (): VegaInspectorAdapters => ({
   requests: new RequestAdapter(),

@@ -33,7 +33,7 @@ export const initializeReactEmbeddableState = async <
   Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
     SerializedState,
     RuntimeState
-  >
+  >,
 >(
   uuid: string,
   factory: ReactEmbeddableFactory<SerializedState, RuntimeState, Api>,

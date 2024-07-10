@@ -122,13 +122,13 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<EditConnectorFlyoutProps>;
   getAddRuleFlyout: <
     Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData,
   >(
     props: Omit<RuleAddProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleAddProps<Params, MetaData>>;
   getEditRuleFlyout: <
     Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData,
   >(
     props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps<Params, MetaData>>;
@@ -286,7 +286,7 @@ export class Plugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           PluginsStart,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./application/rules_app');
@@ -339,7 +339,7 @@ export class Plugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           PluginsStart,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./application/connectors_app');
@@ -390,7 +390,7 @@ export class Plugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,
-            unknown
+            unknown,
           ];
           let kibanaFeatures: KibanaFeature[];
           try {

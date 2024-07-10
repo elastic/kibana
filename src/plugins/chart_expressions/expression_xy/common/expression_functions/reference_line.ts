@@ -115,8 +115,8 @@ export const referenceLineFunction: ReferenceLineFn = {
       args.name !== undefined && args.textVisibility === undefined
         ? true
         : args.name === undefined
-        ? false
-        : args.textVisibility;
+          ? false
+          : args.textVisibility;
 
     const valueMeta =
       args.forAccessor && table

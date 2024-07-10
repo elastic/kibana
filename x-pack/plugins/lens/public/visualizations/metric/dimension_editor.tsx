@@ -180,8 +180,8 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
             state.secondaryPrefix === undefined
               ? 'auto'
               : state.secondaryPrefix === ''
-              ? 'none'
-              : 'custom'
+                ? 'none'
+                : 'custom'
           }`}
           onChange={(_id, secondaryPrefix) => {
             setState({
@@ -450,16 +450,16 @@ export function DimensionEditorAdditionalSection({
               'Line visualizations require use of a data view with a default time field.',
           })
         : metricHasReducedTimeRange
-        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
-            defaultMessage:
-              'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
-          })
-        : secondaryMetricHasReducedTimeRange
-        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
-            defaultMessage:
-              'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
-          })
-        : ''
+          ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
+              defaultMessage:
+                'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
+            })
+          : secondaryMetricHasReducedTimeRange
+            ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
+                defaultMessage:
+                  'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
+              })
+            : ''
     );
   }
 

@@ -337,9 +337,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#FFFFFF'
-            );
+            const colorExists =
+              await PageObjects.visChart.doesSelectedLegendColorExistForPie('#FFFFFF');
             expect(colorExists).to.be(true);
           });
         });
@@ -379,9 +378,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#57c17b'
-            );
+            const colorExists =
+              await PageObjects.visChart.doesSelectedLegendColorExistForPie('#57c17b');
             expect(colorExists).to.be(true);
           });
         });

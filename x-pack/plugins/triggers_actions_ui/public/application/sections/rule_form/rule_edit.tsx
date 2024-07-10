@@ -104,7 +104,7 @@ export type RuleEditComponent = typeof RuleEdit;
 
 export const RuleEdit = <
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 >({
   initialRule,
   onClose,

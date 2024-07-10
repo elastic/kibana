@@ -62,9 +62,8 @@ export function registerTelemetryUsageStatsRoutes(
         refreshCache: unencrypted || refreshCache,
       };
 
-      const body: v2.UnencryptedTelemetryPayload = await telemetryCollectionManager.getStats(
-        statsConfig
-      );
+      const body: v2.UnencryptedTelemetryPayload =
+        await telemetryCollectionManager.getStats(statsConfig);
       return res.ok({ body });
     } catch (err) {
       if (isDev) {

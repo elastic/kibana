@@ -43,7 +43,7 @@ export interface UseDataGridColumnsCellActionsProps
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
-  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
+  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps,
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
 const emptyActions: EuiDataGridColumnCellAction[][] = [];

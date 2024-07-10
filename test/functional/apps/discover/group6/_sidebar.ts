@@ -311,9 +311,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Initial Available fields
         const expectedInitialAvailableFields =
           '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, spaces, type, url, utc_time, xss';
-        let availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-          'available'
-        );
+        let availableFields =
+          await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available');
         expect(availableFields.length).to.be(48);
         expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
 
@@ -324,9 +323,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await metaSectionButton.scrollIntoViewIfNecessary();
 
         await retry.waitFor('list to update after scrolling', async () => {
-          availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-            'available'
-          );
+          availableFields =
+            await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available');
           return availableFields.length === 48;
         });
 
@@ -351,9 +349,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
 
         // Initial Available fields
-        const availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-          'available'
-        );
+        const availableFields =
+          await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available');
         expect(availableFields.length).to.be(48);
         expect(
           availableFields
@@ -396,9 +393,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
         ).to.be('extension, @message');
 
-        const availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-          'available'
-        );
+        const availableFields =
+          await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available');
         expect(availableFields.includes('extension')).to.be(true);
         expect(availableFields.includes('@message')).to.be(true);
 
@@ -801,9 +797,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        let selectedFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-          'selected'
-        );
+        let selectedFields =
+          await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected');
         expect(selectedFields.includes(newField)).to.be(false);
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
 

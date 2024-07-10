@@ -280,9 +280,8 @@ export function transformHealthServiceProvider({
       const result: TestResult[] = [];
 
       if (testsConfig.notStarted.enabled) {
-        const [notStartedTransform, startedTransforms] = await this.getTransformsStateReport(
-          transformIds
-        );
+        const [notStartedTransform, startedTransforms] =
+          await this.getTransformsStateReport(transformIds);
 
         const isHealthy = notStartedTransform.length === 0;
 

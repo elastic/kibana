@@ -64,22 +64,22 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
         byPassCapabilities
           ? true
           : request
-          ? (
-              await capabilities.resolveCapabilities(request, {
-                capabilityPath: 'indexPatterns.save',
-              })
-            ).indexPatterns.save === true
-          : false,
+            ? (
+                await capabilities.resolveCapabilities(request, {
+                  capabilityPath: 'indexPatterns.save',
+                })
+              ).indexPatterns.save === true
+            : false,
       getCanSaveAdvancedSettings: async () =>
         byPassCapabilities
           ? true
           : request
-          ? (
-              await capabilities.resolveCapabilities(request, {
-                capabilityPath: 'advancedSettings.save',
-              })
-            ).advancedSettings.save === true
-          : false,
+            ? (
+                await capabilities.resolveCapabilities(request, {
+                  capabilityPath: 'advancedSettings.save',
+                })
+              ).advancedSettings.save === true
+            : false,
       scriptedFieldsEnabled: deps.scriptedFieldsEnabled,
     });
   };

@@ -53,8 +53,8 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
-      ? [rule.consumer as AlertConsumers]
-      : [];
+        ? [rule.consumer as AlertConsumers]
+        : [];
   const ruleId = alert.fields[ALERT_RULE_UUID];
 
   const {

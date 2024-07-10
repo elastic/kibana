@@ -92,9 +92,8 @@ export const Main = (props: MainProps) => {
       return;
     }
 
-    const selectedGuideConfig = await guidedOnboarding?.guidedOnboardingApi?.getGuideConfig(
-      selectedGuide
-    );
+    const selectedGuideConfig =
+      await guidedOnboarding?.guidedOnboardingApi?.getGuideConfig(selectedGuide);
 
     if (!selectedGuideConfig) {
       return;

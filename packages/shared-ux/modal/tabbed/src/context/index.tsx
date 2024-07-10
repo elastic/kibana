@@ -110,13 +110,16 @@ export function ModalContextProvider<T extends Array<ITabDeclaration<Record<stri
 
   const reducersMap = useMemo(
     () =>
-      tabs.reduce((result, { reducer, initialState, ...rest }) => {
-        initialModalState.current[rest.id] = initialState ?? {};
-        // @ts-ignore
-        modalTabDefinitions.current.push({ ...rest });
-        result[rest.id] = reducer;
-        return result;
-      }, {} as Record<string, T[number]['reducer']>),
+      tabs.reduce(
+        (result, { reducer, initialState, ...rest }) => {
+          initialModalState.current[rest.id] = initialState ?? {};
+          // @ts-ignore
+          modalTabDefinitions.current.push({ ...rest });
+          result[rest.id] = reducer;
+          return result;
+        },
+        {} as Record<string, T[number]['reducer']>
+      ),
     [tabs]
   );
 

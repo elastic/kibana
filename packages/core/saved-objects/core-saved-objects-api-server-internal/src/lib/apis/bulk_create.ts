@@ -142,9 +142,8 @@ export const performBulkCreate = async <T>(
       const namespaces = initialNamespaces ?? [namespaceString];
       return { type, id, overwrite, namespaces };
     });
-  const preflightCheckResponse = await preflightHelper.preflightCheckForCreate(
-    preflightCheckObjects
-  );
+  const preflightCheckResponse =
+    await preflightHelper.preflightCheckForCreate(preflightCheckObjects);
 
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
     const { object, preflightCheckIndex: index } = element.value;

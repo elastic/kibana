@@ -119,10 +119,13 @@ export const DEFAULT_NOTEBOOK_CATALOG: NotebookCatalog = {
   },
 };
 export const NOTEBOOKS_MAP: Record<string, NotebookInformation> =
-  DEFAULT_NOTEBOOK_CATALOG.notebooks.reduce((nbMap, nb) => {
-    nbMap[nb.id] = nb;
-    return nbMap;
-  }, {} as Record<string, NotebookInformation>);
+  DEFAULT_NOTEBOOK_CATALOG.notebooks.reduce(
+    (nbMap, nb) => {
+      nbMap[nb.id] = nb;
+      return nbMap;
+    },
+    {} as Record<string, NotebookInformation>
+  );
 
 const NOTEBOOK_IDS = DEFAULT_NOTEBOOK_CATALOG.notebooks.map(({ id }) => id);
 

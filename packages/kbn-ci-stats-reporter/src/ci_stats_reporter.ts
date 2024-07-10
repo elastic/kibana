@@ -122,7 +122,10 @@ export class CiStatsReporter {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
-  constructor(private readonly config: Config | undefined, private readonly log: SomeDevLog) {}
+  constructor(
+    private readonly config: Config | undefined,
+    private readonly log: SomeDevLog
+  ) {}
 
   /**
    * Determine if CI_STATS is explicitly disabled by the environment. To determine

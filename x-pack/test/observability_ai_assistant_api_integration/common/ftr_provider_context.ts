@@ -9,12 +9,10 @@ import { GenericFtrProviderContext } from '@kbn/test';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { ObservabilityAIAssistantServices } from './config';
 
-export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  {}
->
-  ? TServices
-  : {};
+export type InheritedServices =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, {}>
+    ? TServices
+    : {};
 
 export type { InheritedFtrProviderContext };
 export type FtrProviderContext = GenericFtrProviderContext<ObservabilityAIAssistantServices, {}>;

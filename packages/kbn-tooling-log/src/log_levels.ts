@@ -8,7 +8,7 @@
 
 const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'] as const;
 export const DEFAULT_LOG_LEVEL = 'info' as const;
-export type LogLevel = typeof LEVELS[number];
+export type LogLevel = (typeof LEVELS)[number];
 
 export function pickLevelFromFlags(
   flags: Record<string, string | boolean | string[] | undefined>,

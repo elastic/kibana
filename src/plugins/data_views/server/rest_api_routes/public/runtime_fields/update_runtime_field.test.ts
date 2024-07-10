@@ -26,7 +26,7 @@ describe('update runtime field', () => {
               runtimeField: {},
             }),
           },
-        } as unknown as DataViewLazy)
+        }) as unknown as DataViewLazy
     );
 
     await updateRuntimeField({

@@ -106,8 +106,8 @@ export const fileResponseFactory = {
       typeof fileContentSize === 'number'
         ? fileContentSize
         : Buffer.isBuffer(responseBody)
-        ? responseBody.length
-        : '';
+          ? responseBody.length
+          : '';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,

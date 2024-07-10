@@ -729,20 +729,26 @@ export class CasesService {
           refresh,
         });
 
-      const res = updatedCases.saved_objects.reduce((acc, theCase) => {
-        if (isSOError(theCase)) {
-          acc.push(theCase);
+      const res = updatedCases.saved_objects.reduce(
+        (acc, theCase) => {
+          if (isSOError(theCase)) {
+            acc.push(theCase);
+            return acc;
+          }
+
+          const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
+          const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+          const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
+
+          acc.push(soWithDecodedRes);
+
           return acc;
-        }
-
-        const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
-        const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
-
-        acc.push(soWithDecodedRes);
-
-        return acc;
-      }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
+        },
+        [] as Array<
+          | SavedObjectsUpdateResponse<CaseTransformedAttributes>
+          | SOWithErrors<CaseTransformedAttributes>
+        >
+      );
 
       return Object.assign(updatedCases, {
         saved_objects: res,

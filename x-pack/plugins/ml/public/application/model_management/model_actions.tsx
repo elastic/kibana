@@ -486,15 +486,15 @@ export function useModelActions({
                 }
               )
             : hasDeployments
-            ? i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                {
-                  defaultMessage: 'Model has started deployments',
-                }
-              )
-            : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete model',
-              });
+              ? i18n.translate(
+                  'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                  {
+                    defaultMessage: 'Model has started deployments',
+                  }
+                )
+              : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                  defaultMessage: 'Delete model',
+                });
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',

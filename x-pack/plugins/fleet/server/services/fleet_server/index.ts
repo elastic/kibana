@@ -33,7 +33,7 @@ export const getFleetServerPolicies = async (
 
   // Extract associated fleet server agent policy IDs
   const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) =>
-    p.policy_ids?.map((id) => ({ id, spaceId: p.spaceId } ?? []))
+    p.policy_ids?.map((id) => ({ id, spaceId: p.spaceId }) ?? [])
   );
 
   // Retrieve associated agent policies

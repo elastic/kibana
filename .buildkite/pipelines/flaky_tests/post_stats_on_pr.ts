@@ -80,18 +80,21 @@ function formatTestGroupResult(result: TestSuiteResult) {
 }
 
 function groupBy<T>(field: keyof T, values: T[]): Record<string, T[]> {
-  return values.reduce((acc, value) => {
-    const key = value[field];
-    if (typeof key !== 'string') {
-      throw new Error('Cannot group by non-string value field');
-    }
+  return values.reduce(
+    (acc, value) => {
+      const key = value[field];
+      if (typeof key !== 'string') {
+        throw new Error('Cannot group by non-string value field');
+      }
 
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(value);
-    return acc;
-  }, {} as Record<string, T[]>);
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(value);
+      return acc;
+    },
+    {} as Record<string, T[]>
+  );
 }
 
 function extractPRNumberFromBranch(branch: string | undefined) {

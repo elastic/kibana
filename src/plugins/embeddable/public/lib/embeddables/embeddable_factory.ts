@@ -46,7 +46,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes extends FinderAttributes = FinderAttributes
+  TSavedObjectAttributes extends FinderAttributes = FinderAttributes,
 > extends PersistableState<EmbeddableStateWithType> {
   /**
    * The version of this Embeddable factory. This will be used in the client side migration system

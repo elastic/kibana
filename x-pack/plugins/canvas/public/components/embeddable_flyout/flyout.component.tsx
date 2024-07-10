@@ -89,11 +89,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
           )
         )
         .map((factory) => factory.savedObjectMetaData)
-        .filter<SavedObjectMetaData<{}>>(function (
-          maybeSavedObjectMetaData
-        ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
-          return maybeSavedObjectMetaData !== undefined;
-        })
+        .filter<SavedObjectMetaData<{}>>(
+          function (maybeSavedObjectMetaData): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
+            return maybeSavedObjectMetaData !== undefined;
+          }
+        )
         .sort((a, b) => a.type.localeCompare(b.type)),
     [
       availableEmbeddables,

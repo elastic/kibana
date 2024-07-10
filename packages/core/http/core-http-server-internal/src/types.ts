@@ -35,7 +35,7 @@ export interface InternalHttpServicePreboot
     | 'getServerInfo'
   > {
   registerRoutes<
-    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
   >(
     path: string,
     callback: (router: IRouter<DefaultRequestHandlerType>) => void
@@ -58,7 +58,7 @@ export interface InternalHttpServiceSetup
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContextBase,
-    ContextName extends keyof Omit<Context, 'resolve'>
+    ContextName extends keyof Omit<Context, 'resolve'>,
   >(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,

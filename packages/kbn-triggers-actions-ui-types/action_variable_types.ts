@@ -16,5 +16,5 @@ type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
 };
 
-export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
-  Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
+export type ActionVariables = AsActionVariables<(typeof REQUIRED_ACTION_VARIABLES)[number]> &
+  Partial<AsActionVariables<(typeof OPTIONAL_ACTION_VARIABLES)[number]>>;

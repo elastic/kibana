@@ -68,7 +68,7 @@ export interface WebpackResolveData {
       loc: unknown;
       request: string;
       userRequest: string;
-    }
+    },
   ];
   /** absolute path, but probably includes loaders in some cases */
   userRequest: string;

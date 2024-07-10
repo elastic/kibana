@@ -184,8 +184,8 @@ export class DataViewField implements DataViewFieldBase {
     return this.spec.customLabel
       ? this.spec.customLabel
       : this.spec.shortDotsEnable
-      ? shortenDottedString(this.spec.name)
-      : this.spec.name;
+        ? shortenDottedString(this.spec.name)
+        : this.spec.name;
   }
 
   /**

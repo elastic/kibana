@@ -54,8 +54,8 @@ export type CheckIfStepCompleted<T = StepId> =
   T extends EnablePrebuiltRulesSteps.enablePrebuiltRules
     ? AutoCheckEnablePrebuiltRulesSteps
     : T extends AddIntegrationsSteps.connectToDataSources
-    ? AutoCheckAddIntegrationsSteps
-    : undefined;
+      ? AutoCheckAddIntegrationsSteps
+      : undefined;
 
 export interface Step<T = StepId> {
   autoCheckIfStepCompleted?: CheckIfStepCompleted<T>;

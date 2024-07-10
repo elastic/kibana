@@ -80,7 +80,8 @@ export const App: FunctionComponent = () => {
         listingLimit={1000}
         getOnClickTitle={({ attributes }) =>
           () =>
-            setSelectedFile(attributes as unknown as FileJSON)}
+            setSelectedFile(attributes as unknown as FileJSON)
+          }
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}

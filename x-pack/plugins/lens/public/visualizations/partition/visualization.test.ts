@@ -292,7 +292,7 @@ describe('pie_visualization', () => {
       frame.datasourceLayers[LAYER_ID]!.getOperationForColumnId = (colId) =>
         ({
           label: `Label for ${colId}`,
-        } as OperationDescriptor);
+        }) as OperationDescriptor;
 
       it('applies palette and collapse icons for single slice-by group', () => {
         const state = getExampleState();

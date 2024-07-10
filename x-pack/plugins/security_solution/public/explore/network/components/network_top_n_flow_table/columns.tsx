@@ -37,7 +37,7 @@ export type NetworkTopNFlowColumns = [
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<NetworkTopNFlowEdges>
+  Columns<NetworkTopNFlowEdges>,
 ];
 
 export type NetworkTopNFlowColumnsNetworkDetails = [
@@ -46,7 +46,7 @@ export type NetworkTopNFlowColumnsNetworkDetails = [
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
-  Columns<NetworkTopNFlowEdges>
+  Columns<NetworkTopNFlowEdges>,
 ];
 
 export const getNetworkTopNFlowColumns = (

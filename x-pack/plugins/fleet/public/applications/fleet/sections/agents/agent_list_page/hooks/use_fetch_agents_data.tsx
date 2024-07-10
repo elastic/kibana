@@ -301,11 +301,14 @@ export function useFetchAgentsData() {
     [agentPoliciesRequest]
   );
   const agentPoliciesIndexedById = useMemo(() => {
-    return agentPolicies.reduce((acc, agentPolicy) => {
-      acc[agentPolicy.id] = agentPolicy;
+    return agentPolicies.reduce(
+      (acc, agentPolicy) => {
+        acc[agentPolicy.id] = agentPolicy;
 
-      return acc;
-    }, {} as { [k: string]: AgentPolicy });
+        return acc;
+      },
+      {} as { [k: string]: AgentPolicy }
+    );
   }, [agentPolicies]);
 
   return {

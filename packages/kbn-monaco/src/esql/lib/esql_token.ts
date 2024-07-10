@@ -13,7 +13,11 @@ import { ESQL_TOKEN_POSTFIX } from './constants';
 export class ESQLToken implements monaco.languages.IToken {
   scopes: string;
 
-  constructor(ruleName: string, public startIndex: number, public stopIndex?: number) {
+  constructor(
+    ruleName: string,
+    public startIndex: number,
+    public stopIndex?: number
+  ) {
     this.scopes = ruleName.toLowerCase() + ESQL_TOKEN_POSTFIX;
   }
 }

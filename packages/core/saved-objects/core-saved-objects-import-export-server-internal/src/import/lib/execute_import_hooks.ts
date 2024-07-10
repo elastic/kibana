@@ -35,8 +35,11 @@ export const executeImportHooks = async ({
 };
 
 const splitByType = (objects: SavedObject[]): Record<string, SavedObject[]> => {
-  return objects.reduce((memo, obj) => {
-    memo[obj.type] = [...(memo[obj.type] ?? []), obj];
-    return memo;
-  }, {} as Record<string, SavedObject[]>);
+  return objects.reduce(
+    (memo, obj) => {
+      memo[obj.type] = [...(memo[obj.type] ?? []), obj];
+      return memo;
+    },
+    {} as Record<string, SavedObject[]>
+  );
 };

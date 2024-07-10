@@ -86,7 +86,7 @@ export interface AnomalySwimlaneServices {
 export type AnomalySwimlaneEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices
+  AnomalySwimlaneServices,
 ];
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
@@ -252,7 +252,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export type SingleMetricViewerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  SingleMetricViewerServices
+  SingleMetricViewerServices,
 ];
 export interface EditAnomalyChartsPanelContext {
   embeddable: AnomalyChartsEmbeddableApi;

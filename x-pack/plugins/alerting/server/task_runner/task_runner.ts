@@ -81,7 +81,7 @@ interface TaskRunnerConstructorParams<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   context: TaskRunnerContext;
   inMemoryMetrics: InMemoryMetrics;
@@ -107,7 +107,7 @@ export class TaskRunner<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private context: TaskRunnerContext;
   private logger: Logger;

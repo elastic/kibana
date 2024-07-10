@@ -14,11 +14,10 @@ const HeatmapOptionsLazy = lazy(() => import('./heatmap'));
 
 export const getHeatmapOptions =
   ({ showElasticChartsOptions, palettes }: HeatmapTypeProps) =>
-  (props: VisEditorOptionsProps<HeatmapVisParams>) =>
-    (
-      <HeatmapOptionsLazy
-        {...props}
-        palettes={palettes}
-        showElasticChartsOptions={showElasticChartsOptions}
-      />
-    );
+  (props: VisEditorOptionsProps<HeatmapVisParams>) => (
+    <HeatmapOptionsLazy
+      {...props}
+      palettes={palettes}
+      showElasticChartsOptions={showElasticChartsOptions}
+    />
+  );

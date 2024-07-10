@@ -504,11 +504,14 @@ export class TaskManagerRunner implements TaskRunner {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
           // try to release claim as an unknown failure prevented us from marking as running
-          mapErr((errReleaseClaim: Error) => {
-            this.logger.error(
-              `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
-            );
-          }, await this.releaseClaimAndIncrementAttempts());
+          mapErr(
+            (errReleaseClaim: Error) => {
+              this.logger.error(
+                `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
+              );
+            },
+            await this.releaseClaimAndIncrementAttempts()
+          );
         }
 
         throw error;
@@ -584,16 +587,16 @@ export class TaskManagerRunner implements TaskRunner {
       const reschedule = failureResult.runAt
         ? { runAt: failureResult.runAt }
         : failureResult.schedule
-        ? { schedule: failureResult.schedule }
-        : schedule
-        ? { schedule }
-        : // when result.error is truthy, then we're retrying because it failed
-          {
-            runAt: this.getRetryDelay({
-              attempts,
-              error,
-            }),
-          };
+          ? { schedule: failureResult.schedule }
+          : schedule
+            ? { schedule }
+            : // when result.error is truthy, then we're retrying because it failed
+              {
+                runAt: this.getRetryDelay({
+                  attempts,
+                  error,
+                }),
+              };
 
       if (reschedule.runAt || reschedule.schedule) {
         return asOk({
@@ -679,10 +682,10 @@ export class TaskManagerRunner implements TaskRunner {
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
       : fieldUpdates.status === TaskStatus.ShouldDelete
-      ? TaskRunResult.Deleted
-      : hasTaskRunFailed
-      ? TaskRunResult.SuccessRescheduled
-      : TaskRunResult.RetryScheduled;
+        ? TaskRunResult.Deleted
+        : hasTaskRunFailed
+          ? TaskRunResult.SuccessRescheduled
+          : TaskRunResult.RetryScheduled;
   }
 
   private async processResultWhenDone(): Promise<TaskRunResult> {

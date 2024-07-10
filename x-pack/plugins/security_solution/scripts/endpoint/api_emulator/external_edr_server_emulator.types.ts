@@ -31,5 +31,5 @@ export type ExternalEdrServerEmulatorRouteHandlerMethod<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends HapiTypes.Request['query'] = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = { services: ExternalEdrServerEmulatorCoreServices }
+  TPre extends HapiTypes.Request['pre'] = { services: ExternalEdrServerEmulatorCoreServices },
 > = EmulatorServerRouteHandlerMethod<TParams, TQuery, TPayload, TPre>;

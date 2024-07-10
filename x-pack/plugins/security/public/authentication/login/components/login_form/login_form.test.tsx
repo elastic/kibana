@@ -26,18 +26,18 @@ function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
           ['autoLoginOverlay', false],
         ]
       : mode === PageMode.Selector
-      ? [
-          ['loginForm', false],
-          ['loginSelector', true],
-          ['loginHelp', false],
-          ['autoLoginOverlay', false],
-        ]
-      : [
-          ['loginForm', false],
-          ['loginSelector', false],
-          ['loginHelp', true],
-          ['autoLoginOverlay', false],
-        ];
+        ? [
+            ['loginForm', false],
+            ['loginSelector', true],
+            ['loginHelp', false],
+            ['autoLoginOverlay', false],
+          ]
+        : [
+            ['loginForm', false],
+            ['loginSelector', false],
+            ['loginHelp', true],
+            ['autoLoginOverlay', false],
+          ];
   for (const [selector, exists] of assertions) {
     expect(findTestSubject(wrapper, selector).exists()).toBe(exists);
   }

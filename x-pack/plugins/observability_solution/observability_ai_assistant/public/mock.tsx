@@ -72,7 +72,7 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
     ObservabilityAIAssistantContextualInsight: (() => <></>) as any,
     ObservabilityAIAssistantChatServiceContext: React.createContext<any>(undefined),
     ObservabilityAIAssistantMultipaneFlyoutContext: React.createContext<any>(undefined),
-    useChat: () => ({} as any),
+    useChat: () => ({}) as any,
     useObservabilityAIAssistantChatService: () => mockChatService,
     useGenAIConnectors: () => ({
       loading: false,
@@ -86,7 +86,7 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       getPreferredLanguage: () => 'English',
     }),
     getContextualInsightMessages: () => [],
-    createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),
+    createScreenContextAction: () => ({}) as ScreenContextActionDefinition<any>,
   };
 }
 

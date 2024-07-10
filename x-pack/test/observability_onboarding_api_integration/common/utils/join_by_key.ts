@@ -26,7 +26,7 @@ import { isEqual, pull, merge, castArray } from 'lodash';
 
 export type JoinedReturnType<
   T extends Record<string, any>,
-  U extends UnionToIntersection<T>
+  U extends UnionToIntersection<T>,
 > = Array<
   Partial<U> & {
     [k in keyof T]: T[k];
@@ -38,7 +38,7 @@ type ArrayOrSingle<T> = T | T[];
 export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
-  V extends ArrayOrSingle<keyof T & keyof U>
+  V extends ArrayOrSingle<keyof T & keyof U>,
 >(items: T[], key: V): JoinedReturnType<T, U>;
 
 export function joinByKey<
@@ -46,7 +46,7 @@ export function joinByKey<
   U extends UnionToIntersection<T>,
   V extends ArrayOrSingle<keyof T & keyof U>,
   W extends JoinedReturnType<T, U>,
-  X extends (a: T, b: T) => ValuesType<W>
+  X extends (a: T, b: T) => ValuesType<W>,
 >(items: T[], key: V, mergeFn: X): W;
 
 export function joinByKey(

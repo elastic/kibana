@@ -134,7 +134,7 @@ startServicesMock.dataViews.get = jest.fn(
   async () =>
     ({
       getIndexPattern: jest.fn(),
-    } as unknown as DataView)
+    }) as unknown as DataView
 );
 
 describe('useDiscoverInTimelineActions', () => {

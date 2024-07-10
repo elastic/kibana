@@ -93,7 +93,7 @@ export interface ExecutionHandlerOptions<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -124,7 +124,7 @@ export type Executable<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > = {
   action: RuleAction | RuleSystemAction;
 } & (

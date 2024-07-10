@@ -69,7 +69,7 @@ export class AnomalyExplorerChartsService {
     return combinedResults
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
-      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
+      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed }) as CombinedJob);
   }
 
   public loadDataForCharts$(

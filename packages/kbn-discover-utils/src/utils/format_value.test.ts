@@ -14,7 +14,7 @@ import { formatFieldValue } from './format_value';
 const services = {
   fieldFormats: {
     getDefaultInstance: jest.fn<FieldFormat, [string]>(
-      () => ({ convert: (value: unknown) => value } as FieldFormat)
+      () => ({ convert: (value: unknown) => value }) as FieldFormat
     ),
   } as unknown as FieldFormatsStart,
 };

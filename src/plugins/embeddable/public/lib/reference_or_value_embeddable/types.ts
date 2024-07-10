@@ -16,7 +16,7 @@ import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
  */
 export interface ReferenceOrValueEmbeddable<
   ValTypeInput extends EmbeddableInput = EmbeddableInput,
-  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 > {
   /**
    * determines whether the input is by value or by reference.

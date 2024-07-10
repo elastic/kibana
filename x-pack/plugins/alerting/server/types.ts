@@ -100,7 +100,7 @@ export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = RuleAlertData
+  AlertData extends RuleAlertData = RuleAlertData,
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
@@ -131,7 +131,7 @@ export interface RuleExecutorOptions<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = never
+  AlertData extends RuleAlertData = never,
 > {
   executionId: string;
   logger: Logger;
@@ -160,7 +160,7 @@ export type ExecutorType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = never
+  AlertData extends RuleAlertData = never,
 > = (
   options: RuleExecutorOptions<
     Params,
@@ -286,7 +286,7 @@ export interface RuleType<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
   RecoveryActionGroupId extends string = never,
-  AlertData extends RuleAlertData = never
+  AlertData extends RuleAlertData = never,
 > {
   id: string;
   name: string;

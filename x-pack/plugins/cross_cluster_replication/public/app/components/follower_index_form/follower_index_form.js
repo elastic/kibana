@@ -128,8 +128,8 @@ export class FollowerIndexForm extends PureComponent {
     const areAdvancedSettingsVisible = isNew
       ? false
       : areAdvancedSettingsEdited(followerIndex, documentationLinks)
-      ? true
-      : false;
+        ? true
+        : false;
 
     const fieldsErrors = this.getFieldsErrors(followerIndex);
 

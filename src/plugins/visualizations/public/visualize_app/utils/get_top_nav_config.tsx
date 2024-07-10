@@ -267,12 +267,12 @@ export const getTopNavConfig = (
           defaultMessage: 'Save to library',
         })
       : originatingApp && savedVis.id
-      ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
-          defaultMessage: 'Save as',
-        })
-      : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
-          defaultMessage: 'Save',
-        });
+        ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
+            defaultMessage: 'Save',
+          });
 
   const showSaveButton =
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);

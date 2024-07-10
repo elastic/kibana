@@ -11,7 +11,10 @@
  * which is the "JSON path" where the error occurred.
  */
 export class RuleBuilderError extends Error {
-  constructor(message: string, public readonly ruleTrace: string[]) {
+  constructor(
+    message: string,
+    public readonly ruleTrace: string[]
+  ) {
     super(message);
 
     // Set the prototype explicitly, see:

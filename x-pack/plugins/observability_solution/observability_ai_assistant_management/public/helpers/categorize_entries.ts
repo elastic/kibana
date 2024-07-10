@@ -14,16 +14,19 @@ export interface KnowledgeBaseEntryCategory {
 }
 
 export function categorizeEntries({ entries }: { entries: KnowledgeBaseEntry[] }) {
-  return entries.reduce((acc, entry) => {
-    const categoryName = entry.labels?.category ?? entry.id;
+  return entries.reduce(
+    (acc, entry) => {
+      const categoryName = entry.labels?.category ?? entry.id;
 
-    const index = acc.findIndex((item) => item.categoryName === categoryName);
+      const index = acc.findIndex((item) => item.categoryName === categoryName);
 
-    if (index > -1) {
-      acc[index].entries.push(entry);
-      return acc;
-    } else {
-      return acc.concat({ categoryName, entries: [entry], '@timestamp': entry['@timestamp'] });
-    }
-  }, [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[]; '@timestamp': string }>);
+      if (index > -1) {
+        acc[index].entries.push(entry);
+        return acc;
+      } else {
+        return acc.concat({ categoryName, entries: [entry], '@timestamp': entry['@timestamp'] });
+      }
+    },
+    [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[]; '@timestamp': string }>
+  );
 }

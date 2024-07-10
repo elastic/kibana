@@ -36,7 +36,7 @@ const createMockTemplate = ({ name, composedOf = [] }: { name: string; composedO
     index_template: {
       composed_of: composedOf,
     },
-  } as IndicesGetIndexTemplateIndexTemplateItem);
+  }) as IndicesGetIndexTemplateIndexTemplateItem;
 
 describe('stepUpdateCurrentWriteIndices', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;

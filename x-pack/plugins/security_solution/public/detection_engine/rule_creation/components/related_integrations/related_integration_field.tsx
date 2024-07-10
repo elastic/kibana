@@ -178,8 +178,8 @@ function transformIntegrationToOption(
   const label = integration.is_enabled
     ? i18n.INTEGRATION_ENABLED(integrationTitle)
     : integration.is_installed
-    ? i18n.INTEGRATION_DISABLED(integrationTitle)
-    : integrationTitle;
+      ? i18n.INTEGRATION_DISABLED(integrationTitle)
+      : integrationTitle;
 
   return {
     key: getKey(integration.package_name, integration.integration_name),

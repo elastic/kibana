@@ -27,8 +27,8 @@ function toApiScope(pkg: Package): ApiScope {
       return pkg.manifest.plugin.server && !pkg.manifest.plugin.browser
         ? ApiScope.SERVER
         : !pkg.manifest.plugin.server && pkg.manifest.plugin.browser
-        ? ApiScope.CLIENT
-        : ApiScope.COMMON;
+          ? ApiScope.CLIENT
+          : ApiScope.COMMON;
   }
 }
 

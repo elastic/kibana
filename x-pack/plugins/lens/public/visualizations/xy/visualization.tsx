@@ -509,8 +509,8 @@ export const getXyVisualization = ({
     return firstDataLayer?.colorMapping
       ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
       : firstDataLayer?.palette
-      ? { type: 'legacyPalette', value: firstDataLayer.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: firstDataLayer.palette }
+        : undefined;
   },
 
   getDropProps(dropProps) {

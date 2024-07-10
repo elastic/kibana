@@ -38,7 +38,7 @@ export type FilesRequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > = RequestHandler<P, Q, B, FilesRequestHandlerContext, Method, KibanaResponseFactory>;
 
 export type AsyncResponse<T extends HttpResponsePayload | ResponseError = any> = Promise<

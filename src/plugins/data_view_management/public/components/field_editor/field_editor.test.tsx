@@ -105,7 +105,7 @@ describe('FieldEditor', () => {
 
   const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
   mockContext.fieldFormats.getDefaultType = jest.fn(
-    () => ({} as unknown as FieldFormatInstanceType)
+    () => ({}) as unknown as FieldFormatInstanceType
   );
   mockContext.fieldFormats.getByFieldType = jest.fn((fieldType) => {
     if (fieldType === 'number') {

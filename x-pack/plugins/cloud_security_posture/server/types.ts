@@ -95,7 +95,7 @@ export type CspRequestHandler<
   Q = unknown,
   B = unknown,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = RequestHandler<P, Q, B, CspRequestHandlerContext, Method, ResponseFactory>;
 
 /**

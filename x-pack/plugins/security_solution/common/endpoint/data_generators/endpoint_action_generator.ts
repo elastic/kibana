@@ -43,7 +43,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generate<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
@@ -77,7 +77,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generateActionEsHit<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): estypes.SearchHit<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
@@ -88,7 +88,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   /** Generates an endpoint action response */
   generateResponse<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   >(
     overrides: DeepPartial<LogsEndpointActionResponse<TOutputContent>> = {}
   ): LogsEndpointActionResponse<TOutputContent> {
@@ -210,7 +210,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   generateActionDetails<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   >(
     overrides: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}
   ): ActionDetails<TOutputContent, TParameters> {
@@ -436,7 +436,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateActivityLogActionResponse<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   >(
     overrides: DeepPartial<EndpointActivityLogActionResponse<TOutputContent>>
   ): EndpointActivityLogActionResponse<TOutputContent> {

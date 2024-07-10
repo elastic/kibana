@@ -49,7 +49,10 @@ export class PluginsService
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    plugins: InjectedMetadataPlugin[]
+  ) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 

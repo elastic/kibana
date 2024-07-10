@@ -111,7 +111,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 class EndpointMetadataProcessor {
   private readonly logger: TelemetryLogger;
 
-  constructor(logger: Logger, private readonly receiver: ITelemetryReceiver) {
+  constructor(
+    logger: Logger,
+    private readonly receiver: ITelemetryReceiver
+  ) {
     this.logger = newTelemetryLogger(logger.get('processor'));
   }
 

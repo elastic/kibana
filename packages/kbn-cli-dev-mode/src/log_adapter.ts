@@ -14,8 +14,8 @@ export const convertToLogger = (cliLog: Log): Logger => {
     return typeof msgOrError === 'function'
       ? msgOrError()
       : typeof msgOrError === 'string'
-      ? msgOrError
-      : msgOrError.message;
+        ? msgOrError
+        : msgOrError.message;
   };
 
   const adapter: Logger = {

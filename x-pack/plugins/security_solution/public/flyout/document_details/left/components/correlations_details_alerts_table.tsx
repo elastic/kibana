@@ -101,11 +101,14 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     return data
       .map((hit) => ({ fields: hit.fields ?? {}, id: hit._id, index: hit._index }))
       .map((dataWithMeta) => {
-        const res = Object.keys(dataWithMeta.fields).reduce((result, fieldName) => {
-          result[fieldName] =
-            dataWithMeta.fields?.[fieldName]?.[0] || dataWithMeta.fields?.[fieldName];
-          return result;
-        }, {} as Record<string, unknown>);
+        const res = Object.keys(dataWithMeta.fields).reduce(
+          (result, fieldName) => {
+            result[fieldName] =
+              dataWithMeta.fields?.[fieldName]?.[0] || dataWithMeta.fields?.[fieldName];
+            return result;
+          },
+          {} as Record<string, unknown>
+        );
         res.id = dataWithMeta.id;
         res.index = dataWithMeta.index;
         return res;

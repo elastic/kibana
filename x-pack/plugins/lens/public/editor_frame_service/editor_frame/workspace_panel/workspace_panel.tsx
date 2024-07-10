@@ -631,8 +631,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     const renderWorkspaceContents = hasSomethingToRender
       ? renderVisualization
       : !changesApplied
-      ? renderApplyChangesPrompt
-      : renderDragDropPrompt;
+        ? renderApplyChangesPrompt
+        : renderDragDropPrompt;
 
     return (
       <Droppable
@@ -785,8 +785,8 @@ export const VisualizationWrapper = ({
           const visibleErrorMessages = errorsFromRequest.length
             ? errorsFromRequest
             : errorMessage
-            ? [errorMessage]
-            : [];
+              ? [errorMessage]
+              : [];
 
           if (!hasDynamicError) {
             setDynamicError(true);

@@ -43,9 +43,7 @@ const hasObservabilityDashboardData =
   ({ search }: { search: Promise<ISearchGeneric> }) =>
   async (): Promise<InfraLogsHasDataResponse> => {
     const hasData: boolean = await lastValueFrom(
-      (
-        await search
-      )({
+      (await search)({
         params: {
           ignore_unavailable: true,
           allow_no_indices: true,

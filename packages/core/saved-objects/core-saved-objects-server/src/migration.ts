@@ -53,7 +53,7 @@ export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes
  */
 export interface SavedObjectMigrationParams<
   InputAttributes = unknown,
-  MigratedAttributes = unknown
+  MigratedAttributes = unknown,
 > {
   /**
    * A flag that can defer the migration until either an object is accessed (read) or if there is another non-deferred migration with a higher version.

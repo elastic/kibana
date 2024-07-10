@@ -71,7 +71,7 @@ describe(`POST ${URL}`, () => {
         ({
           // other attributes aren't needed for the purposes of injecting metadata
           management: { icon: `${type}-icon` },
-        } as any)
+        }) as any
     );
 
     savedObjectsClient = handlerContext.savedObjects.getClient();

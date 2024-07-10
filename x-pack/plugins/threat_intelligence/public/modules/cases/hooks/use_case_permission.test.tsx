@@ -17,14 +17,13 @@ const casesServiceMock = casesPluginMock.createStartContract();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
-  ({ children }: { children: ReactNode }) =>
-    (
-      <TestProvidersComponent>
-        <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          {children}
-        </KibanaContext.Provider>
-      </TestProvidersComponent>
-    );
+  ({ children }: { children: ReactNode }) => (
+    <TestProvidersComponent>
+      <KibanaContext.Provider value={{ services: mockedServices } as any}>
+        {children}
+      </KibanaContext.Provider>
+    </TestProvidersComponent>
+  );
 
 describe('useCasePermission', () => {
   let hookResult: RenderHookResult<{}, boolean, Renderer<unknown>>;

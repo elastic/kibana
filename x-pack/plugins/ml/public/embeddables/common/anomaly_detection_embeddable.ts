@@ -65,7 +65,7 @@ export const buildDataViewPublishingApi = (
 
 export abstract class AnomalyDetectionEmbeddable<
   Input extends CommonInput,
-  Output extends CommonOutput
+  Output extends CommonOutput,
 > extends Embeddable<Input, Output> {
   // Need to defer embeddable load in order to resolve data views
   deferEmbeddableLoad = true;

@@ -25,9 +25,8 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient } = await bootstrap(
-    runOptions
-  );
+  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient } =
+    await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
   const { generate } = await scenario({ ...runOptions, logger });
@@ -88,10 +87,13 @@ export async function startLiveDataUpload({
       const promises = generatorsAndClientsArray.map(({ generator }, i) => {
         const concatenatedStream = castArray(generator)
           .reverse()
-          .reduce<Writable>((prev, current) => {
-            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-            return currentStream.pipe(prev);
-          }, new PassThrough({ objectMode: true }));
+          .reduce<Writable>(
+            (prev, current) => {
+              const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+              return currentStream.pipe(prev);
+            },
+            new PassThrough({ objectMode: true })
+          );
 
         concatenatedStream.pipe(streams[i], { end: false });
 

@@ -807,7 +807,7 @@ export class JobCreator {
             counter: false,
             aggs: [],
             runtimeField,
-          } as Field)
+          }) as Field
       );
 
       const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);

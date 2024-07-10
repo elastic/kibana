@@ -15,7 +15,10 @@ export interface SLOInstaller {
 export class DefaultSLOInstaller implements SLOInstaller {
   private isInstalling: boolean = false;
 
-  constructor(private sloResourceInstaller: ResourceInstaller, private logger: Logger) {}
+  constructor(
+    private sloResourceInstaller: ResourceInstaller,
+    private logger: Logger
+  ) {}
 
   public async install() {
     if (this.isInstalling) {

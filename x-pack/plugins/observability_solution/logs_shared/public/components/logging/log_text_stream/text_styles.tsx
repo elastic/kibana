@@ -77,12 +77,11 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
   }, []);
 
   const CharacterDimensionsProbe = useMemo(
-    () => () =>
-      (
-        <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
-          X
-        </MonospaceCharacterDimensionsProbe>
-      ),
+    () => () => (
+      <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
+        X
+      </MonospaceCharacterDimensionsProbe>
+    ),
     [measureElement, scale]
   );
 

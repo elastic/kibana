@@ -441,8 +441,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             location.isInvalid || !locations.some((s) => s.id === location.id)
               ? 'danger'
               : location.isServiceManaged
-              ? 'default'
-              : 'primary',
+                ? 'default'
+                : 'primary',
           label:
             (location.label || locations?.find((loc) => location.id === loc.id)?.label) ??
             location.id,

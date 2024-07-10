@@ -31,9 +31,8 @@ export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
         try {
           const encryptedSoClient = cspContext.encryptedSavedObjects;
 
-          const rulesStates: CspBenchmarkRulesStates = await getCspBenchmarkRulesStatesHandler(
-            encryptedSoClient
-          );
+          const rulesStates: CspBenchmarkRulesStates =
+            await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
 
           return response.ok({
             body: rulesStates,

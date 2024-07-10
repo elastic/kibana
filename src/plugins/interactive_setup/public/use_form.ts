@@ -201,8 +201,8 @@ type DeepMap<T, TValue> = {
       ? Array<DeepMap<T[K][number], TValue>>
       : TValue
     : T[K] extends object
-    ? DeepMap<T[K], TValue>
-    : TValue;
+      ? DeepMap<T[K], TValue>
+      : TValue;
 };
 
 function mapDeep<T, V>(values: T, value: V): DeepMap<T, V> {

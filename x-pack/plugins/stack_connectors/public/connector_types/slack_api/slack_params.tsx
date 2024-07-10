@@ -49,8 +49,8 @@ const SlackParamsFields: React.FunctionComponent<
     channels.length > 0
       ? channels[0]
       : channelIds.length > 0 && channelIds[0].length > 0
-      ? channelIds[0]
-      : ''
+        ? channelIds[0]
+        : ''
   );
   const [messageType, setMessageType] = useState('text');
   const [textValue, setTextValue] = useState<string | undefined>(text);

@@ -65,9 +65,8 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
       const analyticsJobConfig = isAdvancedEditorEnabled
         ? jobConfig
         : getJobConfigFromFormState(form);
-      const validationResults: ValidateAnalyticsJobResponse = await validateDataFrameAnalytics(
-        analyticsJobConfig
-      );
+      const validationResults: ValidateAnalyticsJobResponse =
+        await validateDataFrameAnalytics(analyticsJobConfig);
 
       setValidationMessages(validationResults);
       setErrorMessage(undefined);

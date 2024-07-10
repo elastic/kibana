@@ -17,7 +17,7 @@ type PredefinedKeys = 'rows' | 'columns' | 'locked' | 'type';
 type AllowedDefaultKeys = 'rows' | 'columns';
 
 export type WidgetFactory<TParameters extends Record<string, any>> = <
-  T extends MakePartial<InvestigateWidgetCreate<TParameters>, PredefinedKeys>
+  T extends MakePartial<InvestigateWidgetCreate<TParameters>, PredefinedKeys>,
 >(
   widgetCreate: T
 ) => Pick<InvestigateWidgetCreate<TParameters>, PredefinedKeys> &

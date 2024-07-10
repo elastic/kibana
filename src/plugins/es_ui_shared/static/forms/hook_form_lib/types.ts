@@ -98,7 +98,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __readFieldConfigFromSchema: <
     FieldType = unknown,
     FormType = FormData,
-    InternalFieldType = FieldType
+    InternalFieldType = FieldType,
   >(
     fieldPath: string
     // @ts-expect-error upgrade typescript v4.9.5
@@ -263,7 +263,7 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
 export type ValidationFunc<
   I extends FormData = FormData,
   E extends string = string,
-  V = unknown
+  V = unknown,
 > = (
   data: ValidationFuncArg<I, V>
 ) => ValidationError<E> | void | undefined | ValidationCancelablePromise<E>;
@@ -295,7 +295,7 @@ type FieldValue = unknown;
 export interface ValidationConfig<
   I extends FormData = FormData,
   E extends string = string,
-  V = unknown
+  V = unknown,
 > {
   validator: ValidationFunc<I, E, V>;
   type?: string;

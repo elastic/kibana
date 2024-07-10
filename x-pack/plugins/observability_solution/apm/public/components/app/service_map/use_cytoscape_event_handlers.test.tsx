@@ -41,8 +41,8 @@ describe('useCytoscapeEventHandlers', () => {
         jest.spyOn(cy, 'elements').mockReturnValueOnce({
           difference: () =>
             ({
-              layout: () => ({ run: () => {} } as unknown as cytoscape.Layouts),
-            } as unknown as cytoscape.CollectionReturnValue),
+              layout: () => ({ run: () => {} }) as unknown as cytoscape.Layouts,
+            }) as unknown as cytoscape.CollectionReturnValue,
         } as unknown as cytoscape.CollectionReturnValue);
 
         renderHook(() => useCytoscapeEventHandlers({ serviceName: 'test', cy, theme }));
@@ -62,8 +62,8 @@ describe('useCytoscapeEventHandlers', () => {
       jest.spyOn(cy, 'elements').mockReturnValueOnce({
         difference: () =>
           ({
-            layout: () => ({ run } as unknown as cytoscape.Layouts),
-          } as unknown as cytoscape.CollectionReturnValue),
+            layout: () => ({ run }) as unknown as cytoscape.Layouts,
+          }) as unknown as cytoscape.CollectionReturnValue,
       } as unknown as cytoscape.CollectionReturnValue);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));

@@ -178,8 +178,8 @@ const getUpdateSignalStatusScript = (
   source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
       ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
       ctx._source['${ALERT_WORKFLOW_USER}'] = ${
-    user?.profile_uid ? `'${user.profile_uid}'` : 'null'
-  };
+        user?.profile_uid ? `'${user.profile_uid}'` : 'null'
+      };
       ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {

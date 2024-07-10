@@ -97,7 +97,7 @@ describe('Draggable', () => {
 
   test('removes selection on mouse down before dragging', async () => {
     const removeAllRanges = jest.fn();
-    global.getSelection = jest.fn(() => ({ removeAllRanges } as unknown as Selection));
+    global.getSelection = jest.fn(() => ({ removeAllRanges }) as unknown as Selection);
     const { draggable } = renderDraggable();
     fireEvent.mouseDown(draggable);
     expect(global.getSelection).toBeCalled();

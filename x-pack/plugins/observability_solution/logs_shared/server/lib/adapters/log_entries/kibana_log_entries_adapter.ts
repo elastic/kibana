@@ -63,10 +63,13 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
       ? {
           highlight: {
             boundary_scanner: 'word' as const,
-            fields: fields.reduce((highlightFieldConfigs, fieldName) => {
-              highlightFieldConfigs[fieldName] = {};
-              return highlightFieldConfigs;
-            }, {} as Record<string, unknown>),
+            fields: fields.reduce(
+              (highlightFieldConfigs, fieldName) => {
+                highlightFieldConfigs[fieldName] = {};
+                return highlightFieldConfigs;
+              },
+              {} as Record<string, unknown>
+            ),
             fragment_size: 1,
             number_of_fragments: 100,
             post_tags: [''],

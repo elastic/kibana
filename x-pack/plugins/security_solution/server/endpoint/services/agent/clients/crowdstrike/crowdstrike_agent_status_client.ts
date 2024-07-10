@@ -155,9 +155,9 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
             agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.ONLINE
               ? HostStatus.HEALTHY
               : // TODO TC: not sure what the UNKNOWN is - still to be figured
-              agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.UNKNOWN
-              ? HostStatus.OFFLINE
-              : HostStatus.OFFLINE,
+                agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.UNKNOWN
+                ? HostStatus.OFFLINE
+                : HostStatus.OFFLINE,
 
           pendingActions: pendingActions?.pending_actions ?? {},
         };

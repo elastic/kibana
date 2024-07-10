@@ -59,8 +59,8 @@ export async function runDockerGenerator(
   const imageNamespace = configuredNamespace
     ? configuredNamespace
     : flags.cloud || flags.serverless
-    ? 'kibana-ci'
-    : 'kibana';
+      ? 'kibana-ci'
+      : 'kibana';
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';

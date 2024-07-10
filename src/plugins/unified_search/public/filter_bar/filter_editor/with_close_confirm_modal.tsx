@@ -38,7 +38,7 @@ const isQueryDslFilterChanged = (original: QueryDslFilter, updated: QueryDslFilt
   original.queryDsl !== updated.queryDsl || original.customLabel !== updated.customLabel;
 
 export function withCloseFilterEditorConfirmModal<
-  T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps
+  T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps,
 >(WrappedComponent: FC<T>) {
   return function (props: Omit<T, keyof WithCloseFilterEditorConfirmModalProps>) {
     const [actionsOnClose, setActionsOnClose] = useState<Action[]>();

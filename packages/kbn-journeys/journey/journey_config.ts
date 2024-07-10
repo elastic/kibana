@@ -200,7 +200,7 @@ export class JourneyConfig<CtxExt extends object> {
   }
 
   getExtendedStepCtx(ctx: BaseStepCtx): BaseStepCtx & CtxExt {
-    const ext = this.#opts.extendContext ?? (() => ({} as CtxExt));
+    const ext = this.#opts.extendContext ?? (() => ({}) as CtxExt);
 
     return {
       ...ctx,

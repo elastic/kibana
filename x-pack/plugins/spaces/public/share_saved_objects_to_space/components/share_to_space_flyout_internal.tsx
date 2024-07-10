@@ -315,8 +315,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     const spacesToAdd = isSharedToAllSpaces
       ? [ALL_SPACES_ID]
       : isUnsharedFromAllSpaces
-      ? [...activeSpaceArray, ...selectedSpacesToAdd]
-      : selectedSpacesToAdd;
+        ? [...activeSpaceArray, ...selectedSpacesToAdd]
+        : selectedSpacesToAdd;
     const spacesToAddSet = new Set(spacesToAdd);
     const spacesToRemove =
       isUnsharedFromAllSpaces || !isSharedToAllSpaces

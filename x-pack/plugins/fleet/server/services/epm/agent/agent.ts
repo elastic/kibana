@@ -70,42 +70,45 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
 
 function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
   const yamlValues: { [k: string]: any } = {};
-  const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
-    // support variables with . like key.patterns
-    const keyParts = key.split('.');
-    const lastKeyPart = keyParts.pop();
-    logger.debug(`Building agent template variables`);
+  const vars = Object.entries(variables).reduce(
+    (acc, [key, recordEntry]) => {
+      // support variables with . like key.patterns
+      const keyParts = key.split('.');
+      const lastKeyPart = keyParts.pop();
+      logger.debug(`Building agent template variables`);
 
-    if (!lastKeyPart || !isValidKey(lastKeyPart)) {
-      throw new PackageInvalidArchiveError(
-        `Error while compiling agent template: Invalid key ${lastKeyPart}`
-      );
-    }
-
-    let varPart = acc;
-    for (const keyPart of keyParts) {
-      if (!isValidKey(keyPart)) {
+      if (!lastKeyPart || !isValidKey(lastKeyPart)) {
         throw new PackageInvalidArchiveError(
-          `Error while compiling agent template: Invalid key ${keyPart}`
+          `Error while compiling agent template: Invalid key ${lastKeyPart}`
         );
       }
-      if (!varPart[keyPart]) {
-        varPart[keyPart] = {};
-      }
-      varPart = varPart[keyPart];
-    }
 
-    if (recordEntry.type && recordEntry.type === 'yaml') {
-      const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
-    } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
-    } else {
-      varPart[lastKeyPart] = recordEntry.value;
-    }
-    return acc;
-  }, {} as { [k: string]: any });
+      let varPart = acc;
+      for (const keyPart of keyParts) {
+        if (!isValidKey(keyPart)) {
+          throw new PackageInvalidArchiveError(
+            `Error while compiling agent template: Invalid key ${keyPart}`
+          );
+        }
+        if (!varPart[keyPart]) {
+          varPart[keyPart] = {};
+        }
+        varPart = varPart[keyPart];
+      }
+
+      if (recordEntry.type && recordEntry.type === 'yaml') {
+        const yamlKeyPlaceholder = `##${key}##`;
+        varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
+        yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+      } else if (recordEntry.value && recordEntry.value.isSecretRef) {
+        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      } else {
+        varPart[lastKeyPart] = recordEntry.value;
+      }
+      return acc;
+    },
+    {} as { [k: string]: any }
+  );
 
   return { vars, yamlValues };
 }

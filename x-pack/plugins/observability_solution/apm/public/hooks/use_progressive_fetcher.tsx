@@ -43,7 +43,7 @@ type WithoutProbabilityParameter<T extends Record<string, any>> = {
 >;
 
 type APMProgressiveAPIClient = <
-  TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>
+  TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>,
 >(
   endpoint: TEndpoint,
   options: Omit<APMClientOptions, 'signal'> &

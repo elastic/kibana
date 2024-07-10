@@ -22,7 +22,7 @@ import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from '
  */
 export const ControlRenderer = <
   StateType extends DefaultControlState = DefaultControlState,
-  ApiType extends DefaultControlApi = DefaultControlApi
+  ApiType extends DefaultControlApi = DefaultControlApi,
 >({
   type,
   maybeId,

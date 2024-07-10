@@ -100,22 +100,22 @@ export const getElasticsearchMetricQuery = (
     aggType === Aggregators.COUNT
       ? {}
       : aggType === Aggregators.RATE
-      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
-      : aggType === Aggregators.P95 || aggType === Aggregators.P99
-      ? createPercentileAggregation(aggType, metricParams.metric)
-      : isCustom(metricParams)
-      ? createCustomMetricsAggregations(
-          'aggregatedValue',
-          metricParams.customMetrics,
-          metricParams.equation
-        )
-      : {
-          aggregatedValue: {
-            [aggType]: {
-              field: metricParams.metric,
-            },
-          },
-        };
+        ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
+        : aggType === Aggregators.P95 || aggType === Aggregators.P99
+          ? createPercentileAggregation(aggType, metricParams.metric)
+          : isCustom(metricParams)
+            ? createCustomMetricsAggregations(
+                'aggregatedValue',
+                metricParams.customMetrics,
+                metricParams.equation
+              )
+            : {
+                aggregatedValue: {
+                  [aggType]: {
+                    field: metricParams.metric,
+                  },
+                },
+              };
 
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,

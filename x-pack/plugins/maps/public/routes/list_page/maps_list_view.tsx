@@ -141,7 +141,8 @@ function MapsListViewComp({ history }: Props) {
       title={APP_NAME}
       getOnClickTitle={({ id }) =>
         () =>
-          history.push(getEditPath(id))}
+          history.push(getEditPath(id))
+        }
     />
   );
 }

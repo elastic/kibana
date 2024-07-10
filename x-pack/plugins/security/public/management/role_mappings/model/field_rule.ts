@@ -22,7 +22,10 @@ export type FieldRuleValue =
  * Ex: "username = 'foo'"
  */
 export class FieldRule extends Rule {
-  constructor(public readonly field: string, public readonly value: FieldRuleValue) {
+  constructor(
+    public readonly field: string,
+    public readonly value: FieldRuleValue
+  ) {
     super();
   }
 

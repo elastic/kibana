@@ -17,7 +17,7 @@ export type UsersColumns = [
   Columns<NetworkUsersItem['id']>,
   Columns<NetworkUsersItem['groupName']>,
   Columns<NetworkUsersItem['groupId']>,
-  Columns<NetworkUsersItem['count']>
+  Columns<NetworkUsersItem['count']>,
 ];
 
 export const getUsersColumns = (

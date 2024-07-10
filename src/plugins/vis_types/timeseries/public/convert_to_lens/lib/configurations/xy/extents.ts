@@ -89,25 +89,25 @@ export const getYExtents = (
   const finalLowerBoundLeft = ignoreGlobalSettingsLeft
     ? getLowerValue(lowerBoundLeft, upperBoundLeft, hasBarOrAreaLeft)
     : model.axis_position === 'left'
-    ? getLowerValue(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaLeft)
-    : null;
+      ? getLowerValue(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaLeft)
+      : null;
 
   const finalUpperBoundLeft = ignoreGlobalSettingsLeft
     ? upperBoundLeft
     : model.axis_position === 'left'
-    ? model.axis_max
-    : null;
+      ? model.axis_max
+      : null;
 
   const finalLowerBoundRight = ignoreGlobalSettingsRight
     ? getLowerValue(lowerBoundRight, upperBoundRight, hasBarOrAreaRight)
     : model.axis_position === 'right'
-    ? model.axis_min
-    : null;
+      ? model.axis_min
+      : null;
   const finalUpperBoundRight = ignoreGlobalSettingsRight
     ? upperBoundRight
     : model.axis_position === 'right'
-    ? getLowerValue(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaRight)
-    : null;
+      ? getLowerValue(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaRight)
+      : null;
   return {
     yLeftExtent: {
       ...(finalLowerBoundLeft && {

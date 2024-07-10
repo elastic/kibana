@@ -51,12 +51,15 @@ export function createTelemetryCounterHelper(
 }
 
 function countEventTypes(events: Event[]) {
-  return events.reduce((acc, event) => {
-    if (acc[event.event_type]) {
-      acc[event.event_type] += 1;
-    } else {
-      acc[event.event_type] = 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+  return events.reduce(
+    (acc, event) => {
+      if (acc[event.event_type]) {
+        acc[event.event_type] += 1;
+      } else {
+        acc[event.event_type] = 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 }

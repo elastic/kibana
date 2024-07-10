@@ -22,7 +22,7 @@ import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 
 export const embeddableInputToSubject = <
   ValueType extends unknown = unknown,
-  LegacyInput extends EmbeddableInput = EmbeddableInput
+  LegacyInput extends EmbeddableInput = EmbeddableInput,
 >(
   subscription: Subscription,
   embeddable: IEmbeddable<LegacyInput>,
@@ -60,7 +60,7 @@ export const embeddableInputToSubject = <
 
 export const embeddableOutputToSubject = <
   ValueType extends unknown = unknown,
-  LegacyOutput extends EmbeddableOutput = EmbeddableOutput
+  LegacyOutput extends EmbeddableOutput = EmbeddableOutput,
 >(
   subscription: Subscription,
   embeddable: IEmbeddable<EmbeddableInput, LegacyOutput>,

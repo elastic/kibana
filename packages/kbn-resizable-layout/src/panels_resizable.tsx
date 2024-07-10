@@ -66,9 +66,9 @@ export const PanelsResizable = ({
   const buttonBorderCss = css`
     position: relative;
     inset-${direction === 'horizontal' ? 'inline-start' : 'block-end'}: -${mathWithUnits(
-    euiTheme.border.width.thin,
-    (x) => x / 2
-  )};
+      euiTheme.border.width.thin,
+      (x) => x / 2
+    )};
     `;
   const defaultButtonCss = css`
     z-index: 3;

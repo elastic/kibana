@@ -100,7 +100,7 @@ export const getComments = ({
               regenerateMessage={regenerateMessageOfConversation}
               isEnabledLangChain={isEnabledLangChain}
               setIsStreaming={setIsStreaming}
-              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              transformMessage={() => ({ content: '' }) as unknown as ContentMessage}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}

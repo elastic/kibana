@@ -165,8 +165,11 @@ const MATCHING_DATA_STREAMS = [
   },
 ];
 
-const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = true;
+const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce(
+  (acc, stream) => {
+    acc[stream.name] = true;
 
-  return acc;
-}, {} as Record<string, boolean>);
+    return acc;
+  },
+  {} as Record<string, boolean>
+);

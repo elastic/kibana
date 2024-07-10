@@ -43,10 +43,10 @@ export type ExposedToBrowserDescriptor<T> = {
     ? // handles arrays as primitive values
       boolean
     : T[Key] extends Maybe<object>
-    ? // can be nested for objects
-      ExposedToBrowserDescriptor<T[Key]> | boolean
-    : // primitives
-      boolean;
+      ? // can be nested for objects
+        ExposedToBrowserDescriptor<T[Key]> | boolean
+      : // primitives
+        boolean;
 };
 
 /**
@@ -60,10 +60,10 @@ export type DynamicConfigDescriptor<T> = {
     ? // handles arrays as primitive values
       boolean
     : T[Key] extends Maybe<object>
-    ? // can be nested for objects
-      DynamicConfigDescriptor<T[Key]> | boolean
-    : // primitives
-      boolean;
+      ? // can be nested for objects
+        DynamicConfigDescriptor<T[Key]> | boolean
+      : // primitives
+        boolean;
 };
 
 /**
@@ -142,10 +142,10 @@ export type MakeUsageFromSchema<T> = {
     ? // arrays of objects are always redacted
       false
     : T[Key] extends Maybe<any[]>
-    ? boolean
-    : T[Key] extends Maybe<object>
-    ? MakeUsageFromSchema<T[Key]> | boolean
-    : boolean;
+      ? boolean
+      : T[Key] extends Maybe<object>
+        ? MakeUsageFromSchema<T[Key]> | boolean
+        : boolean;
 };
 
 /**
@@ -291,7 +291,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
 
@@ -311,7 +311,7 @@ export interface AsyncPlugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
 
@@ -324,9 +324,12 @@ export interface AsyncPlugin<
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
-  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
+  elasticsearch: Pick<
+    ElasticsearchConfigType,
+    (typeof SharedGlobalConfigKeys.elasticsearch)[number]
+  >;
+  path: Pick<PathConfigType, (typeof SharedGlobalConfigKeys.path)[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, (typeof SharedGlobalConfigKeys.savedObjects)[number]>;
 }>;
 
 /**
@@ -470,7 +473,7 @@ export type PluginInitializer<
   TSetup,
   TStart,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > = (
   core: PluginInitializerContext
 ) => Promise<

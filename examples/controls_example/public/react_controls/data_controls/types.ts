@@ -31,7 +31,7 @@ export type DataControlApi = DefaultControlApi &
 
 export interface DataControlFactory<
   State extends DefaultDataControlState = DefaultDataControlState,
-  Api extends DataControlApi = DataControlApi
+  Api extends DataControlApi = DataControlApi,
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{

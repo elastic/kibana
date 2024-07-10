@@ -46,7 +46,7 @@ export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
 
 export function getAccessors<
   T,
-  U extends { splitAccessors?: T[]; xAccessor?: T; accessors: T[]; markSizeAccessor?: T }
+  U extends { splitAccessors?: T[]; xAccessor?: T; accessors: T[]; markSizeAccessor?: T },
 >(args: U, table: Datatable) {
   let splitAccessors: Array<T | string> | undefined = args.splitAccessors;
   let xAccessor: T | string | undefined = args.xAccessor;

@@ -118,8 +118,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       size: ruleParams.size
         ? ruleParams.size
         : isServerless
-        ? SERVERLESS_DEFAULT_VALUES.SIZE
-        : DEFAULT_VALUES.SIZE,
+          ? SERVERLESS_DEFAULT_VALUES.SIZE
+          : DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       sourceFields: ruleParams.sourceFields,

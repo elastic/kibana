@@ -141,11 +141,11 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
         featureIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
           : isOnlySecurity
-          ? isIndexNameInitialLoading || isIndexNameLoading
-          : isIndexNameInitialLoading ||
-            isIndexNameLoading ||
-            isAlertFieldsInitialLoading ||
-            isAlertFieldsLoading,
+            ? isIndexNameInitialLoading || isIndexNameLoading
+            : isIndexNameInitialLoading ||
+              isIndexNameLoading ||
+              isAlertFieldsInitialLoading ||
+              isAlertFieldsLoading,
     }),
     [
       dataViews,

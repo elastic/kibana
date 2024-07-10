@@ -95,12 +95,15 @@ const RequiredFieldsList = ({
 
   const typesByFieldName: Record<string, string[]> = useMemo(
     () =>
-      indexPatternFields.reduce((accumulator, field) => {
-        if (field.esTypes?.length) {
-          accumulator[field.name] = field.esTypes;
-        }
-        return accumulator;
-      }, {} as Record<string, string[]>),
+      indexPatternFields.reduce(
+        (accumulator, field) => {
+          if (field.esTypes?.length) {
+            accumulator[field.name] = field.esTypes;
+          }
+          return accumulator;
+        },
+        {} as Record<string, string[]>
+      ),
     [indexPatternFields]
   );
 

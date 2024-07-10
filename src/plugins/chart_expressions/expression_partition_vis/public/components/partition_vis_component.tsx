@@ -283,14 +283,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         defaultFormatter
       )
     : splitRow
-    ? getFormatter(
-        typeof splitRow[0] === 'string'
-          ? getColumnByAccessor(splitRow[0], visData.columns)!
-          : splitRow[0],
-        formatters,
-        defaultFormatter
-      )
-    : undefined;
+      ? getFormatter(
+          typeof splitRow[0] === 'string'
+            ? getColumnByAccessor(splitRow[0], visData.columns)!
+            : splitRow[0],
+          formatters,
+          defaultFormatter
+        )
+      : undefined;
 
   const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
@@ -407,8 +407,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const splitChartDimension = splitColumn
     ? getColumnByAccessor(splitColumn[0], visData.columns)
     : splitRow
-    ? getColumnByAccessor(splitRow[0], visData.columns)
-    : undefined;
+      ? getColumnByAccessor(splitRow[0], visData.columns)
+      : undefined;
 
   const isEsqlMode = originalVisData?.meta?.type === ESQL_TABLE_TYPE;
   const hasTooltipActions =

@@ -72,7 +72,7 @@ export type RuleStepsOrder = [
   RuleStep.defineRule,
   RuleStep.aboutRule,
   RuleStep.scheduleRule,
-  RuleStep.ruleActions
+  RuleStep.ruleActions,
 ];
 
 export interface RuleStepProps {

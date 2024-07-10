@@ -55,7 +55,7 @@ export type RuleAddComponent = typeof RuleAdd;
 
 const RuleAdd = <
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 >({
   consumer,
   ruleTypeRegistry,

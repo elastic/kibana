@@ -19,16 +19,17 @@ type AnyValue = any;
 export type AnyPublishingSubject = PublishingSubject<AnyValue> | undefined;
 
 export type ValueFromPublishingSubject<
-  T extends PublishingSubject<AnyValue> | undefined = PublishingSubject<AnyValue> | undefined
-> = T extends PublishingSubject<infer ValueType>
-  ? ValueType
-  : T extends undefined
-  ? undefined
-  : never;
+  T extends PublishingSubject<AnyValue> | undefined = PublishingSubject<AnyValue> | undefined,
+> =
+  T extends PublishingSubject<infer ValueType>
+    ? ValueType
+    : T extends undefined
+      ? undefined
+      : never;
 
 export type UnwrapPublishingSubjectTuple<T extends [...any[]]> = T extends [
   infer Head extends AnyPublishingSubject,
-  ...infer Tail extends AnyPublishingSubject[]
+  ...infer Tail extends AnyPublishingSubject[],
 ]
   ? [ValueFromPublishingSubject<Head>, ...UnwrapPublishingSubjectTuple<Tail>]
   : [];

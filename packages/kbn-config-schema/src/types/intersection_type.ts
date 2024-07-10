@@ -12,7 +12,7 @@ export type IntersectionTypeOptions<T extends Props = any> = ObjectTypeOptions<T
 
 export class IntersectionType<
   RTS extends Array<ObjectType<any>>,
-  T extends Props
+  T extends Props,
 > extends ObjectType<T> {
   constructor(types: RTS, options?: IntersectionTypeOptions<T>) {
     const props = types.reduce((mergedProps, type) => {

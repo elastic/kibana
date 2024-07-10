@@ -60,7 +60,10 @@ export class DataStreamAdapter {
   protected indexTemplates: IndicesPutIndexTemplateRequest[] = [];
   protected installed: boolean;
 
-  constructor(protected readonly name: string, options: DataStreamAdapterParams) {
+  constructor(
+    protected readonly name: string,
+    options: DataStreamAdapterParams
+  ) {
     this.installed = false;
     this.kibanaVersion = options.kibanaVersion;
     this.totalFieldsLimit = options.totalFieldsLimit ?? DEFAULT_FIELDS_LIMIT;

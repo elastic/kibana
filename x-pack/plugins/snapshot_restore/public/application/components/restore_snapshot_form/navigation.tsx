@@ -30,8 +30,8 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 1
         ? 'selected'
         : maxCompletedStep >= 1
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       onClick: () => updateCurrentStep(1),
     },
     {
@@ -41,8 +41,8 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 2
         ? 'selected'
         : maxCompletedStep >= 2
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 1,
       onClick: () => updateCurrentStep(2),
     },
@@ -53,8 +53,8 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
       status: (currentStep === 3
         ? 'selected'
         : maxCompletedStep >= 2
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 2,
       onClick: () => updateCurrentStep(3),
     },

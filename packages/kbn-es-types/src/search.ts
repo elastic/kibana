@@ -30,12 +30,12 @@ type KeyOfSource<T> = Record<
 type KeysOfSources<T extends any[]> = T extends [any]
   ? KeyOfSource<T[0]>
   : T extends [any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
-  : T extends [any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
-  : T extends [any, any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
-  : Record<string, null | string | number>;
+    ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
+    : T extends [any, any, any]
+      ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
+      : T extends [any, any, any, any]
+        ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
+        : Record<string, null | string | number>;
 
 type CompositeKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends {
@@ -50,18 +50,19 @@ type TopMetricKeysOf<TAggregationContainer extends AggregationsAggregationContai
   TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
     ? TField
     : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
-    ? TField
-    : string;
+      ? TField
+      : string;
 
-type ValueTypeOfField<T> = T extends Record<string, string | number>
-  ? ValuesType<T>
-  : T extends Array<infer U>
-  ? ValueTypeOfField<U>
-  : T extends { field: estypes.Field }
-  ? T['field']
-  : T extends string | number
-  ? T
-  : never;
+type ValueTypeOfField<T> =
+  T extends Record<string, string | number>
+    ? ValuesType<T>
+    : T extends Array<infer U>
+      ? ValueTypeOfField<U>
+      : T extends { field: estypes.Field }
+        ? T['field']
+        : T extends string | number
+          ? T
+          : never;
 
 type MaybeArray<T> = T | T[];
 
@@ -81,7 +82,7 @@ export type ChangePointType =
 export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
-  TDocValueFields extends DocValueFields | undefined = undefined
+  TDocValueFields extends DocValueFields | undefined = undefined,
 > = Omit<estypes.SearchHit, '_source' | 'fields'> &
   (TSource extends false ? {} : { _source: TSource }) &
   (TFields extends Fields
@@ -99,7 +100,7 @@ type HitsOf<
   TOptions extends
     | { _source?: Source; fields?: Fields; docvalue_fields?: DocValueFields }
     | undefined,
-  TDocument extends unknown
+  TDocument extends unknown,
 > = Array<
   SearchHit<
     TOptions extends { _source: false } ? undefined : TDocument,
@@ -112,17 +113,14 @@ type AggregationMap = Partial<Record<string, AggregationsAggregationContainer>>;
 
 type TopLevelAggregationRequest = Pick<AggregationsAggregationContainer, 'aggs' | 'aggregations'>;
 
-type MaybeKeyed<
-  TAggregationContainer,
-  TBucket,
-  TKeys extends string = string
-> = TAggregationContainer extends Record<string, { keyed: true }>
-  ? Record<TKeys, TBucket>
-  : { buckets: TBucket[] };
+type MaybeKeyed<TAggregationContainer, TBucket, TKeys extends string = string> =
+  TAggregationContainer extends Record<string, { keyed: true }>
+    ? Record<TKeys, TBucket>
+    : { buckets: TBucket[] };
 
 export type AggregateOf<
   TAggregationContainer extends AggregationsAggregationContainer,
-  TDocument
+  TDocument,
 > = ValuesType<
   Pick<
     Record<string, unknown> & {
@@ -311,27 +309,27 @@ export type AggregateOf<
               } & SubAggregateOf<TAggregationContainer, TDocument>
             >
           : TAggregationContainer extends { filters: { filters: Record<string, any> } }
-          ? {
-              [key in keyof TAggregationContainer['filters']['filters']]: {
-                doc_count: number;
-              } & SubAggregateOf<TAggregationContainer, TDocument>;
-            } & (TAggregationContainer extends {
-              filters: { other_bucket_key: infer TOtherBucketKey };
-            }
-              ? Record<
-                  TOtherBucketKey & string,
-                  { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument>
-                >
-              : unknown) &
-              (TAggregationContainer extends { filters: { other_bucket: true } }
-                ? {
-                    _other: { doc_count: number } & SubAggregateOf<
-                      TAggregationContainer,
-                      TDocument
-                    >;
-                  }
-                : unknown)
-          : unknown;
+            ? {
+                [key in keyof TAggregationContainer['filters']['filters']]: {
+                  doc_count: number;
+                } & SubAggregateOf<TAggregationContainer, TDocument>;
+              } & (TAggregationContainer extends {
+                filters: { other_bucket_key: infer TOtherBucketKey };
+              }
+                ? Record<
+                    TOtherBucketKey & string,
+                    { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument>
+                  >
+                : unknown) &
+                (TAggregationContainer extends { filters: { other_bucket: true } }
+                  ? {
+                      _other: { doc_count: number } & SubAggregateOf<
+                        TAggregationContainer,
+                        TDocument
+                      >;
+                    }
+                  : unknown)
+            : unknown;
       };
       geo_bounds: {
         top_left: {
@@ -623,12 +621,12 @@ type SubAggregateOf<TAggregationRequest, TDocument = unknown> = TAggregationRequ
 }
   ? AggregateOfMap<TAggregationRequest['aggs'], TDocument>
   : TAggregationRequest extends { aggregations?: AggregationMap }
-  ? AggregateOfMap<TAggregationRequest['aggregations'], TDocument>
-  : {};
+    ? AggregateOfMap<TAggregationRequest['aggregations'], TDocument>
+    : {};
 
 type SearchResponseOf<
   TAggregationRequest extends TopLevelAggregationRequest,
-  TDocument
+  TDocument,
 > = SubAggregateOf<TAggregationRequest, TDocument>;
 
 // if aggregation response cannot be inferred, fall back to unknown
@@ -641,13 +639,13 @@ export type InferSearchResponseOf<
   TSearchRequest extends
     | estypes.SearchRequest
     | (estypesWithoutBodyKey.SearchRequest & { body?: never }) = estypes.SearchRequest,
-  TOptions extends { restTotalHitsAsInt?: boolean } = {}
+  TOptions extends { restTotalHitsAsInt?: boolean } = {},
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest['body'] extends TopLevelAggregationRequest
     ? WrapAggregationResponse<SearchResponseOf<TSearchRequest['body'], TDocument>>
     : TSearchRequest extends TopLevelAggregationRequest
-    ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
-    : { aggregations?: InvalidAggregationRequest }) & {
+      ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
+      : { aggregations?: InvalidAggregationRequest }) & {
     hits: Omit<estypes.SearchResponse<TDocument>['hits'], 'total' | 'hits'> &
       (TOptions['restTotalHitsAsInt'] extends true
         ? {

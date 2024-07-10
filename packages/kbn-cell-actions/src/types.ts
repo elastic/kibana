@@ -107,7 +107,7 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  */
 
 export interface CellActionCompatibilityContext<
-  C extends CellActionExecutionContext = CellActionExecutionContext
+  C extends CellActionExecutionContext = CellActionExecutionContext,
 > extends ActionExecutionContext {
   /**
    * CellActionsData containing the field spec but not the value for the compatibility check

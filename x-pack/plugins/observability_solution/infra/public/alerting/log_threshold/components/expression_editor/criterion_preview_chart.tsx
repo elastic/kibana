@@ -110,8 +110,8 @@ export const CriterionPreview: React.FC<Props> = ({
         executionTimeRange?.buckets
           ? executionTimeRange.buckets
           : !chartAlertParams.groupBy || chartAlertParams.groupBy.length === 0
-          ? NUM_BUCKETS
-          : NUM_BUCKETS / 4
+            ? NUM_BUCKETS
+            : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
       logViewReference={logViewReference}
       threshold={ruleParams.count}

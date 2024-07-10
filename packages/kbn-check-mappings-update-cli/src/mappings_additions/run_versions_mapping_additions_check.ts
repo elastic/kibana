@@ -25,9 +25,8 @@ export const runModelVersionMappingAdditionsChecks = async ({
   log: ToolingLog;
 }) => {
   log.info('Generating field lists from registry and file');
-  const { fieldsFromRegisteredTypes, fieldsFromModelVersions } = await extractFieldListsFromPlugins(
-    log
-  );
+  const { fieldsFromRegisteredTypes, fieldsFromModelVersions } =
+    await extractFieldListsFromPlugins(log);
   const currentFields = await readCurrentFields();
 
   const allTypeNames = [

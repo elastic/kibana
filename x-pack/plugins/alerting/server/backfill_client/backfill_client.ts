@@ -154,9 +154,8 @@ export class BackfillClient {
     }
 
     // Bulk create the saved object
-    const bulkCreateResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-      adHocSOsToCreate
-    );
+    const bulkCreateResponse =
+      await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(adHocSOsToCreate);
 
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
       (so: SavedObject<AdHocRunSO>, index: number) => {

@@ -87,16 +87,22 @@ export function updateRangeType(
   params.rangeMin = checkIsMinContinuity(continuity)
     ? Number.NEGATIVE_INFINITY
     : activePalette.name === CUSTOM_PALETTE
-    ? newColorStops[0].stop
-    : params.stops[0].stop;
+      ? newColorStops[0].stop
+      : params.stops[0].stop;
 
   params.rangeMax = checkIsMaxContinuity(continuity)
     ? Number.POSITIVE_INFINITY
     : activePalette.params?.rangeMax
-    ? calculateStop(activePalette.params.rangeMax, newMin, oldMin, oldMax - oldMin, newMax - newMin)
-    : lastStop > newMax
-    ? lastStop + 1
-    : newMax;
+      ? calculateStop(
+          activePalette.params.rangeMax,
+          newMin,
+          oldMin,
+          oldMax - oldMin,
+          newMax - newMin
+        )
+      : lastStop > newMax
+        ? lastStop + 1
+        : newMax;
 
   return params;
 }

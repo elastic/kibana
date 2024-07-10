@@ -11,7 +11,10 @@ import type { RetryService } from '@kbn/ftr-common-functional-services';
 export class FileWrapper {
   delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  constructor(private readonly path: string, private readonly retry: RetryService) {}
+  constructor(
+    private readonly path: string,
+    private readonly retry: RetryService
+  ) {}
   async reset() {
     // "touch" each file to ensure it exists and is empty before each test
     await Fs.promises.writeFile(this.path, '');

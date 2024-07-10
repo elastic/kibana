@@ -90,7 +90,7 @@ describe('hover', () => {
     string,
     string,
     (n: string) => string[],
-    Parameters<typeof createCustomCallbackMocks>?
+    Parameters<typeof createCustomCallbackMocks>?,
   ];
 
   const testSuggestionsFn = (
@@ -156,7 +156,7 @@ describe('hover', () => {
   describe('policies', () => {
     function createPolicyContent(
       policyName: string,
-      customPolicies: Array<typeof policies[number]> = policies
+      customPolicies: Array<(typeof policies)[number]> = policies
     ) {
       const policyHit = customPolicies.find((p) => p.name === policyName);
       if (!policyHit) {

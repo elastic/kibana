@@ -13,7 +13,7 @@ import { resultTitle } from './result_metadata';
 const makeSearchHit = (source: undefined | unknown): SearchHit =>
   ({
     _source: source,
-  } as SearchHit);
+  }) as SearchHit;
 
 describe('resultTitle', () => {
   it('returns result title if available', () => {

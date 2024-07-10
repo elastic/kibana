@@ -27,7 +27,7 @@ export const RUNTIME_FIELD_TYPES2 = [
 
 export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
   RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>
+    Type<RuntimeType>,
   ]
 );
 

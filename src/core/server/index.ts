@@ -570,7 +570,7 @@ type PublicRequestHandler<
   B = unknown,
   Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
 
 export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };

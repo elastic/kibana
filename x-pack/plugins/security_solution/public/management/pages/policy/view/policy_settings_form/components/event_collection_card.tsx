@@ -69,10 +69,10 @@ export interface EventCollectionCardProps<T extends OperatingSystem = OperatingS
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ANY = any;
 interface EventCollectionCardComponent {
-  <T extends OperatingSystem>(props: EventCollectionCardProps<T>, context?: ANY): ReactElement<
-    ANY,
-    ANY
-  > | null;
+  <T extends OperatingSystem>(
+    props: EventCollectionCardProps<T>,
+    context?: ANY
+  ): ReactElement<ANY, ANY> | null;
   displayName?: string | undefined;
 }
 

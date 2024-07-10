@@ -1148,8 +1148,8 @@ async function getFunctionArgsSuggestions(
         const _suggestions: string[] = p.literalSuggestions
           ? p.literalSuggestions
           : p.literalOptions
-          ? p.literalOptions
-          : [];
+            ? p.literalOptions
+            : [];
 
         return acc.concat(_suggestions);
       }, [] as string[])
@@ -1183,8 +1183,8 @@ async function getFunctionArgsSuggestions(
       command.name !== 'stats'
         ? -1
         : commandArgIndex < 0
-        ? Math.max(command.args.length - 1, 0)
-        : commandArgIndex;
+          ? Math.max(command.args.length - 1, 0)
+          : commandArgIndex;
 
     const finalCommandArg = command.args[finalCommandArgIndex];
 

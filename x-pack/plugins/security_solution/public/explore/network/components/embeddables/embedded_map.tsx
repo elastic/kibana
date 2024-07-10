@@ -200,8 +200,9 @@ export const EmbeddedMapComponent = ({
           <EmbeddableMap>
             <services.maps.Map
               // eslint-disable-next-line react/display-name
-              getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
-                <OutPortal node={portalNode} {...tooltipProps} />}
+              getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) => (
+                <OutPortal node={portalNode} {...tooltipProps} />
+              )}
               mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
               layerList={layerList}
               filters={appliedFilters}

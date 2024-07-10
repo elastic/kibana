@@ -76,19 +76,22 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
   const deploymentPipelinesMap = useMemo(() => {
     if (!isPopulatedObject(model.pipelines)) return {};
-    return Object.entries(model.pipelines).reduce((acc, [pipelineId, pipelineDef]) => {
-      const deploymentIds: string[] = (pipelineDef?.processors ?? [])
-        .map((v) => v?.inference?.model_id)
-        .filter(isDefined);
-      deploymentIds.forEach((dId) => {
-        if (acc[dId]) {
-          acc[dId].push(pipelineId);
-        } else {
-          acc[dId] = [pipelineId];
-        }
-      });
-      return acc;
-    }, {} as Record<string, string[]>);
+    return Object.entries(model.pipelines).reduce(
+      (acc, [pipelineId, pipelineDef]) => {
+        const deploymentIds: string[] = (pipelineDef?.processors ?? [])
+          .map((v) => v?.inference?.model_id)
+          .filter(isDefined);
+        deploymentIds.forEach((dId) => {
+          if (acc[dId]) {
+            acc[dId].push(pipelineId);
+          } else {
+            acc[dId] = [pipelineId];
+          }
+        });
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
   }, [model.pipelines]);
 
   const pipelineWarning = useMemo<string[]>(() => {

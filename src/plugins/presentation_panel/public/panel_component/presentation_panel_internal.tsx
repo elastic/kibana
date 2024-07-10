@@ -21,7 +21,7 @@ import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './t
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  ComponentPropsType extends {} = {}
+  ComponentPropsType extends {} = {},
 >({
   index,
   hideHeader,

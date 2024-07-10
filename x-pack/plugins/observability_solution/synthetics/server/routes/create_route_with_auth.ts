@@ -25,7 +25,7 @@ function getDefaultWriteAccessFlag(method: SupportedMethod) {
 }
 
 export const createSyntheticsRouteWithAuth = <
-  ClientContract extends HttpResponsePayload | ResponseError = any
+  ClientContract extends HttpResponsePayload | ResponseError = any,
 >(
   routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {

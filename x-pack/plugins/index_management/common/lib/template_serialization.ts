@@ -88,8 +88,8 @@ export function deserializeTemplate(
       allowAutoCreate === true
         ? allowAutoCreateRadioIds.TRUE_RADIO_OPTION
         : allowAutoCreate === false
-        ? allowAutoCreateRadioIds.FALSE_RADIO_OPTION
-        : allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
+          ? allowAutoCreateRadioIds.FALSE_RADIO_OPTION
+          : allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
     _meta,
     deprecated,
     _kbnMeta: {

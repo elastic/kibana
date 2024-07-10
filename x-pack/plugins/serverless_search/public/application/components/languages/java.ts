@@ -108,8 +108,8 @@ for (Book book : books) {
     br.operations(op -> op
         .index(idx -> idx
             .index("${indexName}")${
-    ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''
-  }
+              ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''
+            }
             .id(product.getId())
             .document(book)
         )

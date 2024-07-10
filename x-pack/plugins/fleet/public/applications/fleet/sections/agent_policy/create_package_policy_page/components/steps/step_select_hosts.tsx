@@ -127,8 +127,8 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
         initialSelectedTabIndex
           ? tabs[initialSelectedTabIndex]
           : selectedAgentPolicyIds.length > 0
-          ? tabs[1]
-          : tabs[0]
+            ? tabs[1]
+            : tabs[0]
       }
       tabs={tabs}
       onTabClick={handleOnTabClick}

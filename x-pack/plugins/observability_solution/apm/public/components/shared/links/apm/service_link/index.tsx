@@ -47,8 +47,8 @@ export function ServiceLink({
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
     : isLogsSignal(signalTypes)
-    ? '/logs-services/{serviceName}/overview'
-    : '/services/{serviceName}/overview';
+      ? '/logs-services/{serviceName}/overview'
+      : '/services/{serviceName}/overview';
 
   if (serviceName === OTHER_SERVICE_NAME) {
     return (

@@ -42,7 +42,7 @@ export interface InvestigateTimeline {
 
 export interface InvestigateWidget<
   TParameters extends Record<string, any> = {},
-  TData extends Record<string, any> = {}
+  TData extends Record<string, any> = {},
 > {
   id: string;
   created: number;

@@ -96,9 +96,8 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
       if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
-        headers[
-          'cache-control'
-        ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
+        headers['cache-control'] =
+          `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
       } else {
         headers['cache-control'] = 'private, no-cache';
       }

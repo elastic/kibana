@@ -35,15 +35,18 @@ export class EcsFieldsRepository {
       return FieldsMetadataDictionary.create(this.ecsFields);
     }
 
-    const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      const field = this.getByName(fieldName);
+    const fields = fieldNames.reduce(
+      (fieldsMetadata, fieldName) => {
+        const field = this.getByName(fieldName);
 
-      if (field) {
-        fieldsMetadata[fieldName] = field;
-      }
+        if (field) {
+          fieldsMetadata[fieldName] = field;
+        }
 
-      return fieldsMetadata;
-    }, {} as Record<FieldName, FieldMetadata>);
+        return fieldsMetadata;
+      },
+      {} as Record<FieldName, FieldMetadata>
+    );
 
     return FieldsMetadataDictionary.create(fields);
   }

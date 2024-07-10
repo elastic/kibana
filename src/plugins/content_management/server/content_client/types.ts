@@ -14,32 +14,32 @@ export type GetParameters<T = unknown> = [CrudGetParameters<T>[1], CrudGetParame
 type CrudBulkGetParameters<T = unknown> = Parameters<ContentCrud<T>['bulkGet']>;
 export type BulkGetParameters<T = unknown> = [
   CrudBulkGetParameters<T>[1],
-  CrudBulkGetParameters<T>[2]?
+  CrudBulkGetParameters<T>[2]?,
 ];
 
 type CrudCreateParameters<T = unknown> = Parameters<ContentCrud<T>['create']>;
 export type CreateParameters<T = unknown> = [
   CrudCreateParameters<T>[1],
-  CrudCreateParameters<T>[2]?
+  CrudCreateParameters<T>[2]?,
 ];
 
 type CrudUpdateParameters<T = unknown> = Parameters<ContentCrud<T>['update']>;
 export type UpdateParameters<T = unknown> = [
   CrudUpdateParameters<T>[1],
   CrudUpdateParameters<T>[2],
-  CrudUpdateParameters<T>[3]?
+  CrudUpdateParameters<T>[3]?,
 ];
 
 type CrudDeleteParameters<T = unknown> = Parameters<ContentCrud<T>['delete']>;
 export type DeleteParameters<T = unknown> = [
   CrudDeleteParameters<T>[1],
-  CrudDeleteParameters<T>[2]?
+  CrudDeleteParameters<T>[2]?,
 ];
 
 type CrudSearchParameters<T = unknown> = Parameters<ContentCrud<T>['search']>;
 export type SearchParameters<T = unknown> = [
   CrudSearchParameters<T>[1],
-  CrudSearchParameters<T>[2]?
+  CrudSearchParameters<T>[2]?,
 ];
 
 export interface IContentClient<T = unknown> {

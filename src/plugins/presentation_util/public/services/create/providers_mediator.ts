@@ -11,7 +11,7 @@ import { PluginServiceProviders, PluginServiceRequiredServices } from './provide
 
 export class PluginServiceProvidersMediator<
   Services extends Record<keyof Services, {}>,
-  StartParameters
+  StartParameters,
 > {
   constructor(private readonly providers: PluginServiceProviders<Services, StartParameters>) {}
 

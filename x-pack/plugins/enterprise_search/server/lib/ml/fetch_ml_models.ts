@@ -47,9 +47,8 @@ export const fetchMlModels = async (
   }
 
   // Set the compatible ELSER and E5 model IDs based on platform architecture
-  [compatibleElserModelId, compatibleE5ModelId] = await fetchCompatiblePromotedModelIds(
-    trainedModelsProvider
-  );
+  [compatibleElserModelId, compatibleE5ModelId] =
+    await fetchCompatiblePromotedModelIds(trainedModelsProvider);
 
   // Get compatible variants of placeholder models
   const modelPlaceholders: MlModel[] = [
@@ -226,21 +225,21 @@ const sortModels = (m1: MlModel, m2: MlModel) =>
   m1.modelId.startsWith(ELSER_MODEL_ID)
     ? -1
     : m2.modelId.startsWith(ELSER_MODEL_ID)
-    ? 1
-    : m1.modelId.startsWith(E5_MODEL_ID)
-    ? -1
-    : m2.modelId.startsWith(E5_MODEL_ID)
-    ? 1
-    : m1.title.localeCompare(m2.title);
+      ? 1
+      : m1.modelId.startsWith(E5_MODEL_ID)
+        ? -1
+        : m2.modelId.startsWith(E5_MODEL_ID)
+          ? 1
+          : m1.title.localeCompare(m2.title);
 
 const getUserFriendlyTitle = (modelId: string, modelType: string) => {
   return MODEL_TITLES_BY_TYPE[modelType] !== undefined
     ? MODEL_TITLES_BY_TYPE[modelType]!
     : modelId === LANG_IDENT_MODEL_ID
-    ? i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
-        defaultMessage: 'Language Identification',
-      })
-    : modelId;
+      ? i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
+          defaultMessage: 'Language Identification',
+        })
+      : modelId;
 };
 
 const getDeploymentState = (state: string): MlModelDeploymentState => {

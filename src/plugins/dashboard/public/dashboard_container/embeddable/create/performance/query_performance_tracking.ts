@@ -74,8 +74,8 @@ export const startQueryPerformanceTracking = (
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
         ? 'sessionFirstLoad'
         : dashboard.firstLoad
-        ? 'dashboardFirstLoad'
-        : 'dashboardSubsequentLoad';
+          ? 'dashboardFirstLoad'
+          : 'dashboardSubsequentLoad';
 
       const queryHasStarted = !lastLoading && currentLoading;
       const queryHasFinished = lastLoading && !currentLoading;

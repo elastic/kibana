@@ -111,7 +111,7 @@ const createMockMetricsDataClient = (metricAlias: string = 'metrics-*,metricbeat
   ({
     getMetricIndices: jest.fn().mockResolvedValue(metricAlias),
     updateMetricIndices: jest.fn(),
-  } as unknown as MetricsDataClient);
+  }) as unknown as MetricsDataClient;
 
 const createRequestContext = (savedObject?: SavedObject<unknown>) => {
   return {

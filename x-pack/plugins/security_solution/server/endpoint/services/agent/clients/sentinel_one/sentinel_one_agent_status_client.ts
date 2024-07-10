@@ -113,9 +113,9 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
           status: agentInfo?.is_active
             ? HostStatus.HEALTHY
             : // If the agent is pending uninstall or uninstalled, we consider it unenrolled
-            agentInfo?.is_pending_uninstall || agentInfo?.is_uninstalled
-            ? HostStatus.UNENROLLED
-            : HostStatus.OFFLINE,
+              agentInfo?.is_pending_uninstall || agentInfo?.is_uninstalled
+              ? HostStatus.UNENROLLED
+              : HostStatus.OFFLINE,
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 

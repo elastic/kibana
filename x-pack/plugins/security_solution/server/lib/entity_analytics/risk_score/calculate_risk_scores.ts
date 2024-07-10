@@ -263,17 +263,20 @@ export const calculateRiskScores = async ({
           },
         },
       },
-      aggs: identifierTypes.reduce((aggs, _identifierType) => {
-        aggs[_identifierType] = buildIdentifierTypeAggregation({
-          afterKeys: userAfterKeys,
-          identifierType: _identifierType,
-          pageSize,
-          weights,
-          alertSampleSizePerShard,
-          scriptedMetricPainless,
-        });
-        return aggs;
-      }, {} as Record<string, AggregationsAggregationContainer>),
+      aggs: identifierTypes.reduce(
+        (aggs, _identifierType) => {
+          aggs[_identifierType] = buildIdentifierTypeAggregation({
+            afterKeys: userAfterKeys,
+            identifierType: _identifierType,
+            pageSize,
+            weights,
+            alertSampleSizePerShard,
+            scriptedMetricPainless,
+          });
+          return aggs;
+        },
+        {} as Record<string, AggregationsAggregationContainer>
+      ),
     };
 
     if (debug) {

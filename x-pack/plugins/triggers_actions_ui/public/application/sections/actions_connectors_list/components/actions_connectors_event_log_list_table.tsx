@@ -104,8 +104,8 @@ export type ConnectorEventLogListTableProps<T extends ConnectorEventLogListOptio
   T extends 'default'
     ? ConnectorEventLogListCommonProps
     : T extends 'stackManagement'
-    ? ConnectorEventLogListCommonProps
-    : never;
+      ? ConnectorEventLogListCommonProps
+      : never;
 
 export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOptions>(
   props: ConnectorEventLogListTableProps<T>

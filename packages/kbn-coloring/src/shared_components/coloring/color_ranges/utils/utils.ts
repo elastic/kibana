@@ -150,12 +150,12 @@ export const getAutoBoundInformation = ({
           defaultMessage: 'No max.',
         })
     : isPercentage
-    ? i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholderPercentage', {
-        defaultMessage: '0',
-      })
-    : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
-        defaultMessage: 'No min.',
-      });
+      ? i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholderPercentage', {
+          defaultMessage: '0',
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
+          defaultMessage: 'No min.',
+        });
 
   const actionDescription = isUpper
     ? isPercentage
@@ -166,12 +166,12 @@ export const getAutoBoundInformation = ({
           defaultMessage: `No maximum value`,
         })
     : isPercentage
-    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValuePercentage', {
-        defaultMessage: `Use minimum percentage`,
-      })
-    : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
-        defaultMessage: `No minimum value`,
-      });
+      ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValuePercentage', {
+          defaultMessage: `Use minimum percentage`,
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
+          defaultMessage: `No minimum value`,
+        });
 
   const icon = !isPercentage ? InfinityIcon : isUpper ? ValueMaxIcon : ValueMinIcon;
 

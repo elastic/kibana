@@ -306,8 +306,8 @@ export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             const query = test.overwrite
               ? '?overwrite=true'
               : test.createNewCopies
-              ? '?createNewCopies=true'
-              : '';
+                ? '?createNewCopies=true'
+                : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
               .auth(user?.username!, user?.password!)

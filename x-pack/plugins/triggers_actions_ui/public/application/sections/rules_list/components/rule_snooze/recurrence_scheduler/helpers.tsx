@@ -74,10 +74,10 @@ export const recurrenceSummary = ({
   const nthWeekday = !firstWeekday
     ? null
     : firstWeekday.startsWith('+')
-    ? Number(firstWeekday[1])
-    : firstWeekday.startsWith('-1')
-    ? 0
-    : null;
+      ? Number(firstWeekday[1])
+      : firstWeekday.startsWith('-1')
+        ? 0
+        : null;
   let byweekdaySummary =
     byweekday && byweekday.length > 0
       ? nthWeekday !== null
@@ -118,10 +118,10 @@ export const recurrenceSummary = ({
     freq === RRuleFrequency.WEEKLY
       ? byweekdaySummary
       : freq === RRuleFrequency.MONTHLY
-      ? byweekdaySummary ?? bymonthdaySummary
-      : freq === RRuleFrequency.YEARLY
-      ? bymonthSummary
-      : null;
+        ? byweekdaySummary ?? bymonthdaySummary
+        : freq === RRuleFrequency.YEARLY
+          ? bymonthSummary
+          : null;
 
   const untilSummary = until
     ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary', {
@@ -129,11 +129,11 @@ export const recurrenceSummary = ({
         values: { date: moment(until).format('LL') },
       })
     : count
-    ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.occurrencesSummary', {
-        defaultMessage: 'for {count, plural, one {# occurrence} other {# occurrences}}',
-        values: { count },
-      })
-    : null;
+      ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.occurrencesSummary', {
+          defaultMessage: 'for {count, plural, one {# occurrence} other {# occurrences}}',
+          values: { count },
+        })
+      : null;
 
   const every = i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurrenceSummary', {
     defaultMessage: 'every {frequencySummary}{on}{until}',
@@ -174,9 +174,9 @@ export const buildCustomRecurrenceSchedulerState = ({
           .filter((k) => byweekday[k] === true)
           .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)])
       : // If monthly frequency is selected with the nth weekday option, pull byweekday from the configured startDate
-      startDate && isMonthlyByWeekday
-      ? generateNthByweekday(startDate)
-      : [];
+        startDate && isMonthlyByWeekday
+        ? generateNthByweekday(startDate)
+        : [];
 
   const bymonthday = useByMonthDay ? [startDate.date()] : [];
   const bymonth = startDate && frequency === RRuleFrequency.YEARLY ? [startDate.month()] : [];

@@ -90,13 +90,16 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
   };
 
   const itemIdToExpandedRowMap = useMemo(() => {
-    return restores.reduce((acc, restore) => {
-      const { index, shards } = restore;
-      if (expandedIndices[index]) {
-        acc[index] = <ShardsTable shards={shards} />;
-      }
-      return acc;
-    }, {} as { [key: string]: JSX.Element });
+    return restores.reduce(
+      (acc, restore) => {
+        const { index, shards } = restore;
+        if (expandedIndices[index]) {
+          acc[index] = <ShardsTable shards={shards} />;
+        }
+        return acc;
+      },
+      {} as { [key: string]: JSX.Element }
+    );
   }, [expandedIndices, restores]);
 
   const columns: Array<EuiBasicTableColumn<SnapshotRestore>> = [

@@ -163,7 +163,7 @@ describe('Field', function () {
             pattern: '$0,0.[00]',
           },
         }),
-      } as unknown as FieldFormat);
+      }) as unknown as FieldFormat;
     expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

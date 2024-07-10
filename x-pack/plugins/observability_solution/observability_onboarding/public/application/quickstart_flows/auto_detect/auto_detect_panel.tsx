@@ -107,8 +107,8 @@ export const AutoDetectPanel: FunctionComponent = () => {
               status === 'dataReceived'
                 ? 'complete'
                 : status === 'awaitingData' || status === 'inProgress'
-                ? 'current'
-                : 'incomplete',
+                  ? 'current'
+                  : 'incomplete',
             children: (
               <>
                 {status === 'dataReceived' ? (

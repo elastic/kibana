@@ -347,8 +347,8 @@ export function loadInitial(
                       !(initialInput as LensByReferenceInput)?.savedObjectId && currentSessionId
                         ? currentSessionId
                         : !inlineEditing
-                        ? data.search.session.start()
-                        : undefined,
+                          ? data.search.session.start()
+                          : undefined,
                     persistedDoc: doc,
                     activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                     visualization: {

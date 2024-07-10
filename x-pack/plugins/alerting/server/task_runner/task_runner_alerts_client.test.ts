@@ -779,7 +779,7 @@ describe('Task Runner', () => {
       State extends AlertInstanceState = never,
       Context extends AlertInstanceContext = never,
       ActionGroupIds extends string = 'default',
-      RecoveryActionGroupId extends string = 'recovered'
+      RecoveryActionGroupId extends string = 'recovered',
     >({
       alertsClientToUse,
       alertsClientNotToUse,

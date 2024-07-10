@@ -33,8 +33,8 @@ function getOpenAIPromptTokenCount({
             'name' in message
               ? message.name
               : 'function_call' in message && message.function_call
-              ? message.function_call.name + '\n' + message.function_call.arguments
-              : ''
+                ? message.function_call.name + '\n' + message.function_call.arguments
+                : ''
           }<|end|>`
       )
       .join('\n')

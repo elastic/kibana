@@ -32,7 +32,10 @@ export class EmailServiceProvider
   private setupSuccessful: boolean;
   private setupError: string;
 
-  constructor(private config: NotificationsConfigType, private logger: Logger) {
+  constructor(
+    private config: NotificationsConfigType,
+    private logger: Logger
+  ) {
     this.setupSuccessful = false;
     this.setupError = 'Email Service Error: setup() has not been run';
   }

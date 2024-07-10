@@ -100,7 +100,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       },
     },
     uiSettings: {
-      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+      get: () => ({ key: 'mock', defaultOverride: undefined }) as any,
     },
     triggersActionsUi: {
       getAlertSummaryWidget: () => <></>,
@@ -108,7 +108,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     charts: {
       theme: {
-        useChartsBaseTheme: () => ({} as Theme),
+        useChartsBaseTheme: () => ({}) as Theme,
       },
     },
     settings: {
@@ -137,7 +137,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
               getRedirectUrl: (args: any) => {
                 action('share.url.locators.getRedirectUrl')(args);
               },
-            } as unknown as LocatorPublic<any>),
+            }) as unknown as LocatorPublic<any>,
         },
       },
     },

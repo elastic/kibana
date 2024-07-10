@@ -17,7 +17,7 @@ import { getEuiContextMapping } from './i18n_eui_mapping';
 const VALUES_REGEXP = /\{\w+\}/;
 type I18nTranslateCall = [
   string,
-  { defaultMessage: string; values?: object; description?: string }
+  { defaultMessage: string; values?: object; description?: string },
 ];
 
 describe('@elastic/eui i18n tokens', () => {

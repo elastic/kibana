@@ -113,10 +113,10 @@ export const MultiFieldMapping: React.FC = () => {
       isTextExpansionModelSelected
         ? TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL
         : selectedFieldNames.length === 0
-        ? TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
-        : selectedFieldNames.length === 1
-        ? selectedFieldNames[0].label
-        : TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS
+          ? TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
+          : selectedFieldNames.length === 1
+            ? selectedFieldNames[0].label
+            : TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS
     );
   };
 

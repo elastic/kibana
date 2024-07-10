@@ -68,7 +68,7 @@ export async function migrationStateActionMachine({
           ...newState,
           outdatedDocuments: (
             (newState as OutdatedDocumentsSearchTransformState).outdatedDocuments ?? []
-          ).map((doc) => ({ _id: doc._id } as SavedObjectsRawDoc)),
+          ).map((doc) => ({ _id: doc._id }) as SavedObjectsRawDoc),
           bulkOperationBatches: redactBulkOperationBatches(
             (newState as OutdatedDocumentsSearchBulkIndexState).bulkOperationBatches ?? [[]]
           ),

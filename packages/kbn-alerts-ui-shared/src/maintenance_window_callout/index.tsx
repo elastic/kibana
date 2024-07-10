@@ -101,10 +101,10 @@ export function MaintenanceWindowCallout({
     return activeCategories.length === 0
       ? null
       : activeCategories.length === 1
-      ? `${activeCategories}`
-      : activeCategories.length === 2
-      ? maintenanceWindowTwoCategoryNames(activeCategories)
-      : maintenanceWindowMultipleCategoryNames(activeCategories);
+        ? `${activeCategories}`
+        : activeCategories.length === 2
+          ? maintenanceWindowTwoCategoryNames(activeCategories)
+          : maintenanceWindowMultipleCategoryNames(activeCategories);
   }, [activeMaintenanceWindows, categories]);
 
   if (isMaintenanceWindowDisabled) {

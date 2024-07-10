@@ -17,8 +17,8 @@ export const NotebookCell = ({ cell, language }: { cell: NotebookCellType; langu
   const content = cell.source
     ? combineSource(cell.source)
     : cell.input
-    ? combineSource(cell.input)
-    : null;
+      ? combineSource(cell.input)
+      : null;
 
   if (!content) return null;
 

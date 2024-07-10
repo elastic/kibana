@@ -1114,17 +1114,20 @@ export async function validateQuery(
     return result;
   }
   const finalCallbacks = callbacks || {};
-  const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
-    if (
-      !(key in finalCallbacks) ||
-      (key in finalCallbacks && finalCallbacks[key as keyof ESQLCallbacks] == null)
-    ) {
-      for (const e of errorCodes) {
-        acc[e] = true;
+  const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce(
+    (acc, [key, errorCodes]) => {
+      if (
+        !(key in finalCallbacks) ||
+        (key in finalCallbacks && finalCallbacks[key as keyof ESQLCallbacks] == null)
+      ) {
+        for (const e of errorCodes) {
+          acc[e] = true;
+        }
       }
-    }
-    return acc;
-  }, {} as Partial<Record<ErrorTypes, boolean>>);
+      return acc;
+    },
+    {} as Partial<Record<ErrorTypes, boolean>>
+  );
   const filteredErrors = result.errors
     .filter((error) => {
       if ('severity' in error) {

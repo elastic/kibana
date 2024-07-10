@@ -28,7 +28,10 @@ import { BundleRefProcessor } from './process_document/document_processors/bundl
 import { RemoveUnusedComponentsProcessor } from './process_document/document_processors/remove_unused_components';
 
 export class SkipException extends Error {
-  constructor(public documentPath: string, message: string) {
+  constructor(
+    public documentPath: string,
+    message: string
+  ) {
     super(message);
   }
 }

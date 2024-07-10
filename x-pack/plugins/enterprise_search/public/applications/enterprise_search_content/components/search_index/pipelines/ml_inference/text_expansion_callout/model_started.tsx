@@ -57,14 +57,14 @@ export const ModelStarted = ({
                         { defaultMessage: 'Your ELSER model has started single-threaded.' }
                       )
                   : isCompact
-                  ? i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
-                      { defaultMessage: 'Your ELSER model is running.' }
-                    )
-                  : i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
-                      { defaultMessage: 'Your ELSER model has started.' }
-                    )}
+                    ? i18n.translate(
+                        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
+                        { defaultMessage: 'Your ELSER model is running.' }
+                      )
+                    : i18n.translate(
+                        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
+                        { defaultMessage: 'Your ELSER model has started.' }
+                      )}
               </h3>
             </EuiText>
           </EuiFlexItem>

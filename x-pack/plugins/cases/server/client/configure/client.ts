@@ -260,10 +260,13 @@ export async function getConnectors({
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
   try {
-    const actionTypes = (await actionsClient.listTypes()).reduce((types, type) => {
-      types[type.id] = type;
-      return types;
-    }, {} as Record<string, ActionType>);
+    const actionTypes = (await actionsClient.listTypes()).reduce(
+      (types, type) => {
+        types[type.id] = type;
+        return types;
+      },
+      {} as Record<string, ActionType>
+    );
 
     const res = (await actionsClient.getAll())
       .filter((action) => isConnectorSupported(action, actionTypes))

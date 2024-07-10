@@ -30,8 +30,8 @@ export async function loadRuleState({
   ruleId: string;
 }): Promise<RuleTaskState> {
   return (await http
-    .get<AsApiContract<RuleTaskState> | EmptyHttpResponse>(
-      `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${ruleId}/state`
-    )
+    .get<
+      AsApiContract<RuleTaskState> | EmptyHttpResponse
+    >(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${ruleId}/state`)
     .then((state) => (state ? rewriteBodyRes(state) : {}))) as RuleTaskState;
 }

@@ -9,7 +9,7 @@ import { type PathsOf, type TypeOf, useParams } from '@kbn/typed-react-router-co
 import type { AIAssistantManagementObservabilityRoutes } from '../routes/config';
 
 export function useObservabilityAIAssistantManagementRouterParams<
-  TPath extends PathsOf<AIAssistantManagementObservabilityRoutes>
+  TPath extends PathsOf<AIAssistantManagementObservabilityRoutes>,
 >(path: TPath): TypeOf<AIAssistantManagementObservabilityRoutes, TPath> {
   return useParams(path)! as TypeOf<AIAssistantManagementObservabilityRoutes, TPath>;
 }

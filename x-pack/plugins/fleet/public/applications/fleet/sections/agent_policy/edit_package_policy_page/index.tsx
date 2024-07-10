@@ -196,8 +196,8 @@ export const EditPackagePolicyForm = memo<{
           pkgkey: pkgKeyFromPackageInfo(packageInfo!),
         })
       : policyId
-      ? getHref('policy_details', { policyId })
-      : '/';
+        ? getHref('policy_details', { policyId })
+        : '/';
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
@@ -206,8 +206,8 @@ export const EditPackagePolicyForm = memo<{
           pkgkey: pkgKeyFromPackageInfo(packageInfo!),
         })
       : policyId
-      ? getHref('policy_details', { policyId })
-      : '/';
+        ? getHref('policy_details', { policyId })
+        : '/';
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);

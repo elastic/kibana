@@ -403,8 +403,8 @@ export class TaskScheduling {
                     isTaskRunRequestEvent(taskEvent)
                       ? `Task Manager is at capacity, please try again later`
                       : isTaskRunEvent(taskEvent)
-                      ? `${(errorResult as ErroredTask).error}`
-                      : `${errorResult}`
+                        ? `${(errorResult as ErroredTask).error}`
+                        : `${errorResult}`
                   }`
                 )
               );

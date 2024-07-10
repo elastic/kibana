@@ -80,13 +80,13 @@ export function RGBPicker({
   const invalidColor = isColorTextInvalid
     ? euiThemeVars.euiColorDanger
     : colorHasLowContrast
-    ? euiThemeVars.euiColorWarning
-    : '';
+      ? euiThemeVars.euiColorWarning
+      : '';
   const invalidColorText = isColorTextInvalid
     ? euiThemeVars.euiColorDangerText
     : colorHasLowContrast
-    ? euiThemeVars.euiColorWarningText
-    : '';
+      ? euiThemeVars.euiColorWarningText
+      : '';
   return (
     <EuiFlexGroup direction="column" gutterSize="s" style={{ padding: 8 }}>
       <EuiFlexItem>
@@ -171,14 +171,14 @@ export function RGBPicker({
                             defaultMessage: 'Please use a valid color hex code',
                           })
                         : colorHasLowContrast
-                        ? i18n.translate('coloring.colorMapping.colorPicker.lowContrastColor', {
-                            defaultMessage: `This color has a low contrast in {themes} {errorModes, plural, one {mode} other {# modes}}`,
-                            values: {
-                              themes: errorMessage.join(','),
-                              errorModes: errorMessage.length,
-                            },
-                          })
-                        : undefined
+                          ? i18n.translate('coloring.colorMapping.colorPicker.lowContrastColor', {
+                              defaultMessage: `This color has a low contrast in {themes} {errorModes, plural, one {mode} other {# modes}}`,
+                              values: {
+                                themes: errorMessage.join(','),
+                                errorModes: errorMessage.length,
+                              },
+                            })
+                          : undefined
                     }
                   >
                     <EuiIcon
@@ -188,8 +188,8 @@ export function RGBPicker({
                         isColorTextInvalid
                           ? euiThemeVars.euiColorDangerText
                           : colorHasLowContrast
-                          ? euiThemeVars.euiColorWarningText
-                          : euiThemeVars.euiColorPrimary
+                            ? euiThemeVars.euiColorWarningText
+                            : euiThemeVars.euiColorPrimary
                       }
                     />
                   </EuiToolTip>

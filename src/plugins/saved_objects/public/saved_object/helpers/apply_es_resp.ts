@@ -63,9 +63,8 @@ export async function applyESResp(
           searchSourceValues as any,
           resp.references
         );
-        savedObject.searchSource = await dependencies.search.searchSource.create(
-          searchSourceValues
-        );
+        savedObject.searchSource =
+          await dependencies.search.searchSource.create(searchSourceValues);
       } else {
         savedObject.searchSourceFields = searchSourceValues;
       }

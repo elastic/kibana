@@ -78,7 +78,7 @@ export type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
-  ActionGroupIds extends string = string
+  ActionGroupIds extends string = string,
 > {
   id?: string;
   ruleParams: Params;

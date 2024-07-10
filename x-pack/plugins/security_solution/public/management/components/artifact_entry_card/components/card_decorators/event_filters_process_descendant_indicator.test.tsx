@@ -27,12 +27,12 @@ describe('EventFiltersProcessDescendantIndicator', () => {
   const getStandardEventFilter: () => AnyArtifact = () =>
     ({
       tags: [GLOBAL_ARTIFACT_TAG],
-    } as Partial<AnyArtifact> as AnyArtifact);
+    }) as Partial<AnyArtifact> as AnyArtifact;
 
   const getProcessDescendantEventFilter: () => AnyArtifact = () =>
     ({
       tags: [GLOBAL_ARTIFACT_TAG, FILTER_PROCESS_DESCENDANTS_TAG],
-    } as Partial<AnyArtifact> as AnyArtifact);
+    }) as Partial<AnyArtifact> as AnyArtifact;
 
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();

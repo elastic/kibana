@@ -19,7 +19,9 @@ import {
 } from '../dashboard_container/persistable_state/dashboard_container_references';
 
 export function convertSavedDashboardPanelToPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  TEmbeddableInput extends
+    | EmbeddableInput
+    | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,

@@ -117,7 +117,7 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
         ({
           key,
           value,
-        } as AlertField)
+        }) as AlertField
     );
     if (fields?.length) {
       _items = _items.filter((f) => fields.includes(f.key));

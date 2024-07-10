@@ -80,15 +80,18 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   getScriptedFieldsForQuery() {
-    return this.getScriptedFields().reduce((scriptFields, field) => {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script as string,
-          lang: field.lang,
-        },
-      };
-      return scriptFields;
-    }, {} as Record<string, estypes.ScriptField>);
+    return this.getScriptedFields().reduce(
+      (scriptFields, field) => {
+        scriptFields[field.name] = {
+          script: {
+            source: field.script as string,
+            lang: field.lang,
+          },
+        };
+        return scriptFields;
+      },
+      {} as Record<string, estypes.ScriptField>
+    );
   }
 
   getEtag = () => this.etag;

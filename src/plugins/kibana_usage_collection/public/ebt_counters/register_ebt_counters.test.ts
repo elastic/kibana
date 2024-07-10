@@ -24,7 +24,7 @@ describe('registerEbtCounters', () => {
       .spyOn(core.analytics.telemetryCounter$, 'subscribe')
       .mockImplementation(((listener) => {
         internalListener = listener as (counter: TelemetryCounter) => void;
-      }) as typeof core.analytics.telemetryCounter$['subscribe']);
+      }) as (typeof core.analytics.telemetryCounter$)['subscribe']);
   });
 
   test('it subscribes to `analytics.telemetryCounters$`', () => {

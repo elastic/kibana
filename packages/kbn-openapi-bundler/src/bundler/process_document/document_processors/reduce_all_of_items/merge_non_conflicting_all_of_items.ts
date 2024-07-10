@@ -70,7 +70,7 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
 
       const resultItems: [
         MergedObjectSchema,
-        ...Array<OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
+        ...Array<OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>,
       ] = [
         {
           type: 'object',

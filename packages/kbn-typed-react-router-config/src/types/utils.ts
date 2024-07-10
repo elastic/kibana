@@ -12,20 +12,20 @@ export type MaybeOutputOf<T> = T extends t.Type<any> ? [t.OutputOf<T>] : [];
 export type NormalizePath<T extends string> = T extends `//${infer TRest}`
   ? NormalizePath<`/${TRest}`>
   : T extends '/'
-  ? T
-  : T extends `${infer TRest}/`
-  ? TRest
-  : T;
+    ? T
+    : T extends `${infer TRest}/`
+      ? TRest
+      : T;
 export type DeeplyMutableRoutes<T> = T extends React.ReactElement
   ? T
   : T extends t.Type<any>
-  ? T
-  : T extends readonly [infer U]
-  ? [DeeplyMutableRoutes<U>]
-  : T extends readonly [infer U, ...infer V]
-  ? [DeeplyMutableRoutes<U>, ...DeeplyMutableRoutes<V>]
-  : T extends Record<any, any>
-  ? {
-      -readonly [key in keyof T]: DeeplyMutableRoutes<T[key]>;
-    }
-  : T;
+    ? T
+    : T extends readonly [infer U]
+      ? [DeeplyMutableRoutes<U>]
+      : T extends readonly [infer U, ...infer V]
+        ? [DeeplyMutableRoutes<U>, ...DeeplyMutableRoutes<V>]
+        : T extends Record<any, any>
+          ? {
+              -readonly [key in keyof T]: DeeplyMutableRoutes<T[key]>;
+            }
+          : T;

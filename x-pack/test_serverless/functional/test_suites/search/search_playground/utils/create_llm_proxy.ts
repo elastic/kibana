@@ -43,7 +43,10 @@ export class LlmProxy {
 
   interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
 
-  constructor(private readonly port: number, private readonly log: ToolingLog) {
+  constructor(
+    private readonly port: number,
+    private readonly log: ToolingLog
+  ) {
     this.server = http
       .createServer()
       .on('request', async (request, response) => {
@@ -88,7 +91,7 @@ export class LlmProxy {
   }
 
   intercept<
-    TResponseChunks extends Array<Record<string, unknown>> | string | undefined = undefined
+    TResponseChunks extends Array<Record<string, unknown>> | string | undefined = undefined,
   >(
     name: string,
     when: RequestInterceptor['when'],
