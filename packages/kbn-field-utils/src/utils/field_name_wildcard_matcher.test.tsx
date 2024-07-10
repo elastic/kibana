@@ -126,10 +126,10 @@ describe('fieldNameWildcardMatcher', function () {
       expect(getFieldSearchMatchingHighlight('test this')).toBe('');
     });
 
-    it('should correctly return a full match for a wildcard search', async () => {
-      expect(getFieldSearchMatchingHighlight('Test this', 'test*')).toBe('Test this');
-      expect(getFieldSearchMatchingHighlight('test this', '*this')).toBe('test this');
-      expect(getFieldSearchMatchingHighlight('test this', ' te th')).toBe('test this');
+    it('should correctly return a match for a wildcard search', async () => {
+      expect(getFieldSearchMatchingHighlight('Test this', 'test*')).toBe('test');
+      expect(getFieldSearchMatchingHighlight('test this', '*this')).toBe(' this');
+      expect(getFieldSearchMatchingHighlight('test this', ' te th')).toBe('t th');
     });
   });
 });
