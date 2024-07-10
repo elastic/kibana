@@ -184,10 +184,10 @@ test('returns error when not valid string or non-safe positive integer', () => {
   );
 
   expect(() => duration().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y', '1m30s'), where the duration is a safe positive integer."`
   );
 
   expect(() => duration().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y', '1m30s'), where the duration is a safe positive integer."`
   );
 });
