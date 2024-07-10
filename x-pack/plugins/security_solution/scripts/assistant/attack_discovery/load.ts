@@ -35,6 +35,9 @@ const enableRule = async ({
         action: 'enable',
         ids: [ruleId],
       },
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
     });
 
     log.info(`Rule with ID ${ruleId} has been enabled.`);
@@ -51,6 +54,9 @@ const getRule = async ({ kbnClient, log }: { kbnClient: KbnClient; log: ToolingL
   }>({
     method: 'GET',
     path: `/api/detection_engine/rules/_find?page=1&per_page=5&sort_field=enabled&sort_order=asc&filter=alert.attributes.name:%22Endpoint%20Security%20%5BInsights%5D%22`,
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
   return response.data.data?.[0];
@@ -68,6 +74,7 @@ const importRule = async ({ kbnClient, log }: { kbnClient: KbnClient; log: Tooli
       headers: {
         'kbn-xsrf': 'true',
         'Content-Type': 'multipart/form-data',
+        'elastic-api-version': '2023-10-31',
       },
       body: {
         file: fs.createReadStream(RULE_FILE_PATH),
