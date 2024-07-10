@@ -13,18 +13,18 @@ import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
+import { getLogRateAnalysisParametersFromAlert } from '@kbn/aiops-log-rate-analysis/get_log_rate_analysis_parameters_from_alert';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { ALERT_END } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERT_END } from '@kbn/rule-data-utils';
 import { CustomThresholdRuleTypeParams } from '../../types';
 import { TopAlert } from '../../../..';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
-import { getInitialAnalysisStart, getTimeRangeEnd } from './helpers/get_initial_analysis_start';
 
 export interface AlertDetailsLogRateAnalysisProps {
   alert: TopAlert<Record<string, any>>;
@@ -66,22 +66,23 @@ export function LogRateAnalysis({
     }
   }, [alert, rule.params]);
 
-  // Identify `intervalFactor` to adjust time ranges based on alert settings.
-  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
-  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
-  const lookbackDuration =
-    rule.params.criteria[0]?.timeSize && rule.params.criteria[0]?.timeUnit
-      ? moment.duration(rule.params.criteria[0].timeSize, rule.params.criteria[0].timeUnit)
-      : moment.duration(1, 'm');
-  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
+  const { timeRange, windowParameters } = useMemo(() => {
+    const alertStartedAt = moment(alert.start).toISOString();
+    const alertEndedAt = alert.fields[ALERT_END]
+      ? moment(alert.fields[ALERT_END]).toISOString()
+      : undefined;
+    const timeSize = rule.params.criteria[0]?.timeSize as number | undefined;
+    const timeUnit = rule.params.criteria[0]?.timeUnit as
+      | moment.unitOfTime.DurationConstructor
+      | undefined;
 
-  const alertStart = moment(alert.start);
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
-
-  const timeRange = {
-    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: getTimeRangeEnd({ alertStart, intervalFactor, alertEnd }),
-  };
+    return getLogRateAnalysisParametersFromAlert({
+      alertStartedAt,
+      alertEndedAt,
+      timeSize,
+      timeUnit,
+    });
+  }, [alert, rule]);
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.observability.customThreshold.alertDetails.logRateAnalysisTitle',
@@ -188,11 +189,7 @@ export function LogRateAnalysis({
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
-            initialAnalysisStart={getInitialAnalysisStart({
-              alertStart,
-              intervalFactor,
-              alertEnd,
-            })}
+            initialAnalysisStart={windowParameters}
             barColorOverride={colorTransformer(Color.color0)}
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}

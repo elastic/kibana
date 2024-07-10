@@ -5,19 +5,51 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
-export interface GetInitialAnalysisStartArgs {
+export interface GetLogRateAnalysisParametersFromAlertArgs {
+  alertStartedAt: string;
+  alertEndedAt?: string;
+  timeSize?: number;
+  timeUnit?: moment.unitOfTime.DurationConstructor;
+}
+
+export const getLogRateAnalysisParametersFromAlert = ({
+  alertStartedAt,
+  alertEndedAt,
+  timeSize,
+  timeUnit,
+}: GetLogRateAnalysisParametersFromAlertArgs) => {
+  // Identify `intervalFactor` to adjust time ranges based on alert settings.
+  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
+  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
+  const lookbackDuration =
+    timeSize && timeUnit ? moment.duration(timeSize, timeUnit) : moment.duration(1, 'm');
+  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
+
+  const alertStart = moment(alertStartedAt);
+  const alertEnd = alertEndedAt ? moment(alertEndedAt) : undefined;
+
+  const helperArgs = { alertStart, alertEnd, intervalFactor };
+
+  const timeRange = {
+    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
+    max: getTimeRangeEnd(helperArgs),
+  };
+
+  return {
+    timeRange,
+    windowParameters: getWindowParameters(helperArgs),
+  };
+};
+
+interface GetParameterHelperArgs {
   alertStart: Moment;
   intervalFactor: number;
   alertEnd?: Moment;
 }
 
-export const getTimeRangeEnd = ({
-  alertStart,
-  intervalFactor,
-  alertEnd,
-}: GetInitialAnalysisStartArgs) => {
+function getTimeRangeEnd({ alertStart, alertEnd, intervalFactor }: GetParameterHelperArgs) {
   if (alertEnd) {
     if (
       alertStart
@@ -39,13 +71,9 @@ export const getTimeRangeEnd = ({
   } else {
     return alertStart.clone().add(15 * intervalFactor, 'minutes');
   }
-};
+}
 
-export const getDeviationMax = ({
-  alertStart,
-  intervalFactor,
-  alertEnd,
-}: GetInitialAnalysisStartArgs) => {
+function getDeviationMax({ alertStart, alertEnd, intervalFactor }: GetParameterHelperArgs) {
   if (alertEnd) {
     if (
       alertStart
@@ -76,9 +104,9 @@ export const getDeviationMax = ({
       .add(10 * intervalFactor, 'minutes')
       .valueOf();
   }
-};
+}
 
-export const getInitialAnalysisStart = (args: GetInitialAnalysisStartArgs) => {
+function getWindowParameters(args: GetParameterHelperArgs) {
   const { alertStart, intervalFactor } = args;
   return {
     baselineMin: alertStart
@@ -95,4 +123,4 @@ export const getInitialAnalysisStart = (args: GetInitialAnalysisStartArgs) => {
       .valueOf(),
     deviationMax: getDeviationMax(args),
   };
-};
+}
