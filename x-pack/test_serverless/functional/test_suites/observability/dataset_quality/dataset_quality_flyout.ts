@@ -55,8 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDatasetName = datasetNames[2];
 
   describe('Flyout', function () {
-    // see details: https://github.com/elastic/kibana/issues/187624
-    this.tags(['failsOnMKI']);
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -157,17 +155,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should shows the integration section for integrations', async () => {
         await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-        const integrationNameElements = await PageObjects.datasetQuality.getFlyoutElementsByText(
-          '[data-test-subj=datasetQualityFlyoutFieldValue]',
-          apacheIntegrationId
-        );
-
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors
             .datasetQualityFlyoutFieldsListIntegrationDetails
         );
 
-        expect(integrationNameElements.length).to.eql(1);
+        await retry.tryForTime(5000, async () => {
+          const integrationNameExists = await PageObjects.datasetQuality.doesTextExist(
+            PageObjects.datasetQuality.testSubjectSelectors
+              .datasetQualityFlyoutFieldsListIntegrationDetails,
+            apacheIntegrationId
+          );
+          expect(integrationNameExists).to.be(true);
+        });
 
         await PageObjects.datasetQuality.closeFlyout();
       });

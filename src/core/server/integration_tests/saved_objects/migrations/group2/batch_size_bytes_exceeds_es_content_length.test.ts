@@ -58,8 +58,6 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('fails with a descriptive message when maxBatchSizeBytes exceeds ES http.max_content_length', async () => {
