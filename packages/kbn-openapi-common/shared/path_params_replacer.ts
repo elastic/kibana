@@ -12,6 +12,25 @@
  * @param path Path string with placeholders for params
  * @param params Object with params to replace
  * @returns Path string with params replaced
+ *
+ * @example
+ * Having a path string `my/path/{param1}/to/{param2}` and params object
+ *
+ * ```ts
+ * const params = {
+ *   param1: 'value1',
+ *   param2: 'value2,
+ * }
+ * ```
+ *
+ * and invoking the function
+ *
+ * ```ts
+ * replaceParams('my/path/{param1}/to/{param2}', params);
+ * ```
+ *
+ * it will return `my/path/value1/to/value2`.
+ *
  */
 export function replaceParams(path: string, params: Record<string, string | number>): string {
   let output = path;
