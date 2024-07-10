@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           '1m'
         );
 
-        logSynthtrace.index([
+        await logSynthtrace.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)

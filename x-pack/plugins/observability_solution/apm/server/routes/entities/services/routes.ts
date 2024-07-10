@@ -100,14 +100,14 @@ const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
 
     const { serviceNames } = params.body;
 
+    if (!serviceNames.length) {
+      throw Boom.badRequest(`serviceNames cannot be empty`);
+    }
+
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
-
-    if (!serviceNames.length) {
-      throw Boom.badRequest(`serviceNames cannot be empty`);
-    }
 
     const logsParams = {
       esClient: coreContext.elasticsearch.client.asCurrentUser,
