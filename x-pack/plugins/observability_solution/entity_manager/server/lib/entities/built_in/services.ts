@@ -28,7 +28,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
     type: 'service',
     managed: true,
     filter: '@timestamp >= now-10m',
-    indexPatterns: ['logs-*', 'filebeat*', 'metrics-apm*'],
+    indexPatterns: ['logs-*', 'filebeat*', 'metrics-apm.service_transaction.1m*'],
     history: {
       timestampField: '@timestamp',
       interval: '1m',
