@@ -13,6 +13,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
+  ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
 
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -508,6 +509,9 @@ export default ({ getService }: FtrProviderContext) => {
         agent: {
           name,
         },
+        host: {
+          name: 'host-1',
+        },
       });
 
       it('should run rule in the past and generate alert, without duplicates', async () => {
@@ -587,6 +591,67 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits.length).toEqual(1);
+      });
+
+      it('supression with time window should work for manual rule runs and update alert', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).subtract(1, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-35m',
+          interval: '30m',
+          alert_suppression: {
+            duration: {
+              value: 5,
+              unit: 'h',
+            },
+          },
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(0);
+
+        // generate alert in the past
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(1);
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: moment(firstTimestamp).add(41, 'm').toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).add(42, 'm').toISOString() }),
+        ]);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).add(39, 'm'),
+          endDate: moment(firstTimestamp).add(120, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(updatedAlerts.hits.hits.length).toEqual(1);
+
+        expect(updatedAlerts.hits.hits.length).toEqual(1);
+        expect(updatedAlerts.hits.hits[0]._source).toEqual({
+          ...updatedAlerts.hits.hits[0]._source,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
       });
     });
   });
