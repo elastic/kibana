@@ -53,6 +53,23 @@ describe('esql query helpers', () => {
 
       const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
       expect(idxPattern13).toBe('');
+
+      const idxPattern14 = getIndexPatternFromESQLQuery('METRICS tsdb');
+      expect(idxPattern14).toBe('tsdb');
+
+      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb max(cpu) BY host');
+      expect(idxPattern15).toBe('tsdb');
+
+      const idxPattern16 = getIndexPatternFromESQLQuery(
+        'METRICS pods load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
+      );
+      expect(idxPattern16).toBe('pods');
+
+      const idxPattern17 = getIndexPatternFromESQLQuery('FROM "$foo%"');
+      expect(idxPattern17).toBe('$foo%');
+
+      const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
+      expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
     });
   });
 
@@ -115,6 +132,14 @@ describe('esql query helpers', () => {
         hasTransformationalCommand(`from logstash-*
       // | stats  var0 = avg(bytes) by geo.dest`)
       ).toBeFalsy();
+    });
+
+    it('should return false for metrics with no aggregation', () => {
+      expect(hasTransformationalCommand('metrics a')).toBeFalsy();
+    });
+
+    it('should return true for metrics with aggregations', () => {
+      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
     });
   });
 });

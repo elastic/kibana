@@ -8,6 +8,7 @@
 import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '@kbn/discover-utils/types';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -20,6 +21,7 @@ import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
+import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {
@@ -35,6 +37,10 @@ const isCspFinding = (source: Record<string, any> | undefined): source is CspFin
   return source?.result?.evaluation !== undefined;
 };
 
+const getCspFinding = (source: Record<string, any> | undefined): CspFinding | false => {
+  return isCspFinding(source) && (source as CspFinding);
+};
+
 /**
  * This Wrapper component renders the children if the given row is a CspFinding
  * it uses React's Render Props pattern
@@ -46,8 +52,7 @@ const CspFindingRenderer = ({
   row: DataTableRecord;
   children: ({ finding }: { finding: CspFinding }) => JSX.Element;
 }) => {
-  const source = row.raw._source;
-  const finding = isCspFinding(source) && (source as CspFinding);
+  const finding = getCspFinding(row.raw._source);
   if (!finding) return <></>;
   return children({ finding });
 };
@@ -104,6 +109,13 @@ export const LatestFindingsTable = ({
     showDistributionBar,
   });
 
+  const createMisconfigurationRuleFn = (rowIndex: number) => {
+    const finding = getCspFinding(rows[rowIndex].raw._source);
+    if (!finding) return;
+
+    return async (http: HttpSetup) => createDetectionRuleFromBenchmarkRule(http, finding.rule);
+  };
+
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       {error ? (
@@ -137,6 +149,7 @@ export const LatestFindingsTable = ({
             customCellRenderer={customCellRenderer}
             groupSelectorComponent={groupSelectorComponent}
             height={height}
+            createRuleFn={createMisconfigurationRuleFn}
             columnHeaders={findingsTableFieldLabels}
           />
         </>

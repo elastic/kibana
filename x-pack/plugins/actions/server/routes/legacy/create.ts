@@ -31,7 +31,7 @@ export const createActionRoute = (
       path: `${BASE_ACTION_API_PATH}/action`,
       options: {
         access: 'public',
-        description: `Create a connector`,
+        summary: `Create a connector`,
       },
       validate: {
         body: bodySchema,

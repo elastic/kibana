@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -54,6 +54,12 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
   display: flex;
   flex-direction: column;
   height: 100%;
+`;
+
+export const leadingActionsColumnStyles = `
+  .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
+    padding: 0;
+  }
 `;
 
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
@@ -161,5 +167,18 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
+  }
+
+  .udtTimeline .euiDataGrid__leftControls {
+    display: flex;
+    align-items: baseline;
+  }
+
+  ${leadingActionsColumnStyles}
+`;
+
+export const UnifiedTimelineGlobalStyles = createGlobalStyle`
+  body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
+    z-index: 1001 !important;
   }
 `;

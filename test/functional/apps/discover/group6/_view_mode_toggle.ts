@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
-        it('should not show view mode toggle for ES|QL searches', async () => {
+        it('should still show view mode toggle for ES|QL searches', async () => {
           await testSubjects.click('dscViewModeDocumentButton');
 
           await retry.try(async () => {
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.discover.selectTextBaseLang();
 
-          await testSubjects.missingOrFail('dscViewModeToggle');
+          await testSubjects.existOrFail('dscViewModeToggle');
 
           if (!useLegacyTable) {
             await testSubjects.existOrFail('unifiedDataTableToolbar');

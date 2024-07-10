@@ -42,7 +42,7 @@ describe('updateVolatileSearchSource', () => {
       sort: [] as SortOrder[],
       customFilters: [],
     });
-    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
+    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
 
@@ -56,7 +56,7 @@ describe('updateVolatileSearchSource', () => {
       customFilters: [],
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
-      { field: '*', include_unmapped: 'true' },
+      { field: '*', include_unmapped: true },
     ]);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });

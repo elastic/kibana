@@ -84,7 +84,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -124,7 +124,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -189,7 +189,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -229,7 +229,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -275,7 +275,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const { searchSource } = updateSearchSource(
+      const { searchSource } = await updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -346,7 +346,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const { filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+      const { filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,

@@ -93,7 +93,8 @@ describe('react embeddable renderer', () => {
         { bork: 'blorp?' },
         expect.any(Function),
         expect.any(String),
-        expect.any(Object)
+        expect.any(Object),
+        expect.any(Function)
       );
     });
   });
@@ -118,7 +119,8 @@ describe('react embeddable renderer', () => {
         { bork: 'blorp?' },
         expect.any(Function),
         '12345',
-        expect.any(Object)
+        expect.any(Object),
+        expect.any(Function)
       );
     });
   });
@@ -139,7 +141,8 @@ describe('react embeddable renderer', () => {
         { bork: 'blorp?' },
         expect.any(Function),
         expect.any(String),
-        parentApi
+        parentApi,
+        expect.any(Function)
       );
     });
   });
@@ -207,6 +210,43 @@ describe('react embeddable renderer', () => {
       expect(onApiAvailable).toHaveBeenCalledWith(
         expect.objectContaining({ uuid: expect.any(String) })
       )
+    );
+  });
+
+  it('catches error when thrown in deserialize', async () => {
+    const buildEmbeddable = jest.fn();
+    const errorInInitializeFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'errorInDeserialize',
+      buildEmbeddable,
+      deserializeState: (state) => {
+        throw new Error('error in deserialize');
+      },
+    };
+    registerReactEmbeddableFactory('errorInDeserialize', () =>
+      Promise.resolve(errorInInitializeFactory)
+    );
+    setupPresentationPanelServices();
+
+    const onApiAvailable = jest.fn();
+    const embeddable = render(
+      <ReactEmbeddableRenderer
+        type={'errorInDeserialize'}
+        maybeId={'12345'}
+        onApiAvailable={onApiAvailable}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: {},
+          }),
+        })}
+      />
+    );
+
+    await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
+    expect(onApiAvailable).not.toBeCalled();
+    expect(buildEmbeddable).not.toBeCalled();
+    expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
+      'error in deserialize'
     );
   });
 });

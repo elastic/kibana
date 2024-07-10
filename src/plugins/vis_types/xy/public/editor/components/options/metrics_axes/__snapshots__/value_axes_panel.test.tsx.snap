@@ -16,10 +16,9 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         size="xs"
       >
         <h3>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Y-axes"
             id="visTypeXy.controls.pointSeries.valueAxes.yAxisTitle"
-            values={Object {}}
           />
         </h3>
       </EuiTitle>

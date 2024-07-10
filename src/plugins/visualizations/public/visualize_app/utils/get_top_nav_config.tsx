@@ -152,7 +152,7 @@ export const getTopNavConfig = (
           title: i18n.translate(
             'visualizations.topNavMenu.saveVisualization.successNotificationText',
             {
-              defaultMessage: `Saved '{visTitle}'`,
+              defaultMessage: `Saved ''{visTitle}''`,
               values: {
                 visTitle: savedVis.title,
               },
@@ -225,7 +225,7 @@ export const getTopNavConfig = (
         title: i18n.translate(
           'visualizations.topNavMenu.saveVisualization.failureNotificationText',
           {
-            defaultMessage: `Error on saving '{visTitle}'`,
+            defaultMessage: `Error on saving ''{visTitle}''`,
             values: {
               visTitle: savedVis.title,
             },

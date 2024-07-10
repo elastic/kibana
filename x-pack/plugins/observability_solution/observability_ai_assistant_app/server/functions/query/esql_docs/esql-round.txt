@@ -1,15 +1,31 @@
-ROUND
+## ROUND
 
-Syntax
-Parameters
-number
-The numeric value to round. If null, the function returns null.
-decimals
-The number of decimal places to round to. Defaults to 0. If null, the function returns null.
-DescriptionRounds a number to the specified number of decimal places. Defaults to 0, which returns the nearest integer. If the precision is a negative number, rounds to the number of digits left of the decimal point.Supported types
-Example
+The `ROUND` function in ES|QL is used to round a number to a specified number of decimal places. By default, it rounds to 0 decimal places, returning the nearest integer. If the precision is a negative number, it rounds to the number of digits left of the decimal point.
+
+### Syntax:
+
+`ROUND(number, decimals)`
+
+#### Parameters:
+
+- `number`: The numeric value to round. If null, the function returns null.
+- `decimals`: The number of decimal places to round to. Defaults to 0. If null, the function returns null.
+
+### Examples:
+
+Here are a couple of examples of how to use the `ROUND` function in ES|QL queries:
+
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL height_ft = ROUND(height * 3.281, 1)
 ```
+
+In this example, the `ROUND` function is used to round the result of the multiplication of the `height` field and `3.281` to `1` decimal place. The result is stored in the `height_ft` field.
+
+```esql
+FROM sales_data
+| EVAL rounded_sales = ROUND(sales * 1.2)
+```
+
+In this second example, the `ROUND` function is used to round the result of the multiplication of the `sales` field and `1.2` to the nearest integer (since no decimal places are specified). The result is stored in the `rounded_sales` field.

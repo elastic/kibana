@@ -21,6 +21,7 @@ Kibana configuration entries providing developers with a fully typed model of th
       - [`schema.object()`](#schemaobject)
       - [`schema.recordOf()`](#schemarecordof)
       - [`schema.mapOf()`](#schemamapof)
+      - [`schema.allOf` / `schema.intersection`](#schemaintersection--schemaallof)
     - [Advanced types](#advanced-types)
       - [`schema.oneOf()`](#schemaoneof)
       - [`schema.any()`](#schemaany)
@@ -63,6 +64,8 @@ Every schema instance has a `validate` method that is used to perform a validati
 * `data: any` - **required**, data to be validated with the schema
 * `context: Record<string, any>` - **optional**, object whose properties can be referenced by the [context references](#schemacontextref)
 * `namespace: string` - **optional**, arbitrary string that is used to prefix every error message thrown during validation
+* `validationOptions: SchemaValidationOptions` - **optional**, global options to modify the default validation behavior
+  * `stripUnknownKeys: boolean` - **optional**, when `true`, it changes the default `unknowns: 'forbid'` to behave like `unknowns: 'ignore'`. This change of behavior only occurs in schemas without an explicit `unknowns` option. Refer to [`schema.object()`](#schemaobject) for more information about the `unknowns` option.
 
 ```typescript
 const valueSchema = schema.object({
@@ -135,6 +138,7 @@ __Options:__
   * `validate: (value: number) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
   * `min: number` - defines a minimum value the number should have.
   * `max: number` - defines a maximum value the number should have.
+  * `unsafe: boolean` - if true, will accept unsafe numbers (integers > 2^53).
 
 __Usage:__
 ```typescript
@@ -242,7 +246,7 @@ __Output type:__ `{ [K in keyof TProps]: TypeOf<TProps[K]> } as TObject`
 __Options:__
   * `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
-  * `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties should be allowed, ignored, or forbidden. It's `forbid` by default.
+  * `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties and sub-properties should be allowed, ignored, or forbidden. It is `forbid` by default unless the global validation option `stripUnknownKeys` is set to `true` when calling `validate()`. Refer to [the `validate()` API options](#schema-building-blocks) to learn about `stripUnknownKeys`. 
 
 __Usage:__
 ```typescript
@@ -254,6 +258,7 @@ const valueSchema = schema.object({
 
 __Notes:__
 * Using `unknowns: 'allow'` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
+* Bear in mind that specifying `unknowns: 'allow' | 'ignore' | 'forbid'` applies to the entire tree of sub-objects. If you want this option to apply only to the properties in first level, make sure to override this option by setting a new `unknowns` option in the child `schema.object()`s.
 * Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
 * `schema.object()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
@@ -294,6 +299,30 @@ const valueSchema = schema.mapOf(schema.string(), schema.number());
 __Notes:__
 * You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
 * `schema.mapOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
+
+#### `schema.intersection()` / `schema.allOf()`
+
+Creates an `object` schema being the intersection of the provided `object` schemas. 
+Note that schema construction will throw an error if some of the intersection schema share the same key(s).
+
+See the documentation for [schema.object](#schemaobject).
+
+__Options:__
+* `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
+* `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+* `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties should be allowed, ignored, or forbidden. It's `forbid` by default.
+
+__Usage:__
+```typescript
+const mySchema = schema.intersection([
+  schema.object({
+    someKey: schema.string(),
+  }),
+  schema.object({
+    anotherKey: schema.string(),
+  })
+]);
+```
 
 ### Advanced types
 

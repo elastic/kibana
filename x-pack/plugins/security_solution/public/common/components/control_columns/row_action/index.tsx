@@ -10,15 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
+import { SecurityPageName } from '../../../../../common/constants';
 import {
-  ENABLE_EXPANDABLE_FLYOUT_SETTING,
-  SecurityPageName,
-} from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -81,10 +81,6 @@ const RowActionComponent = ({
 
   const dispatch = useDispatch();
   const [{ pageName }] = useRouteSpy();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
-  const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
-    'expandableFlyoutInCreateRuleEnabled'
-  );
   const { activeStep, isTourShown } = useTourContext();
   const shouldFocusOnOverviewTab =
     (activeStep === AlertsCasesTourSteps.expandEvent ||
@@ -106,16 +102,13 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
-  let showExpandableFlyout: boolean;
-
-  // disable the old flyout on attack discovery page
-  if (pageName === SecurityPageName.attackDiscovery) {
-    showExpandableFlyout = true;
-  } else if (tableId === TableId.rulePreview) {
-    showExpandableFlyout = isSecurityFlyoutEnabled && isExpandableFlyoutInCreateRuleEnabled;
-  } else {
-    showExpandableFlyout = isSecurityFlyoutEnabled;
-  }
+  // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+  const showExpandableFlyout =
+    pageName === SecurityPageName.attackDiscovery ? true : !expandableFlyoutDisabled;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const updatedExpandedDetail: ExpandedDetailType = {
@@ -176,6 +169,37 @@ const RowActionComponent = ({
     tabType,
   ]);
 
+  const toggleShowNotes = useCallback(() => {
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
+        },
+      },
+      left: {
+        id: DocumentDetailsLeftPanelKey,
+        path: {
+          tab: LeftPanelNotesTab,
+        },
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
+        },
+      },
+    });
+    telemetry.reportOpenNoteInExpandableFlyoutClicked({
+      location: tableId,
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: tableId,
+      panel: 'left',
+    });
+  }, [eventId, indexName, openFlyout, tableId, telemetry]);
+
   const Action = controlColumn.rowCellRender;
 
   if (!timelineNonEcsData || !ecsData || !eventId) {
@@ -205,10 +229,14 @@ const RowActionComponent = ({
           showCheckboxes={showCheckboxes}
           tabType={tabType}
           timelineId={tableId}
+          toggleShowNotes={
+            !expandableFlyoutDisabled && securitySolutionNotesEnabled ? toggleShowNotes : undefined
+          }
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
           refetch={refetch}
+          showNotes={!expandableFlyoutDisabled && securitySolutionNotesEnabled ? true : false}
         />
       )}
     </>

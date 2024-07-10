@@ -25,18 +25,18 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/update', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/update_rule', () => ({
   updateRule: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
 }));
-jest.mock('../../lib/rule_api/health', () => ({
-  alertingFrameworkHealth: jest.fn(() => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
+  fetchAlertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
 }));
 
-jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest.fn().mockResolvedValue({
     isUsingSecurity: true,
     minimumScheduleInterval: { value: '1m', enforce: false },
   }),
@@ -59,8 +59,8 @@ jest.mock('./rule_errors', () => ({
   isValidRule: jest.fn(),
 }));
 
-jest.mock('../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
+  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 
 describe('rule_edit', () => {

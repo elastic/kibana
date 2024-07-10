@@ -13,8 +13,8 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { incidentSchemaObjectProperties } from './schema';
+import { validateKeysAllowed } from '../lib/validators';
 
 export const validateCommonConfig = (
   configObject: JiraPublicConfigurationType,
@@ -38,18 +38,10 @@ export const validate: ExternalServiceValidation = {
   secrets: validateCommonSecrets,
 };
 
-export const validateOtherFieldsLength = (
-  otherFields: Record<string, unknown>
-): string | undefined => {
-  if (Object.keys(otherFields).length > MAX_OTHER_FIELDS_LENGTH) {
-    return i18n.OTHER_FIELDS_LENGTH_ERROR(MAX_OTHER_FIELDS_LENGTH);
-  }
-};
-
 export const validateOtherFieldsKeys = (key: string): string | undefined => {
-  const propertiesSet = new Set(incidentSchemaObjectProperties);
-
-  if (propertiesSet.has(key)) {
-    return i18n.OTHER_FIELDS_PROPERTY_ERROR(key);
-  }
+  return validateKeysAllowed({
+    key,
+    disallowList: incidentSchemaObjectProperties,
+    fieldName: 'otherFields',
+  });
 };

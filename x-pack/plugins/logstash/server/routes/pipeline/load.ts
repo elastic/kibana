@@ -18,7 +18,7 @@ export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
       path: '/api/logstash/pipeline/{id}',
       options: {
         access: 'public',
-        description: `Get a managed Logstash pipeline`,
+        summary: `Get a managed Logstash pipeline`,
       },
       validate: {
         params: schema.object({

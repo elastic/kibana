@@ -22,7 +22,7 @@ export const getAllActionRoute = (
       path: `${BASE_ACTION_API_PATH}`,
       options: {
         access: 'public',
-        description: `Get all connectors`,
+        summary: `Get all connectors`,
       },
       validate: {},
     },

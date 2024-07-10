@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import { filter, uniq, map } from 'lodash';
+import { filter, uniq, flatMap } from 'lodash';
 import { satisfies } from 'semver';
 import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -67,7 +67,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );
-        const agentPolicyIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
+        const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
         const agentPolicies = await agentPolicyService?.getByIds(
           internalSavedObjectsClient,
           agentPolicyIds

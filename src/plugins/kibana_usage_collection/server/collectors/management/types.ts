@@ -53,6 +53,7 @@ export interface UsageStats {
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
+  'observability:logSources': string[];
   'observability:aiAssistantLogsIndexPattern': string;
   'observability:aiAssistantResponseLanguage': string;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
@@ -73,7 +74,6 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
-  'securitySolution:enableExpandableFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;

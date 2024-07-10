@@ -9,6 +9,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
+import { permissionsPolicyConfig } from './permissions_policy';
 import { ExternalUrlConfig } from './external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
@@ -571,6 +572,73 @@ describe('cdn', () => {
   });
 });
 
+describe('http2 protocol', () => {
+  it('throws if http2 is enabled but TLS is not', () => {
+    expect(() =>
+      config.schema.validate({
+        protocol: 'http2',
+        ssl: {
+          enabled: false,
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"http2 requires TLS to be enabled. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup"`
+    );
+  });
+  it('throws if http2 is enabled but TLS has no suitable versions', () => {
+    expect(() =>
+      config.schema.validate({
+        protocol: 'http2',
+        ssl: {
+          enabled: true,
+          supportedProtocols: ['TLSv1.1'],
+          certificate: '/path/to/certificate',
+          key: '/path/to/key',
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"http2 requires 'ssl.supportedProtocols' to include TLSv1.2 or TLSv1.3. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup"`
+    );
+  });
+  it('does not throws if http2 is enabled and TLS is not if http2.allowUnsecure is true', () => {
+    expect(
+      config.schema.validate({
+        protocol: 'http2',
+        http2: {
+          allowUnsecure: true,
+        },
+        ssl: {
+          enabled: false,
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        protocol: 'http2',
+      })
+    );
+  });
+  it('does not throws if supportedProtocols are not valid for h2c if http2.allowUnsecure is true', () => {
+    expect(
+      config.schema.validate({
+        protocol: 'http2',
+        http2: {
+          allowUnsecure: true,
+        },
+        ssl: {
+          enabled: true,
+          supportedProtocols: ['TLSv1.1'],
+          certificate: '/path/to/certificate',
+          key: '/path/to/key',
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        protocol: 'http2',
+      })
+    );
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
@@ -587,7 +655,13 @@ describe('HttpConfig', () => {
       },
     });
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
@@ -601,7 +675,13 @@ describe('HttpConfig', () => {
   it('defaults restrictInternalApis to false', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
     expect(httpConfig.restrictInternalApis).toBe(false);
   });
 });

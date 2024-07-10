@@ -15,13 +15,10 @@ import {
   EuiFormErrorText,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -43,7 +40,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
-import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
@@ -73,7 +70,6 @@ export default function Expressions(props: Props) {
     data,
     dataViews,
     dataViewEditor,
-    docLinks,
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -332,30 +328,6 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  // Test to see if any of the group fields in groupBy are already filtered down to a single
-  // group by the filterQuery. If this is the case, then a groupBy is unnecessary, as it would only
-  // ever produce one group instance
-  const groupByFilterTestPatterns = useMemo(() => {
-    if (!ruleParams.groupBy) return null;
-    const groups = !Array.isArray(ruleParams.groupBy) ? [ruleParams.groupBy] : ruleParams.groupBy;
-    return groups.map((group: string) => ({
-      groupName: group,
-      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
-    }));
-  }, [ruleParams.groupBy]);
-
-  const redundantFilterGroupBy = useMemo(() => {
-    const { filterQuery } = ruleParams;
-    if (typeof filterQuery !== 'string' || !groupByFilterTestPatterns) return [];
-    return groupByFilterTestPatterns
-      .map(({ groupName, pattern }) => {
-        if (pattern.test(filterQuery)) {
-          return groupName;
-        }
-      })
-      .filter((g) => typeof g === 'string') as string[];
-  }, [ruleParams, groupByFilterTestPatterns]);
-
   if (paramsError) {
     return (
       <>
@@ -563,35 +535,8 @@ export default function Expressions(props: Props) {
           options={{
             groupBy: ruleParams.groupBy || null,
           }}
-          errorOptions={redundantFilterGroupBy}
         />
       </EuiFormRow>
-      {redundantFilterGroupBy.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="danger">
-            <FormattedMessage
-              id="xpack.observability.customThreshold.rule.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
-              values={{
-                matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
-                groupCount: redundantFilterGroupBy.length,
-                filteringAndGroupingLink: (
-                  <EuiLink
-                    data-test-subj="thresholdRuleExpressionsTheDocsLink"
-                    href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
-                  >
-                    {i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink',
-                      { defaultMessage: 'the docs' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </>
-      )}
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
@@ -603,7 +548,9 @@ export default function Expressions(props: Props) {
                 defaultMessage: 'Alert me if a group stops reporting data',
               }
             )}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
                 {
@@ -611,9 +558,7 @@ export default function Expressions(props: Props) {
                     'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 }
               )}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         disabled={!hasGroupBy}

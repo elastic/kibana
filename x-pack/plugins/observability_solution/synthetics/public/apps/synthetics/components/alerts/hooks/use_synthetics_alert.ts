@@ -18,7 +18,11 @@ import {
   getDefaultAlertingAction,
 } from '../../../state/alert_rules';
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
-import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../../state';
+import {
+  selectAlertFlyoutVisibility,
+  selectMonitorListState,
+  setAlertFlyoutVisible,
+} from '../../../state';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const useSyntheticsAlert = (isOpen: boolean) => {
@@ -30,6 +34,10 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
 
   const { canSave } = useSyntheticsSettingsContext();
 
+  const { loaded, data: monitors } = useSelector(selectMonitorListState);
+
+  const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
+
   const getOrCreateAlerts = useCallback(() => {
     if (canSave) {
       dispatch(enableDefaultAlertingSilentlyAction.get());
@@ -39,17 +47,19 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   }, [canSave, dispatch]);
 
   useEffect(() => {
-    if (!defaultRules) {
-      // on initial load we prioritize loading the app
-      setTimeout(() => {
+    if (hasMonitors) {
+      if (!defaultRules) {
+        // on initial load we prioritize loading the app
+        setTimeout(() => {
+          getOrCreateAlerts();
+        }, 1000);
+      } else {
         getOrCreateAlerts();
-      }, 1000);
-    } else {
-      getOrCreateAlerts();
+      }
     }
     // we don't want to run this on defaultRules change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, isOpen]);
+  }, [dispatch, isOpen, hasMonitors]);
 
   const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
 

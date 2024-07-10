@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UsageCounter } from './usage_counter';
-import type { UsageCounters } from '../../common/types';
 import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs';
+import { UsageCounter } from './usage_counter';
+import type { UsageCounters } from '../../common';
 
 describe('UsageCounter', () => {
   const domainId = 'test-domain-id';
@@ -21,18 +20,37 @@ describe('UsageCounter', () => {
 
   describe('#incrementCounter', () => {
     it('#incrementCounter calls counter$.next', async () => {
-      const result = counter$.pipe(rxOp.take(1), rxOp.toArray()).toPromise();
-      usageCounter.incrementCounter({ counterName: 'test', counterType: 'type', incrementBy: 13 });
+      const result = Rx.firstValueFrom(counter$.pipe(Rx.take(1), Rx.toArray()));
+      usageCounter.incrementCounter({
+        counterName: 'test',
+        counterType: 'type',
+        incrementBy: 13,
+        source: 'ui',
+        namespace: 'second',
+      });
       await expect(result).resolves.toEqual([
-        { counterName: 'test', counterType: 'type', domainId: 'test-domain-id', incrementBy: 13 },
+        {
+          domainId: 'test-domain-id',
+          counterType: 'type',
+          counterName: 'test',
+          source: 'ui',
+          namespace: 'second',
+          incrementBy: 13,
+        },
       ]);
     });
 
     it('passes default configs to counter$', async () => {
-      const result = counter$.pipe(rxOp.take(1), rxOp.toArray()).toPromise();
+      const result = Rx.firstValueFrom(counter$.pipe(Rx.take(1), Rx.toArray()));
       usageCounter.incrementCounter({ counterName: 'test' });
       await expect(result).resolves.toEqual([
-        { counterName: 'test', counterType: 'count', domainId: 'test-domain-id', incrementBy: 1 },
+        {
+          domainId: 'test-domain-id',
+          counterType: 'count',
+          counterName: 'test',
+          source: 'server',
+          incrementBy: 1,
+        },
       ]);
     });
   });

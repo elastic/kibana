@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -24,7 +24,7 @@ const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.6';
+  private taskVersion = '1.1.7';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -70,8 +70,12 @@ export class FleetUsageSender {
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
-      throwUnrecoverableError(new Error('Outdated task version for task: ' + taskInstance.id));
-      return;
+      appContextService
+        .getLogger()
+        .info(
+          `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        );
+      return getDeleteTaskRunResult();
     }
     appContextService.getLogger().info('Running Fleet Usage telemetry send task');
 
@@ -89,27 +93,27 @@ export class FleetUsageSender {
       } = usageData;
       appContextService
         .getLogger()
-        .debug('Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
+        .debug(() => 'Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
 
       core.analytics.reportEvent(FLEET_USAGES_EVENT_TYPE, fleetUsageData);
 
       appContextService
         .getLogger()
-        .debug('Agents per privileges telemetry: ' + JSON.stringify(agentsPerPrivileges));
+        .debug(() => 'Agents per privileges telemetry: ' + JSON.stringify(agentsPerPrivileges));
       core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
         agents_per_privileges: agentsPerPrivileges,
       });
 
       appContextService
         .getLogger()
-        .debug('Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
+        .debug(() => 'Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
       agentsPerVersion.forEach((byVersion) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { agents_per_version: byVersion });
       });
 
       appContextService
         .getLogger()
-        .debug('Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
+        .debug(() => 'Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
       agentsPerOutputType.forEach((byOutputType) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
           agents_per_output_type: byOutputType,
@@ -118,7 +122,7 @@ export class FleetUsageSender {
 
       appContextService
         .getLogger()
-        .debug('Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
+        .debug(() => 'Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
       upgradeDetails.forEach((upgradeDetailsObj) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { upgrade_details: upgradeDetailsObj });
       });

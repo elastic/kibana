@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiInMemoryTable,
   CriteriaWithPagination,
-  PropertySort,
   SearchFilterConfig,
   Direction,
   Query,
@@ -59,6 +58,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
+  hasRecentlyAccessedMetadata: boolean;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
@@ -81,6 +81,7 @@ export function Table<T extends UserContentCommonSchema>({
   tableSort,
   tableFilter,
   hasUpdatedAtMetadata,
+  hasRecentlyAccessedMetadata,
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
@@ -174,12 +175,13 @@ export function Table<T extends UserContentCommonSchema>({
           <TableSortSelect
             tableSort={tableSort}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
             onChange={onSortChange}
           />
         );
       },
     };
-  }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
+  }, [hasUpdatedAtMetadata, onSortChange, tableSort, hasRecentlyAccessedMetadata]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     if (!isTaggingEnabled()) return null;
@@ -254,6 +256,7 @@ export function Table<T extends UserContentCommonSchema>({
     if (tableFilter?.createdBy?.length > 0) {
       return items.filter((item) => {
         if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
+        else if (item.managed) return false;
         else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
       });
     }
@@ -267,13 +270,20 @@ export function Table<T extends UserContentCommonSchema>({
     let _showNoUserOption = false;
     const users = new Set<string>();
     items.forEach((item) => {
-      if (item.createdBy) users.add(item.createdBy);
-      else {
+      if (item.createdBy) {
+        users.add(item.createdBy);
+      } else if (!item.managed) {
+        // show no user option only if there is an item without createdBy that is not a "managed" item
         _showNoUserOption = true;
       }
     });
     return { allUsers: Array.from(users), showNoUserOption: _showNoUserOption };
   }, [createdByEnabled, items]);
+
+  const sorting =
+    tableSort.field === 'accessedAt' // "accessedAt" is a special case with a custom sorting
+      ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
+      : { sort: tableSort };
 
   return (
     <UserFilterContextProvider
@@ -295,7 +305,7 @@ export function Table<T extends UserContentCommonSchema>({
         selection={selection}
         search={search}
         executeQueryOptions={{ enabled: false }}
-        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
+        sorting={sorting}
         onChange={onTableChange}
         data-test-subj="itemsInMemTable"
         rowHeader="attributes.title"

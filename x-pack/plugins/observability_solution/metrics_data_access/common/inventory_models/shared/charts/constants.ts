@@ -170,3 +170,11 @@ export const NETWORK_LABEL = i18n.translate(
     defaultMessage: 'Network',
   }
 );
+
+export const RX_LABEL = i18n.translate('xpack.metricsData.assetDetails.metrics.label.networkRx', {
+  defaultMessage: 'Inbound (RX)',
+});
+
+export const TX_LABEL = i18n.translate('xpack.metricsData.assetDetails.metrics.label.networkTx', {
+  defaultMessage: 'Outbound (TX)',
+});

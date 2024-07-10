@@ -94,7 +94,7 @@ export function getChartAnomalyTimeseries({
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
-          '{severity, select, minor {Minor} major {Major} critical {Critical}} anomaly',
+          '{severity, select, minor {Minor} major {Major} critical {Critical} other {unknown severity}} anomaly',
         values: {
           severity,
         },

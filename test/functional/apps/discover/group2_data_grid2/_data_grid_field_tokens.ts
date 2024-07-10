@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let fieldTokens: string[] | undefined = [];
     await retry.try(async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      fieldTokens = await findFirstFieldIcons('docTableDetailsFlyout');
+      fieldTokens = await findFirstFieldIcons('docViewerFlyout');
     });
     return fieldTokens;
   }
@@ -98,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await findFirstDocViewerTokens()).to.eql([
         'Keyword',
         'Keyword',
+        'Keyword',
         'Number',
         'Text',
         'Text',
@@ -105,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Text',
         'Number',
         'IP address',
-        'Text',
       ]);
     });
 
@@ -120,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await findFirstDocViewerTokens()).to.eql([
         'Keyword',
         'Keyword',
+        'Keyword',
         'Number',
         'Text',
         'Text',
@@ -127,7 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Text',
         'Number',
         'IP address',
-        'Text',
       ]);
     });
 
@@ -175,6 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await findFirstDocViewerTokens()).to.eql([
         'Keyword',
         'Keyword',
+        'Keyword',
         'Number',
         'Text',
         'Text',
@@ -182,7 +183,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Text',
         'Number',
         'IP address',
-        'Text',
       ]);
     });
 

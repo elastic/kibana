@@ -9,18 +9,11 @@
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups_types';
 import { ActionGroup } from './action_group_types';
+import { ActionVariable } from './action_variable';
 
 interface ConsumerPrivileges {
   read: boolean;
   all: boolean;
-}
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  deprecated?: boolean;
-  useWithTripleBracesInTemplates?: boolean;
-  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleType<

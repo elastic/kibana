@@ -27,6 +27,8 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
+  isQueryParams,
+  isEqlParams,
   getDisabledActionsWarningText,
   warnIfUnmatchedIndexPatterns,
 } from './utils/utils';
@@ -361,7 +363,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
+          if (
+            !isMachineLearningParams(params) &&
+            !isEsqlParams(params) &&
+            !isQueryParams(params) &&
+            !isEqlParams(params)
+          ) {
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
               dataViews: services.dataViews,

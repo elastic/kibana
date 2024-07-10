@@ -14,7 +14,8 @@ import type { BrowserField } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
-import { getScopeFromPath, useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_paths';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { isLensSupportedType } from '../../../../common/utils/lens';
 

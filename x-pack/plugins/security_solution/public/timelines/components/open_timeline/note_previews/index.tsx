@@ -20,7 +20,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
@@ -36,7 +35,6 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -58,15 +56,12 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
 
   const handleClick = useCallback(() => {
     const indexName = selectedPatterns.join(',');
 
-    if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
+    if (!expandableFlyoutDisabled) {
       openFlyout({
         right: {
           id: DocumentDetailsRightPanelKey,
@@ -97,8 +92,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   }, [
     dispatch,
     eventId,
-    expandableTimelineFlyoutEnabled,
-    isSecurityFlyoutEnabled,
+    expandableFlyoutDisabled,
     openFlyout,
     selectedPatterns,
     telemetry,
