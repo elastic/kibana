@@ -611,7 +611,7 @@ export const SharedLists = React.memo(() => {
           </>
         )}
         <EuiFlexGroup>
-          <EuiFlexItem style={{ flex: '1 1 auto' }}>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="flexStart">
               <EuiFlexItem>
                 <EuiPopover
