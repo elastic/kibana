@@ -18,11 +18,12 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
-import { setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
@@ -92,6 +93,7 @@ export class TaskManagerPlugin
   private adHocTaskCounter: AdHocTaskCounter;
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private kibanaDiscoveryService?: KibanaDiscoveryService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -229,7 +231,17 @@ export class TaskManagerPlugin
     executionContext,
     docLinks,
   }: CoreStart): TaskManagerStartContract {
-    const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
+    const savedObjectsRepository = savedObjects.createInternalRepository([
+      TASK_SO_NAME,
+      BACKGROUND_TASK_NODE_SO_NAME,
+    ]);
+
+    this.kibanaDiscoveryService = new KibanaDiscoveryService({
+      savedObjectsRepository,
+      logger: this.logger,
+      currentNode: this.taskManagerId!,
+    });
+    this.kibanaDiscoveryService.start();
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
@@ -333,6 +345,12 @@ export class TaskManagerPlugin
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };
+  }
+
+  public stop() {
+    if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isStarted()) {
+      this.kibanaDiscoveryService.deleteCurrentNode();
+    }
   }
 }
 
