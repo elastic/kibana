@@ -68,7 +68,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
-import { withAlertingSpan, processRunResults } from './lib';
+import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -668,6 +668,8 @@ export class TaskRunner<
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+
+    this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
