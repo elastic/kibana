@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef, memo, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import InfiniteLoader from 'react-window-infinite-loader';
-import { FixedSizeList } from 'react-window';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,167 +38,173 @@ import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { MetricItem } from './metric_item';
 import { FlyoutParamProps } from './types';
 import { MonitorOverviewItem } from '../types';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;
+const MAX_LIST_HEIGHT = 800;
+const MIN_BATCH_SIZE = 20;
+const LIST_THRESHOLD = 12;
 
-export const OverviewGrid = memo(
-  ({ monitorsSortedByStatus }: { monitorsSortedByStatus: MonitorOverviewItem[] }) => {
-    const { status } = useSelector(selectOverviewStatus);
+interface ListItem {
+  configId: string;
+  location: { id: string };
+}
 
-    const {
-      data: { monitors },
-      flyoutConfig,
-      loaded,
-      pageState,
-      groupBy: { field: groupField },
-    } = useSelector(selectOverviewState);
-    const { perPage } = pageState;
-    const [page, setPage] = useState(1);
-    const [maxItem, setMaxItem] = useState(0);
+export const OverviewGrid = memo(() => {
+  const { status } = useSelector(selectOverviewStatus);
+  const monitorsSortedByStatus: MonitorOverviewItem[] =
+    useMonitorsSortedByStatus().monitorsSortedByStatus;
 
-    const trendData = useSelector(selectOverviewTrends);
-    // offload the fetching of trend data to a new effect and the list will work better
+  const {
+    data: { monitors },
+    flyoutConfig,
+    loaded,
+    pageState,
+    groupBy: { field: groupField },
+  } = useSelector(selectOverviewState);
+  const trendData = useSelector(selectOverviewTrends);
+  const { perPage } = pageState;
 
-    const dispatch = useDispatch();
-    const intersectionRef = useRef(null);
+  const [page, setPage] = useState(1);
+  const [maxItem, setMaxItem] = useState(0);
 
-    const setFlyoutConfigCallback = useCallback(
-      (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
-      [dispatch]
-    );
-    const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
-    const { lastRefresh } = useSyntheticsRefreshContext();
-    const forceRefreshCallback = useCallback(
-      () => dispatch(quietFetchOverviewAction.get(pageState)),
-      [dispatch, pageState]
-    );
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-      if (monitorsSortedByStatus.length && maxItem) {
-        const batch = [];
-        const slice = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
-        for (const item of slice) {
-          if (trendData[item.configId + item.location.id] === undefined) {
-            batch.push({ configId: item.configId, locationId: item.location.id });
-          }
+  const setFlyoutConfigCallback = useCallback(
+    (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
+    [dispatch]
+  );
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const { lastRefresh } = useSyntheticsRefreshContext();
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewAction.get(pageState)),
+    [dispatch, pageState]
+  );
+
+  useEffect(() => {
+    if (monitorsSortedByStatus.length && maxItem) {
+      const batch = [];
+      const slice = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
+      for (const item of slice) {
+        if (trendData[item.configId + item.location.id] === undefined) {
+          batch.push({ configId: item.configId, locationId: item.location.id });
         }
-        if (batch.length) dispatch(trendStatsBatch.get(batch));
       }
-    }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
-
-    const listHeight = Math.min(ITEM_HEIGHT * (monitorsSortedByStatus.length / ROW_COUNT), 800);
-    const listItems: Array<Array<{ configId: string; location: { id: string } }>> = useMemo(() => {
-      const acc = [];
-      for (let i = 0; i < monitorsSortedByStatus.length; i += ROW_COUNT) {
-        acc.push(monitorsSortedByStatus.slice(i, i + ROW_COUNT));
-      }
-      return acc;
-    }, [monitorsSortedByStatus]);
-
-    const listRef: React.LegacyRef<FixedSizeList<any>> | undefined = React.createRef();
-    const infiniteLoaderRef: React.LegacyRef<InfiniteLoader> = React.createRef();
-    useEffect(() => {
-      dispatch(refreshOverviewTrends.get());
-    }, [dispatch, lastRefresh]);
-
-    // Display no monitors found when down, up, or disabled filter produces no results
-    if (status && !monitorsSortedByStatus.length && loaded) {
-      return <NoMonitorsFound />;
+      if (batch.length) dispatch(trendStatsBatch.get(batch));
     }
+  }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
 
-    return (
-      <>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="baseline"
-          responsive={false}
-          wrap={true}
-        >
-          <EuiFlexItem grow={true}>
-            <OverviewPaginationInfo
-              page={page}
-              loading={!loaded}
-              total={status ? monitorsSortedByStatus.length : undefined}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SortFields onSortChange={() => setPage(1)} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <GroupFields />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <div style={{ height: listHeight }}>
-          {groupField === 'none' ? (
-            loaded && monitorsSortedByStatus.length ? (
-              <EuiAutoSizer>
-                {({ width }: EuiAutoSize) => (
-                  <InfiniteLoader
-                    ref={infiniteLoaderRef}
-                    isItemLoaded={(idx: number) => {
-                      return listItems[idx].every(
-                        (m: any) => !!trendData[m.configId + m.location.id]
-                      );
-                    }}
-                    itemCount={listItems.length}
-                    loadMoreItems={(_start: number, stop: number) => {
-                      setMaxItem(Math.max(maxItem, stop));
-                    }}
-                    minimumBatchSize={20}
-                    threshold={12}
-                  >
-                    {({ onItemsRendered }) => (
-                      <FixedSizeList
-                        height={800}
-                        width={width}
-                        onItemsRendered={onItemsRendered}
-                        itemSize={ITEM_HEIGHT}
-                        itemCount={listItems.length}
-                        itemData={listItems}
-                        ref={listRef}
-                      >
-                        {(props) => {
-                          return (
-                            <EuiFlexGroup gutterSize="m" style={{ ...props.style }}>
-                              {props.data[props.index].map((item: any, idx: number) => (
-                                <EuiFlexItem key={props.index * ROW_COUNT + idx}>
-                                  <MetricItem
-                                    monitor={monitorsSortedByStatus[props.index * ROW_COUNT + idx]}
-                                    onClick={setFlyoutConfigCallback}
-                                  />
-                                </EuiFlexItem>
-                              ))}
-                              {props.data[props.index].length % ROW_COUNT !== 0 &&
-                                // Adds empty items to fill out row
-                                Array.from({
-                                  length: ROW_COUNT - props.data[props.index].length,
-                                }).map((_, idx) => <EuiFlexItem key={idx} />)}
-                            </EuiFlexGroup>
-                          );
-                        }}
-                      </FixedSizeList>
-                    )}
-                  </InfiniteLoader>
-                )}
-              </EuiAutoSizer>
-            ) : (
-              <OverviewLoader />
-            )
+  const listHeight = Math.min(
+    ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / ROW_COUNT),
+    MAX_LIST_HEIGHT
+  );
+
+  const listItems: ListItem[][] = useMemo(() => {
+    const acc = [];
+    for (let i = 0; i < monitorsSortedByStatus.length; i += ROW_COUNT) {
+      acc.push(monitorsSortedByStatus.slice(i, i + ROW_COUNT));
+    }
+    return acc;
+  }, [monitorsSortedByStatus]);
+
+  const listRef: React.LegacyRef<FixedSizeList<any>> | undefined = React.createRef();
+  useEffect(() => {
+    dispatch(refreshOverviewTrends.get());
+  }, [dispatch, lastRefresh]);
+
+  // Display no monitors found when down, up, or disabled filter produces no results
+  if (status && !monitorsSortedByStatus.length && loaded) {
+    return <NoMonitorsFound />;
+  }
+
+  return (
+    <>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="baseline"
+        responsive={false}
+        wrap={true}
+      >
+        <EuiFlexItem grow={true}>
+          <OverviewPaginationInfo
+            page={page}
+            loading={!loaded}
+            total={status ? monitorsSortedByStatus.length : undefined}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SortFields onSortChange={() => setPage(1)} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <GroupFields />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <div style={{ height: listHeight }}>
+        {groupField === 'none' ? (
+          loaded && monitorsSortedByStatus.length ? (
+            <EuiAutoSizer>
+              {({ width }: EuiAutoSize) => (
+                <InfiniteLoader
+                  isItemLoaded={(idx: number) =>
+                    listItems[idx].every((m) => !!trendData[m.configId + m.location.id])
+                  }
+                  itemCount={listItems.length}
+                  loadMoreItems={(_start: number, stop: number) =>
+                    setMaxItem(Math.max(maxItem, stop))
+                  }
+                  minimumBatchSize={MIN_BATCH_SIZE}
+                  threshold={LIST_THRESHOLD}
+                >
+                  {({ onItemsRendered }) => (
+                    <FixedSizeList
+                      // pad computed height to avoid clipping last row's drop shadow
+                      height={listHeight + 16}
+                      width={width}
+                      onItemsRendered={onItemsRendered}
+                      itemSize={ITEM_HEIGHT}
+                      itemCount={listItems.length}
+                      itemData={listItems}
+                      ref={listRef}
+                    >
+                      {(props: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => (
+                        <EuiFlexGroup gutterSize="m" style={{ ...props.style }}>
+                          {props.data[props.index].map((_, idx) => (
+                            <EuiFlexItem key={props.index * ROW_COUNT + idx}>
+                              <MetricItem
+                                monitor={monitorsSortedByStatus[props.index * ROW_COUNT + idx]}
+                                onClick={setFlyoutConfigCallback}
+                              />
+                            </EuiFlexItem>
+                          ))}
+                          {props.data[props.index].length % ROW_COUNT !== 0 &&
+                            // Adds empty items to fill out row
+                            Array.from({
+                              length: ROW_COUNT - props.data[props.index].length,
+                            }).map((_, idx) => <EuiFlexItem key={idx} />)}
+                        </EuiFlexGroup>
+                      )}
+                    </FixedSizeList>
+                  )}
+                </InfiniteLoader>
+              )}
+            </EuiAutoSizer>
           ) : (
-            <GridItemsByGroup
-              loaded={loaded}
-              currentMonitors={monitorsSortedByStatus}
-              setFlyoutConfigCallback={setFlyoutConfigCallback}
-            />
-          )}
-          <EuiSpacer size="m" />
-        </div>
-        <div ref={intersectionRef}>
-          <EuiSpacer size="l" />
-        </div>
-        {groupField === 'none' && (
+            <OverviewLoader />
+          )
+        ) : (
+          <GridItemsByGroup
+            loaded={loaded}
+            currentMonitors={monitorsSortedByStatus}
+            setFlyoutConfigCallback={setFlyoutConfigCallback}
+          />
+        )}
+        <EuiSpacer size="m" />
+      </div>
+      {groupField === 'none' && (
+        <>
+          <EuiSpacer />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             {monitorsSortedByStatus.length === monitors.length && (
               <EuiFlexItem grow={false}>
@@ -223,22 +229,22 @@ export const OverviewGrid = memo(
                 </EuiFlexItem>
               )}
           </EuiFlexGroup>
-        )}
-        {flyoutConfig?.configId && flyoutConfig?.location && (
-          <MonitorDetailFlyout
-            configId={flyoutConfig.configId}
-            id={flyoutConfig.id}
-            location={flyoutConfig.location}
-            locationId={flyoutConfig.locationId}
-            onClose={hideFlyout}
-            onEnabledChange={forceRefreshCallback}
-            onLocationChange={setFlyoutConfigCallback}
-          />
-        )}
-      </>
-    );
-  }
-);
+        </>
+      )}
+      {flyoutConfig?.configId && flyoutConfig?.location && (
+        <MonitorDetailFlyout
+          configId={flyoutConfig.configId}
+          id={flyoutConfig.id}
+          location={flyoutConfig.location}
+          locationId={flyoutConfig.locationId}
+          onClose={hideFlyout}
+          onEnabledChange={forceRefreshCallback}
+          onLocationChange={setFlyoutConfigCallback}
+        />
+      )}
+    </>
+  );
+});
 
 const SHOWING_ALL_MONITORS_LABEL = i18n.translate(
   'xpack.synthetics.overview.grid.showingAllMonitors.label',

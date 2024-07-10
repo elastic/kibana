@@ -39,8 +39,8 @@ export function* fetchOverviewTrendStats() {
         for (let i = action.payload.length; i > 0; i -= chunkSize) {
           const chunk = action.payload.slice(Math.max(i - chunkSize, 0), i);
           if (chunk.length > 0) {
-            const res = yield call(trendsApi, chunk);
-            yield put(trendStatsBatch.success(res));
+            const trendStats = yield call(trendsApi, chunk);
+            yield put(trendStatsBatch.success(trendStats));
           }
         }
       } catch (e: any) {
@@ -57,24 +57,24 @@ export function* refreshOverviewTrendStats() {
     void,
     Record<string, any>
   > {
-    const trends: Record<string, any> = yield select(selectOverviewTrends);
-    let all = {};
-    const keys = Object.keys(trends);
+    const existingTrends: Record<string, any> = yield select(selectOverviewTrends);
+    let acc = {};
+    const keys = Object.keys(existingTrends);
     do {
       const res = yield call(
         trendsApi,
         keys
           .splice(0, keys.length < 10 ? keys.length : 10)
-          .filter((key: string) => trends[key] !== null)
+          .filter((key: string) => existingTrends[key] !== null)
           .map((key: string) => ({
-            configId: trends[key].configId,
-            locationId: trends[key].locationId,
+            configId: existingTrends[key].configId,
+            locationId: existingTrends[key].locationId,
           }))
       );
-      all = { ...all, ...res };
+      acc = { ...acc, ...res };
     } while (keys.length);
-    if (Object.keys(all).length) {
-      yield put(trendStatsBatch.success(all));
+    if (Object.keys(acc).length) {
+      yield put(trendStatsBatch.success(acc));
     }
   });
 }

@@ -123,7 +123,7 @@ export const GroupGridItem = ({
 
           <EuiFlexItem>
             <EuiBadge color="subdued">
-              {groupMonitors.length}{' '}
+              {groupMonitors.length}&nbsp;
               {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel', {
                 defaultMessage: 'Monitors',
               })}

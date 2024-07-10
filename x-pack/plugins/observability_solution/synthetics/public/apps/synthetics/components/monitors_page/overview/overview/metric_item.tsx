@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -28,6 +29,8 @@ import {
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
 import { MetricItemIcon } from './metric_item_icon';
+
+const METRIC_ITEM_HEIGHT = 160;
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -59,7 +62,6 @@ export const MetricItem = ({
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];
-  console.log('trend data for monitor', monitor.name, trendData, monitor.configId);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
@@ -74,7 +76,10 @@ export const MetricItem = ({
   const dispatch = useDispatch();
 
   return (
-    <div data-test-subj={`${monitor.name}-metric-item`} style={style ?? { height: '160px' }}>
+    <div
+      data-test-subj={`${monitor.name}-metric-item`}
+      style={style ?? { height: METRIC_ITEM_HEIGHT }}
+    >
       <EuiPanel
         data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
         paddingSize="none"
@@ -103,8 +108,6 @@ export const MetricItem = ({
         `}
         title={moment(timestamp).format('LLL')}
       >
-        {/* {!trendData && <div>{monitor.name}</div>} */}
-        {/* {!!trendData && ( */}
         <Chart>
           <Settings
             onElementClick={() => {
@@ -173,7 +176,12 @@ export const MetricItem = ({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ) : (
-                    <div>Loading metrics</div>
+                    <div>
+                      <FormattedMessage
+                        defaultMessage="Loading metrics"
+                        id="xpack.synthetics.overview.metricItem.loadingMessage"
+                      />
+                    </div>
                   ),
                   valueFormatter: (x: number) => formatDuration(x),
                   color: getColor(theme, monitor.isEnabled, status),
@@ -182,7 +190,6 @@ export const MetricItem = ({
             ]}
           />
         </Chart>
-        {/* )} */}
         <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
           <ActionsPopover
             monitor={monitor}

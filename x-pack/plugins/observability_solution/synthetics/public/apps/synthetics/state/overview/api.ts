@@ -57,11 +57,22 @@ export const fetchOverviewStatus = async (
   const params = toStatusOverviewQueryArgs(pageState);
   return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
 };
-
+interface TrendDatum {
+  x: number;
+  y: number;
+}
+interface OverviewTrend {
+  configId: string;
+  locationId: string;
+  data: TrendDatum[];
+  count: number;
+  min: number;
+  max: number;
+  avg: number;
+  sum: number;
+  median: number;
+}
 export const fetchOverviewTrendStats = async (
-  filters: Array<{ configId: string; locationId: string }>
-): Promise<any> => {
-  if (!filters.length) return [];
-  const res = apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, filters);
-  return res;
-};
+  monitors: Array<{ configId: string; locationId: string }>
+): Promise<Record<string, OverviewTrend>> =>
+  monitors.length ? apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, monitors) : {};
