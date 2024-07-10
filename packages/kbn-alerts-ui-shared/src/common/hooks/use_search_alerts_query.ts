@@ -184,6 +184,13 @@ export const useSearchAlertsQuery = (
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       context: AlertsQueryContext,
+      initialData: {
+        total: -1,
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+      },
+      enabled: featureIds.length > 0,
       ...(options as object),
     }
   );

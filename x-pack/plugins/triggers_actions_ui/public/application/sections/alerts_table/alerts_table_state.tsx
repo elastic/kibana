@@ -358,6 +358,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onUpdate({ isLoading, totalCount: alertsCount, refresh: refetch });
       }
     }, [isLoading, alertsCount, onUpdate, refetch]);
+
     useEffect(() => {
       if (lastReloadRequestTime) {
         refetch();
