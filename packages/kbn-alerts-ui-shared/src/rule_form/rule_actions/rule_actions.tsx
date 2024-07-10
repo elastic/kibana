@@ -99,7 +99,10 @@ export const RuleActions = () => {
 
   return (
     <>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup 
+        data-test-subj="ruleActions"
+        direction="column"
+      >
         {actions.map((action, index) => {
           const isSystemAction = connectorTypes.some((connectorType) => {
             return connectorType.id === action.actionTypeId && connectorType.isSystemActionType;

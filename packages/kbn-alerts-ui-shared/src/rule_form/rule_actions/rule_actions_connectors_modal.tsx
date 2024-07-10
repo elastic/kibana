@@ -163,8 +163,9 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const connectorFacetButtons = useMemo(() => {
     return (
-      <EuiFacetGroup>
+      <EuiFacetGroup data-test-subj="ruleActionsConnectorsModalFilterButtonGroup">
         <EuiFacetButton
+          data-test-subj="ruleActionsConnectorsModalFilterButton"
           key="all"
           quantity={availableConnectors.length}
           isSelected={selectedConnector === 'all'}
@@ -177,6 +178,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
           .map(({ actionTypeId, name, total }) => {
             return (
               <EuiFacetButton
+                data-test-subj="ruleActionsConnectorsModalFilterButton"
                 key={actionTypeId}
                 quantity={total}
                 isSelected={selectedConnector === actionTypeId}
@@ -194,6 +196,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
     if (!filteredConnectors.length) {
       return (
         <EuiEmptyPrompt
+          data-test-subj="ruleActionsConnectorsModalEmpty"
           color="subdued"
           iconType="search"
           title={<h2>{ACTION_TYPE_MODAL_EMPTY_TITLE}</h2>}
@@ -203,7 +206,13 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
             </EuiText>
           }
           actions={
-            <EuiButton size="s" color="primary" fill onClick={onClearFilters}>
+            <EuiButton
+              data-test-subj="ruleActionsConnectorsModalClearFiltersButton"
+              size="s"
+              color="primary"
+              fill
+              onClick={onClearFilters}
+            >
               {MODAL_SEARCH_CLEAR_FILTERS_TEXT}
             </EuiButton>
           }
@@ -235,6 +244,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
           const connectorCard = (
             <EuiCard
+              data-test-subj="ruleActionsConnectorsModalCard"
               hasBorder
               isDisabled={isDisabled}
               titleSize="xs"
@@ -296,6 +306,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         height: responseiveHeight,
         overflow: responsiveOverflow,
       }}
+      data-test-subj="ruleActionsConnectorsModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">{ACTION_TYPE_MODAL_TITLE}</EuiModalHeaderTitle>
@@ -306,6 +317,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFieldSearch
+                  data-test-subj="ruleActionsConnectorsModalSearch"
                   placeholder={MODAL_SEARCH_PLACEHOLDER}
                   value={searchValue}
                   onChange={onSearchChange}
