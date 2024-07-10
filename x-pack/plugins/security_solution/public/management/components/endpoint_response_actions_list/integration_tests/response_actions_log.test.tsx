@@ -39,6 +39,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -1490,11 +1491,14 @@ describe('Response actions history', () => {
   });
 
   describe('Actions filter', () => {
-    const featureFlags = {
-      responseActionUploadEnabled: true,
-      responseActionScanEnabled: false,
-    };
+    let featureFlags: Partial<ExperimentalFeatures>;
+
     beforeEach(() => {
+      featureFlags = {
+        responseActionUploadEnabled: true,
+        responseActionScanEnabled: false,
+      };
+
       mockedContext.setExperimentalFlag(featureFlags);
     });
 
