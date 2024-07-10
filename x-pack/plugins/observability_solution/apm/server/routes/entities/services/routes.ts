@@ -119,14 +119,14 @@ const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
       serviceNames,
     };
 
-    const currentPeriodLogsRateTimeseries =
-      await logsDataAccessStart.services.getLogsRateTimeseries(logsParams);
-
-    const currentPeriodLogsErrorRateTimeseries =
-      await logsDataAccessStart.services.getLogsErrorRateTimeseries(logsParams);
-
-    const apmServiceTransactionDetailedStatsPeriods =
-      await getServiceTransactionDetailedStatsPeriods({
+    const [
+      currentPeriodLogsRateTimeseries,
+      currentPeriodLogsErrorRateTimeseries,
+      apmServiceTransactionDetailedStatsPeriods,
+    ] = await Promise.all([
+      logsDataAccessStart.services.getLogsRateTimeseries(logsParams),
+      logsDataAccessStart.services.getLogsErrorRateTimeseries(logsParams),
+      getServiceTransactionDetailedStatsPeriods({
         environment,
         kuery,
         apmEventClient,
@@ -138,7 +138,8 @@ const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
         start,
         end,
         randomSampler,
-      });
+      }),
+    ]);
 
     return {
       currentPeriod: {
