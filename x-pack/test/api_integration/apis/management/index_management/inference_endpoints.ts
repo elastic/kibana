@@ -33,18 +33,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
     it('create inference endpoint', async () => {
       log.debug(`create inference endpoint`);
-      const createInferenceEndpointResponse = await ml.api.createInferenceEndpoint(
-        inferenceId,
-        taskType,
-        {
-          service,
-          service_settings: {
-            num_allocations: 1,
-            num_threads: 1,
-            model_id: modelId,
-          },
-        }
-      );
+      await ml.api.createInferenceEndpoint(inferenceId, taskType, {
+        service,
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: modelId,
+        },
+      });
     });
     it('get all inference endpoints and confirm inference endpoint exist', async () => {
       const { body: inferenceEndpoints } = await supertest
