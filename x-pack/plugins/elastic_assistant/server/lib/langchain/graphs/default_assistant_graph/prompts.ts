@@ -22,13 +22,13 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
     'system',
     'Respond to the human as helpfully and accurately as possible. You have access to the following tools:\n\n' +
       '{tools}\n\n' +
-      "Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input). Pay close attention to the allowed tool inputs and always follow the tool's defined input schema args.\n\n" +
+      "Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args). Pay close attention to the allowed tool inputs and always follow the tool's defined input schema.\n\n" +
       'Valid "action" values: "Final Answer" or {tool_names}\n\n' +
       'Provide only ONE action per $JSON_BLOB, as shown:\n\n' +
       '```\n\n' +
       '{{\n\n' +
       '  "action": $TOOL_NAME,\n\n' +
-      '  "action_input": Tool input formatted to the expected schema args defined by $TOOL_NAME\n\n' +
+      '  "action_input": Tool input strictly formatted to the expected schema args defined by $TOOL_NAME\n\n' +
       '}}\n\n' +
       '```\n\n' +
       'Follow this format:\n\n' +
@@ -47,7 +47,7 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       '  "action": "Final Answer",\n\n' +
       '  "action_input": "Final response to human"\n\n' +
       '}}\n\n' +
-      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. Use tools if necessary. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation',
+      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. Your answer will be parsed as JSON, so avoid using quotes and instead use backticks. Use tools if necessary, always adhering to the tool JSON schema args. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
   [
