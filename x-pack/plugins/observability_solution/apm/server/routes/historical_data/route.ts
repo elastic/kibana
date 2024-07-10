@@ -9,6 +9,7 @@ import { createEntitiesESClient } from '../../lib/helpers/create_es_client/creat
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
+import { hasEntitiesData } from './has_historical_entities_data';
 
 const hasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_data',
@@ -30,4 +31,23 @@ const hasDataRoute = createApmServerRoute({
   },
 });
 
-export const historicalDataRouteRepository = hasDataRoute;
+const hasEntitiesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/has_entities',
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<{ hasData: boolean }> => {
+    const { context, request } = resources;
+    const coreContext = await context.core;
+
+    const [entitiesESClient] = await Promise.all([
+      createEntitiesESClient({
+        request,
+        esClient: coreContext.elasticsearch.client.asCurrentUser,
+      }),
+    ]);
+
+    const hasData = await hasEntitiesData(entitiesESClient);
+    return { hasData };
+  },
+});
+
+export const historicalDataRouteRepository = { ...hasDataRoute, ...hasEntitiesRoute };
