@@ -37,7 +37,7 @@ jest.doMock('@kbn/core-analytics-browser-internal', () => ({
 }));
 
 export const fetchOptionalMemoryInfoMock = jest.fn();
-jest.doMock('./fetch_optional_memory_info', () => ({
+jest.doMock('./events/fetch_optional_memory_info', () => ({
   fetchOptionalMemoryInfo: fetchOptionalMemoryInfoMock,
 }));
 
