@@ -8,16 +8,12 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuItemProps,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntryColumnContent } from './log_entry_column';
 
 export interface LogEntryContextMenuItem {
   label: string;
@@ -59,18 +55,14 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   }, [onClose]);
 
   const button = (
-    <ButtonWrapper>
-      <EuiButton
-        data-test-subj="infraLogEntryContextMenuButton"
-        size="s"
-        fill
-        aria-label={ariaLabel || DEFAULT_MENU_LABEL}
-        onClick={isOpen ? onClose : onOpen}
-        minWidth="auto"
-      >
-        <EuiIcon type="boxesHorizontal" />
-      </EuiButton>
-    </ButtonWrapper>
+    <EuiButtonEmpty
+      css={{ transform: 'translate(-6px, -6px)' }}
+      data-test-subj="infraLogEntryContextMenuButton"
+      size="s"
+      aria-label={ariaLabel || DEFAULT_MENU_LABEL}
+      onClick={isOpen ? onClose : onOpen}
+      iconType="boxesHorizontal"
+    />
   );
 
   const wrappedItems = useMemo(() => {
@@ -92,34 +84,22 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   }, [items, closeMenuAndCall, externalItems]);
 
   return (
-    <LogEntryContextMenuContent>
-      <AbsoluteWrapper>
-        <EuiPopover
-          panelPaddingSize="none"
-          closePopover={onClose}
-          isOpen={isOpen}
-          button={button}
-          ownFocus={true}
-        >
-          <EuiContextMenuPanel items={wrappedItems} />
-        </EuiPopover>
-      </AbsoluteWrapper>
-    </LogEntryContextMenuContent>
+    <EuiPopover
+      css={{
+        overflow: 'hidden',
+        userSelect: 'none',
+        position: 'absolute',
+      }}
+      panelPaddingSize="none"
+      closePopover={onClose}
+      isOpen={isOpen}
+      button={button}
+      ownFocus={true}
+    >
+      <EuiContextMenuPanel items={wrappedItems} />
+    </EuiPopover>
   );
 };
-
-const LogEntryContextMenuContent = euiStyled(LogEntryColumnContent)`
-  overflow: hidden;
-  user-select: none;
-`;
-
-const AbsoluteWrapper = euiStyled.div`
-  position: absolute;
-`;
-
-const ButtonWrapper = euiStyled.div`
-  transform: translate(-6px, -6px);
-`;
 
 // eslint-disable-next-line import/no-default-export
 export default LogEntryContextMenu;
