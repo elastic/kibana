@@ -19,7 +19,7 @@ import {
   CommandOptionsDefinition,
   CommandModeDefinition,
 } from '../definitions/types';
-import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
+import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
@@ -41,8 +41,8 @@ export function getQuotedText(text: string) {
   return text.startsWith(`"`) && text.endsWith(`"`) ? text : `"${text}"`;
 }
 
-function getSafeInsertSourceText(text: string, options: { dashSupported?: boolean } = {}) {
-  return shouldBeQuotedText(text, options) ? getQuotedText(text) : text;
+function getSafeInsertSourceText(text: string) {
+  return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
@@ -155,7 +155,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name, { dashSupported: true }),
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Issue',

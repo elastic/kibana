@@ -53,11 +53,20 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
 ];
 
 const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: string }>).concat(
-  ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
+  [
+    'a',
+    'index',
+    'otherIndex',
+    '.secretIndex',
+    'my-index',
+    'my-index$',
+    'my_index{}',
+    'my-index+1',
+  ].map((name) => ({
     name,
     hidden: name.startsWith('.'),
   })),
-  ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
+  ['my-index[quoted]', 'logstash-{now/d{yyyy.MM.dd|+12:00}}'].map((name) => ({
     name,
     hidden: false,
     suggestedAs: `"${name}"`,
