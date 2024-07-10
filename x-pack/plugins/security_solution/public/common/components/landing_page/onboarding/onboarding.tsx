@@ -66,13 +66,9 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     [telemetry]
   );
 
-  const year2025 = new Date('January, 1, 2025 00:00:00');
-  console.log('year2025', year2025);
-  // const today = new Date().getTime();
-  // const today = new Date('December, 30, 2024 00:00:00');
-  const today = new Date('January, 1, 2025 00:00:00');
-  console.log('today', today);
-
+  // Logic to hide banner at EOY 2024
+  const year2025 = new Date('January 01, 2025 00:00:00');
+  const today = new Date(Date.now());
   const isStillYear2024 = today < year2025;
 
   const [showAVCBanner, setShowAVCBanner] = useState(
