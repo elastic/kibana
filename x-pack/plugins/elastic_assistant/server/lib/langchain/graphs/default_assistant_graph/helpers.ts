@@ -44,12 +44,12 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
-  isOpenAI,
   logger,
   onLlmResponse,
   request,
   traceOptions,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
+  const isOpenAI = true;
   let streamingSpan: Span | undefined;
   if (agent.isStarted()) {
     streamingSpan = agent.startSpan(`${DEFAULT_ASSISTANT_GRAPH_ID} (Streaming)`) ?? undefined;
@@ -94,6 +94,7 @@ export const streamGraph = async ({
               tokenParentRunId = parentRunId;
             }
             if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
+              console.log('stephhh push 1');
               push({ payload, type: 'content' });
               // store message in case of error
               message += payload;
@@ -108,7 +109,6 @@ export const streamGraph = async ({
         },
       ];
 
-  let finalMessage = '';
   const stream = assistantGraph.streamEvents(inputs, {
     callbacks: [...callbacks, apmTracer, ...(traceOptions?.tracers ?? [])],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
@@ -116,7 +116,14 @@ export const streamGraph = async ({
     tags: traceOptions?.tags ?? [],
     version: 'v1',
   });
+  let finalMessage = '';
 
+  let currentOutput = '';
+  let finalOutputIndex = -1;
+  const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+  let streamingFinished = false;
+  const finalOutputStopRegex = /(?<!\\)\"/;
+  let extraOutput = '';
   const processEvent = async () => {
     try {
       const { value, done } = await stream.next();
@@ -125,27 +132,72 @@ export const streamGraph = async ({
       const event = value;
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
-        if (event.event === 'on_llm_stream') {
-          const chunk = event.data?.chunk;
-          const msg = chunk.message;
+        console.log('stephhh event', event);
+        if (event.name === 'ActionsClientChatOpenAI') {
+          if (event.event === 'on_llm_stream') {
+            const chunk = event.data?.chunk;
+            const msg = chunk.message;
+            if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+              // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
+              // however, no harm to keep it in
+              /* empty */
+            } else if (!didEnd) {
+              if (msg.response_metadata?.finish_reason === 'stop') {
+                handleStreamEnd(finalMessage);
+              } else {
+                push({ payload: msg.content, type: 'content' });
+                finalMessage += msg.content;
+              }
+            }
+          } else if (event.event === 'on_llm_end') {
+            const generations = event.data.output?.generations[0];
 
-          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-            // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
-            // however, no harm to keep it in
-            /* empty */
-          } else if (!didEnd) {
-            if (msg.response_metadata?.finish_reason === 'stop') {
+            if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
               handleStreamEnd(finalMessage);
-            } else {
-              push({ payload: msg.content, type: 'content' });
-              finalMessage += msg.content;
             }
           }
-        } else if (event.event === 'on_llm_end') {
-          const generations = event.data.output?.generations[0];
+        }
+        if (event.name === 'ActionsClientSimpleChatModel') {
+          if (event.event === 'on_llm_stream') {
+            const chunk = event.data?.chunk;
+            console.log('stephhh chunk', chunk);
 
-          if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-            handleStreamEnd(finalMessage);
+            const msg = chunk.content;
+            if (finalOutputIndex === -1) {
+              // Remove whitespace to simplify parsing
+              currentOutput += msg.replace(/\s/g, '');
+              if (currentOutput.includes(finalOutputStartToken)) {
+                console.log('stephhh finalOutputStartToken', currentOutput);
+                finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+                const contentStartIndex = finalOutputIndex + finalOutputStartToken.length;
+                extraOutput = currentOutput.substring(contentStartIndex);
+              }
+            } else if (!streamingFinished && !didEnd) {
+              const finalOutputEndIndex = msg.search(finalOutputStopRegex);
+              if (finalOutputEndIndex !== -1) {
+                extraOutput = msg.substring(0, finalOutputEndIndex);
+                console.log('stephhh finalOutputStopRegex', msg);
+                streamingFinished = true;
+                if (extraOutput.length > 0) {
+                  push({ payload: extraOutput, type: 'content' });
+                  finalMessage += extraOutput;
+                }
+                handleStreamEnd(finalMessage);
+              } else {
+                const tokenOutput = `${extraOutput}${chunk.content}`;
+                push({ payload: tokenOutput, type: 'content' });
+                extraOutput = '';
+                finalMessage += tokenOutput;
+              }
+            }
+          } else if (event.event === 'on_llm_end') {
+            const generations = event.data.output?.generations[0];
+            console.log('stephhh on_llm_end', JSON.stringify(generations, null, 2));
+            console.log('stephhh on_llm_end finalMessage', finalMessage);
+
+            if (generations && generations[0]) {
+              handleStreamEnd(generations[0].text);
+            }
           }
         }
       }
@@ -162,6 +214,7 @@ export const streamGraph = async ({
         return handleStreamEnd(finalMessage);
       }
       logger.error(`Error streaming from LangChain: ${error.message}`);
+      console.log('stephhh push 3');
       push({ payload: error.message, type: 'content' });
       handleStreamEnd(error.message, true);
     }
