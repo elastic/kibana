@@ -61,6 +61,7 @@ const externals = {
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
+  'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
 
   /**
    * big deps which are locked to a single version
