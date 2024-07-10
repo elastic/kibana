@@ -16,14 +16,6 @@ steps:
           limit: 1
   - wait
 
-  - label: 'Triggering changes-based pipelines'
-    branches: main
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution and Plugins
     agents:
