@@ -170,7 +170,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             // don't send the timefilter if the time filter named params are already in the query
             const timeFilter =
               input.timeRange &&
-              (!timeParams?.earliest || !timeParams?.latest) &&
               getTime(undefined, input.timeRange, {
                 fieldName: timeField,
               });
