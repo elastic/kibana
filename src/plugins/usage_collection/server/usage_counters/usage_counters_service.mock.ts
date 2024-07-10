@@ -28,6 +28,7 @@ const createUsageCountersServiceMock = () => {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    search: jest.fn(),
   };
 
   mocked.setup.mockReturnValue(createSetupContractMock());

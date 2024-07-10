@@ -111,14 +111,18 @@ describe('usage-counters#search', () => {
           ({ domainId, namespace }) => domainId === 'dashboards' && namespace === 'default'
         )
       ).toEqual(true);
-      expect(dashboardsNoNamespace.counters.map(counterKey)).toMatchInlineSnapshot(`
+      expect(dashboardsNoNamespace.counters.map(counterKey).sort()).toMatchInlineSnapshot(`
         Array [
-          "dashboards:someGlobalUiCounter:count:ui::default",
-          "dashboards:someGlobalServerCounter:count:server::default",
-          "dashboards:list:viewed:ui::default",
+          "dashboards:list:viewed:ui:default",
+          "dashboards:someGlobalServerCounter:count:server:default",
+          "dashboards:someGlobalUiCounter:count:ui:default",
         ]
       `);
-      expect(dashboardsNoNamespace.counters[0].records).toMatchInlineSnapshot(`
+      expect(
+        dashboardsNoNamespace.counters.find(
+          ({ counterName }) => counterName === 'someGlobalUiCounter'
+        )!.records
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "count": 15,
@@ -144,14 +148,17 @@ describe('usage-counters#search', () => {
           ({ domainId, namespace }) => domainId === 'dashboards' && namespace === 'first'
         )
       ).toEqual(true);
-      expect(dashboardsFirstNamespace.counters.map(counterKey)).toMatchInlineSnapshot(`
+      expect(dashboardsFirstNamespace.counters.map(counterKey).sort()).toMatchInlineSnapshot(`
         Array [
-          "dashboards:aDashboardId:edited:server::first",
-          "dashboards:aDashboardId:viewed:server::first",
-          "dashboards:aDashboardId:consoleErrors:ui::first",
+          "dashboards:aDashboardId:consoleErrors:ui:first",
+          "dashboards:aDashboardId:edited:server:first",
+          "dashboards:aDashboardId:viewed:server:first",
         ]
       `);
-      expect(dashboardsFirstNamespace.counters[0].records).toMatchInlineSnapshot(`
+      expect(
+        dashboardsFirstNamespace.counters.find(({ counterType }) => counterType === 'edited')!
+          .records
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "count": 6,
@@ -196,7 +203,7 @@ describe('usage-counters#search', () => {
       ).toEqual(true);
       expect(dashboardsByName.counters.map(counterKey)).toMatchInlineSnapshot(`
         Array [
-          "dashboards:aDashboardId:viewed:server::second",
+          "dashboards:aDashboardId:viewed:server:second",
         ]
       `);
       expect(dashboardsByName.counters[0].records).toMatchInlineSnapshot(`
@@ -229,13 +236,14 @@ describe('usage-counters#search', () => {
             records.every(({ updatedAt }) => moment(updatedAt).diff(from) > 0)
         )
       ).toEqual(true);
-      expect(dashboardsFrom.counters.map(counterKey)).toMatchInlineSnapshot(`
+      expect(dashboardsFrom.counters.map(counterKey).sort()).toMatchInlineSnapshot(`
         Array [
-          "dashboards:someGlobalUiCounter:count:ui::default",
-          "dashboards:someGlobalServerCounter:count:server::default",
+          "dashboards:someGlobalServerCounter:count:server:default",
+          "dashboards:someGlobalUiCounter:count:ui:default",
         ]
       `);
-      expect(dashboardsFrom.counters[0].records).toMatchInlineSnapshot(`
+      expect(dashboardsFrom.counters.find(({ source }) => source === 'ui')!.records)
+        .toMatchInlineSnapshot(`
         Array [
           Object {
             "count": 15,
@@ -333,5 +341,5 @@ function counterKey(counter: UsageCounterSnapshot): string {
   // e.g. 'dashboards:viewed:total:ui:default'  // namespaced counters
   const { domainId, counterName, counterType, source, namespace } = counter;
   const namespaceSuffix = namespace ? `:${namespace}` : '';
-  return `${domainId}:${counterName}:${counterType}:${source}:${namespaceSuffix}`;
+  return `${domainId}:${counterName}:${counterType}:${source}${namespaceSuffix}`;
 }
