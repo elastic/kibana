@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -116,17 +116,15 @@ export function Histogram({
     timeField: dataView.timeFieldName,
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
-  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
   const { attributes } = visContext;
 
   useEffect(() => {
     if (attributes.visualizationType === 'lnsMetric') {
-      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
-      setChartSize(`${size}px`);
+      setChartSize('90%');
     } else {
       setChartSize('100%');
     }
-  }, [attributes, containerHeight, containerWidth]);
+  }, [attributes]);
 
   const onLoad = useStableCallback(
     (
