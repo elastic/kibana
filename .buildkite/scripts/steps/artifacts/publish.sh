@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-source env.env
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
@@ -55,7 +54,7 @@ echo "--- Pull latest Release Manager CLI"
 docker pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
-if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
   export VAULT_ROLE_ID="$(get_vault_role_id)"
   export VAULT_SECRET_ID="$(get_vault_secret_id)"
   export VAULT_ADDR="https://secrets.elastic.co:8200"
