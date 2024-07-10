@@ -7,9 +7,9 @@
 
 import React from 'react';
 import {
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutResizable,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -32,7 +32,7 @@ export type NotesFlyoutProps = {
  * z-index override is needed because otherwise NotesFlyout appears below
  * Timeline Modal as they both have same z-index of 1000
  */
-const NotesFlyoutContainer = styled(EuiFlyout)`
+const NotesFlyoutContainer = styled(EuiFlyoutResizable)`
   /*
   * We want the width of flyout to be less than 50% of screen because
   * otherwise it interferes with the delete notes modal
@@ -61,7 +61,8 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
       data-test-subj="timeline-notes-flyout"
       onClose={onClose}
       aria-labelledby={notesFlyoutTitleId}
-      maxWidth={750}
+      minWidth={500}
+      maxWidth={1400}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -80,6 +81,7 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
           eventId={eventId}
           timelineId={timelineId}
           onCancel={onCancel}
+          showToggleEventDetailsAction={false}
         />
       </EuiFlyoutBody>
     </NotesFlyoutContainer>
