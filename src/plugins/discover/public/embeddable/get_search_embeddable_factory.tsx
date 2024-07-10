@@ -182,6 +182,7 @@ export const getSearchEmbeddableFactory = ({
               serializeTitles,
               serializeTimeRange: timeRange.serialize,
               savedObjectId: savedObjectId$.getValue(),
+              discoverServices,
             }),
         },
         {

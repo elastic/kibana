@@ -19,6 +19,7 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
+import { SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { DiscoverServices } from '../../build_services';
 import {
@@ -40,7 +41,8 @@ export const deserializeState = async ({
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId, true);
+    const so = await get(savedObjectId);
+
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
     return {
       // ignore the time range from the saved object - only global time range + panel time range matter
@@ -70,13 +72,14 @@ export const deserializeState = async ({
   }
 };
 
-export const serializeState = ({
+export const serializeState = async ({
   uuid,
   initialState,
   savedSearch,
   serializeTitles,
   serializeTimeRange,
   savedObjectId,
+  discoverServices,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -84,20 +87,19 @@ export const serializeState = ({
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   savedObjectId?: string;
-}): SerializedPanelState<SearchEmbeddableSerializedState> => {
+  discoverServices: DiscoverServices;
+}): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {
-    // only save the current state that is **different** than the initial state
+    const { get } = discoverServices.savedSearch;
+    const so = await get(savedObjectId, true);
+
+    // only save the current state that is **different** than the saved object state
     const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-      if (
-        deepEqual(
-          savedSearchAttributes[key],
-          initialState[key as keyof SearchEmbeddableRuntimeState]
-        )
-      ) {
+      if (deepEqual(savedSearchAttributes[key], so[key as keyof SerializableSavedSearch])) {
         return prev;
       }
       return { ...prev, [key]: savedSearchAttributes[key] };

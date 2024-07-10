@@ -122,6 +122,7 @@ describe('Serialization utils', () => {
         savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
+        discoverServices: discoverServiceMock,
       });
 
       expect(serializedState).toEqual({
@@ -137,33 +138,59 @@ describe('Serialization utils', () => {
       });
     });
 
-    test('by reference', async () => {
+    describe('by reference', () => {
       const searchSource = createSearchSourceMock({
         index: dataViewMock,
       });
+
       const savedSearch = {
         ...mockedSavedSearchAttributes,
         managed: false,
         searchSource,
       };
 
-      const serializedState = await serializeState({
-        uuid,
-        initialState: {
-          ...mockedSavedSearchAttributes,
-          serializedSearchSource: {} as SerializedSearchSourceFields,
-        },
-        savedSearch,
-        serializeTitles: jest.fn(),
-        serializeTimeRange: jest.fn(),
-        savedObjectId: 'test-id',
+      beforeAll(() => {
+        discoverServiceMock.savedSearch.get = jest.fn().mockResolvedValue(savedSearch);
       });
 
-      expect(serializedState).toEqual({
-        rawState: {
+      test('equal state', async () => {
+        const serializedState = await serializeState({
+          uuid,
+          initialState: {},
+          savedSearch,
+          serializeTitles: jest.fn(),
+          serializeTimeRange: jest.fn(),
           savedObjectId: 'test-id',
-        },
-        references: [],
+          discoverServices: discoverServiceMock,
+        });
+
+        expect(serializedState).toEqual({
+          rawState: {
+            savedObjectId: 'test-id',
+          },
+          references: [],
+        });
+      });
+
+      test('overwrite state', async () => {
+        const serializedState = await serializeState({
+          uuid,
+          initialState: {},
+          savedSearch: { ...savedSearch, sampleSize: 500, sort: [['order_date', 'asc']] },
+          serializeTitles: jest.fn(),
+          serializeTimeRange: jest.fn(),
+          savedObjectId: 'test-id',
+          discoverServices: discoverServiceMock,
+        });
+
+        expect(serializedState).toEqual({
+          rawState: {
+            sampleSize: 500,
+            savedObjectId: 'test-id',
+            sort: [['order_date', 'asc']],
+          },
+          references: [],
+        });
       });
     });
   });
