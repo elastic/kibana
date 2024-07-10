@@ -69,6 +69,7 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
     httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
+    httpRequestsMockHelpers.setInferenceModels([]);
 
     await act(async () => {
       testBed = await setup({
