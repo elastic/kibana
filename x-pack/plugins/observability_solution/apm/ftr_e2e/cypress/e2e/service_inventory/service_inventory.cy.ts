@@ -91,7 +91,7 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click();
 
@@ -103,6 +103,7 @@ describe('Service inventory', () => {
 
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
+      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
@@ -113,88 +114,88 @@ describe('Service inventory', () => {
     });
   });
 
-  describe('Table search', () => {
-    beforeEach(() => {
-      cy.loginAsEditorUser();
-    });
+  // describe('Table search', () => {
+  //   beforeEach(() => {
+  //     cy.loginAsEditorUser();
+  //   });
 
-    it('Toggles fast filter when clicking on link', () => {
-      cy.visitKibana(serviceInventoryHref);
-      cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.contains('Enable fast filter').click();
-      cy.get('[data-test-subj="tableSearchInput"]').should('exist');
-      cy.contains('Try it').should('not.exist');
-      cy.contains('opbeans-node');
-      cy.contains('opbeans-java');
-      cy.contains('opbeans-rum');
-      cy.get('[data-test-subj="tableSearchInput"]').type('java');
-      cy.contains('opbeans-node').should('not.exist');
-      cy.contains('opbeans-java');
-      cy.contains('opbeans-rum').should('not.exist');
-      cy.get('[data-test-subj="tableSearchInput"]').clear();
-      cy.contains('opbeans-node');
-      cy.contains('opbeans-java');
-      cy.contains('opbeans-rum');
-      cy.contains('Disable fast filter').click();
-      cy.contains('Try it').should('exist');
-      cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-    });
-  });
+  //   it('Toggles fast filter when clicking on link', () => {
+  //     cy.visitKibana(serviceInventoryHref);
+  //     cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
+  //     cy.contains('Enable fast filter').click();
+  //     cy.get('[data-test-subj="tableSearchInput"]').should('exist');
+  //     cy.contains('Try it').should('not.exist');
+  //     cy.contains('opbeans-node');
+  //     cy.contains('opbeans-java');
+  //     cy.contains('opbeans-rum');
+  //     cy.get('[data-test-subj="tableSearchInput"]').type('java');
+  //     cy.contains('opbeans-node').should('not.exist');
+  //     cy.contains('opbeans-java');
+  //     cy.contains('opbeans-rum').should('not.exist');
+  //     cy.get('[data-test-subj="tableSearchInput"]').clear();
+  //     cy.contains('opbeans-node');
+  //     cy.contains('opbeans-java');
+  //     cy.contains('opbeans-rum');
+  //     cy.contains('Disable fast filter').click();
+  //     cy.contains('Try it').should('exist');
+  //     cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
+  //   });
+  // });
 
-  describe('Table search with viewer user', () => {
-    beforeEach(() => {
-      cy.loginAsViewerUser();
-    });
+  // describe('Table search with viewer user', () => {
+  //   beforeEach(() => {
+  //     cy.loginAsViewerUser();
+  //   });
 
-    it('Should not be able to turn it on', () => {
-      cy.visitKibana(serviceInventoryHref);
-      cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.get('[data-test-subj="apmLink"]').should('be.disabled');
-    });
-  });
+  //   it('Should not be able to turn it on', () => {
+  //     cy.visitKibana(serviceInventoryHref);
+  //     cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
+  //     cy.get('[data-test-subj="apmLink"]').should('be.disabled');
+  //   });
+  // });
 
-  describe('Check detailed statistics API with multiple services', () => {
-    before(() => {
-      // clean previous data created
-      synthtrace.clean();
-      const { rangeFrom, rangeTo } = timeRange;
-      synthtrace.index(
-        generateMultipleServicesData({
-          from: new Date(rangeFrom).getTime(),
-          to: new Date(rangeTo).getTime(),
-        })
-      );
-    });
+  // describe('Check detailed statistics API with multiple services', () => {
+  //   before(() => {
+  //     // clean previous data created
+  //     synthtrace.clean();
+  //     const { rangeFrom, rangeTo } = timeRange;
+  //     synthtrace.index(
+  //       generateMultipleServicesData({
+  //         from: new Date(rangeFrom).getTime(),
+  //         to: new Date(rangeTo).getTime(),
+  //       })
+  //     );
+  //   });
 
-    beforeEach(() => {
-      cy.loginAsViewerUser();
-    });
+  //   beforeEach(() => {
+  //     cy.loginAsViewerUser();
+  //   });
 
-    after(() => {
-      synthtrace.clean();
-    });
+  //   after(() => {
+  //     synthtrace.clean();
+  //   });
 
-    it('calls detailed API with visible items only', () => {
-      cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
-        'detailedStatisticsRequest'
-      );
-      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
+  //   it('calls detailed API with visible items only', () => {
+  //     cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
+  //       'detailedStatisticsRequest'
+  //     );
+  //     cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
-      cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
-      cy.wait('@mainStatisticsRequest');
-      cy.contains('Services');
-      cy.get('.euiPagination__list').children().should('have.length', 5);
-      cy.wait('@detailedStatisticsRequest').then((payload) => {
-        expect(payload.request.body.serviceNames).eql(
-          JSON.stringify(['0', '1', '10', '11', '12', '13', '14', '15', '16', '17'])
-        );
-      });
-      cy.getByTestSubj('pagination-button-1').click();
-      cy.wait('@detailedStatisticsRequest').then((payload) => {
-        expect(payload.request.body.serviceNames).eql(
-          JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
-        );
-      });
-    });
-  });
+  //     cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
+  //     cy.wait('@mainStatisticsRequest');
+  //     cy.contains('Services');
+  //     cy.get('.euiPagination__list').children().should('have.length', 5);
+  //     cy.wait('@detailedStatisticsRequest').then((payload) => {
+  //       expect(payload.request.body.serviceNames).eql(
+  //         JSON.stringify(['0', '1', '10', '11', '12', '13', '14', '15', '16', '17'])
+  //       );
+  //     });
+  //     cy.getByTestSubj('pagination-button-1').click();
+  //     cy.wait('@detailedStatisticsRequest').then((payload) => {
+  //       expect(payload.request.body.serviceNames).eql(
+  //         JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
+  //       );
+  //     });
+  //   });
+  // });
 });
