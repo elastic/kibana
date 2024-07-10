@@ -12,7 +12,7 @@ export interface LogRateHistogramItem {
   /**
    * Time of bucket
    */
-  time: number | string;
+  time: number;
   /**
    * Number of doc count for that time bucket
    */

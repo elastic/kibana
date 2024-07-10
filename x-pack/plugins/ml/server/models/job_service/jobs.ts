@@ -289,8 +289,7 @@ export function jobsProvider(
       if (
         auditMessage !== undefined &&
         job.create_time !== undefined &&
-        // @ts-expect-error upgrade typescript v5.1.6
-        job.create_time <= auditMessage.msgTime
+        Number(job.create_time) <= auditMessage.msgTime
       ) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,

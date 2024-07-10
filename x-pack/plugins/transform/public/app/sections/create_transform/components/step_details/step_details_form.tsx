@@ -859,8 +859,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 value={
                   transformSettingsNumFailureRetries ||
                   (transformSettingsNumFailureRetries !== undefined &&
-                    // @ts-expect-error upgrade typescript v5.1.6
-                    transformSettingsNumFailureRetries >= -1)
+                    Number(transformSettingsNumFailureRetries) >= -1)
                     ? transformSettingsNumFailureRetries.toString()
                     : ''
                 }

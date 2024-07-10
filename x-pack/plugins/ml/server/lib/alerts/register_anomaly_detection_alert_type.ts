@@ -293,8 +293,6 @@ export function registerAnomalyDetectionAlertType({
           [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
           [ALERT_TOP_RECORDS]: payload.top_records,
           [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-          // @ts-expect-error upgrade typescript v5.1.6
-          [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
         };
 
         if (alertDoc) {

@@ -25,13 +25,11 @@ export function getLogRateAnalysisType(
 ): LogRateAnalysisType {
   const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
   const baselineItems = logRateHistogram.filter(
-    // @ts-expect-error upgrade typescript v5.1.6
     (d) => d.time >= baselineMin && d.time < baselineMax
   );
   const baselineMedian = median(baselineItems.map((d) => d.value)) ?? 0;
 
   const deviationItems = logRateHistogram.filter(
-    // @ts-expect-error upgrade typescript v5.1.6
     (d) => d.time >= deviationMin && d.time < deviationMax
   );
   const deviationMedian = median(deviationItems.map((d) => d.value)) ?? 0;
