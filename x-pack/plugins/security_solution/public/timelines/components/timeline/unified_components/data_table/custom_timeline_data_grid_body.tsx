@@ -122,7 +122,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   .euiDataGridRowCell__content {
     min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
     .unifiedDataTable__rowControl {
-      margin-top: 0;
+      margin-top: -4px;
     }
   }
 `;
@@ -166,7 +166,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
-  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple);
+  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
