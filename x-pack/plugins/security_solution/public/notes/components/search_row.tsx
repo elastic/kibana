@@ -47,7 +47,7 @@ export const SearchRow = React.memo(() => {
     <SearchRowContainer>
       <SearchRowFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery={''} />
+          <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
         </EuiFlexItem>
       </SearchRowFlexGroup>
     </SearchRowContainer>
