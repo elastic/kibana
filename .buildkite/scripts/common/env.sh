@@ -136,14 +136,11 @@ if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-ag
   FTR_ENABLE_FIPS_AGENT=true
   # used by FIPS agents to link FIPS OpenSSL modules
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+  export XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
 
   if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
     echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
     echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
-  fi
-
-  if [[ -f "$KIBANA_DIR/config/kibana.yml" ]]; then
-    echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
   fi
 fi
 
