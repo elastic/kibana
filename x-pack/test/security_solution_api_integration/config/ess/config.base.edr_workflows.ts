@@ -53,7 +53,7 @@ export const generateConfig = async ({
       ...baseConfig.get('mochaOpts'),
       grep:
         target === 'serverless'
-          ? '/^(?!.*\\b@skipInServerless\\b).*@serverless.*/'
+          ? '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/'
           : '/^(?!.*@skipInEss).*@ess.*/',
     },
   };
