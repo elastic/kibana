@@ -24,7 +24,7 @@ export const indexInfoHandlerFactory =
   async () => {
     const {
       abortSignal,
-      client,
+      esClient,
       logDebugMessage,
       logger,
       requestBody,
@@ -56,12 +56,14 @@ export const indexInfoHandlerFactory =
       );
 
       try {
-        const indexInfo = await fetchIndexInfo(
-          client,
-          requestBody,
-          ['message', 'error.message'],
-          abortSignal
-        );
+        const indexInfo = await fetchIndexInfo({
+          esClient,
+          abortSignal,
+          arguments: {
+            ...requestBody,
+            textFieldCandidatesOverrides: ['message', 'error.message'],
+          },
+        });
 
         logDebugMessage(`Baseline document count: ${indexInfo.baselineTotalDocCount}`);
         logDebugMessage(`Deviation document count: ${indexInfo.deviationTotalDocCount}`);
