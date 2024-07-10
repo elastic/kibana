@@ -194,7 +194,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
             defaultMessage="Checking affected agents…"
           />
-        ) : agentsCount && agentPolicies ? (
+        ) : agentsCount ? (
           <>
             {hasMultipleAgentPolicies && (
               <>
@@ -244,7 +244,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                     ),
                   }}
                 />
-              ) : (
+              ) : agentPolicies && agentPolicies.length > 0 ? (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
                   defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
@@ -252,7 +252,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                     agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
                   }}
                 />
-              )}
+              ) : null}
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>
