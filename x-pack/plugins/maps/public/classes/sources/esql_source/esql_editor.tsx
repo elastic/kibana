@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {
