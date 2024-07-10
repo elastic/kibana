@@ -376,9 +376,42 @@ describe('When calling package policy', () => {
 
     it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
       await routeHandler(context, request, response);
       expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should throw if enterprise license and feature flag is disabled and multiple policy_ids is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: false } as any);
+      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
+      await routeHandler(context, request, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Reusable integration policies are not supported',
+        },
+      });
+    });
+
+    it('should throw if empty policy_ids are provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+      const request = getUpdateKibanaRequest({ policy_ids: [] } as any);
+      await routeHandler(context, request, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'At least one agent policy id must be provided',
+        },
+      });
     });
   });
 
