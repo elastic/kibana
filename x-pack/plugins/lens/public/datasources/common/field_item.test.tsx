@@ -476,7 +476,7 @@ describe('Lens Field Item', () => {
     );
     expect(wrapper.find(FieldPopoverFooter).exists()).toBeTruthy();
   });
-  const clickField = async (fieldname: string) => {
+  const clickFieldRtl = async (fieldname: string) => {
     userEvent.click(screen.getByTestId(`field-${fieldname}-showDetails`));
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -485,7 +485,7 @@ describe('Lens Field Item', () => {
 
   it('should display Explore in discover button', async () => {
     render(<InnerFieldItemWrapper {...defaultProps} />);
-    await clickField('bytes');
+    await clickFieldRtl('bytes');
     expect(
       screen.getAllByTestId('lnsFieldListPanel-exploreInDiscover-bytes')[0]
     ).toBeInTheDocument();
@@ -504,7 +504,7 @@ describe('Lens Field Item', () => {
         }}
       />
     );
-    await clickField('geo_point');
+    await clickFieldRtl('geo_point');
     expect(
       screen.queryByTestId('lnsFieldListPanel-exploreInDiscover-geo_point')
     ).not.toBeInTheDocument();
@@ -525,7 +525,7 @@ describe('Lens Field Item', () => {
         <InnerFieldItem {...defaultProps} />
       </KibanaContextProvider>
     );
-    await clickField('bytes');
+    await clickFieldRtl('bytes');
     expect(
       screen.getAllByTestId('lnsFieldListPanel-exploreInDiscover-bytes')[0]
     ).toBeInTheDocument();
