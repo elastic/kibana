@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { omit } from 'lodash';
-import React, { useCallback, useState } from 'react';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,8 +17,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-
+import { omit } from 'lodash';
+import React, { useCallback, useState } from 'react';
 import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardAPI } from './copy_to_dashboard_action';
@@ -51,21 +50,21 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const onSubmit = useCallback(async () => {
     const dashboard = api.parentApi;
     const panelToCopy = await dashboard.getDashboardPanelFromId(api.uuid);
+    const runtimeSnapshot = apiHasSnapshottableState(api) ? api.snapshotRuntimeState() : undefined;
 
-    if (!panelToCopy) {
+    if (!panelToCopy && !runtimeSnapshot) {
       throw new PanelNotFoundError();
     }
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,
-      input: {
+      input: runtimeSnapshot ?? {
         ...omit(panelToCopy.explicitInput, 'id'),
       },
       size: {
         width: panelToCopy.gridData.w,
         height: panelToCopy.gridData.h,
       },
-      references: panelToCopy.references,
     };
 
     const path =
