@@ -6,22 +6,31 @@
  * Side Public License, v 1.
  */
 
+import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 const ECS_VERSION_FIELD = 'ecs.version';
 
-const removeKeywordModifier = (name: string) => {
+const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
 
+/**
+ * Returns columns with the metadata/description (e.g ECS info)
+ * if available
+ *
+ * @param columns
+ * @param fieldsMetadata
+ * @returns
+ */
 export async function getColumnsWithMetadata(
   columns: Array<{
     name: string;
     type: DatatableColumnType;
   }>,
   fieldsMetadata?: FieldsMetadataPublicStart
-) {
+): Promise<ESQLRealField[]> {
   if (!fieldsMetadata || !columns.find((c) => c.name === ECS_VERSION_FIELD)) {
     return columns;
   }
@@ -39,7 +48,7 @@ export async function getColumnsWithMetadata(
           // Metadata services gives description for
           // 'ecs.version' but not 'ecs.version.keyword'
           // but both should show description if available
-          metadata: fields.fields[removeKeywordModifier(c.name)],
+          metadata: fields.fields[removeKeywordSuffix(c.name)],
         }));
       }
     }
