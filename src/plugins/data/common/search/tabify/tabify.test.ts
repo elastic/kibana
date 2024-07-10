@@ -13,7 +13,6 @@ import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { isSamplingEnabled } from '../aggs/utils/sampler';
 import { timeOffsetFiltersWithZeroDocCountResponse } from './fixtures/fake_timeoffset_data';
-import assert from 'node:assert';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
@@ -215,8 +214,7 @@ describe('tabifyAggResponse Integration', () => {
       // check for something like an average bytes result
       function expectAvgBytes(val: string | number) {
         expect(typeof val).toBe('number');
-        assert(typeof val === 'number');
-        expect(val === 0 || val > 1000).toBeDefined();
+        expect(val === 0 || +val > 1000).toBe(true);
       }
 
       test('for non-hierarchical vis', () => {
