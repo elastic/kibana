@@ -489,8 +489,13 @@ export const updateAlertTags = () => {
 };
 
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
-  cy.get(fieldSelector).first().trigger('mouseover');
-  cy.get(HOVER_ACTIONS_CONTAINER).should('be.visible');
+  recurse(
+    () => {
+      cy.get(fieldSelector).first().trigger('mouseover');
+      return cy.root();
+    },
+    ($el) => !!$el.find(HOVER_ACTIONS_CONTAINER).length
+  );
 };
 
 export const waitForTopNHistogramToLoad = () => {
