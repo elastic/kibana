@@ -70,7 +70,7 @@ export const deserializeState = async ({
   }
 };
 
-export const serializeState = async ({
+export const serializeState = ({
   uuid,
   initialState,
   savedSearch,
@@ -84,7 +84,7 @@ export const serializeState = async ({
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   savedObjectId?: string;
-}): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
+}): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
