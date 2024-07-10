@@ -71,28 +71,28 @@ export const StepNumberNav = ({
   );
 };
 
-export const PREVIOUS_STEP_BUTTON_TEXT = i18n.translate(
+const PREVIOUS_STEP_BUTTON_TEXT = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.previousStepButtonText',
   {
     defaultMessage: 'Previous',
   }
 );
 
-export const PREVIOUS_STEP_BUTTON_ARIA_LABEL = i18n.translate(
+const PREVIOUS_STEP_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.previousStepButtonAriaLabel',
   {
     defaultMessage: 'Previous step',
   }
 );
 
-export const NEXT_STEP_BUTTON_TEXT = i18n.translate(
+const NEXT_STEP_BUTTON_TEXT = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.nextStepButtonText',
   {
     defaultMessage: 'Next',
   }
 );
 
-export const NEXT_STEP_BUTTON_ARIA_LABEL = i18n.translate(
+const NEXT_STEP_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.nextStepButtonAriaLabel',
   {
     defaultMessage: 'Next step',
