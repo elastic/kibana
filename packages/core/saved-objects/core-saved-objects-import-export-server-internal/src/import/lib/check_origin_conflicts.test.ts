@@ -53,7 +53,7 @@ const OTHER_TYPE = 'other';
 describe('#checkOriginConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-  let find: typeof savedObjectsClient['find'];
+  let find: (typeof savedObjectsClient)['find'];
 
   const getResultMock = (...objects: SavedObjectType[]) => ({
     page: 1,

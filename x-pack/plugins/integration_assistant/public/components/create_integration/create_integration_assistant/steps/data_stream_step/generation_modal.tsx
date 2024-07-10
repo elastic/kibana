@@ -43,7 +43,7 @@ import { useTelemetry } from '../../../telemetry';
 export type OnComplete = (result: State['result']) => void;
 
 const ProgressOrder = ['ecs', 'categorization', 'related'];
-type ProgressItem = typeof ProgressOrder[number];
+type ProgressItem = (typeof ProgressOrder)[number];
 
 const progressText: Record<ProgressItem, string> = {
   ecs: i18n.PROGRESS_ECS_MAPPING,

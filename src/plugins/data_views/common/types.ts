@@ -22,7 +22,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 /**
  * Runtime field types
  */
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 /**
  * Runtime field primitive types - excluding composite

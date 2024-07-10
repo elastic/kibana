@@ -63,7 +63,7 @@ const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
 
 describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let socCheckConflicts: typeof savedObjectsClient['checkConflicts'];
+  let socCheckConflicts: (typeof savedObjectsClient)['checkConflicts'];
 
   const setupParams = (partial: {
     objects: SavedObjectType[];

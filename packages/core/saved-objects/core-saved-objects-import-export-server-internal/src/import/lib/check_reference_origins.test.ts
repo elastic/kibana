@@ -24,7 +24,7 @@ const OTHER_TYPE = 'other';
 describe('checkReferenceOrigins', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-  let find: typeof savedObjectsClient['find'];
+  let find: (typeof savedObjectsClient)['find'];
 
   const getResultMock = (...objectIds: string[]) => ({
     page: 1,

@@ -29,10 +29,10 @@ jest.mock('./apis/internals/internal_bulk_resolve', () => ({
 }));
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getBulkOperationError']
+  (typeof InternalUtils)['getBulkOperationError']
 >;
 export const mockGetCurrentTime = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getCurrentTime']
+  (typeof InternalUtils)['getCurrentTime']
 >;
 
 jest.mock('./apis/utils/internal_utils', () => {

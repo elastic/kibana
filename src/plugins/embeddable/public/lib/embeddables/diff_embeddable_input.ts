@@ -42,7 +42,7 @@ const genericInputKeysToCompare = [
 // type used to ensure that only keys present in EmbeddableInput are extracted
 type GenericEmbedableInputToCompare = Pick<
   EmbeddableInput,
-  typeof genericInputKeysToCompare[number]
+  (typeof genericInputKeysToCompare)[number]
 >;
 
 export const omitGenericEmbeddableInput = <

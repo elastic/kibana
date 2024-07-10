@@ -65,7 +65,7 @@ interface FullStoryUserVars {
   cloudTrialEndDate?: string;
 }
 
-type FullStoryPageContext = Pick<EventContext, typeof PAGE_VARS_KEYS[number]>;
+type FullStoryPageContext = Pick<EventContext, (typeof PAGE_VARS_KEYS)[number]>;
 
 /**
  * FullStory shipper.

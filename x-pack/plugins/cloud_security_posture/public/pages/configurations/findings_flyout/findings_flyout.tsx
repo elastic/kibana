@@ -80,7 +80,7 @@ const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.pagin
   defaultMessage: 'Finding navigation',
 });
 
-type FindingsTab = typeof tabs[number];
+type FindingsTab = (typeof tabs)[number];
 
 interface FindingFlyoutProps {
   onClose(): void;

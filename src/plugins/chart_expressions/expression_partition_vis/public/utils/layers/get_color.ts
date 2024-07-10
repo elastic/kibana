@@ -145,7 +145,7 @@ const createSeriesLayers = (
   column: Partial<BucketColumns>
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
-  let tempParent: typeof arrayNode | typeof arrayNode['parent'] = arrayNode;
+  let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
   while (tempParent.parent && tempParent.depth > 0) {
     const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
     const seriesName = String(nodeKey);

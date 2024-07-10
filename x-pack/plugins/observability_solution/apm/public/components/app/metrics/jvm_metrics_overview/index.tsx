@@ -57,7 +57,7 @@ export function JvmMetricsOverview() {
   );
 
   const items = data?.serviceNodes ?? [];
-  const columns: Array<ITableColumn<typeof items[0]>> = [
+  const columns: Array<ITableColumn<(typeof items)[0]>> = [
     {
       name: (
         <EuiToolTip

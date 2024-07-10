@@ -78,7 +78,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
 const maxAlerts = 1000;
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();

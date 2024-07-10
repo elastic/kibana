@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 export function getLogRateChange(
-  analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
+  analysisType: (typeof LOG_RATE_ANALYSIS_TYPE)[keyof typeof LOG_RATE_ANALYSIS_TYPE],
   baselineBucketRate: number,
   deviationBucketRate: number
 ) {
@@ -66,7 +66,7 @@ export function getLogRateChange(
 }
 
 export function getBaselineAndDeviationRates(
-  analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
+  analysisType: (typeof LOG_RATE_ANALYSIS_TYPE)[keyof typeof LOG_RATE_ANALYSIS_TYPE],
   baselineBuckets: number,
   deviationBuckets: number,
   docCount: number | undefined,
