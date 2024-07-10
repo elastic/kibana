@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { EditContextFlyout } from './edit_context_flyout';
+import { EditContextPanel } from './edit_context_panel';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ChatFormFields } from '../../types';
 
-jest.mock('../../hooks/use_indices_fields', () => ({
-  useIndicesFields: () => ({
+jest.mock('../../hooks/use_source_indices_field', () => ({
+  useSourceIndicesFields: () => ({
     fields: {
       index1: {
         elser_query_fields: [],
@@ -43,9 +44,9 @@ jest.mock('../../hooks/use_usage_tracker', () => ({
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
-      indices: ['index1'],
-      docSize: 1,
-      sourceFields: {
+      [ChatFormFields.indices]: ['index1'],
+      [ChatFormFields.docSize]: 1,
+      [ChatFormFields.sourceFields]: {
         index1: ['context_field1'],
         index2: ['context_field2'],
       },
@@ -55,27 +56,20 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 };
 
 describe('EditContextFlyout component tests', () => {
-  const onCloseMock = jest.fn();
-
   beforeEach(() => {
     render(
       <IntlProvider locale="en">
         <MockFormProvider>
-          <EditContextFlyout onClose={onCloseMock} />
+          <EditContextPanel />
         </MockFormProvider>
       </IntlProvider>
     );
   });
 
-  it('calls onClose when the close button is clicked', () => {
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(onCloseMock).toHaveBeenCalledTimes(1);
-  });
-
   it('should see the context fields', async () => {
-    expect(screen.getByTestId('contextFieldsSelectable_index1')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('contextFieldsSelectable_index1'));
-    expect(screen.getByRole('option', { name: 'context_field1' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'context_field2' })).toBeInTheDocument();
+    expect(screen.getByTestId('contextFieldsSelectable-0')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextFieldsSelectable-0'));
+    const fields = await screen.findAllByTestId('contextField');
+    expect(fields.length).toBe(2);
   });
 });
