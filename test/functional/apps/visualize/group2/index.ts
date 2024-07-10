@@ -8,11 +8,12 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['timePicker']);
 
   describe('visualize app', () => {
     before(async () => {
@@ -23,6 +24,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         'histogram:maxBars': 100,
         'visualization:visualize:legacyHeatmapChartsLibrary': true,
       });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await browser.refresh();
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -34,6 +36,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         'histogram:maxBars': 1000,
         'visualization:visualize:legacyHeatmapChartsLibrary': false,
       });
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await browser.refresh();
     });
 
