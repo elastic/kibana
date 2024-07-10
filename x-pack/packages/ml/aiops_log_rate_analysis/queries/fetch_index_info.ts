@@ -39,12 +39,18 @@ interface IndexInfo {
   zeroDocsFallback: boolean;
 }
 
-export const fetchIndexInfo = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  textFieldCandidatesOverrides: string[] = [],
-  abortSignal?: AbortSignal
-): Promise<IndexInfo> => {
+export const fetchIndexInfo = async ({
+  esClient,
+  abortSignal,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  arguments: AiopsLogRateAnalysisSchema & {
+    textFieldCandidatesOverrides?: string[];
+  };
+}): Promise<IndexInfo> => {
+  const { textFieldCandidatesOverrides = [], ...params } = args;
   const { index } = params;
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(

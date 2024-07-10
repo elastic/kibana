@@ -399,9 +399,11 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              " = never>({ aggs, featureIds, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, }: { aggs?: object | undefined; featureIds?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
+              " = never>({ aggs, featureIds, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, runtimeMappings, }: { aggs?: object | undefined; featureIds?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
               "SortOptions",
-              "[] | undefined; track_total_hits?: number | boolean | undefined; _source?: string[] | undefined; }) => Promise<",
+              "[] | undefined; track_total_hits?: number | boolean | undefined; _source?: false | string[] | undefined; runtimeMappings?: ",
+              "MappingRuntimeFields",
+              " | undefined; }) => Promise<",
               "SearchResponse",
               "<OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.consecutive_matches\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.previous_action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
               {
@@ -424,7 +426,7 @@
                 "id": "def-server.AlertsClient.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    aggs,\n    featureIds,\n    index,\n    query,\n    search_after: searchAfter,\n    size,\n    sort,\n    track_total_hits: trackTotalHits,\n    _source,\n  }",
+                "label": "{\n    aggs,\n    featureIds,\n    index,\n    query,\n    search_after: searchAfter,\n    size,\n    sort,\n    track_total_hits: trackTotalHits,\n    _source,\n    runtimeMappings,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
@@ -546,12 +548,180 @@
                   {
                     "parentPluginId": "ruleRegistry",
                     "id": "def-server.AlertsClient.find.$1._source",
-                    "type": "Array",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "_source",
                     "description": [],
                     "signature": [
-                      "string[] | undefined"
+                      "false | string[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.find.$1.runtimeMappings",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "runtimeMappings",
+                    "description": [],
+                    "signature": [
+                      "MappingRuntimeFields",
+                      " | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.getGroupAggregations",
+            "type": "Function",
+            "tags": [],
+            "label": "getGroupAggregations",
+            "description": [
+              "\nPerforms a `find` query to extract aggregations on alert groups"
+            ],
+            "signature": [
+              "({ featureIds, groupByField, aggregations, filters, pageIndex, pageSize, sort, }: { featureIds: string[]; groupByField: string; aggregations?: { [x: string]: { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; } & BucketAggsSchemas & { aggs?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; aggregations?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; }; } | undefined; filters?: ",
+              "QueryDslQueryContainer",
+              "[] | undefined; sort?: ",
+              "SortCombinations",
+              "[] | undefined; pageIndex: number; pageSize: number; }) => Promise<",
+              "SearchResponse",
+              "<OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.consecutive_matches\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.previous_action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
+              {
+                "pluginId": "@kbn/alerts-as-data-utils",
+                "scope": "common",
+                "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+                "section": "def-common.MultiField",
+                "text": "MultiField"
+              },
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, Record<string, ",
+              "AggregationsAggregate",
+              ">>>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.getGroupAggregations.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    featureIds,\n    groupByField,\n    aggregations,\n    filters,\n    pageIndex,\n    pageSize,\n    sort = [{ unitsCount: { order: 'desc' } }],\n  }",
+                "description": [],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.featureIds",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "featureIds",
+                    "description": [
+                      "\nThe feature ids the alerts belong to, used for authorization"
+                    ],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.groupByField",
+                    "type": "string",
+                    "tags": [],
+                    "label": "groupByField",
+                    "description": [
+                      "\nThe field to group by"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.aggregations",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "aggregations",
+                    "description": [
+                      "\nThe aggregations to perform on the groupByField buckets"
+                    ],
+                    "signature": [
+                      "{ [x: string]: { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; } & BucketAggsSchemas & { aggs?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; aggregations?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; }; } | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.filters",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "filters",
+                    "description": [
+                      "\nThe filters to apply to the query"
+                    ],
+                    "signature": [
+                      "QueryDslQueryContainer",
+                      "[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.sort",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "sort",
+                    "description": [
+                      "\nAny sort options to apply to the groupByField aggregations"
+                    ],
+                    "signature": [
+                      "SortCombinations",
+                      "[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.pageIndex",
+                    "type": "number",
+                    "tags": [],
+                    "label": "pageIndex",
+                    "description": [
+                      "\nThe page index to start from"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.pageSize",
+                    "type": "number",
+                    "tags": [],
+                    "label": "pageSize",
+                    "description": [
+                      "\nThe page size"
                     ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,

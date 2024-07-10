@@ -3313,6 +3313,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerts-grouping@link:packages/kbn-alerts-grouping":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts-restricted-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted":
   version "0.0.0"
   uid ""
@@ -4849,6 +4853,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql@link:src/plugins/esql":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
@@ -5829,6 +5837,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/recently-accessed@link:packages/kbn-recently-accessed":
+  version "0.0.0"
+  uid ""
+
 "@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
   version "0.0.0"
   uid ""
@@ -6657,10 +6669,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/text-based-languages@link:src/plugins/text_based_languages":
-  version "0.0.0"
-  uid ""
-
 "@kbn/third-party-lens-navigation-prompt-plugin@link:x-pack/examples/third_party_lens_navigation_prompt":
   version "0.0.0"
   uid ""
@@ -7055,10 +7063,10 @@
     "@launchdarkly/js-sdk-common" "2.5.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.4.6":
-  version "9.4.6"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.6.tgz#e1a1614e05eab2515090c7862764498a2f9b2b1e"
-  integrity sha512-IcQqiaYrAgmCvh1LsfjEVRa4Wk97PWirHnbVu6fRc97kt8WCKDlVo2O+IbOcC6scJVGDJU4aXVehTkfbhUq1Lg==
+"@launchdarkly/node-server-sdk@^9.4.7":
+  version "9.4.7"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.7.tgz#d8f923943b1750efa4c0f80baad079103ac5f700"
+  integrity sha512-9blKdS4c/ZGR0XjB8EqifDTdk08WBX/KZ91lZIc3ND3WA9D3qagysynaVkpBo3FiymHyCYyvwq4ZjiSMOIkrPw==
   dependencies:
     "@launchdarkly/js-server-sdk-common" "2.4.4"
     https-proxy-agent "^5.0.1"
@@ -7397,6 +7405,14 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@mswjs/cookies/-/cookies-1.1.0.tgz#1528eb43630caf83a1d75d5332b30e75e9bb1b5b"
   integrity sha512-0ZcCVQxifZmhwNBoQIrystCb+2sWBY2Zw8lpfJBPCHGCA/HWqehITeCRVIv4VMy8MPlaHo2w2pTHFV2pFfqKPw==
+
+"@mswjs/http-middleware@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.1.tgz#7ff38c5398ba01efe98e16a0da24d612ffd69ccc"
+  integrity sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==
+  dependencies:
+    express "^4.18.2"
+    strict-event-emitter "^0.5.1"
 
 "@mswjs/interceptors@^0.29.0":
   version "0.29.1"
@@ -8096,12 +8112,12 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/cli@^1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.16.0.tgz#c8885ad46bb9993792e4266535692ce0ceb3895f"
-  integrity sha512-REmwkNHOd4e50vPeL6mDgHVdyUQ8e+y0cggi/cNXQzGpkZEk17Z+WFL8UFlcM+WebMWDXulJE712jT2lGYS9Zg==
+"@redocly/cli@^1.17.0":
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.17.1.tgz#a6b5523e98ff84530b7c2654a897414b16dcf6b5"
+  integrity sha512-a7OIlsGQT8OBRMPswqcJzCoub/nvm1zYvOCOBnaLt1cYeYK9nRzYCXA6Bnx0I7wMCXf5YmL7rVTMG8RJTC+3mA==
   dependencies:
-    "@redocly/openapi-core" "1.16.0"
+    "@redocly/openapi-core" "1.17.1"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8120,18 +8136,18 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.6.0":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.6.1.tgz#931da21d6cbf8e73a873ca12ae690902d848cbb5"
-  integrity sha512-p4mlj+CD3Byec3wOxDlDln0B0gOcNvEkpl4jn3/e9y8h11ogzXnWxnlJAtE5Kcr1ByujS/7Mbt01df9z1xfMbg==
+"@redocly/config@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.6.2.tgz#b5180ccb407673ee048b818c3be9a4f9d0636a64"
+  integrity sha512-c3K5u64eMnr2ootPcpEI0ioIRLE8QP8ptvLxG9MwAmb2sU8HMRfVwXDU3AZiMVY2w4Ts0mDc+Xv4HTIk8DRqFw==
 
-"@redocly/openapi-core@1.16.0", "@redocly/openapi-core@^1.4.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.16.0.tgz#95afcf822890af3fe8f1bde97018370b5cadb8ca"
-  integrity sha512-z06h+svyqbUcdAaePq8LPSwTPlm6Ig7j2VlL8skPBYnJvyaQ2IN7x/JkOvRL4ta+wcOCBdAex5JWnZbKaNktJg==
+"@redocly/openapi-core@1.17.1", "@redocly/openapi-core@^1.4.0":
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.17.1.tgz#d18c5223e5b578d64d789c4101b96cbb589162dc"
+  integrity sha512-PQxDLLNk5cBatJBBxvfk49HFw/nVozw1XZ6Dw/GX0Tviq+WxeEjEuLAKfnLVvb5L0wgs4TNmVG4Y+JyofSPu1A==
   dependencies:
     "@redocly/ajv" "^8.11.0"
-    "@redocly/config" "^0.6.0"
+    "@redocly/config" "^0.6.2"
     colorette "^1.2.0"
     https-proxy-agent "^7.0.4"
     js-levenshtein "^1.1.6"
@@ -17504,7 +17520,7 @@ expr-eval@^2.0.2:
   resolved "https://registry.yarnpkg.com/expr-eval/-/expr-eval-2.0.2.tgz#fa6f044a7b0c93fde830954eb9c5b0f7fbc7e201"
   integrity sha512-4EMSHGOPSwAfBiibw3ndnP0AvjDWLsMvGOvWEZ2F96IGk0bIVdjQisOHxReSkE13mHcfbuCiXw+G4y0zv6N8Eg==
 
-express@^4.17.1, express@^4.17.3:
+express@^4.17.1, express@^4.17.3, express@^4.18.2:
   version "4.19.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.19.2.tgz#e25437827a3aa7f2a827bc8171bbbb664a356465"
   integrity sha512-5T6nhjsT+EOMzuck8JjBHARTHfMht0POzlA60WV2pMD3gyXw2LZnZ+ueGdNxG+0calOJcWKbpFcuzLZ91YWq9Q==

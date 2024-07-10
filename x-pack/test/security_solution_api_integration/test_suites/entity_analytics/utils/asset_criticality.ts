@@ -13,6 +13,7 @@ import {
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_INTERNAL_STATUS_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
@@ -22,6 +23,7 @@ import {
 import type {
   AssetCriticalityRecord,
   CreateAssetCriticalityRecord,
+  ListAssetCriticalityQueryParams,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -184,6 +186,19 @@ export const assetCriticalityRouteHelpersFactory = (
       .attach('file', file, { filename: 'asset_criticality.csv' })
       .expect(expectStatusCode);
   },
+  list: async (
+    opts: ListAssetCriticalityQueryParams = {},
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
+    const qs = querystring.stringify(opts);
+    const route = `${routeWithNamespace(ASSET_CRITICALITY_PUBLIC_LIST_URL, namespace)}?${qs}`;
+    return supertest
+      .get(route)
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .expect(expectStatusCode);
+  },
 });
 
 export const assetCriticalityRouteHelpersFactoryNoAuth = (
@@ -217,6 +232,32 @@ export const readAssetCriticality = async (
     size,
   });
   return results.hits.hits.map((hit) => hit._source as AssetCriticalityRecord);
+};
+
+export const createAssetCriticalityRecords = async (
+  records: CreateAssetCriticalityRecord[],
+  es: Client
+) => {
+  const ops = records.flatMap((record) => [
+    {
+      index: {
+        _index: getAssetCriticalityIndex(),
+        _id: `${record.id_field}:${record.id_value}`,
+      },
+    },
+    record,
+  ]);
+
+  const res = await es.bulk({
+    body: ops,
+    refresh: 'wait_for',
+  });
+
+  if (res.errors) {
+    throw new Error(`Error creating asset criticality: ${JSON.stringify(res)}`);
+  }
+
+  return res;
 };
 
 /**

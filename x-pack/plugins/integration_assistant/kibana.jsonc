@@ -18,5 +18,8 @@
       "actions",
       "stackConnectors",
     ],
+    "requiredBundles": [
+      "kibanaUtils",
+    ]
   }
 }
