@@ -7,8 +7,9 @@
 
 import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { getEarliestLatestParams } from '@kbn/esql-utils';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
@@ -69,7 +70,8 @@ const getESQLDocumentCountStats = async (
   timeFieldName?: string,
   intervalMs?: number,
   searchOptions?: ISearchOptions,
-  onError?: HandleErrorCallback
+  onError?: HandleErrorCallback,
+  timeRange?: TimeRange
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number; request?: object }> => {
   if (!isESQLQuery(query)) {
     throw Error(
@@ -81,6 +83,7 @@ const getESQLDocumentCountStats = async (
   const esqlBaseQuery = query.esql;
   let earliestMs = Infinity;
   let latestMs = -Infinity;
+  const namedParams = getEarliestLatestParams(esqlBaseQuery, timeRange);
 
   if (timeFieldName) {
     const aggQuery = appendToESQLQuery(
@@ -95,6 +98,7 @@ const getESQLDocumentCountStats = async (
       params: {
         query: aggQuery,
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
@@ -143,6 +147,7 @@ const getESQLDocumentCountStats = async (
       params: {
         query: appendToESQLQuery(esqlBaseQuery, ' | STATS _count_ = COUNT(*)  | LIMIT 1'),
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
@@ -204,6 +209,7 @@ export const useESQLOverallStatsData = (
         limit: number;
         filter?: QueryDslQueryContainer;
         totalCount?: number;
+        timeRange?: TimeRange;
       }
     | undefined
 ) => {
@@ -251,6 +257,7 @@ export const useESQLOverallStatsData = (
           filter: filter,
           limit,
           totalCount: knownTotalCount,
+          timeRange,
         } = fieldStatsRequest;
 
         if (!isESQLQuery(searchQuery)) {
@@ -269,12 +276,14 @@ export const useESQLOverallStatsData = (
         // And use this one query to
         // 1) identify populated/empty fields
         // 2) gather examples for populated text fields
+        const namedParams = getEarliestLatestParams(esqlBaseQuery, timeRange);
         const columnsResp = (await runRequest(
           {
             params: {
               // Doing this to match with the default limit
               query: getESQLWithSafeLimit(esqlBaseQuery, ESQL_SAFE_LIMIT),
               ...(filter ? { filter } : {}),
+              ...(namedParams.length ? { params: namedParams } : {}),
               dropNullColumns: true,
             },
           },
@@ -340,7 +349,8 @@ export const useESQLOverallStatsData = (
             timeFieldName,
             intervalInMs,
             undefined,
-            onError
+            onError,
+            timeRange
           );
 
           totalCount = results.totalCount;
@@ -424,6 +434,7 @@ export const useESQLOverallStatsData = (
             limitSize: limit,
             totalCount,
             onError,
+            timeRange,
           });
           if (!stats) return;
           stats.aggregatableNotExistsFields = aggregatableNotExistsFields;

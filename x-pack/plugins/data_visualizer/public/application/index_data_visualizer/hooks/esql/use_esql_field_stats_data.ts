@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useReducer, useState } from 'react';
 import { chunk } from 'lodash';
@@ -27,11 +27,13 @@ export const useESQLFieldStatsData = <T extends Column>({
   columns: allColumns,
   filter,
   limit,
+  timeRange,
 }: {
   searchQuery?: AggregateQuery;
   columns?: T[];
   filter?: QueryDslQueryContainer;
   limit: number;
+  timeRange?: TimeRange;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
@@ -93,6 +95,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR KEYWORD FIELDS
@@ -103,6 +106,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR BOOLEAN FIELDS
@@ -111,6 +115,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR DATE FIELDS
@@ -119,6 +124,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
           }
           setFetchState({

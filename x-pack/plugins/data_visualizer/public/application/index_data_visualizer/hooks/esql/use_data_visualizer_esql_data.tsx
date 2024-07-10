@@ -233,6 +233,7 @@ export const useESQLDataVisualizerData = (
         runtimeFieldMap: currentDataView?.getRuntimeMappings(),
         lastRefresh,
         filter,
+        timeRange,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -374,6 +375,7 @@ export const useESQLDataVisualizerData = (
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
     limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
+    timeRange: fieldStatsRequest?.timeRange,
   });
 
   useEffect(
