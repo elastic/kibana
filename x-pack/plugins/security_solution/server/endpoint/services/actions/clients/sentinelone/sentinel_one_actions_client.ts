@@ -1400,7 +1400,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(
       () =>
-        `${completedResponses.length} get-file action responses generated:\n${stringify(
+        `${completedResponses.length} kill-process action responses generated:\n${stringify(
           completedResponses
         )}`
     );

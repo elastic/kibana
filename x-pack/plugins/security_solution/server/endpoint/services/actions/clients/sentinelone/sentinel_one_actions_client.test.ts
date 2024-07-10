@@ -734,6 +734,16 @@ describe('SentinelOneActionsClient class', () => {
         });
       });
     });
+
+    describe('for kill-process response action', () => {
+      it.todo('should create response at error if request has no parentTaskId');
+
+      it.todo('should do nothing if action is still pending');
+
+      it.todo('should create response at error when status is %s');
+
+      it.todo('should create success response');
+    });
   });
 
   describe('#getFile()', () => {
