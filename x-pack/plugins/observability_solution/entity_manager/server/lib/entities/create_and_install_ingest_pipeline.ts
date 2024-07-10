@@ -7,11 +7,13 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+import {
+  generateHistoryIngestPipelineId,
+  generateLatestIngestPipelineId,
+} from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
 import { generateHistoryProcessors } from './ingest_pipeline/generate_history_processors';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
+import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
 
 export async function createAndInstallHistoryIngestPipeline(
   esClient: ElasticsearchClient,
@@ -26,6 +28,9 @@ export async function createAndInstallHistoryIngestPipeline(
         esClient.ingest.putPipeline({
           id: historyId,
           processors: historyProcessors,
+          _meta: {
+            definitionVersion: definition.version,
+          },
         }),
       { logger }
     );
@@ -49,6 +54,9 @@ export async function createAndInstallLatestIngestPipeline(
         esClient.ingest.putPipeline({
           id: latestId,
           processors: latestProcessors,
+          _meta: {
+            definitionVersion: definition.version,
+          },
         }),
       { logger }
     );

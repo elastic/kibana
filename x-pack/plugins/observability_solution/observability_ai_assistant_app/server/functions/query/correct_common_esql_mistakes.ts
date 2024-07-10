@@ -240,13 +240,12 @@ export function correctCommonEsqlMistakes(query: string): {
       .replaceAll(/'@timestamp'/g, '@timestamp');
 
     switch (name) {
-      case 'FROM':
-        formattedCommand = formattedCommand
-          .replaceAll(/FROM "(.*)"/g, 'FROM $1')
-          .replaceAll(/FROM '(.*)'/g, 'FROM $1')
-          .replaceAll(/FROM `(.*)`/g, 'FROM $1');
+      case 'FROM': {
+        formattedCommand = split(formattedCommand, ',')
+          .map((singlePattern) => singlePattern.replaceAll(/`/g, '"').replaceAll(/'/g, '"'))
+          .join(',');
         break;
-
+      }
       case 'WHERE':
         formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = ensureEqualityOperators(formattedCommand);

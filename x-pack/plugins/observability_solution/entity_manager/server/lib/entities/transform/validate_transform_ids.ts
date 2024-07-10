@@ -7,8 +7,10 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { EntityDefinitionIdInvalid } from '../errors/entity_definition_id_invalid';
-import { generateHistoryTransformId } from './generate_history_transform_id';
-import { generateLatestTransformId } from './generate_latest_transform_id';
+import {
+  generateHistoryTransformId,
+  generateLatestTransformId,
+} from '../helpers/generate_component_id';
 
 const TRANSFORM_ID_MAX_LENGTH = 64;
 
