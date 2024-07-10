@@ -6,6 +6,8 @@
  */
 
 import { StreamParser } from './types';
+import { Logger } from '@kbn/core/server';
+import { Readable } from 'node:stream';
 
 export const parseGeminiStream: StreamParser = async (
   stream,
@@ -46,6 +48,42 @@ export const parseGeminiStream: StreamParser = async (
     }
   });
 };
+
+export const parseGeminiStreamAsAsyncIterator = async function* (
+  stream: Readable,
+  logger: Logger,
+  abortSignal?: AbortSignal,
+) {
+  if (abortSignal) {
+    abortSignal.addEventListener('abort', () => {
+      stream.destroy();
+    });
+  }
+  const iterator = stream.iterator();
+  try {
+    for await (const chunk of iterator) {
+      const decoded = chunk.toString();
+      const parsed = parseGeminiResponse(decoded);
+      // TODO: Move modifications of raw generated content out of chat model parsing
+      const splitByQuotes = parsed.split(`"`);
+      for (let i = 0; i < splitByQuotes.length; i++) {
+        const subchunk = splitByQuotes[i];
+        // add quote back on except for last chunk
+        const splitBySpace = `${subchunk}${i === splitByQuotes.length - 1 ? '' : '"'}`.split(` `);
+
+        for (const char of splitBySpace) {
+          yield `${char} `;
+        }
+      }
+    }
+  } catch (err) {
+    if (abortSignal?.aborted) {
+      logger.info('Gemini stream parsing was aborted.');
+    } else {
+      throw err;
+    }
+  }
+}
 
 /** Parse Gemini stream response body */
 export const parseGeminiResponse = (responseBody: string) => {

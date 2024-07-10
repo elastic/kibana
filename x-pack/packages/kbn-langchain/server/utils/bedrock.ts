@@ -7,6 +7,7 @@
 
 import { finished } from 'stream/promises';
 import { Logger } from '@kbn/core/server';
+import { Readable } from 'node:stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { StreamParser } from './types';
@@ -43,6 +44,31 @@ export const parseBedrockStream: StreamParser = async (
   });
 
   return parseBedrockBuffer(responseBuffer, logger);
+};
+
+export const parseBedrockStreamAsAsyncIterator = async function* (
+  responseStream: Readable,
+  logger: Logger,
+  abortSignal?: AbortSignal,
+) {
+  if (abortSignal) {
+    abortSignal.addEventListener('abort', () => {
+      responseStream.destroy(new Error('Aborted'));
+    });
+  }
+  const iterator = responseStream.iterator();
+  try {
+    for await (const chunk of iterator) {
+      const bedrockChunk = handleBedrockChunk({ chunk, bedrockBuffer: new Uint8Array(0), logger });
+      yield bedrockChunk.decodedChunk;
+    }
+  } catch (err) {
+    if (abortSignal?.aborted) {
+      logger.info('Bedrock stream parsing was aborted.');
+    } else {
+      throw err;
+    }
+  }
 };
 
 /**
