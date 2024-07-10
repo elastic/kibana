@@ -39,29 +39,29 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(hostsUrl('allHosts'));
-    openTimelineUsingToggle();
-    openTimelineFieldsBrowser();
-  });
-
-  describe(
-    'Editing the timeline',
-    {
-      tags: ['@ess', '@serverless'],
-      env: {
-        ftrConfig: {
-          kbnServerArgs: [
-            `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-              'unifiedComponentsInTimelineDisabled',
-            ])}`,
-          ],
-        },
+describe(
+  'Fields Browser',
+  {
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'unifiedComponentsInTimelineDisabled',
+          ])}`,
+        ],
       },
     },
-    () => {
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(hostsUrl('allHosts'));
+      openTimelineUsingToggle();
+      openTimelineFieldsBrowser();
+    });
+
+    describe('Editing the timeline', () => {
       it('should add/remove columns from the alerts table when the user checks/un-checks them', () => {
         const filterInput = 'host.geo.c';
 
@@ -114,6 +114,6 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
         cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
         cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
       });
-    }
-  );
-});
+    });
+  }
+);
