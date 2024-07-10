@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { OptionalKeys } from 'utility-types';
+import { MetricVisualizationState } from './types';
+
 export const LENS_METRIC_ID = 'lnsMetric';
 
 export const GROUP_ID = {
@@ -17,3 +20,23 @@ export const GROUP_ID = {
   TREND_TIME: 'trendTime',
   TREND_BREAKDOWN_BY: 'trendBreakdownBy',
 } as const;
+
+type MetricVisualizationStateOptionals = Pick<
+  MetricVisualizationState,
+  OptionalKeys<MetricVisualizationState>
+>;
+
+/**
+ * Defaults for select optional Metric vis state options
+ */
+export const metricStateDefaults: Required<
+  Pick<
+    MetricVisualizationStateOptionals,
+    'titlesTextAlign' | 'valuesTextAlign' | 'iconAlign' | 'valueFontMode'
+  >
+> = {
+  titlesTextAlign: 'left',
+  valuesTextAlign: 'right',
+  iconAlign: 'left',
+  valueFontMode: 'default',
+};

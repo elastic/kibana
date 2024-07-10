@@ -18,7 +18,7 @@ import { StatusRuleComponent } from '../../../components/alerts/status_rule_ui';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
-import { StatusRuleParams } from '../../../../../../common/rules/status_rule';
+import type { StatusRuleParams } from '../../../../../../common/rules/status_rule';
 
 interface Props {
   core: CoreStart;

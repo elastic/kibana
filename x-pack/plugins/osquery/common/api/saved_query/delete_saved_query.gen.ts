@@ -22,6 +22,3 @@ export type DeleteSavedQueryRequestQuery = z.infer<typeof DeleteSavedQueryReques
 export const DeleteSavedQueryRequestQuery = z.object({
   id: SavedQueryId.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

@@ -9,14 +9,14 @@ import React from 'react';
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
-import { StatusRuleParams } from '../../../../../common/rules/status_rule';
+import type { StatusRuleParams } from '../../../../../common/rules/status_rule';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
-import { AlertTypeInitializer } from '.';
+import type { AlertTypeInitializer } from '.';
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
 
