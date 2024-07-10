@@ -506,7 +506,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         400
       );
     }
-
     await this.ensureValidActionId(actionId);
 
     const fileInfo: UploadedFileInfo = {
@@ -522,51 +521,19 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     try {
-      const agentResponse = (
-        await this.fetchActionResponseEsDocs<
-          ResponseActionGetFileOutputContent,
-          SentinelOneGetFileResponseMeta
-        >(actionId, [agentId])
-      )[agentId];
+      const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
 
-      if (!agentResponse) {
-        throw new ResponseActionAgentResponseEsDocNotFound(
-          `Action ID [${actionId}] for agent ID [${agentId}] is still pending`,
-          404
-        );
-      }
-
-      if (agentResponse.error?.message) {
-        throw new ResponseActionsClientError(
-          `Action ID [${actionId}] for agent ID [${agentId}] failed. No file information available`
-        );
-      }
-
-      switch (agentResponse.EndpointActions.data.command) {
-        case 'get-file':
-          // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
-          // calling the download API, which would return the following error:
-          // {  "errors":[ {
-          //      "code":4100010,
-          //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
-          //      "title":"Resource not found"
-          // } ] }
-          fileInfo.status = 'READY';
-          fileInfo.created = agentResponse.meta?.createdAt ?? '';
-          fileInfo.name = agentResponse.meta?.filename ?? '';
-          fileInfo.mimeType = 'application/octet-stream';
-
-          break;
-
-        case 'kill-process':
-          // FIXME:PT implement here
-          break;
-
-        default:
-          throw new ResponseActionsClientError(
-            `File information is not supported for SentinelOne [${agentResponse.EndpointActions.data.command}]`
-          );
-      }
+      // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
+      // calling the download API, which would return the following error:
+      // {  "errors":[ {
+      //      "code":4100010,
+      //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
+      //      "title":"Resource not found"
+      // } ] }
+      fileInfo.status = 'READY';
+      fileInfo.created = agentResponse.meta?.createdAt ?? '';
+      fileInfo.name = agentResponse.meta?.filename ?? '';
+      fileInfo.mimeType = 'application/octet-stream';
     } catch (e) {
       // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
       if (!(e instanceof ResponseActionAgentResponseEsDocNotFound)) {
