@@ -671,7 +671,6 @@ describe('<IndexDetailsPage />', () => {
             testBed = await setup({
               httpSetup,
               dependencies: {
-                config: { enableSemanticText: true },
                 docLinks: {
                   links: {
                     ml: '',

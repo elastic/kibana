@@ -60,7 +60,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
-          logger.debug(`Creating KB Entry:\n${JSON.stringify(request.body)}`);
+          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
           const documents: Array<Document<Metadata>> = [
             {
               metadata: request.body.metadata,
