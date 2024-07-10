@@ -56,9 +56,8 @@ export const parseBedrockStreamAsAsyncIterator = async function* (
       responseStream.destroy(new Error('Aborted'));
     });
   }
-  const iterator = responseStream.iterator();
   try {
-    for await (const chunk of iterator) {
+    for await (const chunk of responseStream) {
       const bedrockChunk = handleBedrockChunk({ chunk, bedrockBuffer: new Uint8Array(0), logger });
       yield bedrockChunk.decodedChunk;
     }

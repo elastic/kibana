@@ -59,9 +59,8 @@ export const parseGeminiStreamAsAsyncIterator = async function* (
       stream.destroy();
     });
   }
-  const iterator = stream.iterator();
   try {
-    for await (const chunk of iterator) {
+    for await (const chunk of stream) {
       const decoded = chunk.toString();
       const parsed = parseGeminiResponse(decoded);
       // TODO: Move modifications of raw generated content out of chat model parsing
