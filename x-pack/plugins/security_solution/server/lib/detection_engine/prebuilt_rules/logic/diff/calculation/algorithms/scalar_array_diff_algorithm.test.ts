@@ -106,7 +106,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         merged_version: expectedMergedVersion,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Merged,
-        conflict: ThreeWayDiffConflictResolutionResult.NO,
+        conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
       })
     );
   });
@@ -247,7 +247,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: expectedMergedVersion,
             diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
             merge_outcome: ThreeWayMergeOutcome.Merged,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
           })
         );
       });
