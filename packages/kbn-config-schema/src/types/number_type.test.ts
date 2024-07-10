@@ -65,6 +65,12 @@ describe('#max', () => {
 });
 
 describe('#unsafe', () => {
+  it('rejects unsafe numbers when undefined', () => {
+    expect(() => schema.number().validate(9007199254740992)).toThrowErrorMatchingInlineSnapshot(
+      `"\\"value\\" must be a safe number"`
+    );
+  });
+
   it('rejects unsafe numbers when false', () => {
     expect(() =>
       schema.number({ unsafe: false }).validate(9007199254740992)
