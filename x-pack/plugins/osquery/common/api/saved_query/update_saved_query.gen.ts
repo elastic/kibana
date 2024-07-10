@@ -44,6 +44,3 @@ export const UpdateSavedQueryRequestBody = z.object({
   snapshot: SnapshotOrUndefined.optional(),
   removed: RemovedOrUndefined.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

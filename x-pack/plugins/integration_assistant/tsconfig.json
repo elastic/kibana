@@ -36,6 +36,7 @@
     "@kbn/licensing-plugin",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/kibana-utils-plugin"
   ]
 }

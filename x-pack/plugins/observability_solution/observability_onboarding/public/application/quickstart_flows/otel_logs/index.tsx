@@ -770,7 +770,12 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                 ),
               },
               {
-                title: 'Visualize your data',
+                title: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.steps.visualize',
+                  {
+                    defaultMessage: 'Visualize your data',
+                  }
+                ),
                 children: (
                   <>
                     <EuiText>
