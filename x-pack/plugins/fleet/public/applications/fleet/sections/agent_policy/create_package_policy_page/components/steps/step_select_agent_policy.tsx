@@ -244,7 +244,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 selectedPolicyIds.length === 0 ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
-                    defaultMessage="An agent policy is required."
+                    defaultMessage="At least one agent policy is required."
                   />
                 ) : someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage
