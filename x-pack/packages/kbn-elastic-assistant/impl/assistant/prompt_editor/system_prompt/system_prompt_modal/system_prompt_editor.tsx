@@ -291,6 +291,9 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   const handleNewConversationDefaultChange = useCallback(
     (e) => {
       const isChecked = e.target.checked;
+      const existingDefaultNewSystemPrompt = systemPromptSettings.filter(
+        (p) => p.isNewConversationDefault
+      );
 
       if (selectedSystemPrompt != null) {
         setUpdatedSystemPromptSettings((prev) => {
@@ -301,14 +304,24 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             };
           });
         });
+        console.log('selectedSystemPrompt----', selectedSystemPrompt);
         setPromptsBulkActions({
-          ...promptsBulkActions,
           ...(selectedSystemPrompt.name !== selectedSystemPrompt.id
             ? {
+                ...promptsBulkActions,
                 update: [
-                  ...(promptsBulkActions.update ?? []).filter(
-                    (p) => p.id !== selectedSystemPrompt.id
-                  ),
+                  ...(promptsBulkActions.update ?? [])
+                    .filter((p) => p.id !== selectedSystemPrompt.id)
+                    .map((sp) => ({
+                      ...sp,
+                      isNewConversationDefault: false,
+                    })),
+                  ...existingDefaultNewSystemPrompt
+                    .filter((sp) => sp.id !== selectedSystemPrompt.id && sp.name !== sp.id)
+                    .map((sp) => ({
+                      ...sp,
+                      isNewConversationDefault: false,
+                    })),
                   {
                     ...selectedSystemPrompt,
                     isNewConversationDefault: isChecked,
@@ -316,10 +329,20 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                 ],
               }
             : {
+                ...promptsBulkActions,
                 create: [
-                  ...(promptsBulkActions.create ?? []).filter(
-                    (p) => p.name !== selectedSystemPrompt.name
-                  ),
+                  ...(promptsBulkActions.create ?? [])
+                    .filter((p) => p.name !== selectedSystemPrompt.name)
+                    .map((sp) => ({
+                      ...sp,
+                      isNewConversationDefault: false,
+                    })),
+                  ...existingDefaultNewSystemPrompt
+                    .filter((sp) => sp.id !== selectedSystemPrompt.id && sp.name === sp.id)
+                    .map((sp) => ({
+                      ...sp,
+                      isNewConversationDefault: false,
+                    })),
                   {
                     ...selectedSystemPrompt,
                     isNewConversationDefault: isChecked,
@@ -334,6 +357,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       selectedSystemPrompt,
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,
+      systemPromptSettings,
     ]
   );
 

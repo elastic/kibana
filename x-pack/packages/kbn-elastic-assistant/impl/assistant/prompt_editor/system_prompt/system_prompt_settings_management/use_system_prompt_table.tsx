@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { FormattedDate } from '@kbn/i18n-react';
+
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -63,8 +65,20 @@ export const useSystemPromptTable = () => {
       },
       {
         align: 'left',
-        field: 'createdAt',
-        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON,
+        field: 'updatedAt',
+        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DATE_UPDATED,
+        render: (updatedAt: SystemPromptTableItem['updatedAt']) =>
+          updatedAt ? (
+            <EuiBadge color="hollow">
+              <FormattedDate
+                value={new Date(updatedAt)}
+                year="numeric"
+                month="2-digit"
+                day="numeric"
+              />
+            </EuiBadge>
+          ) : null,
+        sortable: true,
       },
       {
         align: 'center',

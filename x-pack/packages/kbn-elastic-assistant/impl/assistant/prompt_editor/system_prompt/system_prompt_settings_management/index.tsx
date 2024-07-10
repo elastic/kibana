@@ -61,13 +61,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     [baseConversations]
   );
 
-  const { data: allPrompts } = useFetchPrompts();
+  const { data: allPrompts, refetch: refetchPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
-  const {
-    data: conversations,
-    isFetched: conversationsLoaded,
-    refetch: refetchConversations,
-  } = useFetchCurrentUserConversations({
+  const { data: conversations, isFetched: conversationsLoaded } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
     isAssistantEnabled,
@@ -92,7 +88,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     saveSettings,
     promptsBulkActions,
     setPromptsBulkActions,
-  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded);
+  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
 
   // System Prompt Selection State
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
@@ -106,14 +102,6 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
       setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
     }
   }, [selectedSystemPrompt, systemPromptSettings]);
-
-  const systemPrompts = useMemo(
-    () =>
-      systemPromptSettings.length === 0
-        ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
-        : systemPromptSettings,
-    [allPrompts.data, systemPromptSettings]
-  );
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
@@ -173,9 +161,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const onDeleteConfirmed = useCallback(() => {
     closeConfirmModal();
-    handleSave({ callback: refetchConversations });
+    handleSave({ callback: refetchPrompts });
     setConversationsSettingsBulkActions({});
-  }, [closeConfirmModal, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
+  }, [closeConfirmModal, handleSave, refetchPrompts, setConversationsSettingsBulkActions]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -184,9 +172,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const onSaveConfirmed = useCallback(() => {
     closeFlyout();
-    handleSave({ callback: refetchConversations });
+    handleSave({ callback: refetchPrompts });
     setConversationsSettingsBulkActions({});
-  }, [closeFlyout, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
+  }, [closeFlyout, handleSave, refetchPrompts, setConversationsSettingsBulkActions]);
 
   const confirmationTitle = useMemo(
     () =>
@@ -214,9 +202,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
         connectors,
         conversationSettings,
         defaultConnector,
-        systemPromptSettings: systemPrompts,
+        systemPromptSettings,
       }),
-    [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPrompts]
+    [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPromptSettings]
   );
 
   return (
@@ -228,7 +216,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton iconType="plusInCircle" onClick={onCreate}>
-              {SETTINGS_TITLE}
+              {i18n.CREATE_SYSTEM_PROMPT_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -256,7 +244,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
           selectedSystemPrompt={selectedSystemPrompt}
           setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
           setConversationSettings={setConversationSettings}
-          systemPromptSettings={systemPrompts}
+          systemPromptSettings={systemPromptSettings}
           conversationsSettingsBulkActions={conversationsSettingsBulkActions}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           defaultConnector={defaultConnector}

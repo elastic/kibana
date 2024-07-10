@@ -67,6 +67,7 @@ export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
   allPrompts: FindPromptsResponse,
   conversationsLoaded: boolean,
+  promptsLoaded: boolean,
   anonymizationFields: FindAnonymizationFieldsResponse = DEFAULT_ANONYMIZATION_FIELDS // Put default as a constant to avoid re-creating it on every render
 ): UseSettingsUpdater => {
   // Initial state from assistant context
@@ -243,6 +244,18 @@ export const useSettingsUpdater = (
       setConversationSettings(conversations);
     }
   }, [conversations, conversationsLoaded]);
+
+  useEffect(() => {
+    // Update quick prompts settings when prompts are loaded
+    if (promptsLoaded) {
+      setUpdatedQuickPromptSettings(
+        allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+      );
+      setUpdatedSystemPromptSettings(
+        allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+      );
+    }
+  }, [allPrompts.data, promptsLoaded]);
 
   return {
     conversationSettings,

@@ -65,7 +65,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [baseConversations]
   );
 
-  const { data: allPrompts } = useFetchPrompts();
+  const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
   const {
     data: conversations,
@@ -87,21 +87,25 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     setConversationSettings,
     setConversationsSettingsBulkActions,
     setUpdatedAssistantStreamingEnabled,
-  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded);
+  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      await saveSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      setHasPendingChanges(false);
-      param?.callback?.();
+      const isSuccess = await saveSettings();
+      if (isSuccess) {
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        setHasPendingChanges(false);
+        param?.callback?.();
+      } else {
+        resetSettings();
+      }
     },
-    [saveSettings, toasts]
+    [resetSettings, saveSettings, toasts]
   );
 
   const setAssistantStreamingEnabled = useCallback(

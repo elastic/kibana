@@ -139,8 +139,9 @@ export const bulkUpdateConversations = async (
     toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
       title: i18n.translate('xpack.elasticAssistant.conversations.bulkActionsConversationsError', {
         defaultMessage: 'Error updating conversations {error}',
-        values: { error },
+        values: { error: error.message },
       }),
     });
+    return { success: false };
   }
 };

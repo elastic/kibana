@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { FormattedDate } from '@kbn/i18n-react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { PromptContextTemplate } from '../../prompt_context/types';
@@ -49,8 +50,20 @@ export const useQuickPromptTable = () => {
       },
       {
         align: 'left',
-        field: 'createdAt',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_ON,
+        field: 'updatedAt',
+        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_DATE_UPDATED,
+        render: (updatedAt: PromptResponse['updatedAt']) =>
+          updatedAt ? (
+            <EuiBadge color="hollow">
+              <FormattedDate
+                value={new Date(updatedAt)}
+                year="numeric"
+                month="2-digit"
+                day="numeric"
+              />
+            </EuiBadge>
+          ) : null,
+        sortable: true,
       },
       {
         align: 'center',

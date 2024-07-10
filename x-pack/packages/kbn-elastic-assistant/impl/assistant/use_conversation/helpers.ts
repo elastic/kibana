@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../assistant_context/types';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
@@ -162,5 +162,10 @@ export const getConversationApiConfig = ({
           model: conversation?.apiConfig?.model ?? connectorModel,
         },
       }
-    : {};
+    : ({
+        // Scenario when no connectors is configured
+        apiConfig: {
+          defaultSystemPromptId: defaultSystemPrompt?.id,
+        },
+      } as unknown as { apiConfig: ApiConfig });
 };

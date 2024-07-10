@@ -15,10 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -41,7 +38,7 @@ import { useFetchPrompts } from '../../api';
 const QuickPromptSettingsManagementComponent = () => {
   const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
-  const { data: allPrompts } = useFetchPrompts();
+  const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
   const {
     promptsBulkActions,
@@ -53,7 +50,8 @@ const QuickPromptSettingsManagementComponent = () => {
   } = useSettingsUpdater(
     DEFAULT_CONVERSATIONS, // Quick Prompt settings do not require conversations
     allPrompts,
-    false // Quick Prompt settings do not require conversations
+    false, // Quick Prompt settings do not require conversations
+    promptsLoaded
   );
 
   // Quick Prompt Selection State
@@ -67,14 +65,6 @@ const QuickPromptSettingsManagementComponent = () => {
       setSelectedQuickPrompt(quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name));
     }
   }, [quickPromptSettings, selectedQuickPrompt]);
-
-  const quickPrompts = useMemo(
-    () =>
-      quickPromptSettings.length === 0
-        ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
-        : quickPromptSettings,
-    [allPrompts.data, quickPromptSettings]
-  );
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
@@ -189,7 +179,7 @@ const QuickPromptSettingsManagementComponent = () => {
         <EuiSpacer size="s" />
         <EuiInMemoryTable
           columns={columns}
-          items={quickPrompts}
+          items={quickPromptSettings}
           onTableChange={onTableChange}
           pagination={pagination}
           sorting={sorting}
@@ -204,7 +194,7 @@ const QuickPromptSettingsManagementComponent = () => {
       >
         <QuickPromptSettingsEditor
           onSelectedQuickPromptChange={onSelectedQuickPromptChange}
-          quickPromptSettings={quickPrompts}
+          quickPromptSettings={quickPromptSettings}
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
           setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
