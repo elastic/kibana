@@ -174,7 +174,7 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: () =>
+          serializeState: async () =>
             serializeState({
               uuid,
               initialState,
