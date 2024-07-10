@@ -36,8 +36,8 @@ const inferenceEndpoints = [
   },
   {
     model_id: 'my-elser-model-05',
-    task_type: 'sparse_embedding',
-    service: 'elser',
+    task_type: 'text_embedding',
+    service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
       num_threads: 1,
@@ -54,9 +54,23 @@ const queryParams = {
   sortOrder: 'desc',
 } as QueryParams;
 
+const filterOptions = {
+  provider: ['elser', 'elasticsearch'],
+  type: ['sparse_embedding', 'text_embedding'],
+} as any;
+
+const deploymentStatus = {
+  '.elser_model_2': 'deployed',
+  lang_ident_model_1: 'not_deployed',
+} as any;
+
+const searchKey = 'my';
+
 describe('useTableData', () => {
   it('should return correct pagination', () => {
-    const { result } = renderHook(() => useTableData(inferenceEndpoints, queryParams));
+    const { result } = renderHook(() =>
+      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    );
 
     expect(result.current.pagination).toEqual({
       pageIndex: 0,
@@ -67,7 +81,9 @@ describe('useTableData', () => {
   });
 
   it('should return correct sorting', () => {
-    const { result } = renderHook(() => useTableData(inferenceEndpoints, queryParams));
+    const { result } = renderHook(() =>
+      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    );
 
     expect(result.current.sorting).toEqual({
       sort: {
@@ -78,15 +94,54 @@ describe('useTableData', () => {
   });
 
   it('should return correctly sorted data', () => {
-    const { result } = renderHook(() => useTableData(inferenceEndpoints, queryParams));
+    const { result } = renderHook(() =>
+      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    );
 
     const expectedSortedData = [...inferenceEndpoints].sort((a, b) =>
       b.model_id.localeCompare(a.model_id)
     );
 
-    const sortedEndpoints = result.current.sortedTableData.map((item) => item.endpoint);
+    const sortedEndpoints = result.current.sortedTableData.map((item) => item.endpoint.model_id);
     const expectedModelIds = expectedSortedData.map((item) => item.model_id);
 
     expect(sortedEndpoints).toEqual(expectedModelIds);
+  });
+
+  it('should filter data based on provider and type from filterOptions', () => {
+    const filterOptions2 = {
+      provider: ['elser'],
+      type: ['text_embedding'],
+    } as any;
+    const { result } = renderHook(() =>
+      useTableData(inferenceEndpoints, queryParams, filterOptions2, searchKey, deploymentStatus)
+    );
+
+    const filteredData = result.current.sortedTableData;
+    expect(
+      filteredData.every(
+        (endpoint) =>
+          filterOptions.provider.includes(endpoint.provider) &&
+          filterOptions.type.includes(endpoint.type)
+      )
+    ).toBeTruthy();
+  });
+
+  it('should filter data based on searchKey', () => {
+    const searchKey2 = 'model-05';
+    const { result } = renderHook(() =>
+      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2, deploymentStatus)
+    );
+    const filteredData = result.current.sortedTableData;
+    expect(filteredData.every((item) => item.endpoint.model_id.includes(searchKey))).toBeTruthy();
+  });
+
+  it('should update deployment status based on deploymentStatus object', () => {
+    const { result } = renderHook(() =>
+      useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey, deploymentStatus)
+    );
+
+    const updatedData = result.current.sortedTableData;
+    expect(updatedData[0].deployment).toEqual('deployed');
   });
 });

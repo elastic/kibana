@@ -16,7 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER } from '../../preview';
+import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { DocumentDetailsContext } from '../../shared/context';
 
 jest.mock('../hooks/use_paginated_alerts');
