@@ -12,6 +12,12 @@ export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
 export const E5_MODEL_ID = '.multilingual-e5-small';
 export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
 export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
+export const ELSER_ID_V1 = '.elser_model_1' as const;
+
+export const getLatestElserModel = () => ELSER_LINUX_OPTIMIZED_MODEL_ID;
+export const getLatestE5Model = () => E5_LINUX_OPTIMIZED_MODEL_ID;
+
+export const ElserModels = [ELSER_MODEL_ID, ELSER_LINUX_OPTIMIZED_MODEL_ID, ELSER_ID_V1];
 
 export const DEPLOYMENT_STATE = {
   STARTED: 'started',
@@ -51,8 +57,6 @@ export const ELASTIC_MODEL_TYPE = 'elastic';
 export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
-
-export const ELSER_ID_V1 = '.elser_model_1' as const;
 
 export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
   '.elser_model_1': {

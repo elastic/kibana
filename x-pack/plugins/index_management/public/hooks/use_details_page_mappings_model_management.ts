@@ -7,12 +7,10 @@
 
 import { Service } from '@kbn/inference_integration_flyout/types';
 import { ModelDownloadState, TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  E5_LINUX_OPTIMIZED_MODEL_ID,
-  ELSER_LINUX_OPTIMIZED_MODEL_ID,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
-import {
+  getLatestE5Model,
+  getLatestElserModel,
   InferenceServiceSettings,
   LocalInferenceServiceSettings,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
@@ -51,20 +49,22 @@ const getCustomInferenceIdMap = (
     inferenceMap[model.model_id] = inferenceEntry;
     return inferenceMap;
   }, {});
+  const elser = getLatestElserModel();
+  const e5 = getLatestE5Model();
   const defaultInferenceIds = {
     [DefaultInferenceModels.elser_model_2]: {
-      trainedModelId: ELSER_LINUX_OPTIMIZED_MODEL_ID,
+      trainedModelId: elser,
       isDeployable: true,
-      isDeployed: modelStatsById[ELSER_LINUX_OPTIMIZED_MODEL_ID]?.state === 'started',
-      isDownloading: Boolean(downloadStates[ELSER_LINUX_OPTIMIZED_MODEL_ID]),
-      modelStats: modelStatsById[ELSER_LINUX_OPTIMIZED_MODEL_ID],
+      isDeployed: modelStatsById[elser]?.state === 'started',
+      isDownloading: Boolean(downloadStates[elser]),
+      modelStats: modelStatsById[elser],
     },
     [DefaultInferenceModels.e5]: {
-      trainedModelId: E5_LINUX_OPTIMIZED_MODEL_ID,
+      trainedModelId: e5,
       isDeployable: true,
-      isDeployed: modelStatsById[E5_LINUX_OPTIMIZED_MODEL_ID]?.state === 'started',
-      isDownloading: Boolean(downloadStates[E5_LINUX_OPTIMIZED_MODEL_ID]),
-      modelStats: modelStatsById[E5_LINUX_OPTIMIZED_MODEL_ID],
+      isDeployed: modelStatsById[e5]?.state === 'started',
+      isDownloading: Boolean(downloadStates[e5]),
+      modelStats: modelStatsById[e5],
     },
   };
   return { ...defaultInferenceIds, ...inferenceIdMap };

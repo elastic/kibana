@@ -9,19 +9,16 @@ import { useCallback } from 'react';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect } from 'react';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ELSER_ID_V1,
-  ELSER_LINUX_OPTIMIZED_MODEL_ID,
-  ELSER_MODEL_ID,
-} from '@kbn/ml-trained-models-utils';
+import { ElserModels } from '@kbn/ml-trained-models-utils';
+import { i18n } from '@kbn/i18n';
 import { useDetailsPageMappingsModelManagement } from '../../../../../../../../hooks/use_details_page_mappings_model_management';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, Field, SemanticTextField } from '../../../../../types';
 import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_ml_model_status_toasts';
 
-import { getFieldByPathName } from '../../../../../reducer';
 import { getInferenceEndpoints } from '../../../../../../../services/api';
+import { getFieldByPathName } from '../../../../../lib/utils';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -78,9 +75,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       inferenceId: string,
       customInferenceEndpointConfig?: CustomInferenceEndpointConfig
     ) => {
-      const isElser = [ELSER_LINUX_OPTIMIZED_MODEL_ID, ELSER_ID_V1, ELSER_MODEL_ID].includes(
-        trainedModelId
-      );
+      const isElser = ElserModels.includes(trainedModelId);
       const defaultInferenceEndpointConfig: DefaultInferenceEndpointConfig = {
         service: isElser ? 'elser' : 'elasticsearch',
         taskType: isElser ? 'sparse_embedding' : 'text_embedding',
@@ -110,14 +105,13 @@ export function useSemanticText(props: UseSemanticTextProps) {
   ) => {
     const modelIdMap = await fetchInferenceToModelIdMap();
     const inferenceId = data.inference_id;
-    const referenceField = data.reference_field;
-    const name = data.name;
-    if (!inferenceId || !referenceField || !name) {
-      return;
-    }
     const inferenceData = modelIdMap?.[inferenceId];
     if (!inferenceData) {
-      return;
+      throw new Error(
+        i18n.translate('xpack.idxMgmt.mappingsEditor.semanticText.inferenceError', {
+          defaultMessage: 'No inference model found for inference ID {inferenceId}',
+        })
+      );
     }
 
     const { trainedModelId } = inferenceData;

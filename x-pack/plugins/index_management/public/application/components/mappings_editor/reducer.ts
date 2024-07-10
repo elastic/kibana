@@ -105,10 +105,6 @@ const updateAliasesReferences = (
   return updatedAliases;
 };
 
-export const getFieldByPathName = (fields: NormalizedFields, name: string) => {
-  return Object.values(fields.byId).find((field) => field.path.join('.') === name);
-};
-
 /**
  * Helper to remove a field from our map, in an immutable way.
  * When we remove a field we also need to update its parent "childFields" array, or

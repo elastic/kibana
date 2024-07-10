@@ -25,8 +25,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import {
-  E5_MODEL_ID,
-  ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  getLatestElserModel,
+  getLatestE5Model,
   SUPPORTED_PYTORCH_TASKS,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
@@ -43,8 +43,8 @@ import { CustomInferenceEndpointConfig } from '../../../types';
 import { UseField } from '../../../shared_imports';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, string> = {
-  elser: ELSER_LINUX_OPTIMIZED_MODEL_ID,
-  elasticsearch: E5_MODEL_ID,
+  elser: getLatestElserModel(),
+  elasticsearch: getLatestE5Model(),
 };
 
 export interface SelectInferenceIdProps {

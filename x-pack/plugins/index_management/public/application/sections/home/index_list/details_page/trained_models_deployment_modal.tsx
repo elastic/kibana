@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
-import { Field, SemanticTextField } from '../../../../components/mappings_editor/types';
 import { useMLModelNotificationToasts } from '../../../../../hooks/use_ml_model_status_toasts';
 import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
 import { useAppContext } from '../../../../app_context';
@@ -26,10 +26,6 @@ export interface TrainedModelsDeploymentModalProps {
 
 const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 const TRAINED_MODELS_MANAGE = 'trained_models';
-
-function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
-  return Boolean(field.inference_id && field.type === 'semantic_text');
-}
 
 export function TrainedModelsDeploymentModal({
   errorsInTrainedModelDeployment = {},

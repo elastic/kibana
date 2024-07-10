@@ -18,6 +18,7 @@ import {
   getFieldsFromState,
   getAllFieldTypesFromState,
   getFieldsMatchingFilterFromState,
+  getStateWithCopyToFields,
 } from './utils';
 
 const fieldsWithnestedFields: NormalizedFields = {
@@ -441,6 +442,224 @@ describe('utils', () => {
           hasMultiFields: false,
           isExpanded: false,
         },
+      });
+    });
+    describe('getStateWithCopyToFields', () => {
+      const fields: Fields = {
+        nested_field: {
+          properties: {
+            flag: { type: 'boolean' },
+            points: {
+              properties: {
+                name: { type: 'text' },
+                entity: {
+                  type: 'object',
+                  properties: {
+                    entity_1: { type: 'keyword' },
+                  },
+                },
+              },
+              type: 'object',
+            },
+          },
+          type: 'object',
+        },
+      };
+      test('returns state if there is no semantic text field', () => {
+        const state = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                source: {
+                  name: 'title',
+                  type: 'text',
+                },
+              },
+            },
+          },
+        } as any;
+        expect(getStateWithCopyToFields(state)).toEqual(state);
+      });
+      test('returns state if semantic text field has no reference field', () => {
+        const state = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                source: {
+                  name: 'title',
+                  type: 'semantic_text',
+                  inference_id: 'id',
+                },
+              },
+            },
+          },
+        } as any;
+        expect(getStateWithCopyToFields(state)).toEqual(state);
+      });
+      test('adds text field with copy to to state if semantic text field has reference field', () => {
+        const state = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                path: ['title'],
+                source: {
+                  name: 'title',
+                  type: 'semantic_text',
+                  inference_id: 'id',
+                  reference_field: 'new',
+                },
+              },
+              'new-field': {
+                id: 'new-field',
+                isMultiField: false,
+                path: ['new'],
+                source: {
+                  name: 'new',
+                  type: 'text',
+                },
+              },
+            },
+            rootLevelFields: ['88ebcfdb-19b7-4458-9ea2-9488df54453d'],
+          },
+        } as any;
+        const expectedState = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                path: ['title'],
+                source: {
+                  name: 'title',
+                  type: 'semantic_text',
+                  inference_id: 'id',
+                },
+              },
+              'new-field': {
+                id: 'new-field',
+                isMultiField: false,
+                path: ['new'],
+                source: {
+                  name: 'new',
+                  type: 'text',
+                  copy_to: ['title'],
+                },
+              },
+            },
+            rootLevelFields: ['88ebcfdb-19b7-4458-9ea2-9488df54453d', 'new-field'],
+          },
+        } as any;
+        expect(getStateWithCopyToFields(state)).toEqual(expectedState);
+      });
+      test('adds nested text field with copy to to state if semantic text field has reference field', () => {
+        const state = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                path: ['title'],
+                source: {
+                  name: 'title',
+                  type: 'semantic_text',
+                  inference_id: 'id',
+                  reference_field: 'existing.new',
+                },
+              },
+            },
+            rootLevelFields: ['88ebcfdb-19b7-4458-9ea2-9488df54453d'],
+          },
+          mappingViewFields: {
+            byId: {
+              existing: {
+                id: 'existing',
+                isMultiField: false,
+                path: ['existing'],
+                source: {
+                  name: 'existing',
+                  type: 'object',
+                },
+              },
+              'new-field': {
+                id: 'new-field',
+                parentId: 'existing',
+                isMultiField: false,
+                path: ['existing', 'new'],
+                source: {
+                  name: 'new',
+                  type: 'text',
+                },
+              },
+            },
+          },
+        } as any;
+        const expectedState = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                path: ['title'],
+                source: {
+                  name: 'title',
+                  type: 'semantic_text',
+                  inference_id: 'id',
+                },
+              },
+              existing: {
+                id: 'existing',
+                isMultiField: false,
+                path: ['existing'],
+                source: {
+                  name: 'existing',
+                  type: 'object',
+                },
+              },
+              'new-field': {
+                id: 'new-field',
+                isMultiField: false,
+                parentId: 'existing',
+                path: ['existing', 'new'],
+                source: {
+                  name: 'new',
+                  type: 'text',
+                  copy_to: ['title'],
+                },
+              },
+            },
+            rootLevelFields: ['88ebcfdb-19b7-4458-9ea2-9488df54453d', 'existing'],
+          },
+          mappingViewFields: {
+            byId: {
+              existing: {
+                id: 'existing',
+                isMultiField: false,
+                path: ['existing'],
+                source: {
+                  name: 'existing',
+                  type: 'object',
+                },
+              },
+              'new-field': {
+                id: 'new-field',
+                parentId: 'existing',
+                isMultiField: false,
+                path: ['existing', 'new'],
+                source: {
+                  name: 'new',
+                  type: 'text',
+                },
+              },
+            },
+          },
+        } as any;
+        expect(getStateWithCopyToFields(state)).toEqual(expectedState);
       });
     });
   });
