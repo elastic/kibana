@@ -27,6 +27,6 @@ export async function run(config: Config, client: Client, logger: ToolingLog) {
   await indexSchedule(config, client, logger);
   const indicesCreated = [...indices];
   indices.clear();
-  await client.indices.refresh({ index: indicesCreated });
+  await client.indices.refresh({ index: indicesCreated, ignore_unavailable: true });
   return indicesCreated;
 }

@@ -21,8 +21,9 @@ const processors = [
 export async function installDefaultIngestPipeline(
   _config: Config,
   client: Client,
-  _logger: ToolingLog
+  logger: ToolingLog
 ) {
+  logger.info('Installing default ingest pipeline: kbn-data-forge-add-event-ingested');
   return client.ingest.putPipeline({
     id: 'kbn-data-forge-add-event-ingested',
     processors,

@@ -69,8 +69,12 @@ export async function waitForDocumentInIndex<T>({
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
     test: async () => {
-      const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
-      if (!response.hits.total || response.hits.total < docCountTarget) {
+      const response = await esClient.search<T>({
+        index: indexName,
+        rest_total_hits_as_int: true,
+        ignore_unavailable: true,
+      });
+      if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
         throw new Error(
           `Number of hits does not match expectation (total: ${response.hits.total}, target: ${docCountTarget})`
         );

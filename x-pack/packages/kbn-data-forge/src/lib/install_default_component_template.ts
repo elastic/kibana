@@ -32,8 +32,9 @@ const eventIngestedCommonComponentTemplate = {
 export async function installDefaultComponentTemplate(
   _config: Config,
   client: Client,
-  _logger: ToolingLog
+  logger: ToolingLog
 ) {
+  logger.info('Installing base component template: kbn-data-forge_base');
   await client.cluster.putComponentTemplate({
     name: `kbn-data-forge_base`,
     ...eventIngestedCommonComponentTemplate,
