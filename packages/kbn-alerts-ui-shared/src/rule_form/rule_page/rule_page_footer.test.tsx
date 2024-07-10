@@ -36,7 +36,7 @@ useRuleFormState.mockReturnValue({
   paramsErrors: {},
   formData: {
     actions: [],
-  }
+  },
 });
 
 describe('rulePageFooter', () => {

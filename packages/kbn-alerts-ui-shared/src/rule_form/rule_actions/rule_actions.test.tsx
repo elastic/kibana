@@ -19,15 +19,15 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./rule_actions_system_actions_item', () => ({
-  RuleActionsSystemActionsItem: <div>RuleActionsSystemActionsItem</div>
+  RuleActionsSystemActionsItem: <div>RuleActionsSystemActionsItem</div>,
 }));
 
 jest.mock('./rule_actions_item', () => ({
-  RuleActionsItem: <div>RuleActionsItem</div>
+  RuleActionsItem: <div>RuleActionsItem</div>,
 }));
 
 jest.mock('./rule_actions_connectors_modal', () => ({
-  RuleActionsConnectorsModal: <div>RuleActionsConnectorsModal</div>
+  RuleActionsConnectorsModal: <div>RuleActionsConnectorsModal</div>,
 }));
 
 jest.mock('../../common/hooks', () => ({
@@ -37,11 +37,8 @@ jest.mock('../../common/hooks', () => ({
 }));
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
-const {
-  useLoadConnectors,
-  useLoadConnectorTypes,
-  useLoadRuleTypeAadTemplateField,
-} = jest.requireMock('../../common/hooks');
+const { useLoadConnectors, useLoadConnectorTypes, useLoadRuleTypeAadTemplateField } =
+  jest.requireMock('../../common/hooks');
 
 const mockOnChange = jest.fn();
 
@@ -71,7 +68,7 @@ describe('Rule actions', () => {
         id: 'selectedRuleTypeId',
         defaultActionGroupId: 'test',
         producer: 'stackAlerts',
-      }
+      },
     });
     useRuleFormDispatch.mockReturnValue(mockOnChange);
   });
