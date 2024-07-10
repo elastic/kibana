@@ -896,8 +896,8 @@ export default ({ getService }: FtrProviderContext) => {
           logs: [_log],
         } = await previewRule({ supertest, rule });
 
-        expect(_log.errors).to.contain(
-          'An error occurred during rule execution: message: "verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown column [@timestamp]"'
+        expect(_log.errors[0]).to.contain(
+          'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown column [@timestamp]'
         );
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
