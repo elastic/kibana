@@ -251,7 +251,11 @@ export const DashboardPanelSelectionListFlyout: React.FC<
                         data-test-subj="dashboardPanelSelectionErrorIndicator"
                       />
                     ) : (
-                      <EuiText size="s" textAlign="center">
+                      <EuiText
+                        size="s"
+                        textAlign="center"
+                        data-test-subj="dashboardPanelSelectionNoPanelMessage"
+                      >
                         <FormattedMessage
                           id="dashboard.solutionToolbar.addPanelFlyout.noResultsDescription"
                           defaultMessage="No panel types found"
@@ -268,7 +272,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={close}>
+            <EuiButtonEmpty onClick={close} data-test-subj="dashboardPanelSelectionCloseBtn">
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
                 defaultMessage="Close"
