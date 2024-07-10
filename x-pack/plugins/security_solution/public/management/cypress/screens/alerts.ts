@@ -49,7 +49,7 @@ export const openAlertDetailsView = (rowIndex: number = 0): void => {
 
 export const openAlertDetailsViewFromTimeline = (rowIndex: number = 0): void => {
   cy.getByTestSubj('timeline-container').within(() => {
-    cy.getByTestSubj('expand-event').eq(rowIndex).click();
+    cy.getByTestSubj('docTableExpandToggleColumn').eq(rowIndex).click();
   });
   cy.getByTestSubj('take-action-dropdown-btn').click();
 };
