@@ -132,6 +132,7 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -241,6 +242,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       await requireUniqueName(soClient, enrichedPackagePolicy);
+    }
+    if (enrichedPackagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: enrichedPackagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -845,6 +852,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       !options?.skipUniqueNameVerification
     ) {
       await requireUniqueName(soClient, enrichedPackagePolicy, id);
+    }
+
+    if (packagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: packagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     // eslint-disable-next-line prefer-const

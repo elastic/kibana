@@ -44,7 +44,15 @@ export const GetSpaceSettingsRequestSchema = {};
 export const PutSpaceSettingsRequestSchema = {
   body: schema.object({
     allowed_namespace_prefixes: schema.maybe(
-      schema.oneOf([schema.literal(null), schema.arrayOf(schema.string())])
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        })
+      )
     ),
   }),
 };

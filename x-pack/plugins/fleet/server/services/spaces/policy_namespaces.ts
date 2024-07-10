@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { appContextService } from '../app_context';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
 
 import { getSpaceSettings } from './space_settings';
@@ -16,6 +17,10 @@ export async function validatePolicyNamespaceForSpace({
   namespace: string;
   spaceId?: string;
 }) {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  if (!experimentalFeature.useSpaceAwareness) {
+    return;
+  }
   const settings = await getSpaceSettings(spaceId);
   if (!settings.allowed_namespace_prefixes || settings.allowed_namespace_prefixes.length === 0) {
     return;
