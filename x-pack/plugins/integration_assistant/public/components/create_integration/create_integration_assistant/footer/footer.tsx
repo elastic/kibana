@@ -20,7 +20,7 @@ const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating 
   }
   return (
     <>
-      <EuiLoadingSpinner size="s" />
+      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
       {i18n.LOADING}
     </>
   );

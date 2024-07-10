@@ -12,6 +12,8 @@ import { DeployStep } from './deploy_step';
 import { ActionsProvider } from '../../state';
 import { mockActions, mockState } from '../../mocks/state';
 import type { BuildIntegrationRequestBody } from '../../../../../../common';
+import { mockReportEvent } from '../../../../../services/telemetry/mocks/service';
+import { TelemetryEventType } from '../../../../../services/telemetry/types';
 
 const integrationSettings = mockState.integrationSettings!;
 const connector = mockState.connector!;
@@ -39,7 +41,7 @@ const parameters: BuildIntegrationRequestBody = {
 
 const builtIntegration = new Blob();
 const mockRunBuildIntegration = jest.fn((_: unknown) => builtIntegration);
-const packageName = 'my_integration_33-1.0.0';
+const integrationName = 'my_integration_33-1.0.0';
 const mockRunInstallPackage = jest.fn((_: unknown) => ({
   response: [{ id: 'audit-my_integration_33.data-stream-1.0.0' }],
 }));
@@ -95,6 +97,24 @@ describe('DeployStep', () => {
       expect(result.queryByTestId('deployStep-success')).toBeInTheDocument();
     });
 
+    it('should report telemetry for integration complete', () => {
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        TelemetryEventType.IntegrationAssistantComplete,
+        {
+          sessionId: expect.any(String),
+          integrationName,
+          integrationDescription: integrationSettings.description,
+          dataStreamName: integrationSettings.dataStreamName,
+          inputType: integrationSettings.inputType,
+          model: expect.any(String),
+          actionTypeId: connector.actionTypeId,
+          provider: connector.apiProvider ?? 'unknown',
+          durationMs: expect.any(Number),
+          errorMessage: undefined,
+        }
+      );
+    });
+
     it('should render the save button', () => {
       expect(result.queryByTestId('saveZipButton')).toBeInTheDocument();
     });
@@ -105,7 +125,7 @@ describe('DeployStep', () => {
       });
 
       it('should save file', () => {
-        expect(mockSaveAs).toHaveBeenCalledWith(builtIntegration, `${packageName}.zip`);
+        expect(mockSaveAs).toHaveBeenCalledWith(builtIntegration, `${integrationName}.zip`);
       });
     });
   });
@@ -137,11 +157,29 @@ describe('DeployStep', () => {
 
       it('should render the error message', () => {
         expect(result.queryByTestId('deployStep-error')).toBeInTheDocument();
-        expect(result.queryByText(`Error: ${errorMessage}`)).toBeInTheDocument();
+        expect(result.queryByText(errorMessage)).toBeInTheDocument();
       });
 
       it('should not render the save button', () => {
         expect(result.queryByTestId('saveZipButton')).not.toBeInTheDocument();
+      });
+
+      it('should report telemetry for integration complete with error', () => {
+        expect(mockReportEvent).toHaveBeenCalledWith(
+          TelemetryEventType.IntegrationAssistantComplete,
+          {
+            sessionId: expect.any(String),
+            integrationName: integrationSettings.name,
+            integrationDescription: integrationSettings.description,
+            dataStreamName: integrationSettings.dataStreamName,
+            inputType: integrationSettings.inputType,
+            model: expect.any(String),
+            actionTypeId: connector.actionTypeId,
+            provider: connector.apiProvider ?? 'unknown',
+            durationMs: expect.any(Number),
+            errorMessage,
+          }
+        );
       });
     });
 
@@ -171,11 +209,29 @@ describe('DeployStep', () => {
 
       it('should render the error message', () => {
         expect(result.queryByTestId('deployStep-error')).toBeInTheDocument();
-        expect(result.queryByText(`Error: ${errorMessage}`)).toBeInTheDocument();
+        expect(result.queryByText(errorMessage)).toBeInTheDocument();
       });
 
       it('should not render the save button', () => {
         expect(result.queryByTestId('saveZipButton')).not.toBeInTheDocument();
+      });
+
+      it('should report telemetry for integration complete with error', () => {
+        expect(mockReportEvent).toHaveBeenCalledWith(
+          TelemetryEventType.IntegrationAssistantComplete,
+          {
+            sessionId: expect.any(String),
+            integrationName: integrationSettings.name,
+            integrationDescription: integrationSettings.description,
+            dataStreamName: integrationSettings.dataStreamName,
+            inputType: integrationSettings.inputType,
+            model: expect.any(String),
+            actionTypeId: connector.actionTypeId,
+            provider: connector.apiProvider ?? 'unknown',
+            durationMs: expect.any(Number),
+            errorMessage,
+          }
+        );
       });
     });
   });
