@@ -91,7 +91,16 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchDepNames": ["typescript", "@types/jsdom"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "prettier",
+      "matchDepNames": ["prettier", "eslint-plugin-prettier", "eslint-config-prettier"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
