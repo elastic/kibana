@@ -175,6 +175,7 @@ export const LogEntryRow = memo(
         onMouseLeave={setItemIsNotHovered}
         isHighlighted={isHighlighted}
         scale={scale}
+        onClick={isHovered ? setItemIsNotHovered : setItemIsHovered}
       >
         {columnConfigurations.map((columnConfiguration) => {
           if (isTimestampColumnRenderConfiguration(columnConfiguration)) {
