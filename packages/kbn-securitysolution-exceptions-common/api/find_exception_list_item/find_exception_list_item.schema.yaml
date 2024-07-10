@@ -15,7 +15,7 @@ paths:
         - name: list_id
           in: query
           required: true
-          description: List's ide
+          description: List's id
           schema:
             type: array
             items:

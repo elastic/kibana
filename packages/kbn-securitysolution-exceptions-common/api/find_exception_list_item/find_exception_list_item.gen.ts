@@ -31,7 +31,7 @@ export const FindExceptionListItemsFilter = NonEmptyString;
 export type FindExceptionListItemsRequestQuery = z.infer<typeof FindExceptionListItemsRequestQuery>;
 export const FindExceptionListItemsRequestQuery = z.object({
   /**
-   * List's ide
+   * List's id
    */
   list_id: ArrayFromString(ExceptionListHumanId),
   /** 
