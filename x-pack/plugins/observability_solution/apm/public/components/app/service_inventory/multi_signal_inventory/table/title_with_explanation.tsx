@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiIcon, EuiText } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
+import { css } from '@emotion/react';
 
 interface Props {
   name?: string;
-  description: string;
+  description: ReactElement | string;
   formula: string;
   'data-test-subj'?: string;
 }
@@ -55,7 +56,7 @@ function TitleWithPopoverExplanation(props: Props) {
           <p>
             <strong>
               <FormattedMessage
-                id="xpack.apm.hostsViewPage.table.tooltip.formula"
+                id="xpack.apm.multiSignal.tooltip.formula"
                 defaultMessage="Formula Calculation:"
               />
             </strong>
@@ -110,7 +111,7 @@ export function LogRateWithExplanation({ includeTitle }: ExplanationProps) {
           }}
         />
       }
-      formula=""
+      formula="count(kql='log.level: * OR error.log.level: *')"
       data-test-subj={
         includeTitle ? 'apmMultiSignalLogRateColumnTooltip' : 'apmMultiSignalLogRateChartTooltip'
       }
@@ -150,7 +151,7 @@ export function LogErrorRateWithExplanation({ includeTitle }: ExplanationProps) 
           }}
         />
       }
-      formula=""
+      formula={`count(kql='log.level: "error" OR log.level: "ERROR" OR  error.log.level: "error" OR error.log.level: "ERROR"') / count(kql='log.level: * OR error.log.level: *')`}
       data-test-subj={
         includeTitle
           ? 'apmMultiSignalLogErrorRateColumnTooltip'
