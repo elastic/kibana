@@ -21,6 +21,7 @@ import {
 export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
   return (
     <UnifiedDataTable
+      isPaginationEnabled={false}
       showColumnTokens
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
