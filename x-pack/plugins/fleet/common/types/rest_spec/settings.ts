@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SpaceSettingsSOAttributes } from '@kbn/fleet-plugin/server/types';
 import type { Settings, AgentPolicy, FleetServerHost, FleetProxy, DownloadSource } from '../models';
 
 export interface GetSettingsResponse {
@@ -45,4 +46,15 @@ export interface GetEnrollmentSettingsResponse {
     host_proxy?: FleetProxy;
   };
   download_source?: DownloadSource;
+}
+export interface PutSpaceSettingsRequest {
+  body: {
+    allowed_namespace_prefixes?: string[];
+  };
+}
+
+export interface GetSpaceSettingsResponse {
+  item: {
+    allowed_namespace_prefixes?: string[];
+  };
 }

@@ -21,6 +21,8 @@ import {
   PostEnrollmentAPIKeyRequest,
   GetEnrollmentSettingsResponse,
   GetInfoResponse,
+  GetSpaceSettingsResponse,
+  PutSpaceSettingsRequest,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -170,6 +172,26 @@ export class SpaceTestApiClient {
   async getEnrollmentSettings(spaceId?: string): Promise<GetEnrollmentSettingsResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/internal/fleet/settings/enrollment`)
+      .expect(200);
+
+    return res;
+  }
+  // Space Settings
+  async getSpaceSettings(spaceId?: string): Promise<GetSpaceSettingsResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/space_settings`)
+      .expect(200);
+
+    return res;
+  }
+  async putSpaceSettings(
+    data: PutSpaceSettingsRequest['body'],
+    spaceId?: string
+  ): Promise<GetSpaceSettingsResponse> {
+    const { body: res } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/space_settings`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
       .expect(200);
 
     return res;
