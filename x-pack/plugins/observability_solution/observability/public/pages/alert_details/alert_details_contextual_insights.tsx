@@ -23,6 +23,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
     observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
 
   const getAlertContextMessages = useCallback(async () => {
+    console.log('alert', alert);
     const fields = alert?.formatted.fields as Record<string, string> | undefined;
     if (!observabilityAIAssistant || !fields || !alert) {
       return [];
