@@ -145,6 +145,78 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-common.securityServiceMock.createMockAuthenticatedUser",
+            "type": "Function",
+            "tags": [],
+            "label": "createMockAuthenticatedUser",
+            "description": [],
+            "signature": [
+              "(props?: Partial<Omit<",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; email: string; full_name: string; profile_uid: string; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; authentication_provider: ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              },
+              "; authentication_realm: ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              },
+              "; lookup_realm: ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              },
+              "; authentication_type: string; elastic_cloud_user: boolean; roles: string[]; }"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-browser-mocks",
+                "id": "def-common.securityServiceMock.createMockAuthenticatedUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "Partial<Omit<",
+                  {
+                    "pluginId": "@kbn/core-security-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityCommonPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  ", \"roles\"> & { roles: string[]; }>"
+                ],
+                "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

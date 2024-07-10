@@ -21,8 +21,8 @@ export {
 export type { RetryableEsClientError };
 
 // actions/* imports
-export type { InitActionParams, IncompatibleClusterRoutingAllocation } from './initialize_action';
-export { initAction } from './initialize_action';
+export type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
+export { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_allocation';
 
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
@@ -108,7 +108,7 @@ export {
 } from './update_source_mappings_properties';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
-import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
 import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type ParserRuleContext } from 'antlr4';
+import { ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   default as esql_parser,
   ArithmeticBinaryContext,
@@ -57,10 +57,10 @@ import {
   StringLiteralContext,
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
-  IndexIdentifierContext,
   InlineCastContext,
   InputNamedOrPositionalParamContext,
   InputParamContext,
+  IndexPatternContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -90,6 +90,7 @@ import type {
   ESQLFunction,
   ESQLCommandOption,
   ESQLAstItem,
+  ESQLAstField,
   ESQLInlineCast,
   ESQLUnnamedParamLiteral,
   ESQLPositionalParamLiteral,
@@ -97,16 +98,27 @@ import type {
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx.getTypedRuleContexts(IndexIdentifierContext);
-
+  const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
   return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
+function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
+  const context = new ParserRuleContext();
+  context.start = node.symbol;
+  context.stop = node.symbol;
+  context.children = [node];
+  return context;
+}
 function extractIdentifiers(
   ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
   if (ctx instanceof MetadataOptionContext) {
-    return wrapIdentifierAsArray(ctx.indexIdentifier_list());
+    return ctx
+      .UNQUOTED_SOURCE_list()
+      .map((node) => {
+        return terminalNodeToParserRuleContext(node);
+      })
+      .flat();
   }
   if (ctx instanceof MvExpandCommandContext) {
     return wrapIdentifierAsArray(ctx.qualifiedName());
@@ -355,6 +367,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
           paramType: 'unnamed',
           text: ctx.getText(),
           name: '',
+          value: '',
           location: getPosition(ctx.start, ctx.stop),
           incomplete: Boolean(ctx.exception),
         };
@@ -547,14 +560,14 @@ export function visitField(ctx: FieldContext) {
   return collectBooleanExpression(ctx.booleanExpression());
 }
 
-export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQLAstItem[] {
-  const ast: ESQLAstItem[] = [];
+export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[] {
+  const ast: ESQLAstField[] = [];
   if (!ctx) {
     return ast;
   }
   try {
     for (const field of ctx.field_list()) {
-      ast.push(...visitField(field));
+      ast.push(...(visitField(field) as ESQLAstField[]));
     }
   } catch (e) {
     // do nothing
@@ -567,7 +580,7 @@ export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | un
     return [];
   }
   const option = createOption(ctx.BY()!.getText().toLowerCase(), ctx);
-  option.args.push(...collectAllFieldsStatements(expr));
+  option.args.push(...collectAllFields(expr));
   return [option];
 }
 

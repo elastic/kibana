@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import { policyHasFleetServer } from '../../../../../../../../common/services';
-import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -32,6 +31,7 @@ import {
   AgentPolicyRefreshContext,
   useIsPackagePolicyUpgradable,
   useAuthz,
+  useMultipleAgentPolicies,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -40,6 +40,7 @@ import {
   AgentPolicySummaryLine,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
@@ -103,7 +104,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const {
     data,
@@ -173,7 +174,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [setPagination]
   );
   const canShowMultiplePoliciesCell =
-    enableReusableIntegrationPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
+    canUseMultipleAgentPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
   const columns: Array<EuiTableFieldDataColumnType<InMemoryPackagePolicyAndAgentPolicy>> = useMemo(
     () => [
       {
@@ -229,13 +230,17 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.policy_ids',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentPolicy', {
-          defaultMessage: 'Agent policy',
+          defaultMessage: 'Agent policies',
         }),
         truncateText: true,
-        render(id, { agentPolicies }) {
+        render(id, { agentPolicies, packagePolicy }) {
           return agentPolicies.length > 0 ? (
-            canShowMultiplePoliciesCell && agentPolicies.length > 1 ? (
-              <MultipleAgentPoliciesSummaryLine policies={agentPolicies} />
+            canShowMultiplePoliciesCell ? (
+              <MultipleAgentPoliciesSummaryLine
+                policies={agentPolicies}
+                packagePolicyId={packagePolicy.id}
+                onAgentPoliciesChange={refreshPolicies}
+              />
             ) : (
               <AgentPolicySummaryLine policy={agentPolicies[0]} />
             )
@@ -303,7 +308,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
           return (
             <PackagePolicyActionsMenu
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               packagePolicy={packagePolicy}
               showAddAgent={true}
               upgradePackagePolicyHref={
@@ -326,6 +331,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       canAddFleetServers,
       canAddAgents,
       showAddAgentHelpForPackagePolicyId,
+      refreshPolicies,
     ]
   );
 
@@ -364,7 +370,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
+        <SideBarColumn grow={1} />
         <EuiFlexItem grow={7}>
           <EuiBasicTable
             items={packageAndAgentPolicies || []}
