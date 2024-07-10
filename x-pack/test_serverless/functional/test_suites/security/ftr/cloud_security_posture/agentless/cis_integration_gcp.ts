@@ -23,14 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {

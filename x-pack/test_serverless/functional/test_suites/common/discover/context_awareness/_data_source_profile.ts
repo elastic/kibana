@@ -10,12 +10,22 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'svlCommonPage',
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
 
   describe('data source profile', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
+    });
+
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp or log.level', async () => {

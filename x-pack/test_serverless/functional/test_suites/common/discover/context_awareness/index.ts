@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
       });
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {

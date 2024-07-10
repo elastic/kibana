@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.svlCommonPage.loginWithRole('admin');
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'searchPlayground',
       });
@@ -57,7 +57,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('setup Page', () => {

@@ -55,7 +55,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         roleAuthc
       );
       caseIdMonitoring = caseMonitoring.id;
-      await pageObjects.svlCommonPage.loginWithRole('admin');
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
