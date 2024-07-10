@@ -77,6 +77,7 @@ module.exports = (_, argv) => {
         '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
+        'fastest-levenshtein',
         'history',
         'io-ts',
         'jquery',
