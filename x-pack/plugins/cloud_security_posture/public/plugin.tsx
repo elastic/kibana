@@ -56,6 +56,11 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
+    plugins.data.dataViews.createAndSave({
+      title: 'logs*finding*',
+      name: 'cloud-security-data-view',
+    });
+
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       view: 'package-policy-replace-define-step',
