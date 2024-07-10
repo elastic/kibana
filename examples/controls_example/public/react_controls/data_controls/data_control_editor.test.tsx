@@ -31,6 +31,8 @@ import {
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
 } from './mocks/data_control_mocks';
+import { ControlFactory } from '../types';
+import { DataControlApi, DefaultDataControlState } from './types';
 
 const mockDataViews = dataViewPluginMocks.createStartContract();
 const mockDataView = createStubDataView({
@@ -105,11 +107,12 @@ describe('Data control editor', () => {
   };
 
   beforeAll(() => {
-    const mockRegistry = {
-      search: getMockedSearchControlFactory({ parentApi: controlGroupApi }),
-      optionsList: getMockedOptionsListControlFactory({ parentApi: controlGroupApi }),
-      rangeSlider: getMockedRangeSliderControlFactory({ parentApi: controlGroupApi }),
-    };
+    const mockRegistry: { [key: string]: ControlFactory<DefaultDataControlState, DataControlApi> } =
+      {
+        search: getMockedSearchControlFactory({ parentApi: controlGroupApi }),
+        optionsList: getMockedOptionsListControlFactory({ parentApi: controlGroupApi }),
+        rangeSlider: getMockedRangeSliderControlFactory({ parentApi: controlGroupApi }),
+      };
     (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
     (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]);
   });

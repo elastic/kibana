@@ -131,7 +131,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
           // apply the changes from the new state via the state manager
           (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
             (key) => {
-              mergedStateManager[key].next(newState[key]);
+              if (mergedStateManager[key].getValue() !== newState[key]) {
+                mergedStateManager[key].next(newState[key]);
+              }
             }
           );
         } else {
