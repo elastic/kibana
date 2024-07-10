@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { ViewQueryFlyout } from './view_query_flyout';
+import { render, screen } from '@testing-library/react';
+import { QueryMode } from './query_mode';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ChatFormFields } from '../../types';
 
-jest.mock('../../hooks/use_indices_fields', () => ({
-  useIndicesFields: () => ({
+jest.mock('../../hooks/use_source_indices_field', () => ({
+  useSourceIndicesFields: () => ({
     fields: {
       index1: {
         elser_query_fields: [],
@@ -30,6 +30,7 @@ jest.mock('../../hooks/use_indices_fields', () => ({
         semantic_fields: [],
       },
     },
+    isFieldsLoading: false,
   }),
 }));
 
@@ -45,6 +46,7 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
       [ChatFormFields.indices]: ['index1', 'index2'],
+      [ChatFormFields.queryFields]: { index1: ['field1'], index2: ['field1'] },
       [ChatFormFields.sourceFields]: {
         index1: ['field1'],
         index2: ['field1'],
@@ -54,22 +56,15 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   return <FormProvider {...methods}>{children}</FormProvider>;
 };
 
-describe('ViewQueryFlyout component tests', () => {
-  const onCloseMock = jest.fn();
-
+describe('QueryMode component tests', () => {
   beforeEach(() => {
     render(
       <IntlProvider locale="en">
         <MockFormProvider>
-          <ViewQueryFlyout onClose={onCloseMock} />
+          <QueryMode />
         </MockFormProvider>
       </IntlProvider>
     );
-  });
-
-  it('calls onClose when the close button is clicked', () => {
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-    expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
   it('should see the view elasticsearch query', async () => {
@@ -80,14 +75,14 @@ describe('ViewQueryFlyout component tests', () => {
   });
 
   it('displays query fields and indicates hidden fields', () => {
-    expect(screen.getByTestId('queryFieldsSelectable_index1')).toBeInTheDocument();
-    expect(screen.getByTestId('queryFieldsSelectable_index2')).toBeInTheDocument();
+    expect(screen.getByTestId('fieldsAccordion-0')).toBeInTheDocument();
+    expect(screen.getByTestId('fieldsAccordion-1')).toBeInTheDocument();
 
     // Check if hidden fields indicator is shown
-    expect(screen.getByTestId('skipped_fields_index1')).toBeInTheDocument();
-    expect(screen.getByTestId('skipped_fields_index1')).toHaveTextContent('1 fields are hidden.');
+    expect(screen.getByTestId('skippedFields-0')).toBeInTheDocument();
+    expect(screen.getByTestId('skippedFields-0')).toHaveTextContent('1 fields are hidden.');
 
     // Check if hidden fields indicator is shown
-    expect(screen.queryByTestId('skipped_fields_index2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('skippedFields-1')).not.toBeInTheDocument();
   });
 });

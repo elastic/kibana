@@ -7,9 +7,9 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { CreateIndexCallout } from './create_index_callout';
 import { useKibana } from '../../hooks/use_kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { CreateIndexButton } from './create_index_button';
 
 // Mocking the useKibana hook
 jest.mock('../../hooks/use_kibana', () => ({
@@ -37,9 +37,9 @@ const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   );
 };
 
-describe('CreateIndexCallout', () => {
+describe('CreateIndexButton', () => {
   it('renders correctly when there is no locator', async () => {
-    const { queryByTestId } = render(<CreateIndexCallout />, { wrapper: Wrapper });
+    const { queryByTestId } = render(<CreateIndexButton />, { wrapper: Wrapper });
 
     expect(queryByTestId('createIndexButton')).not.toBeInTheDocument();
   });
@@ -64,7 +64,7 @@ describe('CreateIndexCallout', () => {
       },
     }));
 
-    const { getByTestId } = render(<CreateIndexCallout />, { wrapper: Wrapper });
+    const { getByTestId } = render(<CreateIndexButton />, { wrapper: Wrapper });
 
     const createIndexButton = getByTestId('createIndexButton');
     expect(createIndexButton).toBeInTheDocument();
