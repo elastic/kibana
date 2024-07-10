@@ -10,8 +10,8 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { dataViewAdHoc } from '../__mocks__/data_view_complex';
 
+import { dataViewAdHoc } from '../__mocks__/data_view_complex';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getAppTarget, initializeEditApi } from './initialize_edit_api';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
@@ -64,7 +64,15 @@ describe('initialize edit api', () => {
       return { editPath, editApp, editUrl };
     };
 
-    const testByReference = ({ editPath, editApp, editUrl }) => {
+    const testByReference = ({
+      editPath,
+      editApp,
+      editUrl,
+    }: {
+      editPath: string;
+      editApp: string;
+      editUrl: string;
+    }) => {
       const locatorParams = getDiscoverLocatorParams(mockedApi);
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(1);
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith(locatorParams);
