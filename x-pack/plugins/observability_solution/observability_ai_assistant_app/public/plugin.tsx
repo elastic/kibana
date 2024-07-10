@@ -103,7 +103,8 @@ export class ObservabilityAIAssistantAppPlugin
     const appService = (this.appService = createAppService({
       pluginsStart,
     }));
-
+    const isEnabled = appService.isEnabled();
+    if (isEnabled){
     coreStart.chrome.navControls.registerRight({
       mount: (element) => {
         ReactDOM.render(
@@ -124,6 +125,7 @@ export class ObservabilityAIAssistantAppPlugin
       // right before the user profile
       order: 1001,
     });
+  }
 
     const service = pluginsStart.observabilityAIAssistant.service;
 
