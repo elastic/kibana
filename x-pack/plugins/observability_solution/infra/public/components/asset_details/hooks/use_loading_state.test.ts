@@ -18,6 +18,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 jest.mock('./use_date_picker');
 jest.mock('../../../hooks/use_kibana');
 jest.mock('../../../hooks/use_search_session');
+
 jest.mock('@kbn/data-plugin/public', () => ({
   ...jest.requireActual('@kbn/data-plugin/public'),
   waitUntilNextSessionCompletes$: jest.fn(),
@@ -47,6 +48,8 @@ describe('useLoadingState', () => {
     UseDateRangeProviderProps['autoRefresh'] | undefined
   >({ interval: 1000, isPaused: false });
 
+  const sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
+
   const updateSearchSessionIdMock = jest.fn();
 
   const mockSearchSessionContext = () => {
@@ -68,7 +71,16 @@ describe('useLoadingState', () => {
     useKibanaContextForPluginMock.mockReturnValue({
       services: {
         ...coreMock.createStart(),
-        data: dataPluginStartMock,
+        data: {
+          ...dataPluginStartMock,
+          search: {
+            ...dataPluginStartMock.search,
+            session: {
+              ...dataPluginStartMock.search.session,
+              state$: sessionState$,
+            },
+          },
+        },
       },
     } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
   };
@@ -83,10 +95,10 @@ describe('useLoadingState', () => {
   });
 
   afterEach(() => {
-    subscription.unsubscribe();
     jest.useRealTimers();
     jest.restoreAllMocks();
     jest.clearAllMocks();
+    subscription.unsubscribe();
   });
 
   it('should set isAutoRefreshRequestPending to true when there are requests pending', async () => {
@@ -106,6 +118,7 @@ describe('useLoadingState', () => {
       result.current.requestState$.next('running');
       result.current.requestState$.next('running');
       result.current.requestState$.next('running');
+      autoRefreshTick$.next(null); // auto-refresh ticks
       jest.runOnlyPendingTimers();
     });
 
@@ -119,7 +132,7 @@ describe('useLoadingState', () => {
 
     let receivedValue = true;
     subscription.add(
-      result.current.isAutoRefreshRequestPending$.pipe(skip(1)).subscribe((value) => {
+      result.current.isAutoRefreshRequestPending$.subscribe((value) => {
         receivedValue = value;
       })
     );
@@ -130,6 +143,7 @@ describe('useLoadingState', () => {
       result.current.requestState$.next('done'); // simulates completion of a request
       result.current.requestState$.next('running');
       result.current.requestState$.next('done');
+      autoRefreshTick$.next(null); // auto-refresh ticks
       jest.runOnlyPendingTimers();
     });
 
@@ -138,10 +152,11 @@ describe('useLoadingState', () => {
     unmount();
   });
 
-  it('should not call search.session.start() if waitUntilNextSessionCompletesMock$ returns empty', async () => {
+  it('should not call updateSearchSessionId if waitUntilNextSessionCompletesMock$ returns empty', async () => {
     const { unmount, waitFor } = renderHook(() => useLoadingState());
 
     // waitUntilNextSessionCompletes$ returns EMPTY when the status is loading or none
+    sessionState$.next(SearchSessionState.Loading);
     waitUntilNextSessionCompletesMock$.mockReturnValue(EMPTY);
 
     act(() => {
@@ -155,10 +170,11 @@ describe('useLoadingState', () => {
     unmount();
   });
 
-  it('should call search.session.start() when waitUntilNextSessionCompletesMock$ returns', async () => {
+  it('should call updateSearchSessionId when waitUntilNextSessionCompletesMock$ returns', async () => {
     const { unmount, waitFor } = renderHook(() => useLoadingState());
 
     // waitUntilNextSessionCompletes$ returns something when the status is Completed or BackgroundCompleted
+    sessionState$.next(SearchSessionState.Loading);
     waitUntilNextSessionCompletesMock$.mockReturnValue(of(SearchSessionState.Completed));
 
     act(() => {

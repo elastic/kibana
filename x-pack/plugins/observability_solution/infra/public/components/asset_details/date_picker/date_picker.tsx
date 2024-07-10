@@ -21,7 +21,6 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { Popover } from '../tabs/common/popover';
 
@@ -64,28 +63,22 @@ const COMMONLY_USED_RANGES: DurationRange[] = [
 ];
 
 export const DatePicker = () => {
-  const { updateSearchSessionId } = useSearchSessionContext();
-  const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onAutoRefresh } =
+  const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onRefresh } =
     useDatePickerContext();
 
   const handleRefresh = useCallback(
     ({ start, end }: OnRefreshProps) => {
-      onAutoRefresh({ from: start, to: end });
+      onRefresh({ from: start, to: end });
     },
-    [onAutoRefresh]
+    [onRefresh]
   );
   const handleTimeChange = useCallback(
     ({ start, end, isInvalid }: OnTimeChangeProps) => {
       if (!isInvalid) {
         setDateRange({ from: start, to: end });
-
-        // auto-refresh updates the search session id when the date range changes
-        if (!autoRefresh || autoRefresh.isPaused) {
-          updateSearchSessionId();
-        }
       }
     },
-    [autoRefresh, setDateRange, updateSearchSessionId]
+    [setDateRange]
   );
 
   const handleAutoRefreshChange = useCallback(
@@ -113,8 +106,8 @@ export const DatePicker = () => {
           end={dateRange.to}
           isPaused={autoRefresh?.isPaused}
           onTimeChange={handleTimeChange}
-          onRefresh={autoRefresh && handleRefresh}
-          onRefreshChange={autoRefresh && handleAutoRefreshChange}
+          onRefresh={handleRefresh}
+          onRefreshChange={handleAutoRefreshChange}
           refreshInterval={autoRefresh?.interval}
           width="full"
         />

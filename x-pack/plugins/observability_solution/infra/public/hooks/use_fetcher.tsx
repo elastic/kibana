@@ -109,13 +109,8 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const { searchSessionId } = useSearchSessionContext();
-  const [cachedSearchSessionId, setCachedSearchSessionId] = useState(searchSessionId);
-
-  useEffect(() => {
-    if (autoFetch) {
-      setCachedSearchSessionId(searchSessionId);
-    }
-  }, [autoFetch, searchSessionId]);
+  const [cachedSearchSessionId, setCachedSearchSessionId] = useState('');
+  const autoFetchRef = useRef(autoFetch);
 
   const controller = useRef(new AbortController());
 
@@ -204,6 +199,7 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     if (autoFetch) {
       setCachedSearchSessionId(searchSessionId);
     }
+    autoFetchRef.current = autoFetch;
   }, [autoFetch, searchSessionId]);
 
   useEffect(() => {
@@ -213,8 +209,10 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
   }, []);
 
   useEffect(() => {
-    triggerFetch();
-  }, [fetchWithAbort, cachedSearchSessionId, triggerFetch]);
+    if (autoFetchRef.current) {
+      triggerFetch();
+    }
+  }, [autoFetchRef, fetchWithAbort, cachedSearchSessionId, triggerFetch]);
 
   return useMemo(
     () => ({
