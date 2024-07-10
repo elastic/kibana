@@ -8,6 +8,8 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import murmurhash from 'murmurhash';
+import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -39,6 +41,8 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
+
+const MAX_PARTITIONS = 256;
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -165,12 +169,13 @@ export class TaskStore {
 
     let savedObject;
     try {
+      const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(validatedTaskInstance),
-        { id: taskInstance.id, refresh: false }
+        taskInstanceToAttributes(validatedTaskInstance, id),
+        { id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
         this.adHocTaskCounter.increment();
@@ -191,13 +196,14 @@ export class TaskStore {
    */
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
+      const id = taskInstance.id || v4();
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(validatedTaskInstance),
-        id: taskInstance.id,
+        attributes: taskInstanceToAttributes(validatedTaskInstance, id),
+        id,
       };
     });
 
@@ -252,7 +258,7 @@ export class TaskStore {
     const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
       validate: options.validate,
     });
-    const attributes = taskInstanceToAttributes(taskInstance);
+    const attributes = taskInstanceToAttributes(taskInstance, doc.id);
 
     let updatedSavedObject;
     try {
@@ -297,7 +303,7 @@ export class TaskStore {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
         validate: options.validate,
       });
-      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance));
+      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
       return attrsById;
     }, new Map());
 
@@ -622,7 +628,7 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
+function taskInstanceToAttributes(doc: TaskInstance, id: string): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
@@ -633,6 +639,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
+    partition: doc.partition || murmurhash.v3(id) % MAX_PARTITIONS,
   } as SerializedConcreteTaskInstance;
 }
 

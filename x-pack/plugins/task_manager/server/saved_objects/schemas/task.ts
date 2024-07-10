@@ -37,4 +37,5 @@ export const taskSchemaV1 = schema.object({
     schema.literal('dead_letter'),
   ]),
   version: schema.maybe(schema.string()),
+  partition: schema.maybe(schema.number()),
 });
