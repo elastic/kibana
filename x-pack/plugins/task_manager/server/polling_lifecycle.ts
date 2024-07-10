@@ -167,7 +167,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       pollInterval$: pollIntervalConfiguration$,
       pollIntervalDelay$,
       getCapacity: () => {
-        const capacity = this.pool.availableCapacity;
+        const capacity = this.pool.availableCapacity();
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
           // high load causes the poller to skip work (work isn't called when there is no capacity)

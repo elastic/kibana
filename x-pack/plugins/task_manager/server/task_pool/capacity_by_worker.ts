@@ -18,7 +18,7 @@ export class CapacityByWorker implements ICapacityCalculator {
     opts.capacity$.subscribe((capacity) => {
       // Assign a max worker value based on the capacity and the cost of a normal task
       // For the default starting capacity of 20, this will mean we have 10 workers
-      this.workers = capacity / TaskCost.Normal;
+      this.workers = Math.floor(capacity / TaskCost.Normal);
       this.logger.debug(
         `Task pool now using ${this.workers} as the max worker value which is based on a capacity of ${capacity}`
       );

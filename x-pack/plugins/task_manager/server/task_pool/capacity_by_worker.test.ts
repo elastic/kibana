@@ -30,7 +30,10 @@ describe('CapacityByWorker', () => {
     capacity$.next(16);
     expect(pool.capacity).toBe(8);
 
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    capacity$.next(25);
+    expect(pool.capacity).toBe(12);
+
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       'Task pool now using 10 as the max worker value which is based on a capacity of 20'
@@ -38,6 +41,10 @@ describe('CapacityByWorker', () => {
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       'Task pool now using 8 as the max worker value which is based on a capacity of 16'
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      3,
+      'Task pool now using 12 as the max worker value which is based on a capacity of 25'
     );
   });
 

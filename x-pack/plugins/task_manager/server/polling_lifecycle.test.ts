@@ -21,6 +21,7 @@ import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
+import { CLAIM_STRATEGY_MGET } from './config';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -104,6 +105,20 @@ describe('TaskPollingLifecycle', () => {
   afterEach(() => clock.restore());
 
   describe('start', () => {
+    taskManagerOpts.definitions.registerTaskDefinitions({
+      report: {
+        title: 'report',
+        maxConcurrency: 1,
+        cost: TaskCost.ExtraLarge,
+        createTaskRunner: jest.fn(),
+      },
+      quickReport: {
+        title: 'quickReport',
+        maxConcurrency: 5,
+        createTaskRunner: jest.fn(),
+      },
+    });
+
     test('begins polling once the ES and SavedObjects services are available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
@@ -117,25 +132,42 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
 
-    test('provides TaskClaiming with the capacity available', () => {
+    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_DEFAULT', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const capacity$ = new Subject<number>();
-      taskManagerOpts.definitions.registerTaskDefinitions({
-        report: {
-          title: 'report',
-          maxConcurrency: 1,
-          cost: TaskCost.ExtraLarge,
-          createTaskRunner: jest.fn(),
-        },
-        quickReport: {
-          title: 'quickReport',
-          maxConcurrency: 5,
-          createTaskRunner: jest.fn(),
-        },
-      });
 
       new TaskPollingLifecycle({
         ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+        capacityConfiguration$: capacity$,
+      });
+
+      const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
+        .calls[0][0].getAvailableCapacity;
+
+      capacity$.next(40);
+      expect(taskClaimingGetCapacity()).toEqual(20);
+      expect(taskClaimingGetCapacity('report')).toEqual(1);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+
+      capacity$.next(60);
+      expect(taskClaimingGetCapacity()).toEqual(30);
+      expect(taskClaimingGetCapacity('report')).toEqual(1);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+
+      capacity$.next(4);
+      expect(taskClaimingGetCapacity()).toEqual(2);
+      expect(taskClaimingGetCapacity('report')).toEqual(1);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(2);
+    });
+
+    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const capacity$ = new Subject<number>();
+
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        config: { ...taskManagerOpts.config, claim_strategy: CLAIM_STRATEGY_MGET },
         elasticsearchAndSOAvailability$,
         capacityConfiguration$: capacity$,
       });

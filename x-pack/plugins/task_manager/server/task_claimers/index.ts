@@ -11,7 +11,7 @@ import { Logger } from '@kbn/core/server';
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimingBatches } from '../task_claim_handler';
+import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { claimAvailableTasksDefault } from './strategy_default';
 import { claimAvailableTasksMget } from './strategy_mget';
