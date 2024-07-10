@@ -26,6 +26,7 @@
     "@kbn/index-management",
     "@kbn/code-editor",
     "@kbn/shared-ux-markdown",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": [
     "target/**/*",

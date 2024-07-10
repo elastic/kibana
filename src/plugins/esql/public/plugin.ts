@@ -46,7 +46,7 @@ export class EsqlPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions, fieldsMetadata }: TextBasedLanguagesPluginStart
+    { dataViews, expressions, data, uiActions, fieldsMetadata }: EsqlPluginStart
   ): void {
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
