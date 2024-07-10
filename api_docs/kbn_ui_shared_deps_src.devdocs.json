@@ -526,6 +526,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncryptobrowser",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/crypto-browser'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnesquery",
             "type": "string",
             "tags": [],

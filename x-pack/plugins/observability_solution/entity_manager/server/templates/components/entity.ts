@@ -41,6 +41,14 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               ignore_above: 1024,
               type: 'keyword',
             },
+            definitionVersion: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            schemaVersion: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
             lastSeenTimestamp: {
               type: 'date',
             },
