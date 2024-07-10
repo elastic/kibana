@@ -60,8 +60,8 @@ const FUZZY_SEARCH_DISTANCE = 1;
 
 const testFuzzySearch = (field: { name: string; displayName?: string }, searchValue: string) => {
   return (
-    testFuzzySearchForString(field.displayName, searchValue) ||
-    (field.name !== field.displayName && testFuzzySearchForString(field.name, searchValue))
+    Boolean(testFuzzySearchForString(field.displayName, searchValue)) ||
+    (field.name !== field.displayName && Boolean(testFuzzySearchForString(field.name, searchValue)))
   );
 };
 
@@ -83,7 +83,7 @@ const testFuzzySearchForString = (label: string | undefined, searchValue: string
   for (let i = 0; i <= iterationsCount; i++) {
     for (let j = substrLength - 1; j <= substrLength + 1; j++) {
       if (compareLevenshtein(searchValue, label.substring(i, j + i))) {
-        return true;
+        return label.substring(i, j + i);
       }
     }
   }
@@ -122,5 +122,8 @@ export function getFieldSearchMatchingHighlight(
   if (displayName.toLowerCase().indexOf(searchHighlight.toLowerCase()) > -1) {
     return searchHighlight;
   }
-  return displayName;
+  return (
+    testFuzzySearchForString(displayName.toLowerCase(), searchHighlight.toLowerCase()) ||
+    displayName
+  );
 }
