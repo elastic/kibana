@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef, memo, useCallback, useEffect } from 'react';
+import React, { useState, useRef, memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -40,6 +40,7 @@ import { FlyoutParamProps } from './types';
 import { MonitorOverviewItem } from '../types';
 
 const ITEM_HEIGHT = 172;
+const ROW_COUNT = 4;
 
 export const OverviewGrid = memo(
   ({ monitorsSortedByStatus }: { monitorsSortedByStatus: MonitorOverviewItem[] }) => {
@@ -54,10 +55,7 @@ export const OverviewGrid = memo(
     } = useSelector(selectOverviewState);
     const { perPage } = pageState;
     const [page, setPage] = useState(1);
-    const [vpage, setvpage] = useState<any[]>([]);
     const [maxItem, setMaxItem] = useState(0);
-    console.log('vpage', vpage);
-    console.log('load data up to row', maxItem);
 
     const trendData = useSelector(selectOverviewTrends);
     // offload the fetching of trend data to a new effect and the list will work better
@@ -79,28 +77,25 @@ export const OverviewGrid = memo(
     useEffect(() => {
       if (monitorsSortedByStatus.length && maxItem) {
         const batch = [];
-        const slice = monitorsSortedByStatus.slice(0, (maxItem + 1) * 4);
+        const slice = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
         for (const item of slice) {
           if (trendData[item.configId + item.location.id] === undefined) {
             batch.push({ configId: item.configId, locationId: item.location.id });
           }
         }
-        console.log('dispatching for batch', maxItem, batch);
         if (batch.length) dispatch(trendStatsBatch.get(batch));
       }
     }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
 
-    const listHeight = Math.min(ITEM_HEIGHT * (monitorsSortedByStatus.length / 4), 800);
-    console.log('list height', listHeight);
-    let items = [];
-    const listItems: any = [];
-    let ind = 0;
-    console.log('page state', pageState, monitorsSortedByStatus);
-    do {
-      items = monitorsSortedByStatus.slice(ind, ind + 4);
-      ind += 4;
-      if (items.length) listItems.push(items);
-    } while (items.length);
+    const listHeight = Math.min(ITEM_HEIGHT * (monitorsSortedByStatus.length / ROW_COUNT), 800);
+    const listItems: Array<Array<{ configId: string; location: { id: string } }>> = useMemo(() => {
+      const acc = [];
+      for (let i = 0; i < monitorsSortedByStatus.length; i += ROW_COUNT) {
+        acc.push(monitorsSortedByStatus.slice(i, i + ROW_COUNT));
+      }
+      return acc;
+    }, [monitorsSortedByStatus]);
+
     const listRef: React.LegacyRef<FixedSizeList<any>> | undefined = React.createRef();
     const infiniteLoaderRef: React.LegacyRef<InfiniteLoader> = React.createRef();
     useEffect(() => {
@@ -143,37 +138,18 @@ export const OverviewGrid = memo(
                   <InfiniteLoader
                     ref={infiniteLoaderRef}
                     isItemLoaded={(idx: number) => {
-                      console.log('isitemloaded', idx);
-                      const row = listItems[idx];
-                      for (const monitor of row) {
-                        if (!trendData[monitor.configId + monitor.location.id]) {
-                          return false;
-                        }
-                      }
-                      return true;
+                      return listItems[idx].every(
+                        (m: any) => !!trendData[m.configId + m.location.id]
+                      );
                     }}
                     itemCount={listItems.length}
                     loadMoreItems={(_start: number, stop: number) => {
                       setMaxItem(Math.max(maxItem, stop));
-                      console.log('load more items', stop);
-                      // const newRows = [];
-                      // const slice = listItems.slice(start, stop);
-                      // console.log('slice for', start, stop, slice, monitorsSortedByStatus);
-                      // const mapped = slice
-                      //   .flatMap((x: any) => x)
-                      //   .map(({ configId, location }: any) => ({
-                      //     configId,
-                      //     locationId: location.id,
-                      //   }));
-                      // console.log('mapped', mapped);
-                      // console.log('dispatching for ', start, stop);
-                      // dispatch(trendStatsBatch.get(mapped));
-                      // setvpage([...vpage, ...slice]);
                     }}
                     minimumBatchSize={20}
                     threshold={12}
                   >
-                    {({ onItemsRendered, ref }) => (
+                    {({ onItemsRendered }) => (
                       <FixedSizeList
                         height={800}
                         width={width}
@@ -184,17 +160,21 @@ export const OverviewGrid = memo(
                         ref={listRef}
                       >
                         {(props) => {
-                          console.log('the props', props);
                           return (
-                            <EuiFlexGroup gutterSize="m" style={props.style}>
+                            <EuiFlexGroup gutterSize="m" style={{ ...props.style }}>
                               {props.data[props.index].map((item: any, idx: number) => (
-                                <EuiFlexItem key={props.index * 4 + idx}>
+                                <EuiFlexItem key={props.index * ROW_COUNT + idx}>
                                   <MetricItem
-                                    monitor={monitorsSortedByStatus[props.index * 4 + idx]}
+                                    monitor={monitorsSortedByStatus[props.index * ROW_COUNT + idx]}
                                     onClick={setFlyoutConfigCallback}
                                   />
                                 </EuiFlexItem>
                               ))}
+                              {props.data[props.index].length % ROW_COUNT !== 0 &&
+                                // Adds empty items to fill out row
+                                Array.from({
+                                  length: ROW_COUNT - props.data[props.index].length,
+                                }).map((_, idx) => <EuiFlexItem key={idx} />)}
                             </EuiFlexGroup>
                           );
                         }}
