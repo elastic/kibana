@@ -23,7 +23,7 @@ import { isPlainObjectType } from './is_plain_object_type';
  */
 export function extractByJsonPointer(document: unknown, pointer: string): Record<string, unknown> {
   if (!pointer.startsWith('/')) {
-    throw new Error('$ref pointer must start with a leading slash');
+    throw new Error('JSON pointer must start with a leading slash');
   }
 
   if (!isPlainObjectType(document)) {

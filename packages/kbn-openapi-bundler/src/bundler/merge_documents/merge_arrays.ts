@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './src/openapi_bundler';
-export * from './src/openapi_merger';
+import deepEqual from 'fast-deep-equal';
+
+export function mergeArrays(source: unknown[], merged: unknown[]): void {
+  for (const item of source) {
+    const existing = merged.find((x) => deepEqual(x, item));
+
+    if (existing) {
+      continue;
+    }
+
+    merged.push(item);
+  }
+}
