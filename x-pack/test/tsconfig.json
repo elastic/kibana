@@ -169,15 +169,10 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
-<<<<<<< HEAD
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/ml-trained-models-utils",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-lists-common"
-=======
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/securitysolution-exceptions-common"
->>>>>>> 1b41cda820b (fix a problem of unused replaceParams helper in API client)
   ]
 }
