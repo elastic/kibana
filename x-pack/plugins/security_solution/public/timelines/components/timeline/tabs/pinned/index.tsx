@@ -20,6 +20,7 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import type { ControlColumnProps } from '../../../../../../common/types';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
@@ -94,6 +95,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   expandedDetail,
   eventIdToNoteIds,
 }) => {
+  const { telemetry } = useKibana().services;
   const {
     browserFields,
     dataViewId,
@@ -224,6 +226,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+          location: timelineId,
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'left',
+        });
       } else {
         if (eventId) {
           setNotesEventId(eventId);
@@ -236,6 +245,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
+      telemetry,
       timelineId,
       setNotesEventId,
       showNotesFlyout,

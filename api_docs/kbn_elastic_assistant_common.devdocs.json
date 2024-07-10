@@ -2293,6 +2293,81 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "FindPromptsRequestQuery",
+        "description": [],
+        "signature": [
+          "{ per_page: number; page: number; fields?: string[] | undefined; filter?: string | undefined; sort_field?: \"name\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "FindPromptsRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ fields?: unknown; filter?: string | undefined; sort_field?: \"name\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; page?: number | undefined; per_page?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FindPromptsResponse",
+        "description": [],
+        "signature": [
+          "{ page: number; perPage: number; total: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "FindPromptsSortField",
+        "description": [],
+        "signature": [
+          "\"name\" | \"updated_at\" | \"created_at\" | \"is_default\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsSortFieldEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "FindPromptsSortFieldEnum",
+        "description": [],
+        "signature": [
+          "{ name: \"name\"; updated_at: \"updated_at\"; created_at: \"created_at\"; is_default: \"is_default\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GenerationInterval",
         "type": "Type",
         "tags": [],
@@ -2854,6 +2929,36 @@
           "{ success: boolean; evaluationId: string; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PromptResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PromptResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PromptTypeEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "PromptTypeEnum",
+        "description": [],
+        "signature": [
+          "{ system: \"system\"; quick: \"quick\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4438,6 +4543,66 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "FindPromptsRequestQuery",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; filter: Zod.ZodOptional<Zod.ZodString>; sort_field: Zod.ZodOptional<Zod.ZodEnum<[\"created_at\", \"is_default\", \"name\", \"updated_at\"]>>; sort_order: Zod.ZodOptional<Zod.ZodEnum<[\"asc\", \"desc\"]>>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; per_page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { per_page: number; page: number; fields?: string[] | undefined; filter?: string | undefined; sort_field?: \"name\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; }, { fields?: unknown; filter?: string | undefined; sort_field?: \"name\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; page?: number | undefined; per_page?: number | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "FindPromptsResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ page: Zod.ZodNumber; perPage: Zod.ZodNumber; total: Zod.ZodNumber; data: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodString; promptType: Zod.ZodEnum<[\"system\", \"quick\"]>; content: Zod.ZodString; categories: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; color: Zod.ZodOptional<Zod.ZodString>; isNewConversationDefault: Zod.ZodOptional<Zod.ZodBoolean>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; consumer: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; updatedBy: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodOptional<Zod.ZodString>; createdBy: Zod.ZodOptional<Zod.ZodString>; users: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; namespace: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }, { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { page: number; perPage: number; total: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }[]; }, { page: number; perPage: number; total: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }[]; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsSortField",
+        "type": "Object",
+        "tags": [],
+        "label": "FindPromptsSortField",
+        "description": [],
+        "signature": [
+          "Zod.ZodEnum<[\"created_at\", \"is_default\", \"name\", \"updated_at\"]>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindPromptsSortFieldEnum",
+        "type": "Object",
+        "tags": [],
+        "label": "FindPromptsSortFieldEnum",
+        "description": [],
+        "signature": [
+          "{ name: \"name\"; updated_at: \"updated_at\"; created_at: \"created_at\"; is_default: \"is_default\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GenerationInterval",
         "type": "Object",
         "tags": [],
@@ -4912,6 +5077,36 @@
           "Zod.ZodObject<{ evaluationId: Zod.ZodString; success: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { success: boolean; evaluationId: string; }, { success: boolean; evaluationId: string; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PromptResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "PromptResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodString; promptType: Zod.ZodEnum<[\"system\", \"quick\"]>; content: Zod.ZodString; categories: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; color: Zod.ZodOptional<Zod.ZodString>; isNewConversationDefault: Zod.ZodOptional<Zod.ZodBoolean>; isDefault: Zod.ZodOptional<Zod.ZodBoolean>; consumer: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; updatedBy: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodOptional<Zod.ZodString>; createdBy: Zod.ZodOptional<Zod.ZodString>; users: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; namespace: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }, { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; timestamp?: string | undefined; categories?: string[] | undefined; color?: string | undefined; isNewConversationDefault?: boolean | undefined; isDefault?: boolean | undefined; consumer?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; namespace?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PromptTypeEnum",
+        "type": "Object",
+        "tags": [],
+        "label": "PromptTypeEnum",
+        "description": [],
+        "signature": [
+          "{ system: \"system\"; quick: \"quick\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -14,12 +14,14 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
 import { builtInServicesEntityDefinition } from './built_in/services';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
+import {
+  generateHistoryIngestPipelineId,
+  generateHistoryTransformId,
+  generateLatestIngestPipelineId,
+  generateLatestTransformId,
+} from './helpers/generate_component_id';
 import { generateHistoryTransform } from './transform/generate_history_transform';
 import { generateLatestTransform } from './transform/generate_latest_transform';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
 
 const assertHasCreatedDefinition = (
   definition: EntityDefinition,
@@ -36,10 +38,16 @@ const assertHasCreatedDefinition = (
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateHistoryIngestPipelineId(builtInServicesEntityDefinition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: '0.1.0',
+    },
   });
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(builtInServicesEntityDefinition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: '0.1.0',
+    },
   });
 
   expect(esClient.transform.putTransform).toBeCalledTimes(2);
@@ -116,7 +124,6 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       assertHasCreatedDefinition(builtInServicesEntityDefinition, soClient, esClient);
@@ -159,7 +166,6 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       assertHasUninstalledDefinition(builtInServicesEntityDefinition, soClient, esClient);
@@ -200,7 +206,6 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       expect(soClient.create).toHaveBeenCalledTimes(0);
