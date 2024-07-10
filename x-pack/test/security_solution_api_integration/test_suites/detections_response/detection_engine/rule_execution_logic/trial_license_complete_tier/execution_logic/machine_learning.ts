@@ -88,7 +88,10 @@ export default ({ getService }: FtrProviderContext) => {
 
   const logAnomalyDebugData = async (index = '.ml-anomalies-custom*') => {
     const indexMappings = await es.indices.getMapping({ index });
-    console.log('ML Anomaly Index Mappings:', JSON.stringify(indexMappings, null, 2));
+    console.log(
+      '##logAnomalyDebugData: ML Anomaly Index Mappings:',
+      JSON.stringify(indexMappings, null, 2)
+    );
     const anomalyData = await es.search({
       index,
       body: {
@@ -98,7 +101,41 @@ export default ({ getService }: FtrProviderContext) => {
       },
     });
 
-    console.log('ML Anomaly Data:', JSON.stringify(anomalyData, null, 2));
+    console.log('##logAnomalyDebugData: ML Anomaly Data:', JSON.stringify(anomalyData, null, 2));
+
+    const body = {
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            { query_string: { query: 'result_type:record', analyze_wildcard: false } },
+            { term: { is_interim: false } },
+            {
+              bool: {
+                must: [
+                  { range: { timestamp: { gte: 0, lte: 1720625097537, format: 'epoch_millis' } } },
+                  { range: { record_score: { gte: 20 } } },
+                  {
+                    query_string: {
+                      analyze_wildcard: false,
+                      query: 'job_id:v3_linux_anomalous_network_activity',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      fields: [{ field: '*', include_unmapped: true }],
+      sort: [{ record_score: { order: 'desc' } }],
+    };
+    // @ts-expect-error
+    const anomalySearchResults = await es.search({ index, body });
+    console.log(
+      '##logAnomalyDebugData: ML Anomaly search results',
+      JSON.stringify(anomalySearchResults, null, 2)
+    );
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/171426

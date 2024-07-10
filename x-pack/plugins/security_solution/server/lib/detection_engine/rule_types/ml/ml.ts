@@ -114,6 +114,7 @@ export const mlExecutor = async ({
 
     let anomalyResults: AnomalyResults;
     try {
+      console.log('### mlExecutor: findMlSignals');
       anomalyResults = await findMlSignals({
         ml,
         // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
@@ -127,7 +128,9 @@ export const mlExecutor = async ({
         maxSignals: tuple.maxSignals,
         exceptionFilter,
       });
+      console.log('### mlExecutor: anomalyResults', anomalyResults);
     } catch (error) {
+      console.log('### mlExecutor: error', error);
       if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
         result.userError = true;
       }

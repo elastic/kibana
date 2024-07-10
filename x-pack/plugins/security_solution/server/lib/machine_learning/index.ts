@@ -31,40 +31,38 @@ export const getAnomalies = async (
   mlAnomalySearch: MlAnomalySearch
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
-  return mlAnomalySearch(
-    {
-      body: {
-        size: params.maxRecords || 100,
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
-                  analyze_wildcard: false,
-                },
-              },
-              { term: { is_interim: false } },
-              {
-                bool: {
-                  must: boolCriteria,
-                },
-              },
-            ],
-            must_not: params.exceptionFilter?.query,
-          },
-        },
-        fields: [
+  const body = {
+    size: params.maxRecords || 100,
+    query: {
+      bool: {
+        filter: [
           {
-            field: '*',
-            include_unmapped: true,
+            query_string: {
+              query: 'result_type:record',
+              analyze_wildcard: false,
+            },
+          },
+          { term: { is_interim: false } },
+          {
+            bool: {
+              must: boolCriteria,
+            },
           },
         ],
-        sort: [{ record_score: { order: 'desc' as const } }],
+        must_not: params.exceptionFilter?.query,
       },
     },
-    params.jobIds
-  );
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+    ],
+    sort: [{ record_score: { order: 'desc' as const } }],
+  };
+  console.log('## getAnomalies: body:', JSON.stringify(body));
+  console.log('## getAnomalies: jobIds:', params.jobIds);
+  return mlAnomalySearch({ body }, params.jobIds);
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {
