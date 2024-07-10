@@ -292,13 +292,11 @@ describe('utils', () => {
           connector: {
             id: 'foobar',
             name: 'none',
-            type: ConnectorTypes.swimlane as const,
+            type: ConnectorTypes.jira as const,
             fields: {
-              // @ts-expect-error upgrade typescript v5.1.6
               issueType: '1',
               priority: 'test',
               parent: null,
-              caseId: null,
             },
           },
           owner: casesConfigurationsMock.owner,
@@ -315,7 +313,6 @@ describe('utils', () => {
           issueType: '1',
           priority: 'test',
           parent: null,
-          caseId: null,
         },
         customFields: {},
       });
@@ -333,13 +330,11 @@ describe('utils', () => {
           connector: {
             id: 'foobar',
             name: 'none',
-            type: ConnectorTypes.swimlane as const,
+            type: ConnectorTypes.jira as const,
             fields: {
-              // @ts-expect-error upgrade typescript v5.1.6
               issueType: '1',
               priority: 'test',
               parent: null,
-              caseId: null,
             },
           },
           owner: casesConfigurationsMock.owner,
@@ -372,7 +367,6 @@ describe('utils', () => {
           issueType: '1',
           priority: 'test',
           parent: null,
-          caseId: null,
         },
         customFields: {
           test_key_1: 'first value',

@@ -61,8 +61,7 @@ const CorrelationIdField: React.FunctionComponent<
       error={errors['subActionParams.incident.correlation_id']}
       isInvalid={
         errors['subActionParams.incident.correlation_id'] !== undefined &&
-        // @ts-expect-error upgrade typescript v5.1.6
-        errors['subActionParams.incident.correlation_id'].length > 0 &&
+        Number(errors['subActionParams.incident.correlation_id'].length) > 0 &&
         !correlationId &&
         isRequired
       }
@@ -420,8 +419,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
                 error={errors['subActionParams.incident.short_description']}
                 isInvalid={
                   errors['subActionParams.incident.short_description'] !== undefined &&
-                  // @ts-expect-error upgrade typescript v5.1.6
-                  errors['subActionParams.incident.short_description'].length > 0 &&
+                  Number(errors['subActionParams.incident.short_description'].length) > 0 &&
                   incident.short_description !== undefined
                 }
                 label={i18n.SHORT_DESCRIPTION_LABEL}

@@ -102,8 +102,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
 }) => {
   const isAliasInvalid =
     (errors['subActionParams.alias'] !== undefined &&
-      // @ts-expect-error upgrade typescript v5.1.6
-      errors['subActionParams.alias'].length > 0 &&
+      Number(errors['subActionParams.alias'].length) > 0 &&
       subActionParams?.alias !== undefined) ||
     showSaveError;
 

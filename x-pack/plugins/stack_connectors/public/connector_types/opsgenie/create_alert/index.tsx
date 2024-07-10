@@ -49,8 +49,7 @@ const FormView: React.FC<FormViewProps> = ({
 }) => {
   const isMessageInvalid =
     (errors['subActionParams.message'] !== undefined &&
-      // @ts-expect-error upgrade typescript v5.1.6
-      errors['subActionParams.message'].length > 0 &&
+      Number(errors['subActionParams.message'].length) > 0 &&
       subActionParams?.message !== undefined) ||
     showSaveError;
 

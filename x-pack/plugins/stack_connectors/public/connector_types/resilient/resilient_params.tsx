@@ -211,8 +211,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         error={errors['subActionParams.incident.name']}
         isInvalid={
           errors['subActionParams.incident.name'] !== undefined &&
-          // @ts-expect-error upgrade typescript v5.1.6
-          errors['subActionParams.incident.name'].length > 0 &&
+          Number(errors['subActionParams.incident.name'].length) > 0 &&
           incident.name !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {

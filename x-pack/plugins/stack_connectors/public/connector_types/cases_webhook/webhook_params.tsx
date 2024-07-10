@@ -110,8 +110,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         error={errors['subActionParams.incident.title']}
         isInvalid={
           errors['subActionParams.incident.title'] !== undefined &&
-          // @ts-expect-error upgrade typescript v5.1.6
-          errors['subActionParams.incident.title'].length > 0 &&
+          Number(errors['subActionParams.incident.title'].length) > 0 &&
           incident.title !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.titleFieldLabel', {
@@ -208,8 +207,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         error={errors['subActionParams.incident.id']}
         isInvalid={
           errors['subActionParams.incident.id'] !== undefined &&
-          // @ts-expect-error upgrade typescript v5.1.6
-          errors['subActionParams.incident.id'].length > 0 &&
+          Number(errors['subActionParams.incident.id'].length) > 0 &&
           incident.id !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.idFieldLabel', {

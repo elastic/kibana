@@ -170,8 +170,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
         error={errors['subActionParams.additional_info']}
         isInvalid={
           errors['subActionParams.additional_info'] !== undefined &&
-          // @ts-expect-error upgrade typescript v5.1.6
-          errors['subActionParams.additional_info'].length > 0
+          Number(errors['subActionParams.additional_info'].length) > 0
         }
       >
         <JsonEditorWithMessageVariables

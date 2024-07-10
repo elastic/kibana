@@ -197,22 +197,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow
-                  isInvalid={
-                    // @ts-expect-error upgrade typescript v5.1.6
-                    errors.termSize.length > 0
-                  }
-                  error={errors.termSize}
-                >
+                <EuiFormRow isInvalid={Number(errors.termSize.length) > 0} error={errors.termSize}>
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}
-                    isInvalid={
-                      // @ts-expect-error upgrade typescript v5.1.6
-                      errors.termSize.length > 0
-                    }
+                    isInvalid={Number(errors.termSize.length) > 0}
                     value={termSize || ''}
                     onChange={(e) => {
                       const { value } = e.target;
@@ -226,10 +217,7 @@ export const GroupByExpression = ({
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
                 <EuiFormRow
-                  isInvalid={
-                    // @ts-expect-error upgrade typescript v5.1.6
-                    errors.termField.length > 0
-                  }
+                  isInvalid={Number(errors.termField.length) > 0}
                   error={errors.termField}
                 >
                   <EuiComboBox
@@ -241,10 +229,7 @@ export const GroupByExpression = ({
                       }
                     )}
                     data-test-subj="fieldsExpressionSelect"
-                    isInvalid={
-                      // @ts-expect-error upgrade typescript v5.1.6
-                      errors.termField.length > 0
-                    }
+                    isInvalid={Number(errors.termField.length) > 0}
                     selectedOptions={selectedTermsFieldsOptions}
                     onChange={(
                       selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>

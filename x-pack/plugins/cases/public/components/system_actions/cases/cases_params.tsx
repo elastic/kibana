@@ -153,8 +153,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         error={errors.timeWindow}
         isInvalid={
           errors.timeWindow !== undefined &&
-          // @ts-expect-error upgrade typescript v5.1.6
-          errors.timeWindow.length > 0 &&
+          Number(errors.timeWindow.length) > 0 &&
           timeWindow !== undefined
         }
       >

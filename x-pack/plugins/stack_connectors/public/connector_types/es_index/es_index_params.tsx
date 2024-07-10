@@ -139,12 +139,7 @@ export const IndexParamsFields = ({
       <EuiFormRow
         fullWidth
         error={errors.indexOverride as string[]}
-        isInvalid={
-          errors.indexOverride !== undefined &&
-          (errors.indexOverride as string[]) &&
-          // @ts-expect-error upgrade typescript v5.1.6
-          errors.indexOverride.length > 0
-        }
+        isInvalid={errors.indexOverride !== undefined && Number(errors.indexOverride.length) > 0}
         label={i18n.translate('xpack.stackConnectors.components.index.preconfiguredIndex', {
           defaultMessage: 'Elasticsearch index',
         })}
