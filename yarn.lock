@@ -6983,10 +6983,10 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.17":
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.17.tgz#83e776b5d4d022b22bce907ce08668c56422e8de"
-  integrity sha512-lbmOvOvE0L2EV8lUb/ZcYyrLGF0sveGpYg9A0m6F/nDhuPG1HZqHvU/LiHsCaVO2WJPGowibMPTC02fUG/6dKA==
+"@langchain/community@^0.2.18":
+  version "0.2.18"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.18.tgz#127a7ac53a30dd6dedede887811fdd992061e2d2"
+  integrity sha512-UsCB97dMG87giQLniKx4bjv7OnMw2vQeavSt9gqOnGCnfb5IQBAgdjX4SjwFPbVGMz1HQoQKVlNqQ64ozCdgNg==
   dependencies:
     "@langchain/core" "~0.2.11"
     "@langchain/openai" "~0.1.0"
@@ -6996,14 +6996,14 @@
     js-yaml "^4.1.0"
     langchain "0.2.3"
     langsmith "~0.1.30"
-    uuid "^9.0.0"
+    uuid "^10.0.0"
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.14", "@langchain/core@~0.2.11":
-  version "0.2.14"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.14.tgz#2f607b3da03717bdb1ddb70ec64cf0f6d03bede3"
-  integrity sha512-e+dB2Sra+5sY4fPCXrZh4w1fLR68yfX2XSWS97DzHpeJRRnMGbOzjaaks6gy3wPyWhfS1WGLisJCMfCmFvH9fw==
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.11 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@^0.2.15", "@langchain/core@~0.2.11":
+  version "0.2.15"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.15.tgz#1bb99ac4fffe935c7ba37edcaa91abfba3c82219"
+  integrity sha512-L096itIBQ5XNsy5BCCPqIQEk/x4rzI+U4BhYT+fDBYtljESshIi/WzXdmiGfY/6MpVjB76jNuaRgMDmo1m9NeQ==
   dependencies:
     ansi-styles "^5.0.0"
     camelcase "6"
@@ -21851,12 +21851,12 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@0.2.3, langchain@0.2.8, langchain@^0.2.8:
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.8.tgz#9bd77f5c12071d0ccb637c04fc33415e5369e5aa"
-  integrity sha512-kb2IOMA71xH8e6EXFg0l4S+QSMC/c796pj1+7mPBkR91HHwoyHZhFRrBaZv4tV+Td+Ba91J2uEDBmySklZLpNQ==
+langchain@0.2.3, langchain@^0.2.9:
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.9.tgz#1341bdd7166f4f6da0b9337f363e409a79523dbb"
+  integrity sha512-iZ0l7BDVfoifqZlDl1gy3JP5mIdhYjWiToPlDnlmfHD748cw3okvF0gZo0ruT4nbftnQcaM7JzPUiNC43UPfgg==
   dependencies:
-    "@langchain/core" ">=0.2.9 <0.3.0"
+    "@langchain/core" ">=0.2.11 <0.3.0"
     "@langchain/openai" ">=0.1.0 <0.3.0"
     "@langchain/textsplitters" "~0.0.0"
     binary-extensions "^2.2.0"
@@ -21868,7 +21868,7 @@ langchain@0.2.3, langchain@0.2.8, langchain@^0.2.8:
     ml-distance "^4.0.0"
     openapi-types "^12.1.3"
     p-retry "4"
-    uuid "^9.0.0"
+    uuid "^10.0.0"
     yaml "^2.2.1"
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"

@@ -460,6 +460,7 @@ export const langChainExecute = async ({
 
   // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
   let result: StreamResponseWithHeaders | StaticReturnType;
+
   if (enableKnowledgeBaseByDefault && request.body.isEnabledKnowledgeBase) {
     result = await callAssistantGraph(executorParams);
   } else {

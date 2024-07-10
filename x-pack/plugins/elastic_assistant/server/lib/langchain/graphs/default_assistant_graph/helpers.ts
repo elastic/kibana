@@ -164,7 +164,10 @@ export const streamGraph = async ({
           if (event.name === 'ActionsClientBedrockChatModel') {
             const generations = event.data.output?.generations[0];
 
-            if (generations && generations[0]?.generationInfo.stop_reason === 'end_turn') {
+            if (
+              (generations && generations[0]?.generationInfo?.stop_reason === 'end_turn') ||
+              generations?.[0]?.text
+            ) {
               handleStreamEnd(finalMessage);
             }
           }

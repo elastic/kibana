@@ -8,8 +8,13 @@
 import { StructuredTool } from '@langchain/core/tools';
 import { RetrievalQAChain } from 'langchain/chains';
 import { getDefaultArguments } from '@kbn/langchain/server';
-import { createOpenAIFunctionsAgent, createStructuredChatAgent } from 'langchain/agents';
+import {
+  createOpenAIFunctionsAgent,
+  createStructuredChatAgent,
+  createToolCallingAgent,
+} from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -66,6 +71,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // prevents the agent from retrying on failure
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
+    graph: true,
   });
 
   const anonymizationFieldsRes =
@@ -111,6 +117,18 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         llm,
         tools,
         prompt: openAIFunctionAgentPrompt,
+        streamRunnable: isStream,
+      })
+    : llmType === 'bedrock' && bedrockChatEnabled
+    ? await createToolCallingAgent({
+        llm,
+        tools,
+        prompt: ChatPromptTemplate.fromMessages([
+          ['system', 'You are a helpful assistant'],
+          ['placeholder', '{chat_history}'],
+          ['human', '{input}'],
+          ['placeholder', '{agent_scratchpad}'],
+        ]),
         streamRunnable: isStream,
       })
     : await createStructuredChatAgent({
