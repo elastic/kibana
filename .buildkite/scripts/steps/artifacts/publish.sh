@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+source env.env
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
@@ -12,7 +13,7 @@ function download {
   download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   download_artifact "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   sha512sum -c "$1.sha512.txt"
-  rm "$1.sha512.txt"
+  rm -f "$1.sha512.txt"
 }
 
 mkdir -p target
@@ -63,29 +64,29 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
   export BEATS_MANIFEST_URL=$(jq -r .manifest_url /tmp/beats_manifest.json)
 
   PUBLISH_CMD=$(cat << EOF
-  docker run --rm \
-    --name release-manager \
-    -e VAULT_ADDR \
-    -e VAULT_ROLE_ID \
-    -e VAULT_SECRET_ID \
-    --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts/target \
-    docker.elastic.co/infra/release-manager:latest \
-      cli collect \
-        --project kibana \
-        --branch "$KIBANA_BASE_BRANCH" \
-        --commit "$GIT_COMMIT" \
-        --workflow "$WORKFLOW" \
-        --version "$BASE_VERSION" \
-        --qualifier "$VERSION_QUALIFIER" \
-        --dependency "beats:$BEATS_MANIFEST_URL" \
-        --artifact-set main
+docker run --rm \
+  --name release-manager \
+  -e VAULT_ADDR \
+  -e VAULT_ROLE_ID \
+  -e VAULT_SECRET_ID \
+  --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts/target \
+  docker.elastic.co/infra/release-manager:latest \
+    cli collect \
+      --project kibana \
+      --branch "$KIBANA_BASE_BRANCH" \
+      --commit "$GIT_COMMIT" \
+      --workflow "$WORKFLOW" \
+      --version "$BASE_VERSION" \
+      --qualifier "$VERSION_QUALIFIER" \
+      --dependency "beats:$BEATS_MANIFEST_URL" \
+      --artifact-set main
 EOF
 )
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
-    PUBLISH_CMD+=(" --dry-run")
+    PUBLISH_CMD="$PUBLISH_CMD --dry-run"
   fi
 
-  "${PUBLISH_CMD[@]}"
+  eval "$PUBLISH_CMD"
 
   KIBANA_SUMMARY=$(curl -s "$KIBANA_MANIFEST_LATEST" | jq -re '.summary_url')
 
