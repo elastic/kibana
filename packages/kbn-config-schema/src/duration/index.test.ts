@@ -26,8 +26,11 @@ describe('duration', () => {
       expect(ensureDuration('30000').asMilliseconds()).toEqual(30000);
     });
 
-    test.each(['60s', '1m', '1m0s'])('ensureDuration 1 minute %s', (d) => {
-      expect(ensureDuration(d).asMilliseconds()).toEqual(60000);
-    });
+    test.each([60000, '60000', '60000ms', '60s', '1m', '1m0s'])(
+      'ensureDuration 1 minute as %p',
+      (d) => {
+        expect(ensureDuration(d).asMilliseconds()).toEqual(60000);
+      }
+    );
   });
 });

@@ -461,6 +461,7 @@ const valueSchema = schema.duration({ defaultValue: '70ms' });
 
 __Notes:__
 * The string value for `schema.duration()` supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
+* Multi-unit duration strings are supported (`1m30s`). Spaces are not allowed. 
 * The number value is treated as a number of milliseconds and hence should be a positive integer, e.g. `100` is equal to `'100ms'`.
 
 #### `schema.conditional()`
