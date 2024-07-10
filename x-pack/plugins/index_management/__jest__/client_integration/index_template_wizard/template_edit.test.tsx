@@ -12,7 +12,13 @@ import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, kibanaVersion } from '../helpers';
 
-import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
+import {
+  TEMPLATE_NAME,
+  SETTINGS,
+  ALIASES,
+  MAPPINGS as DEFAULT_MAPPING,
+  INDEX_PATTERNS,
+} from './constants';
 import { setup } from './template_edit.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
@@ -25,6 +31,22 @@ const MAPPING = {
       type: 'text',
     },
   },
+};
+const NONEXISTENT_COMPONENT_TEMPLATE = {
+  name: 'component_template@custom',
+  hasMappings: false,
+  hasAliases: false,
+  hasSettings: false,
+  usedBy: [],
+};
+
+const EXISTING_COMPONENT_TEMPLATE = {
+  name: 'test_component_template',
+  hasMappings: true,
+  hasAliases: false,
+  hasSettings: false,
+  usedBy: [],
+  isManaged: false,
 };
 
 jest.mock('@kbn/code-editor', () => {
@@ -70,6 +92,7 @@ describe('<TemplateEdit />', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
+    httpRequestsMockHelpers.setLoadComponentTemplatesResponse([EXISTING_COMPONENT_TEMPLATE]);
   });
 
   afterAll(() => {
@@ -293,6 +316,46 @@ describe('<TemplateEdit />', () => {
           })
         );
       });
+    });
+  });
+
+  describe('when composed of a nonexistent component template', () => {
+    const templateToEdit = fixtures.getTemplate({
+      name: TEMPLATE_NAME,
+      indexPatterns: INDEX_PATTERNS,
+      composedOf: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+      ignoreMissingComponentTemplates: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+    });
+
+    beforeAll(() => {
+      httpRequestsMockHelpers.setLoadTemplateResponse('my_template', templateToEdit);
+    });
+
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+    });
+
+    it('the nonexistent component template should be selected in the Component templates selector', async () => {
+      const { actions, exists } = testBed;
+
+      // Complete step 1: Logistics
+      await actions.completeStepOne();
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+
+      // Should be at the Component templates step
+      expect(exists('stepComponents')).toBe(true);
+
+      const {
+        actions: {
+          componentTemplates: { getComponentTemplatesSelected },
+        },
+      } = testBed;
+
+      expect(exists('componentTemplatesSelection.emptyPrompt')).toBe(false);
+      expect(getComponentTemplatesSelected()).toEqual([NONEXISTENT_COMPONENT_TEMPLATE.name]);
     });
   });
 
