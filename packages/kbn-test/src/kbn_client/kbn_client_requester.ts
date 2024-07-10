@@ -13,6 +13,7 @@ import Qs from 'querystring';
 import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import { cleanException } from '../auth/saml_auth';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
@@ -149,18 +150,17 @@ export class KbnClientRequester {
         const requestedRetries = options.retries !== undefined;
         const failedToGetResponse = isAxiosRequestError(error);
 
-        if (isIgnorableError(error, options.ignoreErrors)) {
-          return error.response;
-        }
+        if (isIgnorableError(error, options.ignoreErrors)) return error.response;
 
-        let errorMessage;
+        let errorMessage: string = '';
+        const redactedUrl = redactUrl(description.split(' ')[1]);
+
         if (conflictOnGet) {
           errorMessage = `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`;
-          this.log.error(errorMessage);
         } else if (requestedRetries || failedToGetResponse) {
-          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts}): ${error.message}`;
-          this.log.error(errorMessage);
+          errorMessage = `URL [${redactedUrl}] request failed (attempt=${attempt}/${maxAttempts}): ${error.message}`;
         } else {
+          this.log.error(errorMessage);
           throw error;
         }
 
@@ -169,8 +169,16 @@ export class KbnClientRequester {
           continue;
         }
 
-        throw new KbnClientRequesterError(`${errorMessage} -- and ran out of retries`, error);
+        throw new KbnClientRequesterError(
+          `${errorMessage} -- and ran out of retries`,
+          cleanException(redactedUrl, error)
+        );
       }
     }
   }
+}
+
+export function redactUrl(_: string): string {
+  const url = URL.parse(_);
+  return url.password ? `${url.protocol}//${url.host}` : _;
 }
