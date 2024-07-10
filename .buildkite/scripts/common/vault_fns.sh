@@ -1,9 +1,17 @@
 #!/bin/bash
 
+# TODO: rewrite after https://github.com/elastic/kibana-operations/issues/15 is done
 export LEGACY_VAULT_ADDR="https://secrets.elastic.co:8200"
-export VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
-export VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
-export IS_LEGACY_VAULT_ADDR=false
+if [[ "${VAULT_ADDR:-}" == "$LEGACY_VAULT_ADDR" ]]; then
+  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
+  VAULT_KV_PREFIX="secret/kibana-issues/dev"
+  IS_LEGACY_VAULT_ADDR=true
+else
+  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
+  VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
+  IS_LEGACY_VAULT_ADDR=false
+fi
+export IS_LEGACY_VAULT_ADDR
 
 retry() {
   local retries=$1; shift
