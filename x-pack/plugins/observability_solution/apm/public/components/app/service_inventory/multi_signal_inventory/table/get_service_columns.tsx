@@ -31,6 +31,8 @@ import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { LogErrorRateWithExplanation, LogRateWithExplanation } from './title_with_explanation';
+
 export function getServiceColumns({
   query,
   breakpoints,
@@ -153,9 +155,7 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogRatePerMinute,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
-        defaultMessage: 'Log rate (per min.)',
-      }),
+      name: <LogRateWithExplanation includeTitle />,
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
@@ -174,9 +174,7 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogErrorRate,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-        defaultMessage: 'Log error rate',
-      }),
+      name: <LogErrorRateWithExplanation includeTitle />,
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,

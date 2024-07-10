@@ -14,6 +14,7 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { yLabelAsPercent } from '../../../../../common/utils/formatters';
+import { LogRateWithExplanation } from '../../service_inventory/multi_signal_inventory/table/title_with_explanation';
 
 type LogRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries'>;
@@ -76,6 +77,9 @@ export function LogRateChart({ height }: { height: number }) {
               })}
             </h2>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LogRateWithExplanation includeTitle={false} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
