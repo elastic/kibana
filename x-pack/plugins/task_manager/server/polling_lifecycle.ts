@@ -34,7 +34,7 @@ import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
-import { TaskPool } from './task_pool/task_pool';
+import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
@@ -131,6 +131,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger,
       strategy: config.claim_strategy,
       capacity$: capacityConfiguration$,
+      definitions: this.definitions,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -142,22 +143,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions,
       unusedTypes,
       logger: this.logger,
-      getAvailableCapacity: (taskType?: string) => {
-        const taskTypeDefinition = taskType ? this.definitions.get(taskType) : null;
-        if (taskTypeDefinition?.maxConcurrency) {
-          // calculate the max capacity that can be used for this task type based on cost
-          const maxCapacityForType = taskTypeDefinition.maxConcurrency * taskTypeDefinition.cost;
-          return Math.max(
-            Math.min(
-              this.pool.availableCapacity,
-              maxCapacityForType - this.pool.getUsedCapacityByType(taskType!)
-            ),
-            0
-          );
-        } else {
-          return this.pool.availableCapacity;
-        }
-      },
+      getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);

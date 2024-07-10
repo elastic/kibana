@@ -14,22 +14,21 @@ import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
-import { asOk, asErr, Result } from './lib/result_type';
-import { ConcreteTaskInstance } from './task';
-import { TaskClaim } from './task_events';
+import { asOk, asErr, Result } from '../lib/result_type';
+import { ConcreteTaskInstance } from '../task';
+import { TaskClaim } from '../task_events';
 
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { TaskStore, UpdateByQueryResult } from './task_store';
-import { FillPoolResult } from './lib/fill_pool';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskStore, UpdateByQueryResult } from '../task_store';
+import { FillPoolResult } from '../lib/fill_pool';
 import {
   TaskClaimerOpts,
   TaskClaimerFn,
   ClaimOwnershipResult,
   getTaskClaimer,
-} from './task_claimers';
-import { getTaskPool, ITaskPool } from './task_pool';
+} from '../task_claimers';
 
-export type { ClaimOwnershipResult } from './task_claimers';
+export type { ClaimOwnershipResult } from '../task_claimers';
 export interface TaskClaimingOpts {
   logger: Logger;
   strategy: string;
@@ -79,7 +78,7 @@ export type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
 
-export class TaskClaimHandler {
+export class TaskClaiming {
   public readonly errors$ = new Subject<Error>();
   public readonly maxAttempts: number;
 
@@ -93,7 +92,6 @@ export class TaskClaimHandler {
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
   private readonly taskClaimer: TaskClaimerFn;
-  private readonly taskPool: ITaskPool;
 
   /**
    * Constructs a new TaskStore.
@@ -112,7 +110,6 @@ export class TaskClaimHandler {
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
-    this.taskPool = getTaskPool(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
 
     this.logger.info(`using task claiming strategy: ${opts.strategy}`);

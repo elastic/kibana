@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { TaskDefinition } from '../task';
 import { TaskRunner } from '../task_running';
 import { CapacityCalculatorOpts, ICapacityCalculator } from './types';
 export class CapacityByCost implements ICapacityCalculator {
@@ -51,6 +52,27 @@ export class CapacityByCost implements ICapacityCalculator {
         runningTask.definition.type === type ? count + runningTask.definition.cost : count,
       0
     );
+  }
+
+  public availableCapacity(
+    tasksInPool: Map<string, TaskRunner>,
+    taskDefinition?: TaskDefinition | null
+  ): number {
+    const allAvailableCapacity = this.capacity - this.usedCapacity(tasksInPool);
+    if (taskDefinition && taskDefinition.maxConcurrency) {
+      // calculate the max capacity that can be used for this task type based on cost
+      const maxCapacityForType = taskDefinition.maxConcurrency * taskDefinition.cost;
+      return Math.max(
+        Math.min(
+          allAvailableCapacity,
+          maxCapacityForType -
+            this.getUsedCapacityByType([...tasksInPool.values()], taskDefinition.type)
+        ),
+        0
+      );
+    }
+
+    return allAvailableCapacity;
   }
 
   public determineTasksToRunBasedOnCapacity(

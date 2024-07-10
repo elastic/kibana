@@ -20,11 +20,31 @@ import * as CapacityByWorkerModule from './capacity_by_worker';
 import { capacityMock } from './capacity.mock';
 import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
 import { mockRun, mockTask } from './test_utils';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+
+jest.mock('../constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+}));
 
 describe('TaskPool', () => {
   const capacityByCostMock = capacityMock.create();
   const capacityByWorkerMock = capacityMock.create();
   const logger = loggingSystemMock.create().get();
+
+  const definitions = new TaskTypeDictionary(logger);
+  definitions.registerTaskDefinitions({
+    report: {
+      title: 'report',
+      maxConcurrency: 1,
+      cost: TaskCost.ExtraLarge,
+      createTaskRunner: jest.fn(),
+    },
+    quickReport: {
+      title: 'quickReport',
+      maxConcurrency: 5,
+      createTaskRunner: jest.fn(),
+    },
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -55,21 +75,21 @@ describe('TaskPool', () => {
     });
 
     test('uses CapacityByCost to calculate capacity when strategy is mget', () => {
-      new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_MGET });
+      new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_MGET });
 
       expect(CapacityByCostModule.CapacityByCost).toHaveBeenCalledTimes(1);
       expect(CapacityByWorkerModule.CapacityByWorker).not.toHaveBeenCalled();
     });
 
     test('uses CapacityByWorker to calculate capacity when strategy is default', () => {
-      new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_DEFAULT });
 
       expect(CapacityByCostModule.CapacityByCost).not.toHaveBeenCalled();
       expect(CapacityByWorkerModule.CapacityByWorker).toHaveBeenCalledTimes(1);
     });
 
     test('uses CapacityByWorker to calculate capacity when strategy is unrecognized', () => {
-      new TaskPool({ capacity$: of(20), logger, strategy: 'any old strategy' });
+      new TaskPool({ capacity$: of(20), definitions, logger, strategy: 'any old strategy' });
 
       expect(CapacityByCostModule.CapacityByCost).not.toHaveBeenCalled();
       expect(CapacityByWorkerModule.CapacityByWorker).toHaveBeenCalledTimes(1);
@@ -78,7 +98,12 @@ describe('TaskPool', () => {
 
   describe('with CLAIM_STRATEGY_DEFAULT', () => {
     test('usedCapacity are a sum of running tasks', async () => {
-      const pool = new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
@@ -87,25 +112,40 @@ describe('TaskPool', () => {
     });
 
     test('availableCapacity are a function of total_capacity - usedCapacity', async () => {
-      const pool = new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
       expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
-      expect(pool.availableCapacity).toEqual(7);
+      expect(pool.availableCapacity()).toEqual(7);
     });
 
     test('availableCapacity is 0 until capacity$ pushes a value', async () => {
       const capacity$ = new Subject<number>();
-      const pool = new TaskPool({ capacity$, logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$,
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
       capacity$.next(20);
-      expect(pool.availableCapacity).toEqual(10);
+      expect(pool.availableCapacity()).toEqual(10);
     });
 
     test('does not run tasks that are beyond its available capacity', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const shouldRun = mockRun();
       const shouldNotRun = mockRun();
@@ -117,13 +157,18 @@ describe('TaskPool', () => {
       ]);
 
       expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
       expect(shouldRun).toHaveBeenCalledTimes(2);
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
 
-    test('should log when marking a Task as running fails', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+    test('test should log when marking a Task as running fails', async () => {
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const taskFailedToMarkAsRunning = mockTask();
       taskFailedToMarkAsRunning.markTaskAsRunning.mockImplementation(async () => {
@@ -142,7 +187,12 @@ describe('TaskPool', () => {
     });
 
     test('should log when running a Task fails', async () => {
-      const pool = new TaskPool({ capacity$: of(6), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(6),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const taskFailedToRun = mockTask();
       taskFailedToRun.run.mockImplementation(async () => {
@@ -161,7 +211,12 @@ describe('TaskPool', () => {
     });
 
     test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
-      const pool = new TaskPool({ capacity$: of(6), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(6),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const taskFailedToRun = mockTask();
       taskFailedToRun.run.mockImplementation(async () => {
@@ -179,7 +234,12 @@ describe('TaskPool', () => {
     });
 
     test('Running a task which fails still takes up capacity', async () => {
-      const pool = new TaskPool({ capacity$: of(2), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(2),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const taskFailedToRun = mockTask();
       taskFailedToRun.run.mockImplementation(async () => {
@@ -193,7 +253,12 @@ describe('TaskPool', () => {
     });
 
     test('clears up capacity when a task completes', async () => {
-      const pool = new TaskPool({ capacity$: of(2), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(2),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const firstWork = resolvable();
       const firstRun = sinon.spy(async () => {
@@ -215,7 +280,7 @@ describe('TaskPool', () => {
 
       expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
       expect(pool.usedCapacity).toEqual(1);
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
 
       await firstWork;
       sinon.assert.calledOnce(firstRun);
@@ -225,17 +290,22 @@ describe('TaskPool', () => {
       await pool.run([{ ...mockTask(), run: secondRun }]);
       expect(pool.usedCapacity).toEqual(1);
 
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
 
       await secondWork;
 
       expect(pool.usedCapacity).toEqual(0);
-      expect(pool.availableCapacity).toEqual(1);
+      expect(pool.availableCapacity()).toEqual(1);
       sinon.assert.calledOnce(secondRun);
     });
 
     test('run cancels expired tasks prior to running new tasks', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const haltUntilWeAfterFirstRun = resolvable();
       const taskHasExpired = resolvable();
@@ -276,7 +346,7 @@ describe('TaskPool', () => {
 
       expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
       expect(pool.usedCapacity).toEqual(2);
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
 
       // release first stage in task so that it has time to expire, but not complete
       haltUntilWeAfterFirstRun.resolve();
@@ -288,7 +358,7 @@ describe('TaskPool', () => {
       sinon.assert.notCalled(shouldNotRun);
 
       expect(pool.usedCapacity).toEqual(1);
-      expect(pool.availableCapacity).toEqual(1);
+      expect(pool.availableCapacity()).toEqual(1);
 
       haltTaskSoThatItCanBeCanceled.resolve();
 
@@ -298,7 +368,12 @@ describe('TaskPool', () => {
     });
 
     test('calls to availableWorkers ensures we cancel expired tasks', async () => {
-      const pool = new TaskPool({ capacity$: of(2), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(2),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const taskIsRunning = resolvable();
       const taskHasExpired = resolvable();
@@ -331,18 +406,23 @@ describe('TaskPool', () => {
       sinon.assert.notCalled(cancel);
       expect(pool.usedCapacity).toEqual(1);
       // The call to `availableCapacity` will clear the expired task so it's 1 instead of 0
-      expect(pool.availableCapacity).toEqual(1);
+      expect(pool.availableCapacity()).toEqual(1);
       sinon.assert.calledOnce(cancel);
 
       expect(pool.usedCapacity).toEqual(0);
-      expect(pool.availableCapacity).toEqual(1);
+      expect(pool.availableCapacity()).toEqual(1);
       // ensure cancel isn't called twice
       sinon.assert.calledOnce(cancel);
       taskHasExpired.resolve();
     });
 
     test('logs if cancellation errors', async () => {
-      const pool = new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const cancelled = resolvable();
       const result = await pool.run([
@@ -375,7 +455,12 @@ describe('TaskPool', () => {
     });
 
     test('only allows one task with the same id in the task pool', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const shouldRun = mockRun();
       const shouldNotRun = mockRun();
@@ -402,7 +487,12 @@ describe('TaskPool', () => {
     // reproduce with the wacky test below.  It does log the exact error
     // from that issue, without the corresponding fix in task_pool.ts
     test('works when available workers is 0 but there are tasks to run', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_DEFAULT,
+      });
 
       const shouldRun = mockRun();
 
@@ -414,11 +504,9 @@ describe('TaskPool', () => {
       // to partition tasks (0 to run, everything as leftover), then at the
       // end of run(), to check if it should recurse, it should be > 0.
       let awValue = 1;
-      Object.defineProperty(pool, 'availableCapacity', {
-        get() {
-          return ++awValue % 2;
-        },
-      });
+      pool.availableCapacity = () => {
+        return ++awValue % 2;
+      };
 
       const result = await pool.run([task1]);
       expect(result).toBe(TaskPoolRunResult.RanOutOfCapacity);
@@ -433,7 +521,12 @@ describe('TaskPool', () => {
 
   describe('with CLAIM_STRATEGY_MGET', () => {
     test('usedCapacity are a sum of the cost of running tasks', async () => {
-      const pool = new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
@@ -442,25 +535,35 @@ describe('TaskPool', () => {
     });
 
     test('availableCapacity are a function of total_capacity - usedCapacity', async () => {
-      const pool = new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
       expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
-      expect(pool.availableCapacity).toEqual(14);
+      expect(pool.availableCapacity()).toEqual(14);
     });
 
     test('availableCapacity is 0 until capacity$ pushes a value', async () => {
       const capacity$ = new Subject<number>();
-      const pool = new TaskPool({ capacity$, logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({ capacity$, definitions, logger, strategy: CLAIM_STRATEGY_MGET });
 
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
       capacity$.next(20);
-      expect(pool.availableCapacity).toEqual(20);
+      expect(pool.availableCapacity()).toEqual(20);
     });
 
     test('does not run tasks that are beyond its available capacity', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const shouldRun = mockRun();
       const shouldNotRun = mockRun();
@@ -472,13 +575,18 @@ describe('TaskPool', () => {
       ]);
 
       expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
       expect(shouldRun).toHaveBeenCalledTimes(2);
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
 
     test('should log when marking a Task as running fails', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const taskFailedToMarkAsRunning = mockTask();
       taskFailedToMarkAsRunning.markTaskAsRunning.mockImplementation(async () => {
@@ -497,7 +605,12 @@ describe('TaskPool', () => {
     });
 
     test('should log when running a Task fails', async () => {
-      const pool = new TaskPool({ capacity$: of(6), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(6),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const taskFailedToRun = mockTask();
       taskFailedToRun.run.mockImplementation(async () => {
@@ -516,7 +629,12 @@ describe('TaskPool', () => {
     });
 
     test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
-      const pool = new TaskPool({ capacity$: of(6), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(6),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const taskFailedToRun = mockTask();
       taskFailedToRun.run.mockImplementation(async () => {
@@ -534,7 +652,12 @@ describe('TaskPool', () => {
     });
 
     test('Running a task which fails still takes up capacity', async () => {
-      const pool = new TaskPool({ capacity$: of(2), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(2),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const taskFailedToRun = mockTask();
       taskFailedToRun.run.mockImplementation(async () => {
@@ -548,7 +671,12 @@ describe('TaskPool', () => {
     });
 
     test('clears up capacity when a task completes', async () => {
-      const pool = new TaskPool({ capacity$: of(2), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(2),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const firstWork = resolvable();
       const firstRun = sinon.spy(async () => {
@@ -570,7 +698,7 @@ describe('TaskPool', () => {
 
       expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
       expect(pool.usedCapacity).toEqual(2);
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
 
       await firstWork;
       sinon.assert.calledOnce(firstRun);
@@ -580,17 +708,22 @@ describe('TaskPool', () => {
       await pool.run([{ ...mockTask(), run: secondRun }]);
       expect(pool.usedCapacity).toEqual(2);
 
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
 
       await secondWork;
 
       expect(pool.usedCapacity).toEqual(0);
-      expect(pool.availableCapacity).toEqual(2);
+      expect(pool.availableCapacity()).toEqual(2);
       sinon.assert.calledOnce(secondRun);
     });
 
     test('run cancels expired tasks prior to running new tasks', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const haltUntilWeAfterFirstRun = resolvable();
       const taskHasExpired = resolvable();
@@ -631,7 +764,7 @@ describe('TaskPool', () => {
 
       expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
       expect(pool.usedCapacity).toEqual(4);
-      expect(pool.availableCapacity).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(0);
 
       // release first stage in task so that it has time to expire, but not complete
       haltUntilWeAfterFirstRun.resolve();
@@ -643,7 +776,7 @@ describe('TaskPool', () => {
       sinon.assert.notCalled(shouldNotRun);
 
       expect(pool.usedCapacity).toEqual(2);
-      expect(pool.availableCapacity).toEqual(2);
+      expect(pool.availableCapacity()).toEqual(2);
 
       haltTaskSoThatItCanBeCanceled.resolve();
 
@@ -653,7 +786,12 @@ describe('TaskPool', () => {
     });
 
     test('calls to availableWorkers ensures we cancel expired tasks', async () => {
-      const pool = new TaskPool({ capacity$: of(2), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(2),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const taskIsRunning = resolvable();
       const taskHasExpired = resolvable();
@@ -686,18 +824,23 @@ describe('TaskPool', () => {
       sinon.assert.notCalled(cancel);
       expect(pool.usedCapacity).toEqual(2);
       // The call to `availableCapacity` will clear the expired task so it's 2 instead of 0
-      expect(pool.availableCapacity).toEqual(2);
+      expect(pool.availableCapacity()).toEqual(2);
       sinon.assert.calledOnce(cancel);
 
       expect(pool.usedCapacity).toEqual(0);
-      expect(pool.availableCapacity).toEqual(2);
+      expect(pool.availableCapacity()).toEqual(2);
       // ensure cancel isn't called twice
       sinon.assert.calledOnce(cancel);
       taskHasExpired.resolve();
     });
 
     test('logs if cancellation errors', async () => {
-      const pool = new TaskPool({ capacity$: of(20), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const cancelled = resolvable();
       const result = await pool.run([
@@ -730,7 +873,12 @@ describe('TaskPool', () => {
     });
 
     test('only allows one task with the same id in the task pool', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const shouldRun = mockRun();
       const shouldNotRun = mockRun();
@@ -757,7 +905,12 @@ describe('TaskPool', () => {
     // reproduce with the wacky test below.  It does log the exact error
     // from that issue, without the corresponding fix in task_pool.ts
     test('test works when available workers is 0 but there are tasks to run', async () => {
-      const pool = new TaskPool({ capacity$: of(4), logger, strategy: CLAIM_STRATEGY_MGET });
+      const pool = new TaskPool({
+        capacity$: of(4),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
 
       const shouldRun = mockRun();
 
@@ -769,11 +922,9 @@ describe('TaskPool', () => {
       // to partition tasks (0 to run, everything as leftover), then at the
       // end of run(), to check if it should recurse, it should be > 0.
       let awValue = 1;
-      Object.defineProperty(pool, 'availableCapacity', {
-        get() {
-          return ++awValue % 2;
-        },
-      });
+      pool.availableCapacity = () => {
+        return ++awValue % 2;
+      };
 
       const result = await pool.run([task1]);
       expect(result).toBe(TaskPoolRunResult.RanOutOfCapacity);

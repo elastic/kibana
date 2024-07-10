@@ -15,7 +15,7 @@ const defaultGetCapacityOverride: () => Partial<{
   load: 0,
   usedCapacity: 0,
   usedCapacityPercentage: 0,
-  availableCapacity: 10,
+  availableCapacity: 20,
 });
 
 const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) => {
@@ -29,8 +29,8 @@ const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) =>
     get usedCapacityPercentage() {
       return getCapacityOverride().usedCapacityPercentage ?? 0;
     },
-    get availableCapacity() {
-      return getCapacityOverride().availableCapacity ?? 10;
+    availableCapacity() {
+      return getCapacityOverride().availableCapacity ?? 20;
     },
     getUsedCapacityByType: jest.fn(),
     run: jest.fn(),

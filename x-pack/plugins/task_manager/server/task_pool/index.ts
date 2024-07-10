@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TaskPool } from './task_pool';
+export { TaskPool, TaskPoolRunResult } from './task_pool';

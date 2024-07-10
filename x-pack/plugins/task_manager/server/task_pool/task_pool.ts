@@ -20,9 +20,11 @@ import { ICapacityCalculator } from './types';
 import { CLAIM_STRATEGY_MGET } from '../config';
 import { CapacityByWorker } from './capacity_by_worker';
 import { CapacityByCost } from './capacity_by_cost';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 
 interface TaskPoolOpts {
   capacity$: Observable<number>;
+  definitions: TaskTypeDictionary;
   logger: Logger;
   strategy: string;
 }
@@ -48,6 +50,7 @@ export class TaskPool {
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
+  private definitions: TaskTypeDictionary;
   private capacityCalculator: ICapacityCalculator;
 
   /**
@@ -60,6 +63,7 @@ export class TaskPool {
    */
   constructor(opts: TaskPoolOpts) {
     this.logger = opts.logger;
+    this.definitions = opts.definitions;
 
     switch (opts.strategy) {
       case CLAIM_STRATEGY_MGET:
@@ -98,12 +102,16 @@ export class TaskPool {
   /**
    * Gets how much capacity is currently available.
    */
-  public get availableCapacity() {
+  public availableCapacity(taskType?: string) {
     // cancel expired task whenever a call is made to check for capacity
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
-    return this.capacityCalculator.capacity - this.usedCapacity;
+
+    return this.capacityCalculator.availableCapacity(
+      this.tasksInPool,
+      taskType ? this.definitions.get(taskType) : null
+    );
   }
 
   /**
@@ -122,9 +130,9 @@ export class TaskPool {
    * @returns {Promise<boolean>}
    */
   public async run(tasks: TaskRunner[], attempt = 1): Promise<TaskPoolRunResult> {
-    // Note `this.availableCapacity` is a getter with side effects, so we just want
+    // Note `this.availableCapacity` has side effects, so we just want
     // to call it once for this bit of the code.
-    const availableCapacity = this.availableCapacity;
+    const availableCapacity = this.availableCapacity();
     const [tasksToRun, leftOverTasks] = this.capacityCalculator.determineTasksToRunBasedOnCapacity(
       tasks,
       availableCapacity
@@ -180,11 +188,11 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       // see if we have capacity for leftover tasks
-      if (this.availableCapacity) {
+      if (this.availableCapacity()) {
         return this.run(leftOverTasks, attempt + 1);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
-    } else if (!this.availableCapacity) {
+    } else if (!this.availableCapacity()) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
