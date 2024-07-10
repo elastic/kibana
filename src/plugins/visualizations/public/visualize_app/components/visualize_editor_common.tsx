@@ -37,6 +37,7 @@ import {
   OpenInspectorFn,
   SerializeStateFn,
 } from '../utils/use/use_embeddable_api_handler';
+import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -56,6 +57,7 @@ interface VisualizeEditorCommonProps {
   openInspectorFn?: OpenInspectorFn;
   navigateToLensFn?: NavigateToLensFn;
   serializeStateFn?: SerializeStateFn;
+  snapshotStateFn?: () => VisualizeRuntimeState;
 }
 
 export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
@@ -75,6 +77,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   openInspectorFn,
   navigateToLensFn,
   serializeStateFn,
+  snapshotStateFn,
   visInstance,
   children,
 }) => {
@@ -153,7 +156,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
-      {visInstance && serializeStateFn && appState && currentAppState && (
+      {visInstance && serializeStateFn && snapshotStateFn && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
           hasUnsavedChanges={hasUnsavedChanges}
@@ -172,6 +175,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           openInspectorFn={openInspectorFn}
           navigateToLensFn={navigateToLensFn}
           serializeStateFn={serializeStateFn}
+          snapshotStateFn={snapshotStateFn}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&

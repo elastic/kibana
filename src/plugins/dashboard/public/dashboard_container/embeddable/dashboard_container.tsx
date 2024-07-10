@@ -35,6 +35,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
+  HasPanelSaveCheck,
   HasRuntimeChildState,
   HasSaveNotification,
   HasSerializedChildState,
@@ -133,7 +134,8 @@ export class DashboardContainer
     HasRuntimeChildState,
     HasSerializedChildState,
     PublishesSettings,
-    Partial<PublishesViewMode>
+    Partial<PublishesViewMode>,
+    HasPanelSaveCheck
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -475,8 +477,7 @@ export class DashboardContainer
 
   public async addNewPanel<ApiType extends unknown = unknown>(
     panelPackage: PanelPackage,
-    displaySuccessMessage?: boolean,
-    uuid?: string
+    displaySuccessMessage?: boolean
   ) {
     const {
       notifications: { toasts },
@@ -497,7 +498,7 @@ export class DashboardContainer
       this.trackPanelAddMetric(METRIC_TYPE.CLICK, panelPackage.panelType);
     }
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
-      const newId = uuid ?? v4();
+      const newId = v4();
 
       const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
@@ -520,10 +521,12 @@ export class DashboardContainer
           i: newId,
         },
         explicitInput: {
-          ...panelPackage.initialState,
           id: newId,
         },
       };
+      if (panelPackage.initialState) {
+        this.setRuntimeStateForChild(newId, panelPackage.initialState);
+      }
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
       return await this.untilReactEmbeddableLoaded<ApiType>(newId);
@@ -828,6 +831,9 @@ export class DashboardContainer
   };
 
   public saveNotification$: Subject<void> = new Subject<void>();
+  public isPanelSaved = (panelId: string) => {
+    return Boolean(this.getState().componentState.lastSavedInput.panels[panelId]);
+  };
 
   public getSerializedStateForChild = (childId: string) => {
     const rawState = this.getInput().panels[childId].explicitInput;

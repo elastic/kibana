@@ -10,9 +10,13 @@ import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/present
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 
-export interface PanelPackage<SerializedState extends object = object> {
+export interface PanelPackage<RuntimeState extends object = object> {
   panelType: string;
-  initialState?: SerializedState;
+
+  /**
+   * The initial runtime state of the panel.
+   */
+  initialState?: RuntimeState;
 }
 
 export interface PresentationContainer extends CanAddNewPanel {
@@ -29,9 +33,9 @@ export interface PresentationContainer extends CanAddNewPanel {
   /**
    * Replaces a panel in the container with a new panel.
    */
-  replacePanel: <SerializedState extends object = object>(
+  replacePanel: <RuntimeState extends object = object>(
     idToRemove: string,
-    newPanel: PanelPackage<SerializedState>
+    newPanel: PanelPackage<RuntimeState>
   ) => Promise<string>;
 
   /**

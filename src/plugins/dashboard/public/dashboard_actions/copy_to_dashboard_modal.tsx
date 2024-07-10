@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 
 import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
@@ -51,21 +52,20 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const onSubmit = useCallback(async () => {
     const dashboard = api.parentApi;
     const panelToCopy = await dashboard.getDashboardPanelFromId(api.uuid);
-
-    if (!panelToCopy) {
+    const runtimeSnapshot = apiHasSnapshottableState(api) ? api.snapshotRuntimeState() : undefined;
+    if (!panelToCopy && !runtimeSnapshot) {
       throw new PanelNotFoundError();
     }
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,
-      input: {
+      input: runtimeSnapshot ?? {
         ...omit(panelToCopy.explicitInput, 'id'),
       },
       size: {
         width: panelToCopy.gridData.w,
         height: panelToCopy.gridData.h,
       },
-      references: panelToCopy.references,
     };
 
     const path =

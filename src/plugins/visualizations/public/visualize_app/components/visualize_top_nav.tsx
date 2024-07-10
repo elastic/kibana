@@ -29,6 +29,7 @@ import {
   OpenInspectorFn,
   SerializeStateFn,
 } from '../utils/use/use_embeddable_api_handler';
+import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -50,6 +51,7 @@ interface VisualizeTopNavProps {
   openInspectorFn?: OpenInspectorFn;
   navigateToLensFn?: NavigateToLensFn;
   serializeStateFn: SerializeStateFn;
+  snapshotStateFn: () => VisualizeRuntimeState;
 }
 
 const TopNav = ({
@@ -70,6 +72,7 @@ const TopNav = ({
   openInspectorFn,
   navigateToLensFn,
   serializeStateFn,
+  snapshotStateFn,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -131,6 +134,7 @@ const TopNav = ({
           setNavigateToLens,
           navigateToLensFn,
           serializeState: serializeStateFn,
+          snapshotState: snapshotStateFn,
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
           eventEmitter,
           hasInspector: !!openInspectorFn,
@@ -149,6 +153,7 @@ const TopNav = ({
     originatingPath,
     visInstance,
     stateContainer,
+    snapshotStateFn,
     services,
     embeddableId,
     displayEditInLensItem,

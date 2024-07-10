@@ -26,3 +26,13 @@ export interface CanExpandPanels {
 export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is CanExpandPanels => {
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
 };
+
+export interface HasPanelSaveCheck {
+  isPanelSaved: (panelId: string) => boolean;
+}
+
+export const apiHasPanelSaveCheck = (
+  unknownApi: unknown | null
+): unknownApi is HasPanelSaveCheck => {
+  return Boolean((unknownApi as HasPanelSaveCheck)?.isPanelSaved !== undefined);
+};
