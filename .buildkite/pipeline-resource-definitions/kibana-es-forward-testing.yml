@@ -2,44 +2,40 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-artifacts-staging
-  description: Kibana staging artifact builds
+  name: bk-kibana-es-forward-compatibility-testing
+  description: Forward compatibility testing between Kibana 7.17 and ES 8+
   links:
-    - url: https://buildkite.com/elastic/kibana-artifacts-staging
+    - url: 'https://buildkite.com/elastic/kibana-es-forward-compatibility-testing'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: group:kibana-operations
   system: buildkite
+  owner: 'group:kibana-operations'
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / artifacts staging
-      description: Kibana staging artifact builds
+      name: kibana / ES Forward Compatibility Testing
+      description: Forward compatibility testing between Kibana 7.17 and ES 8+
     spec:
       env:
-        RELEASE_BUILD: 'true'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-      allow_rebuilds: true
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: false
+      branch_configuration: main
+      default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/artifacts.yml
+      pipeline_file: .buildkite/pipelines/es_forward.yml # Note: this file exists in 7.17 only
       skip_intermediate_builds: false
       provider_settings:
-        build_branches: false
-        build_pull_requests: false
-        publish_commit_status: false
-        trigger_mode: none
-        build_tags: false
         prefix_pull_request_fork_branch_names: false
-        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
       teams:
-        everyone:
-          access_level: BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
