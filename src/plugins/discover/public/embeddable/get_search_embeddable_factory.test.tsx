@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { BehaviorSubject, Observable } from 'rxjs';
+
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { createDataViewDataSource } from '@kbn/discover-plugin/common/data_sources';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
@@ -16,8 +18,8 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { PhaseEvent, StateComparators } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render } from '@testing-library/react';
-import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+
+import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import {
