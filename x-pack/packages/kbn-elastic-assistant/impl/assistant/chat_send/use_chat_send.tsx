@@ -25,7 +25,6 @@ export interface UseChatSendProps {
   http: HttpSetup;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setEditingSystemPromptId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setPromptTextPreview: React.Dispatch<React.SetStateAction<string>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
@@ -54,7 +53,6 @@ export const useChatSend = ({
   http,
   selectedPromptContexts,
   setEditingSystemPromptId,
-  setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
   setCurrentConversation,
@@ -69,7 +67,6 @@ export const useChatSend = ({
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
-    setPromptTextPreview(prompt);
     setUserPrompt(prompt);
   };
 
@@ -120,7 +117,6 @@ export const useChatSend = ({
 
       // Reset prompt context selection and preview before sending:
       setSelectedPromptContexts({});
-      setPromptTextPreview('');
 
       const rawResponse = await sendMessage({
         apiConfig: currentConversation.apiConfig,
@@ -168,7 +164,6 @@ export const useChatSend = ({
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,
-      setPromptTextPreview,
       setSelectedPromptContexts,
       toasts,
     ]
@@ -214,7 +209,6 @@ export const useChatSend = ({
       conversation: currentConversation,
     })?.id;
 
-    setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
     if (currentConversation) {
@@ -230,7 +224,6 @@ export const useChatSend = ({
     currentConversation,
     setCurrentConversation,
     setEditingSystemPromptId,
-    setPromptTextPreview,
     setSelectedPromptContexts,
     setUserPrompt,
   ]);

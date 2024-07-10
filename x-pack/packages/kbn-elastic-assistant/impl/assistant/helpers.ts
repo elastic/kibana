@@ -10,7 +10,7 @@ import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { ClientMessage } from '../assistant_context/types';
-import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
+import { enterpriseMessaging } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
@@ -57,8 +57,7 @@ export const mergeBaseWithPersistedConversations = (
 
 export const getBlockBotConversation = (
   conversation: Conversation,
-  isAssistantEnabled: boolean,
-  isFlyoutMode: boolean
+  isAssistantEnabled: boolean
 ): Conversation => {
   if (!isAssistantEnabled) {
     if (
@@ -76,7 +75,7 @@ export const getBlockBotConversation = (
 
   return {
     ...conversation,
-    messages: [...conversation.messages, ...(!isFlyoutMode ? WELCOME_CONVERSATION.messages : [])],
+    messages: conversation.messages,
   };
 };
 

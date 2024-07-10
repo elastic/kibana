@@ -36,7 +36,6 @@ interface Props {
   defaultConnector?: AIConnector;
   handleSave: (shouldRefetchConversation?: boolean) => void;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
   onCancelClick: () => void;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -62,7 +61,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   conversationsLoaded,
   handleSave,
   isDisabled,
-  isFlyoutMode,
   onSelectedConversationChange,
   onCancelClick,
   selectedConversation,
@@ -221,7 +219,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             conversationsSettingsBulkActions={conversationsSettingsBulkActions}
             http={http}
             isDisabled={isDisabled}
-            isFlyoutMode={isFlyoutMode}
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
