@@ -13,7 +13,6 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { delay } from '../test_utils';
 import { startElasticsearch } from '../kibana_migrator_test_kit';
 
 const logFilePath = Path.join(__dirname, 'read_batch_size.log');
@@ -33,7 +32,6 @@ describe('migration v2 - read batch size', () => {
   afterEach(async () => {
     await root?.shutdown();
     await esServer?.stop();
-    await delay(10);
   });
 
   it('reduces the read batchSize in half if a batch exceeds maxReadBatchSizeBytes', async () => {
