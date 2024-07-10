@@ -34,8 +34,9 @@ import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './help
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
-const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
+const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
 export function _joinFilters(
   filters: Array<string | undefined | KueryNode>
@@ -216,6 +217,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    includeUnenrolled?: boolean;
     spaceId?: string;
     getStatusSummary?: boolean;
     sortField?: string;
@@ -239,6 +241,7 @@ export async function getAgentsByKuery(
     sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
+    includeUnenrolled = false,
     getStatusSummary = false,
     showUpgradeable,
     searchAfter,
@@ -263,6 +266,9 @@ export async function getAgentsByKuery(
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
+  }
+  if (!includeUnenrolled) {
+    filters.push(ENROLLED_AGENT_CONDITION);
   }
 
   const kueryNode = _joinFilters(filters);

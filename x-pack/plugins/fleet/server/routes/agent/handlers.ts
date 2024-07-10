@@ -191,6 +191,7 @@ export const getAgentsHandler: FleetRequestHandler<
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
+      includeUnenrolled: request.query.includeUnenrolled,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
       sortField: request.query.sortField,

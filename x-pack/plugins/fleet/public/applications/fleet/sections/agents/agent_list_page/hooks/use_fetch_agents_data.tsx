@@ -69,7 +69,11 @@ export function useFetchAgentsData() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
+    return selectedStatus.some((status) => status === 'inactive');
+  }, [selectedStatus]);
+
+  const includeUnenrolled = useMemo(() => {
+    return selectedStatus.some((status) => status === 'unenrolled');
   }, [selectedStatus]);
 
   const setSearch = useCallback(
@@ -149,6 +153,7 @@ export function useFetchAgentsData() {
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
               showInactive,
+              includeUnenrolled,
               showUpgradeable,
               getStatusSummary: true,
               withMetrics: displayAgentMetrics,
@@ -272,6 +277,7 @@ export function useFetchAgentsData() {
       sortField,
       sortOrder,
       showInactive,
+      includeUnenrolled,
       showUpgradeable,
       displayAgentMetrics,
       allTags,

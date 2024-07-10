@@ -988,7 +988,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id} and not status: unenrolled`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
