@@ -28,7 +28,7 @@ export const SearchNotebooksView = ({
   getNotebookList,
 }: SearchNotebooksViewProps) => {
   React.useEffect(() => {
-    usageTracker.load('opened_notebooks_view');
+    usageTracker.count('opened_notebooks_view');
   }, [usageTracker]);
 
   return (

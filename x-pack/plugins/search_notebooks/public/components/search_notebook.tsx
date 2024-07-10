@@ -20,7 +20,7 @@ export const SearchNotebook = ({ notebookId }: SearchNotebookProps) => {
   const usageTracker = useUsageTracker();
   const { data, isLoading, error } = useNotebook(notebookId);
   useEffect(() => {
-    usageTracker.load(`nb-${notebookId}`);
+    usageTracker.count(['view-notebook', `nb-${notebookId}`]);
   }, [usageTracker, notebookId]);
 
   if (isLoading) {
