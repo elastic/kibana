@@ -8,7 +8,11 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
+import {
+  getLogLevelCoalescedValue,
+  getLogLevelCoalescedValueLabel,
+  getLogLevelColor,
+} from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { isDataViewSource, isEsqlSource } from '../../../../common/data_sources';
 import {
@@ -25,7 +29,7 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
-    setRowIndicatorColor:
+    setRowIndicator:
       () =>
       ({ dataView }) => {
         // Check if the data view has any of the log level fields.
@@ -33,7 +37,7 @@ export const createLogsDataSourceProfileProvider = (
           // Otherwise, don't set the row indicator color so the color indicator control column is not added to the grid at all.
           return undefined;
         }
-        return getRowIndicatorColor;
+        return getRowIndicator;
       },
   },
   resolve: (params) => {
@@ -64,7 +68,7 @@ const extractIndexPatternFrom = ({
   return null;
 };
 
-const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
+const getRowIndicator: UnifiedDataTableProps['getRowIndicator'] = (row, euiTheme) => {
   const logLevel = LOG_LEVEL_FIELDS.reduce((acc: unknown, field) => {
     return acc || row.flattened[field];
   }, undefined);
@@ -72,7 +76,16 @@ const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row
   const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
 
   if (logLevelCoalescedValue) {
-    return getLogLevelColor(logLevelCoalescedValue, euiTheme);
+    const color = getLogLevelColor(logLevelCoalescedValue, euiTheme);
+
+    if (!color) {
+      return undefined;
+    }
+
+    return {
+      color,
+      label: getLogLevelCoalescedValueLabel(logLevelCoalescedValue),
+    };
   }
 
   return undefined;

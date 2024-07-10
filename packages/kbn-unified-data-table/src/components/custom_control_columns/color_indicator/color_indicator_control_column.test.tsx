@@ -19,9 +19,9 @@ describe('ColorIndicatorControlColumn', () => {
   };
 
   it('should render the component', () => {
-    const getRowIndicatorColor = jest.fn(() => 'red');
+    const getRowIndicator = jest.fn(() => ({ color: 'red', label: 'error' }));
     const column = getColorIndicatorControlColumn({
-      getRowIndicatorColor,
+      getRowIndicator,
     });
     const ColorIndicatorControlColumn =
       column.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
@@ -30,6 +30,6 @@ describe('ColorIndicatorControlColumn', () => {
         <ColorIndicatorControlColumn {...({ rowIndex: 1 } as EuiDataGridCellValueElementProps)} />
       </UnifiedDataTableContext.Provider>
     );
-    expect(getRowIndicatorColor).toHaveBeenCalledWith(contextMock.rows[1], expect.any(Object));
+    expect(getRowIndicator).toHaveBeenCalledWith(contextMock.rows[1], expect.any(Object));
   });
 });

@@ -78,7 +78,7 @@ describe('logsDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  describe('getRowIndicatorColor', () => {
+  describe('getRowIndicator', () => {
     const dataViewWithLogLevel = createStubIndexPattern({
       spec: {
         title: VALID_INDEX_PATTERN,
@@ -107,40 +107,40 @@ describe('logsDataSourceProfileProvider', () => {
     it('should return the correct color for a given log level', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
-      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicatorColor?.(
+      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicator?.(
         () => undefined
       );
-      const getRowIndicatorColor = setRowIndicator?.({
+      const getRowIndicator = setRowIndicator?.({
         dataView: dataViewWithLogLevel,
       });
 
-      expect(getRowIndicatorColor).toBeDefined();
-      expect(getRowIndicatorColor?.(row, euiTheme)).toBe('#90B0D1');
+      expect(getRowIndicator).toBeDefined();
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90B0D1', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {
       const row = buildDataTableRecord({ fields: { other: 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
-      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicatorColor?.(
+      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicator?.(
         () => undefined
       );
-      const getRowIndicatorColor = setRowIndicator?.({
+      const getRowIndicator = setRowIndicator?.({
         dataView: dataViewWithLogLevel,
       });
 
-      expect(getRowIndicatorColor).toBeDefined();
-      expect(getRowIndicatorColor?.(row, euiTheme)).toBe(undefined);
+      expect(getRowIndicator).toBeDefined();
+      expect(getRowIndicator?.(row, euiTheme)).toBe(undefined);
     });
 
     it('should not set the color indicator handler if data view does not have log level field', () => {
-      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicatorColor?.(
+      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicator?.(
         () => undefined
       );
-      const getRowIndicatorColor = setRowIndicator?.({
+      const getRowIndicator = setRowIndicator?.({
         dataView: dataViewWithoutLogLevel,
       });
 
-      expect(getRowIndicatorColor).toBeUndefined();
+      expect(getRowIndicator).toBeUndefined();
     });
   });
 });

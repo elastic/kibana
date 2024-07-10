@@ -45,6 +45,7 @@ export {
   usePager,
   getLogLevelColor,
   getLogLevelCoalescedValue,
+  getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
 } from './src';
 

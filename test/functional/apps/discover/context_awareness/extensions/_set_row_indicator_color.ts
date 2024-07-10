@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
 
-  describe('extension setRowIndicatorColor', () => {
+  describe('extension setRowIndicator', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });

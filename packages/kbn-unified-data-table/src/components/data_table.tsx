@@ -395,7 +395,7 @@ export interface UnifiedDataTableProps {
    * When specified, this function will be called to determine the color of the row indicator.
    * @param row
    */
-  getRowIndicatorColor?: ColorIndicatorControlColumnParams['getRowIndicatorColor'];
+  getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -466,7 +466,7 @@ export const UnifiedDataTable = ({
   enableComparisonMode,
   cellContext,
   renderCellPopover,
-  getRowIndicatorColor,
+  getRowIndicator,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -865,15 +865,15 @@ export const UnifiedDataTable = ({
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
 
-    if (getRowIndicatorColor) {
+    if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
-        getRowIndicatorColor,
+        getRowIndicator,
       });
       leadingColumns.unshift(colorIndicatorControlColumn);
     }
 
     return leadingColumns;
-  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicatorColor]);
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicator]);
 
   const controlColumnsConfig = customControlColumnsConfiguration?.({
     controlColumns: getAllControlColumns(),

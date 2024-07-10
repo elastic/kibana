@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export enum LogLevelCoalescedValue {
   trace = 'trace',
   debug = 'debug',
@@ -71,5 +73,54 @@ export const getLogLevelCoalescedValue = (
 
   if (logLevelLowerCase.startsWith('fatal')) {
     return LogLevelCoalescedValue.fatal;
+  }
+};
+
+export const getLogLevelCoalescedValueLabel = (coalescedValue: LogLevelCoalescedValue) => {
+  switch (coalescedValue) {
+    case LogLevelCoalescedValue.trace:
+      return i18n.translate('discover.logLevelLabels.trace', {
+        defaultMessage: 'Trace',
+      });
+    case LogLevelCoalescedValue.debug:
+      return i18n.translate('discover.logLevelLabels.debug', {
+        defaultMessage: 'Debug',
+      });
+    case LogLevelCoalescedValue.info:
+      return i18n.translate('discover.logLevelLabels.info', {
+        defaultMessage: 'Info',
+      });
+    case LogLevelCoalescedValue.notice:
+      return i18n.translate('discover.logLevelLabels.notice', {
+        defaultMessage: 'Notice',
+      });
+    case LogLevelCoalescedValue.warning:
+      return i18n.translate('discover.logLevelLabels.warning', {
+        defaultMessage: 'Warning',
+      });
+    case LogLevelCoalescedValue.error:
+      return i18n.translate('discover.logLevelLabels.error', {
+        defaultMessage: 'Error',
+      });
+    case LogLevelCoalescedValue.critical:
+      return i18n.translate('discover.logLevelLabels.critical', {
+        defaultMessage: 'Critical',
+      });
+    case LogLevelCoalescedValue.alert:
+      return i18n.translate('discover.logLevelLabels.alert', {
+        defaultMessage: 'Alert',
+      });
+    case LogLevelCoalescedValue.emergency:
+      return i18n.translate('discover.logLevelLabels.emergency', {
+        defaultMessage: 'Emergency',
+      });
+    case LogLevelCoalescedValue.fatal:
+      return i18n.translate('discover.logLevelLabels.fatal', {
+        defaultMessage: 'Fatal',
+      });
+    default:
+      // If you see a typescript error here, that's a sign that there are missing switch cases ^^
+      const _exhaustiveCheck: never = coalescedValue;
+      return coalescedValue || _exhaustiveCheck;
   }
 };

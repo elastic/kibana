@@ -16,20 +16,24 @@ const COLOR_INDICATOR_WIDTH = 4;
 
 interface ColorIndicatorCellParams {
   rowIndex: number;
-  getRowIndicatorColor: (row: DataTableRecord, euiTheme: EuiThemeComputed) => string | undefined;
+  getRowIndicator: (
+    row: DataTableRecord,
+    euiTheme: EuiThemeComputed
+  ) => { color: string; label: string } | undefined;
 }
 
-const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({
-  rowIndex,
-  getRowIndicatorColor,
-}) => {
+const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({ rowIndex, getRowIndicator }) => {
   const { euiTheme } = useEuiTheme();
   const { rows } = useContext(UnifiedDataTableContext);
   const row = rows[rowIndex];
-  const color: string = (row && getRowIndicatorColor(row, euiTheme)) || 'transparent';
+  const configuration = row ? getRowIndicator(row, euiTheme) : undefined;
+  const color = configuration?.color || 'transparent';
+  const label = configuration?.label;
+
   return (
     <div
       data-test-subj="unifiedDataTableRowColorIndicatorCell"
+      title={label}
       css={css`
         background: ${color};
         width: ${COLOR_INDICATOR_WIDTH}px;
@@ -40,11 +44,11 @@ const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({
 };
 
 export interface ColorIndicatorControlColumnParams {
-  getRowIndicatorColor: ColorIndicatorCellParams['getRowIndicatorColor'];
+  getRowIndicator: ColorIndicatorCellParams['getRowIndicator'];
 }
 
 export const getColorIndicatorControlColumn = ({
-  getRowIndicatorColor,
+  getRowIndicator,
 }: ColorIndicatorControlColumnParams): EuiDataGridControlColumn => {
   return {
     id: 'colorIndicator',
@@ -53,7 +57,7 @@ export const getColorIndicatorControlColumn = ({
       return null;
     },
     rowCellRender: ({ rowIndex }) => {
-      return <ColorIndicatorCell rowIndex={rowIndex} getRowIndicatorColor={getRowIndicatorColor} />;
+      return <ColorIndicatorCell rowIndex={rowIndex} getRowIndicator={getRowIndicator} />;
     },
   };
 };

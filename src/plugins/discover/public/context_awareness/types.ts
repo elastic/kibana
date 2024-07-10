@@ -27,7 +27,7 @@ export interface RowIndicatorExtensionParams {
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
-  setRowIndicatorColor: (
+  setRowIndicator: (
     params: RowIndicatorExtensionParams
-  ) => UnifiedDataTableProps['getRowIndicatorColor'] | undefined;
+  ) => UnifiedDataTableProps['getRowIndicator'] | undefined;
 }
