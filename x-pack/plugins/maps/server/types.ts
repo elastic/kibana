@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';

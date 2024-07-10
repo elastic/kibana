@@ -16,7 +16,7 @@ import {
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup as FeaturesSetup } from '@kbn/features-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,

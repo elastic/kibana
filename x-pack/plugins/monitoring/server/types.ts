@@ -31,7 +31,7 @@ import {
 import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
 import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';

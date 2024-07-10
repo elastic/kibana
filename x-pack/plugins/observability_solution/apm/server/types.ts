@@ -27,8 +27,8 @@ import { ActionsPlugin } from '@kbn/actions-plugin/server';
 import { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
+  FeaturesPluginSetup,
+  FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';

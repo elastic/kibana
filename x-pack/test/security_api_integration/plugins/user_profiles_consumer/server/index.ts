@@ -7,8 +7,8 @@
 
 import type { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
 import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
+  FeaturesPluginSetup,
+  FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';

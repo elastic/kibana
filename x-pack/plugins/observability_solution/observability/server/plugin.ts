@@ -20,7 +20,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';

@@ -17,8 +17,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
+  FeaturesPluginSetup,
+  FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';

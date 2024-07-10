@@ -18,8 +18,8 @@ import type {
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
 import type {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
+  FeaturesPluginStart,
+  FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {

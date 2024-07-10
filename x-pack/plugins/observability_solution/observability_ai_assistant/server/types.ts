@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
+  FeaturesPluginStart,
+  FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,

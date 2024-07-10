@@ -12,7 +12,7 @@ import type {
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
 import type {
-  PluginSetupContract as FeaturesPluginSetup,
+  FeaturesPluginSetup,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 
