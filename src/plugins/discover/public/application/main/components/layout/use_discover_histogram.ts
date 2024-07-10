@@ -247,6 +247,7 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     if (!isEsqlMode) {
       setIsSuggestionLoading(false);
+      return;
     }
 
     const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
