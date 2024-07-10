@@ -67,6 +67,7 @@ export class TaskPool {
           capacity$: opts.capacity$,
           logger: this.logger,
         });
+        break;
 
       default:
         this.capacityCalculator = new CapacityByWorker({
@@ -179,8 +180,7 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       // see if we have capacity for leftover tasks
-      const newAvailableCapacity = this.availableCapacity;
-      if (newAvailableCapacity) {
+      if (this.availableCapacity) {
         return this.run(leftOverTasks, attempt + 1);
       }
       return TaskPoolRunResult.RanOutOfCapacity;

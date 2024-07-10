@@ -5,29 +5,13 @@
  * 2.0.
  */
 
-/*
- * This module contains the logic that ensures we don't run too many
- * tasks at once in a given Kibana instance.
- */
 import { Logger } from '@kbn/core/server';
 import { TaskRunner } from '../task_running';
 import { CapacityCalculatorOpts, ICapacityCalculator } from './types';
-
-/**
- * Runs tasks in batches, taking task costs into account.
- */
 export class CapacityByCost implements ICapacityCalculator {
   private _capacity: number = 0;
   private logger: Logger;
 
-  /**
-   * Creates an instance of TaskPool.
-   *
-   * @param {Opts} opts
-   * @prop {number} capacity - The total capacity available
-   *    (e.g. capacity is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
-   * @prop {Logger} logger - The task manager logger.
-   */
   constructor(opts: CapacityCalculatorOpts) {
     this.logger = opts.logger;
     opts.capacity$.subscribe((capacity) => {
