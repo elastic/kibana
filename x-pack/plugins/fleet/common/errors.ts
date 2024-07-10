@@ -16,6 +16,7 @@ export class FleetError extends Error {
   }
 }
 
+export class PolicyNamespaceValidationError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 
 export class MessageSigningError extends FleetError {}

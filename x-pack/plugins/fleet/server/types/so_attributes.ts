@@ -239,6 +239,10 @@ export interface SettingsSOAttributes {
   output_secret_storage_requirements_met?: boolean;
 }
 
+export interface SpaceSettingsSOAttributes {
+  allowed_namespace_prefixes?: string[] | null;
+}
+
 export interface DownloadSourceSOAttributes {
   name: string;
   host: string;

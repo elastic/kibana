@@ -39,6 +39,16 @@ export const PutSettingsRequestSchema = {
   }),
 };
 
+export const GetSpaceSettingsRequestSchema = {};
+
+export const PutSpaceSettingsRequestSchema = {
+  body: schema.object({
+    allowed_namespace_prefixes: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.arrayOf(schema.string())])
+    ),
+  }),
+};
+
 export const GetEnrollmentSettingsRequestSchema = {
   query: schema.maybe(
     schema.object({
