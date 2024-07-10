@@ -1272,10 +1272,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       // COMPLETE STATUSES ------------------------------------------
       case 'canceled':
-        // FIXME:PT Need to test this one - will we have info about the cancellation?
         isPending = false;
         isError = true;
-        message = 'SentinelOne Task [${taskStatusRecord.parentTaskId}] was canceled by user...'; // FIXME:PT better message
+        message = `SentinelOne Task [${taskStatusRecord.parentTaskId}] was canceled${
+          taskStatusRecord.detailedStatus ? ` - ${taskStatusRecord.detailedStatus}` : ''
+        }`;
         break;
 
       case 'completed':
