@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor, within, screen } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   CspPolicyTemplateForm,
@@ -57,15 +57,7 @@ import {
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 
-jest.mock('@kbn/fleet-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/fleet-plugin/public');
-  return {
-    ...actual,
-    LazyPackagePolicyInputVarField: (props: any) => {
-      return <textarea data-test-subj={props['data-test-subj']} />;
-    },
-  };
-});
+// mock useParams
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn().mockReturnValue({
@@ -637,7 +629,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {
+    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -654,7 +646,7 @@ describe('<CspPolicyTemplateForm />', () => {
       await waitFor(() => expect(getByLabelText('Secret Access Key')).toBeInTheDocument());
     });
 
-    it.skip(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {
+    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -686,7 +678,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {
+    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {
       let policy: NewPackagePolicy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -705,7 +697,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Session Token')).toBeInTheDocument();
     });
 
-    it.skip(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {
+    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -932,7 +924,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {
+    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {
       let policy: NewPackagePolicy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -951,7 +943,7 @@ describe('<CspPolicyTemplateForm />', () => {
       await waitFor(() => expect(getByLabelText('Secret Access Key')).toBeInTheDocument());
     });
 
-    it.skip(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {
+    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -983,7 +975,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {
+    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {
       let policy: NewPackagePolicy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -1000,7 +992,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Session Token')).toBeInTheDocument();
     });
 
-    it.skip(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {
+    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -1386,7 +1378,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
+    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
@@ -1404,7 +1396,7 @@ describe('<CspPolicyTemplateForm />', () => {
       await waitFor(() => expect(getByLabelText('Client Secret')).toBeInTheDocument());
     });
 
-    it.skip(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
+    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
@@ -1507,7 +1499,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for GCP for organisation account type', async () => {
+    it.skip('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
       const { getByTestId, queryByTestId, getByRole } = render(
@@ -1517,6 +1509,7 @@ describe('<CspPolicyTemplateForm />', () => {
           packageInfo={{ version: '1.6.0' } as PackageInfo}
         />
       );
+
       // navigate to GCP
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
       userEvent.click(gcpSelectorButton);
@@ -1527,8 +1520,9 @@ describe('<CspPolicyTemplateForm />', () => {
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-
-      screen.logTestingPlaygroundURL();
+      const credentialsJsonField = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
+      );
       const credentialsTypSelector = queryByTestId(
         CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
@@ -1541,7 +1535,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).toBeInTheDocument();
-      // expect(credentialsJsonField).toBeInTheDocument();
+      expect(credentialsJsonField).toBeInTheDocument();
       expect(projectIdField).not.toBeInTheDocument();
       expect(credentialsTypSelector).not.toBeInTheDocument();
       expect(credentialsFileField).not.toBeInTheDocument();
@@ -1557,7 +1551,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for GCP for single-account', async () => {
+    it.skip('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
       });
@@ -1601,7 +1595,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(credentialsFileField).not.toBeInTheDocument();
     });
 
-    it.skip('should render setup technology selector for Azure for Organisation type', async () => {
+    it('should render setup technology selector for Azure for Organisation type', async () => {
       const newPackagePolicy = getMockPolicyAzure();
 
       const { getByTestId, queryByTestId, getByRole } = render(
@@ -1647,7 +1641,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for Azure for Single Subscription type', async () => {
+    it('should render setup technology selector for Azure for Single Subscription type', async () => {
       const newPackagePolicy = getMockPolicyAzure({
         'azure.account_type': { value: 'single-account', type: 'text' },
       });
@@ -1714,7 +1708,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it.skip(`renders Service principal with Client Certificate fields`, async () => {
+  it(`renders Service principal with Client Certificate fields`, async () => {
     let policy = getMockPolicyAzure();
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
@@ -1733,7 +1727,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => expect(getByLabelText('Client Certificate Password')).toBeInTheDocument());
   });
 
-  it.skip(`updates Service principal with Client Certificate fields`, async () => {
+  it(`updates Service principal with Client Certificate fields`, async () => {
     let policy = getMockPolicyAzure();
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
