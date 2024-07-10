@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLRealField } from '../validation/types';
+import type { ESQLRealField } from '../validation/types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
