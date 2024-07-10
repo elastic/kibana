@@ -33,6 +33,7 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
+import type { AxiosError } from 'axios';
 import axios from 'axios';
 
 import {
@@ -1123,41 +1124,42 @@ class AgentPolicyService {
       })
     );
 
-    try {
-      const { data, status, statusText } = await axios<AgentlessApiResponse>({
-        url: `${agentlessConfig.api.url}/deployments`,
-        data: {
-          policy_id: policyId,
-          fleet_url: fleetUrl,
-          fleet_token: fleetToken,
-          stack_version: appContextService.getKibanaVersion(),
-        },
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        httpsAgent: new https.Agent({
-          rejectUnauthorized: tlsConfig.rejectUnauthorized,
-          cert: tlsConfig.certificate,
-          key: tlsConfig.key,
-          ca: tlsConfig.certificateAuthorities,
-        }),
-      });
-
-      // if status is not CREATED, throw an error
-      if (status !== 200) {
+    const response = await axios<AgentlessApiResponse>({
+      url: `${agentlessConfig.api.url}/deployments`,
+      data: {
+        policy_id: policyId,
+        fleet_url: fleetUrl,
+        fleet_token: fleetToken,
+        stack_version: appContextService.getKibanaVersion(),
+      },
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+        ca: tlsConfig.certificateAuthorities,
+      }),
+    }).catch((error: AxiosError) => {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
         throw new AgentlessAgentCreateError(
-          `received response status: ${status} with message ${statusText}`
+          `received response status: ${error.response.status} with message ${error.response.statusText}`
         );
+      } else if (error.request) {
+        // The request was made but no response was received
+        throw new AgentlessAgentCreateError(`no response received, error: ${error.message}`);
+      } else {
+        // An error happened setting up the request
+        throw new AgentlessAgentCreateError(error.message);
       }
+    });
 
-      return {
-        status,
-        data,
-      };
-    } catch (error) {
-      throw new AgentlessAgentCreateError(error);
-    }
+    // The request was made and the server responded with a status code 2xx
+    return response.data;
   }
 
   private async getFleetUrlAndTokenForAgentlessAgent(
