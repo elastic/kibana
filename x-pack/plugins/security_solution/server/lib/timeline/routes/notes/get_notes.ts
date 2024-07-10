@@ -10,18 +10,13 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
 import type { ConfigType } from '../../../..';
-import type { SetupPlugins } from '../../../../plugin';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest, getNotesPaginated } from '../../utils/common';
 import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 
-export const getNotesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .get({
       path: NOTE_URL,
@@ -40,7 +35,7 @@ export const getNotesRoute = (
       async (context, request, response) => {
         try {
           const queryParams = request.query;
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const documentIds = queryParams.documentIds ?? null;
           if (documentIds != null) {
             if (Array.isArray(documentIds)) {
