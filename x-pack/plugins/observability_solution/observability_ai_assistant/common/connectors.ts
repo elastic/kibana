@@ -8,11 +8,13 @@
 export enum ObservabilityAIAssistantConnectorType {
   Bedrock = '.bedrock',
   OpenAI = '.gen-ai',
+  Gemini = '.gemini',
 }
 
 export const SUPPORTED_CONNECTOR_TYPES = [
   ObservabilityAIAssistantConnectorType.OpenAI,
   ObservabilityAIAssistantConnectorType.Bedrock,
+  ObservabilityAIAssistantConnectorType.Gemini,
 ];
 
 export function isSupportedConnectorType(
@@ -20,6 +22,7 @@ export function isSupportedConnectorType(
 ): type is ObservabilityAIAssistantConnectorType {
   return (
     type === ObservabilityAIAssistantConnectorType.Bedrock ||
-    type === ObservabilityAIAssistantConnectorType.OpenAI
+    type === ObservabilityAIAssistantConnectorType.OpenAI ||
+    type === ObservabilityAIAssistantConnectorType.Gemini
   );
 }

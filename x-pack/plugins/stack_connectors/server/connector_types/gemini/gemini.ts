@@ -241,6 +241,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = await this.getAccessToken();
 
+    console.log({
+      currentModel,
+    });
+
     const response = await this.request({
       url: `${this.url}${path}`,
       method: 'post',

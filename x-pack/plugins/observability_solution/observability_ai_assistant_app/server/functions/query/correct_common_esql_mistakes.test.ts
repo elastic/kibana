@@ -42,6 +42,30 @@ describe('correctCommonEsqlMistakes', () => {
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
   });
 
+  it('replaces double quotes around columns with backticks', () => {
+    expectQuery(
+      `FROM logs-* | WHERE "@timestamp" <= NOW() - 15m`,
+      `FROM logs-* | WHERE \`@timestamp\` <= NOW() - 15m`
+    );
+
+    // expectQuery(
+    //   `FROM logs-* | EVAL date_bucket = DATE_TRUNC("@timestamp", 1 hour)`,
+    //   `FROM logs-* | EVAL date_bucket = DATE_TRUNC(\`@timestamp\`, 1 hour)`
+    // );
+  });
+
+  it.only('removes escaping around timespan literals', () => {
+    // expectQuery(
+    //   `FROM logs-* | STATS BY BUCKET(@timestamp, '1 hour')`,
+    //   `FROM logs-* | STATS BY BUCKET(@timestamp, 1h)`
+    // );
+
+    expectQuery(
+      `FROM logs-* | EVAL date_bucket = DATE_TRUNC('1h', @timestamp)`,
+      `FROM logs-* | EVAL date_bucket = DATE_TRUNC(1h, @timestamp)`
+    );
+  });
+
   it('replaces = as equal operator with ==', () => {
     expectQuery(
       `FROM logs-*\n| WHERE service.name = "foo"`,
