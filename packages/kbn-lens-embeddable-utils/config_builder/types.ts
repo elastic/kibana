@@ -7,7 +7,7 @@
  */
 
 import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataViewsCommon } from './config_builder';
 
@@ -95,7 +95,7 @@ export interface LensConfigOptions {
   /** optional time range override */
   timeRange?: TimeRange;
   filters?: Filter[];
-  query?: Query;
+  query?: Query | AggregateQuery;
 }
 
 export interface LensAxisTitleVisibilityConfig {
@@ -208,9 +208,9 @@ export type LensRegionMapConfig = Identity<
 export interface LensMosaicConfigBase {
   chartType: 'mosaic';
   /** field name to apply breakdown based on field type or full breakdown configuration */
-  breakdown: LensBreakdownConfig;
+  breakdown: LensBreakdownConfig[];
   /** field name to apply breakdown based on field type or full breakdown configuration */
-  xAxis: LensBreakdownConfig;
+  xAxis?: LensBreakdownConfig;
 }
 
 export type LensMosaicConfig = Identity<LensBaseConfig & LensBaseLayer & LensMosaicConfigBase>;
@@ -228,7 +228,7 @@ export type LensTableConfig = Identity<LensBaseConfig & LensBaseLayer & LensTabl
 export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
   /** field name to apply breakdown based on field type or full breakdown configuration */
-  breakdown: LensBreakdownConfig;
+  breakdown?: LensBreakdownConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
 }
