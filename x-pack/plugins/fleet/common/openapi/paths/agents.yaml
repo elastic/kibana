@@ -26,6 +26,11 @@ get:
       required: false
       schema:
         type: boolean
+    - name: includeUnenrolled
+      in: query
+      required: false
+      schema:
+        type: boolean
   security:
     - basicAuth: []
 post:
