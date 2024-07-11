@@ -6,8 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UptimeEsClient } from '../../../lib';
-import { NetworkEvent } from '../../../../common/runtime_types';
+import { SyntheticsEsClient } from '../lib';
+import { NetworkEvent } from '../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
   checkGroup: string;
@@ -19,11 +19,11 @@ export const secondsToMillis = (seconds: number) =>
   seconds === -1 ? -1 : seconds * 1000;
 
 export const getNetworkEvents = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
   checkGroup,
   stepIndex,
 }: GetNetworkEventsParams & {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<{
   events: NetworkEvent[];
   total: number;
@@ -47,7 +47,7 @@ export const getNetworkEvents = async ({
     size: 1000,
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await syntheticsEsClient.search({ body: params });
   let isWaterfallSupported = false;
   let hasNavigationRequest = false;
 
