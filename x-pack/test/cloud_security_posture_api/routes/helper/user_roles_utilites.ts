@@ -96,7 +96,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siem: ['all'],
+            siem: ['read'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],
             fleet: ['all'],

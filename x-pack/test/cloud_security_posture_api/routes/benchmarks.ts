@@ -294,7 +294,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(benchmarksResult.statusCode).to.equal(403);
       });
 
-      it('Calling Benchmark API as User with read access to Security', async () => {
+      // Blocked by https://github.com/elastic/kibana/issues/188059
+      it.skip('Calling Benchmark API as User with read access to Security', async () => {
         const benchmark = 'cis_aws';
         const benchmarkRules = await getCspBenchmarkRules(benchmark);
 

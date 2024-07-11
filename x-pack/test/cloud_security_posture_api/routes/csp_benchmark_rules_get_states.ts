@@ -164,8 +164,8 @@ export default function (providerContext: FtrProviderContext) {
 
       expectExpect(body).toEqual({});
     });
-
-    it('GET rules states API with user with read access', async () => {
+    // Blocked by https://github.com/elastic/kibana/issues/188059
+    it.skip('GET rules states API with user with read access', async () => {
       const { status } = await supertestWithoutAuth
         .get(`/internal/cloud_security_posture/rules/_get_states?tags=CIS`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')

@@ -484,8 +484,8 @@ export default function (providerContext: FtrProviderContext) {
         });
       expect(status).to.be(403);
     });
-
-    it('users with read privileges on cloud security should be able to mute', async () => {
+    // Blocked by https://github.com/elastic/kibana/issues/188059
+    it.skip('users with read privileges on cloud security should be able to mute', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
       const rule2 = await getRandomCspBenchmarkRule();
 
