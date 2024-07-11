@@ -1000,6 +1000,7 @@
     "attempts",
     "enabled",
     "ownerId",
+    "partition",
     "retryAt",
     "runAt",
     "schedule",

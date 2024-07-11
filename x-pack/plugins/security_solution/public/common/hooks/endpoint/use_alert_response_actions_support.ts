@@ -184,7 +184,7 @@ export const useAlertResponseActionsSupport = (
       );
     }
 
-    return getAlertDetailsFieldValue({ category: 'host', field: 'host.os.family' }, eventData);
+    return getAlertDetailsFieldValue({ category: 'host', field: 'host.os.type' }, eventData);
   }, [agentType, eventData]);
 
   const unsupportedReason = useMemo(() => {
