@@ -461,7 +461,10 @@ export default function (providerContext: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .auth('role_security_none_user', cspSecurity.getPasswordForUser('role_security_none_user'))
+        .auth(
+          'role_security_no_read_user',
+          cspSecurity.getPasswordForUser('role_security_no_read_user')
+        )
         .send({
           action: 'mute',
           rules: [

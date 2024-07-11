@@ -60,8 +60,8 @@ export default function (providerContext: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            'role_security_none_user_alerts',
-            cspSecurity.getPasswordForUser('role_security_none_user_alerts')
+            'role_security_no_read_user_alerts',
+            cspSecurity.getPasswordForUser('role_security_no_read_user_alerts')
           );
         expect(status).to.be(403);
       });

@@ -13,7 +13,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
 
   const roles = [
     {
-      name: 'role_security_none',
+      name: 'role_security_no_read',
       elasticsearch: {
         indices: [
           {
@@ -120,7 +120,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
       ],
     },
     {
-      name: 'role_security_none_alerts',
+      name: 'role_security_no_read_alerts',
       elasticsearch: {
         indices: [
           {
@@ -172,16 +172,16 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
       roles: ['role_security_read_alerts'],
     },
     {
-      name: 'role_security_none_user',
+      name: 'role_security_no_read_user',
       full_name: 'user with 0 security privilege',
       password: 'csp123',
-      roles: ['role_security_none'],
+      roles: ['role_security_no_read'],
     },
     {
-      name: 'role_security_none_user_alerts',
+      name: 'role_security_no_read_user_alerts',
       full_name: 'user with 0 security privilege for',
       password: 'csp123',
-      roles: ['role_security_none_alerts'],
+      roles: ['role_security_no_read_alerts'],
     },
   ];
 

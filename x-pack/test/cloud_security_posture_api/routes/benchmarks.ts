@@ -289,8 +289,8 @@ export default function (providerContext: FtrProviderContext) {
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            'role_security_none_user',
-            cspSecurity.getPasswordForUser('role_security_none_user')
+            'role_security_no_read_user',
+            cspSecurity.getPasswordForUser('role_security_no_read_user')
           );
 
         expect(benchmarksResult.statusCode).to.equal(403);
