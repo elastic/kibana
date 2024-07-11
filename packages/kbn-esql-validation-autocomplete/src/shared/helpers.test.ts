@@ -17,7 +17,14 @@ describe('shouldBeQuotedSource', () => {
     expect(shouldBeQuotedSource('.my-index$')).toBe(false);
   });
   it(`should be quoted if containing any of special characters [:"=|,[\]/ \t\r\n]`, () => {
-    expect(shouldBeQuotedSource('foo,test-*')).toBe(true);
+    expect(shouldBeQuotedSource('foo\ttest')).toBe(true);
+    expect(shouldBeQuotedSource('foo\rtest')).toBe(true);
+    expect(shouldBeQuotedSource('foo\ntest')).toBe(true);
+    expect(shouldBeQuotedSource('foo:test=bar')).toBe(true);
+    expect(shouldBeQuotedSource('foo|test=bar')).toBe(true);
+    expect(shouldBeQuotedSource('foo[test]=bar')).toBe(true);
+    expect(shouldBeQuotedSource('foo/test=bar')).toBe(true);
+    expect(shouldBeQuotedSource('foo test=bar')).toBe(true);
     expect(shouldBeQuotedSource('foo,test-*,abc')).toBe(true);
     expect(shouldBeQuotedSource('foo, test-*, abc, xyz')).toBe(true);
     expect(shouldBeQuotedSource('foo, test-*, abc, xyz,test123')).toBe(true);
