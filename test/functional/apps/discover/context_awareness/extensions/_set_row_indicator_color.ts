@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    it('should not render log.level row indicators even for logs data source', async () => {
+    it('should not render log.level row indicators for logs data source without a log.level field', async () => {
       const state = kbnRison.encode({
         dataSource: { type: 'esql' },
         query: { esql: 'from logstash* | sort @timestamp desc' },
