@@ -257,7 +257,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the manual rule run
    */
-  manualRuleRunEnabled: false,
+  manualRuleRunEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
