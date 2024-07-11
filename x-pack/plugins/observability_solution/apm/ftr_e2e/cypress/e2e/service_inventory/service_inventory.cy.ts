@@ -91,7 +91,7 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click();
 
@@ -103,6 +103,7 @@ describe('Service inventory', () => {
 
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
+      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),

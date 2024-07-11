@@ -10,8 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import type { SetupPlugins } from '../../../../plugin';
-
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
@@ -20,8 +18,7 @@ import { createPrebuiltSavedObjectsRequestBody } from '../../../../../common/api
 
 export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
+  logger: Logger
 ) => {
   router.versioned
     .post({
@@ -46,7 +43,7 @@ export const createPrebuiltSavedObjectsRoute = (
 
         const spaceId = securitySolution?.getSpaceId();
 
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
         const result = await bulkCreateSavedObjects({
           savedObjectsClient,
