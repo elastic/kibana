@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/logging';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 

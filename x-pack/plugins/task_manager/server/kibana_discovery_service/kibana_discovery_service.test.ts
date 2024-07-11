@@ -16,7 +16,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
+} from '@kbn/core/server';
+
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 
 const currentNode = 'current-node-id';
