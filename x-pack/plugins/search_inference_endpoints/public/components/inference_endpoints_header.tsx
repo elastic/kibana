@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import * as i18n from '../../common/translations';
 
 interface InferenceEndpointsHeaderProps {
@@ -21,21 +21,18 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
     data-test-subj="allInferenceEndpointsPage"
     pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
     description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
+    bottomBorder={true}
     rightSideItems={[
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
-          <EuiButton
-            key="newInferenceEndpoint"
-            color="primary"
-            iconType="plusInCircle"
-            data-test-subj="addEndpointButtonForAllInferenceEndpoints"
-            fill
-            onClick={() => setIsInferenceFlyoutVisible(true)}
-          >
-            {i18n.ADD_ENDPOINT_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>,
+      <EuiButton
+        key="newInferenceEndpoint"
+        color="primary"
+        iconType="plusInCircle"
+        data-test-subj="addEndpointButtonForAllInferenceEndpoints"
+        fill
+        onClick={() => setIsInferenceFlyoutVisible(true)}
+      >
+        {i18n.ADD_ENDPOINT_LABEL}
+      </EuiButton>,
     ]}
   />
 );

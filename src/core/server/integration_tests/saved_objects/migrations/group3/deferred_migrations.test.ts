@@ -12,7 +12,6 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { delay } from '../test_utils';
 
 import '../jest_matchers';
 import {
@@ -36,7 +35,6 @@ describe('deferred migrations', () => {
 
   afterAll(async () => {
     await server?.stop();
-    await delay(10);
   });
 
   beforeEach(async () => {
