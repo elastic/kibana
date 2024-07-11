@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
+import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
 function createIdTemplate(definition: EntityDefinition) {
@@ -14,13 +15,13 @@ function createIdTemplate(definition: EntityDefinition) {
   }, definition.displayNameTemplate);
 }
 
-function mapDestinationToPainless(destination: string, source: string) {
+function mapDestinationToPainless(destination: string) {
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
     if (currentIndex + 1 === parts.length) {
       return `${acc}\n  ctx${parts
         .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${source}.keySet();`;
+        .join('')} = ctx.entity.metadata.${destination}.keySet();`;
     }
     return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
       .slice(0, currentIndex + 1)
@@ -34,12 +35,11 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return '';
   }
   return definition.metadata.reduce((script, def) => {
-    const source = def.source;
     const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
+    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
       '.',
       '?.'
-    )} != null) {${mapDestinationToPainless(destination, source)}\n}\n`;
+    )} != null) {${mapDestinationToPainless(destination)}\n}\n`;
   }, '');
 }
 
@@ -61,6 +61,18 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
       set: {
         field: 'entity.definitionId',
         value: definition.id,
+      },
+    },
+    {
+      set: {
+        field: 'entity.definitionVersion',
+        value: definition.version,
+      },
+    },
+    {
+      set: {
+        field: 'entity.schemaVersion',
+        value: ENTITY_SCHEMA_VERSION_V1,
       },
     },
     {

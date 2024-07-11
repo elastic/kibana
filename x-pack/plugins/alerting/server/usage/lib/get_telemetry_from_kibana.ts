@@ -272,10 +272,10 @@ export async function getTotalCountAggregations({
       },
     };
 
-    logger.debug(`query for getTotalCountAggregations - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getTotalCountAggregations - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getTotalCountAggregations query - ${JSON.stringify(results)}`);
+    logger.debug(() => `results for getTotalCountAggregations query - ${JSON.stringify(results)}`);
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
@@ -445,10 +445,10 @@ export async function getTotalCountInUse({
       },
     };
 
-    logger.debug(`query for getTotalCountInUse - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getTotalCountInUse - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getTotalCountInUse query - ${JSON.stringify(results)}`);
+    logger.debug(() => `results for getTotalCountInUse query - ${JSON.stringify(results)}`);
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;

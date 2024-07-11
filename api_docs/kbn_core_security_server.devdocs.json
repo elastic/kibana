@@ -18,8 +18,812 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.isCreateRestAPIKeyParams",
+        "type": "Function",
+        "tags": [],
+        "label": "isCreateRestAPIKeyParams",
+        "description": [],
+        "signature": [
+          "(params: any) => boolean"
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.isCreateRestAPIKeyParams.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.APIKeys",
+        "type": "Interface",
+        "tags": [],
+        "label": "APIKeys",
+        "description": [
+          "\nInterface for managing API keys in Elasticsearch, including creation,\nvalidation, and invalidation of API keys,\nas well as checking the status of API key features."
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.areAPIKeysEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areAPIKeysEnabled",
+            "description": [
+              "\nDetermines if API Keys are enabled in Elasticsearch."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.areCrossClusterAPIKeysEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areCrossClusterAPIKeysEnabled",
+            "description": [
+              "\nDetermines if Cross-Cluster API Keys are enabled in Elasticsearch."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nTries to create an API key for the current user.\n\nReturns newly created API key or `null` if API keys are disabled.\n\nUser needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.\n"
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, createParams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CreateAPIKeyParams",
+                "text": "CreateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityCreateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.create.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "createParams",
+                "description": [
+                  "The params to create an API key"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.CreateAPIKeyParams",
+                    "text": "CreateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nAttempts update an API key with the provided 'role_descriptors' and 'metadata'\n\nReturns `updated`, `true` if the update was successful, `false` if there was nothing to update\n\nUser needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.\n"
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, updateParams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.UpdateAPIKeyParams",
+                "text": "UpdateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityUpdateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.update.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "updateParams",
+                "description": [
+                  "The params to edit an API key"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.UpdateAPIKeyParams",
+                    "text": "UpdateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.grantAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "grantAsInternalUser",
+            "description": [
+              "\nTries to grant an API key for the current user."
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, createParams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CreateRestAPIKeyParams",
+                "text": "CreateRestAPIKeyParams"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.GrantAPIKeyResult",
+                "text": "GrantAPIKeyResult"
+              },
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.grantAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.grantAsInternalUser.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "createParams",
+                "description": [
+                  "Create operation parameters."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.CreateRestAPIKeyParams",
+                    "text": "CreateRestAPIKeyParams"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                    "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [
+              "\nTries to validate an API key."
+            ],
+            "signature": [
+              "(apiKeyPrams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.ValidateAPIKeyParams",
+                "text": "ValidateAPIKeyParams"
+              },
+              ") => Promise<boolean>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.validate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "apiKeyPrams",
+                "description": [
+                  "ValidateAPIKeyParams."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.ValidateAPIKeyParams",
+                    "text": "ValidateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.invalidate",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidate",
+            "description": [
+              "\nTries to invalidate an API keys."
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, params: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.InvalidateAPIKeysParams",
+                "text": "InvalidateAPIKeysParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.InvalidateAPIKeyResult",
+                "text": "InvalidateAPIKeyResult"
+              },
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.invalidate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.invalidate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The params to invalidate an API keys."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.InvalidateAPIKeysParams",
+                    "text": "InvalidateAPIKeysParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeys.invalidateAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidateAsInternalUser",
+            "description": [
+              "\nTries to invalidate the API keys by using the internal user."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.InvalidateAPIKeysParams",
+                "text": "InvalidateAPIKeysParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.InvalidateAPIKeyResult",
+                "text": "InvalidateAPIKeyResult"
+              },
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeys.invalidateAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The params to invalidate the API keys."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.InvalidateAPIKeysParams",
+                    "text": "InvalidateAPIKeysParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.APIKeysServiceWithContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "APIKeysServiceWithContext",
+        "description": [
+          "\nPublic API Keys service exposed through core context to manage\nAPI keys in Elasticsearch, including creation,\nvalidation, and invalidation of API keys,\nas well as checking the status of API key features."
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeysServiceWithContext.areAPIKeysEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areAPIKeysEnabled",
+            "description": [
+              "\nDetermines if API Keys are enabled in Elasticsearch."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeysServiceWithContext.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nTries to create an API key for the current user.\n\nReturns newly created API key or `null` if API keys are disabled.\n\nUser needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.\n"
+            ],
+            "signature": [
+              "(createParams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CreateAPIKeyParams",
+                "text": "CreateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityCreateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeysServiceWithContext.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "createParams",
+                "description": [
+                  "The params to create an API key"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.CreateAPIKeyParams",
+                    "text": "CreateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeysServiceWithContext.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nAttempts update an API key with the provided 'role_descriptors' and 'metadata'\n\nReturns `updated`, `true` if the update was successful, `false` if there was nothing to update\n\nUser needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.\n"
+            ],
+            "signature": [
+              "(updateParams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.UpdateAPIKeyParams",
+                "text": "UpdateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityUpdateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeysServiceWithContext.update.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "updateParams",
+                "description": [
+                  "The params to edit an API key"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.UpdateAPIKeyParams",
+                    "text": "UpdateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeysServiceWithContext.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [
+              "\nTries to validate an API key."
+            ],
+            "signature": [
+              "(apiKeyPrams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.ValidateAPIKeyParams",
+                "text": "ValidateAPIKeyParams"
+              },
+              ") => Promise<boolean>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeysServiceWithContext.validate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "apiKeyPrams",
+                "description": [
+                  "ValidateAPIKeyParams."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.ValidateAPIKeyParams",
+                    "text": "ValidateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.APIKeysServiceWithContext.invalidate",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidate",
+            "description": [
+              "\nTries to invalidate an API keys."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.InvalidateAPIKeysParams",
+                "text": "InvalidateAPIKeysParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.InvalidateAPIKeyResult",
+                "text": "InvalidateAPIKeyResult"
+              },
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-common.APIKeysServiceWithContext.invalidate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The params to invalidate an API keys."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.InvalidateAPIKeysParams",
+                    "text": "InvalidateAPIKeysParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-security-server",
         "id": "def-common.AuditEvent",
@@ -540,6 +1344,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.AuthcRequestHandlerContext.apiKeys",
+            "type": "Object",
+            "tags": [],
+            "label": "apiKeys",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.APIKeysServiceWithContext",
+                "text": "APIKeysServiceWithContext"
+              }
+            ],
+            "path": "packages/core/security/core-security-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -707,6 +1531,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CoreAuthenticationService.apiKeys",
+            "type": "Object",
+            "tags": [],
+            "label": "apiKeys",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.APIKeys",
+                "text": "APIKeys"
+              }
+            ],
+            "path": "packages/core/security/core-security-server/src/authc.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -795,6 +1639,513 @@
               }
             ],
             "path": "packages/core/security/core-security-server/src/api_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CreateCrossClusterAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateCrossClusterAPIKeyParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateCrossClusterAPIKeyParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"cross_cluster\""
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateCrossClusterAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateCrossClusterAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateCrossClusterAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateCrossClusterAPIKeyParams.access",
+            "type": "Object",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CreateRestAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateRestAPIKeyParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\" | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyParams.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { [key: string]: any; }; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\" | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana_role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { elasticsearch: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.ElasticsearchPrivilegesType",
+                "text": "ElasticsearchPrivilegesType"
+              },
+              " & { [key: string]: unknown; }; kibana: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.KibanaPrivilegesType",
+                "text": "KibanaPrivilegesType"
+              },
+              "; }; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.ElasticsearchPrivilegesType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchPrivilegesType",
+        "description": [
+          "\nType representing Elasticsearch specific portion of the role definition."
+        ],
+        "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ElasticsearchPrivilegesType.cluster",
+            "type": "Array",
+            "tags": [],
+            "label": "cluster",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ElasticsearchPrivilegesType.remote_cluster",
+            "type": "Array",
+            "tags": [],
+            "label": "remote_cluster",
+            "description": [],
+            "signature": [
+              "{ privileges: string[]; clusters: string[]; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ElasticsearchPrivilegesType.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "{ names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ElasticsearchPrivilegesType.remote_indices",
+            "type": "Array",
+            "tags": [],
+            "label": "remote_indices",
+            "description": [],
+            "signature": [
+              "{ clusters: string[]; names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ElasticsearchPrivilegesType.run_as",
+            "type": "Array",
+            "tags": [],
+            "label": "run_as",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.GrantAPIKeyResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "GrantAPIKeyResult",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.GrantAPIKeyResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique id for this API key"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.GrantAPIKeyResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName for this API key"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.GrantAPIKeyResult.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [
+              "\nGenerated API key"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.InvalidateAPIKeyResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InvalidateAPIKeyResult",
+        "description": [
+          "\nThe return value when invalidating an API key in Elasticsearch."
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.InvalidateAPIKeyResult.invalidated_api_keys",
+            "type": "Array",
+            "tags": [],
+            "label": "invalidated_api_keys",
+            "description": [
+              "\nThe IDs of the API keys that were invalidated as part of the request."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.InvalidateAPIKeyResult.previously_invalidated_api_keys",
+            "type": "Array",
+            "tags": [],
+            "label": "previously_invalidated_api_keys",
+            "description": [
+              "\nThe IDs of the API keys that were already invalidated."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.InvalidateAPIKeyResult.error_count",
+            "type": "number",
+            "tags": [],
+            "label": "error_count",
+            "description": [
+              "\nThe number of errors that were encountered when invalidating the API keys."
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.InvalidateAPIKeyResult.error_details",
+            "type": "Array",
+            "tags": [],
+            "label": "error_details",
+            "description": [
+              "\nDetails about these errors. This field is not present in the response when error_count is 0."
+            ],
+            "signature": [
+              "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.InvalidateAPIKeysParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "InvalidateAPIKeysParams",
+        "description": [
+          "\nRepresents the params for invalidating multiple API keys"
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.InvalidateAPIKeysParams.ids",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [
+              "\nList of unique API key IDs"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1000,6 +2351,307 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.UpdateCrossClusterAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateCrossClusterAPIKeyParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateCrossClusterAPIKeyParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateCrossClusterAPIKeyParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"cross_cluster\""
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateCrossClusterAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateCrossClusterAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateCrossClusterAPIKeyParams.access",
+            "type": "Object",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.UpdateRestAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateRestAPIKeyParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\" | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyParams.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { [key: string]: unknown; }; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateRestAPIKeyWithKibanaPrivilegesParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\" | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana_role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { elasticsearch: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.ElasticsearchPrivilegesType",
+                "text": "ElasticsearchPrivilegesType"
+              },
+              " & { [key: string]: unknown; }; kibana: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.KibanaPrivilegesType",
+                "text": "KibanaPrivilegesType"
+              },
+              "; }; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.ValidateAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidateAPIKeyParams",
+        "description": [
+          "\nRepresents the parameters for validating API Key credentials."
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ValidateAPIKeyParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique id for this API key"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.ValidateAPIKeyParams.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [
+              "\nGenerated API Key (secret)"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1042,6 +2694,133 @@
           }
         ],
         "path": "packages/core/security/core-security-server/src/api_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CreateAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAPIKeyParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.CreateRestAPIKeyParams",
+            "text": "CreateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.CreateCrossClusterAPIKeyParams",
+            "text": "CreateCrossClusterAPIKeyParams"
+          }
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CreateAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAPIKeyResult",
+        "description": [
+          "\nResponse of Kibana Create API key endpoint."
+        ],
+        "signature": [
+          "SecurityCreateApiKeyResponse"
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.KibanaPrivilegesType",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPrivilegesType",
+        "description": [
+          "\nType representing Kibana specific portion of the role definition."
+        ],
+        "signature": [
+          "{ spaces: string[]; base?: string[] | undefined; feature?: Record<string, string[]> | undefined; }[]"
+        ],
+        "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.UpdateAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateAPIKeyParams",
+        "description": [
+          "\nRequest body of Kibana Update API key endpoint."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.UpdateRestAPIKeyParams",
+            "text": "UpdateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.UpdateCrossClusterAPIKeyParams",
+            "text": "UpdateCrossClusterAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "UpdateRestAPIKeyWithKibanaPrivilegesParams"
+          }
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.UpdateAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateAPIKeyResult",
+        "description": [
+          "\nResponse of Kibana Update API key endpoint."
+        ],
+        "signature": [
+          "SecurityUpdateApiKeyResponse"
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

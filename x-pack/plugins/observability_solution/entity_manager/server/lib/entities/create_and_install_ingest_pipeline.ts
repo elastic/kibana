@@ -28,6 +28,10 @@ export async function createAndInstallHistoryIngestPipeline(
         esClient.ingest.putPipeline({
           id: historyId,
           processors: historyProcessors,
+          _meta: {
+            definitionVersion: definition.version,
+            managed: definition.managed,
+          },
         }),
       { logger }
     );
@@ -51,6 +55,10 @@ export async function createAndInstallLatestIngestPipeline(
         esClient.ingest.putPipeline({
           id: latestId,
           processors: latestProcessors,
+          _meta: {
+            definitionVersion: definition.version,
+            managed: definition.managed,
+          },
         }),
       { logger }
     );

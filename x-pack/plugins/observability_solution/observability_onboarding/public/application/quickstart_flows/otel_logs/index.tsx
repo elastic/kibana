@@ -69,7 +69,7 @@ export const OtelLogsPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const AGENT_CDN_BASE_URL = isServerless
-    ? 'snapshots.elastic.co/8.15.0-474afc1d/downloads/beats/elastic-agent'
+    ? 'snapshots.elastic.co/8.15.0-9bb1fcab/downloads/beats/elastic-agent'
     : 'artifacts.elastic.co/downloads/beats/elastic-agent';
   // TODO change once otel flow is shown on serverless
   // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
@@ -190,6 +190,8 @@ data:
         endpoints: 
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
+        logs_dynamic_index:
+          enabled: true
         mapping:
           mode: ecs
     processors:
@@ -213,6 +215,11 @@ data:
           - key: service.name
             from_attribute: app.label.component
             action: insert
+      attributes/k8s_logs_dataset:
+        actions:
+          - key: data_stream.dataset
+            value: "kubernetes.container_logs"
+            action: upsert
       attributes/dataset:
         actions:
           - key: event.dataset
@@ -444,6 +451,7 @@ data:
           - resource/cloud
           - attributes/dataset
           - resource/process
+          - attributes/k8s_logs_dataset
           receivers:
           - kubeletstats
           - hostmetrics
@@ -545,6 +553,8 @@ spec:
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
+
+sudo setcap 'cap_dac_read_search=ep' ./data/elastic-agent-*/elastic-agent
         
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
@@ -721,8 +731,8 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                   <EuiFlexGroup direction="column">
                     <EuiCallOut
                       title={i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataTitle',
-                        { defaultMessage: 'Historical logs will not be collected' }
+                        'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
+                        { defaultMessage: 'Configuration Information' }
                       )}
                       color="warning"
                       iconType="iInCircle"
@@ -731,11 +741,21 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                         {i18n.translate(
                           'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
                           {
-                            defaultMessage:
-                              'We only collect new log messages from the setup onward.',
+                            defaultMessage: 'New log messages are collected from the setup onward.',
                           }
                         )}
                       </p>
+                      {selectedTab !== 'kubernetes' && (
+                        <p>
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                            {
+                              defaultMessage:
+                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                            }
+                          )}
+                        </p>
+                      )}
                     </EuiCallOut>
 
                     {selectedContent.prompt}
@@ -758,7 +778,12 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                 ),
               },
               {
-                title: 'Visualize your data',
+                title: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.steps.visualize',
+                  {
+                    defaultMessage: 'Visualize your data',
+                  }
+                ),
                 children: (
                   <>
                     <EuiText>
