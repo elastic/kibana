@@ -52,7 +52,7 @@ export class AgentRequestInvalidError extends FleetError {}
 export class AgentPolicyInvalidError extends FleetError {}
 
 export class AgentlessAgentCreateError extends FleetError {
-  constructor(message = 'Error creating agentless agent') {
+  constructor(message: string) {
     super(`Error creating agentless agent in Fleet, ${message}`);
   }
 }

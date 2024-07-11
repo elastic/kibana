@@ -284,11 +284,8 @@ describe('Agent policy', () => {
 
     it('should create agentless agent', async () => {
       const returnValue = {
-        data: {
-          id: 'mocked',
-          regional_id: 'mocked',
-        },
-        status: 200,
+        id: 'mocked',
+        regional_id: 'mocked',
       };
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);

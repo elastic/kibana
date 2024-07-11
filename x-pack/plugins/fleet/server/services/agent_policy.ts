@@ -1096,15 +1096,21 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy
   ) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Creating agentless agent ${agentlessAgentPolicy.id}`);
+
     if (!appContextService.getCloud()?.isCloudEnabled) {
+      logger.error('Creating agentless agent not supported in non-cloud environments');
       throw new AgentlessAgentCreateError('Agentless agent not supported');
     }
     if (!agentlessAgentPolicy.supports_agentless) {
+      logger.error('Agentless agent policy does not have agentless enabled');
       throw new AgentlessAgentCreateError('Agentless agent policy does not have agentless enabled');
     }
 
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
+      logger.error('Missing agentless configuration');
       throw new AgentlessAgentCreateError('missing agentless configuration');
     }
 
@@ -1115,6 +1121,11 @@ class AgentPolicyService {
       soClient
     );
 
+    logger.debug(`Creating agentless agent with fleetUrl ${fleetUrl} and fleetToken ${fleetToken}`);
+
+    logger.debug(`Creating agentless agent with TLS config with certificate: ${agentlessConfig.api.tls.certificate},
+       and key: ${agentlessConfig.api.tls.key}`);
+
     const tlsConfig = new SslConfig(
       sslSchema.validate({
         enabled: true,
@@ -1124,7 +1135,7 @@ class AgentPolicyService {
       })
     );
 
-    const response = await axios<AgentlessApiResponse>({
+    const requestConfig = {
       url: `${agentlessConfig.api.url}/deployments`,
       data: {
         policy_id: policyId,
@@ -1142,24 +1153,52 @@ class AgentPolicyService {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
       }),
-    }).catch((error: AxiosError) => {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        throw new AgentlessAgentCreateError(
-          `received response status: ${error.response.status} with message ${error.response.statusText}`
-        );
-      } else if (error.request) {
-        // The request was made but no response was received
-        throw new AgentlessAgentCreateError(`no response received, error: ${error.message}`);
-      } else {
-        // An error happened setting up the request
-        throw new AgentlessAgentCreateError(error.message);
-      }
-    });
+    };
 
-    // The request was made and the server responded with a status code 2xx
-    return response.data;
+    logger.debug(
+      `Creating agentless agent with request config ${JSON.stringify({
+        ...requestConfig,
+        httpsAgent: {
+          ...requestConfig.httpsAgent,
+          options: {
+            ...requestConfig.httpsAgent.options,
+            cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
+            key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+            ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
+          },
+        },
+      })}`
+    );
+
+    const response = await axios<AgentlessApiResponse>(requestConfig).catch(
+      (error: Error | AxiosError) => {
+        if (!axios.isAxiosError(error)) {
+          logger.error(`Creating agentless failed with an error ${error}`);
+          throw new AgentlessAgentCreateError(error.message);
+        }
+        if (error.response) {
+          logger.error(
+            `Creating agentless failed with a response status code that falls out of the range of 2xx: ${error.response.status} ${error.response.statusText} ${requestConfig.data}`
+          );
+          throw new AgentlessAgentCreateError(
+            `the Agentless API could not create the agentless agent`
+          );
+        } else if (error.request) {
+          logger.error(
+            `Creating agentless failed to receive a response from the Agentless API ${JSON.stringify(
+              error.cause
+            )}`
+          );
+          throw new AgentlessAgentCreateError(`no response received from the Agentless API`);
+        } else {
+          logger.error(`Creating agentless failed to create the request ${error.cause}`);
+          throw new AgentlessAgentCreateError('the request could not be created');
+        }
+      }
+    );
+
+    logger.debug(`Created an agentless agent ${response}`);
+    return response;
   }
 
   private async getFleetUrlAndTokenForAgentlessAgent(
