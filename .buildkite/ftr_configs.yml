@@ -18,7 +18,6 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
-  - x-pack/test/security_solution_api_integration/edr_workflows/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
 
   # QA suites that are run out-of-band
