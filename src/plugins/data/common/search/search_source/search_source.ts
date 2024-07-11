@@ -715,7 +715,11 @@ export class SearchSource {
   private getIndexType(index?: DataView | string) {
     return this.shouldOverwriteDataViewType
       ? this.overwriteDataViewType
-      : typeof index !== 'string' && index?.type;
+      : this.getDataView(index)?.type;
+  }
+
+  private getDataView(index?: DataView | string): DataView | undefined {
+    return typeof index !== 'string' ? index : undefined;
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
@@ -792,7 +796,7 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
     const { body, index } = searchRequest;
-    const dataView = typeof index !== 'string' ? index : undefined;
+    const dataView = this.getDataView(index);
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = dataView?.getComputedFields() ?? {
@@ -965,7 +969,7 @@ export class SearchSource {
       filtersInMustClause,
     };
     return buildEsQuery(
-      typeof index !== 'string' ? index : undefined,
+      this.getDataView(index),
       query,
       typeof filters === 'function' ? filters() : filters,
       esQueryConfigs
@@ -1166,7 +1170,7 @@ export class SearchSource {
   toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
-    const dataView = typeof index !== 'string' ? index : undefined;
+    const dataView = this.getDataView(index);
 
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
