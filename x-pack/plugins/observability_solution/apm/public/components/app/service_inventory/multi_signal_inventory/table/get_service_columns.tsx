@@ -30,15 +30,27 @@ import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_met
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
+import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+
+type ServicesDetailedStatisticsAPIResponse =
+  APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
+
 export function getServiceColumns({
   query,
   breakpoints,
   link,
+  timeseriesDataLoading,
+  timeseriesData,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
   link: any;
+  timeseriesDataLoading: boolean;
+  timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
+  const { isSmall, isLarge } = breakpoints;
+  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   return [
     {
       field: ServiceInventoryFieldName.ServiceName,
@@ -46,14 +58,19 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName }) => (
+      render: (_, { serviceName, agentName, signalTypes }) => (
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
           text={serviceName}
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <ServiceLink serviceName={serviceName} agentName={agentName} query={query} />
+                <ServiceLink
+                  signalTypes={signalTypes}
+                  serviceName={serviceName}
+                  agentName={agentName}
+                  query={query}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -84,17 +101,18 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
+      render: (_, { metrics, serviceName, signalTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
+            series={timeseriesData?.currentPeriod?.apm[serviceName]?.latency}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asMillisecondDuration(metrics.latency)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -107,17 +125,18 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
+      render: (_, { metrics, serviceName, signalTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asTransactionRate(metrics.throughput)}
+            isLoading={timeseriesDataLoading}
+            series={timeseriesData?.currentPeriod?.apm[serviceName]?.throughput}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -130,17 +149,18 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
+      render: (_, { metrics, serviceName, signalTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
+            isLoading={timeseriesDataLoading}
+            series={timeseriesData?.currentPeriod?.apm[serviceName]?.transactionErrorRate}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -153,15 +173,16 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { metrics, serviceName }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
 
         return (
           <ListMetric
             isLoading={false}
             color={currentPeriodColor}
-            hideSeries
+            series={timeseriesData?.currentPeriod?.logRate[serviceName] ?? []}
             valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
@@ -174,15 +195,16 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { metrics, serviceName }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
 
         return (
           <ListMetric
             isLoading={false}
             color={currentPeriodColor}
-            hideSeries
+            series={timeseriesData?.currentPeriod?.logErrorRate[serviceName] ?? []}
             valueLabel={asPercent(metrics.logErrorRate, 1)}
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },

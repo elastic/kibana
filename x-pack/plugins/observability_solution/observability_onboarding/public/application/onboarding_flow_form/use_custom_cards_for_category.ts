@@ -34,6 +34,7 @@ export function useCustomCardsForCategory(
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
+  const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
 
   const otelCard: VirtualCard = {
     id: 'otel-logs',
@@ -112,7 +113,23 @@ export function useCustomCardsForCategory(
       ];
     case 'infra':
       return [
-        toFeaturedCard('kubernetes'),
+        {
+          id: 'kubernetes-quick-start',
+          type: 'virtual',
+          title: 'Kubernetes',
+          description: 'Collect logs and metrics from Kubernetes using minimal configuration',
+          name: 'kubernetes-quick-start',
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: http?.staticAssets.getPluginAssetHref('kubernetes.svg') ?? '',
+            },
+          ],
+          url: kubernetesUrl,
+          version: '',
+          integration: '',
+        },
         toFeaturedCard('docker'),
         isServerless ? toFeaturedCard('prometheus') : otelCard,
         {

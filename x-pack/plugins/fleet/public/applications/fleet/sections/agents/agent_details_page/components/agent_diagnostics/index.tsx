@@ -232,32 +232,39 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         );
       },
     },
-    {
-      name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.actionsLabelText', {
-        defaultMessage: 'Actions',
-      }),
-      width: '70px',
-      actions: [
-        {
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText', {
-            defaultMessage: 'Delete',
-          }),
-          available: (item: AgentDiagnostics) => item.status === 'READY',
-          description: i18n.translate(
-            'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
-            {
-              defaultMessage: 'Delete diagnostics file',
-            }
-          ),
-          onClick: (item: AgentDiagnostics) => {
-            deleteFile(item.id);
+    ...((authz.fleet.allAgents
+      ? [
+          {
+            name: i18n.translate('xpack.fleet.requestDiagnostics.tableColumns.actionsLabelText', {
+              defaultMessage: 'Actions',
+            }),
+            width: '70px',
+            actions: [
+              {
+                type: 'icon',
+                icon: 'trash',
+                color: 'danger',
+                name: i18n.translate(
+                  'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonText',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                ),
+                available: (item: AgentDiagnostics) => item.status === 'READY',
+                description: i18n.translate(
+                  'xpack.fleet.requestDiagnostics.tableColumns.deleteButtonDesc',
+                  {
+                    defaultMessage: 'Delete diagnostics file',
+                  }
+                ),
+                onClick: (item: AgentDiagnostics) => {
+                  deleteFile(item.id);
+                },
+              },
+            ],
           },
-        },
-      ],
-    },
+        ]
+      : []) as Array<EuiBasicTableColumn<AgentDiagnostics>>),
   ];
 
   const requestDiagnosticsButton = (
