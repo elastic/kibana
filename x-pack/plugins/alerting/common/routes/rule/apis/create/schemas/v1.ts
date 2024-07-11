@@ -183,5 +183,11 @@ export const createBodySchema = schema.object({
 });
 
 export const createParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The ID of the rule',
+      },
+    })
+  ),
 });

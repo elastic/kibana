@@ -17,8 +17,15 @@ import {
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
-export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+  meta: { description: 'The parameters for the rule.' },
+});
+export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+  meta: {
+    description:
+      'The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.',
+  },
+});
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
 export const notifyWhenSchema = schema.oneOf(
@@ -37,44 +44,98 @@ export const notifyWhenSchema = schema.oneOf(
 );
 
 const intervalScheduleSchema = schema.object({
-  interval: schema.string(),
+  interval: schema.string({
+    meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
+  }),
 });
 
 const actionFrequencySchema = schema.object({
-  summary: schema.boolean(),
+  summary: schema.boolean({ meta: { description: 'Indicates whether the action is a summary.' } }),
   notify_when: notifyWhenSchema,
-  throttle: schema.nullable(schema.string()),
+  throttle: schema.nullable(
+    schema.string({
+      meta: {
+        description: `The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. 
+          NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action.
+          If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.`,
+      },
+    })
+  ),
 });
 
 const actionAlertsFilterSchema = schema.object({
   query: schema.maybe(alertsFilterQuerySchemaV1),
   timeframe: schema.maybe(
-    schema.object({
-      days: schema.arrayOf(
-        schema.oneOf([
-          schema.literal(1),
-          schema.literal(2),
-          schema.literal(3),
-          schema.literal(4),
-          schema.literal(5),
-          schema.literal(6),
-          schema.literal(7),
-        ])
-      ),
-      hours: schema.object({
-        start: schema.string(),
-        end: schema.string(),
-      }),
-      timezone: schema.string(),
-    })
+    schema.object(
+      {
+        days: schema.arrayOf(
+          schema.oneOf([
+            schema.literal(1),
+            schema.literal(2),
+            schema.literal(3),
+            schema.literal(4),
+            schema.literal(5),
+            schema.literal(6),
+            schema.literal(7),
+          ]),
+          {
+            meta: {
+              description:
+                'Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.',
+            },
+          }
+        ),
+        hours: schema.object({
+          start: schema.string({
+            meta: {
+              description: 'The start of the time frame in 24-hour notation (`hh:mm`).',
+            },
+          }),
+          end: schema.string({
+            meta: {
+              description: 'The end of the time frame in 24-hour notation (`hh:mm`).',
+            },
+          }),
+        }),
+        timezone: schema.string({
+          meta: {
+            description:
+              'The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.',
+          },
+        }),
+      },
+      {
+        meta: {
+          description: 'Defines a period that limits whether the action runs.',
+        },
+      }
+    )
   ),
 });
 
 const actionSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
-  group: schema.maybe(schema.string()),
-  id: schema.string(),
-  connector_type_id: schema.string(),
+  uuid: schema.maybe(
+    schema.string({
+      meta: { description: 'A universally unique identifier (UUID) for the action.' },
+    })
+  ),
+  group: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.",
+      },
+    })
+  ),
+  id: schema.string({
+    meta: { description: 'The identifier for the connector saved object.' },
+  }),
+  connector_type_id: schema.string({
+    meta: {
+      description:
+        'The type of connector. This property appears in responses but cannot be set in requests.',
+    },
+  }),
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
@@ -204,23 +265,89 @@ export const alertDelaySchema = schema.object(
 );
 
 export const ruleResponseSchema = schema.object({
-  id: schema.string(),
-  enabled: schema.boolean(),
-  name: schema.string(),
-  tags: schema.arrayOf(schema.string()),
-  rule_type_id: schema.string(),
-  consumer: schema.string(),
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
+  enabled: schema.boolean({
+    meta: {
+      description:
+        'Indicates whether you want to run the rule on an interval basis after it is created.',
+    },
+  }),
+  name: schema.string({
+    meta: {
+      description: ' The name of the rule.',
+    },
+  }),
+  tags: schema.arrayOf(
+    schema.string({
+      meta: { description: 'The tags for the rule.' },
+    })
+  ),
+  rule_type_id: schema.string({
+    meta: { description: 'The rule type identifier.' },
+  }),
+  consumer: schema.string({
+    meta: {
+      description:
+        'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
+    },
+  }),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
-  scheduled_task_id: schema.maybe(schema.string()),
-  created_by: schema.nullable(schema.string()),
-  updated_by: schema.nullable(schema.string()),
-  created_at: schema.string(),
-  updated_at: schema.string(),
-  api_key_owner: schema.nullable(schema.string()),
-  api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
+  scheduled_task_id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The identifier for the scheduled task',
+      },
+    })
+  ),
+  created_by: schema.nullable(
+    schema.string({
+      meta: {
+        description: 'The identifier for the user that created the rule.',
+      },
+    })
+  ),
+  updated_by: schema.nullable(
+    schema.string({
+      meta: {
+        description: 'The identifier for the user that updated this rule most recently.',
+      },
+    })
+  ),
+  created_at: schema.string({
+    meta: {
+      description: 'The date and time that the rule was created.',
+    },
+  }),
+  updated_at: schema.string({
+    meta: {
+      description: 'The date and time that the rule was updated most recently.',
+    },
+  }),
+  api_key_owner: schema.nullable(
+    schema.string({
+      meta: {
+        description:
+          'The owner of the API key that is associated with the rule and used to run background tasks.',
+      },
+    })
+  ),
+  api_key_created_by_user: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        meta: {
+          description:
+            'Indicates whether the API key that is associated with the rule was created by the user.',
+        },
+      })
+    )
+  ),
   throttle: schema.maybe(schema.nullable(schema.string())),
   mute_all: schema.boolean(),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
