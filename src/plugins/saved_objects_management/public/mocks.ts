@@ -6,22 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { actionServiceMock } from './services/action_service.mock';
-import { columnServiceMock } from './services/column_service.mock';
-import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
+import type {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from './plugin';
 
 const createSetupContractMock = (): jest.Mocked<SavedObjectsManagementPluginSetup> => {
-  const mock = {
-    actions: actionServiceMock.createSetup(),
-    columns: columnServiceMock.createSetup(),
-  };
+  const mock = {};
   return mock;
 };
 
 const createStartContractMock = (): jest.Mocked<SavedObjectsManagementPluginStart> => {
   const mock = {
-    actions: actionServiceMock.createStart(),
-    columns: columnServiceMock.createStart(),
     getAllowedTypes: jest.fn(),
     getRelationships: jest.fn(),
     getSavedObjectLabel: jest.fn(),

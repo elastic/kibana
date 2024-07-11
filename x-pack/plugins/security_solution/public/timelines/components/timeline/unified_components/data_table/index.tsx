@@ -19,7 +19,7 @@ import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
+import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
@@ -29,12 +29,7 @@ import type {
   ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { TimelineId } from '../../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
@@ -147,13 +142,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       setExpandedDoc((prev) => (!prev ? prev : undefined));
     }, []);
 
-    const { openFlyout, closeFlyout, isExpandableFlyoutDisabled } = useUnifiedTableExpandableFlyout(
-      {
-        onClose: onCloseExpandableFlyout,
-      }
-    );
-
-    const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
+    const { openFlyout, closeFlyout } = useUnifiedTableExpandableFlyout({
+      onClose: onCloseExpandableFlyout,
+    });
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -168,56 +159,23 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        const updatedExpandedDetail: ExpandedDetailType = {
-          panelView: 'eventDetail',
-          params: {
-            eventId: eventData._id,
-            indexName: eventData.ecs._index ?? '', // TODO: fix type error
-            refetch,
-          },
-        };
-
-        if (!isExpandableFlyoutDisabled) {
-          openFlyout({
-            right: {
-              id: DocumentDetailsRightPanelKey,
-              params: {
-                id: eventData._id,
-                indexName: eventData.ecs._index ?? '',
-                scopeId: timelineId,
-              },
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventData._id,
+              indexName: eventData.ecs._index ?? '',
+              scopeId: timelineId,
             },
-          });
-          telemetry.reportDetailsFlyoutOpened({
-            location: timelineId,
-            panel: 'right',
-          });
-        } else {
-          dispatch(
-            timelineActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              tabType: activeTab,
-              id: timelineId,
-            })
-          );
-        }
-
-        activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+          },
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'right',
+        });
       },
-      [refetch, isExpandableFlyoutDisabled, openFlyout, timelineId, telemetry, dispatch, activeTab]
+      [openFlyout, timelineId, telemetry]
     );
-
-    const onTimelineLegacyFlyoutClose = useCallback(() => {
-      if (
-        expandedDetail[activeTab]?.panelView &&
-        timelineId === TimelineId.active &&
-        showExpandedDetails
-      ) {
-        activeTimeline.toggleExpandedDetail({});
-      }
-      setExpandedDoc(undefined);
-      onEventClosed({ tabType: activeTab, id: timelineId });
-    }, [expandedDetail, activeTab, timelineId, showExpandedDetails, onEventClosed]);
 
     const onSetExpandedDoc = useCallback(
       (newDoc?: DataTableRecord) => {
@@ -228,20 +186,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             handleOnEventDetailPanelOpened(timelineDoc);
           }
         } else {
-          if (!isExpandableFlyoutDisabled) {
-            closeFlyout();
-            return;
-          }
-          onTimelineLegacyFlyoutClose();
+          closeFlyout();
         }
       },
-      [
-        tableRows,
-        handleOnEventDetailPanelOpened,
-        onTimelineLegacyFlyoutClose,
-        closeFlyout,
-        isExpandableFlyoutDisabled,
-      ]
+      [tableRows, handleOnEventDetailPanelOpened, closeFlyout]
     );
 
     const onColumnResize = useCallback(
@@ -393,10 +341,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           visibleRowData={visibleRowData}
           setCustomGridBodyProps={setCustomGridBodyProps}
           enabledRowRenderers={enabledRowRenderers}
+          rowHeight={rowHeight}
           refetch={refetch}
         />
       ),
-      [tableRows, enabledRowRenderers, refetch]
+      [tableRows, enabledRowRenderers, rowHeight, refetch]
     );
 
     const cellContext: UnifiedTimelineDataGridCellContext = useMemo(() => {
@@ -467,16 +416,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
           />
-          {showExpandedDetails && isExpandableFlyoutDisabled && (
-            <DetailsPanel
-              browserFields={browserFields}
-              handleOnPanelClosed={onTimelineLegacyFlyoutClose}
-              runtimeMappings={runtimeMappings}
-              tabType={activeTab}
-              scopeId={timelineId}
-              isFlyoutView
-            />
-          )}
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>
     );

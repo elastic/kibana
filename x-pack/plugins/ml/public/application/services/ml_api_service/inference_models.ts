@@ -18,17 +18,18 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
      * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
      * @param modelConfig - Model configuration based on service type
      */
-    createInferenceEndpoint(
+    async createInferenceEndpoint(
       inferenceId: string,
       taskType: InferenceTaskType,
       modelConfig: ModelConfig
     ) {
-      return httpService.http<estypes.InferencePutModelResponse>({
+      const result = await httpService.http<estypes.InferencePutModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/${taskType}/${inferenceId}`,
         method: 'PUT',
         body: JSON.stringify(modelConfig),
         version: '1',
       });
+      return result;
     },
   };
 }
