@@ -593,6 +593,41 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlerts.hits.hits.length).toEqual(1);
       });
 
+      it('should run rule in the past and generate duplicate alert', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(20, 'm');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).subtract(1, 'm').toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).subtract(40, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-180m',
+          interval: '30m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).toEqual(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(45, 'm'),
+          endDate: moment(firstTimestamp).add(1, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).toEqual(2);
+      });
+
       it('supression with time window should work for manual rule runs and update alert', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h');
