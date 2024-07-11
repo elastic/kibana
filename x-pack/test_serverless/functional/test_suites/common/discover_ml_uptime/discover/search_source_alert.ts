@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -149,12 +148,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const deleteIndexes = (indexes: string[]) => {
-    indexes.forEach((current) => {
-      es.transport.request({
-        path: `/${current}`,
-        method: 'DELETE',
-      });
-    });
+    return Promise.all(
+      indexes.map((current) =>
+        es.transport.request({
+          path: `/${current}`,
+          method: 'DELETE',
+        })
+      )
+    );
   };
 
   const createConnector = async (): Promise<string> => {
@@ -203,6 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return await testSubjects.exists('alertActionAccordion-0');
     });
 
+    await monacoEditor.waitCodeEditorReady('kibanaCodeEditor');
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
@@ -273,24 +275,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // follow url provided by alert to see documents triggered the alert
     const baseUrl = deployment.getHostPort();
-    // TODO: In Serverless `link` is a full URL instead of just a path as in stateful
-    const fullLink = link.startsWith(baseUrl) ? link : baseUrl + link;
+    // In Serverless `link` is a full URL instead of just a path as in stateful
+    const fullLink = link.startsWith('http') ? link : baseUrl + link;
     await browser.navigateTo(fullLink);
     await PageObjects.discover.waitUntilSearchingHasFinished();
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    // TODO: Navigation to Rule Management is different in Serverless
+    // Navigation to Rule Management is different in Serverless
     await PageObjects.common.navigateToApp('triggersActions');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const rulesList = await testSubjects.find('rulesList');
-    const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
-    await alertRule.click();
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    let retries = 0;
+
+    await retry.try(async () => {
+      retries = retries + 1;
+      if (retries > 1) {
+        // It might take time for a rule to get created. Waiting for it.
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      }
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      await alertRule.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    });
   };
 
   const clickViewInApp = async (ruleName: string) => {
@@ -355,9 +364,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
-    // fails on MKI, see https://github.com/elastic/kibana/issues/187069
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -373,37 +379,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       log.debug('create connector');
       connectorId = await createConnector();
-
-      // TODO: fetching connectors fails server side in Serverless with
-      // "index_not_found_exception: no such index [.kibana_ingest]"
-      if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-        await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-      }
     });
 
     after(async () => {
-      deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
-      const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
-      await deleteAlerts([adhocRuleId]);
-      await deleteDataView(outputDataViewId);
-      await deleteConnector(connectorId);
+      // clean up what we can in case of failures in some tests which blocked the creation of the following objects
+      try {
+        await deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
+      } catch {
+        // continue
+      }
+      try {
+        const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
+        await deleteAlerts([adhocRuleId]);
+      } catch {
+        // continue
+      }
+      try {
+        await deleteDataView(outputDataViewId);
+      } catch {
+        // continue
+      }
+      try {
+        await deleteConnector(connectorId);
+      } catch {
+        // continue
+      }
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should create an alert when there is no data view', async () => {
       await openManagementAlertFlyout();
-
-      // should not have data view selected by default
-      const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      // TODO: Serverless Security and Search have an existing data view by default
-      const dataViewSelectorText = await dataViewSelector.getVisibleText();
-      if (
-        !dataViewSelectorText.includes('.alerts-security') &&
-        !dataViewSelectorText.includes('default:all-data')
-      ) {
-        expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
-      }
 
       log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
@@ -423,10 +429,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await defineSearchSourceAlert(RULE_NAME);
       await testSubjects.click('selectDataViewExpression');
 
+      await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
       const input = await find.activeElement();
       // search-source-alert-output index does not have time field
       await input.type('search-source-alert-o*');
+      await testSubjects.existOrFail('explore-matching-indices-button');
       await testSubjects.click('explore-matching-indices-button');
 
       await retry.waitFor('selection to happen', async () => {
@@ -443,9 +451,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should navigate to alert results via view in app link', async () => {
       await testSubjects.click('selectDataViewExpression');
+      await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
       if (await testSubjects.exists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
+        await testSubjects.missingOrFail('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
@@ -453,7 +463,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await sourceDataViewOption.click();
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
+
       await testSubjects.click('saveRuleButton');
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('saveRuleButton');
+      });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -549,6 +567,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('saveRuleButton');
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('saveRuleButton');
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(ADHOC_RULE_NAME);
@@ -610,10 +631,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newAlert = 'New Alert for checking its status';
       await createDataView('search-source*');
 
-      await PageObjects.common.navigateToApp('management');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // TODO: Navigation to Rule Management is different in Serverless
+      // Navigation to Rule Management is different in Serverless
       await PageObjects.common.navigateToApp('triggersActions');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
