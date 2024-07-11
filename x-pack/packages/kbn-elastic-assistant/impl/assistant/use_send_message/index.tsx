@@ -41,10 +41,8 @@ export const useSendMessage = (): UseSendMessage => {
       try {
         return await fetchConnectorExecuteAction({
           conversationId,
-          isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
           alertsIndexPattern,
           apiConfig,
-          isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
           assistantStreamingEnabled,
           http,
           message,

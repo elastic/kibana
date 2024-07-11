@@ -38,8 +38,6 @@ export const ExecuteConnectorRequestBody = z.object({
   alertsIndexPattern: z.string().optional(),
   allow: z.array(z.string()).optional(),
   allowReplacement: z.array(z.string()).optional(),
-  isEnabledKnowledgeBase: z.boolean().optional(),
-  isEnabledRAGAlerts: z.boolean().optional(),
   replacements: Replacements,
   size: z.number().optional(),
   langSmithProject: z.string().optional(),

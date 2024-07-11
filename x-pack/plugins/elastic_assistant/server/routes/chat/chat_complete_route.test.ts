@@ -103,6 +103,12 @@ const mockContext = {
         appendConversationMessages:
           appendConversationMessages.mockResolvedValue(existingConversation),
       }),
+      getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
+        getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+        indexTemplateAndPattern: {
+          alias: 'knowledge-base-alias',
+        },
+      }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
       }),

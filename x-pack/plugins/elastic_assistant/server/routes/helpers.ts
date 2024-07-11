@@ -29,8 +29,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
-import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -309,8 +308,9 @@ export const nonLangChainExecute = async ({
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+    // TODO: @stephmilovic, what's the right way to go about deprecating these telemetry values?
+    isEnabledKnowledgeBase: true,
+    isEnabledRAGAlerts: true,
     model: request.body.model,
     assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
   });
@@ -325,7 +325,6 @@ export const nonLangChainExecute = async ({
 export interface LangChainExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;
   replacements: Replacements;
-  isEnabledKnowledgeBase: boolean;
   isStream?: boolean;
   onNewReplacements: (newReplacements: Replacements) => void;
   abortSignal: AbortSignal;
@@ -353,7 +352,6 @@ export const langChainExecute = async ({
   messages,
   replacements,
   onNewReplacements,
-  isEnabledKnowledgeBase,
   abortSignal,
   telemetry,
   actionTypeId,
@@ -369,10 +367,6 @@ export const langChainExecute = async ({
   responseLanguage,
   isStream = true,
 }: LangChainExecuteParams) => {
-  // TODO: Add `traceId` to actions request when calling via langchain
-  logger.debug(
-    `Executing via langchain, isEnabledKnowledgeBase: ${isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
-  );
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
     request,
@@ -397,19 +391,11 @@ export const langChainExecute = async ({
   const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
   // Create an ElasticsearchStore for KB interactions
-  // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
-  const enableKnowledgeBaseByDefault =
-    assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-  const kbDataClient = enableKnowledgeBaseByDefault
-    ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
-    : undefined;
-  const kbIndex =
-    enableKnowledgeBaseByDefault && kbDataClient != null
-      ? kbDataClient.indexTemplateAndPattern.alias
-      : KNOWLEDGE_BASE_INDEX_PATTERN;
+  const kbDataClient =
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
   const esStore = new ElasticsearchStore(
     esClient,
-    kbIndex,
+    kbDataClient?.indexTemplateAndPattern?.alias ?? '',
     logger,
     telemetry,
     elserId,
@@ -429,7 +415,6 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
-    isEnabledKnowledgeBase,
     assistantTools,
     conversationId,
     connectorId,
@@ -455,18 +440,15 @@ export const langChainExecute = async ({
     },
   };
 
-  // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
-  let result: StreamResponseWithHeaders | StaticReturnType;
-  if (enableKnowledgeBaseByDefault && request.body.isEnabledKnowledgeBase) {
-    result = await callAssistantGraph(executorParams);
-  } else {
-    result = await callAgentExecutor(executorParams);
-  }
+  const result: StreamResponseWithHeaders | StaticReturnType = await callAssistantGraph(
+    executorParams
+  );
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts ?? true,
+    // TODO: @stephmilovic, what's the right way to go about deprecating these telemetry values?
+    isEnabledKnowledgeBase: true,
+    isEnabledRAGAlerts: true,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363

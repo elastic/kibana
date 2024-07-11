@@ -29,7 +29,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
   conversationId,
@@ -93,7 +92,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
-    isEnabledKnowledgeBase,
+    isEnabledKnowledgeBase: true, // TODO: Check if KB is 👌
     kbDataClient: dataClients?.kbDataClient,
     llm,
     logger,
@@ -137,7 +136,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const inputs = { input: latestMessage[0]?.content as string };
 
   if (isStream) {
-    return streamGraph({ apmTracer, assistantGraph, inputs, logger, onLlmResponse, request });
+    return streamGraph({
+      apmTracer,
+      assistantGraph,
+      inputs,
+      logger,
+      onLlmResponse,
+      request,
+      traceOptions,
+    });
   }
 
   const graphResponse = await invokeGraph({

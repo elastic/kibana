@@ -81,6 +81,13 @@ export const KNOWLEDGE_BASE_LABEL = i18n.translate(
   }
 );
 
+export const SETUP_KNOWLEDGE_BASE_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.setupKnowledgeBaseButton',
+  {
+    defaultMessage: 'Setup',
+  }
+);
+
 export const KNOWLEDGE_BASE_TOOLTIP = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseTooltip',
   {
