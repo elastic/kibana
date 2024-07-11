@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ReactQueryDevtools from '@tanstack/react-query-devtools';
 import { EuiButtonIcon } from '@elastic/eui';
 
 export function HideableReactQueryDevTools() {

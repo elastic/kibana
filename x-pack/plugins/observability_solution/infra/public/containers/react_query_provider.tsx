@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { QueryClient, QueryClientConfig, QueryClientProvider } from '@tanstack/react-query';
 import { merge } from 'lodash';
 import { EuiButtonIcon } from '@elastic/eui';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ReactQueryDevtools from '@tanstack/react-query-devtools';
 
 const DEFAULT_CONFIG = {
   defaultOptions: {

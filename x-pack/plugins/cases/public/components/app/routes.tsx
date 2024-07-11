@@ -9,7 +9,7 @@ import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ReactQueryDevtools from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';

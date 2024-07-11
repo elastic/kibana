@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ReactQueryDevtools from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
 import type { CasePostRequest } from '../../../../common/types/api';
 import * as i18n from '../translations';

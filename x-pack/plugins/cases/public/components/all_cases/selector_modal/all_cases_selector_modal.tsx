@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ReactQueryDevtools from '@tanstack/react-query-devtools';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
