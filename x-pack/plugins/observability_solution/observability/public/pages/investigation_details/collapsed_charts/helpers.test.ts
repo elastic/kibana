@@ -9,6 +9,7 @@ import {
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
 import { getBufferThreshold, getLensOperationFromRuleMetric, lensFieldFormatter } from './helpers';
+import { RuleConditionChartExpressions } from './rule_condition_chart';
 const useCases = [
   [
     {
@@ -131,8 +132,6 @@ describe('lensFieldFormatter', () => {
     { metrics: [{ field: undefined }], format: 'number' },
   ];
   it.each(testData)('getBufferThreshold($threshold) = $buffer', ({ metrics, format }) => {
-    expect(lensFieldFormatter(metrics as unknown as CustomThresholdExpressionMetric[])).toBe(
-      format
-    );
+    expect(lensFieldFormatter(metrics as unknown as RuleConditionChartExpressions[])).toBe(format);
   });
 });
