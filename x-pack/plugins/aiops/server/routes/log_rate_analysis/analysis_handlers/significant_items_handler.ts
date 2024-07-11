@@ -18,10 +18,15 @@ import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
+import type { QueueFieldCandidate } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
+import {
+  isKeywordFieldCandidates,
+  isTextFieldCandidates,
+  QUEUE_CHUNKING_SIZE,
+} from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import { fetchSignificantCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_categories';
 import { fetchSignificantTermPValues } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_term_p_values';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import {
   LOADED_FIELD_CANDIDATES,
@@ -29,20 +34,6 @@ import {
   PROGRESS_STEP_P_VALUES,
 } from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
-
-interface FieldCandidates {
-  fieldCandidates: string[];
-}
-const isFieldCandidates = (d: unknown): d is FieldCandidates =>
-  isPopulatedObject(d, ['fieldCandidates']);
-
-interface TextFieldCandidates {
-  textFieldCandidates: string[];
-}
-const isTextFieldCandidates = (d: unknown): d is FieldCandidates =>
-  isPopulatedObject(d, ['textFieldCandidates']);
-
-type Candidate = FieldCandidates | TextFieldCandidates;
 
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
@@ -102,15 +93,14 @@ export const significantItemsHandlerFactory =
 
     logDebugMessage('Fetch p-values.');
 
-    const chunkingSize = 50;
     const loadingStep =
       (1 / (fieldCandidatesCount + textFieldCandidatesCount)) *
       loadingStepSizePValues *
-      chunkingSize;
+      QUEUE_CHUNKING_SIZE;
 
-    const pValuesQueue = queue(async function (payload: Candidate) {
-      if (isFieldCandidates(payload)) {
-        const { fieldCandidates: fieldNames } = payload;
+    const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
+      if (isKeywordFieldCandidates(payload)) {
+        const { keywordFieldCandidates: fieldNames } = payload;
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
@@ -190,13 +180,14 @@ export const significantItemsHandlerFactory =
       );
     }, MAX_CONCURRENT_QUERIES);
 
-    const textFieldCandidatesChunks = chunk(textFieldCandidates, chunkingSize);
-    const fieldCandidatesChunks = chunk(fieldCandidates, chunkingSize);
-
+    // This chunks keyword and text field candidates, then passes them on
+    // to the async queue for processing. Each chunk will be part of a single
+    // query using multiple aggs for each candidate. For many candidates,
+    // on top of that the async queue will process multiple queries concurrently.
     pValuesQueue.push(
       [
-        ...textFieldCandidatesChunks.map((d) => ({ textFieldCandidates: d })),
-        ...fieldCandidatesChunks.map((d) => ({ fieldCandidates: d })),
+        ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
+        ...chunk(fieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ keywordFieldCandidates: d })),
       ],
       (err) => {
         if (err) {
