@@ -140,22 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
       expect(data).to.eql(
         getConfigurationOutput(false, {
-          templates: [
-            {
-              ...mockTemplates[0],
-              caseFields: {
-                customFields: [],
-              },
-            },
-            { ...mockTemplates[1] },
-            {
-              ...mockTemplates[2],
-              caseFields: {
-                ...mockTemplates[2].caseFields,
-                customFields: [],
-              },
-            },
-          ],
+          templates: mockTemplates,
         })
       );
     });
