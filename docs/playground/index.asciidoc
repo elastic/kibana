@@ -81,6 +81,12 @@ a|
 * GPT-4 turbo
 a|
 
+| *Google*
+a|
+* Google Gemini 1.5 Pro
+* Google Gemini 1.5 Flash
+a|
+
 |===
 
 [float]
