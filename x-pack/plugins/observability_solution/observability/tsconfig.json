@@ -107,6 +107,7 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/event-annotation-components",
     "@kbn/slo-schema",
+    "@kbn/license-management-plugin",
   ],
   "exclude": [
     "target/**/*"

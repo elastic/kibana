@@ -58,7 +58,7 @@ export function createAnnotationsClient(params: {
     });
     const mappings = currentMappings?.[index].mappings;
 
-    if (mappings.dynamic) {
+    if (mappings.dynamic === true || mappings.dynamic === 'true') {
       return;
     }
 
