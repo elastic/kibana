@@ -15,6 +15,7 @@ export const entitiesEventComponentTemplateConfig: ClusterPutComponentTemplateRe
       "Component template for the event fields used in the Elastic Entity Model's entity discovery framework",
     documentation: 'https://www.elastic.co/guide/en/ecs/current/ecs-event.html',
     ecs_version: '8.0.0',
+    managed: true,
   },
   template: {
     mappings: {
