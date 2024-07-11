@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
@@ -49,7 +49,7 @@ describe(
   },
   () => {
     beforeEach(() => {
-      login();
+      login(ROLES.platform_engineer);
       createListsIndex();
       visit(RULES_MANAGEMENT_URL);
       waitForListsIndex();
