@@ -18,16 +18,17 @@ export default function (providerContext: FtrProviderContext) {
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');
     const kbnClient = getService('kibanaServer');
-    const { getRegistryUrlFromTestEnv, isRegistryEnabled } = getService('endpointRegistryHelpers');
-
-    if (!isRegistryEnabled()) {
-      log.warning('These tests are being run with an external package registry');
-    }
-
-    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
-    log.info(`Package registry URL for tests: ${registryUrl}`);
+    const endpointRegistryHelpers = getService('endpointRegistryHelpers');
 
     before(async () => {
+      if (!endpointRegistryHelpers.isRegistryEnabled()) {
+        log.warning('These tests are being run with an external package registry');
+      }
+
+      const registryUrl =
+        endpointRegistryHelpers.getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
+      log.info(`Package registry URL for tests: ${registryUrl}`);
+
       log.info('calling Fleet setup');
       await ingestManager.setup();
 

@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');
   const es = getService('es');
   const generator = new EndpointDocGenerator('data');
-  const { deleteEventsStream } = getService('endpointDataStreamHelpers');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   const searchForID = async <T>(id: string) => {
     return es.search<T>(
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteEventsStream(getService);
+        await endpointDataStreamHelpers.deleteEventsStream(getService);
       });
 
       it('does not set dns.question.type if it is already populated', async () => {

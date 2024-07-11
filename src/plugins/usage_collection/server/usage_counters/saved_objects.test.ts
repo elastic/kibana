@@ -9,7 +9,7 @@
 import { serializeCounterKey, storeCounter } from './saved_objects';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
-import { UsageCounters } from '../../common/types';
+import { UsageCounters } from '../../common';
 
 import moment from 'moment';
 
@@ -19,10 +19,12 @@ describe('counterKey', () => {
       domainId: 'a',
       counterName: 'b',
       counterType: 'c',
+      namespace: 'default',
+      source: 'ui',
       date: moment('09042021', 'DDMMYYYY'),
     });
 
-    expect(result).toMatchInlineSnapshot(`"a:09042021:c:b"`);
+    expect(result).toEqual('a:b:c:ui:20210409:default');
   });
 });
 
@@ -40,20 +42,22 @@ describe('storeCounter', () => {
   });
 
   it('stores counter in a saved object', async () => {
-    const counterMetric: UsageCounters.v1.CounterMetric = {
+    const metric: UsageCounters.v1.CounterMetric = {
       domainId: 'a',
       counterName: 'b',
       counterType: 'c',
+      namespace: 'default',
+      source: 'ui',
       incrementBy: 13,
     };
 
-    await storeCounter(counterMetric, internalRepository);
+    await storeCounter({ metric, soRepository: internalRepository });
 
     expect(internalRepository.incrementCounter).toBeCalledTimes(1);
     expect(internalRepository.incrementCounter.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "usage-counters",
-        "a:09042021:c:b",
+        "usage-counter",
+        "a:b:c:ui:20210409",
         Array [
           Object {
             "fieldName": "count",
@@ -61,10 +65,12 @@ describe('storeCounter', () => {
           },
         ],
         Object {
+          "namespace": "default",
           "upsertAttributes": Object {
             "counterName": "b",
             "counterType": "c",
             "domainId": "a",
+            "source": "ui",
           },
         },
       ]

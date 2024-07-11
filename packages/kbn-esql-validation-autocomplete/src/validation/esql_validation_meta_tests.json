@@ -8662,7 +8662,8 @@
     {
       "query": "from a_index | enrich `this``is fine`",
       "error": [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME"
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        "Unknown policy [`this``is]"
       ],
       "warning": []
     },
@@ -26062,6 +26063,36 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, numberField, \"asc\")",
+      "error": [
+        "Argument of [top] must be a constant, received [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats top(nullVar, nullVar, nullVar)",
+      "error": [
+        "Argument of [top] must be a constant, received [nullVar]",
+        "Argument of [top] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = st_distance(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
@@ -26160,6 +26191,184 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(avg(numberField), avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(booleanField, booleanField)",
+      "error": [
+        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort weighted_avg(numberField, numberField)",
+      "error": [
+        "SORT does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(numberField, numberField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(numberField, numberField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "f",
       "error": [
         "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
@@ -26169,7 +26378,7 @@
     {
       "query": "from ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26180,6 +26389,16 @@
     },
     {
       "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"index\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"\"\"index\"\"\"",
       "error": [],
       "warning": []
     },
@@ -26331,14 +26550,14 @@
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
     {
       "query": "FROM index\n, \tother_index\t,\n \t ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26353,8 +26572,7 @@
     {
       "query": "FROM `index`",
       "error": [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'"
+        "Unknown index [`index`]"
       ],
       "warning": []
     },

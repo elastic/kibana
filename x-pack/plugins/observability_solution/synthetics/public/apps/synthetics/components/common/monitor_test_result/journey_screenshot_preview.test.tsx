@@ -62,7 +62,7 @@ describe('JourneyScreenshotPreview', () => {
     const { getByAltText, getByText, queryByAltText } = render(
       <JourneyScreenshotPreview {...defaultProps} />
     );
-    const img = getByAltText('First step');
+    const img = getByAltText('"First step", 1 of 2');
     fireEvent.click(img);
     expect(dialogProps.checkGroup).toEqual(defaultProps.checkGroup);
     expect(getByAltText('img-in-dialog')).not.toBeNull();
@@ -75,7 +75,7 @@ describe('JourneyScreenshotPreview', () => {
       <JourneyScreenshotPreview {...defaultProps} />
     );
 
-    const img = getByAltText('First step');
+    const img = getByAltText('"First step", 1 of 2');
     const euiPopoverMessage =
       'You are in a dialog. Press Escape, or tap/click outside the dialog to close.'; // Helps to detect if popover is open
     expect(queryByText(euiPopoverMessage)).toBeNull();
@@ -88,7 +88,7 @@ describe('JourneyScreenshotPreview', () => {
 
   it('renders the correct image', () => {
     const { getByAltText } = render(<JourneyScreenshotPreview {...defaultProps} />);
-    const img = getByAltText('First step');
+    const img = getByAltText('"First step", 1 of 2');
     expect(img).toHaveAttribute('src', testImgUrl1);
   });
 });

@@ -18,11 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
-  const {
-    deleteMetadataStream,
-    deleteAllDocsFromMetadataCurrentIndex,
-    deleteAllDocsFromMetadataUnitedIndex,
-  } = getService('endpointDataStreamHelpers');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   const expectedData = [
     [
@@ -91,9 +87,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {
-        await deleteMetadataStream(getService);
-        await deleteAllDocsFromMetadataCurrentIndex(getService);
-        await deleteAllDocsFromMetadataUnitedIndex(getService);
+        await endpointDataStreamHelpers.deleteMetadataStream(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataUnitedIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       it('finds no data in list and prompts onboarding to add policy', async () => {
@@ -128,8 +124,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
         });
         after(async () => {
-          await deleteAllDocsFromMetadataCurrentIndex(getService);
-          await deleteAllDocsFromMetadataUnitedIndex(getService);
+          await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
+          await endpointDataStreamHelpers.deleteAllDocsFromMetadataUnitedIndex(getService);
           if (indexedData) {
             await endpointTestResources.unloadEndpointData(indexedData);
           }

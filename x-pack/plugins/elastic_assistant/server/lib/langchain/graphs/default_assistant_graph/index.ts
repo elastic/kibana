@@ -13,11 +13,11 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import { createOpenAIFunctionsAgent, createStructuredChatAgent } from 'langchain/agents';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
 import { openAIFunctionAgentPrompt, structuredChatAgentPrompt } from './prompts';
-import { APMTracer } from '../../tracers/apm_tracer';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
