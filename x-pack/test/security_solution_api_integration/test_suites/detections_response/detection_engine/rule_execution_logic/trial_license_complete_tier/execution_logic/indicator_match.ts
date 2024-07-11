@@ -1852,6 +1852,37 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlerts.hits.hits.length).equal(1);
       });
 
+      it('should not generate alerts if threat query not in manual rule interval', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(2, 'h');
+
+        await indexListOfDocuments([
+          eventDoc(id, moment(firstTimestamp).toISOString()),
+          threatDoc(id, moment(new Date()).subtract(1, 'm').toISOString()),
+        ]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_query: `@timestamp >= "now-5m" and id:${id} and agent.type:threat`,
+          interval: '10m',
+          from: 'now-140m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(1);
+      });
+
       it('supression per rule execution should work for manual rule runs', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h');
@@ -1895,7 +1926,7 @@ export default ({ getService }: FtrProviderContext) => {
           threatDoc(id, firstTimestamp.toISOString()),
         ]);
 
-        const rule = {
+        const rule: ThreatMatchRuleCreateProps = {
           ...threatMatchRuleEcsComplaint(id),
           alert_suppression: {
             group_by: ['host.name'],
