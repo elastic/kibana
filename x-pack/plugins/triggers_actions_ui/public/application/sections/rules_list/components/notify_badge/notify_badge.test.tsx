@@ -27,6 +27,7 @@ describe('RulesListNotifyBadge', () => {
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         snoozeSettings={{
+          name: '',
           isSnoozedUntil: null,
           muteAll: false,
         }}
@@ -47,6 +48,7 @@ describe('RulesListNotifyBadge', () => {
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         snoozeSettings={{
+          name: '',
           muteAll: false,
           isSnoozedUntil: moment('1990-02-01').toDate(),
         }}
@@ -68,6 +70,7 @@ describe('RulesListNotifyBadge', () => {
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         snoozeSettings={{
+          name: '',
           muteAll: true,
           isSnoozedUntil: moment('1990-02-01').toDate(),
         }}
@@ -88,6 +91,7 @@ describe('RulesListNotifyBadge', () => {
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         snoozeSettings={{
+          name: '',
           muteAll: false,
           isSnoozedUntil: null,
         }}
@@ -124,6 +128,7 @@ describe('RulesListNotifyBadge', () => {
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         snoozeSettings={{
+          name: '',
           muteAll: true,
         }}
         onRuleChanged={onRuleChanged}
