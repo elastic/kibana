@@ -20,12 +20,12 @@ import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_o
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
-import { hasLogMonitoringPrivileges } from '../logs/api_key/has_log_monitoring_privileges';
-import { createShipperApiKey } from '../logs/api_key/create_shipper_api_key';
-import { createInstallApiKey } from '../logs/api_key/create_install_api_key';
 import { getAgentVersion } from '../../lib/get_agent_version';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
+import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
+import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
+import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
@@ -229,8 +229,11 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
           progress: {},
         },
       }),
-      createShipperApiKey(client.asCurrentUser, name),
-      securityPluginStart.authc.apiKeys.create(request, createInstallApiKey(name)),
+      createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+      securityPluginStart.authc.apiKeys.create(
+        request,
+        createInstallApiKey(`onboarding_install_${name}`)
+      ),
       getAgentVersion(fleetPluginStart, kibanaVersion),
     ]);
 
