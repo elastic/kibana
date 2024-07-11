@@ -8,7 +8,7 @@
 import {
   KibanaSupertestWithCertProvider,
   KibanaSupertestWithCertWithoutAuthProvider,
-} from '../../test_suites/security_solution_endpoint/services/supertest_with_cert';
+} from '../../../security_solution_endpoint/services/supertest_with_cert';
 import { services as essServices } from '../ess/services_edr_workflows';
 
 export const svlServices = {

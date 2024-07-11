@@ -30,12 +30,11 @@ import {
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 
-
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
-
-
-import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
-
+import {
+  generateAgentDocs,
+  generateMetadataDocs,
+} from '../../../../config/services/security_solution_edr_workflows_metadata';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

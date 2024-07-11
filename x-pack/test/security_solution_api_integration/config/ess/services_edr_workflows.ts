@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { EndpointTestResources } from '../../test_suites/security_solution_endpoint/services/endpoint';
-import { EndpointArtifactsTestResources } from '../../test_suites/security_solution_endpoint/services/endpoint_artifacts';
-import { EndpointPolicyTestResourcesProvider } from '../../test_suites/security_solution_endpoint/services/endpoint_policy';
+import { EndpointTestResources } from '../../../security_solution_endpoint/services/endpoint';
+import { EndpointArtifactsTestResources } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { EndpointPolicyTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_policy';
 
 import { services as xPackAPIServices } from '../../../api_integration/services';
 import { ResolverGeneratorProvider } from '../services/security_solution_edr_workflows_resolver';
 import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';
+import {
+  SecuritySolutionEndpointDataStreamHelpers,
+  SecuritySolutionEndpointRegistryHelpers,
+} from '../../../common/services/security_solution';
 
 export const services = {
   ...xPackAPIServices,
@@ -20,4 +24,6 @@ export const services = {
   endpointPolicyTestResources: EndpointPolicyTestResourcesProvider,
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   rolesUsersProvider: RolesUsersProvider,
+  endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelpers,
+  endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelpers,
 };
