@@ -34,8 +34,11 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.displayName",
-      "value": "{{entity.identityFields.log.logger}}{{#entity.identityFields.event.category}}:{{.}}{{/entity.identityFields.event.category}}",
+      "field": "entity.identityFields",
+      "value": Array [
+        "log.logger",
+        "event.category",
+      ],
     },
   },
   Object {
@@ -60,9 +63,9 @@ Array [
         // Create the string builder
         StringBuilder entityId = new StringBuilder();
 
-        if (ctx[\\"entity\\"][\\"identityFields\\"] != null) {
+        if (ctx[\\"entity\\"][\\"identity\\"] != null) {
           // Get the values as a collection
-          Collection values = collectValues(ctx[\\"entity\\"][\\"identityFields\\"]);
+          Collection values = collectValues(ctx[\\"entity\\"][\\"identity\\"]);
 
           // Convert to a list and sort
           List sortedValues = new ArrayList(values);
@@ -112,6 +115,26 @@ if (ctx.entity?.metadata?.sourceIndex != null) {
   Object {
     "remove": Object {
       "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "log.logger",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "event.category",
+      "if": "ctx.entity?.identity?.event?.category != null",
+      "value": "{{entity.identity.event.category}}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
       "ignore_missing": true,
     },
   },

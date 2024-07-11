@@ -33,6 +33,15 @@ Array [
     },
   },
   Object {
+    "set": Object {
+      "field": "entity.identityFields",
+      "value": Array [
+        "log.logger",
+        "event.category",
+      ],
+    },
+  },
+  Object {
     "script": Object {
       "source": "if (ctx.entity?.metadata?.tags.data != null) {
   ctx[\\"tags\\"] = ctx.entity.metadata.tags.data.keySet();
@@ -56,6 +65,34 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
     "remove": Object {
       "field": "entity.metadata",
       "ignore_missing": true,
+    },
+  },
+  Object {
+    "script": Object {
+      "if": "ctx.entity.identity.log?.logger != null && ctx.entity.identity.log.logger.size() != 0",
+      "source": "
+        ctx.log.logger = ctx.entity.identity.log.logger.keySet().toArray()[0];
+      ",
+    },
+  },
+  Object {
+    "script": Object {
+      "if": "ctx.entity.identity.event?.category != null && ctx.entity.identity.event.category.size() != 0",
+      "source": "
+        ctx.event.category = ctx.entity.identity.event.category.keySet().toArray()[0];
+      ",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.displayName",
+      "value": "{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}",
     },
   },
   Object {

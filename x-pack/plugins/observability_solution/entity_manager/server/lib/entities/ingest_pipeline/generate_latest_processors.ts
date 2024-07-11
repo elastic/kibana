@@ -37,6 +37,20 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
+function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
+  return definition.identityFields.map((identityField) => ({
+    script: {
+      if: `ctx.entity.identity.${identityField.field.replaceAll(
+        '.',
+        '?.'
+      )} != null && ctx.entity.identity.${identityField.field}.size() != 0`,
+      source: `
+        ctx.${identityField.field} = ctx.entity.identity.${identityField.field}.keySet().toArray()[0];
+      `,
+    },
+  }));
+}
+
 export function generateLatestProcessors(definition: EntityDefinition) {
   return [
     {
@@ -75,13 +89,6 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
-    {
-      script: {
-        source: `
-          ctx["entity"]["displayName"] = ctx.entity.displayName.keySet().toArray()[0];
-        `,
-      },
-    },
     ...(definition.staticFields != null
       ? Object.keys(definition.staticFields).map((field) => ({
           set: { field, value: definition.staticFields![field] },
@@ -94,6 +101,20 @@ export function generateLatestProcessors(definition: EntityDefinition) {
       remove: {
         field: 'entity.metadata',
         ignore_missing: true,
+      },
+    },
+    ...liftIdentityFieldsToDocumentRoot(definition),
+    {
+      remove: {
+        field: 'entity.identity',
+        ignore_missing: true,
+      },
+    },
+    {
+      // This must happen AFTER we lift the identity fields into the root of the document
+      set: {
+        field: 'entity.displayName',
+        value: definition.displayNameTemplate,
       },
     },
     {

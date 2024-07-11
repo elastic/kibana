@@ -100,13 +100,13 @@ Object {
           "fixed_interval": "1m",
         },
       },
-      "entity.identityFields.event.category": Object {
+      "entity.identity.event.category": Object {
         "terms": Object {
           "field": "event.category",
           "missing_bucket": true,
         },
       },
-      "entity.identityFields.log.logger": Object {
+      "entity.identity.log.logger": Object {
         "terms": Object {
           "field": "log.logger",
           "missing_bucket": false,

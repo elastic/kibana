@@ -9,12 +9,6 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
-function createIdTemplate(definition: EntityDefinition) {
-  return definition.identityFields.reduce((template, id) => {
-    return template.replaceAll(id.field, `entity.identityFields.${id.field}`);
-  }, definition.displayNameTemplate);
-}
-
 function mapDestinationToPainless(destination: string) {
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
@@ -77,8 +71,8 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     },
     {
       set: {
-        field: 'entity.displayName',
-        value: createIdTemplate(definition),
+        field: 'entity.identityFields',
+        value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
     {
@@ -103,9 +97,9 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         // Create the string builder
         StringBuilder entityId = new StringBuilder();
 
-        if (ctx["entity"]["identityFields"] != null) {
+        if (ctx["entity"]["identity"] != null) {
           // Get the values as a collection
-          Collection values = collectValues(ctx["entity"]["identityFields"]);
+          Collection values = collectValues(ctx["entity"]["identity"]);
 
           // Convert to a list and sort
           List sortedValues = new ArrayList(values);
@@ -144,16 +138,17 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         ignore_missing: true,
       },
     },
+    ...definition.identityFields.map((key) => ({
+      set: {
+        if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
+        field: key.field,
+        value: `{{entity.identity.${key.field}}}`,
+      },
+    })),
     {
       remove: {
-        field: 'entity.identityFields',
+        field: 'entity.identity',
         ignore_missing: true,
-      },
-    },
-    {
-      set: {
-        field: 'entity.identityFields',
-        value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
     {

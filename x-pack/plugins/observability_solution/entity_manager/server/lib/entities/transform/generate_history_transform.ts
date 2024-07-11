@@ -68,7 +68,7 @@ export function generateHistoryTransform(
         ...definition.identityFields.reduce(
           (acc, id) => ({
             ...acc,
-            [`entity.identityFields.${id.field}`]: {
+            [`entity.identity.${id.field}`]: {
               terms: { field: id.field, missing_bucket: id.optional },
             },
           }),
