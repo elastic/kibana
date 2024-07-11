@@ -61,6 +61,7 @@ import {
   type XYDataLayerConfig,
   type SeriesType,
   visualizationTypes,
+  chartSwitchOptions,
 } from './types';
 import {
   getAnnotationLayerErrors,
@@ -166,6 +167,8 @@ export const getXyVisualization = ({
     const type = getVisualizationType(state);
     return type === 'mixed' ? type : type.id;
   },
+
+  chartSwitchOptions,
 
   getLayerIds(state) {
     return getLayersByType(state).map((l) => l.layerId);

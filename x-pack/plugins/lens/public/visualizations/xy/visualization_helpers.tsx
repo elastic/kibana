@@ -27,6 +27,7 @@ import {
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
+  chartSwitchOptions,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
@@ -194,7 +195,8 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
 export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
-      visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+      chartSwitchOptions.find((t) => t.subtypes.includes(state.preferredSeriesType)) ??
+      chartSwitchOptions[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
@@ -202,9 +204,9 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
     const dataLayerSeries = layerId
       ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
       : dataLayers[0].seriesType;
-    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
+    return chartSwitchOptions.find((t) => t.subtypes.includes(dataLayerSeries)) || 'mixed';
   }
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
+  const visualizationType = chartSwitchOptions.find((t) => t.id === dataLayers[0].seriesType);
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';

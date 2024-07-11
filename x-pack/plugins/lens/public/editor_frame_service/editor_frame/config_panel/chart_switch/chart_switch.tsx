@@ -298,7 +298,6 @@ export const ChartSwitch = memo(function ChartSwitch({
           // todo: wildcard, fuzzy search add
           const isSearchMatch =
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
-            visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm) ||
             visualizationType.description?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
             let typeId = visualizationType.id;
@@ -327,12 +326,12 @@ export const ChartSwitch = memo(function ChartSwitch({
         const isChecked = subVisualizationId === v.id;
         const dataLossWarning = getDataLossWarning(v.selection.dataLoss);
         return {
-          'aria-label': v.fullLabel || v.label,
+          'aria-label': v.label,
           className: 'lnsChartSwitch__option',
           key: `${v.visualizationId}:${v.id}`, // todo: should we simplify?
           value: `${v.visualizationId}:${v.id}`,
           'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-          label: v.fullLabel || v.label,
+          label: v.label,
           prepend: (
             <EuiFlexItem grow={false}>
               {isChecked && <EuiIcon type="check" />}

@@ -135,7 +135,7 @@ export const getPieVisualization = ({
 
   visualizationTypes: Object.values(PartitionChartsMeta),
   getVisualizationTypeId(state) {
-    return state.shape;
+    return state.shape === 'donut' ? 'pie' : state.shape;
   },
 
   getLayerIds(state) {

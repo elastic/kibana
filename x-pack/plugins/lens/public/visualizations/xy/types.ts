@@ -303,3 +303,49 @@ export const visualizationTypes: VisualizationType[] = [
     }),
   },
 ];
+
+export const chartSwitchOptions = [
+  {
+    id: 'bar',
+    subtypes: [
+      'bar',
+      'bar_stacked',
+      'bar_percentage_stacked',
+      'bar_horizontal',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+      'bar_horizontal_percentage_stacked',
+    ],
+    icon: IconChartBar,
+    label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
+      defaultMessage: 'Bar',
+    }),
+    sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
+  },
+  {
+    id: 'area',
+    icon: IconChartArea,
+    label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
+      defaultMessage: 'Area',
+    }),
+    sortPriority: 3,
+    description: i18n.translate('xpack.lens.area.visualizationDescription', {
+      defaultMessage: 'Compare distributions of cumulative data trends.',
+    }),
+    subtypes: ['area', 'area_stacked', 'area_percentage_stacked'],
+  },
+  {
+    id: 'line',
+    icon: IconChartLine,
+    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+      defaultMessage: 'Line',
+    }),
+    sortPriority: 2,
+    description: i18n.translate('xpack.lens.line.visualizationDescription', {
+      defaultMessage: 'Reveal variations in data over time or categorically.',
+    }),
+  },
+];
