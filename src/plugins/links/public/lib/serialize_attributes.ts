@@ -14,9 +14,14 @@ export const serializeLinksAttributes = (
   state: LinksRuntimeState,
   shouldExtractReferences: boolean = true
 ) => {
-  const linksToSave: Link[] | undefined = state.links?.map(
-    ({ title, description, error, ...linkToSave }) => linkToSave
-  );
+  const linksToSave: Link[] | undefined = state.links
+    ?.map(({ title, description, error, ...linkToSave }) => linkToSave)
+    ?.map(
+      (link) =>
+        Object.fromEntries(
+          Object.entries(link).filter(([key, value]) => value !== null)
+        ) as unknown as Link
+    );
   const attributes = {
     title: state.defaultPanelTitle,
     description: state.defaultPanelDescription,
