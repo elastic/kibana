@@ -34,14 +34,10 @@ import { isNumericFieldForDatatable } from '../../../common/expressions/datatabl
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import {
-  DEFAULT_MAX_COLUMNS,
-  getDefaultColor,
-  MetricVisualizationState,
-  showingBar,
-} from './visualization';
+import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { iconsSet } from './icon_set';
+import { MetricVisualizationState } from './types';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 

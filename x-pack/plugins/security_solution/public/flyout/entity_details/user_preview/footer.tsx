@@ -47,7 +47,7 @@ export const UserPreviewPanelFooter = ({
         <EuiFlexItem grow={false}>
           <EuiLink onClick={openUserFlyout} target="_blank" data-test-subj={'open-user-flyout'}>
             {i18n.translate('xpack.securitySolution.flyout.user.preview.viewDetailsLabel', {
-              defaultMessage: 'Open user details flyout',
+              defaultMessage: 'Show full user details',
             })}
           </EuiLink>
         </EuiFlexItem>

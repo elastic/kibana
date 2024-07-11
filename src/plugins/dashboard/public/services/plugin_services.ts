@@ -48,6 +48,7 @@ import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
 import { observabilityAIAssistantServiceFactory } from './observability_ai_assistant/observability_ai_assistant_service';
 import { userProfileServiceFactory } from './user_profile/user_profile_service';
+import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -96,6 +97,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
   observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory, ['http']),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();
