@@ -71,8 +71,6 @@ describe('starting with `migration.skip: true` when indices are up to date', () 
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('starts and display the correct service status', async () => {

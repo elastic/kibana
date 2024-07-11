@@ -1,3 +1,11 @@
+defaultValue:
+  oneOf:
+    - type: string
+    - type: boolean
+  description: >
+    A default value for the custom field.
+    If the `type` is `text`, the default value must be a string.
+    If the `type` is `toggle`, the default value must be boolean.
 key:
   description: >
     A unique key for the custom field.

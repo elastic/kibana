@@ -435,6 +435,7 @@ export enum RegistryVarsEntryKeys {
   os = 'os',
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
+  full_width = 'full_width',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -457,6 +458,7 @@ export interface RegistryVarsEntry {
     };
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
+  [RegistryVarsEntryKeys.full_width]?: boolean;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -589,6 +591,7 @@ export interface StateContext<T> {
 
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
+  additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
@@ -649,6 +652,7 @@ export type AssetReference = KibanaAssetReference | EsAssetReference;
 
 export interface KibanaAssetReference {
   id: string;
+  originId?: string;
   type: KibanaSavedObjectType;
 }
 export interface EsAssetReference {

@@ -23,10 +23,11 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/186302
-    describe.skip('CNVM AWS', () => {
+    describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
+        await cisIntegration.inputUniqueIntegrationName();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
@@ -50,6 +51,8 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
+        await cisIntegration.inputUniqueIntegrationName();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(

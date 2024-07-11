@@ -22,6 +22,3 @@ export type DeletePacksRequestQuery = z.infer<typeof DeletePacksRequestQuery>;
 export const DeletePacksRequestQuery = z.object({
   id: PackId.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

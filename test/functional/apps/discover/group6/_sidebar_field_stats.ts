@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| where \`bytes\`==0`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`bytes\`==0`
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| where \`extension.raw\`=="css"`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension.raw\`=="css"`
         );
 
         await PageObjects.unifiedFieldList.closeFieldPopover();
@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| where \`clientip\`::string=="216.126.255.31"`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`clientip\`::string=="216.126.255.31"`
         );
 
         await PageObjects.unifiedFieldList.closeFieldPopover();
@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| where \`@timestamp\` is not null`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
         );
         await testSubjects.missingOrFail('dscFieldStats-statsFooter');
         await PageObjects.unifiedFieldList.closeFieldPopover();
@@ -277,7 +277,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| where \`extension\`=="css"`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension\`=="css"`
         );
 
         await PageObjects.unifiedFieldList.closeFieldPopover();
@@ -317,7 +317,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 50 | stats avg(bytes) by geo.dest | limit 3\n| where \`avg(bytes)\`==5453`
+          `from logstash-* | sort @timestamp desc | limit 50 | stats avg(bytes) by geo.dest | limit 3\n| WHERE \`avg(bytes)\`==5453`
         );
 
         await PageObjects.unifiedFieldList.closeFieldPopover();
@@ -345,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.clickFieldListMinusFilter('enabled', 'true');
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
-        expect(editorValue).to.eql(`row enabled = true\n| where \`enabled\`!=true`);
+        expect(editorValue).to.eql(`row enabled = true\n| WHERE \`enabled\`!=true`);
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
     });

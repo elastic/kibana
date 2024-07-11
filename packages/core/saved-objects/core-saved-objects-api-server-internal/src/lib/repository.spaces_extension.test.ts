@@ -1259,6 +1259,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       serializer = createSpySerializer(registry);
       mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
       mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+      mockEncryptionExt.encryptAttributes.mockImplementation((desc, attributes) =>
+        Promise.resolve(attributes)
+      );
       mockGetCurrentTime.mockReturnValue(mockTimestamp);
       mockGetSearchDsl.mockClear();
       repository = instantiateRepository();

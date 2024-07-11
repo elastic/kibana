@@ -31,7 +31,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {
     query: getPingsRouteQuerySchema,
   },
-  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
+  handler: async ({ syntheticsEsClient, request, response }): Promise<any> => {
     const {
       from,
       to,
@@ -46,7 +46,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
     } = request.query as GetPingsRouteRequest;
 
     return await queryPings({
-      uptimeEsClient,
+      syntheticsEsClient,
       dateRange: { from, to },
       index,
       monitorId,
