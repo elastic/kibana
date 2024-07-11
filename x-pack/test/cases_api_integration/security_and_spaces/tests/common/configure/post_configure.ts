@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql({
         ...getConfigurationOutput(false),
         customFields,
-        templates: templates,
+        templates,
       });
     });
 
