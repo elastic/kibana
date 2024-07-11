@@ -42,6 +42,7 @@ import {
   EuiIconLegend,
   IconRegionMap,
   IconChartHeatmap,
+  IconChartGauge,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
 } from '../..';
@@ -182,6 +183,10 @@ const IconsArray: Array<{
   {
     title: 'IconChartHorizontalBullet',
     Component: IconChartHorizontalBullet,
+  },
+  {
+    title: 'IconChartGauge',
+    Component: IconChartGauge,
   },
   {
     title: 'IconChartVerticalBullet',

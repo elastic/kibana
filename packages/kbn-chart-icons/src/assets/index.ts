@@ -39,6 +39,7 @@ export { EuiIconLegend } from './legend';
 export { IconRegionMap } from './region_map';
 export { IconChartHeatmap } from './chart_heatmap';
 export { IconChartHorizontalBullet } from './chart_horizontal_bullet';
+export { IconChartGauge } from './chart_gauge';
 export { IconChartVerticalBullet } from './chart_vertical_bullet';
 export { IconChartGaugeSemiCircle } from './chart_gauge_semi_circle';
 export { IconChartGaugeArc } from './chart_gauge_arc';

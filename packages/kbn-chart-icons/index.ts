@@ -38,6 +38,7 @@ export {
   EuiIconLegend,
   IconRegionMap,
   IconChartHeatmap,
+  IconChartGauge,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
   IconChartGaugeSemiCircle,

@@ -6,14 +6,22 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
+import { GaugeLabelMajorMode, GaugeShape, GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
 import type { GaugeVisualizationState } from '../constants';
+import { CHART_NAMES, bulletTypes, gaugeShapes } from '../visualization';
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   const { state, setState, frame } = props;
@@ -29,6 +37,8 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
     onChange: setState,
     value: state,
   });
+
+  const selectedOption = CHART_NAMES[state.shape];
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -93,6 +103,57 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 }}
               />
             </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.label.gauge.angleType', {
+                defaultMessage: 'Type',
+              })}
+            >
+              <EuiComboBox
+                fullWidth
+                compressed
+                data-test-subj="lnsToolbarGaugeAngleType"
+                aria-label="Label"
+                onChange={([option]) => {
+                  setState({ ...state, shape: option.value as GaugeShape });
+                }}
+                isClearable={false}
+                options={gaugeShapes.map(({ id, label, icon }) => ({
+                  value: id,
+                  label,
+                  prepend: <EuiIcon type={icon} />,
+                }))}
+                selectedOptions={[selectedOption]}
+                singleSelection={{ asPlainText: true }}
+                prepend={<EuiIcon type={selectedOption.icon} />}
+              />
+            </EuiFormRow>
+            {(state.shape === GaugeShapes.HORIZONTAL_BULLET ||
+              state.shape === GaugeShapes.VERTICAL_BULLET) && (
+              <EuiFormRow
+                fullWidth
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.label.gauge.angleType', {
+                  defaultMessage: 'Type',
+                })}
+              >
+                <EuiButtonGroup
+                  isFullWidth
+                  legend={i18n.translate('xpack.lens.gauge.bulletType', {
+                    defaultMessage: 'Bullet type',
+                  })}
+                  data-test-subj="lens-gauge-bullet-type"
+                  buttonSize="compressed"
+                  options={bulletTypes}
+                  idSelected={selectedOption.id}
+                  onChange={(optionId) => {
+                    const newBulletType = bulletTypes.find(({ id }) => id === optionId)!.id;
+                    setState({ ...state, shape: newBulletType as GaugeShape });
+                  }}
+                />
+              </EuiFormRow>
+            )}
           </ToolbarPopover>
         </EuiFlexGroup>
       </EuiFlexItem>

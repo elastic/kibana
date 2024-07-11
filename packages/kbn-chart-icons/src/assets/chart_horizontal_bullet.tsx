@@ -8,7 +8,6 @@
 
 import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
-import { colors } from './common_styles';
 
 export const IconChartHorizontalBullet = ({
   title,
@@ -17,9 +16,9 @@ export const IconChartHorizontalBullet = ({
 }: Omit<EuiIconProps, 'type'>) => {
   return (
     <svg
-      width="30"
-      height="22"
-      viewBox="0 0 30 22"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-labelledby={titleId}
@@ -27,12 +26,10 @@ export const IconChartHorizontalBullet = ({
     >
       {title ? <title id={titleId}>{title}</title> : null}
       <path
-        className={colors.subdued}
-        d="M1 13a1 1 0 00-1 1v2a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-2a1 1 0 00-1-1H1z"
-      />
-      <path
-        className={colors.accent}
-        d="M0 6a1 1 0 011-1h24a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1V6z"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 7.5C0 7.22386 0.223858 7 0.5 7H15.5C15.7761 7 16 7.22386 16 7.5V9.5C16 9.77614 15.7761 10 15.5 10C15.2239 10 15 9.77614 15 9.5V8H1V9.5C1 9.77614 0.776142 10 0.5 10C0.223858 10 0 9.77614 0 9.5V7.5Z"
+        fill="#343741"
       />
     </svg>
   );

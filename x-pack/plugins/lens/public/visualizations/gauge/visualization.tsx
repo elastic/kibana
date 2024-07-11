@@ -28,6 +28,7 @@ import {
   IconChartGaugeCircle,
   IconChartGaugeArc,
   IconChartHorizontalBullet,
+  IconChartGauge,
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -68,6 +69,29 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 
+export const CHART_SWITCH_OPTIONS = {
+  [LENS_GAUGE_ID]: {
+    id: LENS_GAUGE_ID,
+    icon: IconChartGauge,
+    label: i18n.translate('xpack.lens.gauge.label', {
+      defaultMessage: 'Gauge',
+    }),
+    showExperimentalBadge: true,
+    sortPriority: 7,
+    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+      defaultMessage: 'Show progress to a goal in linear or arced style.',
+    }),
+    subtypes: [
+      GaugeShapes.HORIZONTAL_BULLET,
+      GaugeShapes.VERTICAL_BULLET,
+      GaugeShapes.SEMI_CIRCLE,
+      GaugeShapes.ARC,
+      GaugeShapes.CIRCLE,
+    ],
+  },
+};
+
+// todo: remvoe
 export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
   [GaugeShapes.HORIZONTAL_BULLET]: {
     id: GaugeShapes.HORIZONTAL_BULLET,
@@ -120,6 +144,28 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     }),
   },
 };
+
+export const gaugeShapes = [
+  CHART_NAMES.horizontalBullet,
+  CHART_NAMES.semiCircle,
+  CHART_NAMES.arc,
+  CHART_NAMES.circle,
+];
+
+export const bulletTypes = [
+  {
+    ...CHART_NAMES.horizontalBullet,
+    label: i18n.translate('xpack.lens.gauge.bullet.orientantionHorizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+  {
+    ...CHART_NAMES.verticalBullet,
+    label: i18n.translate('xpack.lens.gauge.bullet.orientantionVertical', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+];
 
 function computePaletteParams(params: CustomPaletteParams) {
   return {
@@ -222,7 +268,7 @@ export const getGaugeVisualization = ({
   paletteService,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
-
+  chartSwitchOptions: [CHART_SWITCH_OPTIONS[LENS_GAUGE_ID]],
   visualizationTypes: [
     CHART_NAMES[GaugeShapes.HORIZONTAL_BULLET],
     CHART_NAMES[GaugeShapes.VERTICAL_BULLET],
@@ -247,8 +293,8 @@ export const getGaugeVisualization = ({
     return newState;
   },
 
-  getDescription(state) {
-    return CHART_NAMES[state.shape];
+  getDescription() {
+    return CHART_SWITCH_OPTIONS[LENS_GAUGE_ID];
   },
 
   switchVisualizationType: (visualizationTypeId, state) => {
