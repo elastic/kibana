@@ -31,7 +31,6 @@ export const StepDetailsLinkIcon = ({
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
-  const title = VIEW_DETAILS(stepIndex);
 
   const stepDetailsLink = `${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`;
 
@@ -53,8 +52,7 @@ export const StepDetailsLinkIcon = ({
     <EuiButtonIcon
       data-test-subj="syntheticsStepDetailsLinkIconButton"
       {...commonProps}
-      aria-label={title}
-      title={title}
+      title={VIEW_DETAILS(stepIndex)}
       size="s"
       href={stepDetailsLink}
       target={target}
@@ -63,7 +61,7 @@ export const StepDetailsLinkIcon = ({
   );
 };
 
-const VIEW_DETAILS = (stepIndex: number) =>
+const VIEW_DETAILS = (stepIndex: number = 1) =>
   i18n.translate('xpack.synthetics.monitor.step.viewStepDetails', {
     defaultMessage: 'View step {stepIndex} details',
     values: {
