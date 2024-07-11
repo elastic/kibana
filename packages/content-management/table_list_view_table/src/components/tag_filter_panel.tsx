@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ForwardedRef, forwardRef } from 'react';
 import type { FC } from 'react';
 import {
   EuiPopover,
@@ -54,156 +54,169 @@ interface Props {
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
 }
 
-export const TagFilterPanel: FC<Props> = ({
-  isPopoverOpen,
-  isInUse,
-  options,
-  totalActiveFilters,
-  onFilterButtonClick,
-  onSelectChange,
-  closePopover,
-  clearTagSelection,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
-  const isSearchVisible = options.length > 10;
-
-  const searchBoxCSS = css`
-    padding: ${euiTheme.size.s};
-    border-bottom: ${euiTheme.border.thin};
-  `;
-
-  const popoverTitleCSS = css`
-    height: ${euiTheme.size.xxxl};
-  `;
-
-  let searchProps: ExclusiveUnion<
-    { searchable: false },
+export const TagFilterPanel: FC<Props> = forwardRef(
+  (
     {
-      searchable: true;
-      searchProps: EuiSelectableProps['searchProps'];
-    }
-  > = {
-    searchable: false,
-  };
+      isPopoverOpen,
+      isInUse,
+      options,
+      totalActiveFilters,
+      onFilterButtonClick,
+      onSelectChange,
+      closePopover,
+      clearTagSelection,
+    },
+    ref: ForwardedRef<HTMLButtonElement>
+  ) => {
+    const { euiTheme } = useEuiTheme();
+    const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
+    const isSearchVisible = options.length > 10;
+    const searchBoxCSS = css`
+      padding: ${euiTheme.size.s};
+      border-bottom: ${euiTheme.border.thin};
+    `;
 
-  if (isSearchVisible) {
-    searchProps = {
-      searchable: true,
-      searchProps: {
-        compressed: true,
-      },
+    const popoverTitleCSS = css`
+      height: ${euiTheme.size.xxxl};
+    `;
+
+    let searchProps: ExclusiveUnion<
+      { searchable: false },
+      {
+        searchable: true;
+        searchProps: EuiSelectableProps['searchProps'];
+      }
+    > = {
+      searchable: false,
     };
-  }
 
-  return (
-    <>
-      <EuiPopover
-        button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={onFilterButtonClick}
-            data-test-subj="tagFilterPopoverButton"
-            hasActiveFilters={totalActiveFilters > 0}
-            numActiveFilters={totalActiveFilters}
-            grow
-          >
-            Tags
-          </EuiFilterButton>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        panelProps={{ css: { width: euiTheme.base * 18 } }}
-        panelStyle={isInUse ? { transition: 'none' } : undefined}
-      >
-        <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
-          <EuiFlexGroup>
-            <EuiFlexItem>Tags</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {totalActiveFilters > 0 && (
-                <EuiButtonEmpty flush="both" onClick={clearTagSelection} css={clearSelectionBtnCSS}>
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
-                    {
-                      defaultMessage: 'Clear selection',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        <EuiSelectable<any>
-          singleSelection={false}
-          aria-label="some aria label"
-          options={options}
-          renderOption={(option) => option.view}
-          emptyMessage="There aren't any tags"
-          noMatchesMessage="No tag matches the search"
-          onChange={onSelectChange}
-          data-test-subj="tagSelectableList"
-          {...searchProps}
+    if (isSearchVisible) {
+      searchProps = {
+        searchable: true,
+        searchProps: {
+          compressed: true,
+        },
+      };
+    }
+
+    return (
+      <>
+        <EuiPopover
+          button={
+            <EuiFilterButton
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={onFilterButtonClick}
+              data-test-subj="tagFilterPopoverButton"
+              hasActiveFilters={totalActiveFilters > 0}
+              numActiveFilters={totalActiveFilters}
+              grow
+              buttonRef={ref}
+            >
+              Tags
+            </EuiFilterButton>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downCenter"
+          panelProps={{ css: { width: euiTheme.base * 18 } }}
+          panelStyle={isInUse ? { transition: 'none' } : undefined}
         >
-          {(list, search) => {
-            return (
-              <>
-                {isSearchVisible ? <div css={searchBoxCSS}>{search}</div> : <EuiSpacer size="s" />}
-                {list}
-              </>
-            );
-          }}
-        </EuiSelectable>
-        <EuiPopoverFooter paddingSize="m">
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <EuiTextColor color="dimgrey">
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
-                    {
-                      defaultMessage: '{modifierKeyPrefix} + click exclude',
-                      values: {
-                        modifierKeyPrefix,
-                      },
-                    }
+          <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
+            <EuiFlexGroup>
+              <EuiFlexItem>Tags</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {totalActiveFilters > 0 && (
+                  <EuiButtonEmpty
+                    flush="both"
+                    onClick={clearTagSelection}
+                    css={clearSelectionBtnCSS}
+                  >
+                    {i18n.translate(
+                      'contentManagement.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
+                      {
+                        defaultMessage: 'Clear selection',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverTitle>
+          <EuiSelectable<any>
+            singleSelection={false}
+            aria-label="some aria label"
+            options={options}
+            renderOption={(option) => option.view}
+            emptyMessage="There aren't any tags"
+            noMatchesMessage="No tag matches the search"
+            onChange={onSelectChange}
+            data-test-subj="tagSelectableList"
+            {...searchProps}
+          >
+            {(list, search) => {
+              return (
+                <>
+                  {isSearchVisible ? (
+                    <div css={searchBoxCSS}>{search}</div>
+                  ) : (
+                    <EuiSpacer size="s" />
                   )}
-                </EuiTextColor>
-              </EuiText>
-            </EuiFlexItem>
+                  {list}
+                </>
+              );
+            }}
+          </EuiSelectable>
+          <EuiPopoverFooter paddingSize="m">
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <EuiTextColor color="dimgrey">
+                    {i18n.translate(
+                      'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
+                      {
+                        defaultMessage: '{modifierKeyPrefix} + click exclude',
+                        values: {
+                          modifierKeyPrefix,
+                        },
+                      }
+                    )}
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
 
-            <EuiFlexItem css={saveBtnWrapperCSS}>
-              <EuiButton onClick={closePopover}>
-                {i18n.translate('contentManagement.tableList.tagFilterPanel.doneButtonLabel', {
-                  defaultMessage: 'Done',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+              <EuiFlexItem css={saveBtnWrapperCSS}>
+                <EuiButton onClick={closePopover}>
+                  {i18n.translate('contentManagement.tableList.tagFilterPanel.doneButtonLabel', {
+                    defaultMessage: 'Done',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
 
-            <EuiFlexItem>
-              <RedirectAppLinks
-                coreStart={{
-                  application: {
-                    navigateToUrl,
-                    currentAppId$,
-                  },
-                }}
-              >
-                <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
-                    {
-                      defaultMessage: 'Manage tags',
-                    }
-                  )}
-                </EuiLink>
-              </RedirectAppLinks>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
-      </EuiPopover>
-    </>
-  );
-};
+              <EuiFlexItem>
+                <RedirectAppLinks
+                  coreStart={{
+                    application: {
+                      navigateToUrl,
+                      currentAppId$,
+                    },
+                  }}
+                >
+                  <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
+                    {i18n.translate(
+                      'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
+                      {
+                        defaultMessage: 'Manage tags',
+                      }
+                    )}
+                  </EuiLink>
+                </RedirectAppLinks>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        </EuiPopover>
+      </>
+    );
+  }
+);
