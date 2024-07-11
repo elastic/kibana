@@ -6,13 +6,19 @@
  */
 
 import { queue } from 'async';
+import { chunk } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import {
+  isKeywordFieldCandidates,
+  isTextFieldCandidates,
+  type QueueFieldCandidate,
+  QUEUE_CHUNKING_SIZE,
+} from '../queue_field_candidates';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 import { getHistogramIntervalMs } from '../get_histogram_interval_ms';
@@ -25,20 +31,6 @@ import { fetchSignificantTermPValues } from './fetch_significant_term_p_values';
 // Don't use more than 5 here otherwise Kibana will emit an error
 // regarding a limit of abort signal listeners of more than 10.
 const MAX_CONCURRENT_QUERIES = 5;
-
-interface KeywordFieldCandidate {
-  keywordFieldCandidate: string;
-}
-const isKeywordFieldCandidate = (d: unknown): d is KeywordFieldCandidate =>
-  isPopulatedObject(d, ['keywordFieldCandidate']);
-
-interface TextFieldCandidate {
-  textFieldCandidate: string;
-}
-const isTextFieldCandidate = (d: unknown): d is TextFieldCandidate =>
-  isPopulatedObject(d, ['textFieldCandidate']);
-
-type QueueFieldCandidate = KeywordFieldCandidate | TextFieldCandidate;
 
 export interface LogRateChange {
   type: string;
@@ -184,15 +176,15 @@ export const fetchLogRateAnalysisForAlert = async ({
   const fieldsToSample = new Set<string>();
 
   const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
-    if (isKeywordFieldCandidate(payload)) {
-      const { keywordFieldCandidate } = payload;
+    if (isKeywordFieldCandidates(payload)) {
+      const { keywordFieldCandidates: fieldNames } = payload;
 
       const pValues = await fetchSignificantTermPValues({
         esClient,
         abortSignal,
         arguments: {
           ...params,
-          fieldNames: [keywordFieldCandidate],
+          fieldNames,
           sampleProbability,
         },
       });
@@ -203,15 +195,15 @@ export const fetchLogRateAnalysisForAlert = async ({
         });
         significantTerms.push(...pValues);
       }
-    } else if (isTextFieldCandidate(payload)) {
-      const { textFieldCandidate } = payload;
+    } else if (isTextFieldCandidates(payload)) {
+      const { textFieldCandidates: fieldNames } = payload;
 
       const significantCategoriesForField = await fetchSignificantCategories({
         esClient,
         abortSignal,
         arguments: {
           ...params,
-          fieldNames: [textFieldCandidate],
+          fieldNames,
           sampleProbability,
         },
       });
@@ -222,10 +214,16 @@ export const fetchLogRateAnalysisForAlert = async ({
     }
   }, MAX_CONCURRENT_QUERIES);
 
+  // This chunks keyword and text field candidates, then passes them on
+  // to the async queue for processing. Each chunk will be part of a single
+  // query using multiple aggs for each candidate. For many candidates,
+  // on top of that the async queue will process multiple queries concurrently.
   pValuesQueue.push(
     [
-      ...textFieldCandidates.map((d) => ({ textFieldCandidate: d })),
-      ...keywordFieldCandidates.map((d) => ({ keywordFieldCandidate: d })),
+      ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
+      ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+        keywordFieldCandidates: d,
+      })),
     ],
     (err) => {
       if (err) {
