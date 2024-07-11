@@ -7,7 +7,7 @@
 
 export const GLOBAL_SETTINGS_SAVED_OBJECT_TYPE = 'ingest_manager_settings';
 
-export const SPACE_SETTINGS_SAVED_OBJECT_TYPE = 'fleet_space_settings';
+export const SPACE_SETTINGS_SAVED_OBJECT_TYPE = 'fleet-space-settings';
 
 export const SPACE_SETTINGS_ID_SUFFIX = '-default-settings';
 

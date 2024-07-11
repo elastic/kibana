@@ -54,7 +54,7 @@ export async function saveSpaceSettings({
   const originalSettings = await getSpaceSettings(spaceId);
   if (originalSettings.managed_by && originalSettings.managed_by !== managedBy) {
     throw new FleetUnauthorizedError(
-      `Settings are managed by: ${managedBy} and should be edited there`
+      `Settings are managed by: ${originalSettings.managed_by} and should be edited there`
     );
   }
 

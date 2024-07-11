@@ -81,6 +81,35 @@ export default function (providerContext: FtrProviderContext) {
           allowed_namespace_prefixes: [],
         });
       });
+
+      describe('with allowed_namespace_prefixes:["test"]', () => {
+        before(async () => {
+          await apiClient.putSpaceSettings(
+            {
+              allowed_namespace_prefixes: ['test'],
+            },
+            TEST_SPACE_1
+          );
+        });
+        it('should restrict non authorized agent policy namespace', async () => {
+          let err: Error | undefined;
+          try {
+            await apiClient.createAgentPolicy(TEST_SPACE_1, {
+              namespace: 'default',
+            });
+          } catch (_err) {
+            err = _err;
+          }
+
+          expect(err).to.be.an(Error);
+          expect(err?.message).to.match(/400 "Bad Request"/);
+        });
+        it('should allow authorized agent policy namespace', async () => {
+          await apiClient.createAgentPolicy(TEST_SPACE_1, {
+            namespace: 'test_production',
+          });
+        });
+      });
     });
   });
 }

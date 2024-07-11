@@ -8,6 +8,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { Agent } from 'supertest';
 import {
+  CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   GetAgentPoliciesResponse,
   GetAgentsResponse,
@@ -44,7 +45,10 @@ export class SpaceTestApiClient {
     return res;
   }
   // Agent policies
-  async createAgentPolicy(spaceId?: string): Promise<CreateAgentPolicyResponse> {
+  async createAgentPolicy(
+    spaceId?: string,
+    data: Partial<CreateAgentPolicyRequest['body']> = {}
+  ): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
       .set('kbn-xsrf', 'xxxx')
@@ -53,6 +57,7 @@ export class SpaceTestApiClient {
         description: '',
         namespace: 'default',
         inactivity_timeout: 24 * 1000,
+        ...data,
       })
       .expect(200);
 
