@@ -378,7 +378,6 @@ describe('When on the package policy create page', () => {
 
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
         ...newPackagePolicy,
-        policy_id: 'agent-policy-1',
         policy_ids: ['agent-policy-1'],
         force: false,
       });

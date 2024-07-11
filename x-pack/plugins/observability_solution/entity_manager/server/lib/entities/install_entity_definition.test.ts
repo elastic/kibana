@@ -38,10 +38,16 @@ const assertHasCreatedDefinition = (
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateHistoryIngestPipelineId(builtInServicesEntityDefinition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: '0.1.0',
+    },
   });
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(builtInServicesEntityDefinition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: '0.1.0',
+    },
   });
 
   expect(esClient.transform.putTransform).toBeCalledTimes(2);
