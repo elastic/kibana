@@ -22,6 +22,10 @@ import {
   getTimeSeriesColor,
   ChartType,
 } from '../../../../shared/charts/helper/get_timeseries_color';
+import {
+  getMetricsFormula,
+  ChartMetricType,
+} from '../../../../shared/charts/helper/get_metrics_formulas';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
@@ -160,7 +164,7 @@ export function getServiceColumns({
           label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
             defaultMessage: 'Log rate (per min.)',
           })}
-          formula={`count(kql='log.level: *')`} // TODO move
+          formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
           toolTip={i18n.translate(
             'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description',
             {
@@ -193,7 +197,7 @@ export function getServiceColumns({
           label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
             defaultMessage: 'Log error rate',
           })}
-          formula={`count(kql='log.level: "error" OR log.level: "ERROR"') / count(kql='log.level: *')`} // TODO
+          formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
           toolTip={i18n.translate(
             'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description',
             {

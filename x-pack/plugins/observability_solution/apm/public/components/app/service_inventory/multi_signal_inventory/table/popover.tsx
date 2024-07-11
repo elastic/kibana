@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
+import { EuiPopover, EuiIcon, type IconColor, type IconSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 
 export function Popover({
   children,
-  icon,
   iconColor,
   iconSize,
   ...props
 }: {
   children: React.ReactNode;
-  icon: IconType;
   iconColor?: IconColor;
   iconSize?: IconSize;
   'data-test-subj'?: string;

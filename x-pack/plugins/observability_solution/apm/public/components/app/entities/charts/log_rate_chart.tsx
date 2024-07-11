@@ -16,6 +16,10 @@ import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_ch
 import { yLabelAsPercent } from '../../../../../common/utils/formatters';
 import { TooltipContent } from '../../service_inventory/multi_signal_inventory/table/tooltip_content';
 import { Popover } from '../../service_inventory/multi_signal_inventory/table/popover';
+import {
+  getMetricsFormula,
+  ChartMetricType,
+} from '../../../shared/charts/helper/get_metrics_formulas';
 
 type LogRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries'>;
@@ -82,7 +86,7 @@ export function LogRateChart({ height }: { height: number }) {
         <EuiFlexItem grow={false}>
           <Popover>
             <TooltipContent
-              formula={`count(kql='log.level: *')`} // TODO
+              formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
               description={i18n.translate(
                 'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description',
                 {
