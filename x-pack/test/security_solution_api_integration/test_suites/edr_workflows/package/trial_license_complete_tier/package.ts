@@ -16,7 +16,6 @@ import {
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
-import { deleteEventsStream } from '../../../../../common/services/security_solution';
 import {
   InsertedEvents,
   processEventsIndex,

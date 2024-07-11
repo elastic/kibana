@@ -583,7 +583,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.trial.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
-    - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/serverless.config.ts
