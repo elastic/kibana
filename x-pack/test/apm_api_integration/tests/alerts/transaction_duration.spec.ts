@@ -75,8 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await apmSynthtraceEsClient.clean();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/176996
-    describe.skip('create rule for opbeans-java without kql filter', () => {
+    describe('create rule for opbeans-java without kql filter', () => {
       let ruleId: string;
       let actionId: string;
       let alerts: ApmAlertFields[];
@@ -188,8 +187,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177061
-    describe.skip('create rule for opbeans-node using kql filter', () => {
+    describe('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

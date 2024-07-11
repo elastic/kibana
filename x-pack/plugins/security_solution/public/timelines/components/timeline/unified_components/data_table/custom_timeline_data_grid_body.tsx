@@ -25,7 +25,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 };
 
 // THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
-const DEFAULT_UDT_ROW_HEIGHT = 40;
+const DEFAULT_UDT_ROW_HEIGHT = 34;
 
 /**
  *
@@ -117,23 +117,13 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   className: `rowCellWrapper ${props.className ?? ''}`,
   role: 'row',
 }))`
-  display: flex;
-  align-items: center;
   height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
-    align-items: flex-start;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
     min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
     .unifiedDataTable__rowControl {
-      margin-top: 0;
+      margin-top: -4px;
     }
-  }
-  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
-    padding: 0;
   }
 `;
 
@@ -176,7 +166,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
-  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple);
+  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -195,7 +185,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
 
   return (
     <CustomGridRow
-      className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
       $cssRowHeight={cssRowHeight}
       key={rowIndex}
     >

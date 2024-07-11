@@ -12,14 +12,14 @@ import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
-import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
+import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
   CommandDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
 } from '../definitions/types';
-import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
+import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
@@ -36,6 +36,13 @@ function getSafeInsertText(text: string, options: { dashSupported?: boolean } = 
   return shouldBeQuotedText(text, options)
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
+}
+export function getQuotedText(text: string) {
+  return text.startsWith(`"`) && text.endsWith(`"`) ? text : `"${text}"`;
+}
+
+function getSafeInsertSourceText(text: string) {
+  return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
@@ -148,7 +155,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title }) => ({
     label: title ?? name,
-    text: name,
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Issue',
@@ -335,9 +342,6 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
     suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
-  }
-  if (types.includes('chrono_literal')) {
-    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...
   }
   if (types.includes('string')) {
     if (names) {
