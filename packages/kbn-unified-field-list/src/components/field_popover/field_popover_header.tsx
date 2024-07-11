@@ -162,7 +162,6 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         field={field}
         Wrapper={FieldDescriptionWrapper}
         fieldsMetadataService={services?.fieldsMetadata}
-        isEcsField={true}
       />
     </>
   );

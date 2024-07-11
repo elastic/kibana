@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 
 const MAX_VISIBLE_LENGTH = 110;
 
@@ -24,6 +25,7 @@ export interface FieldDescriptionContentProps {
   field: {
     name: string;
     customDescription?: string;
+    type: string;
   };
   color?: 'subdued';
   truncate?: boolean;
@@ -32,15 +34,13 @@ export interface FieldDescriptionContentProps {
 
 export interface FieldDescriptionProps extends FieldDescriptionContentProps {
   fieldsMetadataService?: FieldsMetadataPublicStart;
-  isEcsField?: boolean;
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   fieldsMetadataService,
-  isEcsField,
   ...props
 }) => {
-  if (fieldsMetadataService && isEcsField && !props.field.customDescription) {
+  if (fieldsMetadataService && !props.field.customDescription) {
     return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
   }
 
@@ -51,11 +51,12 @@ const EcsFieldDescriptionFallback: React.FC<
   FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
 > = ({ fieldsMetadataService, ...props }) => {
   const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
-    attributes: ['description'],
+    attributes: ['description', 'type'],
     fieldNames: [props.field.name],
   });
 
   const escFieldDescription = fieldsMetadata?.[props.field.name]?.description;
+  const escFieldType = fieldsMetadata?.[props.field.name]?.type;
 
   return (
     <EuiSkeletonText isLoading={loading} size="s">
@@ -63,7 +64,10 @@ const EcsFieldDescriptionFallback: React.FC<
         {...props}
         field={{
           ...props.field,
-          customDescription: escFieldDescription ? `ECS: ${escFieldDescription}` : undefined,
+          customDescription:
+            escFieldType && esFieldTypeToKibanaFieldType(escFieldType) === props.field.type
+              ? escFieldDescription
+              : undefined,
         }}
       />
     </EuiSkeletonText>

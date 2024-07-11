@@ -394,8 +394,6 @@ export const DocViewerTable = ({
                   fieldsMetadataService={fieldsMetadata}
                   field={fieldMapping}
                   truncate={false}
-                  isEcsField={true}
-                  // isEcsField={hasEscFields}
                 />
               </div>
             ) : null}
