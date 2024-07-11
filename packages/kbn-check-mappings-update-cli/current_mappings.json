@@ -1612,6 +1612,18 @@
       }
     }
   },
+  "fleet-space-settings": {
+    "dynamic": false,
+    "properties": {
+      "allowed_namespace_prefixes": {
+        "enabled": false
+      },
+      "managed_by": {
+        "index": false,
+        "type": "keyword"
+      }
+    }
+  },
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {

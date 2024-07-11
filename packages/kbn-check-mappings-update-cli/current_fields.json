@@ -480,6 +480,10 @@
     "status",
     "uuid"
   ],
+  "fleet-space-settings": [
+    "allowed_namespace_prefixes",
+    "managed_by"
+  ],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"
