@@ -43,7 +43,7 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
           soClient,
           esClient,
           logger,
-          deleteData: req.query.deleteData ?? false,
+          deleteData: req.query.deleteData,
         });
 
         return res.ok({ body: { acknowledged: true } });

@@ -56,7 +56,7 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           soClient,
           esClient,
           logger,
-          deleteData: req.query.deleteData ?? false,
+          deleteData: req.query.deleteData,
         });
 
         await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);

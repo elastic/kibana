@@ -29,7 +29,7 @@ export async function uninstallEntityDefinition({
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
-  deleteData: boolean;
+  deleteData?: boolean;
 }) {
   await stopAndDeleteHistoryTransform(esClient, definition, logger);
   await stopAndDeleteLatestTransform(esClient, definition, logger);
@@ -50,7 +50,7 @@ export async function uninstallBuiltInEntityDefinitions({
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
-  deleteData: boolean;
+  deleteData?: boolean;
 }): Promise<EntityDefinition[]> {
   const definitions = await findEntityDefinitions({
     soClient,
