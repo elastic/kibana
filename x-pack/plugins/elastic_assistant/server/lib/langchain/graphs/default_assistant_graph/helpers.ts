@@ -12,7 +12,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { BaseCallbackHandler } from '@langchain/core/dist/callbacks/base';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
@@ -22,7 +21,6 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: { input: string };
-  isOpenAI: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -49,7 +47,6 @@ export const streamGraph = async ({
   request,
   traceOptions,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
-  const isOpenAI = true;
   let streamingSpan: Span | undefined;
   if (agent.isStarted()) {
     streamingSpan = agent.startSpan(`${DEFAULT_ASSISTANT_GRAPH_ID} (Streaming)`) ?? undefined;
@@ -80,36 +77,11 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  let message = '';
-  let tokenParentRunId = '';
-  const callbacks: Array<Partial<BaseCallbackHandler>> = isOpenAI
-    ? []
-    : [
-        {
-          handleLLMNewToken(payload, _idx, _runId, parentRunId) {
-            if (tokenParentRunId.length === 0 && !!parentRunId) {
-              // set the parent run id as the parentRunId of the first token
-              // this is used to ensure that all tokens in the stream are from the same run
-              // filtering out runs that are inside e.g. tool calls
-              tokenParentRunId = parentRunId;
-            }
-            if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
-              push({ payload, type: 'content' });
-              // store message in case of error
-              message += payload;
-            }
-          },
-          handleChainEnd(_outputs, _runId, parentRunId) {
-            // if parentRunId is undefined, this is the end of the stream
-            if (!parentRunId) {
-              handleStreamEnd(message);
-            }
-          },
-        },
-      ];
+  const message = '';
+  const tokenParentRunId = '';
 
   const stream = assistantGraph.streamEvents(inputs, {
-    callbacks: [...callbacks, apmTracer, ...(traceOptions?.tracers ?? [])],
+    callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
     streamMode: 'values',
     tags: traceOptions?.tags ?? [],
@@ -205,7 +177,7 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  if (isOpenAI) void processEvent();
+  void processEvent();
 
   return responseWithHeaders;
 };

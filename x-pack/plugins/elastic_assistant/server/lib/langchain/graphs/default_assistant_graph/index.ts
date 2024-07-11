@@ -141,7 +141,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
-      isOpenAI,
       logger,
       onLlmResponse,
       request,
