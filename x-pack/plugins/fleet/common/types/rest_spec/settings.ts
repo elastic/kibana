@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SpaceSettingsSOAttributes } from '@kbn/fleet-plugin/server/types';
 import type { Settings, AgentPolicy, FleetServerHost, FleetProxy, DownloadSource } from '../models';
 
 export interface GetSettingsResponse {
