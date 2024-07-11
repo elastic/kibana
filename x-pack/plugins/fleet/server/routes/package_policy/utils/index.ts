@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { CreatePackagePolicyRequestSchema, PackagePolicyInput } from '../../../types';
-import { licenseService } from '../../../services';
+import { appContextService, licenseService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 
 export function isSimplifiedCreatePackagePolicyRequest(
@@ -44,9 +44,12 @@ const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export function canUseMultipleAgentPolicies() {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
+  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
 
   return {
-    canUseReusablePolicies: hasEnterpriseLicence,
-    errorMessage: 'Reusable integration policies are only available with an Enterprise license',
+    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
+    errorMessage: !hasEnterpriseLicence
+      ? 'Reusable integration policies are only available with an Enterprise license'
+      : 'Reusable integration policies are not supported',
   };
 }

@@ -245,7 +245,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with interval suppression duration', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/187614
+      describe.skip('with interval suppression duration', () => {
         beforeEach(() => {
           ruleProps = {
             ...baseRuleProps,
