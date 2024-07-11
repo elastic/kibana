@@ -34,6 +34,7 @@ const docs = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['observabilityLogsExplorer', 'svlCommonPage']);
 
   describe('Flyout content customization', () => {
