@@ -163,11 +163,7 @@ export const useGeneration = ({
     setIsRequesting(true);
   }, []);
 
-  return {
-    progress,
-    error,
-    retry,
-  };
+  return { progress, error, retry };
 };
 
 const useModalCss = () => {
@@ -205,7 +201,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
     );
 
     return (
-      <EuiModal onClose={onClose}>
+      <EuiModal onClose={onClose} data-test-subj="generationModal">
         <EuiModalHeader css={headerCss}>
           <EuiModalHeaderTitle>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -219,6 +215,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                       title={i18n.GENERATION_ERROR(progressText[progress])}
                       color="danger"
                       iconType="alert"
+                      data-test-subj="generationErrorCallout"
                     >
                       {error}
                     </EuiCallOut>
@@ -256,7 +253,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
           {error ? (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="refresh" onClick={retry}>
+                <EuiButtonEmpty iconType="refresh" onClick={retry} data-test-subj="retryButton">
                   {i18n.RETRY}
                 </EuiButtonEmpty>
               </EuiFlexItem>
