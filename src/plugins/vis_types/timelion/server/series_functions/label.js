@@ -42,7 +42,7 @@ export default new Chainable('label', {
       if (config.regex) {
         // not using a standard `import` so that if there's an issue with the re2 native module
         // that it doesn't prevent Kibana from starting up and we only have an issue using Timelion labels
-        const RE2 = require('re2');
+        const RE2 = require('re2js');
         eachSeries.label = eachSeries.label.replace(new RE2(config.regex), config.label);
       } else if (config.label) {
         eachSeries.label = config.label;

@@ -1125,7 +1125,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2": "1.20.9",
+    "re2js": "0.4.1",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-diff-view": "^3.2.0",
