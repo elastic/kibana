@@ -34,7 +34,7 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions } from './cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';

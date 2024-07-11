@@ -153,7 +153,6 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               idPrefix={idPrefix}
               render={render}
               values={rowItems}
-              moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
               scopeId={scopeId}
             />

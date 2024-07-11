@@ -108,9 +108,76 @@ describe('Table Helpers', () => {
           fieldName="attrName"
           idPrefix="idPrefix"
           overflowIndexStart={1}
+          maxOverflowItems={5}
         />
       );
       expect(wrapper).toMatchSnapshot();
+    });
+
+    test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          values={items}
+          fieldName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={5}
+          overflowIndexStart={1}
+        />
+      );
+      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
+    });
+
+    test('it shows correct number of overflow items when maxOverflowItems are not exceeded', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={5}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
+
+      expect(
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
+      ).toEqual(2);
+    });
+
+    test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          values={items}
+          fieldName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={1}
+          overflowIndexStart={1}
+        />
+      );
+      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
+    });
+
+    test('it shows correct number of overflow items when maxOverflowItems are exceeded', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={1}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
+
+      expect(
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
+      ).toBe(1);
     });
   });
 

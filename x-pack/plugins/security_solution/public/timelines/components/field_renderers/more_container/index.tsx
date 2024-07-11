@@ -7,6 +7,7 @@
 
 import React, { useContext, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { TimelineContext } from '../../timeline';
 import { getSourcererScopeId } from '../../../../helpers';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -22,14 +23,24 @@ interface MoreContainerProps {
   fieldName: string;
   values: string[];
   idPrefix: string;
-  moreMaxHeight: string;
+  moreMaxHeight?: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
   scopeId?: string;
 }
+/** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({ fieldName, idPrefix, moreMaxHeight, overflowIndexStart, render, values, scopeId }) => {
+  ({
+    fieldName,
+    idPrefix,
+    moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
+    overflowIndexStart,
+    render,
+    values,
+    scopeId,
+  }) => {
     const { timelineId } = useContext(TimelineContext);
     const defaultedScopeId = scopeId ?? timelineId;
     const sourcererScopeId = getSourcererScopeId(defaultedScopeId ?? '');
@@ -67,10 +78,10 @@ export const MoreContainer = React.memo<MoreContainerProps>(
       <div
         data-test-subj="more-container"
         className="eui-yScroll"
-        style={{
-          maxHeight: moreMaxHeight,
-          paddingRight: '2px',
-        }}
+        css={css`
+          max-height: ${moreMaxHeight};
+          padding-right: 2px;
+        `}
       >
         <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
           {moreItemsWithHoverActions}

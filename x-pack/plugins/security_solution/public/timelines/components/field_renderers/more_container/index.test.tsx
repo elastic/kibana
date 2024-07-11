@@ -20,7 +20,7 @@ mockGetUrlForApp.mockImplementation(
 
 jest.mock('../../../../common/hooks/use_get_field_spec');
 
-export const DEFAULT_MORE_MAX_HEIGHT = '200px';
+export const DEFAULT_MORE_MAX_HEIGHT = '100px';
 
 describe('Field Renderers', () => {
   describe('MoreContainer', () => {
@@ -32,7 +32,6 @@ describe('Field Renderers', () => {
         <TestProviders>
           <MoreContainer
             idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
@@ -48,7 +47,6 @@ describe('Field Renderers', () => {
         <TestProviders>
           <MoreContainer
             idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={0}
             values={rowItems}
             fieldName="mock.attr"
@@ -66,7 +64,6 @@ describe('Field Renderers', () => {
         <TestProviders>
           <MoreContainer
             idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
@@ -82,8 +79,8 @@ describe('Field Renderers', () => {
         <TestProviders>
           <MoreContainer
             idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             values={rowItems}
             fieldName="mock.attr"
           />
@@ -100,7 +97,6 @@ describe('Field Renderers', () => {
         <TestProviders>
           <MoreContainer
             idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             values={rowItems}
             fieldName="mock.attr"
@@ -120,7 +116,6 @@ describe('Field Renderers', () => {
         <TestProviders>
           <MoreContainer
             idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             render={renderFn}
             values={rowItems}

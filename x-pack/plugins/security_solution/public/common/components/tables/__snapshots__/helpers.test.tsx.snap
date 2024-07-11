@@ -12,7 +12,7 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
       <MoreContainer
         fieldName="attrName"
         idPrefix="idPrefix"
-        moreMaxHeight="200px"
+        moreMaxHeight="none"
         overflowIndexStart={1}
         values={
           Array [
