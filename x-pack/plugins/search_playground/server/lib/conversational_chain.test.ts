@@ -96,8 +96,8 @@ describe('conversational chain', () => {
         size: 3,
         inputTokensLimit: modelLimit,
       },
-      prompt: 'you are a QA bot {question} {chat_history} {context}',
-      questionRewritePrompt: 'rewrite question {question} using {chat_history}"',
+      prompt: 'you are a QA bot {context}',
+      questionRewritePrompt: 'rewrite question {question} using {context}"',
     });
 
     const stream = await conversationalChain.stream(aiClient, chat);
@@ -292,7 +292,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 38 },
+        { type: 'prompt_token_count', count: 39 },
       ],
       expectedSearchRequest: [
         {
@@ -336,7 +336,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 40 },
+        { type: 'prompt_token_count', count: 39 },
       ],
       expectedSearchRequest: [
         {
@@ -380,7 +380,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 42 },
+        { type: 'prompt_token_count', count: 49 },
       ],
       expectedSearchRequest: [
         {
@@ -445,8 +445,8 @@ describe('conversational chain', () => {
       ],
       // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
-        { type: 'context_token_count', count: 70 },
-        { type: 'prompt_token_count', count: 97 },
+        { type: 'context_token_count', count: 65 },
+        { type: 'prompt_token_count', count: 99 },
       ],
       expectedHasClipped: true,
       expectedSearchRequest: [

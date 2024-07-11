@@ -7,7 +7,11 @@
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Document } from '@langchain/core/documents';
-import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
+import {
+  ChatPromptTemplate,
+  PromptTemplate,
+  SystemMessagePromptTemplate,
+} from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
 import {
@@ -17,6 +21,7 @@ import {
 } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
@@ -58,6 +63,16 @@ const formatVercelMessages = (chatHistory: VercelChatMessage[]) => {
     }
   });
   return formattedDialogueTurns.join('\n');
+};
+
+const getMessages = (chatHistory: any) => {
+  return chatHistory.map((message) => {
+    if (message.role === 'human') {
+      return new HumanMessage(message.content);
+    } else {
+      return new AIMessage(message.content);
+    }
+  });
 };
 
 const buildContext = (docs: Document[]) => {
@@ -161,8 +176,7 @@ class ConversationalChainFn {
       );
       standaloneQuestionChain = RunnableSequence.from([
         {
-          context: () => '',
-          chat_history: (input) => input.chat_history,
+          context: (input) => input.chat_history,
           question: (input) => input.question,
         },
         questionRewritePromptTemplate,
@@ -175,12 +189,15 @@ class ConversationalChainFn {
       });
     }
 
-    const prompt = ChatPromptTemplate.fromTemplate(this.options.prompt);
+    const lcMessages = getMessages(messages);
+    const prompt = ChatPromptTemplate.fromMessages([
+      SystemMessagePromptTemplate.fromTemplate(this.options.prompt),
+      ...lcMessages,
+    ]);
 
     const answerChain = RunnableSequence.from([
       {
         context: RunnableSequence.from([(input) => input.question, retrievalChain]),
-        chat_history: (input) => input.chat_history,
         question: (input) => input.question,
       },
       RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
