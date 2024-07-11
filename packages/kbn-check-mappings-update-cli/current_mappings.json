@@ -1028,6 +1028,9 @@
       },
       "type": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
       }
     }
   },
@@ -3410,6 +3413,9 @@
   "usage-counter": {
     "dynamic": false,
     "properties": {
+      "count": {
+        "type": "integer"
+      },
       "counterName": {
         "type": "keyword"
       },

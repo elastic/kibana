@@ -22,14 +22,14 @@ export interface LogsErrorRateTimeseries {
   kuery?: string;
 }
 
-export const getLogErrorsAggegation = () => ({
+const getLogErrorsAggregation = () => ({
   terms: {
     field: LOG_LEVEL,
     include: ['error', 'ERROR'],
   },
 });
 
-type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggegation>;
+type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
@@ -103,7 +103,7 @@ export function createGetLogErrorRateTimeseries() {
                 },
               },
               aggs: {
-                logErrors: getLogErrorsAggegation(),
+                logErrors: getLogErrorsAggregation(),
               },
             },
           },
