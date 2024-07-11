@@ -22,7 +22,9 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-saved-objects-server",
-    "@kbn/alerting-state-types"
+    "@kbn/alerting-state-types",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",
