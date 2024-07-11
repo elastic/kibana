@@ -103,27 +103,29 @@ export class ObservabilityAIAssistantAppPlugin
     const appService = (this.appService = createAppService({
       pluginsStart,
     }));
+    const isEnabled = appService.isEnabled();
+    if (isEnabled) {
+      coreStart.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <SharedProviders
+              coreStart={coreStart}
+              pluginsStart={pluginsStart}
+              service={appService}
+              theme$={coreStart.theme.theme$}
+            >
+              <LazyNavControl />
+            </SharedProviders>,
+            element,
+            () => {}
+          );
 
-    coreStart.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <SharedProviders
-            coreStart={coreStart}
-            pluginsStart={pluginsStart}
-            service={appService}
-            theme$={coreStart.theme.theme$}
-          >
-            <LazyNavControl />
-          </SharedProviders>,
-          element,
-          () => {}
-        );
-
-        return () => {};
-      },
-      // right before the user profile
-      order: 1001,
-    });
+          return () => {};
+        },
+        // right before the user profile
+        order: 1001,
+      });
+    }
 
     const service = pluginsStart.observabilityAIAssistant.service;
 
