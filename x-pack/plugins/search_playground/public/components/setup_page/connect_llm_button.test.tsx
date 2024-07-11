@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { fireEvent, render as testingLibraryRender, waitFor } from '@testing-library/react';
-import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
-import { useKibana } from '../hooks/use_kibana';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
+import { ConnectLLMButton } from './connect_llm_button';
+import { useKibana } from '../../hooks/use_kibana';
+import { useLoadConnectors } from '../../hooks/use_load_connectors';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
 
-jest.mock('../hooks/use_kibana');
-jest.mock('../hooks/use_load_connectors');
-jest.mock('../hooks/use_usage_tracker', () => ({
+jest.mock('../../hooks/use_kibana');
+jest.mock('../../hooks/use_load_connectors');
+jest.mock('../../hooks/use_usage_tracker', () => ({
   useUsageTracker: () => ({
     count: jest.fn(),
     load: jest.fn(),
@@ -30,7 +30,7 @@ const mockConnectors = {
   '2': { title: 'Connector 2' },
 };
 
-describe('SetUpConnectorPanelForStartChat', () => {
+describe('ConnectLLMButton', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -59,8 +59,8 @@ describe('SetUpConnectorPanelForStartChat', () => {
       isLoading: false,
       isSuccess: true,
     });
-    const { getByTestId } = render(<SetUpConnectorPanelForStartChat />);
-    expect(getByTestId('setupGenAIConnectorButton')).toBeInTheDocument();
+    const { getByTestId } = render(<ConnectLLMButton />);
+    expect(getByTestId('connectLLMButton')).toBeInTheDocument();
   });
 
   it('show the flyout when the button is clicked', async () => {
@@ -69,11 +69,22 @@ describe('SetUpConnectorPanelForStartChat', () => {
       isLoading: false,
       isSuccess: true,
     });
-    const { getByTestId, queryByTestId } = render(<SetUpConnectorPanelForStartChat />);
+    const { getByTestId, queryByTestId } = render(<ConnectLLMButton />);
 
     expect(queryByTestId('addConnectorFlyout')).not.toBeInTheDocument();
 
-    fireEvent.click(getByTestId('setupGenAIConnectorButton'));
+    fireEvent.click(getByTestId('connectLLMButton'));
     await waitFor(() => expect(getByTestId('addConnectorFlyout')).toBeInTheDocument());
+  });
+
+  it('show success button when connector exists', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      data: [{}],
+      isLoading: false,
+      isSuccess: true,
+    });
+    const { queryByTestId } = render(<ConnectLLMButton />);
+
+    expect(queryByTestId('successConnectLLMButton')).toBeInTheDocument();
   });
 });

@@ -12,7 +12,7 @@ import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
-import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
+import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
   CommandDefinition,
@@ -335,9 +335,6 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
     suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
-  }
-  if (types.includes('chrono_literal')) {
-    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...
   }
   if (types.includes('string')) {
     if (names) {
