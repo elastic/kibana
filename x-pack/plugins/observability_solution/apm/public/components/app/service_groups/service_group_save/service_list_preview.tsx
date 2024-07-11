@@ -84,7 +84,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} size="l" />
+                <AgentIcon agentName={agentName} size="l" role="presentation" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
             </EuiFlexGroup>

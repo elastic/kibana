@@ -68,7 +68,7 @@ export interface UserEntityOverviewProps {
 
 export const USER_PREVIEW_BANNER = {
   title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
-    defaultMessage: 'Preview user',
+    defaultMessage: 'Preview user details',
   }),
   backgroundColor: 'warning',
   textColor: 'warning',

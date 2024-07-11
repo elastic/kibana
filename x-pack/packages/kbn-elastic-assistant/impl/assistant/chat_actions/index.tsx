@@ -7,14 +7,12 @@
 
 import React, { useCallback, useRef } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { CLEAR_CHAT, SUBMIT_MESSAGE } from '../translations';
+import { SUBMIT_MESSAGE } from '../translations';
 
 interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
-  isFlyoutMode: boolean;
   promptValue?: string;
-  onChatCleared: () => void;
   onSendMessage: () => void;
 }
 
@@ -26,9 +24,7 @@ type Props = OwnProps;
 export const ChatActions: React.FC<Props> = ({
   isDisabled,
   isLoading,
-  onChatCleared,
   onSendMessage,
-  isFlyoutMode,
   promptValue,
 }) => {
   const submitTooltipRef = useRef<EuiToolTip | null>(null);
@@ -39,21 +35,6 @@ export const ChatActions: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {!isFlyoutMode && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="right" content={CLEAR_CHAT}>
-            <EuiButtonIcon
-              aria-label={CLEAR_CHAT}
-              color="danger"
-              data-test-subj="clear-chat"
-              display="base"
-              iconType="cross"
-              isDisabled={isDisabled}
-              onClick={onChatCleared}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip
           ref={submitTooltipRef}
@@ -66,9 +47,9 @@ export const ChatActions: React.FC<Props> = ({
             aria-label={SUBMIT_MESSAGE}
             data-test-subj="submit-chat"
             color="primary"
-            display={isFlyoutMode && promptValue?.length ? 'fill' : 'base'}
-            size={isFlyoutMode ? 'm' : 'xs'}
-            iconType={isFlyoutMode ? 'kqlFunction' : 'returnKey'}
+            display={promptValue?.length ? 'fill' : 'base'}
+            size={'m'}
+            iconType={'kqlFunction'}
             isDisabled={isDisabled || !promptValue?.length}
             isLoading={isLoading}
             onClick={onSendMessage}

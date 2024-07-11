@@ -13,7 +13,7 @@ import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile, createType } from '../test_utils';
+import { parseLogFile, createType } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'basic_downgrade.test.log');
@@ -28,7 +28,6 @@ describe('ZDT upgrades - basic downgrade', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const typeV1 = createType({
