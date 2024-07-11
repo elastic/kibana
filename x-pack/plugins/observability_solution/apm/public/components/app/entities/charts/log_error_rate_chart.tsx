@@ -7,6 +7,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -87,13 +89,28 @@ export function LogErrorRateChart({ height }: { height: number }) {
           <Popover>
             <TooltipContent
               formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
-              description={i18n.translate(
-                'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description',
-                {
-                  defaultMessage: '% of logs where error detected for given {fieldName}',
-                  values: { fieldName: 'service.name' },
-                }
-              )}
+              description={
+                <FormattedMessage
+                  defaultMessage="% of logs where error detected for given {serviceName}."
+                  id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+                  values={{
+                    serviceName: (
+                      <code
+                        css={css`
+                          word-break: break-word;
+                        `}
+                      >
+                        {i18n.translate(
+                          'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
+                          {
+                            defaultMessage: 'service.name',
+                          }
+                        )}
+                      </code>
+                    ),
+                  }}
+                />
+              }
             />
           </Popover>
         </EuiFlexItem>

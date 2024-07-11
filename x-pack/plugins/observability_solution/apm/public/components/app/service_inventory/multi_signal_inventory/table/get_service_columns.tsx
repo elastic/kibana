@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
@@ -165,13 +167,28 @@ export function getServiceColumns({
             defaultMessage: 'Log rate (per min.)',
           })}
           formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
-          toolTip={i18n.translate(
-            'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description',
-            {
-              defaultMessage: 'Rate of logs per minute observed for given {fieldName}.',
-              values: { fieldName: 'service.name' },
-            }
-          )}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="Rate of logs per minute observed for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
         />
       ),
       sortable: true,
@@ -198,13 +215,28 @@ export function getServiceColumns({
             defaultMessage: 'Log error rate',
           })}
           formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
-          toolTip={i18n.translate(
-            'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description',
-            {
-              defaultMessage: '% of logs where error detected for given {fieldName}',
-              values: { fieldName: 'service.name' }, // convert to code block
-            }
-          )}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="% of logs where error detected for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
         />
       ),
       sortable: true,

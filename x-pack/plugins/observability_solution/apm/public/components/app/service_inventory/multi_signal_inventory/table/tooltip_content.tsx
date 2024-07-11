@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { HTMLAttributes } from 'react';
+import React, { HTMLAttributes, ReactElement } from 'react';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface TooltipContentProps extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
-  description: string;
+  description: ReactElement | string;
   formula?: string;
 }
 

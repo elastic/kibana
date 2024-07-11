@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TooltipContent } from './tooltip_content';
@@ -12,7 +12,7 @@ import { Popover } from './popover';
 
 interface Props {
   label: string;
-  toolTip?: string;
+  toolTip?: ReactElement | string;
   formula?: string;
 }
 
