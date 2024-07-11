@@ -67,7 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display the logs overview tab', async () => {
-      await dataGrid.clickRowToggle();
+      await retry.try(async () => {
+        await dataGrid.clickRowToggle();
+      });
       await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
     });
   });
