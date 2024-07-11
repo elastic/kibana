@@ -75,7 +75,7 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 
 <div>
   <div
-    class="c0 euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
+    class="c0 euiDataGridRow "
     role="row"
   >
     <div
@@ -97,7 +97,7 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
     </div>
   </div>
   <div
-    class="c0 euiDataGridRow "
+    class="c0 euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
     role="row"
   >
     <div
