@@ -19,7 +19,7 @@ import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/publ
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
-import { FtrService } from '../../../../functional/ftr_provider_context';
+import { FtrService } from '../../functional/ftr_provider_context';
 import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {

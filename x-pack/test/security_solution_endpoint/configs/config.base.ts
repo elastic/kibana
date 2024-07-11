@@ -7,11 +7,8 @@
 
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
 import { pageObjects } from '../page_objects';
-import {
-  getRegistryUrlAsArray,
-  createEndpointDockerConfig,
-} from '../../security_solution_endpoint_api_int/registry';
 import type { TargetTags } from '../target_tags';
 
 export const SUITE_TAGS: Record<
@@ -46,9 +43,11 @@ export const generateConfig = async ({
   services: any;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
-
+  // services are not ready yet, so we need to import them here
+  const { createEndpointDockerConfig, getRegistryUrlAsArray } =
+    SecuritySolutionEndpointRegistryHelpers();
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../../../functional/config.base.js')
+    require.resolve('../../functional/config.base.js')
   );
 
   return {
@@ -91,12 +90,10 @@ export const generateConfig = async ({
     layout: {
       fixedHeaderHeight: 200,
     },
-    mochaOpts: {
-      ...baseConfig.get('mochaOpts'),
-      grep:
-        target === 'serverless'
-          ? '/^(?!.*@(skipInServerless|brokenInServerless)).*@serverless/'
-          : '/^(?!.*@skipInEss).*@ess.*/',
+    suiteTags: {
+      ...baseConfig.get('suiteTags'),
+      include: [...baseConfig.get('suiteTags.include'), ...SUITE_TAGS[target].include],
+      exclude: [...baseConfig.get('suiteTags.exclude'), ...SUITE_TAGS[target].exclude],
     },
   };
 };

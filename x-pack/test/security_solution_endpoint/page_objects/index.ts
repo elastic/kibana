@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { pageObjects as xpackFunctionalPageObjects } from '../../../../functional/page_objects';
+import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
-import { DetectionsPageObject } from '../../../../security_solution_ftr/page_objects/detections';
-import { HostsPageObject } from '../../../../security_solution_ftr/page_objects/hosts';
+import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
+import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
 import { EndpointResponderPageObjects } from './endpoint_responder';
-import { TimelinePageObject } from '../../../../security_solution_ftr/page_objects/timeline';
+import { TimelinePageObject } from '../../security_solution_ftr/page_objects/timeline';
 import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { FleetIntegrations } from './fleet_integrations_page';

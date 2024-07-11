@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../configs/ftr_provider_context';
-import { deletePolicyStream } from './data_stream_helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
+
   describe('@ess @serverless Endpoint policy api', function () {
     describe('GET /api/endpoint/policy_response', () => {
       before(
@@ -23,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
-      after(async () => await deletePolicyStream(getService));
+      after(async () => await endpointDataStreamHelpers.deletePolicyStream(getService));
 
       it('should return one policy response for an id', async () => {
         const expectedAgentId = 'a10ac658-a3bc-4ac6-944a-68d9bd1c5a5e';

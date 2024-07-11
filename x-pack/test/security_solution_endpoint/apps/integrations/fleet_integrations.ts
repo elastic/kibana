@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import {
-  deleteMetadataStream,
-  deleteAllDocsFromMetadataCurrentIndex,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { fleetIntegrations, trustedApps } = getPageObjects(['trustedApps', 'fleetIntegrations']);
@@ -16,8 +13,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
-  describe('@ess @serverless When in the Fleet application', function () {
+  describe('When in the Fleet application', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
         useCreate: true,
@@ -25,8 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await browser.refresh();
     });
     after(async () => {
-      await deleteMetadataStream(getService);
-      await deleteAllDocsFromMetadataCurrentIndex(getService);
+      await endpointDataStreamHelpers.deleteMetadataStream(getService);
+      await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
     });
     describe('and on the Endpoint Integration details page', () => {
       beforeEach(async () => {
