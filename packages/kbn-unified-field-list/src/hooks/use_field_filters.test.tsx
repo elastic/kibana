@@ -63,7 +63,9 @@ describe('UnifiedFieldList useFieldFilters()', () => {
 
     expect(result.current.fieldSearchHighlight).toBe('time');
     expect(result.current.onFilterField).toBeDefined();
-    expect(result.current.onFilterField!({ displayName: 'time test' } as DataViewField)).toBe(true);
+    expect(
+      result.current.onFilterField!({ displayName: 'time test', name: '' } as DataViewField)
+    ).toBe(true);
     expect(result.current.onFilterField!(dataView.getFieldByName('@timestamp')!)).toBe(true);
     expect(result.current.onFilterField!(dataView.getFieldByName('bytes')!)).toBe(false);
   });
@@ -86,13 +88,45 @@ describe('UnifiedFieldList useFieldFilters()', () => {
 
     expect(result.current.fieldSearchHighlight).toBe('message*me1');
     expect(result.current.onFilterField).toBeDefined();
-    expect(result.current.onFilterField!({ displayName: 'test' } as DataViewField)).toBe(false);
-    expect(result.current.onFilterField!({ displayName: 'message' } as DataViewField)).toBe(false);
-    expect(result.current.onFilterField!({ displayName: 'message.name1' } as DataViewField)).toBe(
-      true
+    expect(result.current.onFilterField!({ displayName: 'test', name: '' } as DataViewField)).toBe(
+      false
     );
+    expect(
+      result.current.onFilterField!({ displayName: 'message', name: '' } as DataViewField)
+    ).toBe(false);
+    expect(
+      result.current.onFilterField!({ displayName: 'message.name1', name: '' } as DataViewField)
+    ).toBe(true);
     expect(result.current.onFilterField!({ name: 'messagename10' } as DataViewField)).toBe(false);
     expect(result.current.onFilterField!({ name: 'message.test' } as DataViewField)).toBe(false);
+  });
+  it('should update correctly on search by name with a typo', async () => {
+    const props: FieldFiltersParams<DataViewField> = {
+      allFields: dataView.fields,
+      services: mockedServices,
+    };
+    const { result } = renderHook(useFieldFilters, {
+      initialProps: props,
+    });
+
+    expect(result.current.fieldSearchHighlight).toBe('');
+    expect(result.current.onFilterField).toBeUndefined();
+
+    act(() => {
+      result.current.fieldListFiltersProps.onChangeNameFilter('messsge');
+    });
+
+    expect(result.current.fieldSearchHighlight).toBe('messsge');
+    expect(result.current.onFilterField).toBeDefined();
+    expect(result.current.onFilterField!({ displayName: 'test', name: '' } as DataViewField)).toBe(
+      false
+    );
+    expect(
+      result.current.onFilterField!({ displayName: 'message', name: '' } as DataViewField)
+    ).toBe(true);
+    expect(
+      result.current.onFilterField!({ displayName: 'message.name1', name: '' } as DataViewField)
+    ).toBe(true);
   });
 
   it('should update correctly on filter by type', async () => {
