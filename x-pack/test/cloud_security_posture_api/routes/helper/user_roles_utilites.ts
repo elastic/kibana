@@ -28,15 +28,19 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
             names: ['logs-cloud_security_posture.scores-*'],
             privileges: ['read'],
           },
+          {
+            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
+            privileges: ['all'],
+          },
         ],
       },
       kibana: [
         {
           base: [],
           feature: {
-            savedObjectsManagement: ['all'],
             fleet: ['all'],
             fleetv2: ['all'],
+            savedObjectsManagement: ['all'],
           },
           spaces: ['*'],
         },
@@ -69,67 +73,9 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
           base: [],
           feature: {
             siem: ['read'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    },
-    {
-      name: 'role_security_read_benchmark',
-      elasticsearch: {
-        indices: [
-          {
-            names: ['logs-cloud_security_posture.findings-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.findings_latest-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.scores-*'],
-            privileges: ['read'],
-          },
-        ],
-      },
-      kibana: [
-        {
-          base: [],
-          feature: {
-            siem: ['read'],
+            fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],
-            fleet: ['all'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    },
-    {
-      name: 'role_security_none_benchmark',
-      elasticsearch: {
-        indices: [
-          {
-            names: ['logs-cloud_security_posture.findings-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.findings_latest-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.scores-*'],
-            privileges: ['read'],
-          },
-        ],
-      },
-      kibana: [
-        {
-          base: [],
-          feature: {
-            fleetv2: ['all'],
-            savedObjectsManagement: ['all'],
-            fleet: ['all'],
           },
           spaces: ['*'],
         },
@@ -166,8 +112,8 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
           base: [],
           feature: {
             siem: ['read'],
-            fleetv2: ['all'],
             fleet: ['all'],
+            fleetv2: ['all'],
           },
           spaces: ['*'],
         },
@@ -203,8 +149,8 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            fleetv2: ['all'],
             fleet: ['all'],
+            fleetv2: ['all'],
           },
           spaces: ['*'],
         },
@@ -220,12 +166,6 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
       roles: ['role_security_read'],
     },
     {
-      name: 'role_security_read_user_benchmark',
-      full_name: 'security read privilege user',
-      password: 'test123',
-      roles: ['role_security_read_benchmark'],
-    },
-    {
       name: 'role_security_read_user_alerts',
       full_name: 'user with 0 security privilege for',
       password: 'csp123',
@@ -236,12 +176,6 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
       full_name: 'user with 0 security privilege',
       password: 'csp123',
       roles: ['role_security_none'],
-    },
-    {
-      name: 'role_security_none_user_benchmark',
-      full_name: 'user with 0 security privilege for',
-      password: 'csp123',
-      roles: ['role_security_none_benchmark'],
     },
     {
       name: 'role_security_none_user_alerts',

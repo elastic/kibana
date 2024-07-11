@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { expect as expectExpect } from 'expect';
 
 import {
@@ -461,10 +461,7 @@ export default function (providerContext: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .auth(
-          'role_security_none_user_benchmark',
-          cspSecurity.getPasswordForUser('role_security_none_user_benchmark')
-        )
+        .auth('role_security_none_user', cspSecurity.getPasswordForUser('role_security_none_user'))
         .send({
           action: 'mute',
           rules: [
@@ -494,10 +491,7 @@ export default function (providerContext: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .auth(
-          'role_security_read_user_benchmark',
-          cspSecurity.getPasswordForUser('role_security_read_user_benchmark')
-        )
+        .auth('role_security_read_user', cspSecurity.getPasswordForUser('role_security_read_user'))
         .send({
           action: 'mute',
           rules: [

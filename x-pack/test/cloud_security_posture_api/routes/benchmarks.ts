@@ -13,7 +13,7 @@ import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -289,8 +289,8 @@ export default function (providerContext: FtrProviderContext) {
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            'role_security_none_user_benchmark',
-            cspSecurity.getPasswordForUser('role_security_none_user_benchmark')
+            'role_security_none_user',
+            cspSecurity.getPasswordForUser('role_security_none_user')
           );
 
         expect(benchmarksResult.statusCode).to.equal(403);
@@ -311,8 +311,8 @@ export default function (providerContext: FtrProviderContext) {
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            'role_security_read_user_benchmark',
-            cspSecurity.getPasswordForUser('role_security_read_user_benchmark')
+            'role_security_read_user',
+            cspSecurity.getPasswordForUser('role_security_read_user')
           );
         expect(status).to.equal(200);
       });
