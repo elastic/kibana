@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     const defaultXFrameOptions = 'SAMEORIGIN';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
     });
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);

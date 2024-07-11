@@ -7,7 +7,7 @@
 
 import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { SamlSessionManager } from '@kbn/test';
-import { readRolesFromResource } from '@kbn/es';
+import { readRolesDescriptorsFromResource } from '@kbn/es';
 import { resolve } from 'path';
 import { Role } from '@kbn/test/src/auth/types';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
@@ -38,9 +38,12 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     throw new Error(`Unsupported serverless projectType: ${projectType}`);
   }
 
-  const supportedRoles = readRolesFromResource(
+  const supportedRoleDescriptors = readRolesDescriptorsFromResource(
     resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml')
   );
+
+  const supportedRoles = Object.keys(supportedRoleDescriptors);
+
   const defaultRolesToMap = new Map<string, Role>([
     ['es', 'developer'],
     ['security', 'editor'],
@@ -94,16 +97,40 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       return this.createApiKeyForRole(this.DEFAULT_ROLE);
     },
     async createApiKeyForRole(role: string): Promise<RoleCredentials> {
-      const cookieHeader = await this.getApiCredentialsForRole(role);
+      // Get admin credentials in order to create the API key
+      const adminCookieHeader = await this.getApiCredentialsForRole('admin');
+
+      // Get the role descrtiptor for the role
+      let roleDescriptors = {};
+      if (role !== 'admin') {
+        const roleDescriptor = supportedRoleDescriptors[role];
+        if (!roleDescriptor) {
+          throw new Error(`Cannot create API key for non-existent role "${role}"`);
+        }
+        log.debug(
+          `Creating api key for ${role} role with the following privileges ${JSON.stringify(
+            roleDescriptor
+          )}`
+        );
+        roleDescriptors = {
+          [role]: roleDescriptor ?? {
+            cluster: [],
+            index: [],
+            applications: [],
+          },
+        };
+      }
+
+      log.debug(`Creating api key for default role: [${this.DEFAULT_ROLE}]`);
 
       const { body, status } = await supertestWithoutAuth
         .post('/internal/security/api_key')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(cookieHeader)
+        .set(adminCookieHeader)
         .send({
           name: 'myTestApiKey',
           metadata: {},
-          role_descriptors: {},
+          role_descriptors: roleDescriptors,
         });
       expect(status).to.be(200);
 
@@ -111,7 +138,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
       log.debug(`Created api key for role: [${role}]`);
-      return { apiKey, apiKeyHeader, cookieHeader };
+      return { apiKey, apiKeyHeader, cookieHeader: adminCookieHeader };
     },
     async invalidateApiKeyForRole(roleCredentials: RoleCredentials) {
       const requestBody = {
