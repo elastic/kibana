@@ -12,6 +12,7 @@ import { SPACE_SETTINGS_ID_SUFFIX } from '../../../common/constants';
 import { appContextService } from '../app_context';
 import { SPACE_SETTINGS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { SpaceSettingsSOAttributes } from '../../types';
+import { FleetUnauthorizedError } from '../..';
 
 function _getSavedObjectId(spaceId?: string) {
   if (!spaceId || spaceId === DEFAULT_SPACE_ID) {
@@ -35,17 +36,27 @@ export async function getSpaceSettings(spaceId?: string) {
 
   return {
     allowed_namespace_prefixes: settings?.attributes?.allowed_namespace_prefixes ?? [],
+    managed_by: settings?.attributes?.managed_by,
   };
 }
 
 export async function saveSpaceSettings({
   settings,
   spaceId,
+  managedBy,
 }: {
   settings: Partial<SpaceSettingsSOAttributes>;
   spaceId?: string;
+  managedBy?: 'kibana_config';
 }) {
   const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+  const originalSettings = await getSpaceSettings(spaceId);
+  if (originalSettings.managed_by && originalSettings.managed_by !== managedBy) {
+    throw new FleetUnauthorizedError(
+      `Settings are managed by: ${managedBy} and should be edited there`
+    );
+  }
 
   await soClient.update<SpaceSettingsSOAttributes>(
     SPACE_SETTINGS_SAVED_OBJECT_TYPE,

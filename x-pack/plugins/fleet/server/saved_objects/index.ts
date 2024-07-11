@@ -136,6 +136,7 @@ export const getSavedObjectTypes = (
         dynamic: false,
         properties: {
           allowed_namespace_prefixes: { enabled: false },
+          managed_by: { type: 'keyword', index: false },
         },
       },
     },
