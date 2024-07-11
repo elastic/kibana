@@ -15,8 +15,10 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -52,6 +54,7 @@ import { RuleConditionChart as ExpandedCharts } from './explanded_charts';
 import { AlertParams } from '../../components/custom_threshold/types';
 import { getGroupFilters } from '../..';
 import { Group } from '../../../common/typings';
+import { generateChartTitleAndTooltip } from '../../components/custom_threshold/components/alert_details_app_section/helpers/generate_chart_title_and_tooltip';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -87,6 +90,9 @@ export function InvestigationDetails() {
   const alertStart = alertDetail?.formatted.fields[ALERT_START];
   const alertEnd = alertDetail?.formatted.fields[ALERT_END];
   const groups = alertDetail?.formatted.fields[ALERT_GROUP];
+
+  const [chartLabel, setChartLabel] = useState<Array<{ title: string; tooltip: string }>>([]);
+
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
 
@@ -122,6 +128,16 @@ export function InvestigationDetails() {
         : defaultBreadcrumb,
     },
   ]);
+
+  useEffect(() => {
+    if (rule?.params) {
+      const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
+      (rule?.params.criteria as any).forEach((criterion: any) => {
+        chartTitleAndTooltip.push(generateChartTitleAndTooltip(criterion));
+      });
+      setChartLabel(chartTitleAndTooltip);
+    }
+  }, [rule]);
 
   useEffect(() => {
     const initDataView = async () => {
@@ -222,19 +238,18 @@ export function InvestigationDetails() {
       data-test-subj="alertInvestigationDetails"
     >
       <HeaderMenu />
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiLink
+          <EuiButton
             data-test-subj="o11yInvestigationDetailsLink"
-            style={{ width: '110px' }}
             onClick={() => {
               setToggle0On((isOn) => !isOn);
             }}
           >
-            {toggle0On ? 'Collapse charts' : 'Expand charts'}
-          </EuiLink>
+            {toggle0On ? 'Hide separate charts' : 'Show separate charts'}
+          </EuiButton>
         </EuiFlexItem>
-        {!toggle0On && (
+        {
           <EuiFlexItem>
             <EuiButtonGroup
               legend="normalizedOriginalGroup"
@@ -242,10 +257,13 @@ export function InvestigationDetails() {
               idSelected={toggleIdSelected}
               onChange={(id) => onChange(id)}
               color="primary"
+              buttonSize="m"
+              isFullWidth
+              style={{ width: 250 }}
             />
           </EuiFlexItem>
-        )}
-        {!toggle0On && (
+        }
+        {
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
@@ -259,7 +277,6 @@ export function InvestigationDetails() {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="o11yInvestigationDetailsApplyButton"
-                  // style={{ width: '110px' }}
                   onClick={() => {
                     setChartInterval(intervalValue);
                   }}
@@ -271,9 +288,9 @@ export function InvestigationDetails() {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        )}
+        }
       </EuiFlexGroup>
-      {rule?.params && !toggle0On ? (
+      {rule?.params ? (
         <CollapsedCharts
           additionalFilters={getGroupFilters(groups as Group[])}
           annotations={annotations}
@@ -296,6 +313,13 @@ export function InvestigationDetails() {
         <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
           {(rule?.params.criteria as any).map((criterion: any, index: number) => (
             <EuiFlexItem key={`criterion-${index}`}>
+              {/* <EuiPanel hasBorder hasShadow={false}> */}
+              <EuiToolTip content={chartLabel[index].tooltip}>
+                <EuiTitle size="xs">
+                  <h4 data-test-subj={`chartTitle-${index}`}>{chartLabel[index].title}</h4>
+                </EuiTitle>
+              </EuiToolTip>
+              <EuiSpacer size="m" />
               <EuiFlexGroup>
                 <EuiFlexItem grow={5}>
                   <ExpandedCharts
@@ -305,6 +329,7 @@ export function InvestigationDetails() {
                       // For alert details page, the series type needs to be changed to 'bar_stacked'
                       // due to https://github.com/elastic/elastic-charts/issues/2323
                       seriesType: 'bar_stacked',
+                      interval: chartInterval,
                     }}
                     dataView={dataView}
                     groupBy={rule?.params.groupBy as string[]}
@@ -314,6 +339,7 @@ export function InvestigationDetails() {
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              {/* </EuiPanel> */}
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
