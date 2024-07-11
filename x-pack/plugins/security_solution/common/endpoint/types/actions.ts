@@ -9,10 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
-  ResponseActionBodySchema,
-  UploadActionApiRequestBody,
   KillProcessRouteRequestSchema,
+  ResponseActionBodySchema,
   SuspendProcessRouteRequestSchema,
+  UploadActionApiRequestBody,
 } from '../../api/endpoint';
 import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
 import type { NoParametersRequestSchema } from '../../api/endpoint/actions/common/base';

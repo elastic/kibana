@@ -116,6 +116,14 @@ export interface SentinelOneGetFileResponseMeta {
   filename: string;
 }
 
+export interface SentinelOneProcessesRequestMeta extends SentinelOneGetFileRequestMeta {
+  /**
+   * The Parent Task Is that is executing the kill process action in SentinelOne.
+   * Used to check on the status of that action
+   */
+  parentTaskId: string;
+}
+
 export interface SentinelOneKillProcessRequestMeta extends SentinelOneIsolationRequestMeta {
   /**
    * The Parent Task Is that is executing the kill process action in SentinelOne.
