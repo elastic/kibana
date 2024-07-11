@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { URL } from 'node:url';
 import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
@@ -92,7 +93,7 @@ export class KbnClientRequester {
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
     this.httpsAgent =
-      Url.parse(options.url).protocol === 'https:'
+      new URL(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
             rejectUnauthorized: false,
