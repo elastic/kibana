@@ -436,13 +436,8 @@ export async function create(
       fieldName: 'customFields',
     });
 
-    const updatedTemplates = transformTemplateCustomFields({
-      templates: validatedConfigurationRequest.templates,
-      customFields: validatedConfigurationRequest.customFields,
-    });
-
     await validateTemplates({
-      templates: updatedTemplates,
+      templates: validatedConfigurationRequest.templates,
       clientArgs,
       customFields: validatedConfigurationRequest.customFields,
     });
@@ -520,7 +515,7 @@ export async function create(
       attributes: {
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
-        templates: updatedTemplates ?? [],
+        templates: validatedConfigurationRequest.templates ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,
