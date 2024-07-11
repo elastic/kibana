@@ -9,9 +9,9 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import type { RiskEntity } from './risk_summary';
+import type { RiskEntity } from './risk_summary_panel';
 import * as i18n from '../../common/components/event_details/cti_details/translations';
-import { RiskSummary } from './risk_summary';
+import { RiskSummaryPanel } from './risk_summary_panel';
 import { RiskScoreEntity, RiskSeverity } from '../../../common/search_strategy';
 import { getEmptyValue } from '../../common/components/empty_value';
 
@@ -46,7 +46,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
       const { getByText } = render(
         <TestProviders>
-          <RiskSummary {...props} />
+          <RiskSummaryPanel {...props} />
         </TestProviders>
       );
 
@@ -67,7 +67,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       } as RiskEntity;
       const { getByTestId } = render(
         <TestProviders>
-          <RiskSummary {...props} />
+          <RiskSummaryPanel {...props} />
         </TestProviders>
       );
 
@@ -86,7 +86,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       } as RiskEntity;
       const { getByText } = render(
         <TestProviders>
-          <RiskSummary {...props} />
+          <RiskSummaryPanel {...props} />
         </TestProviders>
       );
 
