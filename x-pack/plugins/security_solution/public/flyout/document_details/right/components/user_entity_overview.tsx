@@ -68,7 +68,7 @@ export interface UserEntityOverviewProps {
 
 export const USER_PREVIEW_BANNER = {
   title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
-    defaultMessage: 'Preview user',
+    defaultMessage: 'Preview user details',
   }),
   backgroundColor: 'warning',
   textColor: 'warning',
@@ -187,7 +187,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{USER_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+              <RiskScoreDocTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
