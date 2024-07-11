@@ -23,7 +23,7 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { DimensionsVisParam } from '../../common';
+import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import faker from 'faker';
@@ -72,6 +72,15 @@ type Props = MetricVisComponentProps;
 const dayOfWeekColumnId = 'col-0-0';
 const basePriceColumnId = 'col-1-1';
 const minPriceColumnId = 'col-2-2';
+
+const defaultMetricParams: MetricVisParam = {
+  progressDirection: 'vertical',
+  maxCols: 5,
+  titlesTextAlign: 'left',
+  valuesTextAlign: 'right',
+  iconAlign: 'left',
+  valueFontSize: 'default',
+};
 
 const table: Datatable = {
   type: 'datatable',
@@ -217,8 +226,7 @@ describe('MetricVisComponent', function () {
   describe('single metric', () => {
     const config: Props['config'] = {
       metric: {
-        progressDirection: 'vertical',
-        maxCols: 5,
+        ...defaultMetricParams,
         icon: 'empty',
       },
       dimensions: {
@@ -402,8 +410,7 @@ describe('MetricVisComponent', function () {
   describe('metric grid', () => {
     const config: Props['config'] = {
       metric: {
-        progressDirection: 'vertical',
-        maxCols: 5,
+        ...defaultMetricParams,
       },
       dimensions: {
         metric: basePriceColumnId,
@@ -856,8 +863,7 @@ describe('MetricVisComponent', function () {
           data={table}
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,
@@ -911,8 +917,7 @@ describe('MetricVisComponent', function () {
       <MetricVis
         config={{
           metric: {
-            progressDirection: 'vertical',
-            maxCols: 5,
+            ...defaultMetricParams,
           },
           dimensions: {
             metric: basePriceColumnId,
@@ -953,8 +958,7 @@ describe('MetricVisComponent', function () {
       <MetricVis
         config={{
           metric: {
-            progressDirection: 'vertical',
-            maxCols: 5,
+            ...defaultMetricParams,
           },
           dimensions: {
             metric: metricId,
@@ -980,8 +984,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,
@@ -1057,8 +1060,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,
@@ -1088,8 +1090,7 @@ describe('MetricVisComponent', function () {
                 metric: basePriceColumnId,
               },
               metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
+                ...defaultMetricParams,
                 // should be overridden
                 color: 'static-color',
                 palette: {
@@ -1141,9 +1142,8 @@ describe('MetricVisComponent', function () {
               config={{
                 dimensions,
                 metric: {
+                  ...defaultMetricParams,
                   palette,
-                  progressDirection: 'vertical',
-                  maxCols: 5,
                 },
               }}
               data={table}
@@ -1205,8 +1205,7 @@ describe('MetricVisComponent', function () {
                 metric: basePriceColumnId,
               },
               metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
+                ...defaultMetricParams,
                 color: staticColor,
                 palette: undefined,
               },
@@ -1230,8 +1229,7 @@ describe('MetricVisComponent', function () {
                 metric: basePriceColumnId,
               },
               metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
+                ...defaultMetricParams,
                 color: undefined,
                 palette: undefined,
               },
@@ -1260,8 +1258,7 @@ describe('MetricVisComponent', function () {
     ) => {
       const config: Props['config'] = {
         metric: {
-          progressDirection: 'vertical',
-          maxCols: 5,
+          ...defaultMetricParams,
         },
         dimensions: {
           metric: '1',
@@ -1416,8 +1413,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,
