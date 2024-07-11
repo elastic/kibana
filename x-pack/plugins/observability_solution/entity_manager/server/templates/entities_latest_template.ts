@@ -20,6 +20,7 @@ export const entitiesLatestIndexTemplateConfig: IndicesPutIndexTemplateRequest =
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
     ecs_version: '8.0.0',
+    managed: true,
   },
   composed_of: [
     ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
