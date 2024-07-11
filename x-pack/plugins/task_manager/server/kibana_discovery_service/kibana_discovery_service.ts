@@ -7,8 +7,8 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/logging';
-import { BACKGROUND_TASK_NODE_SO_NAME } from './saved_objects';
-import { BackgroundTaskNode } from './saved_objects/schemas/background_task_node';
+import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
+import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 
 interface DiscoveryServiceParams {
   currentNode: string;
@@ -99,13 +99,10 @@ export class KibanaDiscoveryService {
 
   public async start() {
     if (!this.started) {
-      Promise.allSettled([
-        this.scheduleUpsertCurrentNode(),
-        this.scheduleDeleteInactiveNodes(),
-      ]).then(() => {
-        this.started = true;
-        this.logger.info('Kibana Discovery Service has been initialized');
-      });
+      await this.scheduleUpsertCurrentNode();
+      await this.scheduleDeleteInactiveNodes();
+      this.started = true;
+      this.logger.info('Kibana Discovery Service has been initialized');
     } else {
       this.logger.warn('Kibana Discovery Service has already been initialized');
     }
