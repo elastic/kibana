@@ -1722,6 +1722,10 @@ packages/react @elastic/appex-sharedux
 /x-pack/plugins/ml/common/openapi             @elastic/platform-docs
 /packages/core/saved-objects/docs/openapi     @elastic/platform-docs
 /plugins/data_views/docs/openapi              @elastic/platform-docs
+oas_docs/.spectral.yaml                       @elastic/platform-docs
+oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
+oas_docs/kibana.serverless.yaml               @elastic/platform-docs
+oas_docs/makefile                             @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
