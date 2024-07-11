@@ -96,3 +96,14 @@ test('forwards http requests to https', async () => {
       expect(res.header.location).toEqual(`https://${config.host}:${config.port}/`);
     });
 });
+
+test('keeps the request host when redirecting', async () => {
+  await server.start(config);
+
+  await supertest(`http://localhost:${config.ssl.redirectHttpFromPort}`)
+    .get('/')
+    .expect(302)
+    .then((res) => {
+      expect(res.header.location).toEqual(`https://localhost:${config.port}/`);
+    });
+});
