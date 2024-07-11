@@ -241,7 +241,8 @@ export class TaskManagerPlugin
       logger: this.logger,
       currentNode: this.taskManagerId!,
     });
-    this.kibanaDiscoveryService.start();
+    this.kibanaDiscoveryService.startDiscovery();
+    this.kibanaDiscoveryService.startCleanup();
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
@@ -348,7 +349,7 @@ export class TaskManagerPlugin
   }
 
   public stop() {
-    if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isStarted()) {
+    if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isDiscoveryStarted()) {
       this.kibanaDiscoveryService.deleteCurrentNode();
     }
   }

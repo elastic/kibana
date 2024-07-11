@@ -21,11 +21,13 @@ interface DiscoveryServiceUpsertParams {
   lastSeen: string;
 }
 
+export const discoveryInterval = 1000 * 10;
+export const cleanupInterval = 1000 * 60;
+
 export class KibanaDiscoveryService {
   private currentNode: string;
-  private started = false;
-  private refreshInterval = 1000 * 10;
-  private deleteInterval = 1000 * 60;
+  private discoveryStarted = false;
+  private cleanupStarted = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
 
@@ -43,7 +45,7 @@ export class KibanaDiscoveryService {
         id,
         last_seen: lastSeen,
       },
-      { upsert: { id, last_seen: lastSeen } }
+      { upsert: { id, last_seen: lastSeen }, refresh: true }
     );
   }
 
@@ -61,7 +63,7 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         id: node.attributes.id,
       }));
-      await this.savedObjectsRepository.bulkDelete(nodesToDelete, { force: true });
+      await this.savedObjectsRepository.bulkDelete(nodesToDelete, { force: true, refresh: true });
       this.logger.info(
         `Inactive Kibana nodes: ${nodesToDelete.map(
           (node) => node.id
@@ -72,11 +74,21 @@ export class KibanaDiscoveryService {
 
   private async scheduleDeleteInactiveNodes() {
     try {
-      this.deleteInactiveNodes();
+      await this.deleteInactiveNodes();
+      if (!this.cleanupStarted) {
+        this.logger.info('Kibana Discovery Service - Cleanup - has been started');
+        this.cleanupStarted = true;
+      }
     } catch (e) {
-      this.logger.error(`Deleting inactive nodes failed. error: ${e.message} `);
+      if (!this.cleanupStarted) {
+        this.logger.error(
+          `Kibana Discovery Service - Cleanup - couldn't be started. Error: ${e.message}`
+        );
+      } else {
+        this.logger.error(`Deleting inactive nodes failed. Error: ${e.message} `);
+      }
     } finally {
-      setTimeout(async () => await this.scheduleDeleteInactiveNodes(), this.deleteInterval);
+      setTimeout(async () => await this.scheduleDeleteInactiveNodes(), cleanupInterval);
     }
   }
 
@@ -84,27 +96,40 @@ export class KibanaDiscoveryService {
     const lastSeen = new Date().toISOString();
     try {
       await this.upsertCurrentNode({ id: this.currentNode, lastSeen });
+      if (!this.discoveryStarted) {
+        this.logger.info('Kibana Discovery Service has been started');
+        this.discoveryStarted = true;
+      }
     } catch (e) {
-      this.logger.error(
-        `Background Task Node couldn't be updated. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
-      );
+      if (!this.discoveryStarted) {
+        this.logger.error(`Kibana Discovery Service couldn't be started, error:${e.message}`);
+      } else {
+        this.logger.error(
+          `Background Task Node couldn't be updated. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
+        );
+      }
     } finally {
-      setTimeout(async () => await this.scheduleUpsertCurrentNode(), this.refreshInterval);
+      setTimeout(async () => await this.scheduleUpsertCurrentNode(), discoveryInterval);
     }
   }
 
-  public isStarted() {
-    return this.started;
+  public isDiscoveryStarted() {
+    return this.discoveryStarted;
   }
 
-  public async start() {
-    if (!this.started) {
+  public async startDiscovery() {
+    if (!this.discoveryStarted) {
       await this.scheduleUpsertCurrentNode();
-      await this.scheduleDeleteInactiveNodes();
-      this.started = true;
-      this.logger.info('Kibana Discovery Service has been initialized');
     } else {
-      this.logger.warn('Kibana Discovery Service has already been initialized');
+      this.logger.warn('Kibana Discovery Service has already been started');
+    }
+  }
+
+  public async startCleanup() {
+    if (!this.cleanupStarted) {
+      await this.scheduleDeleteInactiveNodes();
+    } else {
+      this.logger.warn('Kibana Discovery Service - Cleanup - has already been started');
     }
   }
 
