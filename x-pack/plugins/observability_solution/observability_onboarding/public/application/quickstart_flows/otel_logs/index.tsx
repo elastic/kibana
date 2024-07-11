@@ -190,6 +190,8 @@ data:
         endpoints: 
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
+        logs_dynamic_index:
+          enabled: true
         mapping:
           mode: ecs
     processors:
