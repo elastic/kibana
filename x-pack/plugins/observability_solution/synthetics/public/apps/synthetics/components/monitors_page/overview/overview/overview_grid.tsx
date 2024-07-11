@@ -108,7 +108,7 @@ export const OverviewGrid = memo(() => {
     return acc;
   }, [monitorsSortedByStatus]);
 
-  const listRef: React.LegacyRef<FixedSizeList<any>> | undefined = React.createRef();
+  const listRef: React.LegacyRef<FixedSizeList<ListItem[][]>> | undefined = React.createRef();
   useEffect(() => {
     dispatch(refreshOverviewTrends.get());
   }, [dispatch, lastRefresh]);

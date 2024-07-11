@@ -183,7 +183,7 @@ export const MetricItem = ({
                       />
                     </div>
                   ),
-                  valueFormatter: (x: number) => formatDuration(x),
+                  valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),
                 },
               ],

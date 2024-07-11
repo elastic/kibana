@@ -7,10 +7,11 @@
 import { createAction } from '@reduxjs/toolkit';
 import { createAsyncAction } from '../utils/actions';
 
-import {
+import type {
   MonitorOverviewFlyoutConfig,
   MonitorOverviewPageState,
   MonitorOverviewState,
+  TrendTable,
 } from './models';
 import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
@@ -34,12 +35,12 @@ export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewResult
 >('quietFetchOverviewAction');
 
-export const refreshOverviewTrends = createAsyncAction<void, Record<string, any>, any>(
+export const refreshOverviewTrends = createAsyncAction<void, TrendTable, any>(
   'refreshOverviewTrendStats'
 );
 
 export const trendStatsBatch = createAsyncAction<
   Array<{ configId: string; locationId: string }>,
-  Record<string, any>,
+  TrendTable,
   any
 >('batchTrendStats');

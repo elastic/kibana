@@ -32,13 +32,29 @@ export interface MonitorOverviewState {
   isErrorPopoverOpen?: string | null;
   error: IHttpSerializedFetchError | null;
   groupBy: GroupByState;
-  trendStats: Record<
-    string,
-    null | { data: any[]; median: number; avg: number; min: number; max: number }
-  >;
+  trendStats: TrendTable;
 }
 
 export interface GroupByState {
   field: ConfigKey.TAGS | ConfigKey.PROJECT_ID | ConfigKey.MONITOR_TYPE | 'locationId' | 'none';
   order: 'asc' | 'desc';
 }
+
+export interface TrendDatum {
+  x: number;
+  y: number;
+}
+
+export interface OverviewTrend {
+  configId: string;
+  locationId: string;
+  data: TrendDatum[];
+  count: number;
+  min: number;
+  max: number;
+  avg: number;
+  sum: number;
+  median: number;
+}
+
+export type TrendTable = Record<string, OverviewTrend | null>;

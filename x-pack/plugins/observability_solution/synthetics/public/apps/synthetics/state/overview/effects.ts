@@ -15,6 +15,7 @@ import {
   trendStatsBatch,
 } from './actions';
 import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
+import type { TrendTable } from './models';
 
 export function* fetchMonitorOverviewEffect() {
   yield debounce(
@@ -33,7 +34,7 @@ export function* fetchOverviewTrendStats() {
     trendStatsBatch.get,
     function* (
       action: ReturnType<typeof trendStatsBatch.get>
-    ): Generator<unknown, void, Record<string, any>> {
+    ): Generator<unknown, void, TrendTable> {
       try {
         const chunkSize = 40;
         for (let i = action.payload.length; i > 0; i -= chunkSize) {
@@ -51,12 +52,8 @@ export function* fetchOverviewTrendStats() {
 }
 
 export function* refreshOverviewTrendStats() {
-  yield takeLeading(refreshOverviewTrends.get, function* (): Generator<
-    unknown,
-    void,
-    Record<string, any>
-  > {
-    const existingTrends: Record<string, any> = yield select(selectOverviewTrends);
+  yield takeLeading(refreshOverviewTrends.get, function* (): Generator<unknown, void, TrendTable> {
+    const existingTrends: TrendTable = yield select(selectOverviewTrends);
     let acc = {};
     const keys = Object.keys(existingTrends);
     do {
@@ -66,8 +63,9 @@ export function* refreshOverviewTrendStats() {
           .splice(0, keys.length < 10 ? keys.length : 10)
           .filter((key: string) => existingTrends[key] !== null)
           .map((key: string) => ({
-            configId: existingTrends[key].configId,
-            locationId: existingTrends[key].locationId,
+            // assertion in filter above ensures this is not null
+            configId: existingTrends[key]!.configId,
+            locationId: existingTrends[key]!.locationId,
           }))
       );
       acc = { ...acc, ...res };
