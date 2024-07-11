@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
       .set('kbn-xsrf', 'true');
   };
-  // It's flaky only in Serverless
+
   // Failing: See https://github.com/elastic/kibana/issues/187314
   // Failing: See https://github.com/elastic/kibana/issues/187383
   describe('For each artifact list under management', function () {
