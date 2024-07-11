@@ -12,20 +12,21 @@ import {
   getLogLevelColor,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { Profile } from '../../../types';
+import type { DataSourceProfileProvider } from '../../../profiles';
 
 const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
 
-export const getRowIndicatorProvider: () => Profile['getRowIndicatorProvider'] =
-  () =>
-  ({ dataView }) => {
-    // Check if the data view has any of the log level fields.
-    if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
-      // Otherwise, don't set the row indicator color so the color indicator control column is not added to the grid at all.
-      return undefined;
-    }
-    return getRowIndicator;
-  };
+export const getRowIndicatorProvider: DataSourceProfileProvider['profile']['getRowIndicatorProvider'] =
+
+    () =>
+    ({ dataView }) => {
+      // Check if the data view has any of the log level fields.
+      if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
+        // Otherwise, don't set the row indicator color so the color indicator control column is not added to the grid at all.
+        return undefined;
+      }
+      return getRowIndicator;
+    };
 
 const getRowIndicator: UnifiedDataTableProps['getRowIndicator'] = (row, euiTheme) => {
   const logLevel = LOG_LEVEL_FIELDS.reduce((acc: unknown, field) => {
