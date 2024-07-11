@@ -90,7 +90,7 @@ export const streamGraph = async ({
   let finalOutputIndex = -1;
   const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
   let streamingFinished = false;
-  const finalOutputStopRegex = /(?<!\\)"/; // /(?<!\\)\"/;
+  const finalOutputStopRegex = /(?<!\\)"/;
   let extraOutput = '';
   const processEvent = async () => {
     try {
@@ -125,10 +125,10 @@ export const streamGraph = async ({
 
             const msg = chunk.content;
             if (finalOutputIndex === -1) {
+              currentOutput += msg;
               // Remove whitespace to simplify parsing
-              currentOutput += msg; // .replace(/\s/g, '');
-              const currentFormattedOutput = currentOutput.replace(/\s/g, '');
-              if (currentFormattedOutput.includes(finalOutputStartToken)) {
+              const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
+              if (noWhitespaceOutput.includes(finalOutputStartToken)) {
                 const nonStrippedToken = '"action_input": "';
                 finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
                 const contentStartIndex = finalOutputIndex + nonStrippedToken.length;

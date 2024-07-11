@@ -154,18 +154,29 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     let finalOutputIndex = -1;
     const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
     let streamingFinished = false;
-    const finalOutputStopRegex = /(?<!\\)\"/;
+    const finalOutputStopRegex = /(?<!\\)"/;
+    let extraOutput = '';
     const handleLLMNewToken = async (token: string) => {
       if (finalOutputIndex === -1) {
+        currentOutput += token;
         // Remove whitespace to simplify parsing
-        currentOutput += token.replace(/\s/g, '');
-        if (currentOutput.includes(finalOutputStartToken)) {
-          finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+        const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
+        if (noWhitespaceOutput.includes(finalOutputStartToken)) {
+          const nonStrippedToken = '"action_input": "';
+          finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+          const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
+          extraOutput = currentOutput.substring(contentStartIndex);
+          await runManager?.handleLLMNewToken(extraOutput);
         }
       } else if (!streamingFinished) {
         const finalOutputEndIndex = token.search(finalOutputStopRegex);
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
+          extraOutput = token.substring(0, finalOutputEndIndex);
+          streamingFinished = true;
+          if (extraOutput.length > 0) {
+            await runManager?.handleLLMNewToken(extraOutput);
+          }
         } else {
           await runManager?.handleLLMNewToken(token);
         }
