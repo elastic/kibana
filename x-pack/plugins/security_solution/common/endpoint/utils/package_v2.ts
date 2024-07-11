@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Installation } from '@kbn/fleet-plugin/common';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
-// import semverLte from 'semver/functions/lte';
-
-// switch to "v2" logic
-// const MIN_ENDPOINT_PACKAGE_V2_VERSION = '8.14.0-prerelease.1';
-export function isEndpointPackageV2(version: string) {
-  return false;
+export function isTransformUnattended(install: Installation) {
+  const unattendedTransforms = install.installed_es.filter(
+    (asset) => asset.type === ElasticsearchAssetType.transform && asset.id.startsWith('logs-')
+  );
+  return unattendedTransforms?.length > 0;
 }

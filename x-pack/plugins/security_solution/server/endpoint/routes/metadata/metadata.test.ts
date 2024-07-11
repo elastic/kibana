@@ -60,6 +60,7 @@ import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
 describe('test endpoint routes', () => {
   let routerMock: SecuritySolutionPluginRouterMock;
@@ -81,6 +82,9 @@ describe('test endpoint routes', () => {
     perPage: 1,
   };
   const agentGenerator = new FleetAgentGenerator('seed');
+
+  const MockCurrentTransformName = 'metadata.endpoint_current-default-8.12.0';
+  const MockUnitedTransformName = 'metadata.endpoint_united-default-8.12.0';
 
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -110,6 +114,23 @@ describe('test endpoint routes', () => {
       .agent as jest.Mocked<AgentClient>;
     mockAgentPolicyService = startContract.endpointFleetServicesFactory.asInternalUser()
       .agentPolicy as jest.Mocked<AgentPolicyServiceInterface>;
+
+    const mockEndpointAppContext = createMockEndpointAppContext();
+    jest
+      .spyOn(endpointAppContextService.getInternalFleetServices().packages, 'getInstallation')
+      .mockResolvedValue({
+        installed_es: [
+          {
+            type: ElasticsearchAssetType.transform,
+            id: MockCurrentTransformName,
+          } as EsAssetReference,
+          {
+            type: ElasticsearchAssetType.transform,
+            id: MockUnitedTransformName,
+          } as EsAssetReference,
+        ],
+        version: '8.11.0',
+      } as Installation);
 
     registerEndpointRoutes(routerMock, {
       ...createMockEndpointAppContext(),

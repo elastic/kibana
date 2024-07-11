@@ -12,11 +12,7 @@ import { Client } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   metadataCurrentIndexPattern,
-  metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
   METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
   HOST_METADATA_GET_ROUTE,
   METADATA_DATASTREAM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
@@ -26,7 +22,6 @@ import {
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
-import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
@@ -38,6 +33,7 @@ import { merge } from 'lodash';
 
 import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 import { FtrService } from '../../../../functional/ftr_provider_context';
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
@@ -121,17 +117,15 @@ export class EndpointTestResources extends FtrService {
       customIndexFn,
     } = options;
 
-    let currentTransformName = metadataTransformPrefix;
-    let unitedTransformName = METADATA_UNITED_TRANSFORM;
-    if (waitUntilTransformed && customIndexFn) {
-      const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
-      const isV2 = isEndpointPackageV2(endpointPackage.version);
-
-      if (isV2) {
-        currentTransformName = METADATA_CURRENT_TRANSFORM_V2;
-        unitedTransformName = METADATA_UNITED_TRANSFORM_V2;
-      }
+    const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
+    const transforms = endpointPackage.installationInfo.installed_es
+      .filter((asset) => asset.type === ElasticsearchAssetType.transform)
+      .map((asset) => asset.id);
+    if (!transforms) {
+      throw new error('transforms not installed');
     }
+    const currentTransformName = transforms.find((t) => t.includes('current'));
+    const unitedTransformName = transforms.find((t) => t.includes('united'));
 
     if (waitUntilTransformed && customIndexFn) {
       // need this before indexing docs so that the united transform doesn't

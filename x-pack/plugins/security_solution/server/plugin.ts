@@ -127,7 +127,7 @@ import {
   latestRiskScoreIndexPattern,
   allRiskScoreIndexPattern,
 } from '../common/entity_analytics/risk_engine';
-import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
+import { isTransformUnattended } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
@@ -699,10 +699,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     Promise.all([endpointPkgInstallationPromise, plugins.fleet?.fleetSetupCompleted()])
       .then(async ([endpointPkgInstallation]) => {
         if (plugins.taskManager) {
-          if (
-            endpointPkgInstallation?.version &&
-            isEndpointPackageV2(endpointPkgInstallation.version)
-          ) {
+          if (endpointPkgInstallation && isTransformUnattended(endpointPkgInstallation)) {
             return;
           }
 

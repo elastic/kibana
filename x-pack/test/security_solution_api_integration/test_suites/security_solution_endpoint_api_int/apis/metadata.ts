@@ -15,10 +15,6 @@ import {
   METADATA_DATASTREAM,
   METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
-  metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
