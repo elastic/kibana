@@ -92,6 +92,44 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-security-server-mocks",
+        "id": "def-common.apiKeysMock",
+        "type": "Object",
+        "tags": [],
+        "label": "apiKeysMock",
+        "description": [],
+        "path": "packages/core/security/core-security-server-mocks/src/api_keys.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server-mocks",
+            "id": "def-common.apiKeysMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.APIKeys",
+                "text": "APIKeys"
+              },
+              ">"
+            ],
+            "path": "packages/core/security/core-security-server-mocks/src/api_keys.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server-mocks",
         "id": "def-common.auditLoggerMock",
         "type": "Object",
         "tags": [],

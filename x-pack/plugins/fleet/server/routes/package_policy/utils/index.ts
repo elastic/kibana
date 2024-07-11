@@ -56,10 +56,13 @@ const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export function canUseMultipleAgentPolicies() {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
+  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
 
   return {
-    canUseReusablePolicies: hasEnterpriseLicence,
-    errorMessage: 'Reusable integration policies are only available with an Enterprise license',
+    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
+    errorMessage: !hasEnterpriseLicence
+      ? 'Reusable integration policies are only available with an Enterprise license'
+      : 'Reusable integration policies are not supported',
   };
 }
 
