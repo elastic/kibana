@@ -14,7 +14,7 @@ import { EventReporter } from '../telemetry';
 
 /* @internal */
 export interface SearchBarProps {
-  globalSearch: GlobalSearchPluginStart;
+  globalSearch: GlobalSearchPluginStart & { searchCharLimit: number };
   navigateToUrl: ApplicationStart['navigateToUrl'];
   reportEvent: EventReporter;
   taggingApi?: SavedObjectTaggingPluginStart;
