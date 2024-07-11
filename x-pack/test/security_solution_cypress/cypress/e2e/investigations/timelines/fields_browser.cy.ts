@@ -28,17 +28,6 @@ import { openTimelineFieldsBrowser } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
-const defaultHeaders = [
-  { id: '@timestamp' },
-  { id: 'message' },
-  { id: 'event.category' },
-  { id: 'event.action' },
-  { id: 'host.name' },
-  { id: 'source.ip' },
-  { id: 'destination.ip' },
-  { id: 'user.name' },
-];
-
 describe(
   'Fields Browser',
   {

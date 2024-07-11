@@ -215,7 +215,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     });
 
     return (
-      <ActionsContainer>
+      <ActionsContainer data-test-subj="header-actions-container">
         {showSelectAllCheckbox && (
           <EventsTh role="checkbox">
             <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

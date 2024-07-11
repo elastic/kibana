@@ -36,10 +36,10 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
     });
     cy.getBySel('sourcerer-save').click();
 
-    cy.getBySel('event-actions-container')
+    cy.getBySel('actions-container')
       .first()
       .within(() => {
-        cy.getBySel('expand-event')
+        cy.getBySel('docTableExpandToggleColumn')
           .first()
           .within(() => {
             cy.get(`[data-is-loading="true"]`).should('not.exist');

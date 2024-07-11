@@ -246,7 +246,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled, expandableFlyoutDisabled]);
 
   return (
-    <ActionsContainer>
+    <ActionsContainer data-test-subj="actions-container">
       <>
         {!disableExpandAction && (
           <GuidedOnboardingTourStep
