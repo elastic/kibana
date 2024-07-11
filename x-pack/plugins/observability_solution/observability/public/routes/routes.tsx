@@ -32,8 +32,10 @@ import {
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
+  INVESTIGATION_DETAIL_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
+import { InvestigationDetails } from '../pages/investigation_details/investigation_details';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -134,6 +136,13 @@ export const routes = {
   [ALERT_DETAIL_PATH]: {
     handler: () => {
       return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  [INVESTIGATION_DETAIL_PATH]: {
+    handler: () => {
+      return <InvestigationDetails />;
     },
     params: {},
     exact: true,
