@@ -14,7 +14,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
-import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
 import { useRedirectLink } from './use_redirect_link';
@@ -193,7 +192,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 };
 
 function getDataViewIndexPattern(dataStream: string | undefined) {
-  return dataStream ? `${indexNameToDataStreamParts(dataStream).type}-*-*` : DEFAULT_LOGS_DATA_VIEW;
+  return dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 }
 
 function getDataViewField(dataView: DataView | undefined, fieldName: string | undefined) {
