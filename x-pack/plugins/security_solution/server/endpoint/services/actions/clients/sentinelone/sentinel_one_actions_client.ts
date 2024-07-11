@@ -827,7 +827,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       case 'kill-process':
         searchQueryParams.query = 'terminate';
         searchQueryParams.scriptType = 'action';
-
         isDesiredScript = (scriptInfo) => {
           return (
             scriptInfo.creator === 'SentinelOne' &&
@@ -842,13 +841,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       case 'running-processes':
         if (osType === 'windows') {
           throw new ResponseActionsClientError(
-            `Retrival of running processes for Windows host is not supported for SentinelOne`
+            `Retrieval of running processes for Windows host is not supported by SentinelOne`,
+            405
           );
         }
 
         searchQueryParams.query = 'process list';
         searchQueryParams.scriptType = 'dataCollection';
-
         isDesiredScript = (scriptInfo) => {
           return scriptInfo.creator === 'SentinelOne' && scriptInfo.creatorId === '-1';
         };
