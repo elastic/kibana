@@ -75,6 +75,7 @@ module.exports = (_, argv) => {
         'immer',
         '@tanstack/react-query',
         'classnames',
+        'fflate',
         'fastest-levenshtein',
         'history',
         'io-ts',
