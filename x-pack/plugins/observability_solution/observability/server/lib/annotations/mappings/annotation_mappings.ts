@@ -7,7 +7,7 @@
 import { Mappings } from '../../../utils/create_or_update_index';
 
 export const ANNOTATION_MAPPINGS: Mappings = {
-  dynamic: true,
+  dynamic: 'strict',
   properties: {
     annotation: {
       properties: {
