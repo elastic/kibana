@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { useController, useFormContext } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import { useEffect, useState } from 'react';
-import { useKibana } from './use_kibana';
-import { APIRoutes, IndicesQuerySourceFields } from '../types';
+import { useCallback, useEffect, useState } from 'react';
+import { merge } from 'lodash';
+import { useIndicesFields } from './use_indices_fields';
 import { ChatForm, ChatFormFields } from '../types';
 import {
   createQuery,
@@ -36,10 +35,7 @@ export const getIndicesWithNoSourceFields = (
 
 export const useSourceIndicesFields = () => {
   const usageTracker = useUsageTracker();
-  const { services } = useKibana();
   const [loading, setLoading] = useState<boolean>(false);
-  const [noFieldsIndicesWarning, setNoFieldsIndicesWarning] = useState<string | null>(null);
-  const { resetField } = useFormContext<ChatForm>();
 
   const {
     field: { value: selectedIndices, onChange: onIndicesChange },
@@ -55,73 +51,74 @@ export const useSourceIndicesFields = () => {
   });
 
   const {
-    field: { onChange: onSourceFieldsChange },
+    field: { onChange: onQueryFieldsOnChange, value: queryFields },
+  } = useController<ChatForm, ChatFormFields.queryFields>({
+    name: ChatFormFields.queryFields,
+  });
+
+  const {
+    field: { onChange: onSourceFieldsChange, value: sourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
   });
-
-  const { data: fields } = useQuery({
-    enabled: selectedIndices.length > 0,
-    queryKey: ['fields', selectedIndices.toString()],
-    queryFn: async () => {
-      const response = await services.http.post<IndicesQuerySourceFields>(
-        APIRoutes.POST_QUERY_SOURCE_FIELDS,
-        {
-          body: JSON.stringify({ indices: selectedIndices }),
-        }
-      );
-      return response;
-    },
-  });
+  const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
     if (fields) {
-      resetField(ChatFormFields.queryFields);
-
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
+      const mergedQueryFields = merge(defaultFields, queryFields);
+      const mergedSourceFields = merge(defaultSourceFields, sourceFields);
 
-      const indicesWithNoSourceFields = getIndicesWithNoSourceFields(defaultSourceFields);
+      onElasticsearchQueryChange(createQuery(mergedQueryFields, mergedSourceFields, fields));
+      onQueryFieldsOnChange(mergedQueryFields);
 
-      if (indicesWithNoSourceFields) {
-        setNoFieldsIndicesWarning(indicesWithNoSourceFields);
-      } else {
-        setNoFieldsIndicesWarning(null);
-      }
-
-      onElasticsearchQueryChange(createQuery(defaultFields, defaultSourceFields, fields));
-      onSourceFieldsChange(defaultSourceFields);
+      onSourceFieldsChange(mergedSourceFields);
       usageTracker?.count(
         AnalyticsEvents.sourceFieldsLoaded,
         Object.values(fields)?.flat()?.length
       );
-    } else {
-      setNoFieldsIndicesWarning(null);
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
-  const addIndex = (newIndex: IndexName) => {
-    const newIndices = [...selectedIndices, newIndex];
-    setLoading(true);
-    onIndicesChange(newIndices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
-  };
+  const addIndex = useCallback(
+    (newIndex: IndexName) => {
+      const newIndices = [...selectedIndices, newIndex];
+      setLoading(true);
+      onIndicesChange(newIndices);
+      usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
+    },
+    [onIndicesChange, selectedIndices, usageTracker]
+  );
 
-  const removeIndex = (index: IndexName) => {
-    const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
-    setLoading(true);
-    onIndicesChange(newIndices);
-    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
-  };
+  const removeIndex = useCallback(
+    (index: IndexName) => {
+      const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
+      setLoading(true);
+      onIndicesChange(newIndices);
+      usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
+    },
+    [onIndicesChange, selectedIndices, usageTracker]
+  );
+
+  const setIndices = useCallback(
+    (indices: IndexName[]) => {
+      setLoading(true);
+      onIndicesChange(indices);
+      usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
+    },
+    [onIndicesChange, usageTracker]
+  );
 
   return {
     indices: selectedIndices,
     fields,
     loading,
+    isFieldsLoading,
     addIndex,
     removeIndex,
-    noFieldsIndicesWarning,
+    setIndices,
   };
 };
