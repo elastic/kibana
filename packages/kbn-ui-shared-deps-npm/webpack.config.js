@@ -114,7 +114,7 @@ module.exports = (_, argv) => {
       noParse: [MOMENT_SRC, WEBPACK_SRC],
       rules: [
         {
-          include: [require.resolve('jquery')],
+          include: [],
           use: [
             {
               loader: UiSharedDepsNpm.publicPathLoader,
