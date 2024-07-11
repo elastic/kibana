@@ -101,6 +101,7 @@ const apmRoutes = {
               environmentFilter={false}
               showServiceGroupSaveButton={false}
               showServiceGroupsNav
+              showEnablementCallout
               selectedNavButton="serviceGroups"
             >
               <ServiceGroupsList />

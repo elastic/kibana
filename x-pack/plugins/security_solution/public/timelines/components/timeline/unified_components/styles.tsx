@@ -22,7 +22,7 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
   }
 `;
 
-export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
+export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
   className: `${className}`,
 }))`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}

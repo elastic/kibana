@@ -341,10 +341,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           visibleRowData={visibleRowData}
           setCustomGridBodyProps={setCustomGridBodyProps}
           enabledRowRenderers={enabledRowRenderers}
+          rowHeight={rowHeight}
           refetch={refetch}
         />
       ),
-      [tableRows, enabledRowRenderers, refetch]
+      [tableRows, enabledRowRenderers, rowHeight, refetch]
     );
 
     const cellContext: UnifiedTimelineDataGridCellContext = useMemo(() => {

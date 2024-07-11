@@ -52,6 +52,17 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
         );
       },
     }),
+    getDocViewer: (prev) => (params) => {
+      const recordId = params.record.id;
+      const prevValue = prev(params);
+      return {
+        title: `Record #${recordId}`,
+        docViewsRegistry: (registry) => {
+          registry.enableById('doc_view_logs_overview');
+          return prevValue.docViewsRegistry(registry);
+        },
+      };
+    },
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
