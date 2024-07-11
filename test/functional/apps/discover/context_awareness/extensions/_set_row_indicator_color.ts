@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await firstColorIndicator.getComputedStyle('background-color')).to.be(
         'rgba(190, 207, 227, 1)'
       );
+      expect(await firstColorIndicator.getAttribute('title')).to.be('Debug');
     });
   });
 }
