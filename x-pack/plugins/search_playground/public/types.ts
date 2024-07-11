@@ -22,7 +22,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { ChatRequestData } from '../common/types';
+import { ChatRequestData, MessageRole } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
@@ -78,12 +78,6 @@ export interface ChatForm {
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
-}
-
-export enum MessageRole {
-  'user' = 'human',
-  'assistant' = 'assistant',
-  'system' = 'system',
 }
 
 export interface Message {
