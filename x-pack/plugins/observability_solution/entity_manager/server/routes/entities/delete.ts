@@ -19,12 +19,14 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
-  router.delete<{ id: string; deleteData: boolean }, unknown, unknown>(
+  router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
           deleteData: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
@@ -41,7 +43,7 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
           soClient,
           esClient,
           logger,
-          deleteData: req.params.deleteData,
+          deleteData: req.query.deleteData ?? false,
         });
 
         return res.ok({ body: { acknowledged: true } });
