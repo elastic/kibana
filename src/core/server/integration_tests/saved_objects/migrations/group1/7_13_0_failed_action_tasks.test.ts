@@ -57,8 +57,6 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
       if (esServer) {
         await esServer.stop();
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 10000));
     });
 
     const getCounts = async (

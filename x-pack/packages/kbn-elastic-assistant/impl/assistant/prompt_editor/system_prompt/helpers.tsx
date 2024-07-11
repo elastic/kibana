@@ -8,46 +8,23 @@
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
+  margin-right: ${euiThemeVars.euiSizeS};
 `;
 
 export const getOptionFromPrompt = ({
   content,
   id,
   name,
-  showTitles = false,
-  isFlyoutMode,
-}: PromptResponse & {
-  showTitles?: boolean;
-  isFlyoutMode: boolean;
-}): EuiSuperSelectOption<string> => ({
+}: PromptResponse): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: isFlyoutMode ? (
-    name
-  ) : (
-    <EuiText
-      color="subdued"
-      data-test-subj="systemPromptText"
-      css={css`
-        overflow: hidden;
-        &:hover {
-          cursor: pointer;
-          text-decoration: underline;
-        }
-      `}
-    >
-      {showTitles ? name : content}
-    </EuiText>
-  ),
+  inputDisplay: <span data-test-subj="systemPromptText">{name}</span>,
   dropdownDisplay: (
     <>
       <Strong data-test-subj="name">{name}</Strong>
@@ -64,12 +41,6 @@ export const getOptionFromPrompt = ({
 
 interface GetOptionsProps {
   prompts: PromptResponse[] | undefined;
-  showTitles?: boolean;
-  isFlyoutMode: boolean;
 }
-export const getOptions = ({
-  prompts,
-  showTitles = false,
-  isFlyoutMode,
-}: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles, isFlyoutMode })) ?? [];
+export const getOptions = ({ prompts }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
+  prompts?.map(getOptionFromPrompt) ?? [];

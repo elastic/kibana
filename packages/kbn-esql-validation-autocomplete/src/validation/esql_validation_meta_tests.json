@@ -8662,7 +8662,8 @@
     {
       "query": "from a_index | enrich `this``is fine`",
       "error": [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME"
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        "Unknown policy [`this``is]"
       ],
       "warning": []
     },
@@ -11006,6 +11007,13 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_extract(\"SOME_RANDOM_STRING\", now())",
+      "error": [],
+      "warning": [
+        "Invalid option [\"SOME_RANDOM_STRING\"] for date_extract. Supported options: [\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", \"ALIGNED_DAY_OF_WEEK_IN_YEAR\", \"ALIGNED_WEEK_OF_MONTH\", \"ALIGNED_WEEK_OF_YEAR\", \"AMPM_OF_DAY\", \"CLOCK_HOUR_OF_AMPM\", \"CLOCK_HOUR_OF_DAY\", \"DAY_OF_MONTH\", \"DAY_OF_WEEK\", \"DAY_OF_YEAR\", \"EPOCH_DAY\", \"ERA\", \"HOUR_OF_AMPM\", \"HOUR_OF_DAY\", \"INSTANT_SECONDS\", \"MICRO_OF_DAY\", \"MICRO_OF_SECOND\", \"MILLI_OF_DAY\", \"MILLI_OF_SECOND\", \"MINUTE_OF_DAY\", \"MINUTE_OF_HOUR\", \"MONTH_OF_YEAR\", \"NANO_OF_DAY\", \"NANO_OF_SECOND\", \"OFFSET_SECONDS\", \"PROLEPTIC_MONTH\", \"SECOND_OF_DAY\", \"SECOND_OF_MINUTE\", \"YEAR\", \"YEAR_OF_ERA\"]."
+      ]
+    },
+    {
       "query": "from a_index | eval var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField)",
       "error": [],
       "warning": []
@@ -11023,7 +11031,6 @@
     {
       "query": "from a_index | eval date_extract(stringField, stringField)",
       "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [stringField] type [string]",
         "Argument of [date_extract] must be [date], found value [stringField] type [string]"
       ],
       "warning": []
@@ -11043,7 +11050,7 @@
     {
       "query": "row var = date_extract(true, true)",
       "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [true] type [boolean]",
+        "Argument of [date_extract] must be [string], found value [true] type [boolean]",
         "Argument of [date_extract] must be [date], found value [true] type [boolean]"
       ],
       "warning": []
@@ -11056,7 +11063,7 @@
     {
       "query": "from a_index | eval date_extract(booleanField, booleanField)",
       "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [booleanField] type [boolean]",
+        "Argument of [date_extract] must be [string], found value [booleanField] type [boolean]",
         "Argument of [date_extract] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
@@ -26377,7 +26384,7 @@
     {
       "query": "from ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26388,6 +26395,16 @@
     },
     {
       "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"index\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"\"\"index\"\"\"",
       "error": [],
       "warning": []
     },
@@ -26539,14 +26556,14 @@
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
     {
       "query": "FROM index\n, \tother_index\t,\n \t ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26561,8 +26578,7 @@
     {
       "query": "FROM `index`",
       "error": [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'"
+        "Unknown index [`index`]"
       ],
       "warning": []
     },

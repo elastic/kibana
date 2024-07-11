@@ -73,7 +73,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await apmSynthtraceEsClient.clean();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177104
     describe('create rule without kql query', () => {
       let ruleId: string;
       let actionId: string;
@@ -197,7 +196,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177108
     describe('create rule with kql query', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
