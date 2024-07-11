@@ -24,8 +24,11 @@ export async function waitForDocumentInIndex<T>({
   return pRetry(
     async () => {
       const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
-      // @ts-expect-error upgrade typescript v5.1.6
-      if (!response.hits.total || response.hits.total < docCountTarget) {
+      if (
+        !response.hits.total ||
+        typeof response.hits.total !== 'number' ||
+        response.hits.total < docCountTarget
+      ) {
         throw new Error('No hits found');
       }
       return response;

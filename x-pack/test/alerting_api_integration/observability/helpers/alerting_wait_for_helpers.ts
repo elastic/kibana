@@ -70,8 +70,11 @@ export async function waitForDocumentInIndex<T>({
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
     test: async () => {
       const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
-      // @ts-expect-error upgrade typescript v5.1.6
-      if (!response.hits.total || response.hits.total < docCountTarget) {
+      if (
+        !response.hits.total ||
+        typeof response.hits.total !== 'number' ||
+        response.hits.total < docCountTarget
+      ) {
         throw new Error(
           `Number of hits does not match expectation (total: ${response.hits.total}, target: ${docCountTarget})`
         );
