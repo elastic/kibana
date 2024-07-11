@@ -68,9 +68,25 @@ export class VisualizeEditorPageObject extends FtrService {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
 
+    this.log.warning(`Nick -- isNewChartLibrary: ${isNewChartLibrary}`);
+
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
+    this.log.warning(`Nick -- prevRenderingCount: ${prevRenderingCount}`);
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
+
+    this.log.warning(
+      `Nick -- visualizeEditorRenderButton-exists: ${await this.testSubjects.exists('visualizeEditorRenderButton')}`
+    );
+
+    this.log.warning(
+      `Nick -- visualizeEditorRenderButton-isDisplayed: ${await this.testSubjects.isDisplayed('visualizeEditorRenderButton')}`
+    );
+
+    this.log.warning(
+      `Nick -- visualizeEditorRenderButton-isEnabled: ${await this.testSubjects.isEnabled('visualizeEditorRenderButton')}`
+    );
+
+    await this.testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
     await this.visChart.waitForRenderingCount(prevRenderingCount + 1);
   }
 
