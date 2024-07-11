@@ -101,6 +101,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   return (
     <EuiButtonIcon
+      data-test-subj="notes-toggle-event-details"
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       color="text"

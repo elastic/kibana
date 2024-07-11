@@ -12,11 +12,11 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { appSelectors } from '../../../../common/store';
 import { timelineActions } from '../../../store';
 
-interface UseNotesInFlyoutArgs {
+export interface UseNotesInFlyoutArgs {
   eventIdToNoteIds: Record<string, string[]>;
   refetch?: () => void;
   timelineId: string;
-  activeTab?: TimelineTabs;
+  activeTab: TimelineTabs;
 }
 
 const EMPTY_STRING_ARRAY: string[] = [];
@@ -45,8 +45,11 @@ export const useNotesInFlyout = (args: UseNotesInFlyoutArgs) => {
   const notesById = useDeepEqualSelector(getNotesByIds);
 
   useEffect(() => {
-    setIsNotesFlyoutVisible(false);
-  }, [activeTab]);
+    if (activeTab) {
+      // if activeTab changes, close the notes flyout
+      closeNotesFlyout();
+    }
+  }, [activeTab, closeNotesFlyout]);
 
   const dispatch = useDispatch();
 
