@@ -13,8 +13,6 @@ import {
 } from '../../../common/constants';
 
 export const useEntityModel = () => {
-  console.log('Initializing entity model');
-
   const http = useKibana().services.http;
 
   const initialize = useCallback(() => {

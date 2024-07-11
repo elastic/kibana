@@ -24,9 +24,12 @@ import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privilege
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityModel } from '../common/entity_model';
 
+import { useVectorSearch } from '../common/vector_search';
+
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
   const { initialize, get, deleteAPI } = useEntityModel();
+  const { install: installVectorSearch } = useVectorSearch();
   const [state, setState] = useState('loading');
 
   useEffect(() => {
@@ -42,9 +45,12 @@ export const EntityAnalyticsManagementPage = () => {
 
   const handleInitialize = () => {
     setState('loading');
-    initialize().then((response) => {
-      setState('installed');
-    });
+
+    initialize()
+      .then((response) => {
+        setState('installed');
+      })
+      .then(installVectorSearch);
   };
 
   const handleDelete = () => {
