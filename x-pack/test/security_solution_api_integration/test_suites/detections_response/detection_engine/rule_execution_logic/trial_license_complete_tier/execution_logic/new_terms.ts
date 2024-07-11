@@ -1120,7 +1120,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('manual rule run', () => {
+    describe('@skipInServerlessMKI manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');

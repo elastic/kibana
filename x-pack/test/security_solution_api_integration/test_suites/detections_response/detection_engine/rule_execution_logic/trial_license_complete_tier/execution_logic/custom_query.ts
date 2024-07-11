@@ -2423,7 +2423,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('manual rule run', () => {
+    describe('@skipInServerlessMKI manual rule run', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',

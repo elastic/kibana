@@ -2403,7 +2403,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('manual rule run action', () => {
+    describe('@skipInServerlessMKI manual rule run action', () => {
       it('should return all existing and enabled rules as succeeded', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;
