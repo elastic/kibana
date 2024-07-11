@@ -40,12 +40,12 @@ import {
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
 import {
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   getAlerts,
   getPreviewAlerts,
   previewRule,
   previewRuleWithExceptionEntries,
+  setupMlModulesWithRetry,
 } from '../../../../utils';
 import {
   createRule,
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load(auditPath);
-      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
+      await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
