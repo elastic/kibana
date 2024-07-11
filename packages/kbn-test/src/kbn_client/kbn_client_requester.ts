@@ -157,7 +157,11 @@ function hasMoreAttempts(current: number, ceiling: number) {
   return current < ceiling;
 }
 
-function build(url: any, httpsAgent: any, { method, body, query, headers, responseType }: any) {
+function build(
+  url: any,
+  httpsAgent: Https.Agent | null,
+  { method, body, query, headers, responseType }: any
+) {
   return {
     method,
     url,
@@ -178,6 +182,6 @@ function build(url: any, httpsAgent: any, { method, body, query, headers, respon
   };
 }
 const redactUrl = (_: string): string => {
-  const url = URL.parse(_, true);
-  return url.password ? `${url.protocol}//${url.host}` : _;
+  const url = new URL(_);
+  return url.password ? `${url.protocol}//${url.host}${url.pathname}` : _;
 };
