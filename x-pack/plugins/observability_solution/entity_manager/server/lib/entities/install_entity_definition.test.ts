@@ -40,6 +40,7 @@ const assertHasCreatedDefinition = (
     processors: expect.anything(),
     _meta: {
       definitionVersion: '0.1.0',
+      managed: true,
     },
   });
   expect(esClient.ingest.putPipeline).toBeCalledWith({
@@ -47,6 +48,7 @@ const assertHasCreatedDefinition = (
     processors: expect.anything(),
     _meta: {
       definitionVersion: '0.1.0',
+      managed: true,
     },
   });
 
