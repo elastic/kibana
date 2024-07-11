@@ -73,7 +73,7 @@ const columns: (
   ];
 };
 
-const pageSizeOptions = [50, 25, 10, 0];
+const pageSizeOptions = [10, 25, 50, 100];
 
 /**
  * Allows user to search and delete notes.
