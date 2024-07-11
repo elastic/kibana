@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UptimeEsClient } from '../../../lib';
-import { Ping } from '../../../../common/runtime_types/ping';
+import { SyntheticsEsClient } from '../lib';
+import { Ping } from '../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
@@ -81,12 +81,12 @@ export const getLastSuccessfulStepParams = ({
 };
 
 export const getLastSuccessfulCheck = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
   monitorId,
   timestamp,
   location,
 }: GetStepScreenshotParams & {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<Ping | null> => {
   const lastSuccessCheckParams = getLastSuccessfulStepParams({
     monitorId,
@@ -94,7 +94,7 @@ export const getLastSuccessfulCheck = async ({
     location,
   });
 
-  const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
+  const { body: result } = await syntheticsEsClient.search({ body: lastSuccessCheckParams });
 
   if (result.hits.total.value < 1) {
     return null;

@@ -7,13 +7,13 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import {
   SyntheticsMonitorWithSecretsAttributes,
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
-} from '../../../../common/runtime_types';
-import { normalizeSecrets } from '../../../synthetics_service/utils/secrets';
+} from '../../common/runtime_types';
+import { normalizeSecrets } from '../synthetics_service/utils/secrets';
 
 export const getSyntheticsMonitor = async ({
   monitorId,

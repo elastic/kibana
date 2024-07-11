@@ -6,19 +6,19 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UptimeEsClient } from '../../../lib';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import { SyntheticsEsClient } from '../lib';
+import { asMutableArray } from '../../common/utils/as_mutable_array';
+import { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroups: string[];
 }
 
 export const getJourneyFailedSteps = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
   checkGroups,
 }: GetJourneyStepsParams & {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<JourneyStep[]> => {
   const params = {
     query: {
@@ -52,7 +52,7 @@ export const getJourneyFailedSteps = async ({
     size: 500,
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await syntheticsEsClient.search({ body: params });
 
   return result.hits.hits.map(({ _id, _source }) => {
     const step = Object.assign({ _id }, _source) as JourneyStep;
