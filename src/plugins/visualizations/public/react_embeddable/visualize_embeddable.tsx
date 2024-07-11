@@ -98,17 +98,14 @@ export const getVisualizeEmbeddableFactory: (
     const api = buildApi(
       {
         ...titlesApi,
-        serializeState: (extractReferences?: boolean) => {
+        serializeState: () => {
           const savedObjectProperties = savedObjectProperties$.getValue();
-          return serializeState(
-            {
-              serializedVis: vis$.getValue().serialize(),
-              titles: serializeTitles(),
-              id: savedObjectId$.getValue(),
-              ...(savedObjectProperties ? { savedObjectProperties } : {}),
-            },
-            extractReferences
-          );
+          return serializeState({
+            serializedVis: vis$.getValue().serialize(),
+            titles: serializeTitles(),
+            id: savedObjectId$.getValue(),
+            ...(savedObjectProperties ? { savedObjectProperties } : {}),
+          });
         },
         getVis: () => vis$.getValue(),
         getTitles: () => serializeTitles(),
@@ -199,10 +196,8 @@ export const getVisualizeEmbeddableFactory: (
               ...serializeTitles(),
               title: newTitle,
             },
-            id: uuid,
           });
           return saveToLibrary({
-            id: uuid,
             uiState: vis$.getValue().uiState,
             rawState: rawState as VisualizeOutputState,
             references,

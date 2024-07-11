@@ -104,6 +104,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
             resolve(undefined);
             return { id: libraryId };
           } catch (error) {
+            console.error('FAILED TO SAVE', error);
             reject(error);
             return { error };
           }

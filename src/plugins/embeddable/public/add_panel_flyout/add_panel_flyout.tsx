@@ -131,6 +131,7 @@ export const AddPanelFlyout = ({
       name: string,
       savedObject: SavedObjectCommon
     ) => {
+      debugger;
       if (factoriesBySavedObjectType[type]) {
         const factory = factoriesBySavedObjectType[type];
         const { onAdd, savedObjectMetaData } = factory;

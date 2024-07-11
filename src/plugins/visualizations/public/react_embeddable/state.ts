@@ -40,6 +40,7 @@ import {
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
+  debugger;
   if (!state.rawState)
     return {
       serializedVis: {
@@ -146,20 +147,17 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
   } as VisualizeSavedVisInputState;
 };
 
-export const serializeState = (
-  {
-    serializedVis, // Serialize the vis before passing it to this function for easier testing
-    titles,
-    id,
-    savedObjectProperties,
-  }: {
-    serializedVis: SerializedVis;
-    titles: SerializedTitles;
-    id?: string;
-    savedObjectProperties?: ExtraSavedObjectProperties;
-  },
-  extractReferences?: boolean
-) => {
+export const serializeState = ({
+  serializedVis, // Serialize the vis before passing it to this function for easier testing
+  titles,
+  id,
+  savedObjectProperties,
+}: {
+  serializedVis: SerializedVis;
+  titles: SerializedTitles;
+  id?: string;
+  savedObjectProperties?: ExtraSavedObjectProperties;
+}) => {
   const titlesWithDefaults = {
     title: '',
     description: '',

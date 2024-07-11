@@ -22,7 +22,6 @@ import {
   getIncompatibleMappingsMigrator,
   getNonDeprecatedMappingsMigrator,
 } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
 
 describe('when upgrading to a new stack version', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -34,7 +33,6 @@ describe('when upgrading to a new stack version', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   describe('if the mappings match (diffMappings() === false)', () => {

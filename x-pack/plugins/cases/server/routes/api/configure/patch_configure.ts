@@ -17,7 +17,9 @@ export const patchCaseConfigureRoute = createCasesRoute({
   path: CASE_CONFIGURE_DETAILS_URL,
   routerOptions: {
     access: 'public',
-    summary: `Update case settings`,
+    summary: 'Update case settings',
+    description:
+      'Updates case settings such as the closure type, custom fields, templates, and the default connector for cases. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the case was created.',
   },
   handler: async ({ context, request, response }) => {
     try {

@@ -10,10 +10,10 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersion } from '../../lib/get_agent_version';
-import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
-import { createShipperApiKey } from './api_key/create_shipper_api_key';
+import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
+import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -115,7 +115,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, name);
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(
+      client.asCurrentUser,
+      `standalone_agent_logs_onboarding_${name}`
+    );
 
     const generatedState = type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);

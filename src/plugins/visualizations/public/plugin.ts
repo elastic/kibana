@@ -492,6 +492,9 @@ export class VisualizationsPlugin
       setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
+    const addAggVisAction = new AddAggVisualizationPanelAction(types);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
+
     return {
       ...types,
       showNewVisModal,

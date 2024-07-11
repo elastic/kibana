@@ -13,22 +13,26 @@ import { saveVisualization } from '../utils/saved_visualize_utils';
 import { VisualizeOutputState } from './types';
 
 export const saveToLibrary = async ({
-  id,
   uiState,
   rawState,
   references,
 }: {
-  id: string;
   uiState: PersistedState;
   rawState: VisualizeOutputState;
   references: Reference[];
 }) => {
-  const { savedVis: serializedVis, getDisplayName, getEsType, managed } = rawState;
+  const {
+    savedVis: serializedVis,
+    title,
+    description,
+    getDisplayName,
+    getEsType,
+    managed,
+  } = rawState;
 
   const visSavedObjectAttributes = {
-    id,
-    title: serializedVis.title,
-    description: serializedVis.description,
+    title,
+    description,
     visState: {
       type: serializedVis.type,
       params: serializedVis.params,
@@ -40,7 +44,7 @@ export const saveToLibrary = async ({
     searchSourceFields: serializedVis.data.searchSource,
     uiStateJSON: uiState.toString(),
     lastSavedTitle: '',
-    displayName: serializedVis.title,
+    displayName: title,
     getDisplayName,
     getEsType,
     managed,
