@@ -195,7 +195,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
 
   return (
     <CustomGridRow
-      className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
       $cssRowHeight={cssRowHeight}
       key={rowIndex}
     >
