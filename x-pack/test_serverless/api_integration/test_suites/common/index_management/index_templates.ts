@@ -232,7 +232,8 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: templates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          templates2.templates.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+          templates2.templates.find(({ name: catTemplateName }) => catTemplateName === name)
+            ?.version
         ).to.equal(updatedVersion);
       });
 

@@ -7,7 +7,7 @@
 
 import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
 import { API_BASE_PATH } from './constants';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+import { RoleCredentials } from '../../../shared/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlTemplatesApi({ getService }: FtrProviderContext) {
