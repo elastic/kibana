@@ -11,13 +11,12 @@ import {
   EuiFlexItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  EuiImage,
-  EuiSelectableMessage,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiText,
   EuiBadge,
   euiSelectableTemplateSitewideRenderOptions,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -36,10 +35,11 @@ import {
 import { SavedObjectTaggingPluginStart, Tag } from '../../../saved_objects_tagging/public';
 import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
+import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 
 interface Props {
-  globalSearch: GlobalSearchPluginStart;
+  globalSearch: GlobalSearchPluginStart & { searchCharLimit: number };
   navigateToUrl: ApplicationStart['navigateToUrl'];
   trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   taggingApi?: SavedObjectTaggingPluginStart;
@@ -86,6 +86,43 @@ const TagListWrapper = ({ children }: { children: ReactNode }) => (
   >
     {children}
   </ul>
+);
+
+const NoMatchesMessage = (props: { basePathUrl: string }) => {
+  return <PopoverPlaceholder basePath={props.basePathUrl} />;
+};
+
+const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
+  const charLimitMessage = (
+    <>
+      <EuiText size="m">
+        <p data-test-subj="searchCharLimitExceededMessageHeading">
+          <FormattedMessage
+            id="xpack.globalSearchBar.searchBar.searchCharLimitExceededHeading"
+            defaultMessage="Search character limit exceeded"
+          />
+        </p>
+      </EuiText>
+      <p>
+        <FormattedMessage
+          id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
+          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+        />
+      </p>
+    </>
+  );
+
+  return (
+    <PopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
+  );
+};
+
+const EmptyMessage = () => (
+  <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 const buildListItem = ({ color, name, id }: Tag) => {
@@ -189,6 +226,7 @@ export function SearchBar({
   const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const UNKNOWN_TAG_ID = '__unknown__';
+  const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
   useEffect(() => {
     if (initialLoad) {
@@ -242,6 +280,14 @@ export function SearchBar({
         if (searchSubscription.current) {
           searchSubscription.current.unsubscribe();
           searchSubscription.current = null;
+        }
+
+        if (searchValue.length > globalSearch.searchCharLimit) {
+          // setting this will display cause a more descriptive error message to be displayed to the user
+          setSearchCharLimitExceeded(true);
+          return setOptions([], []);
+        } else {
+          setSearchCharLimitExceeded(false);
         }
 
         const suggestions = loadSuggestions(searchValue);
@@ -357,34 +403,6 @@ export function SearchBar({
     }
   };
 
-  const emptyMessage = (
-    <EuiSelectableMessage style={{ minHeight: 300 }} data-test-subj="nav-search-no-results">
-      <EuiImage
-        alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
-          defaultMessage: 'Illustration of black hole',
-        })}
-        size="fullWidth"
-        url={`${basePathUrl}illustration_product_no_search_results_${
-          darkMode ? 'dark' : 'light'
-        }.svg`}
-      />
-      <EuiText size="m">
-        <p>
-          <FormattedMessage
-            id="xpack.globalSearchBar.searchBar.noResultsHeading"
-            defaultMessage="No results found"
-          />
-        </p>
-      </EuiText>
-      <p>
-        <FormattedMessage
-          id="xpack.globalSearchBar.searchBar.noResults"
-          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
-        />
-      </p>
-    </EuiSelectableMessage>
-  );
-
   useEvent('keydown', onKeyDown);
 
   return (
@@ -422,14 +440,20 @@ export function SearchBar({
           setInitialLoad(true);
         },
       }}
+      emptyMessage={<EmptyMessage />}
+      noMatchesMessage={
+        searchCharLimitExceeded ? (
+          <SearchCharLimitExceededMessage basePathUrl={basePathUrl} />
+        ) : (
+          <NoMatchesMessage basePathUrl={basePathUrl} />
+        )
+      }
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
       }}
-      emptyMessage={emptyMessage}
-      noMatchesMessage={emptyMessage}
       popoverFooter={
         <EuiFlexGroup
           alignItems="center"

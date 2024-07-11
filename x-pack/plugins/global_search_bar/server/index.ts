@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/public';
 import { GlobalSearchBarPlugin } from './plugin';
 
-export const plugin: PluginInitializer<{}, {}, {}, {}> = (initializerContext) =>
-  new GlobalSearchBarPlugin(initializerContext);
+export const plugin = () => new GlobalSearchBarPlugin();
+
+export { config } from './config';
