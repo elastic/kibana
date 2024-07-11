@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './alerts';
 export * from './certs';
 export * from './common';
 export * from './dynamic_settings';
