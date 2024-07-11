@@ -204,13 +204,7 @@ export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
   '[data-test-subj="securitySolutionAssigneesSelectable"] .euiSelectableListItem[role="option"]';
 
 export const ALERT_USER_AVATAR = (assignee: string) => {
-  let expectedAssignee = assignee;
-
-  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
-    expectedAssignee = `test ${expectedAssignee}`;
-  }
-
-  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title*='${assignee}']`;
 };
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
