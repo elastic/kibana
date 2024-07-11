@@ -77,9 +77,6 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  const message = '';
-  const tokenParentRunId = '';
-
   const stream = assistantGraph.streamEvents(inputs, {
     callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
