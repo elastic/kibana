@@ -27,7 +27,6 @@
       "kibanaUtils",
       "esql",
       "esqlDataGrid",
-      "observability",
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import type {
   GlobalWidgetParameters,
   InvestigateWidgetCreate,
@@ -12,17 +13,17 @@ import type {
   OnWidgetAdd,
   WorkflowBlock,
 } from '@kbn/investigate-plugin/public';
-import type { AuthenticatedUser } from '@kbn/core/public';
 
+import { assertNever } from '@kbn/std';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
+import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 import { AddFromLibraryButton } from '../add_from_library_button';
 import { AddWidgetModeSelector } from '../add_widget_mode_selector';
 import { AssistantWidgetControl } from '../assistant_widget_control';
 import { EsqlWidgetControl } from '../esql_widget_control';
 import { NoteWidgetControl } from '../note_widget_control';
-import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 
 type AddWidgetUIProps = {
   user: Pick<AuthenticatedUser, 'full_name' | 'username'>;
@@ -75,6 +76,9 @@ function getControlsForMode({
 
     case AddWidgetMode.Note:
       return <NoteWidgetControl user={user} onWidgetAdd={onWidgetAdd} />;
+
+    default:
+      assertNever(mode);
   }
 }
 
