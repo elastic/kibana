@@ -123,7 +123,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
-  assistantModelEvaluation: false,
+  assistantModelEvaluation: true,
 
   /**
    * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
