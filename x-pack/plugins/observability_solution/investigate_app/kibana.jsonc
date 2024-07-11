@@ -1,0 +1,35 @@
+{
+  "type": "plugin",
+  "id": "@kbn/investigate-app-plugin",
+  "owner": "@elastic/obs-ai-assistant",
+  "plugin": {
+    "id": "investigateApp",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "investigateApp"],
+    "requiredPlugins": [
+      "investigate",
+      "observabilityAIAssistant",
+      "observabilityShared",
+      "lens",
+      "dataViews",
+      "data",
+      "embeddable",
+      "contentManagement",
+      "datasetQuality",
+      "slo",
+      "unifiedSearch",
+      "security",
+      "apm"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "esql",
+      "esqlDataGrid",
+      "observability",
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}
