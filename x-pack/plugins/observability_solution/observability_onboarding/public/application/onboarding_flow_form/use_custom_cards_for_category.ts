@@ -31,7 +31,7 @@ export function useCustomCardsForCategory(
   } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
-  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
   const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
@@ -178,19 +178,19 @@ export function useCustomCardsForCategory(
     case 'logs':
       return [
         {
-          id: 'system-logs',
+          id: 'auto-detect-logs',
           type: 'virtual',
-          title: 'Stream host system logs',
-          description: 'Collect system logs from your machine or server',
-          name: 'system-logs-virtual',
+          title: 'Auto-detect logs and metrics',
+          description: 'This installation scans your host and auto-detects log and metric files',
+          name: 'auto-detect-logs-virtual',
           categories: ['observability'],
           icons: [
             {
-              type: 'svg',
-              src: http?.staticAssets.getPluginAssetHref('system.svg') ?? '',
+              type: 'eui',
+              src: 'consoleApp',
             },
           ],
-          url: systemLogsUrl,
+          url: autoDetectUrl,
           version: '',
           integration: '',
         },
