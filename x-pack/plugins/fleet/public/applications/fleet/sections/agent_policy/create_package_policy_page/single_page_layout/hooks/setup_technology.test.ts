@@ -280,7 +280,7 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, waitForNextUpdate, rerender, waitFor } = renderHook(() =>
+    const { result, rerender, waitFor } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -295,7 +295,6 @@ describe('useSetupTechnology', () => {
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
-    waitForNextUpdate();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
     expect(updateNewAgentPolicyMock).toHaveBeenCalledWith({
