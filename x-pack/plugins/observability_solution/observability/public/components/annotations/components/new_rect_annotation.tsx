@@ -28,13 +28,20 @@ export function NewRectAnnotation({
   if (!timestamp || !eventEnd || !isCreateOpen) {
     return null;
   }
-  const annotation = watch('annotation');
   const values = getValues();
+
+  const annotationStyle = watch('annotation.style');
+  const annotationType = watch('annotation.type');
+
   return (
     <ObsRectAnnotation
       annotation={{
         ...values,
-        annotation,
+        annotation: {
+          ...values.annotation,
+          style: annotationStyle,
+          type: annotationType,
+        },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
       }}
     />

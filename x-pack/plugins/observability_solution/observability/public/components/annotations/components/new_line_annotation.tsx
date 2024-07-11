@@ -29,13 +29,18 @@ export function NewLineAnnotation({
     return null;
   }
   const values = getValues();
-  const annotation = watch('annotation');
+  const annotationStyle = watch('annotation.style');
+  const annotationType = watch('annotation.type');
 
   return (
     <ObsLineAnnotation
       annotation={{
         ...values,
-        annotation,
+        annotation: {
+          ...values.annotation,
+          style: annotationStyle,
+          type: annotationType,
+        },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
       }}
     />

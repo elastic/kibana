@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { formatAnnotation } from './format_annotations';
 import { checkAnnotationsPermissions } from './permissions';
 import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
@@ -101,6 +102,10 @@ export function createAnnotationsClient(params: {
             created: new Date().toISOString(),
           },
         };
+        if (!annotation.annotation.title) {
+          // TODO: handle this when we integrate with the APM UI
+          annotation.annotation.title = annotation.message;
+        }
 
         const body = await unwrapEsResponse(
           esClient.index(
@@ -113,7 +118,7 @@ export function createAnnotationsClient(params: {
           )
         );
 
-        return (
+        const document = (
           await esClient.get<Annotation>(
             {
               index,
@@ -122,6 +127,11 @@ export function createAnnotationsClient(params: {
             { meta: true }
           )
         ).body as { _id: string; _index: string; _source: Annotation };
+        return {
+          _id: document._id,
+          _index: document._index,
+          _source: formatAnnotation(document._source),
+        };
       }
     ),
     update: ensureGoldLicense(
@@ -138,6 +148,10 @@ export function createAnnotationsClient(params: {
             updated: new Date().toISOString(),
           },
         };
+        if (!annotation.annotation.title) {
+          // TODO: handle this when we integrate with the APM UI
+          annotation.annotation.title = annotation.message;
+        }
 
         const body = await unwrapEsResponse(
           esClient.index(
@@ -165,7 +179,7 @@ export function createAnnotationsClient(params: {
     getById: ensureGoldLicense(async (getByIdParams: GetByIdAnnotationParams) => {
       const { id } = getByIdParams;
 
-      const response = await esClient.search({
+      const response = await esClient.search<Annotation>({
         index: readIndex,
         ignore_unavailable: true,
         query: {
@@ -180,7 +194,12 @@ export function createAnnotationsClient(params: {
           },
         },
       });
-      return response.hits.hits?.[0];
+      const document = response.hits.hits?.[0];
+      return {
+        _id: document._id,
+        _index: document._index,
+        _source: formatAnnotation(document._source!),
+      };
     }),
     find: ensureGoldLicense(async (findParams: FindAnnotationParams) => {
       const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
@@ -260,10 +279,12 @@ export function createAnnotationsClient(params: {
           },
         },
       });
+
       const items = result.hits.hits.map((hit) => ({
-        ...(hit._source as Annotation),
+        ...formatAnnotation(hit._source as Annotation),
         id: hit._id,
       }));
+
       return {
         items,
         total: (result.hits.total as SearchTotalHits)?.value,
