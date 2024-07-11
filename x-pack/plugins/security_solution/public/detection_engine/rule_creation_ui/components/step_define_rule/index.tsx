@@ -483,17 +483,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     isEsqlSuppressionLoading ||
     (isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length));
 
-  const suppressionGroupByDisabledText = areSuppressionFieldsDisabledBySequence
-    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-    : isMlRule(ruleType) && noMlJobsStarted
-    ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
-    : alertSuppressionUpsellingMessage;
+  const suppressionGroupByDisabledText = useMemo(() => {
+    if (areSuppressionFieldsDisabledBySequence) {
+      return i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP;
+    } else if (isMlRule(ruleType) && noMlJobsStarted) {
+      return i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL;
+    } else {
+      return alertSuppressionUpsellingMessage;
+    }
+  }, [
+    alertSuppressionUpsellingMessage,
+    areSuppressionFieldsDisabledBySequence,
+    noMlJobsStarted,
+    ruleType,
+  ]);
 
-  const suppressionGroupByFields = isEsqlRule(ruleType)
-    ? esqlSuppressionFields
-    : isMlRule(ruleType)
-    ? mlSuppressionFields
-    : termsAggregationFields;
+  const suppressionGroupByFields = useMemo(() => {
+    if (isEsqlRule(ruleType)) {
+      return esqlSuppressionFields;
+    } else if (isMlRule(ruleType)) {
+      return mlSuppressionFields;
+    } else {
+      return termsAggregationFields;
+    }
+  }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
 
   /**
    * Component that allows selection of suppression intervals disabled:
