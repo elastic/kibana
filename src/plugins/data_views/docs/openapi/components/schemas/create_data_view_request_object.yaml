@@ -12,7 +12,9 @@ properties:
       allowNoIndex:
         $ref: 'allownoindex.yaml'
       fieldAttrs:
-        $ref: 'fieldattrs.yaml'
+        type: object
+        additionalProperties:
+          $ref: 'fieldattrs.yaml'
       fieldFormats:
         $ref: 'fieldformats.yaml'
       fields:
