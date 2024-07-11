@@ -17,6 +17,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../../common/lib/kibana';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -63,6 +64,8 @@ import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
+import { NotesFlyout } from '../../properties/notes_flyout';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -85,6 +88,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   pinnedEventIds,
   eventIdToNoteIds,
 }) => {
+  const { telemetry } = useKibana().services;
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
@@ -146,6 +150,21 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
@@ -171,6 +190,18 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+          location: timelineId,
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'left',
+        });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
       }
     },
     [
@@ -178,7 +209,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
+      telemetry,
       timelineId,
+      setNotesEventId,
+      showNotesFlyout,
     ]
   );
 
@@ -188,6 +222,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.eql,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
     onToggleShowNotes,
   });
 
@@ -225,6 +262,20 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   return (
     <>
       {unifiedComponentsInTimelineEnabled ? (
@@ -232,34 +283,31 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           <InPortal node={eqlEventsCountPortalNode}>
             {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
           </InPortal>
+          {NotesFlyoutMemo}
           <FullWidthFlexGroup>
-            <ScrollableFlexItem grow={2}>
-              <UnifiedTimelineBody
-                header={unifiedHeader}
-                columns={augmentedColumnHeaders}
-                isSortEnabled={false}
-                rowRenderers={rowRenderers}
-                timelineId={timelineId}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                sort={TIMELINE_NO_SORTING}
-                events={events}
-                refetch={refetch}
-                dataLoadingState={dataLoadingState}
-                totalCount={isBlankTimeline ? 0 : totalCount}
-                onEventClosed={onEventClosed}
-                expandedDetail={expandedDetail}
-                showExpandedDetails={showExpandedDetails}
-                onChangePage={loadPage}
-                activeTab={activeTab}
-                updatedAt={refreshedAt}
-                isTextBasedQuery={false}
-                pageInfo={pageInfo}
-                leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-                pinnedEventIds={pinnedEventIds}
-                eventIdToNoteIds={eventIdToNoteIds}
-              />
-            </ScrollableFlexItem>
+            <UnifiedTimelineBody
+              header={unifiedHeader}
+              columns={augmentedColumnHeaders}
+              isSortEnabled={false}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              sort={TIMELINE_NO_SORTING}
+              events={events}
+              refetch={refetch}
+              dataLoadingState={dataLoadingState}
+              totalCount={isBlankTimeline ? 0 : totalCount}
+              onEventClosed={onEventClosed}
+              expandedDetail={expandedDetail}
+              showExpandedDetails={showExpandedDetails}
+              onChangePage={loadPage}
+              activeTab={activeTab}
+              updatedAt={refreshedAt}
+              isTextBasedQuery={false}
+              pageInfo={pageInfo}
+              leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+            />
           </FullWidthFlexGroup>
         </>
       ) : (
@@ -267,6 +315,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           <InPortal node={eqlEventsCountPortalNode}>
             {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
           </InPortal>
+          {NotesFlyoutMemo}
           <TimelineRefetch
             id={`${timelineId}-${TimelineTabs.eql}`}
             inputId={InputsModelId.timeline}
@@ -274,14 +323,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             loading={isQueryLoading}
             refetch={refetch}
           />
-          <FullWidthFlexGroup>
-            <ScrollableFlexItem grow={2}>
-              <EqlTabHeader
-                activeTab={activeTab}
-                setTimelineFullScreen={setTimelineFullScreen}
-                timelineFullScreen={timelineFullScreen}
-                timelineId={timelineId}
-              />
+          <FullWidthFlexGroup gutterSize="s" direction="column">
+            <ScrollableFlexItem grow={false}>{unifiedHeader}</ScrollableFlexItem>
+            <ScrollableFlexItem grow={true}>
               <EventDetailsWidthProvider>
                 <StyledEuiFlyoutBody
                   data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}

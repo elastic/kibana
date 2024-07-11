@@ -42,6 +42,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
+  esql: 37000
   esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
@@ -95,6 +96,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
+  logsDataAccess: 16759
   logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
@@ -102,7 +104,7 @@ pageLoadAssetSize:
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82187
+  ml: 85000
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
@@ -155,7 +157,6 @@ pageLoadAssetSize:
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
-  textBasedLanguages: 37000
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
