@@ -23,16 +23,9 @@ export const parseGeminiStreamAsAsyncIterator = async function* (
     for await (const chunk of stream) {
       const decoded = chunk.toString();
       const parsed = parseGeminiResponse(decoded);
-      // TODO: Move modifications of raw generated content out of chat model parsing
-      const splitByQuotes = parsed.split(`"`);
-      for (let i = 0; i < splitByQuotes.length; i++) {
-        const subchunk = splitByQuotes[i];
-        // add quote back on except for last chunk
-        const splitBySpace = `${subchunk}${i === splitByQuotes.length - 1 ? '' : '"'}`.split(` `);
-
-        for (const char of splitBySpace) {
-          yield `${char} `;
-        }
+      // Split the parsed string into chunks of 5 characters
+      for (let i = 0; i < parsed.length; i += 5) {
+        yield parsed.substring(i, i + 5);
       }
     }
   } catch (err) {

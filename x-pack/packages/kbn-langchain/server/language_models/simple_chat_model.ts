@@ -18,8 +18,8 @@ import { get } from 'lodash/fp';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
-import { parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
+import { parseGeminiStreamAsAsyncIterator, parseGeminiStream } from '../utils/gemini';
+import { parseBedrockStreamAsAsyncIterator, parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
@@ -104,14 +104,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
-    if (this.streaming) {
-      const chunks = [];
-      for await (const chunk of this._streamResponseChunks(messages, options, runManager)) {
-        chunks.push(chunk.message.content);
-      }
-      console.log('stephhh _call return', chunks.join(''));
-      return chunks.join('');
-    }
     const formattedMessages = _formatMessages(messages);
     this.#logger.debug(
       () =>
@@ -140,15 +132,50 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       );
     }
 
-    const content = get('data.message', actionResult);
+    if (!this.streaming) {
+      const content = get('data.message', actionResult);
 
-    if (typeof content !== 'string') {
-      throw new Error(
-        `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
-      );
+      if (typeof content !== 'string') {
+        throw new Error(
+          `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
+        );
+      }
+
+      return content; // per the contact of _call, return a string
     }
 
-    return content; // per the contact of _call, return a string
+    const readable = get('data', actionResult) as Readable;
+
+    if (typeof readable?.read !== 'function') {
+      throw new Error('Action result status is error: result is not streamable');
+    }
+
+    let currentOutput = '';
+    let finalOutputIndex = -1;
+    const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+    let streamingFinished = false;
+    const finalOutputStopRegex = /(?<!\\)\"/;
+    const handleLLMNewToken = async (token: string) => {
+      if (finalOutputIndex === -1) {
+        // Remove whitespace to simplify parsing
+        currentOutput += token.replace(/\s/g, '');
+        if (currentOutput.includes(finalOutputStartToken)) {
+          finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+        }
+      } else if (!streamingFinished) {
+        const finalOutputEndIndex = token.search(finalOutputStopRegex);
+        if (finalOutputEndIndex !== -1) {
+          streamingFinished = true;
+        } else {
+          await runManager?.handleLLMNewToken(token);
+        }
+      }
+    };
+    const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
+
+    const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
+
+    return parsed; // per the contact of _call, return a string
   }
 
   async *_streamResponseChunks(

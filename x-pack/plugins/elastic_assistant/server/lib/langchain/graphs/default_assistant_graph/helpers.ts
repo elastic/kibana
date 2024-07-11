@@ -94,7 +94,6 @@ export const streamGraph = async ({
               tokenParentRunId = parentRunId;
             }
             if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
-              console.log('stephhh push 1');
               push({ payload, type: 'content' });
               // store message in case of error
               message += payload;
@@ -122,7 +121,7 @@ export const streamGraph = async ({
   let finalOutputIndex = -1;
   const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
   let streamingFinished = false;
-  const finalOutputStopRegex = /(?<!\\)\"/;
+  const finalOutputStopRegex = /(?<!\\)"/; // /(?<!\\)\"/;
   let extraOutput = '';
   const processEvent = async () => {
     try {
@@ -132,7 +131,6 @@ export const streamGraph = async ({
       const event = value;
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
-        console.log('stephhh event', event);
         if (event.name === 'ActionsClientChatOpenAI') {
           if (event.event === 'on_llm_stream') {
             const chunk = event.data?.chunk;
@@ -160,43 +158,37 @@ export const streamGraph = async ({
         if (event.name === 'ActionsClientSimpleChatModel') {
           if (event.event === 'on_llm_stream') {
             const chunk = event.data?.chunk;
-            console.log('stephhh chunk', chunk);
 
             const msg = chunk.content;
             if (finalOutputIndex === -1) {
               // Remove whitespace to simplify parsing
-              currentOutput += msg.replace(/\s/g, '');
-              if (currentOutput.includes(finalOutputStartToken)) {
-                console.log('stephhh finalOutputStartToken', currentOutput);
-                finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
-                const contentStartIndex = finalOutputIndex + finalOutputStartToken.length;
+              currentOutput += msg; // .replace(/\s/g, '');
+              const currentFormattedOutput = currentOutput.replace(/\s/g, '');
+              if (currentFormattedOutput.includes(finalOutputStartToken)) {
+                const nonStrippedToken = '"action_input": "';
+                finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+                const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
                 extraOutput = currentOutput.substring(contentStartIndex);
+                push({ payload: extraOutput, type: 'content' });
+                finalMessage += extraOutput;
               }
             } else if (!streamingFinished && !didEnd) {
               const finalOutputEndIndex = msg.search(finalOutputStopRegex);
               if (finalOutputEndIndex !== -1) {
                 extraOutput = msg.substring(0, finalOutputEndIndex);
-                console.log('stephhh finalOutputStopRegex', msg);
                 streamingFinished = true;
                 if (extraOutput.length > 0) {
                   push({ payload: extraOutput, type: 'content' });
                   finalMessage += extraOutput;
                 }
-                handleStreamEnd(finalMessage);
               } else {
-                const tokenOutput = `${extraOutput}${chunk.content}`;
-                push({ payload: tokenOutput, type: 'content' });
-                extraOutput = '';
-                finalMessage += tokenOutput;
+                push({ payload: chunk.content, type: 'content' });
+                finalMessage += chunk.content;
               }
             }
           } else if (event.event === 'on_llm_end') {
-            const generations = event.data.output?.generations[0];
-            console.log('stephhh on_llm_end', JSON.stringify(generations, null, 2));
-            console.log('stephhh on_llm_end finalMessage', finalMessage);
-
-            if (generations && generations[0]) {
-              handleStreamEnd(generations[0].text);
+            if (streamingFinished) {
+              handleStreamEnd(finalMessage);
             }
           }
         }
@@ -214,7 +206,6 @@ export const streamGraph = async ({
         return handleStreamEnd(finalMessage);
       }
       logger.error(`Error streaming from LangChain: ${error.message}`);
-      console.log('stephhh push 3');
       push({ payload: error.message, type: 'content' });
       handleStreamEnd(error.message, true);
     }
