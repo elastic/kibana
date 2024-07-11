@@ -6,29 +6,53 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { EuiDataGridControlColumn, useEuiTheme, EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiDataGridControlColumn,
+  useEuiTheme,
+  EuiThemeComputed,
+  EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../../../table_context';
 
 const COLOR_INDICATOR_WIDTH = 4;
 
 interface ColorIndicatorCellParams {
-  rowIndex: number;
+  rowIndex: EuiDataGridCellValueElementProps['rowIndex'];
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
   getRowIndicator: (
     row: DataTableRecord,
     euiTheme: EuiThemeComputed
   ) => { color: string; label: string } | undefined;
 }
 
-const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({ rowIndex, getRowIndicator }) => {
+const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({
+  rowIndex,
+  setCellProps,
+  getRowIndicator,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const { rows } = useContext(UnifiedDataTableContext);
+  const { rows, expanded } = useContext(UnifiedDataTableContext);
   const row = rows[rowIndex];
   const configuration = row ? getRowIndicator(row, euiTheme) : undefined;
   const color = configuration?.color || 'transparent';
   const label = configuration?.label;
+
+  useEffect(() => {
+    if (row.isAnchor) {
+      setCellProps({
+        className: 'unifiedDataTable__cell--highlight',
+      });
+    } else if (expanded && row && expanded.id === row.id) {
+      setCellProps({
+        className: 'unifiedDataTable__cell--expanded',
+      });
+    } else {
+      setCellProps({ className: '' });
+    }
+  }, [expanded, row, setCellProps]);
 
   return (
     <div
@@ -56,8 +80,14 @@ export const getColorIndicatorControlColumn = ({
     headerCellRender: () => {
       return null;
     },
-    rowCellRender: ({ rowIndex }) => {
-      return <ColorIndicatorCell rowIndex={rowIndex} getRowIndicator={getRowIndicator} />;
+    rowCellRender: ({ rowIndex, setCellProps }) => {
+      return (
+        <ColorIndicatorCell
+          rowIndex={rowIndex}
+          setCellProps={setCellProps}
+          getRowIndicator={getRowIndicator}
+        />
+      );
     },
   };
 };

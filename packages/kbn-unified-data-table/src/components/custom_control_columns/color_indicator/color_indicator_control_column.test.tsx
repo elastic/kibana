@@ -27,7 +27,15 @@ describe('ColorIndicatorControlColumn', () => {
       column.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
     mountWithIntl(
       <UnifiedDataTableContext.Provider value={contextMock}>
-        <ColorIndicatorControlColumn {...({ rowIndex: 1 } as EuiDataGridCellValueElementProps)} />
+        <ColorIndicatorControlColumn
+          rowIndex={1}
+          setCellProps={jest.fn()}
+          columnId="color_indicator"
+          colIndex={0}
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+        />
       </UnifiedDataTableContext.Provider>
     );
     expect(getRowIndicator).toHaveBeenCalledWith(contextMock.rows[1], expect.any(Object));
