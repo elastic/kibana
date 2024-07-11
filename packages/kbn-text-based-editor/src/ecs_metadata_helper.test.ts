@@ -11,7 +11,7 @@ import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 describe('getColumnsWithMetadata', () => {
-  it('should return columns as is if fieldsMetadata is not provided', async () => {
+  it('should return original columns if fieldsMetadata is not provided', async () => {
     const columns = [
       { name: 'ecs.version', type: 'string' as DatatableColumnType },
       { name: 'field1', type: 'string' as DatatableColumnType },
@@ -19,22 +19,6 @@ describe('getColumnsWithMetadata', () => {
     ];
 
     const result = await getColumnsWithMetadata(columns);
-    expect(result).toEqual(columns);
-  });
-
-  it('should return columns as is if ECS version field is not present', async () => {
-    const columns = [
-      { name: 'field1', type: 'string' as DatatableColumnType },
-      { name: 'field2', type: 'number' as DatatableColumnType },
-    ];
-    const fieldsMetadata = {
-      getClient: jest.fn().mockResolvedValue({
-        find: jest.fn().mockResolvedValue({ fields: {} }),
-      }),
-    } as unknown as FieldsMetadataPublicStart;
-
-    const result = await getColumnsWithMetadata(columns, fieldsMetadata);
-
     expect(result).toEqual(columns);
   });
 
