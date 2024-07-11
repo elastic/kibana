@@ -12,6 +12,7 @@ import { createInferenceSchema } from './schemas/inference_schema';
 import { modelsProvider } from '../models/model_management';
 import { wrapError } from '../client/error_wrapper';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { syncSavedObjectsFactory } from '../saved_objects';
 
 export function inferenceModelRoutes(
   { router, routeGuard }: RouteInitialization,
@@ -42,20 +43,24 @@ export function inferenceModelRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const { inferenceId, taskType } = request.params;
-          const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
-            inferenceId,
-            taskType as InferenceTaskType,
-            request.body as InferenceModelConfig
-          );
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const { inferenceId, taskType } = request.params;
+            const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
+              inferenceId,
+              taskType as InferenceTaskType,
+              request.body as InferenceModelConfig
+            );
+            const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
+            await syncSavedObjects(false);
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 }
