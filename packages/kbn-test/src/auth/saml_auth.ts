@@ -37,7 +37,7 @@ export class Session {
 
 const REQUEST_TIMEOUT_MS = 60_000;
 
-export const cleanException = (url: string, ex: any) => {
+const cleanException = (url: string, ex: any) => {
   if (ex.isAxiosError) {
     ex.url = url;
     if (ex.response?.data) {
@@ -51,7 +51,6 @@ export const cleanException = (url: string, ex: any) => {
     ex.request = { REDACTED: 'REDACTED' };
     ex.response = { REDACTED: 'REDACTED' };
   }
-  return ex;
 };
 
 const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
