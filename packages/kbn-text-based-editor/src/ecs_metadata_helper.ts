@@ -49,7 +49,7 @@ export async function getColumnsWithMetadata(
           if (!metadata || convertEcsFieldTypeToESQLType(metadata.type) !== c.type) return c;
           return {
             ...c,
-            metadata,
+            metadata: { description: metadata.description },
           };
         });
       }

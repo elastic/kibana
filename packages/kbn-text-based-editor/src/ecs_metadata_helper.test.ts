@@ -31,8 +31,8 @@ describe('getColumnsWithMetadata', () => {
       getClient: jest.fn().mockResolvedValue({
         find: jest.fn().mockResolvedValue({
           fields: {
-            'ecs.version': { description: 'ECS version field' },
-            'ecs.field': { description: 'ECS field description' },
+            'ecs.version': { description: 'ECS version field', type: 'keyword' },
+            'ecs.field': { description: 'ECS field description', type: 'keyword' },
           },
         }),
       }),
@@ -41,7 +41,11 @@ describe('getColumnsWithMetadata', () => {
     const result = await getColumnsWithMetadata(columns, fieldsMetadata);
 
     expect(result).toEqual([
-      { name: 'ecs.version', type: 'string', metadata: { description: 'ECS version field' } },
+      {
+        name: 'ecs.version',
+        type: 'string',
+        metadata: { description: 'ECS version field' },
+      },
       { name: 'field2', type: 'number' },
     ]);
   });
@@ -56,7 +60,7 @@ describe('getColumnsWithMetadata', () => {
       getClient: jest.fn().mockResolvedValue({
         find: jest.fn().mockResolvedValue({
           fields: {
-            'ecs.version': { description: 'ECS version field' },
+            'ecs.version': { description: 'ECS version field', type: 'keyword' },
           },
         }),
       }),
