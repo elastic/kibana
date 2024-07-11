@@ -7,7 +7,13 @@
 
 import React, { useCallback, useState } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
@@ -26,6 +32,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
   onTemplateChange,
 }) => {
   const [selectedTemplate, onSelectTemplate] = useState<string>();
+  const isSmallScreen = useIsWithinMaxBreakpoint('s');
 
   const options: EuiSelectOption[] = templates.map((template) => ({
     text: template.name,
@@ -56,6 +63,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
           css={css`
             flex-grow: 0;
           `}
+          responsive={false}
         >
           <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
           <EuiFlexItem
@@ -64,7 +72,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
               line-height: 0;
             `}
           >
-            <ExperimentalBadge />
+            <ExperimentalBadge compact={isSmallScreen} />
           </EuiFlexItem>
         </EuiFlexGroup>
       }
