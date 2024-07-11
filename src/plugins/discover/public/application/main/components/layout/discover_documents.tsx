@@ -277,7 +277,8 @@ function DiscoverDocumentsComponent({
       <>
         <SelectedVSAvailableCallout
           esqlQueryColumns={documents?.esqlQueryColumns}
-          selectedColumns={currentColumns}
+          // `discover:searchFieldsFromSource` adds `_source` to the columns, but we should exclude it from the callout
+          selectedColumns={currentColumns.filter((col) => col !== '_source')}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
