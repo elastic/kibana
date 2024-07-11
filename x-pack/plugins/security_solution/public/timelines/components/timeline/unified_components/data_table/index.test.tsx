@@ -36,7 +36,6 @@ const onChangePageMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
 const closeFlyoutMock = jest.fn();
-const isExpandableFlyoutDisabled = false;
 
 jest.mock('../hooks/use_unified_timeline_expandable_flyout');
 
@@ -99,7 +98,6 @@ describe('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
     (useUnifiedTableExpandableFlyout as jest.Mock).mockReturnValue({
-      isExpandableFlyoutDisabled,
       openFlyout: openFlyoutMock,
       closeFlyout: closeFlyoutMock,
     });
