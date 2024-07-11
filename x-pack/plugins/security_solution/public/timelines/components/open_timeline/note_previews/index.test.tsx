@@ -239,6 +239,63 @@ describe('NotePreviews', () => {
     expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeFalsy();
   });
 
+  test('should render toggle event details action by default', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithI18nProvider(
+      <TestProviders>
+        <NotePreviews
+          notes={[
+            {
+              noteId: 'noteId1',
+              note: 'enabled delete',
+              savedObjectId: 'test-id',
+              updated: note2updated,
+              updatedBy: 'alice',
+            },
+          ]}
+          showTimelineDescription
+          timelineId="test-timeline-id"
+        />
+      </TestProviders>,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
+    );
+
+    expect(wrapper.find('[data-test-subj="notes-toggle-event-details"]').exists()).toBeTruthy();
+  });
+
+  test('should not render toggle event details action when showToggleEventDetailsAction is false ', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithI18nProvider(
+      <TestProviders>
+        <NotePreviews
+          notes={[
+            {
+              noteId: 'noteId1',
+              note: 'enabled delete',
+              savedObjectId: 'test-id',
+              updated: note2updated,
+              updatedBy: 'alice',
+            },
+          ]}
+          showTimelineDescription
+          timelineId="test-timeline-id"
+          showToggleEventDetailsAction={false}
+        />
+      </TestProviders>,
+      {
+        wrappingComponent: createReactQueryWrapper(),
+      }
+    );
+
+    expect(wrapper.find('[data-test-subj="notes-toggle-event-details"]').exists()).toBeFalsy();
+  });
+
   describe('Delete Notes', () => {
     it('should delete note correctly', async () => {
       const timeline = {
