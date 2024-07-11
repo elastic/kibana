@@ -199,6 +199,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     eventIdToNoteIds,
     refetch,
     timelineId,
+    activeTab: TimelineTabs.pinned,
   });
 
   const onToggleShowNotes = useCallback(
