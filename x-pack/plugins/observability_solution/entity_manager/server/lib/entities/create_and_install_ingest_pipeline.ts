@@ -30,6 +30,7 @@ export async function createAndInstallHistoryIngestPipeline(
           processors: historyProcessors,
           _meta: {
             definitionVersion: definition.version,
+            managed: definition.managed,
           },
         }),
       { logger }
@@ -56,6 +57,7 @@ export async function createAndInstallLatestIngestPipeline(
           processors: latestProcessors,
           _meta: {
             definitionVersion: definition.version,
+            managed: definition.managed,
           },
         }),
       { logger }
