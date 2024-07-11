@@ -178,3 +178,6 @@ export const SortOrderOrUndefined = z.union([z.string().nullable(), z.unknown()]
 
 export type Shards = z.infer<typeof Shards>;
 export const Shards = z.object({}).catchall(z.number());
+
+export type DefaultSuccessResponse = z.infer<typeof DefaultSuccessResponse>;
+export const DefaultSuccessResponse = z.object({});
