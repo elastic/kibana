@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
     'user.name': ['root'],
   };
 
-  describe.only('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Manual rule run', () => {
+  describe('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Manual rule run', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
