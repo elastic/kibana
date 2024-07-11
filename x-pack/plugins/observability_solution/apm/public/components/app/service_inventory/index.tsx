@@ -5,24 +5,39 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { apmEnableMultiSignal } from '@kbn/observability-plugin/common';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceInventory } from './apm_signal_inventory';
 import { MultiSignalInventory } from './multi_signal_inventory';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
-export const ServiceInventory = () => {
-  const { core } = useApmPluginContext();
-  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
+export function ServiceInventory() {
+  const { isEntityManagerEnabled, isEnablementPending } = useEntityManagerEnablementContext();
 
   const {
     query: { serviceGroup },
   } = useApmParams('/services');
 
-  return isMultiSignalEnabled && isEmpty(serviceGroup) ? (
+  if (isEnablementPending) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.loadingService', {
+              defaultMessage: 'Loading services',
+            })}
+          </h2>
+        }
+      />
+    );
+  }
+
+  return isEntityManagerEnabled && isEmpty(serviceGroup) ? (
     <MultiSignalInventory />
   ) : (
     <ApmServiceInventory />
   );
-};
+}

@@ -64,7 +64,6 @@
     "@kbn/utility-types-jest",
     "@kbn/es-query",
     "@kbn/ui-theme",
-    "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/telemetry-plugin",
     "@kbn/task-manager-plugin",

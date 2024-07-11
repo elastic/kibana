@@ -4,13 +4,6 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-    UpdatePacksRequestQueryParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdatePacksRequestParams'
   schemas:
     UpdatePacksRequestParams:
       type: object
@@ -32,7 +25,3 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed
