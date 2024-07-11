@@ -10,8 +10,6 @@ import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-const ECS_VERSION_FIELD = 'ecs.version';
-
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
@@ -31,15 +29,14 @@ export async function getColumnsWithMetadata(
   }>,
   fieldsMetadata?: FieldsMetadataPublicStart
 ): Promise<ESQLRealField[]> {
-  if (!fieldsMetadata || !columns.find((c) => c.name === ECS_VERSION_FIELD)) {
-    return columns;
-  }
+  if (!fieldsMetadata) return columns;
 
   try {
     const fieldsMetadataClient = await fieldsMetadata?.getClient();
     if (fieldsMetadataClient) {
       const fields = await fieldsMetadataClient.find({
         fieldNames: columns.map((c) => c.name),
+        attributes: ['description', 'type'],
       });
 
       if (fields.fields) {

@@ -20,6 +20,7 @@ export interface ESQLRealField {
   type: string;
   metadata?: {
     description?: string;
+    type?: string;
   };
 }
 
