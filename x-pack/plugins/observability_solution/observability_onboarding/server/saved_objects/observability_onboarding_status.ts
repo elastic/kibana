@@ -23,9 +23,9 @@ export interface SystemLogsState {
   namespace: string;
 }
 
-export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs' | 'autoDetect';
-
 type ObservabilityOnboardingFlowState = LogFilesState | SystemLogsState | undefined;
+
+type ObservabilityOnboardingType = 'logFiles' | 'systemLogs' | 'autoDetect' | 'kubernetes';
 
 export interface ObservabilityOnboardingFlow {
   type: ObservabilityOnboardingType;
