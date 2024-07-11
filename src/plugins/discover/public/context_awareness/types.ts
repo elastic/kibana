@@ -27,7 +27,7 @@ export interface RowIndicatorExtensionParams {
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
-  setRowIndicator: (
+  getRowIndicatorProvider: (
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;
 }

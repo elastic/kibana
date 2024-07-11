@@ -107,10 +107,9 @@ describe('logsDataSourceProfileProvider', () => {
     it('should return the correct color for a given log level', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
-      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicator?.(
-        () => undefined
-      );
-      const getRowIndicator = setRowIndicator?.({
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+      const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
 
@@ -121,10 +120,9 @@ describe('logsDataSourceProfileProvider', () => {
     it('should not return a color for a missing log level in the document', () => {
       const row = buildDataTableRecord({ fields: { other: 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
-      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicator?.(
-        () => undefined
-      );
-      const getRowIndicator = setRowIndicator?.({
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+      const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
 
@@ -133,10 +131,9 @@ describe('logsDataSourceProfileProvider', () => {
     });
 
     it('should not set the color indicator handler if data view does not have log level field', () => {
-      const setRowIndicator = logsDataSourceProfileProvider.profile.setRowIndicator?.(
-        () => undefined
-      );
-      const getRowIndicator = setRowIndicator?.({
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+      const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
       });
 
