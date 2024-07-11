@@ -74,6 +74,22 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).contain('/app/search_playground/chat');
     });
 
+    it('navigate to inference management ui from side nav', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchInferenceEndpoints' });
+      await header.waitUntilLoadingHasFinished();
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Relevance',
+        'Inference Endpoints',
+      ]);
+
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      expect(await browser.getCurrentUrl()).contain(
+        '/app/search_inference_endpoints/inference_endpoints'
+      );
+    });
+
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
