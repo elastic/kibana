@@ -2,6 +2,9 @@
 
 exports[`generateHistoryTransform(definition) should generate a valid latest transform 1`] = `
 Object {
+  "_meta": Object {
+    "definitionVersion": "999.999.999",
+  },
   "defer_validation": true,
   "dest": Object {
     "index": ".entities.v1.history.noop",
