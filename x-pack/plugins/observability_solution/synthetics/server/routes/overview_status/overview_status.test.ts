@@ -13,7 +13,7 @@ import times from 'lodash/times';
 import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { RouteContext } from '../types';
-import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
+import { getUptimeESMockClient } from '../../queries/test_helpers';
 
 import * as commonLibs from '../common';
 import { SyntheticsServerSetup } from '../../types';
@@ -107,7 +107,7 @@ describe('current status route', () => {
 
   describe('queryMonitorStatus', () => {
     it('parses expected agg fields', async () => {
-      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
         getEsResponse([
           {
@@ -212,7 +212,7 @@ describe('current status route', () => {
       );
       expect(
         await queryMonitorStatus(
-          uptimeEsClient,
+          syntheticsEsClient,
           ['Europe - Germany', 'Asia/Pacific - Japan'],
           { from: 'now-1d', to: 'now' },
           ['id1', 'id2'],
@@ -260,7 +260,7 @@ describe('current status route', () => {
     });
 
     it('handles limits with multiple requests', async () => {
-      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
         getEsResponse([
           {
@@ -377,7 +377,7 @@ describe('current status route', () => {
       ];
       expect(
         await queryMonitorStatus(
-          uptimeEsClient,
+          syntheticsEsClient,
           [...concernedLocations, ...times(9997).map((n) => 'Europe - Germany' + n)],
           { from: 'now-24h', to: 'now' },
           ['id1', 'id2'],
@@ -435,7 +435,7 @@ describe('current status route', () => {
     });
 
     it('handles pending configs', async () => {
-      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
         getEsResponse([
           {
@@ -540,7 +540,7 @@ describe('current status route', () => {
       );
       expect(
         await queryMonitorStatus(
-          uptimeEsClient,
+          syntheticsEsClient,
           ['Europe - Germany', 'Asia/Pacific - Japan'],
           { from: 'now-12h', to: 'now' },
           ['id1', 'id2', 'project-monitor-id', 'id4'],
@@ -667,7 +667,7 @@ describe('current status route', () => {
           sort: ['a', 3013],
         } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
-      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
         getEsResponse([
           {
@@ -772,7 +772,7 @@ describe('current status route', () => {
       );
       const result = await getStatus(
         {
-          uptimeEsClient,
+          syntheticsEsClient,
           savedObjectsClient: savedObjectsClientMock.create(),
           server: serverMock,
         } as unknown as RouteContext,
@@ -833,12 +833,12 @@ describe('current status route', () => {
           sort: ['a', 3013],
         } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
-      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(getEsResponse([]));
       expect(
         await getStatus(
           {
-            uptimeEsClient,
+            syntheticsEsClient,
             savedObjectsClient: savedObjectsClientMock.create(),
           } as unknown as RouteContext,
           {

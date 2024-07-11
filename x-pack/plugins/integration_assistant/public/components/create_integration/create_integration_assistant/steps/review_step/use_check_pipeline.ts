@@ -42,19 +42,19 @@ export const useCheckPipeline = ({ integrationSettings, customPipeline }: CheckP
         };
         setIsGenerating(true);
 
-        const ecsGraphResult = await runCheckPipelineResults(parameters, deps);
+        const checkPipelineResults = await runCheckPipelineResults(parameters, deps);
         if (abortController.signal.aborted) return;
-        if (isEmpty(ecsGraphResult?.results.docs)) {
+        if (isEmpty(checkPipelineResults?.results.docs)) {
           setError('No results for the pipeline');
           return;
         }
         setResult({
           pipeline: customPipeline,
-          docs: ecsGraphResult.results.docs,
+          docs: checkPipelineResults.results.docs,
         });
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body.message ?? e.message}`);
+        setError(`Error: ${e.body?.message ?? e.message}`);
       } finally {
         setIsGenerating(false);
       }

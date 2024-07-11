@@ -25,12 +25,9 @@ import {
   MonitorStatusActionGroup,
   SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
 } from '../../common/constants/synthetics_alerts';
-import {
-  getUptimeIndexPattern,
-  IndexPatternTitleAndFields,
-} from '../legacy_uptime/lib/requests/get_index_pattern';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
 import { StatusCheckFilters } from '../../common/runtime_types';
-import { UptimeEsClient } from '../lib';
+import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
@@ -311,14 +308,14 @@ export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.re
 });
 
 export const formatFilterString = async (
-  uptimeEsClient: UptimeEsClient,
+  syntheticsEsClient: SyntheticsEsClient,
   filters?: StatusCheckFilters,
   search?: string
 ) =>
   await generateFilterDSL(
     () =>
       getUptimeIndexPattern({
-        uptimeEsClient,
+        syntheticsEsClient,
       }),
     filters,
     search
