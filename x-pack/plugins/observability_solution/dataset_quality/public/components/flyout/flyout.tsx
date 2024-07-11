@@ -43,14 +43,15 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     integration,
   } = useDatasetQualityFlyout();
 
-  const titleAndLinkDetails: BasicDataStream = {
+  const linkDetails: BasicDataStream = {
     name: dataset.name,
     rawName: dataset.rawName,
     integration: integration?.integrationDetails,
     type: dataset.type,
     namespace: dataset.namespace,
-    title: integration?.integrationDetails?.datasets?.[dataset.name] ?? dataset.name,
   };
+
+  const title = integration?.integrationDetails?.datasets?.[dataset.name] ?? dataset.name;
 
   const { startTracking } = useDatasetDetailsTelemetry();
 
@@ -70,8 +71,9 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
       ) : (
         <>
           <Header
-            titleAndLinkDetails={titleAndLinkDetails}
+            linkDetails={linkDetails}
             loading={!loadingState.datasetIntegrationDone}
+            title={title}
           />
           <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
