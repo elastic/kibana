@@ -10,11 +10,6 @@ import { CustomInferenceEndpointConfig, SemanticTextField } from '../../../../..
 import { useSemanticText } from './use_semantic_text';
 import { act } from 'react-dom/test-utils';
 
-// jest.mock('../../../../../mappings_state_context', () => ({
-//   useMappingsState: () => ({ inferenceToModelIdMap: {} }),
-//   useDispatch: () => mockDispatch,
-// }));
-
 jest.mock('../../../../../../../../hooks/use_details_page_mappings_model_management', () => ({
   useDetailsPageMappingsModelManagement: () => ({
     fetchInferenceToModelIdMap: () => ({
