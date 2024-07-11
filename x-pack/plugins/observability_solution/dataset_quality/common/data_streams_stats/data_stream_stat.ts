@@ -17,7 +17,7 @@ export class DataStreamStat {
   type: DataStreamType;
   name: DataStreamStatType['name'];
   namespace: string;
-  title: string;
+  title?: string;
   size?: DataStreamStatType['size']; // total datastream size
   sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];

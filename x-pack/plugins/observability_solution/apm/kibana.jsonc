@@ -30,7 +30,8 @@
       "lens",
       "maps",
       "uiActions",
-      "logsDataAccess"
+      "logsDataAccess",
+      "entityManager"
     ],
     "optionalPlugins": [
       "actions",
@@ -52,13 +53,6 @@
       "cases",
       "observabilityAIAssistant"
     ],
-    "requiredBundles": [
-      "fleet",
-      "kibanaReact",
-      "kibanaUtils",
-      "ml",
-      "observability",
-      "maps"
-    ]
+    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }
 }

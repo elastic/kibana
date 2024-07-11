@@ -14,7 +14,6 @@ export * from './review_rule_installation/review_rule_installation_route';
 export * from './review_rule_upgrade/review_rule_upgrade_route';
 export * from './urls';
 export * from './model/aggregated_prebuilt_rules_error';
-export * from './model/diff/diffable_rule/build_schema';
 export * from './model/diff/diffable_rule/diffable_field_types';
 export * from './model/diff/diffable_rule/diffable_rule';
 export * from './model/diff/rule_diff/fields_diff';
