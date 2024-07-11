@@ -95,6 +95,8 @@ interface FetchScriptInfoResponse<
   buildScriptArgs: (options: TScriptOptions) => string;
 }
 
+// Temporary comment to trigger unit tests
+
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: NormalizedExternalConnectorClient;
