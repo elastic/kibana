@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { TaskRunner } from '../task_running';
 import { TaskDefinition } from '../task';
 
-export interface ICapacityCalculator {
+export interface ICapacity {
   get capacity(): number;
   availableCapacity(
     tasksInPool: Map<string, TaskRunner>,
@@ -25,7 +25,7 @@ export interface ICapacityCalculator {
   ): [TaskRunner[], TaskRunner[]];
 }
 
-export interface CapacityCalculatorOpts {
+export interface CapacityOpts {
   capacity$: Observable<number>;
   logger: Logger;
 }

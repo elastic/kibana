@@ -29,60 +29,54 @@ describe('createManagedConfiguration()', () => {
   test('returns observables with initialized values', async () => {
     const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { startingCapacity, capacityConfiguration$, pollIntervalConfiguration$ } =
-      createManagedConfiguration({
-        logger,
-        errors$: new Subject<Error>(),
-        config: {
-          capacity: 20,
-          poll_interval: 2,
-        } as TaskManagerConfig,
-      });
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        capacity: 20,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(startingCapacity).toEqual(20);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
     expect(capacitySubscription).toHaveBeenNthCalledWith(1, 20);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
 
-  test('calculates capacity based on max_workers if only max workers is defined', async () => {
+  test('uses max_workers config as capacity if only max workers is defined', async () => {
     const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { startingCapacity, capacityConfiguration$, pollIntervalConfiguration$ } =
-      createManagedConfiguration({
-        logger,
-        errors$: new Subject<Error>(),
-        config: {
-          max_workers: 10,
-          poll_interval: 2,
-        } as TaskManagerConfig,
-      });
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        max_workers: 10,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(startingCapacity).toEqual(20);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 20);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 10);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
 
-  test('calculates capacity based on max_workers but does not exceed capacity of 100', async () => {
+  test('uses max_workers config as capacity but does not exceed MAX_CAPACITY', async () => {
     const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { startingCapacity, capacityConfiguration$, pollIntervalConfiguration$ } =
-      createManagedConfiguration({
-        logger,
-        errors$: new Subject<Error>(),
-        config: {
-          max_workers: 1000,
-          poll_interval: 2,
-        } as TaskManagerConfig,
-      });
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        max_workers: 1000,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(startingCapacity).toEqual(100);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
     expect(capacitySubscription).toHaveBeenNthCalledWith(1, 100);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
@@ -92,17 +86,15 @@ describe('createManagedConfiguration()', () => {
   test('uses DEFAULT_CAPACITY if neither capacity nor max_workers is defined', async () => {
     const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { startingCapacity, capacityConfiguration$, pollIntervalConfiguration$ } =
-      createManagedConfiguration({
-        logger,
-        errors$: new Subject<Error>(),
-        config: {
-          poll_interval: 2,
-        } as TaskManagerConfig,
-      });
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(startingCapacity).toEqual(DEFAULT_CAPACITY);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
     expect(capacitySubscription).toHaveBeenNthCalledWith(1, DEFAULT_CAPACITY);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
@@ -112,19 +104,17 @@ describe('createManagedConfiguration()', () => {
   test('logs warning and uses capacity config if both capacity and max_workers is defined', async () => {
     const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { startingCapacity, capacityConfiguration$, pollIntervalConfiguration$ } =
-      createManagedConfiguration({
-        logger,
-        errors$: new Subject<Error>(),
-        config: {
-          capacity: 30,
-          max_workers: 10,
-          poll_interval: 2,
-        } as TaskManagerConfig,
-      });
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        capacity: 30,
+        max_workers: 10,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(startingCapacity).toEqual(30);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
     expect(capacitySubscription).toHaveBeenNthCalledWith(1, 30);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
@@ -142,7 +132,7 @@ describe('createManagedConfiguration()', () => {
       errors$,
       logger,
       config: {
-        capacity: 20,
+        capacity: 10,
         poll_interval: 100,
       } as TaskManagerConfig,
     });

@@ -8,7 +8,9 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const MAX_WORKERS_LIMIT = 100;
-export const DEFAULT_CAPACITY = 20;
+export const DEFAULT_CAPACITY = 10;
+export const MAX_CAPACITY = 100;
+export const MIN_CAPACITY = 10;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
@@ -65,8 +67,8 @@ const requestTimeoutsConfig = schema.object({
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
-    // Min capacity must be equivalent of the biggest cost task
-    capacity: schema.maybe(schema.number({ min: 10, max: 100 })),
+    /* The number of normal cost tasks that this Kibana instance will run simultaneously */
+    capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     ephemeral_tasks: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       /* How many requests can Task Manager buffer before it rejects new requests. */

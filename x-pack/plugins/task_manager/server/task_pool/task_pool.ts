@@ -16,10 +16,10 @@ import { Logger } from '@kbn/core/server';
 import { TaskRunner } from '../task_running';
 import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
 import { TaskManagerStat } from '../task_events';
-import { ICapacityCalculator } from './types';
+import { ICapacity } from './types';
 import { CLAIM_STRATEGY_MGET } from '../config';
-import { CapacityByWorker } from './capacity_by_worker';
-import { CapacityByCost } from './capacity_by_cost';
+import { WorkerCapacity } from './worker_capacity';
+import { CostCapacity } from './cost_capacity';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
 interface TaskPoolOpts {
@@ -41,7 +41,6 @@ export enum TaskPoolRunResult {
 }
 
 const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana service';
-const MAX_RUN_ATTEMPTS = 3;
 
 /**
  * Runs tasks in batches, taking costs into account.
@@ -51,7 +50,7 @@ export class TaskPool {
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
   private definitions: TaskTypeDictionary;
-  private capacityCalculator: ICapacityCalculator;
+  private capacityCalculator: ICapacity;
 
   /**
    * Creates an instance of TaskPool.
@@ -67,14 +66,14 @@ export class TaskPool {
 
     switch (opts.strategy) {
       case CLAIM_STRATEGY_MGET:
-        this.capacityCalculator = new CapacityByCost({
+        this.capacityCalculator = new CostCapacity({
           capacity$: opts.capacity$,
           logger: this.logger,
         });
         break;
 
       default:
-        this.capacityCalculator = new CapacityByWorker({
+        this.capacityCalculator = new WorkerCapacity({
           capacity$: opts.capacity$,
           logger: this.logger,
         });
@@ -129,7 +128,7 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public async run(tasks: TaskRunner[], attempt = 1): Promise<TaskPoolRunResult> {
+  public async run(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
     // Note `this.availableCapacity` has side effects, so we just want
     // to call it once for this bit of the code.
     const availableCapacity = this.availableCapacity();
@@ -137,21 +136,6 @@ export class TaskPool {
       tasks,
       availableCapacity
     );
-
-    if (attempt > MAX_RUN_ATTEMPTS) {
-      const stats = [
-        `availableCapacity: ${availableCapacity}`,
-        `tasksToRun: ${tasksToRun.length}`,
-        `leftOverTasks: ${leftOverTasks.length}`,
-        `capacity: ${this.capacityCalculator.capacity}`,
-        `usedCapacity: ${this.usedCapacity}`,
-        `capacityLoad: ${this.usedCapacityPercentage}`,
-      ].join(', ');
-      this.logger.warn(
-        `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity; ${stats}`
-      );
-      return TaskPoolRunResult.RanOutOfCapacity;
-    }
 
     if (tasksToRun.length) {
       await Promise.all(
@@ -187,10 +171,8 @@ export class TaskPool {
     }
 
     if (leftOverTasks.length) {
-      // see if we have capacity for leftover tasks
-      if (this.availableCapacity()) {
-        return this.run(leftOverTasks, attempt + 1);
-      }
+      // leave any leftover tasks
+      // they will be available for claiming in 30 seconds
       return TaskPoolRunResult.RanOutOfCapacity;
     } else if (!this.availableCapacity()) {
       return TaskPoolRunResult.RunningAtCapacity;

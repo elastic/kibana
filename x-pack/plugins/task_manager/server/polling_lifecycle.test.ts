@@ -89,8 +89,6 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
-    startingCapacity: 20,
-    startingPollInterval: 100,
     capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,

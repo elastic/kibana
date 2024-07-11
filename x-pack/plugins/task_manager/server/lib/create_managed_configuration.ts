@@ -10,7 +10,7 @@ import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'r
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
-import { DEFAULT_CAPACITY, TaskManagerConfig } from '../config';
+import { DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
 import { TaskCost } from '../task';
 
 const FLUSH_MARKER = Symbol('flush');
@@ -39,8 +39,6 @@ interface ManagedConfigurationOpts {
 }
 
 export interface ManagedConfiguration {
-  startingCapacity: number;
-  startingPollInterval: number;
   capacityConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
@@ -54,8 +52,6 @@ export function createManagedConfiguration({
   const startingCapacity = calculateStartingCapacity(config, logger);
   const startingPollInterval = config.poll_interval;
   return {
-    startingCapacity,
-    startingPollInterval,
     capacityConfiguration$: errorCheck$.pipe(
       createCapacityScan(logger, startingCapacity),
       startWith(startingCapacity),
@@ -206,9 +202,8 @@ export function calculateStartingCapacity(config: TaskManagerConfig, logger: Log
     // Use capacity if explicitly set
     return config.capacity!;
   } else if (config.max_workers) {
-    // Otherwise calculate capacity based on max_workers
-    // Assume each worker can handle one normal cost task
-    return Math.min(config.max_workers! * TaskCost.Normal, 100);
+    // Otherwise use max_worker value as capacity, capped at MAX_CAPACITY
+    return Math.min(config.max_workers, MAX_CAPACITY);
   }
 
   // Neither are set, use DEFAULT CAPACITY

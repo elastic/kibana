@@ -8,35 +8,41 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { of, Subject } from 'rxjs';
 import { TaskCost } from '../task';
-import { CapacityByCost } from './capacity_by_cost';
+import { CostCapacity } from './cost_capacity';
 import { mockTask } from './test_utils';
 
 const logger = loggingSystemMock.create().get();
 
-describe('CapacityByCost', () => {
+describe('CostCapacity', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   test('capacity responds to changes from capacity$ observable', () => {
     const capacity$ = new Subject<number>();
-    const pool = new CapacityByCost({ capacity$, logger });
+    const pool = new CostCapacity({ capacity$, logger });
 
     expect(pool.capacity).toBe(0);
 
     capacity$.next(20);
-    expect(pool.capacity).toBe(20);
+    expect(pool.capacity).toBe(40);
 
     capacity$.next(16);
-    expect(pool.capacity).toBe(16);
+    expect(pool.capacity).toBe(32);
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'Task pool now using 20 as the capacity value');
-    expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task pool now using 16 as the capacity value');
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      `Task pool now using 40 as the max allowed cost which is based on a capacity of 20`
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      2,
+      `Task pool now using 32 as the max allowed cost which is based on a capacity of 16`
+    );
   });
 
   test('usedCapacity returns the sum of costs of tasks in the pool', () => {
-    const pool = new CapacityByCost({ capacity$: of(20), logger });
+    const pool = new CostCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -48,7 +54,7 @@ describe('CapacityByCost', () => {
   });
 
   test('usedCapacityPercentage returns the percentage of capacity used based on cost of tasks in the pool', () => {
-    const pool = new CapacityByCost({ capacity$: of(20), logger });
+    const pool = new CostCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -60,7 +66,7 @@ describe('CapacityByCost', () => {
   });
 
   test('usedCapacityByType returns the sum of of costs of tasks of specified type in the pool', () => {
-    const pool = new CapacityByCost({ capacity$: of(20), logger });
+    const pool = new CostCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = [
       { ...mockTask({}, { type: 'type1' }) },
@@ -74,7 +80,7 @@ describe('CapacityByCost', () => {
   });
 
   test('availableCapacity returns the full available capacity when no task type is defined', () => {
-    const pool = new CapacityByCost({ capacity$: of(20), logger });
+    const pool = new CostCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -86,7 +92,7 @@ describe('CapacityByCost', () => {
   });
 
   test('availableCapacity returns the full available capacity when task type with no maxConcurrency is provided', () => {
-    const pool = new CapacityByCost({ capacity$: of(20), logger });
+    const pool = new CostCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -105,7 +111,7 @@ describe('CapacityByCost', () => {
   });
 
   test('availableCapacity returns the available capacity for the task type when task type with maxConcurrency is provided', () => {
-    const pool = new CapacityByCost({ capacity$: of(20), logger });
+    const pool = new CostCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask({}, { type: 'type1' }) }],
@@ -126,7 +132,7 @@ describe('CapacityByCost', () => {
 
   describe('determineTasksToRunBasedOnCapacity', () => {
     test('runs all tasks if there is capacity', () => {
-      const pool = new CapacityByCost({ capacity$: of(20), logger });
+      const pool = new CostCapacity({ capacity$: of(10), logger });
       const tasks = [{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }];
       const [tasksToRun, leftoverTasks] = pool.determineTasksToRunBasedOnCapacity(tasks, 20);
 
@@ -135,7 +141,7 @@ describe('CapacityByCost', () => {
     });
 
     test('runs task in order until capacity is reached', () => {
-      const pool = new CapacityByCost({ capacity$: of(20), logger });
+      const pool = new CostCapacity({ capacity$: of(10), logger });
       const tasks = [
         { ...mockTask() },
         { ...mockTask() },
@@ -154,7 +160,7 @@ describe('CapacityByCost', () => {
     });
 
     test('does not run tasks if there is no capacity', () => {
-      const pool = new CapacityByCost({ capacity$: of(20), logger });
+      const pool = new CostCapacity({ capacity$: of(10), logger });
       const tasks = [{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }];
       const [tasksToRun, leftoverTasks] = pool.determineTasksToRunBasedOnCapacity(tasks, 1);
 

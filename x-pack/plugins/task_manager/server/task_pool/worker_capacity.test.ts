@@ -8,48 +8,48 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { of, Subject } from 'rxjs';
 import { TaskCost } from '../task';
-import { CapacityByWorker } from './capacity_by_worker';
 import { mockTask } from './test_utils';
+import { WorkerCapacity } from './worker_capacity';
 
 const logger = loggingSystemMock.create().get();
 
-describe('CapacityByWorker', () => {
+describe('WorkerCapacity', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   test('workers set based on capacity responds to changes from capacity$ observable', () => {
     const capacity$ = new Subject<number>();
-    const pool = new CapacityByWorker({ capacity$, logger });
+    const pool = new WorkerCapacity({ capacity$, logger });
 
     expect(pool.capacity).toBe(0);
 
     capacity$.next(20);
-    expect(pool.capacity).toBe(10);
+    expect(pool.capacity).toBe(20);
 
     capacity$.next(16);
-    expect(pool.capacity).toBe(8);
+    expect(pool.capacity).toBe(16);
 
     capacity$.next(25);
-    expect(pool.capacity).toBe(12);
+    expect(pool.capacity).toBe(25);
 
     expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).toHaveBeenNthCalledWith(
       1,
-      'Task pool now using 10 as the max worker value which is based on a capacity of 20'
+      'Task pool now using 20 as the max worker value which is based on a capacity of 20'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
-      'Task pool now using 8 as the max worker value which is based on a capacity of 16'
+      'Task pool now using 16 as the max worker value which is based on a capacity of 16'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       3,
-      'Task pool now using 12 as the max worker value which is based on a capacity of 25'
+      'Task pool now using 25 as the max worker value which is based on a capacity of 25'
     );
   });
 
   test('usedCapacity returns the number of tasks in the pool', () => {
-    const pool = new CapacityByWorker({ capacity$: of(20), logger });
+    const pool = new WorkerCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -61,7 +61,7 @@ describe('CapacityByWorker', () => {
   });
 
   test('usedCapacityPercentage returns the percentage of workers in use by tasks in the pool', () => {
-    const pool = new CapacityByWorker({ capacity$: of(20), logger });
+    const pool = new WorkerCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -73,7 +73,7 @@ describe('CapacityByWorker', () => {
   });
 
   test('usedCapacityByType returns the number of tasks of specified type in the pool', () => {
-    const pool = new CapacityByWorker({ capacity$: of(20), logger });
+    const pool = new WorkerCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = [
       { ...mockTask({}, { type: 'type1' }) },
@@ -87,7 +87,7 @@ describe('CapacityByWorker', () => {
   });
 
   test('availableCapacity returns the overall number of available workers when no task type is defined', () => {
-    const pool = new CapacityByWorker({ capacity$: of(20), logger });
+    const pool = new WorkerCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -99,7 +99,7 @@ describe('CapacityByWorker', () => {
   });
 
   test('availableCapacity returns the overall number of available workers when task type with no maxConcurrency is provided', () => {
-    const pool = new CapacityByWorker({ capacity$: of(20), logger });
+    const pool = new WorkerCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask() }],
@@ -118,7 +118,7 @@ describe('CapacityByWorker', () => {
   });
 
   test('availableCapacity returns the number of available workers for the task type when task type with maxConcurrency is provided', () => {
-    const pool = new CapacityByWorker({ capacity$: of(20), logger });
+    const pool = new WorkerCapacity({ capacity$: of(10), logger });
 
     const tasksInPool = new Map([
       ['1', { ...mockTask({}, { type: 'type1' }) }],
@@ -139,7 +139,7 @@ describe('CapacityByWorker', () => {
 
   describe('determineTasksToRunBasedOnCapacity', () => {
     test('runs all tasks if there are workers available', () => {
-      const pool = new CapacityByWorker({ capacity$: of(20), logger });
+      const pool = new WorkerCapacity({ capacity$: of(10), logger });
       const tasks = [{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }];
       const [tasksToRun, leftoverTasks] = pool.determineTasksToRunBasedOnCapacity(tasks, 10);
 
@@ -148,7 +148,7 @@ describe('CapacityByWorker', () => {
     });
 
     test('splits tasks if there are more tasks than available workers', () => {
-      const pool = new CapacityByWorker({ capacity$: of(20), logger });
+      const pool = new WorkerCapacity({ capacity$: of(10), logger });
       const tasks = [
         { ...mockTask() },
         { ...mockTask() },
@@ -165,7 +165,7 @@ describe('CapacityByWorker', () => {
     });
 
     test('does not run tasks if there is no capacity', () => {
-      const pool = new CapacityByWorker({ capacity$: of(20), logger });
+      const pool = new WorkerCapacity({ capacity$: of(10), logger });
       const tasks = [{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }];
       const [tasksToRun, leftoverTasks] = pool.determineTasksToRunBasedOnCapacity(tasks, 0);
 

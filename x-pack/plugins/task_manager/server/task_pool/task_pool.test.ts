@@ -15,8 +15,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { TaskCost } from '../task';
-import * as CapacityByCostModule from './capacity_by_cost';
-import * as CapacityByWorkerModule from './capacity_by_worker';
+import * as CostCapacityModule from './cost_capacity';
+import * as WorkerCapacityModule from './worker_capacity';
 import { capacityMock } from './capacity.mock';
 import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
 import { mockRun, mockTask } from './test_utils';
@@ -27,8 +27,8 @@ jest.mock('../constants', () => ({
 }));
 
 describe('TaskPool', () => {
-  const capacityByCostMock = capacityMock.create();
-  const capacityByWorkerMock = capacityMock.create();
+  const costCapacityMock = capacityMock.create();
+  const workerCapacityMock = capacityMock.create();
   const logger = loggingSystemMock.create().get();
 
   const definitions = new TaskTypeDictionary(logger);
@@ -57,49 +57,49 @@ describe('TaskPool', () => {
   });
 
   describe('uses the correct capacity calculator based on the strategy', () => {
-    let capacityByCostSpy: jest.SpyInstance;
-    let capacityByWorkerSpy: jest.SpyInstance;
+    let costCapacitySpy: jest.SpyInstance;
+    let workerCapacitySpy: jest.SpyInstance;
     beforeEach(() => {
-      capacityByCostSpy = jest
-        .spyOn(CapacityByCostModule, 'CapacityByCost')
-        .mockImplementation(() => capacityByCostMock);
+      costCapacitySpy = jest
+        .spyOn(CostCapacityModule, 'CostCapacity')
+        .mockImplementation(() => costCapacityMock);
 
-      capacityByWorkerSpy = jest
-        .spyOn(CapacityByWorkerModule, 'CapacityByWorker')
-        .mockImplementation(() => capacityByWorkerMock);
+      workerCapacitySpy = jest
+        .spyOn(WorkerCapacityModule, 'WorkerCapacity')
+        .mockImplementation(() => workerCapacityMock);
     });
 
     afterEach(() => {
-      capacityByCostSpy.mockRestore();
-      capacityByWorkerSpy.mockRestore();
+      costCapacitySpy.mockRestore();
+      workerCapacitySpy.mockRestore();
     });
 
-    test('uses CapacityByCost to calculate capacity when strategy is mget', () => {
+    test('uses CostCapacity to calculate capacity when strategy is mget', () => {
       new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_MGET });
 
-      expect(CapacityByCostModule.CapacityByCost).toHaveBeenCalledTimes(1);
-      expect(CapacityByWorkerModule.CapacityByWorker).not.toHaveBeenCalled();
+      expect(CostCapacityModule.CostCapacity).toHaveBeenCalledTimes(1);
+      expect(WorkerCapacityModule.WorkerCapacity).not.toHaveBeenCalled();
     });
 
-    test('uses CapacityByWorker to calculate capacity when strategy is default', () => {
+    test('uses WorkerCapacity to calculate capacity when strategy is default', () => {
       new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_DEFAULT });
 
-      expect(CapacityByCostModule.CapacityByCost).not.toHaveBeenCalled();
-      expect(CapacityByWorkerModule.CapacityByWorker).toHaveBeenCalledTimes(1);
+      expect(CostCapacityModule.CostCapacity).not.toHaveBeenCalled();
+      expect(WorkerCapacityModule.WorkerCapacity).toHaveBeenCalledTimes(1);
     });
 
-    test('uses CapacityByWorker to calculate capacity when strategy is unrecognized', () => {
+    test('uses WorkerCapacity to calculate capacity when strategy is unrecognized', () => {
       new TaskPool({ capacity$: of(20), definitions, logger, strategy: 'any old strategy' });
 
-      expect(CapacityByCostModule.CapacityByCost).not.toHaveBeenCalled();
-      expect(CapacityByWorkerModule.CapacityByWorker).toHaveBeenCalledTimes(1);
+      expect(CostCapacityModule.CostCapacity).not.toHaveBeenCalled();
+      expect(WorkerCapacityModule.WorkerCapacity).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('with CLAIM_STRATEGY_DEFAULT', () => {
-    test('usedCapacity are a sum of running tasks', async () => {
+    test('usedCapacity is the number running tasks', async () => {
       const pool = new TaskPool({
-        capacity$: of(20),
+        capacity$: of(10),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -113,7 +113,7 @@ describe('TaskPool', () => {
 
     test('availableCapacity are a function of total_capacity - usedCapacity', async () => {
       const pool = new TaskPool({
-        capacity$: of(20),
+        capacity$: of(10),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -135,13 +135,13 @@ describe('TaskPool', () => {
       });
 
       expect(pool.availableCapacity()).toEqual(0);
-      capacity$.next(20);
+      capacity$.next(10);
       expect(pool.availableCapacity()).toEqual(10);
     });
 
     test('does not run tasks that are beyond its available capacity', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(2),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -162,9 +162,9 @@ describe('TaskPool', () => {
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
 
-    test('test should log when marking a Task as running fails', async () => {
+    test('should log when marking a Task as running fails', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(3),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -183,12 +183,12 @@ describe('TaskPool', () => {
         ]
       `);
 
-      expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
+      expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     });
 
     test('should log when running a Task fails', async () => {
       const pool = new TaskPool({
-        capacity$: of(6),
+        capacity$: of(3),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -212,7 +212,7 @@ describe('TaskPool', () => {
 
     test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
       const pool = new TaskPool({
-        capacity$: of(6),
+        capacity$: of(3),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -235,7 +235,7 @@ describe('TaskPool', () => {
 
     test('Running a task which fails still takes up capacity', async () => {
       const pool = new TaskPool({
-        capacity$: of(2),
+        capacity$: of(1),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -254,7 +254,7 @@ describe('TaskPool', () => {
 
     test('clears up capacity when a task completes', async () => {
       const pool = new TaskPool({
-        capacity$: of(2),
+        capacity$: of(1),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -301,7 +301,7 @@ describe('TaskPool', () => {
 
     test('run cancels expired tasks prior to running new tasks', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(2),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -369,7 +369,7 @@ describe('TaskPool', () => {
 
     test('calls to availableWorkers ensures we cancel expired tasks', async () => {
       const pool = new TaskPool({
-        capacity$: of(2),
+        capacity$: of(1),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -418,7 +418,7 @@ describe('TaskPool', () => {
 
     test('logs if cancellation errors', async () => {
       const pool = new TaskPool({
-        capacity$: of(20),
+        capacity$: of(10),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -456,7 +456,7 @@ describe('TaskPool', () => {
 
     test('only allows one task with the same id in the task pool', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(2),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_DEFAULT,
@@ -481,48 +481,12 @@ describe('TaskPool', () => {
       expect(shouldRun).toHaveBeenCalledTimes(1);
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
-
-    // This test is from https://github.com/elastic/kibana/issues/172116
-    // It's not clear how to reproduce the actual error, but it is easy to
-    // reproduce with the wacky test below.  It does log the exact error
-    // from that issue, without the corresponding fix in task_pool.ts
-    test('works when available workers is 0 but there are tasks to run', async () => {
-      const pool = new TaskPool({
-        capacity$: of(4),
-        definitions,
-        logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
-      });
-
-      const shouldRun = mockRun();
-
-      const taskId = uuidv4();
-      const task1 = mockTask({ id: taskId, run: shouldRun });
-
-      // we need to alternate the values of `availableWorkers`.  First it
-      // should be 0, then 1, then 0, then 1, etc.  This will cause task_pool.run
-      // to partition tasks (0 to run, everything as leftover), then at the
-      // end of run(), to check if it should recurse, it should be > 0.
-      let awValue = 1;
-      pool.availableCapacity = () => {
-        return ++awValue % 2;
-      };
-
-      const result = await pool.run([task1]);
-      expect(result).toBe(TaskPoolRunResult.RanOutOfCapacity);
-
-      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "task pool run attempts exceeded 3; assuming ran out of capacity; availableCapacity: 0, tasksToRun: 0, leftOverTasks: 1, capacity: 2, usedCapacity: 0, capacityLoad: 0",
-        ]
-      `);
-    });
   });
 
   describe('with CLAIM_STRATEGY_MGET', () => {
-    test('usedCapacity are a sum of the cost of running tasks', async () => {
+    test('usedCapacity is the sum of the cost of running tasks', async () => {
       const pool = new TaskPool({
-        capacity$: of(20),
+        capacity$: of(10),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -536,7 +500,7 @@ describe('TaskPool', () => {
 
     test('availableCapacity are a function of total_capacity - usedCapacity', async () => {
       const pool = new TaskPool({
-        capacity$: of(20),
+        capacity$: of(10),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -554,12 +518,12 @@ describe('TaskPool', () => {
 
       expect(pool.availableCapacity()).toEqual(0);
       capacity$.next(20);
-      expect(pool.availableCapacity()).toEqual(20);
+      expect(pool.availableCapacity()).toEqual(40);
     });
 
     test('does not run tasks that are beyond its available capacity', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(2),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -582,7 +546,7 @@ describe('TaskPool', () => {
 
     test('should log when marking a Task as running fails', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(6),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -601,12 +565,12 @@ describe('TaskPool', () => {
         ]
       `);
 
-      expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
+      expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     });
 
     test('should log when running a Task fails', async () => {
       const pool = new TaskPool({
-        capacity$: of(6),
+        capacity$: of(3),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -630,7 +594,7 @@ describe('TaskPool', () => {
 
     test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
       const pool = new TaskPool({
-        capacity$: of(6),
+        capacity$: of(3),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -653,7 +617,7 @@ describe('TaskPool', () => {
 
     test('Running a task which fails still takes up capacity', async () => {
       const pool = new TaskPool({
-        capacity$: of(2),
+        capacity$: of(1),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -672,7 +636,7 @@ describe('TaskPool', () => {
 
     test('clears up capacity when a task completes', async () => {
       const pool = new TaskPool({
-        capacity$: of(2),
+        capacity$: of(1),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -719,7 +683,7 @@ describe('TaskPool', () => {
 
     test('run cancels expired tasks prior to running new tasks', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(2),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -787,7 +751,7 @@ describe('TaskPool', () => {
 
     test('calls to availableWorkers ensures we cancel expired tasks', async () => {
       const pool = new TaskPool({
-        capacity$: of(2),
+        capacity$: of(1),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -836,7 +800,7 @@ describe('TaskPool', () => {
 
     test('logs if cancellation errors', async () => {
       const pool = new TaskPool({
-        capacity$: of(20),
+        capacity$: of(10),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -874,7 +838,7 @@ describe('TaskPool', () => {
 
     test('only allows one task with the same id in the task pool', async () => {
       const pool = new TaskPool({
-        capacity$: of(4),
+        capacity$: of(2),
         definitions,
         logger,
         strategy: CLAIM_STRATEGY_MGET,
@@ -898,42 +862,6 @@ describe('TaskPool', () => {
 
       expect(shouldRun).toHaveBeenCalledTimes(1);
       expect(shouldNotRun).not.toHaveBeenCalled();
-    });
-
-    // This test is from https://github.com/elastic/kibana/issues/172116
-    // It's not clear how to reproduce the actual error, but it is easy to
-    // reproduce with the wacky test below.  It does log the exact error
-    // from that issue, without the corresponding fix in task_pool.ts
-    test('test works when available workers is 0 but there are tasks to run', async () => {
-      const pool = new TaskPool({
-        capacity$: of(4),
-        definitions,
-        logger,
-        strategy: CLAIM_STRATEGY_MGET,
-      });
-
-      const shouldRun = mockRun();
-
-      const taskId = uuidv4();
-      const task1 = mockTask({ id: taskId, run: shouldRun }, { cost: TaskCost.Tiny });
-
-      // we need to alternate the values of `availableWorkers`.  First it
-      // should be 0, then 2, then 0, then 2, etc.  This will cause task_pool.run
-      // to partition tasks (0 to run, everything as leftover), then at the
-      // end of run(), to check if it should recurse, it should be > 0.
-      let awValue = 1;
-      pool.availableCapacity = () => {
-        return ++awValue % 2;
-      };
-
-      const result = await pool.run([task1]);
-      expect(result).toBe(TaskPoolRunResult.RanOutOfCapacity);
-
-      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "task pool run attempts exceeded 3; assuming ran out of capacity; availableCapacity: 0, tasksToRun: 0, leftOverTasks: 1, capacity: 4, usedCapacity: 0, capacityLoad: 0",
-        ]
-      `);
     });
   });
 });
