@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import assert from 'assert';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
@@ -43,6 +44,7 @@ describe('FileService', () => {
   let fileServiceFactory: FileServiceFactory;
   let security: ReturnType<typeof securityMock.createSetup>;
   let auditLogger: AuditLogger;
+  let fileKindsRegistry: ReturnType<typeof getFileKindsRegistry>;
 
   beforeAll(async () => {
     const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
@@ -52,7 +54,7 @@ describe('FileService', () => {
     await kbnRoot.setup();
     coreStart = await kbnRoot.start();
     setFileKindsRegistry(new FileKindsRegistryImpl());
-    const fileKindsRegistry = getFileKindsRegistry();
+    fileKindsRegistry = getFileKindsRegistry();
     fileKindsRegistry.register({
       id: fileKind,
       http: {},
@@ -69,7 +71,10 @@ describe('FileService', () => {
       },
       http: {},
     });
+
     esClient = coreStart.elasticsearch.client.asInternalUser;
+
+    assert.strictEqual(await esClient.ping(), true, 'Unable to reach ES, test setup failed!');
   });
 
   afterAll(async () => {
@@ -87,7 +92,7 @@ describe('FileService', () => {
       coreStart.savedObjects,
       blobStorageService,
       security,
-      getFileKindsRegistry(),
+      fileKindsRegistry,
       kbnRoot.logger.get('test-file-service')
     );
     fileService = fileServiceFactory.asInternal();
