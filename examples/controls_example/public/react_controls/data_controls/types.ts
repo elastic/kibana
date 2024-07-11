@@ -13,6 +13,7 @@ import {
   PublishesDataViews,
   PublishesFilters,
   PublishesPanelTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
   ControlFactory,
@@ -21,10 +22,15 @@ import {
   DefaultControlState,
 } from '../types';
 
+interface PublishesFieldSpec {
+  fieldSpec: PublishingSubject<DataViewField | undefined>;
+}
+
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesPanelTitle, 'hidePanelTitle'> & // control titles cannot be hidden
   HasEditCapabilities &
   PublishesDataViews &
+  PublishesFieldSpec &
   PublishesFilters & {
     setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
   };

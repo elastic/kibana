@@ -36,7 +36,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../react_controls/control_group/types';
-import { OPTIONS_LIST_CONTROL_TYPE } from '../react_controls/data_controls/options_list_control/types';
+import { OPTIONS_LIST_CONTROL_TYPE } from '../react_controls/data_controls/options_list_control/constants';
 import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
@@ -105,8 +105,8 @@ const controlGroupPanels = {
     width: 'medium',
     explicitInput: {
       id: searchControlId,
-      fieldName: 'message',
-      title: 'Message',
+      fieldName: 'agent.keyword',
+      title: 'Agent',
       grow: true,
       width: 'medium',
       enhancements: {},

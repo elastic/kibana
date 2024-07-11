@@ -71,7 +71,11 @@ export const FieldPicker = ({
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
-            type={field.type}
+            type={
+              field.spec.esTypes?.length === 1 && field.spec.esTypes[0] === 'keyword'
+                ? 'keyword'
+                : field.type
+            }
             label={field.name}
             scripted={field.scripted}
             className="eui-alignMiddle"

@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { DataControlApi, DefaultDataControlState } from '../types';
-
-export const OPTIONS_LIST_CONTROL_TYPE = OPTIONS_LIST_CONTROL;
-
-export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
 
 export interface OptionsListControlState extends DefaultDataControlState {
   searchTechnique?: OptionsListSearchTechnique;
@@ -25,10 +22,22 @@ export interface OptionsListControlState extends DefaultDataControlState {
   exclude?: boolean;
 
   // display settings
-  placeholder?: string;
-  hideActionBar?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  hideSort?: boolean;
+  // placeholder?: string;
+  // hideActionBar?: boolean;
+  // hideExclude?: boolean;
+  // hideExists?: boolean;
+  // hideSort?: boolean;
 }
-export type OptionsListControlApi = DataControlApi;
+export interface PublishesOptions {
+  totalCardinality$: PublishingSubject<number>;
+  invalidSelections$: PublishingSubject<string[]>;
+  allowExpensiveQueries$: PublishingSubject<boolean>;
+  availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
+}
+
+export interface OptionsListComponentState extends OptionsListControlState {
+  searchString: string;
+  requestSize: number;
+}
+
+export type OptionsListControlApi = DataControlApi & PublishesOptions; // make PublishesOptions private

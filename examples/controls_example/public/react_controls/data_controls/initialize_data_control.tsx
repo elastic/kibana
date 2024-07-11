@@ -9,7 +9,11 @@
 import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import {
+  DataView,
+  DataViewField,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+} from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
@@ -46,6 +50,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const fieldSpec = new BehaviorSubject<DataViewField | undefined>(undefined);
   const filters = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   const stateManager: ControlStateManager<DefaultDataControlState> = {
@@ -104,6 +109,8 @@ export const initializeDataControl = <EditorState extends object = {}>(
       } else {
         clearBlockingError();
       }
+
+      fieldSpec.next(field);
       defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
     }
   );
@@ -125,6 +132,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     panelTitle,
     defaultPanelTitle,
     dataViews,
+    fieldSpec,
     onEdit,
     filters$: filters,
     setOutputFilter: (newFilter: Filter | undefined) => {

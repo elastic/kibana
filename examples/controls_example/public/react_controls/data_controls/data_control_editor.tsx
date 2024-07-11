@@ -202,6 +202,7 @@ export const DataControlEditor = ({
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType || !selectedFieldName || !fieldRegistry) return;
 
+    console.log('selectedControlType', selectedControlType);
     const controlFactory = getControlFactory(selectedControlType) as DataControlFactory;
     const CustomSettings = controlFactory.CustomOptionsComponent;
 

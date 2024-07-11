@@ -210,11 +210,11 @@ export const getRangesliderControlFactory = (
       return {
         api,
         Component: (controlPanelClassNames) => {
-          const [dataLoading, dataViews, fieldName, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, dataViews, fieldSpec, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
               dataControl.api.dataViews,
-              dataControl.stateManager.fieldName,
+              dataControl.api.fieldSpec,
               max$,
               min$,
               selectionHasNoResults$,
@@ -237,11 +237,10 @@ export const getRangesliderControlFactory = (
             if (!dataView) {
               return undefined;
             }
-            const fieldSpec = dataView.getFieldByName(fieldName);
             return fieldSpec
               ? dataView.getFormatterForField(fieldSpec).getConverterFor('text')
               : undefined;
-          }, [dataViews, fieldName]);
+          }, [fieldSpec, dataViews]);
 
           return (
             <RangeSliderControl
