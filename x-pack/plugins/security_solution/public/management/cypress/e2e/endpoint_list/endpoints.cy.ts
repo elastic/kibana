@@ -28,7 +28,8 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/168284
+describe.skip('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -125,7 +126,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get<number>('@originalPolicyRevision').then((originalRevision: number) => {
       const revisionRegex = new RegExp(`^rev\\. ${originalRevision + 1}$`);
-      cy.get('@endpointRow').findByTestSubj('policyListRevNo').contains(revisionRegex);
+      cy.get('@endpointRow').findByTestSubj('policyNameCellLink-revision').contains(revisionRegex);
     });
   });
 

@@ -65,9 +65,9 @@ export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
 export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'release',
+  'processes',
   'kill-process',
   'suspend-process',
-  'processes',
   'get-file',
   'execute',
   'upload',
@@ -183,5 +183,5 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
 > = Object.freeze({
   endpoint: 'agent.id',
   sentinel_one: 'observer.serial_number',
-  crowdstrike: 'crowdstrike.event.DeviceId',
+  crowdstrike: 'device.id',
 });

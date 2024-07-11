@@ -12,13 +12,12 @@ import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
-import { METADATA_FIELDS } from '../shared/constants';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 import {
   fields,
@@ -28,6 +27,8 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
+import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
+import { Setup, setup } from './__tests__/helpers';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -57,13 +58,9 @@ const nestedFunctions = {
 };
 
 const literals = {
-  chrono_literal: chronoLiterals[0].name,
-  time_literal: timeLiterals[0].name,
+  time_literal: timeUnitsToSuggest[0].name,
 };
-function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
-  if (typeString === 'chrono_literal') {
-    return literals[typeString];
-  }
+function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
@@ -143,7 +140,7 @@ function getFieldMapping(
     }
     if (/literal$/.test(typeString) && useLiterals) {
       return {
-        name: getLiteralType(typeString as 'chrono_literal' | 'time_literal'),
+        name: getLiteralType(typeString as 'time_literal'),
         type,
         ...rest,
       };
@@ -262,116 +259,28 @@ describe('validation logic', () => {
       );
     });
 
-    describe('from', () => {
-      testErrorsAndWarnings('f', [
-        `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
-      ]);
-      testErrorsAndWarnings(`from `, ["SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"]);
-      testErrorsAndWarnings(`from index,`, [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
-      ]);
-      testErrorsAndWarnings(`from assignment = 1`, [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        'Unknown index [assignment]',
-      ]);
-      testErrorsAndWarnings(`from index`, []);
-      testErrorsAndWarnings(`FROM index`, []);
-      testErrorsAndWarnings(`FrOm index`, []);
-      testErrorsAndWarnings('from `index`', [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'",
-      ]);
+    const collectFixturesSetup: Setup = async (...args) => {
+      const api = await setup(...args);
+      type ExpectErrors = Awaited<ReturnType<Setup>>['expectErrors'];
+      return {
+        ...api,
+        expectErrors: async (...params: Parameters<ExpectErrors>) => {
+          const [query, error = [], warning = []] = params;
+          const allStrings =
+            error.every((e) => typeof e === 'string') &&
+            warning.every((w) => typeof w === 'string');
+          if (allStrings) {
+            testCases.push({
+              query,
+              error,
+              warning,
+            });
+          }
+        },
+      };
+    };
 
-      testErrorsAndWarnings(`from index, other_index`, []);
-      testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
-      testErrorsAndWarnings(`from fn()`, ['Unknown index [fn()]']);
-      testErrorsAndWarnings(`from average()`, ['Unknown index [average()]']);
-      for (const isWrapped of [true, false]) {
-        function setWrapping(option: string) {
-          return isWrapped ? `[${option}]` : option;
-        }
-        function addBracketsWarning() {
-          return isWrapped
-            ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
-            : [];
-        }
-        testErrorsAndWarnings(
-          `from index ${setWrapping('METADATA _id')}`,
-          [],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from index ${setWrapping('metadata _id')}`,
-          [],
-          addBracketsWarning()
-        );
-
-        testErrorsAndWarnings(
-          `from index ${setWrapping('METADATA _id, _source')}`,
-          [],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from index ${setWrapping('METADATA _id, _source2')}`,
-          [
-            `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
-              ', '
-            )}]`,
-          ],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
-          [
-            isWrapped
-              ? "SyntaxError: mismatched input '[' expecting <EOF>"
-              : "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
-          ],
-          addBracketsWarning()
-        );
-
-        testErrorsAndWarnings(
-          `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
-          [],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from *:indexes ${setWrapping('METADATA _id')}`,
-          [],
-          addBracketsWarning()
-        );
-      }
-      testErrorsAndWarnings(`from index (metadata _id)`, [
-        "SyntaxError: mismatched input '(metadata' expecting <EOF>",
-      ]);
-      testErrorsAndWarnings(`from ind*, other*`, []);
-      testErrorsAndWarnings(`from index*`, []);
-      testErrorsAndWarnings(`from *a_i*dex*`, []);
-      testErrorsAndWarnings(`from in*ex*`, []);
-      testErrorsAndWarnings(`from *n*ex`, []);
-      testErrorsAndWarnings(`from *n*ex*`, []);
-      testErrorsAndWarnings(`from i*d*x*`, []);
-      testErrorsAndWarnings(`from i*d*x`, []);
-      testErrorsAndWarnings(`from i***x*`, []);
-      testErrorsAndWarnings(`from i****`, []);
-      testErrorsAndWarnings(`from i**`, []);
-      testErrorsAndWarnings(`from index**`, []);
-      testErrorsAndWarnings(`from *ex`, []);
-      testErrorsAndWarnings(`from *ex*`, []);
-      testErrorsAndWarnings(`from in*ex`, []);
-      testErrorsAndWarnings(`from ind*ex`, []);
-      testErrorsAndWarnings(`from *,-.*`, []);
-      testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
-
-      testErrorsAndWarnings(`from remote-*:indexes*`, []);
-      testErrorsAndWarnings(`from remote-*:indexes`, []);
-      testErrorsAndWarnings(`from remote-ccs:indexes`, []);
-      testErrorsAndWarnings(`from a_index, remote-ccs:indexes`, []);
-      testErrorsAndWarnings('from .secret_index', []);
-      testErrorsAndWarnings('from my-index', []);
-      testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
-      testErrorsAndWarnings('from policy', ['Unknown index [policy]']);
-    });
+    runFromTestSuite(collectFixturesSetup);
 
     describe('row', () => {
       testErrorsAndWarnings('row', [
@@ -508,7 +417,7 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('row var = 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
         testErrorsAndWarnings('row now() + 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
-        for (const timeLiteral of timeLiterals) {
+        for (const timeLiteral of timeUnitsToSuggest) {
           testErrorsAndWarnings(`row 1 ${timeLiteral.name}`, [
             `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
           ]);
@@ -1334,263 +1243,36 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval now() + 1 anno', [
           "Unexpected time interval qualifier: 'anno'",
         ]);
-        for (const timeLiteral of timeLiterals) {
-          testErrorsAndWarnings(`from a_index | eval 1 ${timeLiteral.name}`, [
-            `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        for (const unit of timeUnits) {
+          testErrorsAndWarnings(`from a_index | eval 1 ${unit}`, [
+            `EVAL does not support [date_period] in expression [1 ${unit}]`,
           ]);
-          testErrorsAndWarnings(`from a_index | eval 1                ${timeLiteral.name}`, [
-            `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          testErrorsAndWarnings(`from a_index | eval 1                ${unit}`, [
+            `EVAL does not support [date_period] in expression [1 ${unit}]`,
           ]);
 
           // this is not possible for now
           // testErrorsAndWarnings(`from a_index | eval var = 1 ${timeLiteral.name}`, [
           //   `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
           // ]);
-          testErrorsAndWarnings(`from a_index | eval var = now() - 1 ${timeLiteral.name}`, []);
-          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${timeLiteral.name}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = now() - 1 ${unit}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${unit}`, []);
           testErrorsAndWarnings(
-            `from a_index | eval var = dateField - 1 ${timeLiteral.name.toUpperCase()}`,
+            `from a_index | eval var = dateField - 1 ${unit.toUpperCase()}`,
             []
           );
-          testErrorsAndWarnings(
-            `from a_index | eval var = dateField - 1 ${capitalize(timeLiteral.name)}`,
-            []
-          );
-          testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${timeLiteral.name}`, []);
-          testErrorsAndWarnings(`from a_index | eval 1 ${timeLiteral.name} + 1 year`, [
-            `Argument of [+] must be [date], found value [1 ${timeLiteral.name}] type [duration]`,
+          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${capitalize(unit)}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${unit}`, []);
+          testErrorsAndWarnings(`from a_index | eval 1 ${unit} + 1 year`, [
+            `Argument of [+] must be [date], found value [1 ${unit}] type [duration]`,
           ]);
           for (const op of ['*', '/', '%']) {
-            testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${timeLiteral.name}`, [
+            testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
               `Argument of [${op}] must be [number], found value [now()] type [date]`,
-              `Argument of [${op}] must be [number], found value [1 ${timeLiteral.name}] type [duration]`,
+              `Argument of [${op}] must be [number], found value [1 ${unit}] type [duration]`,
             ]);
           }
         }
-      });
-    });
-
-    describe('stats', () => {
-      testErrorsAndWarnings('from a_index | stats ', [
-        'At least one aggregation or grouping expression required in [STATS]',
-      ]);
-      testErrorsAndWarnings('from a_index | stats by stringField', []);
-      testErrorsAndWarnings('from a_index | stats by ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
-      testErrorsAndWarnings('from a_index | stats numberField ', [
-        'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
-      ]);
-      testErrorsAndWarnings('from a_index | stats numberField=', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
-      testErrorsAndWarnings('from a_index | stats numberField=5 by ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
-      testErrorsAndWarnings('from a_index | stats avg(numberField) by wrongField', [
-        'Unknown column [wrongField]',
-      ]);
-      testErrorsAndWarnings('from a_index | stats avg(numberField) by wrongField + 1', [
-        'Unknown column [wrongField]',
-      ]);
-      testErrorsAndWarnings('from a_index | stats avg(numberField) by var0 = wrongField + 1', [
-        'Unknown column [wrongField]',
-      ]);
-      testErrorsAndWarnings('from a_index | stats avg(numberField) by 1', []);
-      testErrorsAndWarnings('from a_index | stats avg(numberField) by percentile(numberField)', [
-        'STATS BY does not support function percentile',
-      ]);
-      testErrorsAndWarnings('from a_index | stats count(`numberField`)', []);
-
-      // this is a scenario that was failing because "or" didn't accept "null"
-      testErrorsAndWarnings('from a_index | stats count(stringField == "a" or null)', []);
-
-      for (const subCommand of ['keep', 'drop', 'eval']) {
-        testErrorsAndWarnings(
-          `from a_index | stats count(\`numberField\`) | ${subCommand} \`count(\`\`numberField\`\`)\` `,
-          []
-        );
-      }
-
-      testErrorsAndWarnings(
-        'from a_index | stats avg(numberField) by stringField, percentile(numberField) by ipField',
-        [
-          "SyntaxError: mismatched input 'by' expecting <EOF>",
-          'STATS BY does not support function percentile',
-        ]
-      );
-
-      testErrorsAndWarnings(
-        'from a_index | stats avg(numberField), percentile(numberField, 50) by ipField',
-        []
-      );
-
-      testErrorsAndWarnings(
-        'from a_index | stats avg(numberField), percentile(numberField, 50) BY ipField',
-        []
-      );
-      for (const op of ['+', '-', '*', '/', '%']) {
-        testErrorsAndWarnings(
-          `from a_index | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
-          []
-        );
-      }
-      testErrorsAndWarnings('from a_index | stats count(* + 1) BY ipField', [
-        "SyntaxError: no viable alternative at input 'count(* +'",
-      ]);
-      testErrorsAndWarnings('from a_index | stats count(* + round(numberField)) BY ipField', [
-        "SyntaxError: no viable alternative at input 'count(* +'",
-      ]);
-      testErrorsAndWarnings('from a_index | stats count(round(*)) BY ipField', [
-        'Using wildcards (*) in round is not allowed',
-      ]);
-      testErrorsAndWarnings('from a_index | stats count(count(*)) BY ipField', [
-        `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
-      ]);
-      testErrorsAndWarnings('from a_index | stats numberField + 1', [
-        'At least one aggregation function required in [STATS], found [numberField+1]',
-      ]);
-
-      for (const nesting of NESTED_DEPTHS) {
-        const moreBuiltinWrapping = Array(nesting).fill('+1').join('');
-        testErrorsAndWarnings(
-          `from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`,
-          []
-        );
-        testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + numberField`, [
-          `At least one aggregation function required in [STATS], found [5${moreBuiltinWrapping}+numberField]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | stats 5 + numberField ${moreBuiltinWrapping}`, [
-          `At least one aggregation function required in [STATS], found [5+numberField${moreBuiltinWrapping}]`,
-        ]);
-        testErrorsAndWarnings(
-          `from a_index | stats 5 + numberField ${moreBuiltinWrapping}, var0 = sum(numberField)`,
-          [
-            `At least one aggregation function required in [STATS], found [5+numberField${moreBuiltinWrapping}]`,
-          ]
-        );
-        const evalFnWrapping = Array(nesting).fill('round(').join('');
-        const closingWrapping = Array(nesting).fill(')').join('');
-        // stress test the validation of the nesting check here
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} sum(numberField) ${closingWrapping}`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} sum(numberField) ${closingWrapping} + ${evalFnWrapping} sum(numberField) ${closingWrapping}`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}`,
-          [
-            `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
-          ]
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}, var0 = sum(numberField)`,
-          [
-            `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
-          ]
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats var0 = ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}, var1 = sum(numberField)`,
-          [
-            `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
-          ]
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} sum(numberField + numberField) ${closingWrapping}`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping} + ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats sum(${evalFnWrapping} numberField ${closingWrapping} )`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats sum(${evalFnWrapping} numberField ${closingWrapping} ) + sum(${evalFnWrapping} numberField ${closingWrapping} )`,
-          []
-        );
-      }
-
-      testErrorsAndWarnings('from a_index | stats 5 + numberField + 1', [
-        'At least one aggregation function required in [STATS], found [5+numberField+1]',
-      ]);
-
-      testErrorsAndWarnings('from a_index | stats numberField + 1 by ipField', [
-        'At least one aggregation function required in [STATS], found [numberField+1]',
-      ]);
-
-      testErrorsAndWarnings(
-        'from a_index | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
-        []
-      );
-
-      testErrorsAndWarnings('from a_index | stats count(*)', []);
-      testErrorsAndWarnings('from a_index | stats count()', []);
-      testErrorsAndWarnings('from a_index | stats var0 = count(*)', []);
-      testErrorsAndWarnings('from a_index | stats var0 = count()', []);
-      testErrorsAndWarnings('from a_index | stats var0 = avg(numberField), count(*)', []);
-      testErrorsAndWarnings('from a_index | stats var0 = avg(fn(number)), count(*)', [
-        'Unknown function [fn]',
-      ]);
-
-      // test all not allowed combinations
-      testErrorsAndWarnings('from a_index | STATS sum( numberField ) + abs( numberField ) ', [
-        'Cannot combine aggregation and non-aggregation values in [STATS], found [sum(numberField)+abs(numberField)]',
-      ]);
-      testErrorsAndWarnings('from a_index | STATS abs( numberField + sum( numberField )) ', [
-        'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(numberField+sum(numberField))]',
-      ]);
-
-      testErrorsAndWarnings(
-        `FROM index
-    | EVAL numberField * 3.281
-    | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
-        []
-      );
-
-      testErrorsAndWarnings(
-        `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
-        []
-      );
-
-      testErrorsAndWarnings(`from a_index | stats sum(case(false, 0, 1))`, []);
-      testErrorsAndWarnings(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
-
-      describe('constant-only parameters', () => {
-        testErrorsAndWarnings('from index | stats by bucket(dateField, abs(numberField), "", "")', [
-          'Argument of [bucket] must be a constant, received [abs(numberField)]',
-        ]);
-        testErrorsAndWarnings(
-          'from index | stats by bucket(dateField, abs(length(numberField)), "", "")',
-          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
-        );
-        testErrorsAndWarnings('from index | stats by bucket(dateField, pi(), "", "")', []);
-        testErrorsAndWarnings('from index | stats by bucket(dateField, 1 + 30 / 10, "", "")', []);
-        testErrorsAndWarnings(
-          'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-          []
-        );
-        testErrorsAndWarnings(
-          'from index | stats by bucket(dateField, numberField, stringField, stringField)',
-          [
-            'Argument of [bucket] must be a constant, received [numberField]',
-            'Argument of [bucket] must be a constant, received [stringField]',
-            'Argument of [bucket] must be a constant, received [stringField]',
-          ]
-        );
       });
     });
 
@@ -1673,7 +1355,8 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy `, []);
       testErrorsAndWarnings('from a_index | enrich `this``is fine`', [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME",
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        'Unknown policy [`this``is]',
       ]);
       testErrorsAndWarnings('from a_index | enrich this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
@@ -2923,6 +2606,13 @@ describe('validation logic', () => {
       describe('date_extract', () => {
         testErrorsAndWarnings('row var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", now())', []);
         testErrorsAndWarnings('row date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", now())', []);
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("SOME_RANDOM_STRING", now())',
+          [],
+          [
+            'Invalid option ["SOME_RANDOM_STRING"] for date_extract. Supported options: ["ALIGNED_DAY_OF_WEEK_IN_MONTH", "ALIGNED_DAY_OF_WEEK_IN_YEAR", "ALIGNED_WEEK_OF_MONTH", "ALIGNED_WEEK_OF_YEAR", "AMPM_OF_DAY", "CLOCK_HOUR_OF_AMPM", "CLOCK_HOUR_OF_DAY", "DAY_OF_MONTH", "DAY_OF_WEEK", "DAY_OF_YEAR", "EPOCH_DAY", "ERA", "HOUR_OF_AMPM", "HOUR_OF_DAY", "INSTANT_SECONDS", "MICRO_OF_DAY", "MICRO_OF_SECOND", "MILLI_OF_DAY", "MILLI_OF_SECOND", "MINUTE_OF_DAY", "MINUTE_OF_HOUR", "MONTH_OF_YEAR", "NANO_OF_DAY", "NANO_OF_SECOND", "OFFSET_SECONDS", "PROLEPTIC_MONTH", "SECOND_OF_DAY", "SECOND_OF_MINUTE", "YEAR", "YEAR_OF_ERA"].',
+          ]
+        );
 
         testErrorsAndWarnings(
           'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField)',
@@ -2940,7 +2630,6 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(stringField, stringField)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [stringField] type [string]',
           'Argument of [date_extract] must be [date], found value [stringField] type [string]',
         ]);
 
@@ -2955,7 +2644,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('row var = date_extract(true, true)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [true] type [boolean]',
+          'Argument of [date_extract] must be [string], found value [true] type [boolean]',
           'Argument of [date_extract] must be [date], found value [true] type [boolean]',
         ]);
 
@@ -2965,7 +2654,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(booleanField, booleanField)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [booleanField] type [boolean]',
+          'Argument of [date_extract] must be [string], found value [booleanField] type [boolean]',
           'Argument of [date_extract] must be [date], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_extract(null, null)', []);
@@ -10469,6 +10158,343 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort repeat(stringField, numberField)', []);
         testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
+      });
+
+      describe('top', () => {
+        describe('no errors on correct usage', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 3, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top(stringField, 1, "desc")', []);
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
+        });
+
+        describe('errors on invalid argument count', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 3)', [
+            'Error: [top] function expects exactly 3 arguments, got 2.',
+          ]);
+          testErrorsAndWarnings('from a_index | stats var = top(stringField)', [
+            'Error: [top] function expects exactly 3 arguments, got 1.',
+          ]);
+        });
+
+        describe('limit must be a literal', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, numberField, "asc")', [
+            'Argument of [=] must be a constant, received [top(stringField,numberField,"asc")]',
+          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top(stringField, 100 + numberField, "asc")',
+            [
+              'Argument of [=] must be a constant, received [top(stringField,100+numberField,"asc")]',
+            ]
+          );
+        });
+
+        describe('order must be "asc" or "desc"', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 1, stringField)', [
+            'Argument of [=] must be a constant, received [top(stringField,1,stringField)]',
+          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top(stringField, 1, "asdf")',
+            [],
+            ['Invalid option ["asdf"] for top. Supported options: ["asc", "desc"].']
+          );
+        });
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, numberField, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, numberField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(stringField, numberField, "asc") > 0',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, 5, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, 5, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, 5, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, 5, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
+        testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
+
+        testErrorsAndWarnings('from a_index | stats top(stringField, numberField, "asc")', [
+          'Argument of [top] must be a constant, received [numberField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats top(null, null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats top(nullVar, nullVar, nullVar)', [
+          'Argument of [top] must be a constant, received [nullVar]',
+          'Argument of [top] must be a constant, received [nullVar]',
+        ]);
+      });
+
+      describe('st_distance', () => {
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = st_distance(true, true)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(booleanField, booleanField)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(geoPointField, geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval st_distance(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField, extraArg)',
+          ['Error: [st_distance] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval st_distance(nullVar, nullVar)', []);
+      });
+
+      describe('weighted_avg', () => {
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(numberField, numberField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(avg(numberField), avg(numberField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(booleanField, booleanField)', [
+          'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort weighted_avg(numberField, numberField)', [
+          'SORT does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(numberField, numberField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(numberField, numberField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(numberField, numberField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(numberField, numberField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
       });
     });
   });

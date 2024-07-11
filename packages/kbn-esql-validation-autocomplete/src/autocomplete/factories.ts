@@ -12,14 +12,14 @@ import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
   CommandDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
 } from '../definitions/types';
-import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
+import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
@@ -37,12 +37,19 @@ function getSafeInsertText(text: string, options: { dashSupported?: boolean } = 
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
 }
+export function getQuotedText(text: string) {
+  return text.startsWith(`"`) && text.endsWith(`"`) ? text : `"${text}"`;
+}
+
+function getSafeInsertSourceText(text: string) {
+  return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
+}
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn);
   return {
     label: fullSignatures[0].declaration,
-    text: `${fn.name}($0)`,
+    text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
     detail: fn.description,
@@ -60,7 +67,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
     label: fn.name,
-    text: hasArgs ? `${fn.name} $0` : fn.name,
+    text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
     kind: 'Operator',
     detail: fn.description,
@@ -103,10 +110,10 @@ export function getSuggestionCommandDefinition(
   const commandDefinition = getCommandDefinition(command.name);
   const commandSignature = getCommandSignature(commandDefinition);
   return {
-    label: commandDefinition.name,
+    label: commandDefinition.name.toUpperCase(),
     text: commandDefinition.signature.params.length
-      ? `${commandDefinition.name} $0`
-      : commandDefinition.name,
+      ? `${commandDefinition.name.toUpperCase()} $0`
+      : commandDefinition.name.toUpperCase(),
     asSnippet: true,
     kind: 'Method',
     detail: commandDefinition.description,
@@ -148,7 +155,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title }) => ({
     label: title ?? name,
-    text: name,
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Issue',
@@ -247,14 +254,16 @@ export const buildOptionDefinition = (
   isAssignType: boolean = false
 ) => {
   const completeItem: SuggestionRawDefinition = {
-    label: option.name,
-    text: option.name,
+    label: option.name.toUpperCase(),
+    text: option.name.toUpperCase(),
     kind: 'Reference',
     detail: option.description,
     sortText: '1',
   };
   if (isAssignType || option.signature.params.length) {
-    completeItem.text = isAssignType ? `${option.name} = $0` : `${option.name} $0`;
+    completeItem.text = isAssignType
+      ? `${option.name.toUpperCase()} = $0`
+      : `${option.name.toUpperCase()} $0`;
     completeItem.asSnippet = true;
     completeItem.command = TRIGGER_SUGGESTION_COMMAND;
   }
@@ -298,7 +307,7 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
 });
 
 export function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeLiterals.filter(({ name }) => {
+  const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
     const result = /s$/.test(name);
     return unit > 1 ? result : !result;
   });
@@ -332,10 +341,7 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   }
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
-    suggestions.push(...buildConstantsDefinitions(timeLiterals.map(({ name }) => name))); // i.e. year, month, ...
-  }
-  if (types.includes('chrono_literal')) {
-    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...
+    suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
   }
   if (types.includes('string')) {
     if (names) {

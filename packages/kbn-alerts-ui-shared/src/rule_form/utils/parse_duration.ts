@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const DEFAULT_RULE_INTERVAL = '1m';
+import { DEFAULT_RULE_INTERVAL } from '../constants';
 
 const SECONDS_REGEX = /^[1-9][0-9]*s$/;
 const MINUTES_REGEX = /^[1-9][0-9]*m$/;

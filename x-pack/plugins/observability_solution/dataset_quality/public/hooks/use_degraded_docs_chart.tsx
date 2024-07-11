@@ -14,12 +14,12 @@ import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
-import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
 import { useRedirectLink } from './use_redirect_link';
 import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useKibanaContextForPlugin } from '../utils';
+import { useDatasetDetailsTelemetry } from './use_telemetry';
 
 const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',
@@ -53,6 +53,8 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     services: { lens },
   } = useKibanaContextForPlugin();
   const { service } = useDatasetQualityContext();
+  const { trackDetailsNavigated, navigationTargets, navigationSources } =
+    useDatasetDetailsTelemetry();
 
   const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
 
@@ -104,13 +106,14 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
+      trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
       lens.navigateToPrefilledEditor({
         id: '',
         timeRange,
         attributes,
       });
     }
-  }, [lens, attributes, timeRange]);
+  }, [attributes, trackDetailsNavigated, navigationTargets, navigationSources, lens, timeRange]);
 
   const getOpenInLensAction = useMemo(() => {
     return {
@@ -137,6 +140,10 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,
+    telemetry: {
+      page: 'details',
+      navigationSource: navigationSources.Chart,
+    },
   });
 
   const getOpenInLogsExplorerAction = useMemo(() => {
@@ -149,10 +156,10 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
           : exploreDataInDiscoverText;
       },
       getHref: async () => {
-        return redirectLinkProps.href;
+        return redirectLinkProps.linkProps.href;
       },
       getIconType(): string | undefined {
-        return 'popout';
+        return 'visTable';
       },
       async isCompatible(): Promise<boolean> {
         return true;
@@ -185,7 +192,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 };
 
 function getDataViewIndexPattern(dataStream: string | undefined) {
-  return dataStream ? `${indexNameToDataStreamParts(dataStream).type}-*-*` : DEFAULT_LOGS_DATA_VIEW;
+  return dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 }
 
 function getDataViewField(dataView: DataView | undefined, fieldName: string | undefined) {

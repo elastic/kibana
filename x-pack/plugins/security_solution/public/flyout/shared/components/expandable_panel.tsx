@@ -35,7 +35,7 @@ export interface ExpandablePanelPanelProps {
       /**
        * Callback function to be called when the title is clicked
        */
-      callback: () => void;
+      callback?: () => void;
       /**
        * Tooltip text to be displayed around the title link
        */
@@ -44,7 +44,7 @@ export interface ExpandablePanelPanelProps {
     /**
      * Icon string for displaying the specified icon in the header
      */
-    iconType: IconType;
+    iconType?: IconType;
     /**
      * Optional content and actions to be displayed next to header or on the right side of header
      */
@@ -121,7 +121,12 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
 
   const headerLeftSection = useMemo(
     () => (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          min-height: ${euiTheme.size.xl};
+        `}
+      >
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
@@ -129,16 +134,18 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
           data-test-subj={`${dataTestSubj}LeftSection`}
         >
           <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              color={link?.callback ? 'primary' : 'text'}
-              type={iconType}
-              css={css`
-                margin: ${euiTheme.size.s} 0;
-              `}
-              data-test-subj={`${dataTestSubj}TitleIcon`}
-            />
-          </EuiFlexItem>
+          {iconType && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                color={link?.callback ? 'primary' : 'text'}
+                type={iconType}
+                css={css`
+                  margin: ${euiTheme.size.s} 0;
+                `}
+                data-test-subj={`${dataTestSubj}TitleIcon`}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             {link?.callback ? (
               <EuiToolTip content={link?.tooltip}>
@@ -170,6 +177,7 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       link?.callback,
       iconType,
       euiTheme.size.s,
+      euiTheme.size.xl,
       link?.tooltip,
       title,
     ]
