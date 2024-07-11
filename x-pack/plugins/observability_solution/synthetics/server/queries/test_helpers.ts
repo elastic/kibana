@@ -8,7 +8,7 @@
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { UptimeEsClient } from '../../../lib';
+import { SyntheticsEsClient } from '../lib';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
@@ -58,7 +58,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
 
 interface UptimeEsMockClient {
   esClient: ElasticsearchClientMock;
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }
 
 export const getUptimeESMockClient = (
@@ -70,15 +70,15 @@ export const getUptimeESMockClient = (
 
   return {
     esClient: esClientMock || esClient,
-    uptimeEsClient: new UptimeEsClient(savedObjectsClient, esClientMock || esClient),
+    syntheticsEsClient: new SyntheticsEsClient(savedObjectsClient, esClientMock || esClient),
   };
 };
 
 export function mockSearchResult(
   data: unknown,
   aggregations: Record<string, AggregationsAggregate> = {}
-): UptimeEsClient {
-  const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+): SyntheticsEsClient {
+  const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
 
   mockEsClient.search.mockResponse({
     took: 18,
@@ -100,5 +100,5 @@ export function mockSearchResult(
     aggregations,
   });
 
-  return uptimeEsClient;
+  return syntheticsEsClient;
 }
