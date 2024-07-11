@@ -16,6 +16,7 @@ import {
 } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
 import { getRowIndicatorProvider } from './accessors';
+
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({

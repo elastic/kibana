@@ -16,7 +16,7 @@ import { Profile } from '../../../types';
 
 const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
 
-export const getRowIndicatorProvider: Profile['getRowIndicatorProvider'] =
+export const getRowIndicatorProvider: () => Profile['getRowIndicatorProvider'] =
   () =>
   ({ dataView }) => {
     // Check if the data view has any of the log level fields.
