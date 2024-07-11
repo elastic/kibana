@@ -40,12 +40,12 @@ import {
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
 import {
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   getAlerts,
   getPreviewAlerts,
   previewRule,
   previewRuleWithExceptionEntries,
+  setupMlModulesWithRetry,
 } from '../../../../utils';
 import {
   createRule,
@@ -147,10 +147,10 @@ export default ({ getService }: FtrProviderContext) => {
       // as the job looks for certain indices on start
       await esArchiver.load(auditPath);
       console.log('loaded auditbeat data', auditPath);
-      const moduleResponse = await executeSetupModuleRequest({
+      const moduleResponse = await setupMlModulesWithRetry({
         module: siemModule,
-        rspCode: 200,
         supertest,
+        retry,
       });
       console.log('modules set up', JSON.stringify(moduleResponse), null, 2);
       const datafeedResponse = await forceStartDatafeeds({
