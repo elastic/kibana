@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -17,6 +18,8 @@ export default function ({ getService }: FtrProviderContext) {
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
   const service = 'elser';
+
+  const modelId = '.elser_model_2';
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -24,50 +27,52 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   // FLAKY: https://github.com/elastic/kibana/issues/185216
-  describe.skip('Inference endpoints', function () {
-    // test adds new trained model '.elser_model_2_linux-x86_64', but does not clean it. Follow up tests are affected
-    this.tags(['failsOnMKI']);
+  describe('Inference endpoints', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      log.debug(`Creating inference endpoint`);
-      try {
-        await ml.api.createInferenceEndpoint(inferenceId, taskType, {
-          service,
-          service_settings: {
-            num_allocations: 1,
-            num_threads: 1,
-          },
-        });
-      } catch (err) {
-        log.debug('[Setup error] Error creating inference endpoint');
-        throw err;
-      }
     });
-
     after(async () => {
-      // Cleanup inference endpoints created for testing purposes
       try {
-        log.debug(`Deleting inference endpoint`);
-        await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
+        log.debug(`Deleting underlying trained model`);
+        await ml.api.deleteTrainedModelES(modelId);
+        await ml.testResources.cleanMLSavedObjects();
       } catch (err) {
-        log.debug('[Cleanup error] Error deleting inference endpoint');
+        log.debug('[Cleanup error] Error deleting trained model and saved ml objects');
         throw err;
       }
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    describe('get inference endpoints', () => {
-      it('returns the existing inference endpoints', async () => {
-        const { body: inferenceEndpoints } = await supertestWithoutAuth
-          .get(`${API_BASE_PATH}/inference/all`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .expect(200);
-
-        expect(inferenceEndpoints).to.be.ok();
-        expect(inferenceEndpoints[0].model_id).to.eql(inferenceId);
+    it('create inference endpoint', async () => {
+      log.debug(`create inference endpoint`);
+      await ml.api.createInferenceEndpoint(inferenceId, taskType, {
+        service,
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: modelId,
+        },
       });
+    });
+    it('get all inference endpoints and confirm inference endpoint exist', async () => {
+      const { body: inferenceEndpoints } = await supertestWithoutAuth
+        .get(`${API_BASE_PATH}/inference/all`)
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200);
+
+      expect(inferenceEndpoints).to.be.ok();
+      expect(
+        inferenceEndpoints.some(
+          (endpoint: InferenceAPIConfigResponse) => endpoint.model_id === inferenceId
+        )
+      ).to.be(true);
+    });
+    it('can delete inference endpoint', async () => {
+      log.debug(`Deleting inference endpoint`);
+      await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
+      log.debug('> Inference endpoint deleted');
     });
   });
 }
