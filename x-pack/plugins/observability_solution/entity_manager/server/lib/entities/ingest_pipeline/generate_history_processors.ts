@@ -37,6 +37,16 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
+function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
+  return definition.identityFields.map((key) => ({
+    set: {
+      if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
+      field: key.field,
+      value: `{{entity.identity.${key.field}}}`,
+    },
+  }));
+}
+
 export function generateHistoryProcessors(definition: EntityDefinition) {
   return [
     {
@@ -138,13 +148,7 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         ignore_missing: true,
       },
     },
-    ...definition.identityFields.map((key) => ({
-      set: {
-        if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
-        field: key.field,
-        value: `{{entity.identity.${key.field}}}`,
-      },
-    })),
+    ...liftIdentityFieldsToDocumentRoot(definition),
     {
       remove: {
         field: 'entity.identity',
