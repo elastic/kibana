@@ -173,7 +173,6 @@ const calculateCommonFieldsDiff = (
 const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> = {
   rule_id: simpleDiffAlgorithm,
   version: numberDiffAlgorithm,
-  meta: simpleDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
   tags: simpleDiffAlgorithm,
   description: simpleDiffAlgorithm,
@@ -191,8 +190,6 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   author: simpleDiffAlgorithm,
   license: singleLineStringDiffAlgorithm,
   rule_schedule: simpleDiffAlgorithm,
-  actions: simpleDiffAlgorithm,
-  throttle: simpleDiffAlgorithm,
   exceptions_list: simpleDiffAlgorithm,
   max_signals: numberDiffAlgorithm,
   rule_name_override: simpleDiffAlgorithm,
@@ -211,7 +208,6 @@ const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQue
   type: simpleDiffAlgorithm,
   kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
-  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateSavedQueryFieldsDiff = (
@@ -224,7 +220,6 @@ const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQuery
   type: simpleDiffAlgorithm,
   kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
-  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateEqlFieldsDiff = (
