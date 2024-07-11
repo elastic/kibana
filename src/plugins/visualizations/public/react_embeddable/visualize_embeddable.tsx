@@ -213,16 +213,16 @@ export const getVisualizeEmbeddableFactory: (
         canLinkToLibrary: () => !state.linkedToLibrary,
         canUnlinkFromLibrary: () => !!state.linkedToLibrary,
         checkForDuplicateTitle: () => false,
-        getByValueState: () =>
-          serializeState({
-            serializedVis: vis$.getValue().serialize(),
-            titles: serializeTitles(),
-          }).rawState,
+        getByValueState: () => ({
+          savedVis: vis$.getValue().serialize(),
+          ...serializeTitles(),
+        }),
         getByReferenceState: (libraryId) =>
           serializeState({
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
             id: libraryId,
+            linkedToLibrary: true,
           }).rawState,
       },
       {
