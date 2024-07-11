@@ -522,6 +522,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       rollupSettings: `${KIBANA_DOCS}advanced-options.html#kibana-rollups-settings`,
       visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
       timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
+      generalSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
       savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
     },
     ml: {

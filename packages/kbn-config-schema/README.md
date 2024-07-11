@@ -138,6 +138,7 @@ __Options:__
   * `validate: (value: number) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
   * `min: number` - defines a minimum value the number should have.
   * `max: number` - defines a maximum value the number should have.
+  * `unsafe: boolean` - if true, will accept unsafe numbers (integers > 2^53).
 
 __Usage:__
 ```typescript
