@@ -127,6 +127,195 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('create', () => {
+      it('should create an index template', async () => {
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          `template-${getRandomString()}`,
+          [getRandomString()],
+          undefined,
+          false
+        );
+
+        const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(status).to.eql(200);
+      });
+
+      it('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        );
+
+        await svlTemplatesApi.createTemplate(payload, roleAuthc);
+
+        const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+
+        expect(status).to.eql(409);
+      });
+
+      it('should validate the request payload', async () => {
+        const templateName = `template-${getRandomString()}`;
+        // need to cast as any to avoid errors after deleting index patterns
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        ) as any;
+
+        delete payload.indexPatterns; // index patterns are required
+
+        const { body } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(body.message).to.contain(
+          '[request body.indexPatterns]: expected value of type [array] '
+        );
+      });
+
+      it('should parse the ES error and return the cause', async () => {
+        const templateName = `template-create-parse-es-error`;
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          ['create-parse-es-error'],
+          undefined,
+          false
+        );
+        const runtime = {
+          myRuntimeField: {
+            type: 'boolean',
+            script: {
+              source: 'emit("hello with error', // error in script
+            },
+          },
+        };
+        payload.template!.mappings = { ...payload.template!.mappings, runtime };
+        const { body, status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(status).to.eql(400);
+
+        expect(body.attributes).an('object');
+        expect(body.attributes.error.reason).contain('template after composition is invalid');
+        // one of the item of the cause array should point to our script
+        expect(body.attributes.causes.join(',')).contain('"hello with error');
+      });
+    });
+
+    describe('update', () => {
+      it('should update an index template', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const indexTemplate = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        );
+
+        const { status } = await svlTemplatesApi.createTemplate(indexTemplate, roleAuthc);
+        expect(status).to.eql(200);
+
+        const { body: templates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
+        const { name, version } = indexTemplate;
+        expect(
+          templates.templates.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+        ).to.equal(version);
+
+        // Update template with new version
+        const updatedVersion = 2;
+        const { status: updateStatus } = await svlTemplatesApi.updateTemplate(
+          { ...indexTemplate, version: updatedVersion },
+          templateName,
+          roleAuthc
+        );
+        expect(updateStatus).to.eql(200);
+
+        const { body: templates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
+
+        expect(
+          templates2.templates.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+        ).to.equal(updatedVersion);
+      });
+
+      it('should parse the ES error and return the cause', async () => {
+        const templateName = `template-update-parse-es-error`;
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          ['update-parse-es-error'],
+          undefined,
+          false
+        );
+        const runtime = {
+          myRuntimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("hello")',
+            },
+          },
+        };
+
+        // Add runtime field
+        payload.template!.mappings = { ...payload.template!.mappings, runtime };
+
+        const { status: createStatus } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(createStatus).to.eql(200);
+
+        // Update template with an error in the runtime field script
+        payload.template!.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
+        const { status: updateStatus, body } = await svlTemplatesApi.updateTemplate(
+          payload,
+          templateName,
+          roleAuthc
+        );
+
+        expect(updateStatus).to.eql(400);
+
+        expect(body.attributes).an('object');
+        // one of the item of the cause array should point to our script
+        expect(body.attributes.causes.join(',')).contain('"hello with error');
+      });
+    });
+
+    describe('delete', () => {
+      it('should delete an index template', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = svlTemplatesHelpers.getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        );
+
+        const { status: createStatus, body: createBody } = await svlTemplatesApi.createTemplate(
+          payload,
+          roleAuthc
+        );
+        if (createStatus !== 200)
+          throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
+
+        const { body: allTemplates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
+
+        expect(
+          allTemplates.templates.find((template) => template.name === payload.name)?.name
+        ).to.equal(templateName);
+
+        const { status: deleteStatus, body: deleteBody } = await svlTemplatesApi.deleteTemplates(
+          [{ name: templateName }],
+          roleAuthc
+        );
+
+        if (deleteStatus !== 200) throw new Error(`Error deleting template: ${deleteBody.message}`);
+
+        expect(deleteBody.errors).to.be.empty();
+        expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
+
+        const { body: allTemplates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
+
+        expect(allTemplates2.templates.find((template) => template.name === payload.name)).to.equal(
+          undefined
+        );
+      });
+    });
+
     describe('simulate', () => {
       it('should simulate an index template', async () => {
         const payload = svlTemplatesHelpers.getSerializedTemplate([getRandomString()], false);
