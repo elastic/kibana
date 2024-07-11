@@ -140,18 +140,13 @@ export const streamGraph = async ({
               // however, no harm to keep it in
               /* empty */
             } else if (!didEnd) {
-              if (msg.response_metadata?.finish_reason === 'stop') {
-                handleStreamEnd(finalMessage);
-              } else {
-                push({ payload: msg.content, type: 'content' });
-                finalMessage += msg.content;
-              }
+              push({ payload: msg.content, type: 'content' });
+              finalMessage += msg.content;
             }
-          } else if (event.event === 'on_llm_end') {
+          } else if (event.event === 'on_llm_end' && !didEnd) {
             const generations = event.data.output?.generations[0];
-
             if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-              handleStreamEnd(finalMessage);
+              handleStreamEnd(generations[0]?.text ?? finalMessage);
             }
           }
         }
@@ -186,10 +181,8 @@ export const streamGraph = async ({
                 finalMessage += chunk.content;
               }
             }
-          } else if (event.event === 'on_llm_end') {
-            if (streamingFinished) {
-              handleStreamEnd(finalMessage);
-            }
+          } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
+            handleStreamEnd(finalMessage);
           }
         }
       }
