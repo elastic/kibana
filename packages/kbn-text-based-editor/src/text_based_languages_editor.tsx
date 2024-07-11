@@ -57,7 +57,7 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
-import { getColumnsWithMetadata } from './ecs_metadata_helper';
+import { getBulkColumnsWithMetadata } from './ecs_metadata_helper';
 
 import './overwrite.scss';
 
@@ -441,7 +441,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               abortController
             ).result;
             const columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
-            return await getColumnsWithMetadata(columns, fieldsMetadata);
+            return await getBulkColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
           }
