@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { USER_SETTINGS_TEMPLATE_SUFFIX } from '../../../../constants';
 
@@ -12,3 +13,33 @@ type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPL
 
 export const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
   name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
+
+// For any `constant_keyword` fields in `newMappings` that don't have a `value`, access the same field in
+// the `oldMappings` and fill in the value from there
+export const fillConstantKeywordValues = (
+  oldMappings: MappingTypeMapping,
+  newMappings: MappingTypeMapping
+) => {
+  const filledMappings = JSON.parse(JSON.stringify(newMappings)) as MappingTypeMapping;
+  const deepGet = (obj: any, keys: string[]) => keys.reduce((xs, x) => xs?.[x] ?? null, obj);
+
+  const fillEmptyConstantKeywordFields = (
+    mappings: MappingTypeMapping,
+    currentPath: string[] = []
+  ) => {
+    for (const [key, potentialField] of Object.entries(mappings)) {
+      const path = [...currentPath, key];
+      if (typeof potentialField === 'object') {
+        if (potentialField.type === 'constant_keyword' && potentialField.value === undefined) {
+          potentialField.value = deepGet(oldMappings, [...path, 'value']);
+        } else {
+          fillEmptyConstantKeywordFields(potentialField, path);
+        }
+      }
+    }
+  };
+
+  fillEmptyConstantKeywordFields(filledMappings);
+
+  return filledMappings;
+};
