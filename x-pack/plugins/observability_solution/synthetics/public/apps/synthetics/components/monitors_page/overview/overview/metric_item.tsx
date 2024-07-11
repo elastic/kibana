@@ -77,7 +77,7 @@ export const MetricItem = ({
 
   return (
     <div
-      data-test-subj={`${monitor.name}-metric-item`}
+      data-test-subj={`${monitor.name}-${monitor.location.id}-metric-item`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel

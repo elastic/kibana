@@ -169,7 +169,11 @@ export const OverviewGrid = memo(() => {
                       ref={listRef}
                     >
                       {(props: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => (
-                        <EuiFlexGroup gutterSize="m" style={{ ...props.style }}>
+                        <EuiFlexGroup
+                          data-test-subj={`overview-grid-row-${props.index}`}
+                          gutterSize="m"
+                          style={{ ...props.style }}
+                        >
                           {props.data[props.index].map((_, idx) => (
                             <EuiFlexItem key={props.index * ROW_COUNT + idx}>
                               <MetricItem

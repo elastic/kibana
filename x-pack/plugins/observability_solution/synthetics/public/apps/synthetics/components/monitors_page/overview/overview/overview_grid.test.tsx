@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '../../../../utils/testing/rtl_helpers';
+import * as reactRedux from 'react-redux';
 import { waitFor } from '@testing-library/react';
+import { render } from '../../../../utils/testing/rtl_helpers';
 import { MonitorOverviewItem } from '../types';
 import { OverviewGrid } from './overview_grid';
-import * as hooks from '../../../../hooks/use_last_50_duration_chart';
+import * as useMonitorsSortedByStatus from '../../../../hooks/use_monitors_sorted_by_status';
+import { MonitorOverviewState } from '../../../../state';
 
 describe('Overview Grid', () => {
   const locationIdToName: Record<string, string> = {
@@ -63,19 +65,88 @@ describe('Overview Grid', () => {
     return hits;
   };
 
+  const useSelectorMockImplementation = (selector: any) => {
+    const monitors = getMockData();
+    if (selector.name === 'selectOverviewState') {
+      const overviewState: MonitorOverviewState = {
+        flyoutConfig: null,
+        data: {
+          monitors,
+          total: monitors.length,
+          allMonitorIds: monitors.map((monitor) => monitor.configId),
+        },
+        pageState: {
+          perPage: 20,
+          sortOrder: 'desc',
+          sortField: 'status',
+        },
+        loading: false,
+        loaded: true,
+        error: null,
+        groupBy: {
+          field: 'none',
+          order: 'asc',
+        },
+        trendStats: {},
+      };
+      return overviewState;
+    } else if (selector.name === 'selectOverviewStatus') {
+      return {
+        status: {
+          allConfigs: monitors.reduce((acc: Record<string, any>, cur) => {
+            acc[`${cur.configId}`] = {
+              configId: cur.configId,
+              monitorQueryId: cur.id,
+              location: locationIdToName[cur.location.id],
+              status: 'down',
+            };
+            return acc;
+          }, {}),
+          allIds: monitors.map((monitor) => monitor.configId),
+          allMonitorsCount: monitors.length,
+          disabledCount: 0,
+          disabledMonitorQueryIds: [],
+          disabledMonitorsCount: 0,
+          down: 0,
+          downConfigs: {},
+          enabledMonitorQueryIds: monitors.map((monitor) => monitor.configId),
+          pending: 0,
+          pendingConfigs: {},
+          projectMonitorsCount: 0,
+          up: monitors.length,
+          upConfigs: monitors.map((monitor) => monitor.configId),
+        },
+      };
+    }
+    const overviewState: Record<
+      string,
+      null | { data: any[]; median: number; avg: number; min: number; max: number }
+    > = {};
+    monitors.forEach((monitor) => {
+      const key = `${monitor.configId}${monitor.location.id}`;
+      if (!overviewState[key]) {
+        overviewState[key] = {
+          data: getMockChart(),
+          avg: 30000,
+          min: 0,
+          max: 50000,
+          median: 15000,
+        };
+      }
+    });
+    return overviewState;
+  };
+
   const perPage = 20;
 
   it('renders correctly', async () => {
-    jest.spyOn(hooks, 'useLast50DurationChart').mockReturnValue({
-      data: getMockChart(),
-      avgDuration: 30000,
-      minDuration: 0,
-      maxDuration: 50000,
-      medianDuration: 15000,
-      loading: false,
+    jest.spyOn(useMonitorsSortedByStatus, 'useMonitorsSortedByStatus').mockReturnValue({
+      monitorsSortedByStatus: getMockData(),
+      downMonitors: {},
     });
+    jest.spyOn(reactRedux, 'useSelector').mockImplementation(useSelectorMockImplementation);
 
-    const { getByText, getAllByTestId, queryByText } = render(<OverviewGrid />, {
+    const { getByText, getByTestId } = render(<OverviewGrid />, {
       state: {
         overview: {
           pageState: {
@@ -125,20 +196,22 @@ describe('Overview Grid', () => {
       expect(getByText('Showing')).toBeInTheDocument();
       expect(getByText('40')).toBeInTheDocument();
       expect(getByText('Monitors')).toBeInTheDocument();
-      expect(queryByText('Showing all monitors')).not.toBeInTheDocument();
-      expect(getAllByTestId('syntheticsOverviewGridItem').length).toEqual(perPage);
+      getMockData()
+        // since <OverviewGrid /> uses react-window, it only renders the visible items,
+        // thus, monitors that would be significantly below the fold will not render without scrolling
+        .slice(0, 27)
+        .forEach((monitor) => {
+          expect(getByTestId(`${monitor.name}-${monitor.location.id}-metric-item`));
+        });
     });
   });
 
   it('displays showing all monitors label when reaching the end of the list', async () => {
-    jest.spyOn(hooks, 'useLast50DurationChart').mockReturnValue({
-      data: getMockChart(),
-      avgDuration: 30000,
-      minDuration: 0,
-      maxDuration: 50000,
-      medianDuration: 15000,
-      loading: false,
+    jest.spyOn(useMonitorsSortedByStatus, 'useMonitorsSortedByStatus').mockReturnValue({
+      monitorsSortedByStatus: getMockData(),
+      downMonitors: {},
     });
+    jest.spyOn(reactRedux, 'useSelector').mockImplementation(useSelectorMockImplementation);
 
     const { getByText } = render(<OverviewGrid />, {
       state: {

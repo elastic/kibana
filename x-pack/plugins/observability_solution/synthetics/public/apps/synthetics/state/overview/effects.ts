@@ -50,7 +50,6 @@ export function* fetchOverviewTrendStats() {
   );
 }
 
-// writing refresh logic
 export function* refreshOverviewTrendStats() {
   yield takeLeading(refreshOverviewTrends.get, function* (): Generator<
     unknown,
