@@ -133,10 +133,6 @@ export const JourneyScreenshotDialog = ({
             animateLoading={false}
             hasBorder={false}
             size={'full'}
-            onClick={(evt) => {
-              // for table row click to work
-              evt.stopPropagation();
-            }}
           />
         </ModalBodyStyled>
 

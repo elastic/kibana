@@ -172,6 +172,8 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/ml-trained-models-utils",
     "@kbn/observability-synthetics-test-data"
   ]
 }
