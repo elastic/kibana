@@ -238,7 +238,7 @@ describe('runV2Migration', () => {
 });
 
 const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
-  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  const mockedClient = elasticsearchClientMock.createInternalClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
   const typeRegistry = savedObjectTypeRegistryMock;

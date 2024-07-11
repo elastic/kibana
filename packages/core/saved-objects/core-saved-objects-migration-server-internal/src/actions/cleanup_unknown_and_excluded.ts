@@ -10,8 +10,8 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import {
   checkForUnknownDocs,
@@ -24,7 +24,7 @@ import { deleteByQuery } from './delete_by_query';
 
 /** @internal */
 export interface CleanupUnknownAndExcludedParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   indexName: string;
   discardUnknownDocs: boolean;
   excludeOnUpgradeQuery: QueryDslQueryContainer;

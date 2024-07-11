@@ -28,6 +28,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { ApiExecutionContext } from './types';
 import {
   validateConvertFilterToKueryNode,
@@ -215,7 +216,10 @@ export const performFind = async <T = unknown, A = unknown>(
     },
   };
 
-  const { body, statusCode, headers } = await client.search<SavedObjectsRawDocSource>(esOptions, {
+  // Applying this workaround because the types mismatch
+  const { body, statusCode, headers } = await (
+    client as ElasticsearchTraditionalClient
+  ).search<SavedObjectsRawDocSource>(esOptions, {
     ignore: [404],
     meta: true,
   });

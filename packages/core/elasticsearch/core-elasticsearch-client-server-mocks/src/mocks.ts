@@ -8,7 +8,11 @@
 
 import type { Client, TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { PublicKeys } from '@kbn/utility-types';
-import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchTraditionalClient,
+  ICustomClusterClient,
+} from '@kbn/core-elasticsearch-server';
 import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 
 const omittedProps = [
@@ -183,6 +187,7 @@ const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedApi<Clien
 };
 
 export type ElasticsearchClientMock = DeeplyMockedApi<ElasticsearchClient>;
+export type ElasticsearchTraditionalClientMock = DeeplyMockedApi<ElasticsearchTraditionalClient>;
 
 const createClientMock = (res?: Promise<unknown>): ElasticsearchClientMock =>
   createInternalClientMock(res) as unknown as ElasticsearchClientMock;
@@ -205,12 +210,14 @@ const createScopedClusterClientMock = () => {
 
 export interface ClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
+  asInternalUserTraditionalClient: ElasticsearchTraditionalClientMock;
   asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
 const createClusterClientMock = () => {
   const mock: ClusterClientMock = {
     asInternalUser: createClientMock(),
+    asInternalUserTraditionalClient: createClientMock() as ElasticsearchTraditionalClientMock,
     asScoped: jest.fn(),
   };
 
@@ -224,6 +231,7 @@ export type CustomClusterClientMock = jest.Mocked<ICustomClusterClient> & Cluste
 const createCustomClusterClientMock = () => {
   const mock: CustomClusterClientMock = {
     asInternalUser: createClientMock(),
+    asInternalUserTraditionalClient: createClientMock() as ElasticsearchTraditionalClientMock,
     asScoped: jest.fn(),
     close: jest.fn(),
   };

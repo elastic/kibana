@@ -104,7 +104,7 @@ export class ElasticsearchService
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
       log: this.log,
-      internalClient: this.client.asInternalUser,
+      internalClient: this.client.asInternalUserTraditionalClient,
     }).pipe(takeUntil(this.stop$));
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
@@ -166,7 +166,7 @@ export class ElasticsearchService
 
       // Ensure inline scripting is enabled on the ES cluster
       const scriptingEnabled = await isInlineScriptingEnabled({
-        client: this.client.asInternalUser,
+        client: this.client.asInternalUserTraditionalClient, // We can use this client because we know that this API is internally allowed.
       });
       if (!scriptingEnabled) {
         throw new Error(
@@ -221,6 +221,7 @@ export class ElasticsearchService
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      flavor: this.coreContext.env.packageInfo.buildFlavor,
     });
   }
 

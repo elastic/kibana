@@ -33,6 +33,7 @@ import {
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
 import pMap from 'p-map';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import {
   getCurrentTime,
   getSavedObjectFromSource,
@@ -139,8 +140,9 @@ export async function internalBulkResolve<T>(
   });
 
   const bulkGetResponse = docsToBulkGet.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: docsToBulkGet } },
+    ? // Applying this workaround because the types mismatch
+      await (client as ElasticsearchTraditionalClient).mget<SavedObjectsRawDocSource>(
+        { docs: docsToBulkGet },
         { ignore: [404], meta: true }
       )
     : undefined;

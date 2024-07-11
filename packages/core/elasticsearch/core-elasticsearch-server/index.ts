@@ -23,6 +23,10 @@ export type {
   ElasticsearchClientSslConfig,
   ElasticsearchClientConfig,
   ElasticsearchApiToRedactInLogs,
+  ElasticsearchTraditionalClient,
+  ElasticsearchServerlessClient,
+  isElasticsearchServerlessClient,
+  isElasticsearchTraditionalClient,
 } from './src/client';
 
 export type {

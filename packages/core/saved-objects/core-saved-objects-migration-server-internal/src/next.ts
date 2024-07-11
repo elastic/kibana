@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as Option from 'fp-ts/lib/Option';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { omit } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
@@ -72,7 +72,7 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 >;
 
 export const nextActionMap = (
-  client: ElasticsearchClient,
+  client: ElasticsearchTraditionalClient,
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
@@ -317,7 +317,7 @@ export const nextActionMap = (
 };
 
 export const next = (
-  client: ElasticsearchClient,
+  client: ElasticsearchTraditionalClient,
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,

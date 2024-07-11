@@ -11,7 +11,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type {
-  ElasticsearchClient,
+  ElasticsearchTraditionalClient,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import {
@@ -33,7 +33,7 @@ export type CloneIndexResponse = AcknowledgeResponse;
 
 /** @internal */
 export interface CloneIndexParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   esCapabilities: ElasticsearchCapabilities;
   source: string;
   target: string;

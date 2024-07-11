@@ -9,8 +9,8 @@
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
@@ -44,7 +44,7 @@ import type { AliasAction } from './actions';
  */
 
 export interface RunResilientMigratorParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;

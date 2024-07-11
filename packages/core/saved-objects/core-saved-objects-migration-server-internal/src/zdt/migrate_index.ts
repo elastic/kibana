@@ -7,8 +7,8 @@
  */
 
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type {
   SavedObjectsMigrationConfigType,
@@ -45,7 +45,7 @@ export interface MigrateIndexOptions {
   /** SO serializer to use for migration */
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
-  elasticsearchClient: ElasticsearchClient;
+  elasticsearchClient: ElasticsearchTraditionalClient;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
   /** Capabilities of the ES cluster we're using */

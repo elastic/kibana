@@ -1707,6 +1707,14 @@
   resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-8.11.1.tgz#81d9a7592cdc2fb75fd484a2526f1a4f2f65d24e"
   integrity sha512-f8P6XeFBQQ4Pxag131hjqUoGonYShzZl4cMSdbdstEtipjf9sqjzKKuEdnwbFhcGLiNOrq+K81P7476C4RC/aw==
 
+"@elastic/elasticsearch-serverless@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-serverless/-/elasticsearch-serverless-0.3.0.tgz#efcbaed33c780e65b9bffa692ab87f280fe27d00"
+  integrity sha512-KdwHwUo1uAFLjPGBz2ce/VX0atpHffcSbX5m5ErRxoSeG0wuPUyFjgNIwm/URrs1qYjlItUHT6E8hp2dvp0/Zw==
+  dependencies:
+    "@elastic/transport" "^8.4.1"
+    tslib "^2.5.0"
+
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.6.0.tgz#c474f49808deee64b5bc5b8f938bf78f4468cb94"
@@ -1895,10 +1903,10 @@
     undici "^5.21.2"
     yaml "^2.2.2"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.6.0":
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.6.0.tgz#8de9794c87eb0fd2bdb2c6c1e32792aeb06b32bc"
-  integrity sha512-/Ucpztrc+urZK8yCtFBUu2LePYJNnukgZSUUApUzGH/SxejqkH526Nph7aru8I0vZwdW5wqgCHSOIq3J7tIxGg==
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.4.1", "@elastic/transport@^8.6.0":
+  version "8.6.1"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.6.1.tgz#54954f7fd9d6f121471c1a437e59dc1edeb079aa"
+  integrity sha512-3vGs4W3wP5oeIT/4j1vcvd+t7m6ndP0uyb5GDY23LQCmbtI5Oq0aQwD9gb09KJbLFLUbI7db9vMFPzKavSFA5g==
   dependencies:
     debug "^4.3.4"
     hpagent "^1.0.0"

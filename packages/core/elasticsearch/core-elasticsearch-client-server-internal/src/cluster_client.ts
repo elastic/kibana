@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { Client as TraditionalClient } from '@elastic/elasticsearch';
+import type { Client as ServerlessClient } from '@elastic/elasticsearch-serverless';
 import type { Logger } from '@kbn/logging';
 import type { Headers, IAuthHeadersStorage } from '@kbn/core-http-server';
 import {
@@ -19,9 +20,9 @@ import type {
   ScopeableRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
+  ElasticsearchClientConfig,
 } from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { configureClient } from './configure_client';
+import { configureClient, type ElasticsearchClientFlavor } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
 import { getDefaultHeaders, AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';
 import {
@@ -37,13 +38,14 @@ const noop = () => undefined;
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
-  private readonly rootScopedClient: Client;
+  private readonly rootScopedClient: TraditionalClient | ServerlessClient;
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private isClosed = false;
 
-  public readonly asInternalUser: Client;
+  public readonly asInternalUser: TraditionalClient | ServerlessClient;
+  public readonly asInternalUserTraditionalClient: TraditionalClient;
 
   constructor({
     config,
@@ -54,6 +56,7 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler = noop,
     agentFactoryProvider,
     kibanaVersion,
+    flavor,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -63,6 +66,7 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
+    flavor: ElasticsearchClientFlavor;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
@@ -76,6 +80,15 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      flavor,
+    });
+    this.asInternalUserTraditionalClient = configureClient(config, {
+      logger,
+      type,
+      getExecutionContext,
+      agentFactoryProvider,
+      kibanaVersion,
+      flavor: 'traditional',
     });
     this.rootScopedClient = configureClient(config, {
       scoped: true,
@@ -84,6 +97,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      flavor,
     });
   }
 

@@ -15,8 +15,11 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchTraditionalClient,
+} from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -25,7 +28,7 @@ import { addExcludedTypesToBoolQuery } from '../model/helpers';
 
 /** @internal */
 export interface CheckForUnknownDocsParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   indexName: string;
   excludeOnUpgradeQuery: QueryDslQueryContainer;
   knownTypes: string[];
@@ -86,7 +89,10 @@ export async function getAggregatedTypesDocuments(
     },
   };
 
-  const body = await esClient.search<SavedObjectsRawDocSource>(params);
+  // Applying this workaround because the types mismatch
+  const body = await (esClient as ElasticsearchTraditionalClient).search<SavedObjectsRawDocSource>(
+    params
+  );
 
   if (!body.aggregations) return [];
 
