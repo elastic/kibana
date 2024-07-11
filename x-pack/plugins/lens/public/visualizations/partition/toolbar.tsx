@@ -14,7 +14,8 @@ import {
   EuiSuperSelect,
   EuiRange,
   EuiHorizontalRule,
-  EuiButtonGroup,
+  EuiComboBox,
+  EuiIcon,
 } from '@elastic/eui';
 import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
@@ -22,7 +23,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { EmptySizeRatios, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
 import { LegendDisplay } from '../../../common/constants';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
@@ -66,8 +67,8 @@ const legendOptions: Array<{
   },
 ];
 
-const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLabel', {
-  defaultMessage: 'Inner area size',
+const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.donutHole', {
+  defaultMessage: 'Donut hole',
 });
 
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
@@ -151,12 +152,27 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onEmptySizeRatioChange = useCallback(
-    (sizeId) => {
-      const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
-      onStateChange({ emptySizeRatio });
+    ([option]) => {
+      console.log(option);
+      if (option.value === 'none') {
+        setState({ ...state, shape: 'pie', layers: [{ ...layer, emptySizeRatio: undefined }] });
+      } else {
+        const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === option.value)?.value;
+        setState({
+          ...state,
+          shape: 'donut',
+          layers: [{ ...layer, emptySizeRatio }],
+        });
+      }
     },
-    [emptySizeRatioOptions, onStateChange]
+    [emptySizeRatioOptions, layer, setState, state]
   );
+  const selectedOption = emptySizeRatioOptions
+    ? emptySizeRatioOptions.find(
+        ({ value }) =>
+          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
+      )
+    : undefined;
 
   if (!layer) {
     return null;
@@ -227,7 +243,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           />
         </EuiFormRow>
       </ToolbarPopover>
-      {emptySizeRatioOptions?.length ? (
+      {emptySizeRatioOptions?.length && selectedOption ? (
         <ToolbarPopover
           title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
             defaultMessage: 'Visual options',
@@ -237,17 +253,23 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           buttonDataTestSubj="lnsVisualOptionsButton"
         >
           <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
-            <EuiButtonGroup
-              isFullWidth
-              buttonSize="compressed"
-              legend={emptySizeRatioLabel}
-              options={emptySizeRatioOptions}
-              idSelected={
-                emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
-                'emptySizeRatioOption-small'
-              }
+            <EuiComboBox
+              fullWidth
+              compressed
+              data-test-subj="lnsEmptySizeRatioOption"
+              aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
+                defaultMessage: 'Donut hole',
+              })}
               onChange={onEmptySizeRatioChange}
-              data-test-subj="lnsEmptySizeRatioButtonGroup"
+              isClearable={false}
+              options={emptySizeRatioOptions.map(({ id, label, icon }) => ({
+                value: id,
+                label,
+                prepend: icon ? <EuiIcon type={icon} /> : undefined,
+              }))}
+              selectedOptions={[{ value: selectedOption.id, label: selectedOption.label }]}
+              singleSelection={{ asPlainText: true }}
+              prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
             />
           </EuiFormRow>
         </ToolbarPopover>

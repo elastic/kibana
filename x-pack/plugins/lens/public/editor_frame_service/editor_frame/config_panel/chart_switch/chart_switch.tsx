@@ -127,6 +127,7 @@ export const ChartSwitch = memo(function ChartSwitch({
   datasourceMap,
   layerId,
 }: ChartSwitchProps) {
+  console.log(visualizationMap);
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -292,17 +293,25 @@ export const ChartSwitch = memo(function ChartSwitch({
       const chartSwitchPositions: VisChartSwitchPosition[] = [];
       const deprecatedChartSwitchPositions: VisChartSwitchPosition[] = [];
       Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
-        for (const visualizationType of v.visualizationTypes) {
+        const chartSwitchOptions = v.chartSwitchOptions || v.visualizationTypes;
+        for (const visualizationType of chartSwitchOptions) {
           // todo: wildcard, fuzzy search add
           const isSearchMatch =
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
             visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm) ||
             visualizationType.description?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
+            let typeId = visualizationType.id;
+
+            if (visualizationType.subtypes) {
+              typeId =
+                visualizationType.subtypes.find((subtype) => subtype === subVisualizationId) ||
+                visualizationType.subtypes[0];
+            }
             const visualizationEntry = {
               ...visualizationType,
               visualizationId,
-              selection: getSelection(visualizationId, visualizationType.id),
+              selection: getSelection(visualizationId, typeId),
             };
             if (visualizationEntry.isDeprecated) {
               deprecatedChartSwitchPositions.push(visualizationEntry);

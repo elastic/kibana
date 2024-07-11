@@ -1676,7 +1676,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     hasEmptySizeRatioButtonGroup() {
-      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
+      return testSubjects.exists('lnsEmptySizeRatioOption');
     },
 
     settingsMenuOpen() {

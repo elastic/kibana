@@ -45,6 +45,9 @@ import {
   IconChartGauge,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
+  IconDonutHoleLarge,
+  IconDonutHoleMedium,
+  IconDonutHoleSmall,
 } from '../..';
 
 export default {
@@ -192,6 +195,9 @@ const IconsArray: Array<{
     title: 'IconChartVerticalBullet',
     Component: IconChartVerticalBullet,
   },
+  { title: 'IconDonutHoleLarge', Component: IconDonutHoleLarge },
+  { title: 'IconDonutHoleMedium', Component: IconDonutHoleMedium },
+  { title: 'IconDonutHoleSmall', Component: IconDonutHoleSmall },
 ];
 
 interface RootComponentProps {

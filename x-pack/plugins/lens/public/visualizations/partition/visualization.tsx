@@ -45,7 +45,7 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
-import { PartitionChartsMeta } from './partition_charts_meta';
+import { PartitionChartsMeta, chartSwitchOptions } from './partition_charts_meta';
 import { PieToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
@@ -131,16 +131,9 @@ export const getPieVisualization = ({
   kibanaTheme: ThemeServiceStart;
 }): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
   id: 'lnsPie',
+  chartSwitchOptions,
 
-  visualizationTypes: Object.entries(PartitionChartsMeta).map(([key, meta]) => ({
-    id: key,
-    icon: meta.icon,
-    label: meta.label,
-    showExperimentalBadge: meta.isExperimental,
-    sortPriority: meta.sortPriority,
-    description: meta.description,
-  })),
-
+  visualizationTypes: Object.values(PartitionChartsMeta),
   getVisualizationTypeId(state) {
     return state.shape;
   },
@@ -285,8 +278,8 @@ export const getPieVisualization = ({
               defaultMessage: 'Slice',
             }),
             fakeFinalAccessor,
-            supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
-            dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
+            supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.donut.maxBuckets,
+            dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.donut.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
             hideGrouping: true,
           };
