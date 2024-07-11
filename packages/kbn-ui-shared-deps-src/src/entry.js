@@ -8,8 +8,8 @@
 
 require('./polyfills');
 
-export const Jquery = require('jquery');
-window.$ = window.jQuery = Jquery;
+// export const Jquery = require('jquery');
+// window.$ = window.jQuery = Jquery;
 
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
@@ -54,8 +54,8 @@ export const Reselect = require('reselect');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
-const { unzlibSync, strFromU8 } = require('fflate');
-export const Fflate = { unzlibSync, strFromU8 };
+// const { unzlibSync, strFromU8 } = require('fflate');
+// export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
@@ -72,6 +72,6 @@ export const KbnRison = require('@kbn/rison');
 export const History = require('history');
 export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');
-export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
+// export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
 export const KbnEsqlAst = require('@kbn/esql-ast');

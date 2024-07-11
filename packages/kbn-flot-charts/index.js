@@ -34,6 +34,9 @@
  * THE SOFTWARE.
  */
 
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
 import './lib/jquery_flot';
 import './lib/jquery_flot_canvas';
 import './lib/jquery_flot_time';
