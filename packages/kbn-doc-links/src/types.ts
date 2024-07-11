@@ -334,6 +334,7 @@ export interface DocLinks {
   };
   readonly securitySolution: {
     readonly artifactControl: string;
+    readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
@@ -359,8 +360,6 @@ export interface DocLinks {
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
-      readonly hostRiskScore: string;
-      readonly userRiskScore: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
     };

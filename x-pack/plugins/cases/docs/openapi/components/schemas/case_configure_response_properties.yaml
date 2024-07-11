@@ -1,14 +1,6 @@
 closure_type:
   $ref: 'closure_types.yaml'
-customFields:
-  type: array
-  x-technical-preview: true
-  description: Custom fields configuration details.
-  items:
-    type: object
-    properties:
-      $ref: 'case_configure_customfields.yaml'
-connector: 
+connector:
   type: object
   properties:
     $ref: 'case_configure_connector_properties.yaml'
@@ -20,15 +12,22 @@ created_at:
 created_by:
   type: object
   required:
-      - email
-      - full_name
-      - username
+    - email
+    - full_name
+    - username
   properties:
     $ref: 'user_properties.yaml'
+customFields:
+  type: array
+  description: Custom fields configuration details.
+  items:
+    type: object
+    properties:
+      $ref: 'case_configure_customfields.yaml'
 error:
   type:
-    - "string"
-    - "null"
+    - 'string'
+    - 'null'
   examples:
     - null
 id:
@@ -54,21 +53,23 @@ mappings:
           - summary
 owner:
   $ref: 'owners.yaml'
+templates:
+  $ref: 'templates.yaml'
 updated_at:
   type:
-    - "string"
-    - "null"
+    - 'string'
+    - 'null'
   format: date-time
   examples:
     - 2022-06-01T19:58:48.169Z
 updated_by:
   type:
-    - "object"
-    - "null"
+    - 'object'
+    - 'null'
   required:
-      - email
-      - full_name
-      - username
+    - email
+    - full_name
+    - username
   properties:
     $ref: 'user_properties.yaml'
 version:
