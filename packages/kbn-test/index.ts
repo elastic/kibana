@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_error';
-
 // @internal
 export { startServersCli, startServers } from './src/functional_tests/start_servers';
 
