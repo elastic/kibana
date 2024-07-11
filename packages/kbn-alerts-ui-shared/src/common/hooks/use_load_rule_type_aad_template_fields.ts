@@ -33,15 +33,18 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
   } = useQuery({
     queryKey: ['useLoadRuleTypeAadTemplateField', ruleTypeId],
     queryFn,
+    select: (dataViewFields) => {
+      return dataViewFields.map<ActionVariable>((d) => ({
+        name: d.name,
+        description: getDescription(d.name, EcsFlat),
+      }));
+    },
     refetchOnWindowFocus: false,
     enabled,
   });
 
   return {
-    data: data.map<ActionVariable>((d) => ({
-      name: d.name,
-      description: getDescription(d.name, EcsFlat),
-    })),
+    data,
     isInitialLoading,
     isLoading: isLoading || isFetching,
   };

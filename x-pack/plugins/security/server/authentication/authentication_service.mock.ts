@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { apiKeysMock } from '@kbn/core-security-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { apiKeysMock } from './api_keys/api_keys.mock';
 import type { InternalAuthenticationServiceStart } from './authentication_service';
 
 export const authenticationServiceMock = {

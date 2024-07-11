@@ -347,12 +347,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return refreshButton.click();
     },
 
-    async getFlyoutElementsByText(selector: string, text: string) {
-      const flyoutContainer: WebElementWrapper = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyout
-      );
+    async doesTextExist(selector: string, text: string) {
+      const textValues = await testSubjects.getVisibleTextAll(selector);
+      if (textValues && textValues.length > 0) {
+        const values = textValues[0].split('\n');
+        return values.includes(text);
+      }
 
-      return getAllByText(flyoutContainer, selector, text);
+      return false;
     },
 
     getFlyoutLogsExplorerButton() {
@@ -371,15 +373,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.findAll(
         testSubjectSelectors.datasetQualityFlyoutIntegrationAction('Dashboard')
       );
-    },
-
-    async doestTextExistInFlyout(text: string, elementSelector: string) {
-      const flyoutContainer: WebElementWrapper = await testSubjects.find(
-        testSubjectSelectors.datasetQualityFlyoutBody
-      );
-
-      const elements = await getAllByText(flyoutContainer, elementSelector, text);
-      return elements.length > 0;
     },
 
     // `excludeKeys` needed to circumvent `_stats` not available in Serverless  https://github.com/elastic/kibana/issues/178954
@@ -553,29 +546,4 @@ async function getDatasetTableHeaderTexts(tableWrapper: WebElementWrapper) {
   return Promise.all(
     headerElementWrappers.map((headerElementWrapper) => headerElementWrapper.getVisibleText())
   );
-}
-
-/**
- * Get all elements matching the given selector and text
- * @example
- * const container = await testSubjects.find('myContainer');
- * const elements = await getAllByText(container, 'button', 'Click me');
- *
- * @param container { WebElementWrapper } The container to search within
- * @param selector { string } The selector to search for (or filter elements by)
- * @param text { string } The text to search for within the filtered elements
- */
-export async function getAllByText(container: WebElementWrapper, selector: string, text: string) {
-  const elements = await container.findAllByCssSelector(selector);
-  const matchingElements: WebElementWrapper[] = [];
-
-  for (let i = 0; i < elements.length; i++) {
-    const element = elements[i];
-    const elementText = await element.getVisibleText();
-    if (elementText === text) {
-      matchingElements.push(element);
-    }
-  }
-
-  return matchingElements;
 }

@@ -303,7 +303,6 @@ export const renderApp = (
           </IntlProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
-      ,
     </KibanaRenderContextProvider>,
     element
   );
