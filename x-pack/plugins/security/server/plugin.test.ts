@@ -127,6 +127,7 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
+            "getLicenseType": [Function],
             "getUnavailableReason": [Function],
             "hasAtLeast": [Function],
             "isEnabled": [Function],

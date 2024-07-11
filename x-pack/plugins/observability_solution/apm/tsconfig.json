@@ -121,7 +121,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/test-jest-helpers",
-    "@kbn/security-plugin-types-common"
+    "@kbn/security-plugin-types-common",
+    "@kbn/entityManager-plugin"
   ],
   "exclude": [
     "target/**/*"

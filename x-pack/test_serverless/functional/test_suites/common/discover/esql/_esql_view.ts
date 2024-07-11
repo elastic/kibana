@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverQueryHits');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.existOrFail('shareTopNavButton');
-        await testSubjects.existOrFail('dataGridColumnSortingButton');
+        await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
         await testSubjects.click('field-@message-showDetails');
@@ -308,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 10';
+          return item[1] === 'FROM logstash-* | LIMIT 10';
         });
 
         expect(queryAdded).to.be(true);
