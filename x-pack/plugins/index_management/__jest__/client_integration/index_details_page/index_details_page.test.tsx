@@ -69,6 +69,7 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
     httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
+    httpRequestsMockHelpers.setInferenceModels([]);
 
     await act(async () => {
       testBed = await setup({
@@ -671,7 +672,6 @@ describe('<IndexDetailsPage />', () => {
             testBed = await setup({
               httpSetup,
               dependencies: {
-                config: { enableSemanticText: true },
                 docLinks: {
                   links: {
                     ml: '',
@@ -693,6 +693,7 @@ describe('<IndexDetailsPage />', () => {
                   ml: {
                     mlApi: {
                       trainedModels: {
+                        getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
                         getTrainedModels: jest.fn().mockResolvedValue([
                           {
                             model_id: '.elser_model_2',

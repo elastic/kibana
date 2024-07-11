@@ -24,7 +24,7 @@ import {
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { maybe } from '../../../../common/utils/maybe';
 
-interface ServiceTransactionDetailedStat {
+export interface ServiceTransactionDetailedStat {
   serviceName: string;
   latency: Array<{ x: number; y: number | null }>;
   transactionErrorRate?: Array<{ x: number; y: number }>;
