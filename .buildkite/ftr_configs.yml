@@ -91,6 +91,10 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # http/2 security muted tests
+  - x-pack/test/security_functional/saml.http2.config.ts
+  - x-pack/test/security_functional/oidc.http2.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -193,7 +197,6 @@ enabled:
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
@@ -402,8 +405,6 @@ enabled:
   - x-pack/test/security_functional/login_selector.config.ts
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts
-  - x-pack/test/security_functional/saml.http2.config.ts
-  - x-pack/test/security_functional/oidc.http2.config.ts
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
@@ -454,6 +455,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless.ts
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
@@ -582,5 +584,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations_feature_flag.config.ts

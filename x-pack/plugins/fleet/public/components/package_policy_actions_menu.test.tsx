@@ -12,9 +12,20 @@ import { act } from '@testing-library/react';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { ExperimentalFeaturesService } from '../services';
+import { useMultipleAgentPolicies } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
+
+jest.mock('../hooks', () => {
+  return {
+    ...jest.requireActual('../hooks'),
+    useMultipleAgentPolicies: jest.fn(),
+  };
+});
+
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+  typeof useMultipleAgentPolicies
+>;
 
 function renderMenu({
   agentPolicies,
@@ -87,9 +98,7 @@ function createMockPackagePolicy(
 }
 describe('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-      enableReusableIntegrationPolicies: false,
-    } as any);
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
   it('Should disable upgrade button if package does not have upgrade', async () => {

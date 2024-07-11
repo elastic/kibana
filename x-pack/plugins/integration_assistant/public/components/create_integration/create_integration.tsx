@@ -5,24 +5,46 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { CreateIntegrationServices } from './types';
+import type { Services } from '../../services';
+import { TelemetryContextProvider } from './telemetry';
 import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
 import { CreateIntegrationAssistant } from './create_integration_assistant';
+import { Page, PagePath } from '../../common/constants';
+import { useRoutesAuthorization } from '../../common/hooks/use_authorization';
+import { useIsAvailable } from '../../common/hooks/use_availability';
 
 interface CreateIntegrationProps {
-  services: CreateIntegrationServices;
+  services: Services;
 }
 export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services }) => (
   <KibanaContextProvider services={services}>
-    <Switch>
-      <Route path={'/create/assistant'} component={CreateIntegrationAssistant} />
-      <Route path={'/create/upload'} component={CreateIntegrationUpload} />
-      <Route path={'/create'} component={CreateIntegrationLanding} />
-    </Switch>
+    <TelemetryContextProvider>
+      <CreateIntegrationRouter />
+    </TelemetryContextProvider>
   </KibanaContextProvider>
 ));
 CreateIntegration.displayName = 'CreateIntegration';
+
+const CreateIntegrationRouter = React.memo(() => {
+  const { canUseIntegrationAssistant, canUseIntegrationUpload } = useRoutesAuthorization();
+  const isAvailable = useIsAvailable();
+  return (
+    <Switch>
+      {isAvailable && canUseIntegrationAssistant && (
+        <Route path={PagePath[Page.assistant]} exact component={CreateIntegrationAssistant} />
+      )}
+      {isAvailable && canUseIntegrationUpload && (
+        <Route path={PagePath[Page.upload]} exact component={CreateIntegrationUpload} />
+      )}
+
+      <Route path={PagePath[Page.landing]} exact component={CreateIntegrationLanding} />
+
+      <Route render={() => <Redirect to={PagePath[Page.landing]} />} />
+    </Switch>
+  );
+});
+CreateIntegrationRouter.displayName = 'CreateIntegrationRouter';

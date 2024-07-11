@@ -7,9 +7,9 @@
 
 import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +23,7 @@ import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -242,28 +243,39 @@ export const ActionNotifyWhen = ({
     [onSummaryChange, selectedOptionDoesNotExist, onNotifyWhenChange, getDefaultNotifyWhenOption]
   );
 
+  const { euiTheme } = useEuiTheme();
+  const summaryContextMenuOptionStyles = useMemo(
+    () => css`
+      min-width: 300px;
+      padding: ${euiTheme.size.s};
+    `,
+    [euiTheme]
+  );
+
   const summaryOptions = useMemo(
     () => [
-      <SummaryContextMenuOption
+      <EuiContextMenuItem
         key="summary"
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-summary"
         data-test-subj="actionNotifyWhen-option-summary"
+        className={summaryContextMenuOptionStyles}
       >
         {SUMMARY_OF_ALERTS}
-      </SummaryContextMenuOption>,
-      <SummaryContextMenuOption
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         key="for_each"
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-for_each"
         data-test-subj="actionNotifyWhen-option-for_each"
+        className={summaryContextMenuOptionStyles}
       >
         {FOR_EACH_ALERT}
-      </SummaryContextMenuOption>,
+      </EuiContextMenuItem>,
     ],
-    [frequency.summary, selectSummaryOption]
+    [frequency.summary, selectSummaryOption, summaryContextMenuOptionStyles]
   );
 
   const summaryOrPerRuleSelect = (
@@ -387,8 +399,3 @@ const SUMMARY_OF_ALERTS = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
   { defaultMessage: 'Summary of alerts' }
 );
-
-const SummaryContextMenuOption = euiStyled(EuiContextMenuItem)`
-  min-width: 300px;
-  padding: ${({ theme }) => theme.eui.euiSizeS};
-`;

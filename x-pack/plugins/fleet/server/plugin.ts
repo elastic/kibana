@@ -23,6 +23,7 @@ import type {
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
@@ -155,6 +156,7 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
+  securityCoreStart: SecurityServiceStart;
   securitySetup: SecurityPluginSetup;
   securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
@@ -292,6 +294,7 @@ export class FleetPlugin
     core.status.set(this.fleetStatus$.asObservable());
 
     const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+    const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
       useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
@@ -331,7 +334,7 @@ export class FleetPlugin
           ? [
               {
                 name: 'Agents',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -365,7 +368,7 @@ export class FleetPlugin
               },
               {
                 name: 'Agent policies',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -402,7 +405,7 @@ export class FleetPlugin
               },
               {
                 name: 'Settings',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -440,7 +443,7 @@ export class FleetPlugin
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID],
-            requireAllSpaces: true,
+            requireAllSpaces,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -452,7 +455,7 @@ export class FleetPlugin
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
+            requireAllSpaces,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
@@ -612,6 +615,7 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
+      securityCoreStart: core.security,
       securitySetup: this.securitySetup,
       securityStart: plugins.security,
       configInitialValue: this.configInitialValue,

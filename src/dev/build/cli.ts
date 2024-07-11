@@ -47,7 +47,7 @@ if (showHelp) {
         --skip-cdn-assets                    {dim Don't build CDN assets}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-ubuntu                 {dim Don't build the docker ubuntu image}
-        --skip-docker-chainguard             {dim Don't build the docker chainguard image}
+        --skip-docker-wolfi                  {dim Don't build the docker wolfi image}
         --skip-docker-fips                   {dim Don't build the docker fips image}
         --release                            {dim Produce a release-ready distributable}
         --version-qualifier                  {dim Suffix version with a qualifier}

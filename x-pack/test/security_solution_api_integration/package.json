@@ -35,6 +35,12 @@
     "initialize-server:lists:complete": "node ./scripts/index.js server lists_and_exception_lists trial_license_complete_tier",
     "run-tests:lists:complete": "node ./scripts/index.js runner lists_and_exception_lists trial_license_complete_tier",
 
+    "initialize-server:investigations": "node scripts/index.js server investigation trial_license_complete_tier",
+    "run-tests:investigations": "node scripts/index.js runner investigation trial_license_complete_tier",
+
+    "intialize-server:explore": "node scripts/index.js server explore trial_license_complete_tier",
+    "run-tests:explore": "node scripts/index.js runner explore trial_license_complete_tier",
+
     "genai:server:serverless": "npm run initialize-server:genai:trial_complete invoke_ai serverless",
     "genai:runner:serverless": "npm run run-tests:genai:trial_complete invoke_ai serverless serverlessEnv",
     "genai:qa:serverless": "npm run run-tests:genai:trial_complete invoke_ai serverless qaPeriodicEnv",
@@ -302,6 +308,48 @@
     "rules_management:essentials:qa:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless qaPeriodicEnv",
     "rules_management:essentials:qa:serverless:release": "npm run run-tests:rm:basic_essentials rule_management serverless qaEnv",
     "rules_management:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_management ess",
-    "rules_management:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_management ess essEnv"
+    "rules_management:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_management ess essEnv",
+
+    "investigations:timeline:server:serverless": "npm run initialize-server:investigations timeline serverless",
+    "investigations:timeline:runner:serverless": "npm run run-tests:investigations timeline serverless serverlessEnv",
+    "investigations:timeline:runner:qa:serverless": "npm run run-tests:investigations timeline serverless qaPeriodicEnv",
+    "investigations:timeline:runner:qa:serverless:release": "npm run run-tests:investigations timeline serverless qaEnv",
+    "investigations:timeline:server:ess": "npm run initialize-server:investigations timeline ess",
+    "investigations:timeline:runner:ess": "npm run run-tests:investigations timeline ess essEnv",
+
+    "investigations:saved-objects:server:serverless": "npm run initialize-server:investigations saved_objects serverless",
+    "investigations:saved-objects:runner:serverless": "npm run run-tests:investigations saved_objects serverless serverlessEnv",
+    "investigations:saved-objects:runner:qa:serverless": "npm run run-tests:investigations saved_objects serverless qaPeriodicEnv",
+    "investigations:saved-objects:runner:qa:serverless:release": "npm run run-tests:investigations saved_objects serverless qaEnv",
+    "investigations:saved-objects:server:ess": "npm run initialize-server:investigations saved_objects ess",
+    "investigations:saved-objects:runner:ess": "npm run run-tests:investigations saved_objects ess essEnv",
+
+    "explore:hosts:server:serverless": "npm run intialize-server:explore hosts serverless",
+    "explore:hosts:runner:serverless": "npm run run-tests:explore hosts serverless serverlessEnv",
+    "explore:hosts:runner:qa:serverless": "npm run run-tests:explore hosts serverless qaPeriodicEnv",
+    "explore:hosts:runner:qa:serverless:release": "npm run run-tests:explore hosts serverless qaEnv",
+    "explore:hosts:server:ess": "npm run intialize-server:explore hosts ess",
+    "explore:hosts:runner:ess": "npm run run-tests:explore hosts ess essEnv",
+
+    "explore:network:server:serverless": "npm run intialize-server:explore network serverless",
+    "explore:network:runner:serverless": "npm run run-tests:explore network serverless serverlessEnv",
+    "explore:network:runner:qa:serverless": "npm run run-tests:explore network serverless qaPeriodicEnv",
+    "explore:network:runner:qa:serverless:release": "npm run run-tests:explore network serverless qaEnv",
+    "explore:network:server:ess": "npm run intialize-server:explore network ess",
+    "explore:network:runner:ess": "npm run run-tests:explore network ess essEnv",
+
+    "explore:overview:server:serverless": "npm run intialize-server:explore overview serverless",
+    "explore:overview:runner:serverless": "npm run run-tests:explore overview serverless serverlessEnv",
+    "explore:overview:runner:qa:serverless": "npm run run-tests:explore overview serverless qaPeriodicEnv",
+    "explore:overview:runner:qa:serverless:release": "npm run run-tests:explore overview serverless qaEnv",
+    "explore:overview:server:ess": "npm run intialize-server:explore overview ess",
+    "explore:overview:runner:ess": "npm run run-tests:explore overview ess essEnv",
+
+    "explore:users:server:serverless": "npm run intialize-server:explore users serverless",
+    "explore:users:runner:serverless": "npm run run-tests:explore users serverless serverlessEnv",
+    "explore:users:runner:qa:serverless": "npm run run-tests:explore users serverless qaPeriodicEnv",
+    "explore:users:runner:qa:serverless:release": "npm run run-tests:explore users serverless qaEnv",
+    "explore:users:server:ess": "npm run intialize-server:explore users ess",
+    "explore:users:runner:ess": "npm run run-tests:explore users ess essEnv"
   }
 }

@@ -7,9 +7,11 @@
 
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
+import { AddNote } from './add_note';
 import { NotesList } from './notes_list';
-import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
-import { useLeftPanelContext } from '../context';
+import { fetchNotesByDocumentIds } from '../../../../notes/store/notes.slice';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
@@ -17,13 +19,19 @@ import { useLeftPanelContext } from '../context';
  */
 export const NotesDetails = memo(() => {
   const dispatch = useDispatch();
-  const { eventId } = useLeftPanelContext();
+  const { eventId } = useDocumentDetailsContext();
 
   useEffect(() => {
-    dispatch(fetchNotesByDocumentId({ documentId: eventId }));
+    dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
   }, [dispatch, eventId]);
 
-  return <NotesList eventId={eventId} />;
+  return (
+    <>
+      <NotesList eventId={eventId} />
+      <EuiSpacer />
+      <AddNote eventId={eventId} />
+    </>
+  );
 });
 
 NotesDetails.displayName = 'NotesDetails';
