@@ -62,15 +62,18 @@ const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: stri
     'my-index$',
     'my_index{}',
     'my-index+1',
+    'synthetics-*',
   ].map((name) => ({
     name,
     hidden: name.startsWith('.'),
   })),
-  ['my-index[quoted]', 'logstash-{now/d{yyyy.MM.dd|+12:00}}'].map((name) => ({
-    name,
-    hidden: false,
-    suggestedAs: `"${name}"`,
-  }))
+  ['my-index[quoted]', 'my:index', 'my,index', 'logstash-{now/d{yyyy.MM.dd|+12:00}}'].map(
+    (name) => ({
+      name,
+      hidden: false,
+      suggestedAs: `"${name}"`,
+    })
+  )
 );
 
 const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({

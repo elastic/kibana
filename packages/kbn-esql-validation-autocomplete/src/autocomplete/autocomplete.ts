@@ -858,7 +858,7 @@ async function getExpressionSuggestionsByType(
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
         const index = getSourcesFromCommands(commands, 'index');
-        const shouldRemoveQuote = isNewExpression && innerText.includes('"');
+        const canRemoveQuote = isNewExpression && innerText.includes('"');
 
         // This is going to be empty for simple indices, and not empty for integrations
         if (index && index.text && index.text !== EDITOR_MARKER) {
@@ -869,14 +869,14 @@ async function getExpressionSuggestionsByType(
             dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
           );
           suggestions.push(
-            ...(shouldRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
           );
         } else {
           // FROM <suggest>
           // @TODO: filter down the suggestions here based on other existing sources defined
           const sourcesDefinitions = await getSources();
           suggestions.push(
-            ...(shouldRemoveQuote
+            ...(canRemoveQuote
               ? removeQuoteForSuggestedSources(sourcesDefinitions)
               : sourcesDefinitions)
           );
