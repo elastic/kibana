@@ -10,7 +10,7 @@ import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
-  TypeSpecificResponse,
+  TypeSpecificCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
@@ -32,11 +32,11 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
 
 /**
  * Aditionally remove fields which are part only of the optional fields in the rule types that make up
- * the TypeSpecificResponse discriminatedUnion, by using a Zod transformation which extracts out the
+ * the TypeSpecificCreateProps discriminatedUnion, by using a Zod transformation which extracts out the
  * necessary fields in the rules types where they exist. Fields to extract:
  *  - response_actions: from Query and SavedQuery rules
  */
-const TypeSpecificFields = TypeSpecificResponse.transform((val) => {
+const TypeSpecificFields = TypeSpecificCreateProps.transform((val) => {
   switch (val.type) {
     case 'query': {
       const { response_actions: _, ...rest } = val;

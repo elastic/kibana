@@ -36,7 +36,7 @@ describe('Prebuilt rule asset schema', () => {
     // The PrebuiltRuleAsset schema is built out of the rule schema,
     // but the following fields are manually omitted.
     // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
-    const omittedFields = [
+    const omittedBaseFields = [
       'actions',
       'throttle',
       'meta',
@@ -47,10 +47,24 @@ describe('Prebuilt rule asset schema', () => {
       'outcome',
     ];
 
-    test.each(omittedFields)('ignores %s since it`s an omitted field', (field) => {
+    test.each(omittedBaseFields)(
+      'ignores the base %s field since it`s an omitted field',
+      (field) => {
+        const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
+          ...getPrebuiltRuleMock(),
+          [field]: 'some value',
+        };
+
+        const result = PrebuiltRuleAsset.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(getPrebuiltRuleMock());
+      }
+    );
+
+    test('ignores the type specific response_actions field since it`s an omitted field', () => {
       const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
         ...getPrebuiltRuleMock(),
-        [field]: 'some value',
+        response_actions: [{ action_type_id: `.osquery`, params: {} }],
       };
 
       const result = PrebuiltRuleAsset.safeParse(payload);
