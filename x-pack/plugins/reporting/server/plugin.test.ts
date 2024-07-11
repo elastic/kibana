@@ -98,6 +98,17 @@ describe('Reporting Plugin', () => {
     expect(logger.error).toHaveBeenCalledTimes(2);
   });
 
+  it('logs the hash for the security encryption key', () => {
+    plugin.setup(coreSetup, pluginSetup);
+
+    expect(logger.info.mock.calls.map(([message]) => message)).toMatchInlineSnapshot(`
+      Array [
+        "Hashed 'xpack.reporting.encryptionKey' for this instance: VQT++jjB3Ks9FX3E8a/bRTHqUj4LLcys+afhSkTsX4o=",
+      ]
+    `);
+    expect(logger.info).toHaveBeenCalledTimes(1);
+  });
+
   describe('config and export types registration', () => {
     jest.mock('@kbn/reporting-server/export_types_registry');
     ExportTypesRegistry.prototype.getAll = jest.fn(() => []); // code breaks if getAll returns undefined
