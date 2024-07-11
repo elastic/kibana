@@ -93,6 +93,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const focusTrapButtonRef = useRef<HTMLButtonElement>(null);
 
+  const snoozeButtonAriaLabel = useMemo(
+    () => (snoozeSettings?.name ? OPEN_SNOOZE_PANEL_ARIA_LABEL(snoozeSettings.name) : undefined),
+    [snoozeSettings]
+  );
+
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -189,7 +194,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         isLoading={isLoading}
         disabled={isLoading || isDisabled}
         data-test-subj="rulesListNotifyBadge-snoozed"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
+        aria-label={snoozeButtonAriaLabel}
         minWidth={85}
         iconType="bellSlash"
         color="accent"
@@ -199,7 +204,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, isLoading, isDisabled, openPopover]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover, formattedSnoozeText]);
 
   const scheduledSnoozeButton = useMemo(() => {
     return (
@@ -211,14 +216,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         minWidth={85}
         iconType="calendar"
         color="text"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
+        aria-label={snoozeButtonAriaLabel}
         onClick={openPopover}
         buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, isLoading, isDisabled, openPopover]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover, formattedSnoozeText]);
 
   const unsnoozedButton = useMemo(() => {
     // This show on hover is needed because we need style sheets to achieve the
@@ -232,14 +237,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         disabled={isLoading || isDisabled}
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
+        aria-label={snoozeButtonAriaLabel}
         className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={openPopover}
         buttonRef={focusTrapButtonRef}
       />
     );
-  }, [isPopoverOpen, isLoading, isDisabled, showOnHover, openPopover]);
+  }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, openPopover]);
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
@@ -249,14 +254,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         disabled={isLoading || isDisabled}
         display="base"
         data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
+        aria-label={snoozeButtonAriaLabel}
         iconType="bellSlash"
         color="accent"
         onClick={openPopover}
         buttonRef={focusTrapButtonRef}
       />
     );
-  }, [isLoading, isDisabled, openPopover]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover]);
 
   const button = useMemo(() => {
     if (isScheduled) {

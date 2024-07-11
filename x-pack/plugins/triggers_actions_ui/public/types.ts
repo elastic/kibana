@@ -265,7 +265,7 @@ export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nex
 
 export type RuleSnoozeSettings = Pick<
   Rule,
-  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule' | 'name'
 >;
 
 export interface RuleTableItem extends Rule {
