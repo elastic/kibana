@@ -60,13 +60,6 @@ export const DELETE_SINGLE_NOTE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NOTES_MANAGEMENT_TITLE = i18n.translate(
-  'xpack.securitySolution.notes.management.pageTitle',
-  {
-    defaultMessage: 'Notes management',
-  }
-);
-
 export const TABLE_ERROR = i18n.translate('xpack.securitySolution.notes.management.tableError', {
   defaultMessage: 'Unable to load notes',
 });
