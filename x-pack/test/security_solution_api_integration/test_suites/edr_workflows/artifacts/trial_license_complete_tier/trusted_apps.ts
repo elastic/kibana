@@ -13,8 +13,8 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 

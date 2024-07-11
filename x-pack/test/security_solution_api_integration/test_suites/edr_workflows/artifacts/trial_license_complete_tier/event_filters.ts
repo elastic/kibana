@@ -14,8 +14,8 @@ import {
   getImportExceptionsListSchemaMock,
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
-import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
