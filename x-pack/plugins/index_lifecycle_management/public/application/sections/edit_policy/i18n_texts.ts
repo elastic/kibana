@@ -24,6 +24,12 @@ export const i18nTexts = {
         defaultMessage: 'Configure shard size',
       }
     ),
+    allowWriteAfterShrinkLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.allowWritesLabel',
+      {
+        defaultMessage: 'Allow writes after shrink',
+      }
+    ),
     rolloverOffsetsHotPhaseTiming: i18n.translate(
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {
