@@ -26,7 +26,6 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/185216
   describe('Inference endpoints', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
