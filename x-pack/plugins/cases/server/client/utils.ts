@@ -635,16 +635,15 @@ export const transformTemplateCustomFields = ({
     );
 
     // add new custom fields to template
-    if (customFields.length > transformedTemplateCustomFields.length) {
+    if (customFields.length >= transformedTemplateCustomFields.length) {
       customFields.forEach((field) => {
         if (
-          !transformedTemplateCustomFields.length ||
           !transformedTemplateCustomFields.find(
             (templateCustomField) => templateCustomField.key === field.key
           )
         ) {
           const { getDefaultValue } = casesCustomFields.get(field.type) ?? {};
-          const value = getDefaultValue ? getDefaultValue() : null;
+          const value = getDefaultValue?.() ?? null;
 
           transformedTemplateCustomFields.push({
             key: field.key,

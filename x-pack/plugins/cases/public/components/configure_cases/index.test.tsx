@@ -752,7 +752,7 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
