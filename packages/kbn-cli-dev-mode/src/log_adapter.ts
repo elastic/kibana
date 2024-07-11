@@ -10,8 +10,12 @@ import { Logger } from '@kbn/logging';
 import { Log } from './log';
 
 export const convertToLogger = (cliLog: Log): Logger => {
-  const getErrorMessage = (msgOrError: string | Error): string => {
-    return typeof msgOrError === 'string' ? msgOrError : msgOrError.message;
+  const getErrorMessage = (msgOrError: string | (() => string) | Error): string => {
+    return typeof msgOrError === 'function'
+      ? msgOrError()
+      : typeof msgOrError === 'string'
+      ? msgOrError
+      : msgOrError.message;
   };
 
   const adapter: Logger = {
