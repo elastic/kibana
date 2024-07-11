@@ -78,6 +78,18 @@ export class EncryptedSavedObjectsPlugin
       );
     }
 
+    const readOnlyKeys = config.keyRotation?.decryptionOnlyKeys;
+
+    if (readOnlyKeys !== undefined && readOnlyKeys.length > 0) {
+      const readOnlyKeyHashses = readOnlyKeys.map((readOnlyKey, i) =>
+        createHash('sha3-256').update(readOnlyKey).digest('base64')
+      );
+
+      this.logger.info(
+        `Hashed 'xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys' for this instance: ${readOnlyKeyHashses}`
+      );
+    }
+
     const primaryCrypto = config.encryptionKey
       ? nodeCrypto({ encryptionKey: config.encryptionKey })
       : undefined;
