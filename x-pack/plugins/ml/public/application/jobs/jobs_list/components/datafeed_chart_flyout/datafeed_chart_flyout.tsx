@@ -272,8 +272,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       <EuiFlyout
         size="m"
         ownFocus
-        // Alternative to just onClose.bind(null, false) to satisfy TypeScript v5.1.6
-        onClose={onClose.call.bind(onClose, null, false)}
+        onClose={onClose}
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',
         })}
