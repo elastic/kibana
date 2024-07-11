@@ -29,6 +29,7 @@ export type VisualizeRuntimeState = SerializedTitles & {
   serializedVis: SerializedVis<VisParams>;
   savedObjectId?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
+  linkedToLibrary?: boolean;
 };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {

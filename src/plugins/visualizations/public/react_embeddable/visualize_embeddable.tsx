@@ -19,6 +19,7 @@ import {
   apiHasExecutionContext,
   apiPublishesUnifiedSearch,
   apiPublishesViewMode,
+  apiIsOfType,
   fetch$,
   initializeTitles,
   useStateFromPublishingSubject,
@@ -27,7 +28,7 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import { get, isEmpty, isEqual } from 'lodash';
 import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getTimeFilter, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
@@ -71,6 +72,7 @@ export const getVisualizeEmbeddableFactory: (
     const savedObjectProperties$ = new BehaviorSubject<ExtraSavedObjectProperties | undefined>(
       undefined
     );
+    const linkedToLibrary$ = new BehaviorSubject<boolean | undefined>(state.linkedToLibrary);
     const visData$ = new BehaviorSubject<unknown>({});
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
@@ -104,6 +106,11 @@ export const getVisualizeEmbeddableFactory: (
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
             id: savedObjectId$.getValue(),
+            linkedToLibrary:
+              // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
+              // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
+              // serialize the state with just the savedObjectId so that the current revision of the vis is always used
+              apiIsOfType(parentApi, VISUALIZE_APP_NAME) ? false : linkedToLibrary$.getValue(),
             ...(savedObjectProperties ? { savedObjectProperties } : {}),
           });
         },
@@ -203,8 +210,8 @@ export const getVisualizeEmbeddableFactory: (
             references,
           });
         },
-        canLinkToLibrary: () => !state.savedObjectId,
-        canUnlinkFromLibrary: () => !!state.savedObjectId,
+        canLinkToLibrary: () => !state.linkedToLibrary,
+        canUnlinkFromLibrary: () => !!state.linkedToLibrary,
         checkForDuplicateTitle: () => false,
         getByValueState: () =>
           serializeState({
@@ -232,6 +239,7 @@ export const getVisualizeEmbeddableFactory: (
           savedObjectProperties$,
           (value) => savedObjectProperties$.next(value),
         ],
+        linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
       }
     );
 

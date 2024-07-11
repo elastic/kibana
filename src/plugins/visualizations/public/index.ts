@@ -18,6 +18,7 @@ export { TypesService } from './vis_types/types_service';
 export {
   apiHasVisualizeConfig,
   VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_APP_NAME,
   VIS_EVENT_TO_TRIGGER,
   COMMON_VISUALIZATION_GROUPING,
 } from './embeddable';

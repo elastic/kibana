@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-plugin/public';
+import { VISUALIZE_EMBEDDABLE_TYPE, VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/public';
 import './_vis_editor_visualization.scss';
 import { omit } from 'lodash';
 
@@ -39,6 +39,8 @@ class VisEditorVisualizationUI extends Component {
       timeRange$: new BehaviorSubject(props.timeRange),
       query$: new BehaviorSubject(props.query),
       filters$: new BehaviorSubject(props.filters),
+      isContainer: false,
+      type: VISUALIZE_APP_NAME,
     };
   }
 

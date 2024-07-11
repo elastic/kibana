@@ -20,6 +20,7 @@ import {
   SerializedVis,
   Vis,
   VisParams,
+  VISUALIZE_APP_NAME,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 import { Reference } from '@kbn/content-management-utils';
@@ -61,6 +62,8 @@ function DefaultEditor({
     query$: new BehaviorSubject(query),
     filters$: new BehaviorSubject(filters),
     dataView$: new BehaviorSubject(dataView),
+    isContainer: false,
+    type: VISUALIZE_APP_NAME,
   });
   const [titles, setTitles] = useState<SerializedTitles>({ title: '', description: '' });
   const [onUpdateVis, setOnUpdateVis] = useState<

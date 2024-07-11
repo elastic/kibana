@@ -142,7 +142,7 @@ export const getTopNavConfig = (
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean },
     metadata?: SavedVisMetadata
   ) {
-    const { rawState, references } = serializeState(true);
+    const { rawState, references } = serializeState();
     const {
       savedVis: serializedVis,
       lastSavedTitle,

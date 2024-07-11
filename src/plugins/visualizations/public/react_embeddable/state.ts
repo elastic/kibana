@@ -12,6 +12,7 @@ import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { SerializedTitles } from '@kbn/presentation-publishing';
 import { cloneDeep, omit } from 'lodash';
+import { VisualizationSavedObject } from '../../common';
 import {
   getAnalytics,
   getDataViews,
@@ -26,7 +27,7 @@ import {
   deserializeReferences,
   serializeReferences,
 } from '../utils/saved_visualization_references';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import { getSavedVisualization, SAVED_VIS_TYPE } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import {
   isVisualizeSavedObjectState,
@@ -40,7 +41,6 @@ import {
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
-  debugger;
   if (!state.rawState)
     return {
       serializedVis: {
@@ -107,6 +107,7 @@ export const deserializeSavedVisState = (
 };
 
 export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInputState) => {
+  // Load a saved visualization from the library
   const {
     title,
     description,
@@ -144,6 +145,7 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
     description,
     savedObjectId: state.savedObjectId,
     savedObjectProperties,
+    linkedToLibrary: true,
   } as VisualizeSavedVisInputState;
 };
 
@@ -152,11 +154,13 @@ export const serializeState = ({
   titles,
   id,
   savedObjectProperties,
+  linkedToLibrary,
 }: {
   serializedVis: SerializedVis;
   titles: SerializedTitles;
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
+  linkedToLibrary?: boolean;
 }) => {
   const titlesWithDefaults = {
     title: '',
@@ -164,6 +168,17 @@ export const serializeState = ({
     ...titles,
   };
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
+
+  // Serialize ONLY the savedObjectId. This ensures that when this vis is loaded again, it will always fetch the
+  // latest revision of the saved object
+  if (linkedToLibrary) {
+    return {
+      rawState: {
+        savedObjectId: id,
+      } as VisualizeSavedObjectInputState,
+      references,
+    };
+  }
 
   return {
     rawState: {
@@ -186,5 +201,47 @@ export const serializeState = ({
       },
     },
     references,
+  };
+};
+
+export const savedObjectToRuntimeState: (
+  savedObject: VisualizationSavedObject
+) => VisualizeRuntimeState = (savedObject) => {
+  const { references, attributes, id, managed = false } = savedObject;
+
+  const { title, description, visState: visStateJSON, kibanaSavedObjectMeta } = attributes;
+
+  const visState = JSON.parse(visStateJSON ?? '{}');
+  const { searchSourceJSON } = kibanaSavedObjectMeta ?? {};
+  const searchSource = searchSourceJSON
+    ? JSON.parse(searchSourceJSON)
+    : getSearch().searchSource.createEmpty();
+
+  return {
+    serializedVis: deserializeSavedVisState(
+      {
+        savedVis: {
+          title,
+          description,
+          type: visState.type,
+          params: visState.params,
+          data: {
+            aggs: visState.aggs,
+            searchSource,
+            savedSearchId: visState.savedSearchId,
+          },
+        },
+      } as VisualizeSavedVisInputState,
+      references
+    ),
+    linkedToLibrary: true,
+    savedObjectId: id,
+    savedObjectProperties: {
+      lastSavedTitle: title,
+      displayName: SAVED_VIS_TYPE,
+      getDisplayName: () => SAVED_VIS_TYPE,
+      getEsType: () => SAVED_VIS_TYPE,
+      managed,
+    },
   };
 };

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+export { VISUALIZE_EMBEDDABLE_TYPE, VISUALIZE_APP_NAME } from '../../common/constants';
 
 export const COMMON_VISUALIZATION_GROUPING = [
   {

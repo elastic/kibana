@@ -18,9 +18,7 @@ export type OpenInspectorFn = () => OverlayRef | undefined;
 export type NavigateToLensFn = (
   timefilter: TimefilterContract
 ) => Promise<NavigateToLensContext | undefined | null> | undefined;
-export type SerializeStateFn = (
-  extractReferences?: boolean
-) => SerializedPanelState<VisualizeOutputState>;
+export type SerializeStateFn = () => SerializedPanelState<VisualizeOutputState>;
 export type GetVisFn = () => Vis;
 
 export interface EmbeddableApiHandler {

@@ -124,6 +124,8 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
+import { VisualizeRuntimeState } from './react_embeddable/types';
+import { savedObjectToRuntimeState } from './react_embeddable/state';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -396,8 +398,6 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
-    const addAggVisAction = new AddAggVisualizationPanelAction();
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
         plugins: { embeddable: embeddableStart },
@@ -408,11 +408,9 @@ export class VisualizationsPlugin
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
       onAdd: (container, savedObject) => {
-        container.addNewPanel({
+        container.addNewPanel<VisualizeRuntimeState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: {
-            savedObjectId: savedObject.id,
-          },
+          initialState: savedObjectToRuntimeState(savedObject),
         });
       },
       embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
