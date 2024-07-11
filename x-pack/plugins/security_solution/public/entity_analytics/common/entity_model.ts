@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../common/constants';
 
@@ -61,14 +62,18 @@ const entityDefinition = {
   id: 'secsol-ea-entity-store',
   name: 'EA store',
   type: 'node',
-  indexPatterns: [RISK_SCORE_INDEX_PATTERN, ASSET_CRITICALITY_INDEX_PATTERN],
+  indexPatterns: [
+    RISK_SCORE_INDEX_PATTERN,
+    ASSET_CRITICALITY_INDEX_PATTERN,
+    ...DEFAULT_INDEX_PATTERN,
+  ],
   filter: '@timestamp >= now-5m',
   lookback: '5m',
   identityFields: [
     { field: 'user.name', optional: true },
     { field: 'id_value', optional: true },
   ],
-  displayNameTemplate: '{{user.name}}',
+  displayNameTemplate: '{{user.name}}{{id_value}}',
   metadata: ['user.risk.calculated_level', 'user.risk.calculated_score_norm', 'criticality_level'],
   history: {
     timestampField: '@timestamp',
