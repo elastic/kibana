@@ -14,7 +14,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { SeriesType } from '@kbn/visualizations-plugin/common';
-import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
   VisualizeEditorContext,
@@ -34,6 +33,7 @@ import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../t
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import type { LensAppServices } from '../app_plugin/types';
+import { LensSerializedState } from '../react_embeddable/types';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -202,7 +202,7 @@ export const switchAndCleanDatasource = createAction<{
 }>('lens/switchAndCleanDatasource');
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
   redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
   inlineEditing?: boolean;

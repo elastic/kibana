@@ -11,20 +11,23 @@ import { isFilterPinned } from '@kbn/es-query';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { omit } from 'lodash';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { checkForDuplicateTitle, SavedObjectIndexStore, LensDocument } from '../persistence';
-import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
+import type { LensByReferenceInput } from '../embeddable';
 import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
-import { getPersisted } from '../state_management/init_middleware/load_initial';
-import { VisualizeEditorContext } from '../types';
+import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
+import { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import { Simplify } from '../react_embeddable/types';
+import { LensSerializedState } from '../react_embeddable/types';
 
-type ExtraProps = Pick<LensAppProps, 'initialInput'> &
-  Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
+type ExtraProps = Simplify<
+  Pick<LensAppProps, 'initialInput'> &
+    Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>
+>;
 
 export type SaveModalContainerProps = {
   originatingApp?: string;
@@ -110,7 +113,7 @@ export function SaveModalContainer({
     let isMounted = true;
 
     if (initialInput) {
-      getPersisted({
+      getFromPreloaded({
         initialInput,
         lensServices,
       })
@@ -189,11 +192,22 @@ export function SaveModalContainer({
   );
 }
 
+function fromDocumentToSerializedState(
+  doc: LensDocument,
+  panelSettings: Partial<LensSerializedState>
+): LensSerializedState {
+  return {
+    attributes: omit(doc, 'savedObjectId'),
+    savedObjectId: doc.savedObjectId,
+    ...panelSettings,
+  };
+}
+
 const getDocToSave = (
   lastKnownDoc: LensDocument,
   saveProps: SaveProps,
   references: SavedObjectReference[]
-) => {
+): LensDocument => {
   const docToSave = {
     ...removePinnedFilters(lastKnownDoc)!,
     references,
@@ -319,16 +333,46 @@ export const runSaveLensVisualization = async (
     }
   }
   try {
-    const newInput = stateTransfer;
-    // let newInput = (await attributeService.wrapAttributes(
-    //   docToSave,
-    //   options.saveToLibrary,
-    //   originalInput
-    // )) as LensEmbeddableInput;
-    const newDoc = {
-      ...docToSave,
-      timeRange: saveProps.panelTimeRange ?? docToSave.timeRange,
-    };
+    // wrap the doc into a serializable state
+    const newDoc = fromDocumentToSerializedState(docToSave, {
+      timeRange: saveProps.panelTimeRange,
+    });
+
+    const shouldNavigateBackToOrigin = saveProps.returnToOrigin && redirectToOrigin;
+    const hasRedirect = shouldNavigateBackToOrigin || saveProps.dashboardId;
+
+    // is a redirect was set, prevent the validation on app leave
+    if (hasRedirect) {
+      // disabling the validation on app leave because the document has been saved.
+      onAppLeave?.((actions) => {
+        return actions.default();
+      });
+    }
+
+    if (shouldNavigateBackToOrigin) {
+      redirectToOrigin({ state: newDoc.attributes, isCopied: saveProps.newCopyOnSave });
+      return;
+    }
+    if (saveProps.dashboardId) {
+      redirectToDashboard({
+        embeddableInput: newDoc,
+        dashboardId: saveProps.dashboardId,
+        stateTransfer,
+        originatingApp: props.originatingApp,
+        getOriginatingPath: props.getOriginatingPath,
+      });
+      return;
+    }
+    // const newInput = stateTransfer;
+    // // let newInput = (await attributeService.wrapAttributes(
+    // //   docToSave,
+    // //   options.saveToLibrary,
+    // //   originalInput
+    // // )) as LensEmbeddableInput;
+    // const newDoc = {
+    //   ...docToSave,
+    //   timeRange: saveProps.panelTimeRange ?? docToSave.timeRange,
+    // };
     // if (saveProps.panelTimeRange) {
     //   newInput = {
     //     ...newInput,
@@ -390,7 +434,7 @@ export const runSaveLensVisualization = async (
     // };
 
     return {
-      persistedDoc: newDoc,
+      persistedDoc: newDoc.attributes,
       isLinkedToOriginatingApp: false,
     };
   } catch (e) {

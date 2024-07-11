@@ -292,7 +292,6 @@ export const LensTopNavMenu = ({
     navigation,
     uiSettings,
     application,
-    attributeService,
     share,
     dataViewFieldEditor,
     dataViewEditor,
@@ -680,8 +679,7 @@ export const LensTopNavMenu = ({
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                  saveToLibrary: Boolean(initialInput?.savedObjectId),
                 }
               );
             }
@@ -791,7 +789,6 @@ export const LensTopNavMenu = ({
     defaultLensTitle,
     onAppLeave,
     runSave,
-    attributeService,
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,

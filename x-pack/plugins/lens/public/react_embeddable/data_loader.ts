@@ -11,7 +11,7 @@ import { fetch$, apiHasExecutionContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { KibanaExecutionContext } from '@kbn/core/public';
 import { getEditPath } from '../../common/constants';
-import { ExpressionWrapperProps, getStateType, LensApi, VisualizationContextHelper } from './types';
+import { ExpressionWrapperProps, GetStateType, LensApi, VisualizationContextHelper } from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import { ReactiveConfigs } from './initializers/initialize_observables';
 import { LensEmbeddableStartServices } from './types';
@@ -26,7 +26,7 @@ import { getLogError } from './expressions/telemetry';
  */
 export function loadEmbeddableData(
   uuid: string,
-  getState: getStateType,
+  getState: GetStateType,
   api: LensApi,
   parentApi: unknown,
   {

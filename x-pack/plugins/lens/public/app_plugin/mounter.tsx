@@ -33,11 +33,6 @@ import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext 
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import {
-  LensEmbeddableInput,
-  LensByReferenceInput,
-  LensByValueInput,
-} from '../embeddable/embeddable';
 import { LensAttributesService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {
@@ -55,6 +50,7 @@ import {
   MainHistoryLocationState,
 } from '../../common/locator/locator';
 import { SavedObjectIndexStore } from '../persistence';
+import { LensSerializedState } from '../react_embeddable/types';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -195,12 +191,12 @@ export async function mountApp(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
 
-  const getInitialInput = (id?: string, editByValue?: boolean): LensEmbeddableInput | undefined => {
+  const getInitialInput = (id?: string, editByValue?: boolean): LensSerializedState | undefined => {
     if (editByValue) {
-      return embeddableEditorIncomingState?.valueInput as LensByValueInput;
+      return embeddableEditorIncomingState?.valueInput as LensSerializedState;
     }
     if (id) {
-      return { savedObjectId: id } as LensByReferenceInput;
+      return { savedObjectId: id } as LensSerializedState;
     }
   };
 
@@ -227,14 +223,14 @@ export async function mountApp(
     if (initialContext && 'embeddableId' in initialContext) {
       embeddableId = initialContext.embeddableId;
     }
-    if (stateTransfer && props?.input) {
-      const { input, isCopied } = props;
+    if (stateTransfer && props?.state) {
+      const { state, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
-          input,
+          input: state,
           searchSessionId: data.search.session.getSessionId(),
         },
       });

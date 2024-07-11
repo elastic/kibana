@@ -9,23 +9,19 @@ import { apiHasAppContext, apiPublishesViewMode, ViewMode } from '@kbn/presentat
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import React from 'react';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
-  getStateType,
+  GetStateType,
   LensEmbeddableStartServices,
   LensInspectorAdapters,
   LensRuntimeState,
 } from '../types';
 import { emptySerializer } from '../helper';
-import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { LensPluginStartDependencies } from '../../plugin';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { TypedLensByValueInput } from '../../embeddable/embeddable_component';
+import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 
 function getSupportedTriggers(
-  getState: getStateType,
+  getState: GetStateType,
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
@@ -43,7 +39,7 @@ function getSupportedTriggers(
  **/
 export function initializeEditApi(
   uuid: string,
-  getState: getStateType,
+  getState: GetStateType,
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
   viewMode$: BehaviorSubject<ViewMode | undefined>,
   {
@@ -95,7 +91,7 @@ export function initializeEditApi(
     cleanup: noop,
     api: {
       supportedTriggers,
-      onEdit: navigateToLensEditor(embeddable.getStateTransfer(), false),
+      onEdit: () => navigateToLensEditor(embeddable.getStateTransfer(), false)(),
       isEditingEnabled: () => {
         if (viewMode$.getValue() !== 'edit') {
           return false;
@@ -120,60 +116,13 @@ export function initializeEditApi(
           data.query.timefilter.timefilter.getRefreshInterval()
         );
       },
-      openConfigPanel: async (
-        startDependencies: LensPluginStartDependencies,
-        isNewPanel?: boolean,
-        deletePanel?: () => void
-      ): Promise<JSX.Element | null> => {
-        const { getEditLensConfiguration } = await import('../../async_services');
-        const Component = await getEditLensConfiguration(
-          coreStart,
-          startDependencies,
-          visualizationMap,
-          datasourceMap
-        );
-        const currentState = getState();
-        const attributes = currentState.attributes;
-        const activeDatasourceId = getActiveDatasourceIdFromDoc(attributes);
-
-        const datasourceId = (activeDatasourceId ||
-          'formBased') as EditLensConfigurationProps['datasourceId'];
-
-        if (attributes?.visualizationType == null) {
-          return null;
-        }
-        return (
-          <Component
-            attributes={attributes as TypedLensByValueInput['attributes']}
-            // updatePanelState={this.updateVisualization.bind(this)}
-            // updateSuggestion={this.updateSuggestion.bind(this)}
-            // updateByRefInput={this.updateByRefInput.bind(this)}
-            updateByRefInput={noop}
-            updatePanelState={noop}
-            updateSuggestion={noop}
-            datasourceId={datasourceId}
-            lensAdapters={inspectorApi.getInspectorAdapters()}
-            output$={new BehaviorSubject({})}
-            panelId={uuid}
-            savedObjectId={currentState.savedObjectId}
-            navigateToLensEditor={
-              !isTextBasedLanguage(currentState)
-                ? navigateToLensEditor(
-                    new EmbeddableStateTransfer(
-                      coreStart.application.navigateToApp,
-                      coreStart.application.currentAppId$
-                    ),
-                    true
-                  )
-                : undefined
-            }
-            displayFlyoutHeader
-            canEditTextBasedQuery={isTextBasedLanguage(currentState)}
-            isNewPanel={isNewPanel}
-            deletePanel={deletePanel}
-          />
-        );
-      },
+      openConfigPanel: prepareInlineEditPanel(
+        uuid,
+        getState,
+        { visualizationMap, datasourceMap, coreStart },
+        inspectorApi,
+        navigateToLensEditor
+      ),
     },
   };
 }

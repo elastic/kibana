@@ -8,10 +8,10 @@
 import { noop } from 'lodash';
 import { emptySerializer } from '../helper';
 import { ReactiveConfigs } from './initialize_observables';
-import { getStateType } from '../types';
+import { GetStateType } from '../types';
 
 export function initializeData(
-  getState: getStateType,
+  getState: GetStateType,
   { dataLoading$ }: ReactiveConfigs['variables']
 ) {
   return {

@@ -37,7 +37,7 @@ import { initializeIntegrations } from './initializers/initialize_integrations';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): ReactEmbeddableFactory<LensSerializedState, LensApi, LensRuntimeState> => ({
+): ReactEmbeddableFactory<LensSerializedState, LensRuntimeState, LensApi> => ({
   type: DOC_TYPE,
   /**
    * This is called before the build and will make sure that the
@@ -152,7 +152,7 @@ export const createLensEmbeddableFactory = (
 
     // Compute the expression using the provided parameters
     // Inside a subscription will be updated based on each unifiedSearch change
-    // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount% with the new values upon updates
+    // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount$ with the new values upon updates
     const { getUserMessages, ...expression } = loadEmbeddableData(
       uuid,
       getState,

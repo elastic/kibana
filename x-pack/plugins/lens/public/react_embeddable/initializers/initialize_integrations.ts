@@ -13,9 +13,9 @@ import {
 } from '@kbn/es-query';
 import { noop } from 'lodash';
 import { emptySerializer } from '../helper';
-import type { getStateType } from '../types';
+import type { GetStateType } from '../types';
 
-export function initializeIntegrations(getState: getStateType) {
+export function initializeIntegrations(getState: GetStateType) {
   const isTextBasedLanguage = () => {
     const currentState = getState().attributes;
     return !isOfQueryType(currentState?.state.query);

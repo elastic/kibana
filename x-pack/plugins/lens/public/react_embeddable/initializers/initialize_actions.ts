@@ -24,7 +24,7 @@ import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
 import { emptySerializer } from '../helper';
 import type {
-  getStateType,
+  GetStateType,
   LensEmbeddableStartServices,
   LensRuntimeState,
   ViewUnderlyingDataArgs,
@@ -169,7 +169,7 @@ function computeViewUnderlyingDataArgs(
 }
 
 function createViewUnderlyingDataApis(
-  getState: getStateType,
+  getState: GetStateType,
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices
 ) {
@@ -197,7 +197,7 @@ function createViewUnderlyingDataApis(
 export function initializeActionApi(
   uuid: string,
   initialState: LensRuntimeState,
-  getState: getStateType,
+  getState: GetStateType,
   titleApi: { panelTitle: PublishingSubject<string | undefined> },
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices

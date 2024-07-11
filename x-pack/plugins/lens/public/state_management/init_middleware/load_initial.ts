@@ -17,7 +17,7 @@ import { initializeSources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { LensDocument } from '../../persistence';
-import { LensRuntimeState } from '../../react_embeddable/types';
+import { LensRuntimeState, LensSerializedState } from '../../react_embeddable/types';
 
 interface PersistedDoc {
   doc: LensDocument;
@@ -33,7 +33,7 @@ export const getFromPreloaded = async ({
   lensServices,
   history,
 }: {
-  initialInput: LensRuntimeState;
+  initialInput: LensSerializedState;
   lensServices: Pick<LensAppServices, 'attributeService' | 'notifications' | 'spaces' | 'http'>;
   history?: History<unknown>;
 }): Promise<PersistedDoc | undefined> => {
@@ -57,7 +57,6 @@ export const getFromPreloaded = async ({
       };
     }
     const { sharingSavedObjectProps, attributes, managed } = result;
-    // const sharingSavedObjectProps = metaInfo?.sharingSavedObjectProps;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'

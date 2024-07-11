@@ -56,14 +56,14 @@ import type {
   StartServices,
 } from '../types';
 import type { LensAttributesService } from '../lens_attribute_service';
-import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 import type { LensDocument, SavedObjectIndexStore } from '../persistence/saved_object_store';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
+import { LensSerializedState } from '../react_embeddable/types';
 
 export interface RedirectToOriginProps {
-  input?: LensEmbeddableInput;
+  state?: LensDocument;
   isCopied?: boolean;
 }
 
@@ -76,7 +76,7 @@ export interface LensAppProps {
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
@@ -110,7 +110,7 @@ export interface LensTopNavMenuProps {
 
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
   getIsByValueMode: () => boolean;
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;

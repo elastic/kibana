@@ -10,7 +10,7 @@ import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { getStateType, LensApi, LensEmbeddableStartServices } from '../types';
+import { GetStateType, LensApi, LensEmbeddableStartServices } from '../types';
 
 function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unknown) {
   if (!activeData || !canTrackContentfulRender(parentApi)) {
@@ -34,7 +34,7 @@ function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unk
 export function prepareOnRender(
   api: LensApi,
   parentApi: unknown,
-  getState: getStateType,
+  getState: GetStateType,
   { datasourceMap, visualizationMap }: LensEmbeddableStartServices,
   executionContext: KibanaExecutionContext | undefined,
   dispatchRenderComplete: () => void

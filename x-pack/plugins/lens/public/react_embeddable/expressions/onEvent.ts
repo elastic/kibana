@@ -14,13 +14,13 @@ import {
   isLensTableRowContextMenuClickEvent,
 } from '../../types';
 import { inferTimeField } from '../../utils';
-import { getStateType, LensApi, LensCallbacks, LensEmbeddableStartServices } from '../types';
+import { GetStateType, LensApi, LensCallbacks, LensEmbeddableStartServices } from '../types';
 import { isTextBasedLanguage } from '../helper';
 
 export const prepareEventHandler =
   (
     api: LensApi,
-    getState: getStateType,
+    getState: GetStateType,
     { data, uiActions }: LensEmbeddableStartServices,
     disableTriggers: boolean | undefined
   ) =>

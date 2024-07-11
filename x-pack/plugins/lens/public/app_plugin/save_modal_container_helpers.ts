@@ -6,8 +6,8 @@
  */
 
 import type { LensAppServices } from './types';
-import type { LensEmbeddableInput } from '../embeddable';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import { LensSerializedState } from '../react_embeddable/types';
 
 export const redirectToDashboard = ({
   embeddableInput,
@@ -16,7 +16,7 @@ export const redirectToDashboard = ({
   getOriginatingPath,
   stateTransfer,
 }: {
-  embeddableInput: LensEmbeddableInput;
+  embeddableInput: LensSerializedState;
   dashboardId: string;
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string | undefined;
