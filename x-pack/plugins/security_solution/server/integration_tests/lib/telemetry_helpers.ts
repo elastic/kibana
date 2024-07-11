@@ -216,42 +216,6 @@ export async function dropEndpointIndices(esClient: ElasticsearchClient) {
   await esClient.indices.delete({ index: endpointMetricsPolicyIndex }).catch(() => {});
 }
 
-export async function initPrebuiltRulesIndices(esClient: ElasticsearchClient) {
-  const mappings: object = {
-    dynamic: false,
-    properties: {
-      '@timestamp': {
-        type: 'date',
-      },
-      kibana: {
-        properties: {
-          alert: {
-            properties: {
-              rule: {
-                properties: {
-                  parameters: {
-                    properties: {
-                      immutable: {
-                        type: 'keyword',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  await esClient.indices.create({ index: prebuiltRulesIndex, mappings }).catch(() => {});
-}
-
-export async function dropPrebuiltRulesIndices(esClient: ElasticsearchClient) {
-  await esClient.indices.delete({ index: prebuiltRulesIndex }).catch(() => {});
-}
-
 export async function cleanupMockedEndpointAlerts(esClient: ElasticsearchClient) {
   const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
 

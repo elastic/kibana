@@ -33,9 +33,7 @@ import {
   getTelemetryTaskType,
   getTelemetryTasks,
   initEndpointIndices,
-  initPrebuiltRulesIndices,
   dropEndpointIndices,
-  dropPrebuiltRulesIndices,
   mockEndpointData,
   getTelemetryReceiver,
   mockPrebuiltRulesData,
@@ -667,14 +665,6 @@ describe('telemetry tasks', () => {
   });
 
   describe('telemetry-prebuilt-rule-alerts', () => {
-    beforeEach(async () => {
-      await initPrebuiltRulesIndices(esClient);
-    });
-
-    afterEach(async () => {
-      await dropPrebuiltRulesIndices(esClient);
-    });
-
     it('should execute when scheduled', async () => {
       await mockAndSchedulePrebuiltRulesTask();
 
