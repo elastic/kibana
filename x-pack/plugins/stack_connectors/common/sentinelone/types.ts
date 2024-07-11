@@ -39,7 +39,7 @@ interface SentinelOneErrors {
   errors?: string[];
 }
 
-type SentinelOneOsType = 'linux' | 'macos' | 'windows';
+export type SentinelOneOsType = 'linux' | 'macos' | 'windows';
 
 export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
 export type SentinelOneSecrets = TypeOf<typeof SentinelOneSecretsSchema>;

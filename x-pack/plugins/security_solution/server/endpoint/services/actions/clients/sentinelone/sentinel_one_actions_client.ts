@@ -1274,7 +1274,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       case 'canceled':
         isPending = false;
         isError = true;
-        message = `SentinelOne Task [${taskStatusRecord.parentTaskId}] was canceled${
+        message = `SentinelOne Parent Task Id [${taskStatusRecord.parentTaskId}] was canceled${
           taskStatusRecord.detailedStatus ? ` - ${taskStatusRecord.detailedStatus}` : ''
         }`;
         break;

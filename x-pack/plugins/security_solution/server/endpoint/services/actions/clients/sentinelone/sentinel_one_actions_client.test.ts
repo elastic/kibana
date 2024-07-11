@@ -35,6 +35,9 @@ import type {
   ResponseActionGetFileParameters,
   SentinelOneGetFileRequestMeta,
   KillOrSuspendProcessRequestBody,
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithProcessName,
+  SentinelOneKillProcessRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
@@ -44,6 +47,10 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { Readable } from 'stream';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type {
+  SentinelOneGetRemoteScriptStatusApiResponse,
+  SentinelOneRemoteScriptExecutionStatus,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -700,7 +707,7 @@ describe('SentinelOneActionsClient class', () => {
       it('should generate an action success response doc', async () => {
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
-        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+        expect(`processPendingActionsOptions.addToQueue`).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
             action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
@@ -736,13 +743,171 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     describe('for kill-process response action', () => {
-      it.todo('should create response at error if request has no parentTaskId');
+      let actionRequestsSearchResponse: SearchResponse<
+        LogsEndpointAction<
+          ResponseActionParametersWithProcessName,
+          KillProcessActionOutputContent,
+          SentinelOneKillProcessRequestMeta
+        >
+      >;
 
-      it.todo('should do nothing if action is still pending');
+      const setGetRemoteScriptStatusConnectorResponse = (
+        response: SentinelOneGetRemoteScriptStatusApiResponse
+      ): void => {
+        const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
 
-      it.todo('should create response at error when status is %s');
+        (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+          if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPT_STATUS) {
+            return responseActionsClientMock.createConnectorActionExecuteResponse({
+              data: response,
+            });
+          }
 
-      it.todo('should create success response');
+          return executeMockFn!(options);
+        });
+      };
+
+      beforeEach(() => {
+        const s1DataGenerator = new SentinelOneDataGenerator('seed');
+        actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateActionEsHit<
+            ResponseActionParametersWithProcessName,
+            KillProcessActionOutputContent,
+            SentinelOneKillProcessRequestMeta
+          >({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: {
+              data: { command: 'kill-process', parameters: { process_name: 'foo' } },
+            },
+            meta: {
+              agentId: 's1-agent-a',
+              agentUUID: 'agent-uuid-1',
+              hostName: 's1-host-name',
+              parentTaskId: 's1-parent-task-123',
+            },
+          }),
+        ]);
+        const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+          LogsEndpointActionResponse | EndpointActionResponse
+        >([]);
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: actionRequestsSearchResponse,
+          pitUsage: true,
+        });
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          response: actionResponsesSearchResponse,
+        });
+      });
+
+      it('should create response at error if request has no parentTaskId', async () => {
+        actionRequestsSearchResponse.hits.hits[0]!._source!.meta!.parentTaskId = '';
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            completed_at: expect.any(String),
+            data: {
+              command: 'kill-process',
+              comment: '',
+            },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+          },
+          agent: {
+            id: 'agent-uuid-1',
+          },
+          error: {
+            message:
+              "Action request missing SentinelOne 'parentTaskId' value - unable check on its status",
+          },
+          meta: undefined,
+        });
+      });
+
+      it('should do nothing if action is still pending', async () => {
+        setGetRemoteScriptStatusConnectorResponse(
+          new SentinelOneDataGenerator('seed').generateSentinelOneApiRemoteScriptStatusResponse({
+            status: 'pending',
+          })
+        );
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).not.toHaveBeenCalled();
+      });
+
+      it.each`
+        s1ScriptStatus | expectedResponseActionResponse
+        ${'canceled'}  | ${'failure'}
+        ${'expired'}   | ${'failure'}
+        ${'failed'}    | ${'failure'}
+        ${'completed'} | ${'success'}
+      `(
+        'should create $expectedResponseActionResponse response when S1 script status is $s1ScriptStatus',
+        async ({ s1ScriptStatus, expectedResponseActionResponse }) => {
+          const s1ScriptStatusResponse = new SentinelOneDataGenerator(
+            'seed'
+          ).generateSentinelOneApiRemoteScriptStatusResponse({
+            status: s1ScriptStatus,
+          });
+          setGetRemoteScriptStatusConnectorResponse(s1ScriptStatusResponse);
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          if (expectedResponseActionResponse === 'failure') {
+            expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+              expect.objectContaining({
+                error: {
+                  message: expect.any(String),
+                },
+              })
+            );
+          } else {
+            expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+              expect.objectContaining({
+                meta: { taskId: s1ScriptStatusResponse.data[0].id },
+                error: undefined,
+                EndpointActions: expect.objectContaining({
+                  data: expect.objectContaining({
+                    output: {
+                      type: 'json',
+                      content: {
+                        code: 'ok',
+                        command: 'kill-process',
+                        process_name: 'foo',
+                      },
+                    },
+                  }),
+                }),
+              })
+            );
+          }
+        }
+      );
+
+      it.each([
+        'created',
+        'pending',
+        'pending_user_action',
+        'scheduled',
+        'in_progress',
+        'partially_completed',
+      ])('should leave action pending when S1 script status is %s', async (s1ScriptStatus) => {
+        setGetRemoteScriptStatusConnectorResponse(
+          new SentinelOneDataGenerator('seed').generateSentinelOneApiRemoteScriptStatusResponse({
+            status: s1ScriptStatus as SentinelOneRemoteScriptExecutionStatus['status'],
+          })
+        );
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).not.toHaveBeenCalled();
+      });
     });
   });
 
