@@ -6,6 +6,7 @@
  */
 
 import { queue } from 'async';
+import { chunk } from 'lodash';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
@@ -29,19 +30,19 @@ import {
 } from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
-interface FieldCandidate {
-  fieldCandidate: string;
+interface FieldCandidates {
+  fieldCandidates: string[];
 }
-const isFieldCandidate = (d: unknown): d is FieldCandidate =>
-  isPopulatedObject(d, ['fieldCandidate']);
+const isFieldCandidates = (d: unknown): d is FieldCandidates =>
+  isPopulatedObject(d, ['fieldCandidates']);
 
-interface TextFieldCandidate {
-  textFieldCandidate: string;
+interface TextFieldCandidates {
+  textFieldCandidates: string[];
 }
-const isTextFieldCandidate = (d: unknown): d is FieldCandidate =>
-  isPopulatedObject(d, ['textFieldCandidate']);
+const isTextFieldCandidates = (d: unknown): d is FieldCandidates =>
+  isPopulatedObject(d, ['textFieldCandidates']);
 
-type Candidate = FieldCandidate | TextFieldCandidate;
+type Candidate = FieldCandidates | TextFieldCandidates;
 
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
@@ -101,12 +102,15 @@ export const significantItemsHandlerFactory =
 
     logDebugMessage('Fetch p-values.');
 
+    const chunkingSize = 50;
     const loadingStep =
-      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
+      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) *
+      loadingStepSizePValues *
+      chunkingSize;
 
     const pValuesQueue = queue(async function (payload: Candidate) {
-      if (isFieldCandidate(payload)) {
-        const { fieldCandidate } = payload;
+      if (isFieldCandidates(payload)) {
+        const { fieldCandidates: fieldNames } = payload;
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
@@ -117,21 +121,21 @@ export const significantItemsHandlerFactory =
             emitError: responseStream.pushError,
             arguments: {
               ...requestBody,
-              fieldNames: [fieldCandidate],
+              fieldNames,
               sampleProbability: stateHandler.sampleProbability(),
             },
           });
         } catch (e) {
           if (!isRequestAbortedError(e)) {
             logger.error(
-              `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
+              `Failed to fetch p-values for ${fieldNames.join()}, got: \n${e.toString()}`
             );
-            responseStream.pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+            responseStream.pushError(`Failed to fetch p-values for ${fieldNames.join()}.`);
           }
           return;
         }
 
-        remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
+        remainingFieldCandidates = remainingFieldCandidates.filter((d) => !fieldNames.includes(d));
 
         if (pValues.length > 0) {
           pValues.forEach((d) => {
@@ -143,8 +147,8 @@ export const significantItemsHandlerFactory =
 
           fieldValuePairsCount += pValues.length;
         }
-      } else if (isTextFieldCandidate(payload)) {
-        const { textFieldCandidate } = payload;
+      } else if (isTextFieldCandidates(payload)) {
+        const { textFieldCandidates: fieldNames } = payload;
 
         const significantCategoriesForField = await fetchSignificantCategories({
           esClient,
@@ -153,7 +157,7 @@ export const significantItemsHandlerFactory =
           abortSignal,
           arguments: {
             ...requestBody,
-            fieldNames: [textFieldCandidate],
+            fieldNames,
             sampleProbability: stateHandler.sampleProbability(),
           },
         });
@@ -186,10 +190,13 @@ export const significantItemsHandlerFactory =
       );
     }, MAX_CONCURRENT_QUERIES);
 
+    const textFieldCandidatesChunks = chunk(textFieldCandidates, chunkingSize);
+    const fieldCandidatesChunks = chunk(fieldCandidates, chunkingSize);
+
     pValuesQueue.push(
       [
-        ...textFieldCandidates.map((d) => ({ textFieldCandidate: d })),
-        ...fieldCandidates.map((d) => ({ fieldCandidate: d })),
+        ...textFieldCandidatesChunks.map((d) => ({ textFieldCandidates: d })),
+        ...fieldCandidatesChunks.map((d) => ({ fieldCandidates: d })),
       ],
       (err) => {
         if (err) {
