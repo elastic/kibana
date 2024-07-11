@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "server/**/*",
@@ -22,11 +22,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-saved-objects-server",
-    "@kbn/alerting-state-types",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/logging"
+    "@kbn/alerting-state-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
