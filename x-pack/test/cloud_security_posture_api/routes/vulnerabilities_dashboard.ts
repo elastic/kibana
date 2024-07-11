@@ -324,7 +324,10 @@ export default function (providerContext: FtrProviderContext) {
         .get('/internal/cloud_security_posture/vulnerabilities_dashboard')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
-        .auth('role_security_no_read_user', cspSecurity.getPasswordForUser('role_security_no_read_user'));
+        .auth(
+          'role_security_no_read_user',
+          cspSecurity.getPasswordForUser('role_security_no_read_user')
+        );
 
       expect(status).to.be(403);
     });
