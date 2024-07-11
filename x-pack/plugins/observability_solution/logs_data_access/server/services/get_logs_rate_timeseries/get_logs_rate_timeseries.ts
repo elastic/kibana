@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { existsQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
-import { APM_LOG_LEVEL, LOG_LEVEL } from '../../es_fields';
+import { LOG_LEVEL } from '../../es_fields';
 
 export interface LogsRateTimeseries {
   esClient: ElasticsearchClient;
@@ -57,13 +57,8 @@ export function createGetLogsRateTimeseries() {
       query: {
         bool: {
           filter: [
+            ...existsQuery(LOG_LEVEL),
             ...kqlQuery(kuery),
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [...existsQuery(LOG_LEVEL), ...existsQuery(APM_LOG_LEVEL)],
-              },
-            },
             {
               terms: {
                 [identifyingMetadata]: serviceNames,

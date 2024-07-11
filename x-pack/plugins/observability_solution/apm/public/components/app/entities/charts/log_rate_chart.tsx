@@ -14,7 +14,8 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { yLabelAsPercent } from '../../../../../common/utils/formatters';
-import { LogRateWithExplanation } from '../../service_inventory/multi_signal_inventory/table/title_with_explanation';
+import { TooltipContent } from '../../service_inventory/multi_signal_inventory/table/tooltip_content';
+import { Popover } from '../../service_inventory/multi_signal_inventory/table/popover';
 
 type LogRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries'>;
@@ -79,7 +80,18 @@ export function LogRateChart({ height }: { height: number }) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogRateWithExplanation includeTitle={false} />
+          <Popover>
+            <TooltipContent
+              formula={`count(kql='log.level: *')`} // TODO
+              description={i18n.translate(
+                'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description',
+                {
+                  defaultMessage: 'Rate of logs per minute observed for given {fieldName}.',
+                  values: { fieldName: 'service.name' },
+                }
+              )}
+            />
+          </Popover>
         </EuiFlexItem>
       </EuiFlexGroup>
 

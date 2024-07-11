@@ -31,7 +31,7 @@ import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 import { isApmSignal } from '../../../../../utils/get_signal_type';
-import { LogErrorRateWithExplanation, LogRateWithExplanation } from './title_with_explanation';
+import { ColumnHeader } from './column_header';
 
 export function getServiceColumns({
   query,
@@ -155,7 +155,21 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogRatePerMinute,
-      name: <LogRateWithExplanation includeTitle />,
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
+            defaultMessage: 'Log rate (per min.)',
+          })}
+          formula={`count(kql='log.level: *')`} // TODO move
+          toolTip={i18n.translate(
+            'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description',
+            {
+              defaultMessage: 'Rate of logs per minute observed for given {fieldName}.',
+              values: { fieldName: 'service.name' },
+            }
+          )}
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
@@ -174,7 +188,21 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogErrorRate,
-      name: <LogErrorRateWithExplanation includeTitle />,
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
+            defaultMessage: 'Log error rate',
+          })}
+          formula={`count(kql='log.level: "error" OR log.level: "ERROR"') / count(kql='log.level: *')`} // TODO
+          toolTip={i18n.translate(
+            'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description',
+            {
+              defaultMessage: '% of logs where error detected for given {fieldName}',
+              values: { fieldName: 'service.name' }, // convert to code block
+            }
+          )}
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,

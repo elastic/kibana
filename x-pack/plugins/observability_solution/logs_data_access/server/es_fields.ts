@@ -6,4 +6,3 @@
  */
 
 export const LOG_LEVEL = 'log.level';
-export const APM_LOG_LEVEL = 'error.log.level';

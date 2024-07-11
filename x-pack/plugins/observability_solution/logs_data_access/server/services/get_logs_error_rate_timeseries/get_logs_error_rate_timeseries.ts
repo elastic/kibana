@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { existsQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount, getLogErrorRate } from '../../utils';
-import { APM_LOG_LEVEL, LOG_LEVEL } from '../../es_fields';
+import { LOG_LEVEL } from '../../es_fields';
 
 export interface LogsErrorRateTimeseries {
   esClient: ElasticsearchClient;
@@ -29,20 +29,12 @@ const getLogErrorsAggregation = () => ({
   },
 });
 
-const getApmLogErrorsAggregation = () => ({
-  terms: {
-    field: APM_LOG_LEVEL,
-    include: ['error', 'ERROR'],
-  },
-});
-
 type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
-type ApmLogErrorsAggregation = ReturnType<typeof getApmLogErrorsAggregation>;
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { logErrors: LogErrorsAggregation; apmLogErrors: ApmLogErrorsAggregation };
+      aggs: { logErrors: LogErrorsAggregation };
     },
     {}
   >;
@@ -74,12 +66,7 @@ export function createGetLogErrorRateTimeseries() {
       query: {
         bool: {
           filter: [
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [...existsQuery(LOG_LEVEL), ...existsQuery(APM_LOG_LEVEL)],
-              },
-            },
+            ...existsQuery(LOG_LEVEL),
             ...kqlQuery(kuery),
             {
               terms: {
@@ -117,7 +104,6 @@ export function createGetLogErrorRateTimeseries() {
               },
               aggs: {
                 logErrors: getLogErrorsAggregation(),
-                apmLogErrors: getApmLogErrorsAggregation(),
               },
             },
           },
@@ -133,15 +119,10 @@ export function createGetLogErrorRateTimeseries() {
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
             const totalCount = timeseriesBucket.doc_count;
             const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count;
-            const apmLogErrorCount = timeseriesBucket.apmLogErrors.buckets[0]?.doc_count;
-            const logAndApmErrorCount = logErrorCount ?? apmLogErrorCount ?? 0;
 
             return {
               x: timeseriesBucket.key,
-              y:
-                logAndApmErrorCount > 0
-                  ? getLogErrorRate({ logCount: totalCount, logErrorCount: logAndApmErrorCount })
-                  : null,
+              y: logErrorCount ? getLogErrorRate({ logCount: totalCount, logErrorCount }) : null,
             };
           });
 
