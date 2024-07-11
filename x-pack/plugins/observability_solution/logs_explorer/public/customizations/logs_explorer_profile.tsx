@@ -131,6 +131,10 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
+        const logsAIAssistantFeature = plugins.discoverShared.features.registry.getById(
+          'observability-logs-ai-assistant'
+        );
+
         registry.add({
           id: 'doc_view_logs_overview',
           title: i18n.translate('xpack.logsExplorer.docViews.logsOverview.title', {
@@ -140,7 +144,7 @@ export const createLogsExplorerProfileCustomizations =
           component: (props) => (
             <UnifiedDocViewerLogsOverview
               {...props}
-              renderAIAssistant={plugins.logsShared.renderLogsAIAssistant}
+              renderAIAssistant={logsAIAssistantFeature?.render}
             />
           ),
         });

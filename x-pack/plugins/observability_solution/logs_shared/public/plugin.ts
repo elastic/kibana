@@ -67,17 +67,15 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     }
 
     const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
-    const renderLogsAIAssistant = createLogsAIAssistantRenderer(LogAIAssistant);
 
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',
-      render: renderLogsAIAssistant,
+      render: createLogsAIAssistantRenderer(LogAIAssistant),
     });
 
     return {
       logViews,
       LogAIAssistant,
-      renderLogsAIAssistant,
     };
   }
 
