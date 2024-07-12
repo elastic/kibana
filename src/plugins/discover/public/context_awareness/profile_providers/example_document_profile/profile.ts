@@ -6,27 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { DocumentProfileProvider, DocumentType } from '../../profiles';
+import { DocumentProfileProvider } from '../../profiles';
 
 export const exampleDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'example-document-profile',
   profile: {},
   resolve: (params) => {
-    if (getFieldValue(params.record, 'data_stream.type') !== 'logs') {
-      return { isMatch: false };
-    }
-
-    return {
-      isMatch: true,
-      context: {
-        type: DocumentType.Log,
-      },
-    };
+    return { isMatch: false };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
 };
