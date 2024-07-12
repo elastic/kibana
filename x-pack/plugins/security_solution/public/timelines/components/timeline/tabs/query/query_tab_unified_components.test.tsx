@@ -34,7 +34,6 @@ import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
-import userEvent from '@testing-library/user-event';
 import * as timelineActions from '../../../../store/actions';
 
 jest.mock('../../../../../common/components/user_privileges');
@@ -895,7 +894,7 @@ describe('query tab with unified timeline', () => {
       );
 
       it(
-        'should be cancel adding notes',
+        'should cancel adding notes',
         async () => {
           renderTestComponents();
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -909,8 +908,6 @@ describe('query tab with unified timeline', () => {
           await waitFor(() => {
             expect(screen.getByTestId('add-note-container')).toBeVisible();
           });
-
-          userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
 
           expect(screen.getByTestId('cancel')).not.toBeDisabled();
 
