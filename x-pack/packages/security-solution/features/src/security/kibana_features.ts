@@ -18,6 +18,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../types';
 import {
   APP_ID,
@@ -42,7 +43,7 @@ const SECURITY_RULE_TYPES = [
 
 const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [SERVER_APP_ID],
+  consumers: [SERVER_APP_ID, ALERTING_FEATURE_ID],
 }));
 
 export const getSecurityBaseKibanaFeature = ({

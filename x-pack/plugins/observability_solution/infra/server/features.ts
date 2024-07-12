@@ -14,6 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -32,7 +33,7 @@ const metricRuleTypes = [
 
 const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [METRICS_FEATURE_ID],
+  consumers: [METRICS_FEATURE_ID, ALERTING_FEATURE_ID],
 }));
 
 export const METRICS_FEATURE = {
@@ -103,7 +104,7 @@ const logsRuleTypes = [
 
 const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [LOGS_FEATURE_ID],
+  consumers: [LOGS_FEATURE_ID, ALERTING_FEATURE_ID],
 }));
 
 export const LOGS_FEATURE = {

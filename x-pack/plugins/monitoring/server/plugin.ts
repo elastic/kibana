@@ -23,6 +23,7 @@ import {
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RouteMethod } from '@kbn/core/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -268,7 +269,7 @@ export class MonitoringPlugin
   registerPluginInUI(plugins: PluginsSetup) {
     const alertingFeatures = RULES.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: ['monitoring'],
+      consumers: ['monitoring', ALERTING_FEATURE_ID],
     }));
 
     plugins.features.registerKibanaFeature({

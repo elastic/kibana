@@ -11,6 +11,7 @@ import {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
@@ -32,7 +33,7 @@ const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN.ID],
+  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID],
 }));
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {

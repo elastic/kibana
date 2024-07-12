@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { PLUGIN_ID } from '../constants/app';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
@@ -110,7 +111,7 @@ export function getDefaultCapabilities(): MlCapabilities {
 
 const alertingFeatures = Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN_ID],
+  consumers: [PLUGIN_ID, ALERTING_FEATURE_ID],
 }));
 
 export function getPluginPrivileges() {

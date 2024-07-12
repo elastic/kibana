@@ -12,6 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ruleType as alwaysFiringRule } from './rule_types/always_firing';
 import { ruleType as peopleInSpaceRule } from './rule_types/astros';
 import { ruleType as patternRule } from './rule_types/pattern';
@@ -76,25 +77,52 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       },
       category: DEFAULT_APP_CATEGORIES.management,
       alerting: [
-        { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-        { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-        { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+        {
+          ruleTypeId: alwaysFiringRule.id,
+          consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+        },
+        {
+          ruleTypeId: peopleInSpaceRule.id,
+          consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+        },
+        {
+          ruleTypeId: INDEX_THRESHOLD_ID,
+          consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+        },
       ],
       privileges: {
         all: {
           alerting: {
             rule: {
               all: [
-                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                {
+                  ruleTypeId: alwaysFiringRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: peopleInSpaceRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: INDEX_THRESHOLD_ID,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
               ],
             },
             alert: {
               all: [
-                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                {
+                  ruleTypeId: alwaysFiringRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: peopleInSpaceRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: INDEX_THRESHOLD_ID,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
               ],
             },
           },
@@ -111,16 +139,34 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
           alerting: {
             rule: {
               read: [
-                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                {
+                  ruleTypeId: alwaysFiringRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: peopleInSpaceRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: INDEX_THRESHOLD_ID,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
               ],
             },
             alert: {
               read: [
-                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
-                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                {
+                  ruleTypeId: alwaysFiringRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: peopleInSpaceRule.id,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
+                {
+                  ruleTypeId: INDEX_THRESHOLD_ID,
+                  consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+                },
               ],
             },
           },

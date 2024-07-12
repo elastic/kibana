@@ -25,6 +25,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { IEventLogClientService } from '@kbn/event-log-plugin/server';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineRuleTypes } from './rule_types';
@@ -49,6 +50,35 @@ export interface FixtureStartDeps {
   notifications: NotificationsPluginStart;
 }
 
+const testRuleTypes = [
+  'test.always-firing',
+  'test.cumulative-firing',
+  'test.never-firing',
+  'test.failing',
+  'test.authorization',
+  'test.delayed',
+  'test.validation',
+  'test.onlyContextVariables',
+  'test.onlyStateVariables',
+  'test.noop',
+  'test.unrestricted-noop',
+  'test.patternFiring',
+  'test.patternSuccessOrFailure',
+  'test.throw',
+  'test.longRunning',
+  'test.exceedsAlertLimit',
+  'test.always-firing-alert-as-data',
+  'test.patternFiringAad',
+  'test.waitingRule',
+  'test.patternFiringAutoRecoverFalse',
+  'test.severity',
+];
+
+const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: ['alertsFixture', ALERTING_FEATURE_ID],
+}));
+
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly logger: Logger;
 
@@ -71,29 +101,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      alerting: [
-        'test.always-firing',
-        'test.cumulative-firing',
-        'test.never-firing',
-        'test.failing',
-        'test.authorization',
-        'test.delayed',
-        'test.validation',
-        'test.onlyContextVariables',
-        'test.onlyStateVariables',
-        'test.noop',
-        'test.unrestricted-noop',
-        'test.patternFiring',
-        'test.patternSuccessOrFailure',
-        'test.throw',
-        'test.longRunning',
-        'test.exceedsAlertLimit',
-        'test.always-firing-alert-as-data',
-        'test.patternFiringAad',
-        'test.waitingRule',
-        'test.patternFiringAutoRecoverFalse',
-        'test.severity',
-      ],
+      alerting: testRuleTypes,
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -103,29 +111,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: [
-                'test.always-firing',
-                'test.cumulative-firing',
-                'test.never-firing',
-                'test.failing',
-                'test.delayed',
-                'test.authorization',
-                'test.validation',
-                'test.onlyContextVariables',
-                'test.onlyStateVariables',
-                'test.noop',
-                'test.unrestricted-noop',
-                'test.patternFiring',
-                'test.patternSuccessOrFailure',
-                'test.throw',
-                'test.longRunning',
-                'test.exceedsAlertLimit',
-                'test.always-firing-alert-as-data',
-                'test.patternFiringAad',
-                'test.waitingRule',
-                'test.patternFiringAutoRecoverFalse',
-                'test.severity',
-              ],
+              all: testRuleTypes,
             },
           },
           ui: [],
@@ -138,29 +124,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: [
-                'test.always-firing',
-                'test.cumulative-firing',
-                'test.never-firing',
-                'test.failing',
-                'test.authorization',
-                'test.delayed',
-                'test.validation',
-                'test.onlyContextVariables',
-                'test.onlyStateVariables',
-                'test.noop',
-                'test.unrestricted-noop',
-                'test.patternFiring',
-                'test.patternSuccessOrFailure',
-                'test.throw',
-                'test.longRunning',
-                'test.exceedsAlertLimit',
-                'test.always-firing-alert-as-data',
-                'test.patternFiringAad',
-                'test.waitingRule',
-                'test.patternFiringAutoRecoverFalse',
-                'test.severity',
-              ],
+              read: testRuleTypes,
             },
           },
           ui: [],
