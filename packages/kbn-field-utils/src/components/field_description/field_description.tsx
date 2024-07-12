@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import {
   EuiText,
   EuiButtonEmpty,
@@ -114,13 +115,15 @@ export const FieldDescriptionContent: React.FC<FieldDescriptionContentProps> = (
               }
             `}
           >
-            <EuiTextBlockTruncate lines={2}>{customDescription}</EuiTextBlockTruncate>
+            <EuiTextBlockTruncate lines={2}>
+              <Markdown readOnly>{customDescription}</Markdown>
+            </EuiTextBlockTruncate>
           </button>
         </EuiText>
       ) : (
         <>
           <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
-            {customDescription}
+            <Markdown readOnly>{customDescription}</Markdown>
           </EuiText>
           {isTooLong && (
             <EuiButtonEmpty

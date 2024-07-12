@@ -144,7 +144,6 @@ export const DocViewerTable = ({
   const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
-  // const hasEscFields = useMemo(() => Boolean(dataView.getFieldByName('ecs.version')), [dataView]);
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -414,7 +413,6 @@ export const DocViewerTable = ({
 
       return null;
     },
-    // [rows, searchText, fieldsMetadata, hasEscFields]
     [rows, searchText, fieldsMetadata]
   );
 
