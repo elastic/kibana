@@ -197,8 +197,7 @@ export function createAnnotationsClient(params: {
       });
       const document = response.hits.hits?.[0];
       return {
-        _id: document._id,
-        _index: document._index,
+        ...document,
         _source: formatAnnotation(document._source!),
       };
     }),
