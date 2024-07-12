@@ -67,7 +67,6 @@ export const OtelLogsPanel: React.FC = () => {
     services: {
       share,
       http,
-      notifications,
       context: { isServerless, stackVersion },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -900,7 +899,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="s">
                 {i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title',
+                  'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label',
                   {
                     defaultMessage: 'Was this helpful or were there any problems?',
                   }
