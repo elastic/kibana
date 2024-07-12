@@ -8,7 +8,7 @@
 import type { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import {
   REPORTING_DATA_STREAM_WILDCARD,
@@ -142,10 +142,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
+  const generatePdf = async (username: string, password: string, job: JobParamsPDFV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdf`)
+      .post(`/api/reporting/generate/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });

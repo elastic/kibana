@@ -60,9 +60,6 @@ export interface ReportOutput extends TaskRunResult {
  */
 export type CsvPagingStrategy = 'pit' | 'scroll';
 
-/**
- * @deprecated
- */
 export interface BaseParams {
   browserTimezone: string; // to format dates in the user's time zone
   objectType: string;
@@ -80,9 +77,6 @@ export type BaseParamsV2 = BaseParams & {
   locatorParams: LocatorParams[];
 };
 
-/**
- * @deprecated
- */
 export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
