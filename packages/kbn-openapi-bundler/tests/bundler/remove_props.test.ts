@@ -8,7 +8,7 @@
 
 import { OpenAPIV3 } from 'openapi-types';
 import { bundleSpecs } from './bundle_specs';
-import { createOASDocument } from './create_oas_document';
+import { createOASDocument } from '../create_oas_document';
 
 describe('OpenAPI Bundler - remove custom x- props', () => {
   it('removes "x-codegen-enabled" property', async () => {
