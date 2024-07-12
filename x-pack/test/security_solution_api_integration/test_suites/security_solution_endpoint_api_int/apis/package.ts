@@ -17,7 +17,6 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { FtrProviderContext } from '../configs/ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';
-import { deleteEventsStream } from './data_stream_helper';
 
 interface EventIngested {
   event: {
@@ -46,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');
   const es = getService('es');
   const generator = new EndpointDocGenerator('data');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   const searchForID = async <T>(id: string) => {
     return es.search<T>(
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteEventsStream(getService);
+        await endpointDataStreamHelpers.deleteEventsStream(getService);
       });
 
       it('does not set dns.question.type if it is already populated', async () => {
