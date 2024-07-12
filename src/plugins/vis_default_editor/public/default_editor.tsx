@@ -10,10 +10,14 @@ import 'brace/mode/json';
 import './index.scss';
 
 import { EuiErrorBoundary, EuiResizableContainer } from '@elastic/eui';
+import { DeepPartial } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
 import React, { useCallback, useEffect, useState } from 'react';
-import { DeepPartial } from '@kbn/utility-types';
 
+import { Reference } from '@kbn/content-management-utils';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { SerializedTitles } from '@kbn/presentation-publishing';
+import { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import {
   EditorRenderProps,
   EmbeddableApiHandler,
@@ -23,9 +27,6 @@ import {
   VISUALIZE_APP_NAME,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
-import { Reference } from '@kbn/content-management-utils';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   VisualizeApi,
   VisualizeRuntimeState,
@@ -40,6 +41,7 @@ export type DefaultEditorProps = EditorRenderProps & {
   eventEmitter: EventEmitter;
   embeddableApiHandler: EmbeddableApiHandler;
   dataView?: string;
+  savedSearchService: SavedSearchPublicPluginStart;
   references: Reference[];
 };
 
@@ -53,7 +55,7 @@ function DefaultEditor({
   embeddableApiHandler,
   eventEmitter,
   linked,
-  savedSearch,
+  savedSearchService,
   references = [],
 }: DefaultEditorProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -70,6 +72,7 @@ function DefaultEditor({
     (serializedVis: DeepPartial<SerializedVis>) => void
   >(() => () => {});
   const [vis, setVis] = useState<Vis<VisParams> | undefined>(undefined);
+  const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
@@ -144,7 +147,12 @@ function DefaultEditor({
                   setOnUpdateVis(() => api.updateVis);
                   setTitles(api.getTitles());
 
-                  setVis(api.getVis());
+                  const embeddableVis = api.getVis();
+                  setVis(embeddableVis);
+                  if (embeddableVis.data.savedSearchId)
+                    savedSearchService
+                      .get(embeddableVis.data.savedSearchId)
+                      .then((result) => setSavedSearch(result));
 
                   api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
                   api.subscribeToHasInspector((hasInspector) => {

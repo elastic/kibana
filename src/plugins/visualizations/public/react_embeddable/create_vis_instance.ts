@@ -8,7 +8,7 @@
 
 import { SerializedVis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import { getSearch, getSavedSearch } from '../services';
+import { getSavedSearch } from '../services';
 
 export const createVisInstance = async (serializedVis: SerializedVis) => {
   const vis = await createVisAsync(serializedVis.type, serializedVis);
@@ -18,7 +18,6 @@ export const createVisInstance = async (serializedVis: SerializedVis) => {
     if (indexPattern) {
       vis.data.indexPattern = indexPattern;
       vis.data.searchSource?.setField('index', indexPattern);
-      vis.data.aggs = getSearch().aggs.createAggConfigs(indexPattern, serializedVis.data.aggs);
     }
   }
   return vis;
