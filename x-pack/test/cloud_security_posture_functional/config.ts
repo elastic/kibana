@@ -43,6 +43,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
+        `--xpack.fleet.agentPolicies.0.id=agentPoliciesTestId`,
+        `--xpack.fleet.agentPolicies.0.name=agentPoliciesTest`,
       ],
     },
   };

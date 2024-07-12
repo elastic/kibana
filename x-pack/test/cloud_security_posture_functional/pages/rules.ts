@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { createPackagePolicy } from '../../api_integration/apis/cloud_security_posture/helper';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   RULES_BULK_ACTION_OPTION_DISABLE,
@@ -33,7 +31,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
-    let agentPolicyId: string;
 
     beforeEach(async () => {
       rule = pageObjects.rule;
@@ -42,25 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test policy',
-          namespace: 'default',
-        });
-
-      agentPolicyId = agentPolicyResponse.item.id;
-
-      await createPackagePolicy(
-        supertest,
-        agentPolicyId,
-        'kspm',
-        'cloudbeat/cis_k8s',
-        'vanilla',
-        'kspm'
-      );
       await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
