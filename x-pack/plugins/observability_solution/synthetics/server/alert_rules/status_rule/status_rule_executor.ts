@@ -38,7 +38,7 @@ import {
 } from './queries/query_monitor_status_alert';
 import { parseArrayFilters } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
   getAllMonitors,
@@ -72,7 +72,7 @@ export type PendingConfigs = Record<string, OverviewPendingStatusMetaData>;
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
   params: StatusRuleParams;
-  esClient: UptimeEsClient;
+  esClient: SyntheticsEsClient;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -95,7 +95,7 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+    this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
     this.server = server;

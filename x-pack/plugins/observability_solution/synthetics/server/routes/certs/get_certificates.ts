@@ -34,7 +34,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       to: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ request, uptimeEsClient, savedObjectsClient }) => {
+  handler: async ({ request, syntheticsEsClient, savedObjectsClient }) => {
     const queryParams = request.query;
 
     const monitors = await getAllMonitors({
@@ -55,7 +55,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
 
     const data = await getSyntheticsCerts({
       ...queryParams,
-      uptimeEsClient,
+      syntheticsEsClient,
       monitorIds: enabledMonitorQueryIds,
     });
     return { data };
