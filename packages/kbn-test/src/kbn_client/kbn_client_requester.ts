@@ -123,7 +123,7 @@ export class KbnClientRequester {
       attempt += 1;
 
       try {
-        return await Axios.request(build(url, this.httpsAgent, options));
+        return await Axios.request(buildRequest(url, this.httpsAgent, options));
       } catch (ex) {
         if (isIgnorableError(ex, options.ignoreErrors)) return ex.response;
         if (hasMoreAttempts(attempt, maxAttempts)) {
@@ -131,24 +131,18 @@ export class KbnClientRequester {
           continue;
         }
 
-        throw new Error(buildErrMsg(redactUrl(url), options.path, options.retries, ex, this.log));
+        throw new Error(buildErrMsg(redactUrl(url), options.path, options.retries, ex));
 
-        function buildErrMsg(redactedUrl: string, path: any, retries: any, err: any, logger: any) {
+        function buildErrMsg(redactedUrl: string, path: any, retries: any, err: any) {
           const conflictOnGet: boolean = isConcliftOnGetError(err);
           const requestedRetries: boolean = retries !== undefined;
           const failedToGetResponse: boolean = isAxiosRequestError(err);
 
-          let _ = '';
-          if (conflictOnGet) {
-            _ = `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`;
-          } else if (requestedRetries || failedToGetResponse) {
-            _ = `${err.code} ${err.name} [${redactedUrl}] request failed (attempt=${attempt}/${maxAttempts})`;
-          } else {
-            logger.error(_);
-            throw err;
-          }
-
-          return _;
+          if (conflictOnGet)
+            return `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`;
+          else if (requestedRetries || failedToGetResponse)
+            return `${err.code} ${err.name} [${redactedUrl}] request failed (attempt=${attempt}/${maxAttempts})`;
+          else throw err;
         }
       }
     }
@@ -158,7 +152,7 @@ function hasMoreAttempts(current: number, ceiling: number) {
   return current < ceiling;
 }
 
-function build(
+function buildRequest(
   url: any,
   httpsAgent: Https.Agent | null,
   { method, body, query, headers, responseType }: any
