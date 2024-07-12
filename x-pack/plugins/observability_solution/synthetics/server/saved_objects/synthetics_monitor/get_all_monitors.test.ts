@@ -6,46 +6,11 @@
  */
 
 import { processMonitors } from './get_all_monitors';
-import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as getLocations from '../../synthetics_service/get_all_locations';
-import { SyntheticsServerSetup } from '../../types';
 
 describe('processMonitors', () => {
-  const mockEsClient = {
-    search: jest.fn(),
-  };
-  const logger = loggerMock.create();
-  const soClient = savedObjectsClientMock.create();
-
-  const serverMock: SyntheticsServerSetup = {
-    logger,
-    uptimeEsClient: mockEsClient,
-    authSavedObjectsClient: soClient,
-    config: {
-      service: {
-        username: 'dev',
-        password: '12345',
-        manifestUrl: 'http://localhost:8080/api/manifest',
-      },
-    },
-    spaces: {
-      spacesService: {
-        getSpaceId: jest.fn().mockReturnValue('test-space'),
-      },
-    },
-    encryptedSavedObjects: mockEncryptedSO(),
-  } as unknown as SyntheticsServerSetup;
-
-  const syntheticsService = new SyntheticsService(serverMock);
-
-  const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
-
   it('should return a processed data', async () => {
-    const result = processMonitors(testMonitors, serverMock, soClient, monitorClient);
+    const result = processMonitors(testMonitors);
     expect(result).toEqual({
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
@@ -81,7 +46,7 @@ describe('processMonitors', () => {
   it('should return a processed data where location label is missing', async () => {
     testMonitors[0].attributes.locations[0].label = undefined;
 
-    const result = processMonitors(testMonitors, serverMock, soClient, monitorClient);
+    const result = processMonitors(testMonitors);
     expect(result).toEqual({
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
@@ -155,7 +120,7 @@ describe('processMonitors', () => {
       )
     );
 
-    const result = processMonitors(testMonitors, serverMock, soClient, monitorClient);
+    const result = processMonitors(testMonitors);
     expect(result).toEqual({
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',

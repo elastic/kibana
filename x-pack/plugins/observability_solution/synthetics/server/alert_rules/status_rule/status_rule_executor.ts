@@ -11,9 +11,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isEmpty } from 'lodash';
-import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { periodToMs } from '../../routes/overview_status/overview_status';
 import { getMonitorToPing } from './utils';
@@ -71,9 +69,6 @@ export interface AlertOverviewStatus extends AlertStatusResponse {
 
 export type PendingConfigs = Record<string, OverviewPendingStatusMetaData>;
 
-type Services = RuleExecutorServices &
-  LifecycleAlertServices<Record<string, any>, Record<string, any>, string>;
-
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
   params: StatusRuleParams;
@@ -86,7 +81,6 @@ export class StatusRuleExecutor {
   monitorLocationsMap: Record<string, string[]>; // monitorId: locationIds
   dateFormat?: string;
   tz?: string;
-  services: Services;
   options: StatusRuleExecutorOptions;
 
   constructor(
@@ -96,7 +90,6 @@ export class StatusRuleExecutor {
     scopedClient: ElasticsearchClient,
     server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient,
-    services: Services,
     options: StatusRuleExecutorOptions
   ) {
     this.previousStartedAt = previousStartedAt;
@@ -109,12 +102,11 @@ export class StatusRuleExecutor {
     this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.hasCustomCondition = !isEmpty(this.params);
     this.monitorLocationsMap = {};
-    this.services = services;
     this.options = options;
   }
 
   async init() {
-    const { uiSettingsClient } = this.services;
+    const { uiSettingsClient } = this.options.services;
     this.dateFormat = await uiSettingsClient.get('dateFormat');
     const timezone = await uiSettingsClient.get('dateFormat:tz');
     this.tz = timezone === 'Browser' ? 'UTC' : timezone;
@@ -416,7 +408,7 @@ export class StatusRuleExecutor {
   }) {
     const { configId, locationId, checks } = statusConfig;
     const { spaceId, startedAt } = this.options;
-    const { alertsClient } = this.services;
+    const { alertsClient } = this.options.services;
     const { basePath } = this.server;
     if (!alertsClient) return;
 

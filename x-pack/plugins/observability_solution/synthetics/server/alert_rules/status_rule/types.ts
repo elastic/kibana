@@ -7,6 +7,10 @@
 
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-types';
+import {
+  AlertInstanceContext as AlertContext,
+  RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 import {

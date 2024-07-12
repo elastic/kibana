@@ -154,7 +154,7 @@ describe('useMonitorsSortedByStatus', () => {
                 [`test-monitor-4-${location1.id}`]: {
                   configId: 'test-monitor-4',
                   monitorQueryId: 'test-monitor-4',
-                  location: location1.id,
+                  locationId: location1.id,
                 },
               },
             },

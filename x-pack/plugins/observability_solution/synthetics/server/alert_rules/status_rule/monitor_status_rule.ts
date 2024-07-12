@@ -81,7 +81,6 @@ export const registerSyntheticsStatusCheckRule = (
         scopedClusterClient.asCurrentUser,
         server,
         syntheticsMonitorClient,
-        services,
         options
       );
 

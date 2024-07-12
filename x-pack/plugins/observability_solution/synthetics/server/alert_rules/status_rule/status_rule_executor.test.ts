@@ -60,7 +60,6 @@ describe('StatusRuleExecutor', () => {
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
-  const mock = coreMock.createSetup();
   const mockStart = coreMock.createStart();
   const uiSettingsClient = mockStart.uiSettings.asScopedToClient(soClient);
 
@@ -72,11 +71,11 @@ describe('StatusRuleExecutor', () => {
     serverMock,
     monitorClient,
     {
-      uiSettingsClient,
-    } as any,
-    'default',
-    mock.http.basePath,
-    {} as any
+      spaceId: 'default',
+      services: {
+        uiSettingsClient,
+      },
+    } as any
   );
 
   it('should only query enabled monitors', async () => {

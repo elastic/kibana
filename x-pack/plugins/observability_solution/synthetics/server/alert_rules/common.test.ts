@@ -7,7 +7,7 @@
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
 import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
-import { StaleDownConfig } from './status_rule/status_rule_executor';
+import { AlertOverviewStatus, StaleDownConfig } from './status_rule/status_rule_executor';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -193,7 +193,7 @@ describe('setRecoveredAlertsContext', () => {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
 
-  const upConfigs = {
+  const upConfigs: AlertOverviewStatus['upConfigs'] = {
     [idWithLocation]: {
       configId,
       monitorQueryId: 'stale-config',
@@ -211,6 +211,10 @@ describe('setRecoveredAlertsContext', () => {
         },
       } as StaleDownConfig['ping'],
       timestamp: new Date().toISOString(),
+      checks: {
+        total: 1,
+        down: 0,
+      },
     },
   };
 
@@ -235,7 +239,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -252,6 +256,10 @@ describe('setRecoveredAlertsContext', () => {
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
     };
     setRecoveredAlertsContext({
@@ -262,6 +270,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
+      pendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: 'alert-id',
@@ -270,6 +279,7 @@ describe('setRecoveredAlertsContext', () => {
         configId: '12345',
         idWithLocation,
         linkMessage: '',
+        'kibana.alert.reason': 'the monitor has been deleted',
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
         recoveryReason: 'the monitor has been deleted',
@@ -277,9 +287,11 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
+
         stateId: '123456',
         status: 'recovered',
+        timestamp: '2023-02-26T00:00:00.000Z',
       },
     });
   });
@@ -305,7 +317,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -322,6 +334,10 @@ describe('setRecoveredAlertsContext', () => {
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
     };
     setRecoveredAlertsContext({
@@ -332,6 +348,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
+      pendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: 'alert-id',
@@ -339,9 +356,8 @@ describe('setRecoveredAlertsContext', () => {
         configId: '12345',
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
         monitorUrl: '(unavailable)',
-        reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
         idWithLocation,
+        'kibana.alert.reason': 'this location has been removed from the monitor',
         linkMessage: '',
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
@@ -350,6 +366,9 @@ describe('setRecoveredAlertsContext', () => {
         stateId: '123456',
         status: 'recovered',
         monitorUrlLabel: 'URL',
+        timestamp: '2023-02-26T00:00:00.000Z',
+        reason:
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
       },
     });
   });
@@ -377,7 +396,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -394,6 +413,10 @@ describe('setRecoveredAlertsContext', () => {
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
     };
     setRecoveredAlertsContext({
@@ -404,6 +427,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs,
       dateFormat,
       tz: 'UTC',
+      pendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: 'alert-id',
@@ -415,6 +439,8 @@ describe('setRecoveredAlertsContext', () => {
         status: 'up',
         recoveryReason:
           'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
+        'kibana.alert.reason':
+          'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
         recoveryStatus: 'is now up',
         locationId: 'us_west',
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -423,8 +449,9 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
         stateId: null,
+        timestamp: '2023-02-26T00:00:00.000Z',
       },
     });
   });
