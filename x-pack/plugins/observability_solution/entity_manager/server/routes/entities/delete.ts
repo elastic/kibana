@@ -19,12 +19,15 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
-  router.delete<{ id: string }, unknown, unknown>(
+  router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
+          deleteData: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -35,7 +38,13 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
-        await uninstallEntityDefinition({ definition, soClient, esClient, logger });
+        await uninstallEntityDefinition({
+          definition,
+          soClient,
+          esClient,
+          logger,
+          deleteData: req.query.deleteData,
+        });
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {

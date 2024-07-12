@@ -111,8 +111,8 @@ export const getAlertDetailsContextHandler = (
       ? getAssistantDownstreamDependencies({
           apmEventClient,
           arguments: {
-            'service.name': serviceName,
-            'service.environment': serviceEnvironment,
+            serviceName,
+            serviceEnvironment,
             start: moment(alertStartedAt).subtract(24, 'hours').toISOString(),
             end: alertStartedAt,
           },
