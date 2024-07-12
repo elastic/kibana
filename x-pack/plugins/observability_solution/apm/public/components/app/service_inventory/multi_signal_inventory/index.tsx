@@ -163,7 +163,7 @@ export function MultiSignalInventory() {
     return callApmApi('GET /internal/apm/has_entities');
   }, []);
 
-  if (!data?.hasData) {
+  if (!data?.hasData && status === FETCH_STATUS.SUCCESS) {
     return <NoEntitiesEmptyState />;
   }
   return (
