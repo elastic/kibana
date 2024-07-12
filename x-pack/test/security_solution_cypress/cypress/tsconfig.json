@@ -42,6 +42,5 @@
     "@kbn/license-management-plugin",
     "@kbn/actions-plugin",
     "@kbn/alerts-ui-shared",
-    "@kbn/security-solution-plugin/public/management/cypress",
   ]
 }

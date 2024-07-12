@@ -436,7 +436,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               const productTypes = isOpen
                 ? getProductTypes(tier, endpointAddon, cloudAddon)
-                : (parseTestFileConfig(filePath).ftrConfig?.productTypes as ProductType[]);
+                : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
               log.info(`Running spec file: ${filePath}`);
               log.info(`${id}: Creating project ${PROJECT_NAME}...`);

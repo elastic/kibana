@@ -59,12 +59,7 @@ export const isSkipped = (filePath: string): boolean => {
   return callExpression?.callee?.property?.name === 'skip';
 };
 
-export const parseTestFileConfig = (
-  filePath: string
-): {
-  ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
-  devConfig: boolean;
-} => {
+export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeBlockFtrConfig => {
   const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
 
   const ast = parser.parse(testFile, {
@@ -95,17 +90,9 @@ export const parseTestFileConfig = (
       'key.name',
       'ftrConfig',
     ]);
-    // @ts-expect-error
-    const devConfig = _.find(callExpressionProperties?.value?.properties, [
-      'key.name',
-      'devConfig',
-    ]);
 
-    if (!ftrConfig && !devConfig) {
-      return {
-        ftrConfig: {},
-        devConfig: false,
-      };
+    if (!ftrConfig) {
+      return {};
     }
 
     const ftrConfigCode = generate(ftrConfig.value, { jsonCompatibleStrings: true }).code;
@@ -113,10 +100,7 @@ export const parseTestFileConfig = (
     try {
       // TODO:PT need to assess implication of using this approach to get the JSON back out
       const ftrConfigJson = new Function(`return ${ftrConfigCode}`)();
-      return {
-        ftrConfig: TestFileFtrConfigSchema.validate(ftrConfigJson),
-        devConfig: devConfig?.value?.value || false,
-      };
+      return TestFileFtrConfigSchema.validate(ftrConfigJson);
     } catch (err) {
       throw new Error(
         `Failed to parse 'ftrConfig' value defined in 'describe()' at ${filePath}. ${err.message}\nCode: ${ftrConfigCode}`
@@ -124,10 +108,7 @@ export const parseTestFileConfig = (
     }
   }
 
-  return {
-    ftrConfig: {},
-    devConfig: false,
-  };
+  return {};
 };
 
 const TestFileFtrConfigSchema = schema.object(

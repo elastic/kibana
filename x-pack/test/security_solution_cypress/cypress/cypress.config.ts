@@ -7,8 +7,6 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
-import { getVideosForFailedSpecs } from './support/filter_videos';
-import { aiAssistantDataLoaders } from './tasks/ai_assistant/data_loaders';
 
 export default defineCypressConfig({
   chromeWebSecurity: false,
@@ -32,6 +30,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
+      esArchiver(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');
@@ -44,16 +43,8 @@ export default defineCypressConfig({
         }
         return launchOptions;
       });
-
-      esArchiver(on, config);
-      aiAssistantDataLoaders(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
-
-      on('after:spec', (_, results) => {
-        getVideosForFailedSpecs(results);
-      });
-
       return config;
     },
   },

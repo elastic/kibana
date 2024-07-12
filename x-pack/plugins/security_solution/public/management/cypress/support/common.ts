@@ -11,10 +11,7 @@ import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack
 
 const RUNTIME_SERVICES_CACHE = new WeakMap<Cypress.PluginConfigOptions, RuntimeServices>();
 
-export const setupStackServicesUsingCypressConfig = async (
-  config: Cypress.PluginConfigOptions,
-  logPrefix: string = 'cy.dfw'
-) => {
+export const setupStackServicesUsingCypressConfig = async (config: Cypress.PluginConfigOptions) => {
   if (RUNTIME_SERVICES_CACHE.has(config)) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return RUNTIME_SERVICES_CACHE.get(config)!;
@@ -36,7 +33,7 @@ export const setupStackServicesUsingCypressConfig = async (
   }).then(({ log, ...others }) => {
     return {
       ...others,
-      log: prefixedOutputLogger(logPrefix, log),
+      log: prefixedOutputLogger('cy.dfw', log),
     };
   });
 

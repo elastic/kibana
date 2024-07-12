@@ -33,7 +33,6 @@
 
 import 'cypress-file-upload';
 import 'cypress-recurse/commands';
-import 'cypress-each';
 
 Cypress.Commands.add(
   'attachFile',

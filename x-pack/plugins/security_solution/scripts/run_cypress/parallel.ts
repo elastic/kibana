@@ -248,7 +248,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 fleetServerPort,
                 ftrConfigFilePath,
                 specFilePath: filePath,
-                specFileFTRConfig: specFileFTRConfig.ftrConfig,
+                specFileFTRConfig,
                 isOpen,
               });
 
@@ -339,14 +339,8 @@ ${JSON.stringify(
                   installDir: options?.installDir,
                   extraKbnOpts:
                     options?.installDir || options?.ci || !isOpen
-                      ? specFileFTRConfig.devConfig
-                        ? ['--dev']
-                        : []
-                      : // if test spec file contains devConfig: true
-                        _.xor(
-                          ['--dev', '--no-dev-config', '--no-dev-credentials'],
-                          specFileFTRConfig.devConfig ? ['--no-dev-config'] : []
-                        ),
+                      ? []
+                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
                   onEarlyExit,
                   inspect: argv.inspect,
                 });

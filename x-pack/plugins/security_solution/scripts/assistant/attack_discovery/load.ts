@@ -294,13 +294,6 @@ const checkDeleteIndices = async ({ esClient, log }: { esClient: Client; log: To
             ', '
           )}`
         );
-
-        // TODO: add deletion logic
-        // for (const index of existingIndices) {
-        //   await esClient.indices.delete({ index: pattern });
-
-        //   log.info(`Deleted index ${index}`);
-        // }
       } else {
         log.info(`No ${description} indices matching pattern '${pattern}' found.`);
       }

@@ -1206,7 +1206,6 @@
     "xml2js": "^0.5.0",
     "xstate": "^4.38.2",
     "xterm": "^5.1.0",
-    "yaml-loader": "^0.8.1",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
     "zod": "^3.22.3"
@@ -1608,7 +1607,6 @@
     "csstype": "^3.0.2",
     "cypress": "13.6.3",
     "cypress-axe": "^1.5.0",
-    "cypress-each": "^1.14.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.4",
     "cypress-real-events": "^1.11.0",

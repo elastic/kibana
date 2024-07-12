@@ -15055,11 +15055,6 @@ cypress-data-session@^2.8.0:
     debug "^4.3.2"
     simple-sha256 "^1.1.0"
 
-cypress-each@^1.14.0:
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.14.0.tgz#dcaf569b74ac93374c1f55f4672eb5185c38f22a"
-  integrity sha512-mUpF5KSSBy0kQaxYPLFswHceYoUMpXWRAJJ2LrcuHu1Vp5lgMw96lLtpDsNGID13FQhBfPSW6FmYBBCQqdJRBg==
-
 cypress-file-upload@^5.0.8:
   version "5.0.8"
   resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-5.0.8.tgz#d8824cbeaab798e44be8009769f9a6c9daa1b4a1"
@@ -20776,11 +20771,6 @@ jake@^10.8.5:
     chalk "^4.0.2"
     filelist "^1.0.1"
     minimatch "^3.0.4"
-
-javascript-stringify@^2.0.1:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/javascript-stringify/-/javascript-stringify-2.1.0.tgz#27c76539be14d8bd128219a2d731b09337904e79"
-  integrity sha512-JVAfqNPTvNq3sB/VHQJAFxN/sPgKnsKrCwyRt15zwNCdrMMJDdcEOdubuy+DuJYYdm0ox1J4uzEuYKkN+9yhVg==
 
 jest-canvas-mock@^2.5.2:
   version "2.5.2"
@@ -32574,15 +32564,6 @@ yaml-ast-parser@0.0.43:
   version "0.0.43"
   resolved "https://registry.yarnpkg.com/yaml-ast-parser/-/yaml-ast-parser-0.0.43.tgz#e8a23e6fb4c38076ab92995c5dca33f3d3d7c9bb"
   integrity sha512-2PTINUwsRqSd+s8XxKaJWQlUuEMHJQyEuh2edBbW8KNJz0SJPwUSD2zRWqezFEdN7IzAgeuYHFUCF7o8zRdZ0A==
-
-yaml-loader@^0.8.1:
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/yaml-loader/-/yaml-loader-0.8.1.tgz#034f901147073cfc307cdcce8bd44c1547e60ba1"
-  integrity sha512-BCEndnUoi3BaZmePkwGGe93txRxLgMhBa/gE725v1/GHnura8QvNs7c4+4C1yyhhKoj3Dg63M7IqhA++15j6ww==
-  dependencies:
-    javascript-stringify "^2.0.1"
-    loader-utils "^2.0.0"
-    yaml "^2.0.0"
 
 yaml@^1.10.0, yaml@^1.10.2, yaml@^1.7.2:
   version "1.10.2"
