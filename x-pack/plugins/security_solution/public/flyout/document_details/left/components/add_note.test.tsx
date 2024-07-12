@@ -21,7 +21,7 @@ import userEvent from '@testing-library/user-event';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { Flyouts } from '../../shared/constants/flyouts';
 
-jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
+jest.mock('../../shared/hooks/use_which_flyout');
 
 const mockAddError = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({

@@ -7,34 +7,21 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
-import { useOnClose } from './use_on_close';
+import { useOnExpandableFlyoutClose } from './use_on_expandable_flyout_close';
 import { Flyouts } from '../../document_details/shared/constants/flyouts';
-import { SECURITY_SOLUTION_ON_CLOSE_EVENT, TIMELINE_ON_CLOSE_EVENT } from '../..';
+import { TIMELINE_ON_CLOSE_EVENT } from '../..';
 
 jest.mock('../../document_details/shared/hooks/use_which_flyout');
 
-describe('useOnClose', () => {
+describe('useOnExpandableFlyoutClose', () => {
   const callbackFct = jest.fn().mockImplementation((id: string) => {});
-
-  it('should add event listener to window', () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
-
-    window.addEventListener = jest.fn().mockImplementationOnce((event, callback) => callback());
-
-    renderHook(() => useOnClose({ callback: callbackFct }));
-
-    expect(window.addEventListener).toBeCalledWith(
-      SECURITY_SOLUTION_ON_CLOSE_EVENT,
-      expect.any(Function)
-    );
-  });
 
   it('should run the callback function and remove the event listener from the window', () => {
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
 
     window.removeEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
 
-    renderHook(() => useOnClose({ callback: callbackFct }));
+    renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
 
     window.dispatchEvent(
       new CustomEvent(TIMELINE_ON_CLOSE_EVENT, {
@@ -44,5 +31,15 @@ describe('useOnClose', () => {
 
     expect(callbackFct).toHaveBeenCalledWith(Flyouts.timeline);
     expect(window.removeEventListener).toBeCalled();
+  });
+
+  it('should add event listener to window', async () => {
+    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
+
+    window.addEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
+
+    renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
+
+    expect(window.addEventListener).toBeCalled();
   });
 });

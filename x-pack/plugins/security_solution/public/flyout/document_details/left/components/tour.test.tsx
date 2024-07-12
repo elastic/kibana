@@ -23,7 +23,7 @@ import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { Flyouts } from '../../shared/constants/flyouts';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
+jest.mock('../../shared/hooks/use_which_flyout');
 
 const mockedUseKibana = mockUseKibana();
 

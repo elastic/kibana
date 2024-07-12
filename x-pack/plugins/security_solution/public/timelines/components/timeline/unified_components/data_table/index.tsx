@@ -14,7 +14,7 @@ import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useOnClose } from '../../../../../flyout/shared/hooks/use_on_close';
+import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
@@ -144,7 +144,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     }, []);
 
     const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
-    useOnClose({ callback: onCloseExpandableFlyout });
+    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
