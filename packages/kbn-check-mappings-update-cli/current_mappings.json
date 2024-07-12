@@ -348,6 +348,17 @@
     "dynamic": false,
     "properties": {}
   },
+  "background_task_node": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "last_seen": {
+        "type": "date"
+      }
+    }
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
