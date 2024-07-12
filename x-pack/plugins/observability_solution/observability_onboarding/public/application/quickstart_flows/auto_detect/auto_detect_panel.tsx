@@ -157,7 +157,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         <GetStartedPanel
                           integration={integration.pkgName}
                           newTab
-                          isLoading={status === 'dataReceived'}
+                          isLoading={status !== 'dataReceived'}
                           dashboardLinks={integration.kibanaAssets
                             .filter((asset) => asset.type === 'dashboard')
                             .map((asset) => {

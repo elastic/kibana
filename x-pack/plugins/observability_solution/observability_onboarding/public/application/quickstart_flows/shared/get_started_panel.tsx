@@ -47,6 +47,8 @@ export function GetStartedPanel({
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {isLoading ? (
+            <EuiSkeletonRectangle width={162} height={117} />
+          ) : (
             <EuiImage
               src={http.staticAssets.getPluginAssetHref('charts_screen.svg')}
               width={162}
@@ -54,8 +56,6 @@ export function GetStartedPanel({
               alt=""
               hasShadow
             />
-          ) : (
-            <EuiSkeletonRectangle width={162} height={117} />
           )}
         </EuiFlexItem>
 
