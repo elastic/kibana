@@ -36,22 +36,48 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('has search homepage with Home sidenav', async () => {
-      pageObjects.svlSearchHomePage.expectToBeOnHomepage();
-      pageObjects.svlSearchHomePage.expectHomepageHeader();
+      await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+      await pageObjects.svlSearchHomePage.expectHomepageHeader();
       // Navigate to another page
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'serverlessConnectors',
       });
-      pageObjects.svlSearchHomePage.expectToNotBeOnHomepage();
+      await pageObjects.svlSearchHomePage.expectToNotBeOnHomepage();
       // Click Home in Side nav
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'searchHomepage',
       });
-      pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+      await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
     });
 
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
+    });
+
+    it('has console quickstart link on page', async () => {
+      await pageObjects.svlSearchHomePage.expectConsoleLinkExists();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.svlSearchHomePage.clickConsoleLink();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+    });
+
+    it('has endpoints link and flyout', async () => {
+      await pageObjects.svlSearchHomePage.expectEndpointsLinkExists();
+      await pageObjects.svlSearchHomePage.clickEndpointsLink();
+      await pageObjects.svlSearchHomePage.expectConnectionDetailsFlyoutToBeOpen();
+      await pageObjects.svlSearchHomePage.expectEndpointsTabIsAvailable();
+      await pageObjects.svlSearchHomePage.closeConnectionDetailsFlyout();
+    });
+
+    it('can create an API key', async () => {
+      await pageObjects.svlSearchHomePage.expectEndpointsLinkExists();
+      await pageObjects.svlSearchHomePage.clickEndpointsLink();
+      await pageObjects.svlSearchHomePage.expectConnectionDetailsFlyoutToBeOpen();
+      await pageObjects.svlSearchHomePage.expectAPIKeyTabIsAvailable();
+      await pageObjects.svlSearchHomePage.createApiKeyInFlyout('ftr-test-key');
+      await pageObjects.svlSearchHomePage.closeConnectionDetailsFlyout();
     });
   });
 }

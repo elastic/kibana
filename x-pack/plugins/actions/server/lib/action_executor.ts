@@ -603,6 +603,7 @@ export class ActionExecutor {
                   ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
                     ? { provider: config?.apiProvider }
                     : {}),
+                  ...(config?.defaultModel != null ? { model: config?.defaultModel } : {}),
                 });
               }
             })

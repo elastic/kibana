@@ -220,6 +220,7 @@ describe('Task Runner', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    logger.isLevelEnabled.mockReturnValue(true);
     jest
       .requireMock('../lib/wrap_scoped_cluster_client')
       .createWrappedScopedClusterClientFactory.mockReturnValue({

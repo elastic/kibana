@@ -25,7 +25,7 @@ import type { BulkActionsDryRunErrCode } from '../../../../../../../common/const
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import type { DryRunError } from '../../../logic/bulk_actions/dry_run';
-import { internalRuleToAPIResponse } from '../../../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../../../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 

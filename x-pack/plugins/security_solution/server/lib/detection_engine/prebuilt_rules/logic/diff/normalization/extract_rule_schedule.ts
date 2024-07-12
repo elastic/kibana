@@ -9,7 +9,10 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleMetadata,
+  RuleResponse,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleSchedule } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 
@@ -18,8 +21,7 @@ export const extractRuleSchedule = (rule: RuleResponse | PrebuiltRuleAsset): Rul
   const from = rule.from ?? 'now-6m';
   const to = rule.to ?? 'now';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ruleMeta = (rule.meta ?? {}) as any;
+  const ruleMeta: RuleMetadata = ('meta' in rule ? rule.meta : undefined) ?? {};
   const lookbackFromMeta = String(ruleMeta.from ?? '');
 
   const intervalDuration = parseInterval(interval);

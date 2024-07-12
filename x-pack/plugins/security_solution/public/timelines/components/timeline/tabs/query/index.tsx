@@ -211,7 +211,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
@@ -234,7 +233,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+      if (eventId && securitySolutionNotesEnabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -271,7 +270,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       }
     },
     [
-      expandableFlyoutDisabled,
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,

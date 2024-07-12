@@ -64,6 +64,12 @@ describe('esql query helpers', () => {
         'METRICS pods load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
       );
       expect(idxPattern16).toBe('pods');
+
+      const idxPattern17 = getIndexPatternFromESQLQuery('FROM "$foo%"');
+      expect(idxPattern17).toBe('$foo%');
+
+      const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
+      expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
     });
   });
 

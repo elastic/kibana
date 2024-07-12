@@ -41,7 +41,9 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
         query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
       }),
       func: async (input, _, cbManager) => {
-        logger.debug(`KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`);
+        logger.debug(
+          () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
+        );
 
         const docs = await kbDataClient.getKnowledgeBaseDocuments({
           query: input.query,

@@ -102,6 +102,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 
+|{kib-repo}blob/{branch}/src/plugins/esql/README.md[esql]
+|The editor accepts the following properties:
+
+
 |{kib-repo}blob/{branch}/src/plugins/esql_datagrid/README.md[esqlDataGrid]
 |Contains a Discover-like table specifically for ES|QL queries:
 
@@ -326,10 +330,6 @@ generating deep links to other apps using locators, and creating short URLs.
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry_management_section/README.md[telemetryManagementSection]
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
-
-
-|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
-|The editor accepts the following properties:
 
 
 |<<uiactions-plugin>>

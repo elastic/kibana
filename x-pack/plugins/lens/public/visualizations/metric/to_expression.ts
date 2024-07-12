@@ -17,7 +17,9 @@ import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
 import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
-import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
+import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
+import { MetricVisualizationState } from './types';
+import { metricStateDefaults } from './constants';
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(params: CustomPaletteParams) {
@@ -148,6 +150,10 @@ export const toExpression = (
     progressDirection: showingBar(state)
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
+    titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
+    valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
+    iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
+    valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
     color: state.color || getDefaultColor(state, isMetricNumeric),
     icon: state.icon,
     palette:

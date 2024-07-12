@@ -19,6 +19,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { ControlApiRegistration } from '../../types';
 import { RangesliderControlApi, RangesliderControlState } from './types';
 import { StateComparators } from '@kbn/presentation-publishing';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -205,6 +206,37 @@ describe('RangesliderControlApi', () => {
         const maxInput = await findByTestId('rangeSlider__upperBoundFieldNumber');
         expect(maxInput).toHaveAttribute('placeholder', String(DEFAULT_MAX));
       });
+    });
+  });
+
+  describe('step state', () => {
+    test('default value provided when state.step is undefined', () => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
+      expect(serializedState.rawState.step).toBe(1);
+    });
+
+    test('retains value from initial state', () => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          step: 1024,
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
+      expect(serializedState.rawState.step).toBe(1024);
     });
   });
 });

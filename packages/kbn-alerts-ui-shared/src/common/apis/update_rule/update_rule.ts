@@ -44,7 +44,7 @@ export async function updateRule({
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
-      body: JSON.stringify(transformUpdateRuleBody(pick(rule, UPDATE_FIELDS))),
+      body: JSON.stringify(transformUpdateRuleBody(pick(rule, UPDATE_FIELDS_WITH_ACTIONS))),
     }
   );
   return transformRule(res);
