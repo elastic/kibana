@@ -7,6 +7,7 @@
  */
 
 import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { chunk } from 'lodash';
 
@@ -15,15 +16,13 @@ const removeKeywordSuffix = (name: string) => {
 };
 
 /**
- * Temporary helper to convert ECS field type to ESQL type since currently some might not match
- * @param type
+ * Returns columns with the metadata/description (e.g ECS info)
+ * if available
+ *
+ * @param columns
+ * @param fieldsMetadata
  * @returns
  */
-const convertEcsFieldTypeToESQLType = (type?: string) => {
-  if (type === 'keyword') return 'string';
-  return type;
-};
-
 export async function getColumnsWithMetadata(
   columns: Array<Omit<ESQLRealField, 'metadata'>>,
   fieldsMetadata?: FieldsMetadataPublicStart
@@ -46,7 +45,11 @@ export async function getColumnsWithMetadata(
           const metadata = fields.fields[removeKeywordSuffix(c.name)];
 
           // Need to convert metadata's type (e.g. keyword) to ES|QL type (e.g. string) to check if they are the same
-          if (!metadata || convertEcsFieldTypeToESQLType(metadata.type) !== c.type) return c;
+          if (
+            !metadata ||
+            (metadata?.type && esFieldTypeToKibanaFieldType(metadata.type) !== c.type)
+          )
+            return c;
           return {
             ...c,
             metadata: { description: metadata.description },
@@ -62,25 +65,34 @@ export async function getColumnsWithMetadata(
 }
 /**
  * Returns columns with the metadata/description (e.g ECS info)
- * if available
+ * if available. Safely partition the requests to avoid 400 payload too big errors.
  *
  * @param columns
  * @param fieldsMetadata
  * @returns
  */
-export async function getBulkColumnsWithMetadata(
+export async function getRateLimitedColumnsWithMetadata(
   columns: Array<Omit<ESQLRealField, 'metadata'>>,
-  fieldsMetadata?: FieldsMetadataPublicStart
+  fieldsMetadata?: FieldsMetadataPublicStart,
+  maxFieldsPerRequest = 250,
+  maxConcurrentRequests = 10
 ): Promise<ESQLRealField[]> {
   if (!fieldsMetadata) return columns;
 
   try {
     // Chunking requests here since we are calling fieldsMetadata.find with list of fields,
     // and we need to make sure payload is not too big, or else get 400 error
-    const chunkedColumns = chunk(columns, 250);
-    const result = await Promise.allSettled(
-      chunkedColumns.map((c) => getColumnsWithMetadata(c, fieldsMetadata))
-    );
+    const chunkedColumns = chunk(columns, maxFieldsPerRequest);
+    const result: Array<PromiseSettledResult<ESQLRealField[]>> = [];
+    // Also only make max of n at a time to avoid too many concurrent requests
+    for (let i = 0; i < chunkedColumns.length; i += maxConcurrentRequests) {
+      const cols = chunkedColumns.slice(i, i + maxConcurrentRequests);
+      const chunkResult = await Promise.allSettled(
+        cols.map((c) => getColumnsWithMetadata(c, fieldsMetadata))
+      );
+      result.push(...chunkResult);
+    }
+
     return result.flatMap((r, idx) => (r.status === 'fulfilled' ? r.value : chunkedColumns[idx]));
   } catch (error) {
     // eslint-disable-next-line no-console
