@@ -25,7 +25,6 @@ import {
   EuiLink,
   EuiImage,
   EuiCallOut,
-  EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import {
