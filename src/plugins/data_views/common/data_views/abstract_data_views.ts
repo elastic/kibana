@@ -149,6 +149,11 @@ export abstract class AbstractDataView {
             hasAttrs = true;
           }
 
+          if (value.customDescription) {
+            attrs.customDescription = value.customDescription;
+            hasAttrs = true;
+          }
+
           if (hasAttrs) {
             acc[key] = attrs;
           }
