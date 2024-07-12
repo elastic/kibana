@@ -254,7 +254,11 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0, columnIndex: 0 }
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+      isAnchorRow: false,
+      rowIndex: 0,
+      columnIndex: 0,
+    }
   ): Promise<void> {
     const rowColumns = await this.getRow(options);
     const testSubj = options.isAnchorRow
@@ -265,6 +269,11 @@ export class DataGridService extends FtrService {
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
+    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+  }
+
+  public async clickDocViewerTab(id: string) {
+    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
