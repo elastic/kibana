@@ -23,10 +23,7 @@ import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_nod
 const currentNode = 'current-node-id';
 const now = '2024-08-10T10:00:00.000Z';
 
-const createNodeRecord = (
-  id: string = '1',
-  lastSeen: string = '2024-08-10T10:00:00.000Z'
-): BackgroundTaskNode => ({
+const createNodeRecord = (id: string = '1', lastSeen: string = now): BackgroundTaskNode => ({
   id,
   last_seen: lastSeen,
 });
@@ -65,7 +62,7 @@ describe('KibanaDiscoveryService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
-    jest.setSystemTime(new Date(2024, 7, 10, 12, 0, 0));
+    jest.setSystemTime(new Date(now));
   });
 
   afterEach(() => {

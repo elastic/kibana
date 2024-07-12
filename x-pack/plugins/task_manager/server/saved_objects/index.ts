@@ -15,7 +15,7 @@ import { TASK_MANAGER_INDEX } from '../constants';
 import { backgroundTaskNodeModelVersions, taskModelVersions } from './model_versions';
 
 export const TASK_SO_NAME = 'task';
-export const BACKGROUND_TASK_NODE_SO_NAME = 'background_task_node';
+export const BACKGROUND_TASK_NODE_SO_NAME = 'background-task-node';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
