@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
-export function UnauthorisedModal({
+export function Unauthorized({
   isUnauthorizedModalVisible = false,
   onClose,
 }: {

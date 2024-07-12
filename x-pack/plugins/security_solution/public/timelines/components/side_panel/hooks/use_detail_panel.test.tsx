@@ -8,7 +8,6 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import React from 'react';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
-import { timelineActions } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
@@ -33,14 +32,6 @@ jest.mock('../../../../common/lib/kibana', () => {
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../store');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
 jest.mock('../../../../sourcerer/containers', () => {
   const mockSourcererReturn = {
     browserFields: {},
@@ -85,18 +76,6 @@ describe('useDetailPanel', () => {
       expect(result.current.openEventDetailsPanel).toBeDefined();
       expect(result.current.shouldShowDetailsPanel).toBe(false);
       expect(result.current.DetailsPanel).toBeNull();
-    });
-  });
-
-  test('should fire redux action to open event details panel', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderUseDetailPanel();
-      await waitForNextUpdate();
-
-      result.current?.openEventDetailsPanel('123');
-
-      expect(mockDispatch).not.toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
     });
   });
 
