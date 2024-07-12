@@ -38,11 +38,11 @@ export function registerGetApmDownstreamDependenciesFunction({
       parameters: {
         type: 'object',
         properties: {
-          'service.name': {
+          serviceName: {
             type: 'string',
             description: 'The name of the service',
           },
-          'service.environment': {
+          serviceEnvironment: {
             type: 'string',
             description:
               'The environment that the service is running in. Leave empty to query for all environments.',
@@ -56,7 +56,7 @@ export function registerGetApmDownstreamDependenciesFunction({
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
-        required: ['service.name', 'start', 'end'],
+        required: ['serviceName', 'start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
