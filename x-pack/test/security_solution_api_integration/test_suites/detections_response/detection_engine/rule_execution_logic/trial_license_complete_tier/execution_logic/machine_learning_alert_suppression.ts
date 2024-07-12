@@ -112,7 +112,8 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAnomalies(log, es);
       });
 
-      describe('with per-execution suppression duration', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/187478
+      describe.skip('with per-execution suppression duration', () => {
         beforeEach(() => {
           ruleProps = {
             ...baseRuleProps,
@@ -244,7 +245,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with interval suppression duration', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/187614
+      describe.skip('with interval suppression duration', () => {
         beforeEach(() => {
           ruleProps = {
             ...baseRuleProps,

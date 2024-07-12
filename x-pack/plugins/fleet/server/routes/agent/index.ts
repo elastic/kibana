@@ -338,7 +338,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .delete({
       path: AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN,
       fleetAuthz: {
-        fleet: { readAgents: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(

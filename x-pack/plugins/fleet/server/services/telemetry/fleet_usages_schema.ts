@@ -357,6 +357,7 @@ export const fleetUsagesSchema: RootSchema<any> = {
         _meta: {
           description:
             'Average number of global data tags defined per agent policy (accross policies using global data tags)',
+          optional: true,
         },
       },
     },

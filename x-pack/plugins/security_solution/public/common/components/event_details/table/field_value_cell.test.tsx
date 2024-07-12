@@ -22,7 +22,6 @@ const hostIpData: EventFieldsData = {
   ariaRowindex: 35,
   field: 'host.ip',
   format: '',
-  indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
   isObjectArray: false,
   name: 'host.ip',
   originalValue: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
@@ -87,7 +86,6 @@ describe('FieldValueCell', () => {
       ariaRowindex: 50,
       field: 'message',
       format: '',
-      indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       isObjectArray: false,
       name: 'message',
       originalValue: ['Endpoint network event'],
@@ -101,7 +99,6 @@ describe('FieldValueCell', () => {
     const messageFieldFromBrowserField: BrowserField = {
       aggregatable: false,
       format: '',
-      indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'message',
       readFromDocValues: false,
       searchable: true,
@@ -137,7 +134,6 @@ describe('FieldValueCell', () => {
     const hostIpFieldFromBrowserField: BrowserField = {
       aggregatable: true,
       format: '',
-      indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'host.ip',
       readFromDocValues: false,
       searchable: true,

@@ -124,6 +124,14 @@
           "section": "def-server.LogsRatesServiceReturnType",
           "text": "LogsRatesServiceReturnType"
         },
+        ">; getLogsRateTimeseries: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, kuery, serviceEnvironmentQuery, }: ",
+        "LogsRateTimeseries",
+        ") => Promise<",
+        "LogsRateTimeseriesReturnType",
+        ">; getLogsErrorRateTimeseries: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, kuery, serviceEnvironmentQuery, }: ",
+        "LogsErrorRateTimeseries",
+        ") => Promise<",
+        "LogsErrorRateTimeseriesReturnType",
         ">; getLogSourcesService: (request: ",
         {
           "pluginId": "@kbn/core-http-server",

@@ -130,7 +130,7 @@ export const useAssistantOverlay = (
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    async (showOverlay: boolean, silent?: boolean) => {
+    async (showOverlay: boolean) => {
       let conversation;
       if (!isLoading) {
         conversation = conversationTitle

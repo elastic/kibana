@@ -145,7 +145,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
@@ -168,7 +167,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+      if (eventId && securitySolutionNotesEnabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -205,7 +204,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       }
     },
     [
-      expandableFlyoutDisabled,
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
@@ -285,31 +283,29 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           </InPortal>
           {NotesFlyoutMemo}
           <FullWidthFlexGroup>
-            <ScrollableFlexItem grow={2}>
-              <UnifiedTimelineBody
-                header={unifiedHeader}
-                columns={augmentedColumnHeaders}
-                isSortEnabled={false}
-                rowRenderers={rowRenderers}
-                timelineId={timelineId}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                sort={TIMELINE_NO_SORTING}
-                events={events}
-                refetch={refetch}
-                dataLoadingState={dataLoadingState}
-                totalCount={isBlankTimeline ? 0 : totalCount}
-                onEventClosed={onEventClosed}
-                expandedDetail={expandedDetail}
-                showExpandedDetails={showExpandedDetails}
-                onChangePage={loadPage}
-                activeTab={activeTab}
-                updatedAt={refreshedAt}
-                isTextBasedQuery={false}
-                pageInfo={pageInfo}
-                leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-              />
-            </ScrollableFlexItem>
+            <UnifiedTimelineBody
+              header={unifiedHeader}
+              columns={augmentedColumnHeaders}
+              isSortEnabled={false}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              sort={TIMELINE_NO_SORTING}
+              events={events}
+              refetch={refetch}
+              dataLoadingState={dataLoadingState}
+              totalCount={isBlankTimeline ? 0 : totalCount}
+              onEventClosed={onEventClosed}
+              expandedDetail={expandedDetail}
+              showExpandedDetails={showExpandedDetails}
+              onChangePage={loadPage}
+              activeTab={activeTab}
+              updatedAt={refreshedAt}
+              isTextBasedQuery={false}
+              pageInfo={pageInfo}
+              leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+            />
           </FullWidthFlexGroup>
         </>
       ) : (
@@ -325,14 +321,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             loading={isQueryLoading}
             refetch={refetch}
           />
-          <FullWidthFlexGroup>
-            <ScrollableFlexItem grow={2}>
-              <EqlTabHeader
-                activeTab={activeTab}
-                setTimelineFullScreen={setTimelineFullScreen}
-                timelineFullScreen={timelineFullScreen}
-                timelineId={timelineId}
-              />
+          <FullWidthFlexGroup gutterSize="s" direction="column">
+            <ScrollableFlexItem grow={false}>{unifiedHeader}</ScrollableFlexItem>
+            <ScrollableFlexItem grow={true}>
               <EventDetailsWidthProvider>
                 <StyledEuiFlyoutBody
                   data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
