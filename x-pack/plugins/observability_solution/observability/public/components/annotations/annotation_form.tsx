@@ -79,7 +79,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.observability.annotationForm.euiFormRow.descriptionLabel', {
-          defaultMessage: 'Message',
+          defaultMessage: 'Description',
         })}
         display="columnCompressed"
         fullWidth

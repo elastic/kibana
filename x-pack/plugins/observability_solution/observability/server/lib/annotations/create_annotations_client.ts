@@ -58,7 +58,7 @@ export function createAnnotationsClient(params: {
     });
     const mappings = currentMappings?.[index].mappings;
 
-    if (mappings.dynamic === true || mappings.dynamic === 'true') {
+    if (mappings?.properties?.slo) {
       return;
     }
 
@@ -139,6 +139,7 @@ export function createAnnotationsClient(params: {
         updateParams: Annotation
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
         validateAnnotation(updateParams);
+        await updateMappings();
         const { id, ...rest } = updateParams;
 
         const annotation = {

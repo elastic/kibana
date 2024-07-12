@@ -41,6 +41,9 @@ export function useUpdateAnnotation() {
   >(
     ['updateAnnotation'],
     async ({ annotation }) => {
+      if (!annotation.message) {
+        annotation.message = annotation.annotation?.title ?? '';
+      }
       const body = JSON.stringify(annotation);
       return await http.put<CreateAnnotationResponse>(
         `/api/observability/annotation/${annotation.id}`,

@@ -41,6 +41,9 @@ export function useCreateAnnotation() {
   >(
     ['createAnnotation'],
     ({ annotation }) => {
+      if (!annotation.message) {
+        annotation.message = annotation.annotation?.title ?? '';
+      }
       const body = JSON.stringify(annotation);
       return http.post<CreateAnnotationResponse>(`/api/observability/annotation`, { body });
     },
