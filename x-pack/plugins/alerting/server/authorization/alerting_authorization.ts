@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { has, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
@@ -217,7 +217,7 @@ export class AlertingAuthorization {
       producer: ruleType.producer,
     });
 
-    const isAvailableConsumer = has(await this.allRegisteredConsumers, consumer);
+    const isAvailableConsumer = this.allRegisteredConsumers.has(consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 

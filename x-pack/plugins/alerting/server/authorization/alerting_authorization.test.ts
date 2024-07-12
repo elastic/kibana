@@ -20,17 +20,12 @@ import {
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { NormalizedRuleType, RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 import { schema } from '@kbn/config-schema';
-
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
-const request = {} as KibanaRequest;
-const allRegisteredConsumers = new Set<string>();
-const ruleTypesConsumersMap = new Map<string, Set<string>>();
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 const getSpace = jest.fn();
 const getSpaceId = () => 'space1';
@@ -53,65 +48,6 @@ function mockSecurity() {
   ).mockImplementation(mockAuthorizationAction);
   authorization.mode.useRbacForRequest.mockReturnValue(true);
   return { authorization };
-}
-
-function mockFeature(appName: string, typeName?: string[]) {
-  const alertingFeatures = typeName?.map((ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [appName],
-  }));
-
-  return new KibanaFeature({
-    id: appName,
-    name: appName,
-    app: [],
-    category: { id: 'foo', label: 'foo' },
-    ...(alertingFeatures
-      ? {
-          alerting: alertingFeatures,
-        }
-      : {}),
-    privileges: {
-      all: {
-        ...(alertingFeatures
-          ? {
-              alerting: {
-                rule: {
-                  all: alertingFeatures,
-                },
-                alert: {
-                  all: alertingFeatures,
-                },
-              },
-            }
-          : {}),
-        savedObject: {
-          all: [],
-          read: [],
-        },
-        ui: [],
-      },
-      read: {
-        ...(alertingFeatures
-          ? {
-              alerting: {
-                rule: {
-                  read: alertingFeatures,
-                },
-                alert: {
-                  read: alertingFeatures,
-                },
-              },
-            }
-          : {}),
-        savedObject: {
-          all: [],
-          read: [],
-        },
-        ui: [],
-      },
-    },
-  });
 }
 
 function mockFeatureWithSubFeature(appName: string, typeName: string[]) {
@@ -191,64 +127,309 @@ function mockFeatureWithSubFeature(appName: string, typeName: string[]) {
   });
 }
 
-const myAppFeature = mockFeature('myApp', ['myType']);
-const myOtherAppFeature = mockFeature('myOtherApp', ['myType']);
-const myAppWithSubFeature = mockFeatureWithSubFeature('myAppWithSubFeature', ['myType']);
-const myFeatureWithoutAlerting = mockFeature('myOtherApp');
+function mockFeatureWithConsumers(
+  appName: string,
+  alertingFeatures?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>
+) {
+  return new KibanaFeature({
+    id: appName,
+    name: appName,
+    app: [],
+    category: { id: 'foo', label: 'foo' },
+    ...(alertingFeatures
+      ? {
+          alerting: alertingFeatures,
+        }
+      : {}),
+    privileges: {
+      all: {
+        ...(alertingFeatures
+          ? {
+              alerting: {
+                rule: {
+                  all: alertingFeatures,
+                },
+                alert: {
+                  all: alertingFeatures,
+                },
+              },
+            }
+          : {}),
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        ...(alertingFeatures
+          ? {
+              alerting: {
+                rule: {
+                  read: alertingFeatures,
+                },
+                alert: {
+                  read: alertingFeatures,
+                },
+              },
+            }
+          : {}),
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+  });
+}
 
-beforeEach(() => {
-  jest.resetAllMocks();
-  ruleTypeRegistry.get.mockImplementation((id) => ({
-    id,
-    name: 'My Alert Type',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    recoveryActionGroup: RecoveredActionGroup,
-    async executor() {
-      return { state: {} };
-    },
-    category: 'test',
-    producer: 'myApp',
-    validate: {
-      params: schema.any(),
-    },
-    validLegacyConsumers: [],
-  }));
-  features.getKibanaFeatures.mockReturnValue([
-    myAppFeature,
-    myOtherAppFeature,
-    myAppWithSubFeature,
-    myFeatureWithoutAlerting,
-  ]);
-  getSpace.mockResolvedValue(undefined);
-});
+const myAppFeature = mockFeatureWithConsumers('myApp', [
+  { ruleTypeId: 'myType', consumers: ['myApp'] },
+]);
+
+const myOtherAppFeature = mockFeatureWithConsumers('myOtherApp', [
+  { ruleTypeId: 'myType', consumers: ['myOtherApp'] },
+]);
+
+const myAppWithSubFeature = mockFeatureWithSubFeature('myAppWithSubFeature', ['myType']);
+const myFeatureWithoutAlerting = mockFeatureWithConsumers('myOtherApp');
 
 describe('AlertingAuthorization', () => {
-  describe('constructor', () => {
-    test(`fetches the user's current space`, async () => {
-      const space = {
-        id: uuidv4(),
-        name: uuidv4(),
-        disabledFeatures: [],
-      };
-      getSpace.mockResolvedValue(space);
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
+  const allRegisteredConsumers = new Set<string>();
+  const ruleTypesConsumersMap = new Map<string, Set<string>>();
+  let request: KibanaRequest;
 
-      new AlertingAuthorization({
+  beforeEach(() => {
+    jest.clearAllMocks();
+    request = httpServerMock.createKibanaRequest();
+
+    ruleTypeRegistry.get.mockImplementation((id) => ({
+      id,
+      name: 'My Alert Type',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      recoveryActionGroup: RecoveredActionGroup,
+      async executor() {
+        return { state: {} };
+      },
+      category: 'test',
+      producer: 'myApp',
+      validate: {
+        params: schema.any(),
+      },
+      validLegacyConsumers: [],
+    }));
+
+    features.getKibanaFeatures.mockReturnValue([
+      myAppFeature,
+      myOtherAppFeature,
+      myAppWithSubFeature,
+      myFeatureWithoutAlerting,
+    ]);
+    getSpace.mockResolvedValue(undefined);
+
+    allRegisteredConsumers.clear();
+    ruleTypesConsumersMap.clear();
+  });
+
+  describe('create', () => {
+    let securityStart: jest.Mocked<SecurityPluginStart>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      securityStart = securityMock.createStart();
+      getSpace.mockReturnValue({ id: 'default', name: 'Default', disabledFeatures: [] });
+    });
+
+    it('creates an AlertingAuthorization object', async () => {
+      expect.assertions(2);
+
+      const authPromise = AlertingAuthorization.create({
         request,
         ruleTypeRegistry,
         getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
       });
 
-      expect(getSpace).toHaveBeenCalledWith(request);
+      await expect(authPromise).resolves.toBeDefined();
+      await expect(authPromise).resolves.not.toThrow();
+    });
+
+    it('creates an AlertingAuthorization object without spaces', async () => {
+      getSpace.mockReturnValue(undefined);
+      expect.assertions(2);
+
+      const authPromise = AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      await expect(authPromise).resolves.toBeDefined();
+      await expect(authPromise).resolves.not.toThrow();
+    });
+
+    it('filters out disabled spaces and features without alerting', async () => {
+      getSpace.mockReturnValue({
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: ['my-feature-1'],
+      });
+
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeatureWithConsumers('my-feature-1', [
+          { ruleTypeId: 'rule-type-1', consumers: ['consumer-a', 'consumer-b'] },
+        ]),
+        mockFeatureWithConsumers('my-feature-2', [
+          { ruleTypeId: 'rule-type-2', consumers: ['consumer-c', 'consumer-d'] },
+        ]),
+        mockFeatureWithConsumers('my-feature-3'),
+        mockFeatureWithConsumers('my-feature-4', []),
+      ]);
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      expect(auth.allRegisteredConsumers).toMatchInlineSnapshot(`
+        Set {
+          "consumer-c",
+          "consumer-d",
+        }
+      `);
+      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      expect(auth.ruleTypesConsumersMap).toMatchInlineSnapshot(`
+        Map {
+          "rule-type-2" => Set {
+            "consumer-c",
+            "consumer-d",
+          },
+        }
+      `);
+    });
+
+    it('removes duplicated consumers', async () => {
+      getSpace.mockReturnValue({
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+      });
+
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeatureWithConsumers('my-feature-1', [
+          { ruleTypeId: 'rule-type-1', consumers: ['consumer-a', 'consumer-b', 'consumer-a'] },
+          { ruleTypeId: 'rule-type-2', consumers: ['consumer-a', 'consumer-b', 'consumer-c'] },
+        ]),
+        mockFeatureWithConsumers('my-feature-2', [
+          { ruleTypeId: 'rule-type-2', consumers: ['consumer-a', 'consumer-b', 'consumer-c'] },
+        ]),
+      ]);
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      expect(auth.allRegisteredConsumers).toMatchInlineSnapshot(`
+        Set {
+          "consumer-a",
+          "consumer-b",
+          "consumer-c",
+        }
+      `);
+    });
+
+    it('removes duplicated ruleTypes and consumers', async () => {
+      getSpace.mockReturnValue({
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+      });
+
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeatureWithConsumers('my-feature-1', [
+          { ruleTypeId: 'rule-type-1', consumers: ['consumer-a', 'consumer-b', 'consumer-a'] },
+          { ruleTypeId: 'rule-type-2', consumers: ['consumer-a', 'consumer-b', 'consumer-c'] },
+        ]),
+        mockFeatureWithConsumers('my-feature-2', [
+          { ruleTypeId: 'rule-type-2', consumers: ['consumer-a', 'consumer-b', 'consumer-e'] },
+          { ruleTypeId: 'rule-type-1', consumers: ['consumer-a', 'consumer-b', 'consumer-d'] },
+        ]),
+      ]);
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      expect(auth.ruleTypesConsumersMap).toMatchInlineSnapshot(`
+        Map {
+          "rule-type-1" => Set {
+            "consumer-a",
+            "consumer-b",
+            "consumer-d",
+          },
+          "rule-type-2" => Set {
+            "consumer-a",
+            "consumer-b",
+            "consumer-c",
+            "consumer-e",
+          },
+        }
+      `);
+    });
+
+    it('throws an error when a failure occurs', async () => {
+      expect.assertions(1);
+
+      getSpace.mockRejectedValue(new Error('Error'));
+
+      const authPromise = AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      await expect(authPromise).rejects.toThrow();
     });
   });
 
   describe('ensureAuthorized', () => {
-    test('is a no-op when there is no authorization api', async () => {
+    beforeEach(() => {
+      allRegisteredConsumers.clear();
+      allRegisteredConsumers.add('myApp');
+    });
+
+    it('is a no-op when there is no authorization api', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -267,9 +448,10 @@ describe('AlertingAuthorization', () => {
       expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
     });
 
-    test('is a no-op when the security license is disabled', async () => {
+    it('is a no-op when the security license is disabled', async () => {
       const { authorization } = mockSecurity();
       authorization.mode.useRbacForRequest.mockReturnValue(false);
+
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -289,7 +471,7 @@ describe('AlertingAuthorization', () => {
       expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
     });
 
-    test('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
+    it('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -331,7 +513,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
+    it('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -373,7 +555,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when consumer is alerts', async () => {
+    it('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when consumer is alerts', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -415,7 +597,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when consumer is alerts', async () => {
+    it('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when consumer is alerts', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -457,7 +639,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the user has privileges to execute rules for the specified rule type, operation and producer when producer is different from consumer', async () => {
+    it('ensures the user has privileges to execute rules for the specified rule type, operation and producer when producer is different from consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -468,6 +650,7 @@ describe('AlertingAuthorization', () => {
         hasAllRequested: true,
         privileges: { kibana: [] },
       });
+      allRegisteredConsumers.add('myOtherApp');
 
       const alertAuthorization = new AlertingAuthorization({
         request,
@@ -499,7 +682,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the user has privileges to execute alerts for the specified rule type, operation and producer when producer is different from consumer', async () => {
+    it('ensures the user has privileges to execute alerts for the specified rule type, operation and producer when producer is different from consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -510,6 +693,7 @@ describe('AlertingAuthorization', () => {
         hasAllRequested: true,
         privileges: { kibana: [] },
       });
+      allRegisteredConsumers.add('myOtherApp');
 
       const alertAuthorization = new AlertingAuthorization({
         request,
@@ -541,7 +725,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('ensures the producer is used for authorization if the consumer is `alerts`', async () => {
+    it('ensures the producer is used for authorization if the consumer is `alerts`', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -583,7 +767,7 @@ describe('AlertingAuthorization', () => {
       });
     });
 
-    test('throws if user lacks the required rule privileges for the consumer', async () => {
+    it('throws if user lacks the required rule privileges for the consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -627,7 +811,7 @@ describe('AlertingAuthorization', () => {
       );
     });
 
-    test('throws if user lacks the required alert privileges for the consumer', async () => {
+    it('throws if user lacks the required alert privileges for the consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -675,7 +859,7 @@ describe('AlertingAuthorization', () => {
       );
     });
 
-    test('throws if user lacks the required privileges for the producer', async () => {
+    it('throws if user lacks the required privileges for the producer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -719,7 +903,7 @@ describe('AlertingAuthorization', () => {
       );
     });
 
-    test('throws if user lacks the required privileges for both consumer and producer', async () => {
+    it('throws if user lacks the required privileges for both consumer and producer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -763,7 +947,7 @@ describe('AlertingAuthorization', () => {
       );
     });
 
-    test('checks additional privileges correctly', async () => {
+    it('checks additional privileges correctly', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -857,7 +1041,7 @@ describe('AlertingAuthorization', () => {
       validLegacyConsumers: [],
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
-    test('omits filter when there is no authorization api', async () => {
+    it('omits filter when there is no authorization api', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -876,7 +1060,7 @@ describe('AlertingAuthorization', () => {
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
       expect(filter).toEqual(undefined);
     });
-    test('ensureRuleTypeIsAuthorized is no-op when there is no authorization api', async () => {
+    it('ensureRuleTypeIsAuthorized is no-op when there is no authorization api', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -897,10 +1081,17 @@ describe('AlertingAuthorization', () => {
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
     });
 
-    test('creates a filter based on the privileged types', async () => {
+    it('creates a filter based on the privileged types', async () => {
       features.getKibanaFeatures.mockReturnValue([
-        mockFeature('myApp', ['myAppAlertType', 'mySecondAppAlertType']),
-        mockFeature('alerts', ['myOtherAppAlertType']),
+        mockFeatureWithConsumers('myApp', [
+          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'mySecondAppAlertType', consumers: ['myApp'] },
+        ]),
+
+        mockFeatureWithConsumers('alerts', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['alerts'] },
+        ]),
+
         myOtherAppFeature,
         myAppWithSubFeature,
       ]);
@@ -1015,7 +1206,7 @@ describe('AlertingAuthorization', () => {
         )
       );
     });
-    test('throws if user has no privileges to any rule type', async () => {
+    it('throws if user has no privileges to any rule type', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1059,10 +1250,16 @@ describe('AlertingAuthorization', () => {
       );
     });
 
-    test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
+    it('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
       features.getKibanaFeatures.mockReturnValue([
-        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
-        mockFeature('myOtherApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeatureWithConsumers('myApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
+        ]),
+        mockFeatureWithConsumers('myOtherApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myOtherApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myOtherApp'] },
+        ]),
       ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -1123,10 +1320,15 @@ describe('AlertingAuthorization', () => {
         `"Unauthorized by \\"myOtherApp\\" to find \\"myAppAlertType\\" alert"`
       );
     });
-    test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
+    it('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
       features.getKibanaFeatures.mockReturnValue([
-        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
-        mockFeature('myOtherApp', ['myAppAlertType']),
+        mockFeatureWithConsumers('myApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
+        ]),
+        mockFeatureWithConsumers('myOtherApp', [
+          { ruleTypeId: 'myOtherApp', consumers: ['myOtherApp'] },
+        ]),
       ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -1185,10 +1387,17 @@ describe('AlertingAuthorization', () => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
     });
-    test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
+    it('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
       features.getKibanaFeatures.mockReturnValue([
-        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType', 'mySecondAppAlertType']),
-        mockFeature('myOtherApp', ['mySecondAppAlertType', 'myAppAlertType']),
+        mockFeatureWithConsumers('myApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'mySecondAppAlertType', consumers: ['myApp'] },
+        ]),
+        mockFeatureWithConsumers('myOtherApp', [
+          { ruleTypeId: 'mySecondAppAlertType', consumers: ['myOtherApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myOtherApp'] },
+        ]),
       ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -1266,7 +1475,7 @@ describe('AlertingAuthorization', () => {
     // This is a specific use case currently for alerts as data
     // Space ids are stored in the alerts documents and even if security is disabled
     // still need to consider the users space privileges
-    test('creates a spaceId only filter if security is disabled, but require space awareness', async () => {
+    it('creates a spaceId only filter if security is disabled, but require space awareness', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -1328,11 +1537,17 @@ describe('AlertingAuthorization', () => {
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
     beforeEach(() => {
       features.getKibanaFeatures.mockReturnValue([
-        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
-        mockFeature('myOtherApp', ['myAppAlertType', 'myOtherAppAlertType']),
+        mockFeatureWithConsumers('myApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
+        ]),
+        mockFeatureWithConsumers('myOtherApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
+          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
+        ]),
       ]);
     });
-    test('augments a list of types with all features when there is no authorization api', async () => {
+    it('augments a list of types with all features when there is no authorization api', async () => {
       features.getKibanaFeatures.mockReturnValue([
         myAppFeature,
         myOtherAppFeature,
@@ -1434,7 +1649,7 @@ describe('AlertingAuthorization', () => {
       `);
     });
 
-    test('augments a list of types with consumers under which the operation is authorized', async () => {
+    it('augments a list of types with consumers under which the operation is authorized', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1546,7 +1761,7 @@ describe('AlertingAuthorization', () => {
       `);
     });
 
-    test('authorizes user under the `alerts` consumer when they are authorized by the producer', async () => {
+    it('authorizes user under the `alerts` consumer when they are authorized by the producer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1616,7 +1831,7 @@ describe('AlertingAuthorization', () => {
       `);
     });
 
-    test('augments a list of types with consumers under which multiple operations are authorized', async () => {
+    it('augments a list of types with consumers under which multiple operations are authorized', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1753,7 +1968,7 @@ describe('AlertingAuthorization', () => {
       `);
     });
 
-    test('omits types which have no consumers under which the operation is authorized', async () => {
+    it('omits types which have no consumers under which the operation is authorized', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1892,9 +2107,13 @@ describe('AlertingAuthorization', () => {
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
     beforeEach(() => {
-      features.getKibanaFeatures.mockReturnValue([mockFeature('myApp', ['myOtherAppAlertType'])]);
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeatureWithConsumers('myOtherApp', [
+          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
+        ]),
+      ]);
     });
-    test('it returns authorized rule types given a set of feature ids', async () => {
+    it('it returns authorized rule types given a set of feature ids', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1963,7 +2182,7 @@ describe('AlertingAuthorization', () => {
       `);
     });
 
-    test('it returns all authorized if user has read, get and update alert privileges', async () => {
+    it('it returns all authorized if user has read, get and update alert privileges', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -2223,8 +2442,10 @@ describe('AlertingAuthorization', () => {
 
         features.getKibanaFeatures.mockReset();
         features.getKibanaFeatures.mockReturnValue([
-          mockFeature('stackAlerts', ['.esQuery']),
-          mockFeature('discover', []),
+          mockFeatureWithConsumers('stackAlerts', [
+            { ruleTypeId: '.esQuery', consumers: ['stackAlerts'] },
+          ]),
+          mockFeatureWithConsumers('discover'),
         ]);
         checkPrivileges.mockReset();
         checkPrivileges.mockResolvedValue({
@@ -2247,7 +2468,7 @@ describe('AlertingAuthorization', () => {
       });
 
       describe('ensureAuthorized', () => {
-        test('should allow to create .esquery rule type with stackAlerts consumer', async () => {
+        it('should allow to create .esquery rule type with stackAlerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2259,7 +2480,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .esquery rule type with discover consumer', async () => {
+        it('should allow to create .esquery rule type with discover consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2271,7 +2492,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .esquery rule type with alerts consumer', async () => {
+        it('should allow to create .esquery rule type with alerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2283,7 +2504,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .esquery rule type with logs consumer', async () => {
+        it('should throw an error to create .esquery rule type with logs consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2297,7 +2518,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
+        it('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2311,7 +2532,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
+        it('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.threshold-rule-o11y',
@@ -2325,7 +2546,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .logs-threshold-o11y rule type with alerts infrastructure', async () => {
+        it('should throw an error to create .logs-threshold-o11y rule type with alerts infrastructure', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.logs-threshold-o11y',
@@ -2341,7 +2562,7 @@ describe('AlertingAuthorization', () => {
         });
       });
 
-      test('creates a filter based on the privileged types', async () => {
+      it('creates a filter based on the privileged types', async () => {
         expect(
           (
             await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
@@ -2370,12 +2591,16 @@ describe('AlertingAuthorization', () => {
 
         features.getKibanaFeatures.mockReset();
         features.getKibanaFeatures.mockReturnValue([
-          mockFeature('infrastructure', [
-            '.infrastructure-threshold-o11y',
-            '.threshold-rule-o11y',
-            '.esQuery',
+          mockFeatureWithConsumers('infrastructure', [
+            { ruleTypeId: '.infrastructure-threshold-o11y', consumers: ['infrastructure'] },
+            { ruleTypeId: '.threshold-rule-o11y', consumers: ['myApp'] },
+            { ruleTypeId: '.esQuery', consumers: ['myApp'] },
           ]),
-          mockFeature('logs', ['.threshold-rule-o11y', '.esQuery', '.logs-threshold-o11y']),
+          mockFeatureWithConsumers('logs', [
+            { ruleTypeId: '.threshold-rule-o11y', consumers: ['logs'] },
+            { ruleTypeId: '.esQuery', consumers: ['logs'] },
+            { ruleTypeId: '.logs-threshold-o11y', consumers: ['logs'] },
+          ]),
         ]);
         checkPrivileges.mockReset();
         checkPrivileges.mockResolvedValue({
@@ -2398,7 +2623,7 @@ describe('AlertingAuthorization', () => {
       });
 
       describe('ensureAuthorized', () => {
-        test('should throw an error to create .esquery rule type with stackAlerts consumer', async () => {
+        it('should throw an error to create .esquery rule type with stackAlerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2412,7 +2637,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .esquery rule type with discover consumer', async () => {
+        it('should throw an error to create .esquery rule type with discover consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2426,7 +2651,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
+        it('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.threshold-rule-o11y',
@@ -2440,7 +2665,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .esquery rule type with logs consumer', async () => {
+        it('should allow to create .esquery rule type with logs consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2452,7 +2677,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .esquery rule type with logs infrastructure', async () => {
+        it('should allow to create .esquery rule type with logs infrastructure', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2464,7 +2689,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
+        it('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.logs-threshold-o11y',
@@ -2476,7 +2701,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
+        it('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.threshold-rule-o11y',
@@ -2489,7 +2714,7 @@ describe('AlertingAuthorization', () => {
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
       });
-      test('creates a filter based on the privileged types', async () => {
+      it('creates a filter based on the privileged types', async () => {
         expect(
           (
             await alertAuthorization.getFindAuthorizationFilter(
@@ -2522,8 +2747,14 @@ describe('AlertingAuthorization', () => {
 
         features.getKibanaFeatures.mockClear();
         features.getKibanaFeatures.mockReturnValue([
-          mockFeature('stackAlerts', ['.esQuery']),
-          mockFeature('logs', ['.logs-threshold-o11y', '.threshold-rule-o11y', '.esQuery']),
+          mockFeatureWithConsumers('stackAlerts', [
+            { ruleTypeId: '.esQuery', consumers: ['stackAlerts'] },
+          ]),
+          mockFeatureWithConsumers('logs', [
+            { ruleTypeId: '.logs-threshold-o11y', consumers: ['logs'] },
+            { ruleTypeId: '.threshold-rule-o11y', consumers: ['logs'] },
+            { ruleTypeId: '.esQuery', consumers: ['logs'] },
+          ]),
         ]);
         checkPrivileges.mockClear();
         checkPrivileges.mockResolvedValue({
@@ -2545,7 +2776,7 @@ describe('AlertingAuthorization', () => {
       });
 
       describe('ensureAuthorized', () => {
-        test('should allow to create .esquery rule type with stackAlerts consumer', async () => {
+        it('should allow to create .esquery rule type with stackAlerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2557,7 +2788,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .esquery rule type with discover consumer', async () => {
+        it('should allow to create .esquery rule type with discover consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2569,7 +2800,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .esquery rule type with logs consumer', async () => {
+        it('should allow to create .esquery rule type with logs consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2581,7 +2812,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
+        it('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.logs-threshold-o11y',
@@ -2593,7 +2824,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
+        it('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.threshold-rule-o11y',
@@ -2605,7 +2836,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .esquery rule type with logs infrastructure', async () => {
+        it('should throw an error to create .esquery rule type with logs infrastructure', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2619,7 +2850,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
+        it('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.threshold-rule-o11y',
@@ -2633,7 +2864,7 @@ describe('AlertingAuthorization', () => {
 
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
-        test('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
+        it('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
           await expect(
             alertAuthorization.ensureAuthorized({
               ruleTypeId: '.esQuery',
@@ -2648,7 +2879,7 @@ describe('AlertingAuthorization', () => {
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
       });
-      test('creates a filter based on the privileged types', async () => {
+      it('creates a filter based on the privileged types', async () => {
         expect(
           (
             await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
