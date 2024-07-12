@@ -4,17 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Observable } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
-import type { IntegrationAssistantPluginStartDependencies } from '../types';
-import type { TelemetryService } from './telemetry/service';
-
+export * from './types';
 export { Telemetry } from './telemetry/service';
-
-export type RenderUpselling = React.ReactNode;
-
-export type Services = CoreStart &
-  IntegrationAssistantPluginStartDependencies & {
-    telemetry: TelemetryService;
-    renderUpselling$: Observable<RenderUpselling | undefined>;
-  };
