@@ -7,27 +7,28 @@
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { FtrProviderContext } from '../configs/ftr_provider_context';
-import { getRegistryUrlFromTestEnv, isRegistryEnabled } from '../registry';
 import { ROLE } from '../services/roles_users';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('Endpoint plugin', function () {
+  describe('Endpoint plugin', async function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
     const kbnClient = getService('kibanaServer');
     const log = getService('log');
-
-    if (!isRegistryEnabled()) {
-      log.warning('These tests are being run with an external package registry');
-    }
-
-    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
-    log.info(`Package registry URL for tests: ${registryUrl}`);
+    const endpointRegistryHelpers = getService('endpointRegistryHelpers');
 
     const roles = Object.values(ROLE);
     before(async () => {
+      if (!endpointRegistryHelpers.isRegistryEnabled()) {
+        log.warning('These tests are being run with an external package registry');
+      }
+
+      const registryUrl =
+        endpointRegistryHelpers.getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
+      log.info(`Package registry URL for tests: ${registryUrl}`);
+
       try {
         await ingestManager.setup();
       } catch (err) {

@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('should fetch an index settings', async () => {
       const index = await createIndex();
 
-      const { body } = await getIndexSettings(index).expect(200);
+      const { status, body } = await getIndexSettings(index);
+      expect(status).to.eql(200);
 
       // Verify we fetch the corret index settings
       expect(body.settings.index.provided_name).to.be(index);

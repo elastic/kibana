@@ -6,18 +6,18 @@
  */
 
 import { memo, useMemo } from 'react';
-import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
+import type { KillProcessRequestBody } from '../../../../../common/endpoint/types';
 
 export const KillProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendKillProcessRequest();
 
-  const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
+  const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
@@ -30,7 +30,7 @@ export const KillProcessActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
-  return useConsoleActionSubmitter<KillOrSuspendProcessRequestBody>({
+  return useConsoleActionSubmitter<KillProcessRequestBody>({
     ResultComponent,
     setStore,
     store,

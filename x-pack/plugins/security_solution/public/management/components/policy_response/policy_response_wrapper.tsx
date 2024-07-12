@@ -32,6 +32,8 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
 
     const [policyResponseConfig, setPolicyResponseConfig] =
       useState<HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']>();
+    const [policyResponseArtifacts, setPolicyResponseArtifacts] =
+      useState<HostPolicyResponse['Endpoint']['policy']['applied']['artifacts']>();
     const [policyResponseActions, setPolicyResponseActions] =
       useState<HostPolicyResponse['Endpoint']['policy']['applied']['actions']>();
     const [policyResponseAttentionCount, setPolicyResponseAttentionCount] = useState<
@@ -43,6 +45,7 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
         setPolicyResponseConfig(
           data.policy_response.Endpoint.policy.applied.response.configurations
         );
+        setPolicyResponseArtifacts(data.policy_response.Endpoint.policy.applied.artifacts);
         setPolicyResponseActions(data.policy_response.Endpoint.policy.applied.actions);
         setPolicyResponseAttentionCount(
           getFailedOrWarningActionCountFromPolicyResponse(
@@ -125,23 +128,26 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
           />
         )}
         {isLoading && <EuiLoadingSpinner size="m" />}
-        {policyResponseConfig !== undefined && policyResponseActions !== undefined && (
-          <>
-            <PolicyResponse
-              hostOs={endpointDetails?.metadata.host.os.name.toLowerCase() ?? ''}
-              policyResponseConfig={policyResponseConfig}
-              policyResponseActions={policyResponseActions}
-              policyResponseAttentionCount={policyResponseAttentionCount}
-            />
-            <EuiSpacer size="m" />
-            {genericErrors?.map((genericActionError) => (
-              <React.Fragment key={genericActionError.key}>
-                <PolicyResponseActionItem policyResponseActionFormatter={genericActionError} />
-                <EuiSpacer size="m" />
-              </React.Fragment>
-            ))}
-          </>
-        )}
+        {policyResponseConfig !== undefined &&
+          policyResponseActions !== undefined &&
+          policyResponseArtifacts !== undefined && (
+            <>
+              <PolicyResponse
+                hostOs={endpointDetails?.metadata.host.os.name.toLowerCase() ?? ''}
+                policyResponseConfig={policyResponseConfig}
+                policyResponseActions={policyResponseActions}
+                policyResponseArtifacts={policyResponseArtifacts}
+                policyResponseAttentionCount={policyResponseAttentionCount}
+              />
+              <EuiSpacer size="m" />
+              {genericErrors?.map((genericActionError) => (
+                <React.Fragment key={genericActionError.key}>
+                  <PolicyResponseActionItem policyResponseActionFormatter={genericActionError} />
+                  <EuiSpacer size="m" />
+                </React.Fragment>
+              ))}
+            </>
+          )}
       </>
     );
   }

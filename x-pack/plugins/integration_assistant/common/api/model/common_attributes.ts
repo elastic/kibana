@@ -156,3 +156,18 @@ export const Integration = z.object({
    */
   logo: z.string().optional(),
 });
+
+/**
+ * The LangSmith options object.
+ */
+export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
+export const LangSmithOptions = z.object({
+  /**
+   * The project name to use with tracing.
+   */
+  projectName: z.string(),
+  /**
+   * The api key for the project
+   */
+  apiKey: z.string(),
+});

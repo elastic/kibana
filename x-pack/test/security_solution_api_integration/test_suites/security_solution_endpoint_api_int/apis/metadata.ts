@@ -30,21 +30,14 @@ import {
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
-import {
-  bulkIndex,
-  deleteAllDocsFromFleetAgents,
-  deleteAllDocsFromIndex,
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteAllDocsFromMetadataDatastream,
-  startTransform,
-  stopTransform,
-} from './data_stream_helper';
+
 import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   describe('@ess @serverless test metadata apis', function () {
     describe('list endpoints GET route', () => {
@@ -54,11 +47,11 @@ export default function ({ getService }: FtrProviderContext) {
       let metadataTimestamp: number;
 
       before(async () => {
-        await deleteAllDocsFromFleetAgents(getService);
-        await deleteAllDocsFromMetadataDatastream(getService);
-        await deleteAllDocsFromMetadataCurrentIndex(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataDatastream(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
         try {
-          await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+          await endpointDataStreamHelpers.deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
         } catch (err) {
           log.warning(`Unable to delete index: ${err}`);
         }
@@ -80,8 +73,8 @@ export default function ({ getService }: FtrProviderContext) {
           const metadataDocs = generateMetadataDocs(metadataTimestamp);
 
           await Promise.all([
-            bulkIndex(getService, AGENTS_INDEX, agentDocs),
-            bulkIndex(getService, METADATA_DATASTREAM, metadataDocs),
+            endpointDataStreamHelpers.bulkIndex(getService, AGENTS_INDEX, agentDocs),
+            endpointDataStreamHelpers.bulkIndex(getService, METADATA_DATASTREAM, metadataDocs),
           ]);
 
           return {
@@ -94,10 +87,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteAllDocsFromFleetAgents(getService);
-        await deleteAllDocsFromMetadataDatastream(getService);
-        await deleteAllDocsFromMetadataCurrentIndex(getService);
-        await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataDatastream(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
       });
 
       it('should return one entry for each host with default paging', async () => {
@@ -427,8 +420,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('correctly returns stopped transform stats', async () => {
-        await stopTransform(getService, `${currentTransformName}*`);
-        await stopTransform(getService, `${unitedTransformName}*`);
+        await endpointDataStreamHelpers.stopTransform(getService, `${currentTransformName}*`);
+        await endpointDataStreamHelpers.stopTransform(getService, `${unitedTransformName}*`);
 
         const { body } = await supertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
@@ -453,8 +446,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(unitedTransform).to.be.ok();
 
-        await startTransform(getService, currentTransformName);
-        await startTransform(getService, unitedTransformName);
+        await endpointDataStreamHelpers.startTransform(getService, currentTransformName);
+        await endpointDataStreamHelpers.startTransform(getService, unitedTransformName);
       });
 
       it('correctly returns started transform stats', async () => {
