@@ -219,3 +219,10 @@ export const ENTRY_INPUT_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Input',
   }
 );
+
+export const KNOWLEDGE_BASE_DOCUMENTATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseDocumentation',
+  {
+    defaultMessage: 'documentation',
+  }
+);

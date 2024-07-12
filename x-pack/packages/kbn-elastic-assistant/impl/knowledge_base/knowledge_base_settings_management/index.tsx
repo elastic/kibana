@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable, EuiLink, EuiPanel, EuiSearchBarProps, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiLink,
+  EuiPanel,
+  EuiSearchBarProps,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
@@ -28,10 +35,13 @@ import {
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
 import { KnowledgeBaseSettings } from '../knowledge_base_settings';
 import { EntryButton } from './entry_button';
-import { DEFAULT_FLYOUT_TITLE, SEARCH_PLACEHOLDER } from './translations';
+import {
+  DEFAULT_FLYOUT_TITLE,
+  SEARCH_PLACEHOLDER,
+  KNOWLEDGE_BASE_DOCUMENTATION,
+} from './translations';
 import { Flyout } from '../../assistant/common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
-import { KNOWLEDGE_BASE_DOCUMENTATION } from '../translations';
 import { IndexEntryEditor } from './index_entry_editor';
 import { EntryEditor } from './entry_editor';
 
