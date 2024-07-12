@@ -461,72 +461,80 @@ export class VisualizeEmbeddable
       this.domNode
     );
 
-    const expressions = getExpressions();
-    this.handler = await expressions.loader(this.domNode, undefined, {
-      renderMode: this.input.renderMode || 'view',
-      onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
-        this.onContainerError(error);
-      },
-      executionContext: this.getExecutionContext(),
-    });
+    try {
+      const expressions = getExpressions();
+      this.handler = await expressions.loader(this.domNode, undefined, {
+        renderMode: this.input.renderMode || 'view',
+        onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
+          this.onContainerError(error);
+        },
+        executionContext: this.getExecutionContext(),
+      });
 
-    this.subscriptions.push(
-      this.handler.events$
-        .pipe(
-          mergeMap(async (event) => {
-            // Visualize doesn't respond to sizing events, so ignore.
-            if (isChartSizeEvent(event)) {
-              return;
-            }
-            if (!this.input.disableTriggers) {
-              const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-              let context;
+      this.subscriptions.push(
+        this.handler.events$
+          .pipe(
+            mergeMap(async (event) => {
+              // Visualize doesn't respond to sizing events, so ignore.
+              if (isChartSizeEvent(event)) {
+                return;
+              }
+              if (!this.input.disableTriggers) {
+                const triggerId = get(
+                  VIS_EVENT_TO_TRIGGER,
+                  event.name,
+                  VIS_EVENT_TO_TRIGGER.filter
+                );
+                let context;
 
-              if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-                context = {
-                  embeddable: this,
-                  timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
-                  ...event.data,
-                };
-              } else {
-                context = {
-                  embeddable: this,
-                  data: {
+                if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                  context = {
+                    embeddable: this,
                     timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
                     ...event.data,
-                  },
-                };
+                  };
+                } else {
+                  context = {
+                    embeddable: this,
+                    data: {
+                      timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                      ...event.data,
+                    },
+                  };
+                }
+
+                await getUiActions().getTrigger(triggerId).exec(context);
               }
+            })
+          )
+          .subscribe()
+      );
 
-              await getUiActions().getTrigger(triggerId).exec(context);
-            }
-          })
-        )
-        .subscribe()
-    );
+      if (this.vis.description) {
+        div.setAttribute('data-description', this.vis.description);
+      }
 
-    if (this.vis.description) {
-      div.setAttribute('data-description', this.vis.description);
+      div.setAttribute('data-test-subj', 'visualizationLoader');
+      div.setAttribute('data-shared-item', '');
+
+      this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
+      this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));
+      this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
+
+      this.subscriptions.push(
+        this.getUpdated$().subscribe(() => {
+          const { error } = this.getOutput();
+
+          if (error) {
+            render(this.renderError(error), this.domNode);
+          }
+        })
+      );
+
+      await this.updateHandler();
+    } catch (e) {
+      render(this.renderError(e.message), this.domNode);
     }
-
-    div.setAttribute('data-test-subj', 'visualizationLoader');
-    div.setAttribute('data-shared-item', '');
-
-    this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
-    this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));
-    this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
-
-    this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
-        const { error } = this.getOutput();
-
-        if (error) {
-          render(this.renderError(error), this.domNode);
-        }
-      })
-    );
-
-    await this.updateHandler();
   }
 
   private renderError(error: ErrorLike | string) {
