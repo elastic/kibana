@@ -20,10 +20,11 @@ import {
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types';
 import { timelineSelectors } from '../../../../timelines/store';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import {
   ADD_NOTE_BUTTON_TEST_ID,
   ADD_NOTE_MARKDOWN_TEST_ID,
@@ -131,11 +132,6 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   const buttonDisabled = useMemo(
     () => editorValue.trim().length === 0 || isMarkdownInvalid,
     [editorValue, isMarkdownInvalid]
-  );
-
-  const initialCheckboxChecked = useMemo(
-    () => isTimelineFlyout && activeTimeline.savedObjectId != null,
-    [activeTimeline?.savedObjectId, isTimelineFlyout]
   );
 
   const checkBoxDisabled = useMemo(
