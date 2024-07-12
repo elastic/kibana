@@ -11,6 +11,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
+import { isAgentlessCloudEnabled } from '../../../services/utils/agentless';
+
 import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_policy_helper';
 
 import type {
@@ -76,36 +78,38 @@ export async function renameAgentlessAgentPolicy(
   packagePolicy: PackagePolicy,
   name: string
 ) {
-  const cloudSetup = appContextService.getCloud();
-  // If cloud and agentless is enabled, we need to rename the agent policy
+  if (!isAgentlessCloudEnabled()) {
+    return;
+  }
+  // If agentless is enabled for cloud, we need to rename the agent policy
   // tech debt: update this condition when Serverless uses the Agentless API
   // https://github.com/elastic/security-team/issues/9781
-  if (cloudSetup?.isCloudEnabled && appContextService.getExperimentalFeatures().agentless) {
-    const packagePolicyAgentPolicyId = packagePolicy?.policy_id;
-    if (packagePolicyAgentPolicyId) {
-      const agentPolicy = await agentPolicyService.get(soClient, packagePolicyAgentPolicyId);
+  const packagePolicyAgentPolicyId = packagePolicy?.policy_id;
+  if (!packagePolicyAgentPolicyId) {
+    return;
+  }
 
-      const isManagedAgentlessAgentPolicy =
-        agentPolicy?.is_managed && agentPolicy.supports_agentless;
+  const agentPolicy = await agentPolicyService.get(soClient, packagePolicyAgentPolicyId);
+  if (!agentPolicy) {
+    return;
+  }
 
-      if (
-        isManagedAgentlessAgentPolicy &&
-        agentPolicy?.name !== getAgentlessAgentPolicyNameFromPackagePolicyName(name)
-      ) {
-        try {
-          await agentPolicyService.update(
-            soClient,
-            esClient,
-            agentPolicy.id,
-            { name: getAgentlessAgentPolicyNameFromPackagePolicyName(name) },
-            { force: true }
-          );
-        } catch (error) {
-          throw new PackagePolicyRequestError(
-            `Failed to update agent policy name for agentless policy: ${error.message}`
-          );
-        }
-      }
+  if (
+    agentPolicy.supports_agentless &&
+    agentPolicy.name !== getAgentlessAgentPolicyNameFromPackagePolicyName(name)
+  ) {
+    try {
+      await agentPolicyService.update(
+        soClient,
+        esClient,
+        agentPolicy.id,
+        { name: getAgentlessAgentPolicyNameFromPackagePolicyName(name) },
+        { force: true }
+      );
+    } catch (error) {
+      throw new PackagePolicyRequestError(
+        `Failed to update agent policy name for agentless policy: ${error.message}`
+      );
     }
   }
 }
