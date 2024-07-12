@@ -65,7 +65,7 @@ export const getKnowledgeBaseStatusRoute = (
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          // Use old status checks by overriding esStore to use kbDataClient, TODO
+          // Use old status checks by overriding esStore to use kbDataClient
           const esStore = new ElasticsearchStore(
             esClient,
             kbDataClient.indexTemplateAndPattern.alias,
@@ -75,7 +75,6 @@ export const getKnowledgeBaseStatusRoute = (
             kbResource,
             kbDataClient
           );
-          kbDataClient.isModelInstalled();
 
           const indexExists = await esStore.indexExists();
           const pipelineExists = await esStore.pipelineExists();

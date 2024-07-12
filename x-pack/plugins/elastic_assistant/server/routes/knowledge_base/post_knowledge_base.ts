@@ -89,7 +89,6 @@ export const postKnowledgeBaseRoute = (
 
           return response.ok({ body: { success: true } });
         } catch (err) {
-          console.log(err);
           logger.log(err);
           const error = transformError(err);
 

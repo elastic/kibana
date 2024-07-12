@@ -55,14 +55,7 @@ export const useSendMessage = (): UseSendMessage => {
         setIsLoading(false);
       }
     },
-    [
-      alertsIndexPattern,
-      assistantStreamingEnabled,
-      knowledgeBase.isEnabledRAGAlerts,
-      knowledgeBase.isEnabledKnowledgeBase,
-      knowledgeBase.latestAlerts,
-      traceOptions,
-    ]
+    [alertsIndexPattern, assistantStreamingEnabled, knowledgeBase.latestAlerts, traceOptions]
   );
 
   const cancelRequest = useCallback(() => {
