@@ -47,12 +47,10 @@ describe('FileService', () => {
   let fileKindsRegistry: ReturnType<typeof getFileKindsRegistry>;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
-    manageES = await startES();
-    kbnRoot = createRootWithCorePlugins();
-    await kbnRoot.preboot();
-    await kbnRoot.setup();
-    coreStart = await kbnRoot.start();
+    const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
+    const testServers = await Promise.all([startES(), startKibana()]);
+    manageES = testServers[0];
+    ({ root: kbnRoot, coreStart } = testServers[1]);
     setFileKindsRegistry(new FileKindsRegistryImpl());
     fileKindsRegistry = getFileKindsRegistry();
     fileKindsRegistry.register({
@@ -73,11 +71,14 @@ describe('FileService', () => {
     });
 
     esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    assert.strictEqual(await esClient.ping(), true, 'Unable to reach ES, test setup failed!');
   });
 
   afterAll(async () => {
+    assert.strictEqual(
+      await esClient.ping(),
+      true,
+      'Unable to reach ES, Initial test setup failed!'
+    );
     await kbnRoot.shutdown();
     await manageES.stop();
   });
