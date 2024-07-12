@@ -69,6 +69,9 @@ describe('fillConstantKeywordValues', () => {
       'dot.field': {
         type: 'keyword',
       },
+      constant_keyword_without_value: {
+        type: 'constant_keyword',
+      },
     },
   };
 
@@ -136,12 +139,15 @@ describe('fillConstantKeywordValues', () => {
       some_new_field: {
         type: 'keyword',
       },
+      constant_keyword_without_value: {
+        type: 'constant_keyword',
+      },
     },
   };
 
   it('should fill in missing constant_keyword values from old mappings correctly', () => {
     // @ts-ignore
-    expect(fillConstantKeywordValues(oldMappings, newMappings)).toMatchObject({
+    expect(fillConstantKeywordValues(oldMappings, newMappings)).toEqual({
       dynamic: false,
       _meta: {
         managed_by: 'fleet',
@@ -205,6 +211,9 @@ describe('fillConstantKeywordValues', () => {
         },
         some_new_field: {
           type: 'keyword',
+        },
+        constant_keyword_without_value: {
+          type: 'constant_keyword',
         },
       },
     });

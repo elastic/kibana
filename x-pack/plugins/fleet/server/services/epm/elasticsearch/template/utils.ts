@@ -21,7 +21,7 @@ export const fillConstantKeywordValues = (
   newMappings: MappingTypeMapping
 ) => {
   const filledMappings = JSON.parse(JSON.stringify(newMappings)) as MappingTypeMapping;
-  const deepGet = (obj: any, keys: string[]) => keys.reduce((xs, x) => xs?.[x] ?? null, obj);
+  const deepGet = (obj: any, keys: string[]) => keys.reduce((xs, x) => xs?.[x] ?? undefined, obj);
 
   const fillEmptyConstantKeywordFields = (mappings: unknown, currentPath: string[] = []) => {
     if (!mappings) return;
@@ -29,7 +29,10 @@ export const fillConstantKeywordValues = (
       const path = [...currentPath, key];
       if (typeof potentialField === 'object') {
         if (potentialField.type === 'constant_keyword' && potentialField.value === undefined) {
-          potentialField.value = deepGet(oldMappings.properties, [...path, 'value']);
+          const valueFromOldMappings = deepGet(oldMappings.properties, [...path, 'value']);
+          if (valueFromOldMappings !== undefined) {
+            potentialField.value = valueFromOldMappings;
+          }
         } else if (potentialField.properties && typeof potentialField.properties === 'object') {
           fillEmptyConstantKeywordFields(potentialField.properties, [...path, 'properties']);
         }
