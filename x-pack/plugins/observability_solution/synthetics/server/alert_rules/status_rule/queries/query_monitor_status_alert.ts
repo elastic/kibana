@@ -13,7 +13,7 @@ import moment from 'moment';
 import { getIntervalFromTimespan } from '../utils';
 import { FINAL_SUMMARY_FILTER, getRangeFilter } from '../../../../common/constants/client_defaults';
 import { OverviewPendingStatusMetaData, OverviewPing } from '../../../../common/runtime_types';
-import { createEsParams, UptimeEsClient } from '../../../lib';
+import { createEsParams, SyntheticsEsClient } from '../../../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -55,7 +55,7 @@ export interface AlertStatusResponse {
 }
 
 export async function queryMonitorStatusAlert(
-  esClient: UptimeEsClient,
+  esClient: SyntheticsEsClient,
   monitorLocationIds: string[],
   range: { from: string; to: string },
   monitorQueryIds: string[],

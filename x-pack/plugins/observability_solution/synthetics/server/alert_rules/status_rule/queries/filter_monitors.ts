@@ -8,7 +8,7 @@
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { StatusRuleParams } from '../../../../common/rules/status_rule';
-import { UptimeEsClient } from '../../../lib';
+import { SyntheticsEsClient } from '../../../lib';
 import {
   FINAL_SUMMARY_FILTER,
   getRangeFilter,
@@ -21,7 +21,7 @@ export async function queryFilterMonitors({
   ruleParams,
 }: {
   spaceId: string;
-  esClient: UptimeEsClient;
+  esClient: SyntheticsEsClient;
   ruleParams: StatusRuleParams;
 }) {
   if (!ruleParams.kqlQuery) {

@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment, { Moment } from 'moment';
-import { createEsParams, UptimeEsClient } from '../../../lib';
+import { createEsParams, SyntheticsEsClient } from '../../../lib';
 import { FINAL_SUMMARY_FILTER, getRangeFilter } from '../../../../common/constants/client_defaults';
 import { OverviewPing } from '../../../../common/runtime_types';
 
@@ -24,7 +24,7 @@ const fields = [
 ];
 
 export async function queryMonitorLastRun(
-  esClient: UptimeEsClient,
+  esClient: SyntheticsEsClient,
   pendingConfigs: Array<{
     configId: string;
     locationId: string;
