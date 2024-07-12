@@ -309,6 +309,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           onSaveConfirmed={onSaveConfirmed}
           onSaveCancelled={onSaveCancelled}
           title={selectedConversation?.title ?? i18n.CONVERSATIONS_FLYOUT_DEFAULT_TITLE}
+          saveButtonDisabled={
+            selectedConversation?.title == null || selectedConversation?.title === ''
+          }
         >
           <ConversationSettingsEditor
             allSystemPrompts={allSystemPrompts}

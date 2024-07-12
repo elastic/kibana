@@ -192,6 +192,7 @@ const QuickPromptSettingsManagementComponent = () => {
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
+        saveButtonDisabled={selectedQuickPrompt?.name == null || selectedQuickPrompt?.name === ''}
       >
         <QuickPromptSettingsEditor
           onSelectedQuickPromptChange={onSelectedQuickPromptChange}
