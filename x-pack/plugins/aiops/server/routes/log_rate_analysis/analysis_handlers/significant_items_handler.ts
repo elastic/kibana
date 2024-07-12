@@ -94,13 +94,14 @@ export const significantItemsHandlerFactory =
     logDebugMessage('Fetch p-values.');
 
     const loadingStep =
-      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) *
-      loadingStepSizePValues *
-      QUEUE_CHUNKING_SIZE;
+      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
 
     const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
+      let queueItemLoadingStep = 0;
+
       if (isKeywordFieldCandidates(payload)) {
         const { keywordFieldCandidates: fieldNames } = payload;
+        queueItemLoadingStep = loadingStep * fieldNames.length;
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
@@ -139,6 +140,7 @@ export const significantItemsHandlerFactory =
         }
       } else if (isTextFieldCandidates(payload)) {
         const { textFieldCandidates: fieldNames } = payload;
+        queueItemLoadingStep = loadingStep * fieldNames.length;
 
         const significantCategoriesForField = await fetchSignificantCategories({
           esClient,
@@ -159,7 +161,7 @@ export const significantItemsHandlerFactory =
         }
       }
 
-      stateHandler.loaded(loadingStep, false);
+      stateHandler.loaded(queueItemLoadingStep, false);
 
       responseStream.push(
         updateLoadingState({
