@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition, MetadataField } from '@kbn/entities-schema';
 import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
@@ -15,13 +15,20 @@ function createIdTemplate(definition: EntityDefinition) {
   }, definition.displayNameTemplate);
 }
 
-function mapDestinationToPainless(destination: string) {
+function mapDestinationToPainless(metadata: MetadataField) {
+  const destination = metadata.destination || metadata.source;
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
     if (currentIndex + 1 === parts.length) {
-      return `${acc}\n  ctx${parts
-        .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${destination}.keySet();`;
+      if (metadata.aggregation.type === 'terms') {
+        return `${acc}\n  ctx${parts
+          .map((s) => `["${s}"]`)
+          .join('')} = ctx.entity.metadata.${destination}.keySet();`;
+      } else if (metadata.aggregation.type === 'top_metrics') {
+        return `${acc}\n  ctx${parts
+          .map((s) => `["${s}"]`)
+          .join('')} = ctx.entity.metadata.${destination}["${metadata.source}"];`;
+      }
     }
     return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
       .slice(0, currentIndex + 1)
@@ -34,12 +41,18 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   if (!definition.metadata) {
     return '';
   }
-  return definition.metadata.reduce((script, def) => {
-    const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
-      '.',
-      '?.'
-    )} != null) {${mapDestinationToPainless(destination)}\n}\n`;
+  return definition.metadata.reduce((script, metadata) => {
+    const destination = metadata.destination || metadata.source;
+    if (metadata.aggregation.type === 'terms') {
+      return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
+        '.',
+        '?.'
+      )} != null) {${mapDestinationToPainless(metadata)}\n}\n`;
+    }
+
+    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll('.', '?.')}["${
+      metadata.source
+    }"] != null) {${mapDestinationToPainless(metadata)}\n}\n`;
   }, '');
 }
 

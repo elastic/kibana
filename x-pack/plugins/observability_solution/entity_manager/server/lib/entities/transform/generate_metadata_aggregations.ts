@@ -12,18 +12,29 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
   if (!definition.metadata) {
     return {};
   }
-  return definition.metadata.reduce(
-    (aggs, metadata) => ({
-      ...aggs,
-      [`entity.metadata.${metadata.destination ?? metadata.source}`]: {
+  return definition.metadata.reduce((aggs, metadata) => {
+    let agg;
+    if (metadata.aggregation.type === 'terms') {
+      agg = {
         terms: {
           field: metadata.source,
-          size: metadata.limit ?? ENTITY_DEFAULT_METADATA_LIMIT,
+          size: metadata.aggregation.limit,
         },
-      },
-    }),
-    {}
-  );
+      };
+    } else if (metadata.aggregation.type === 'top_metrics') {
+      agg = {
+        top_metrics: {
+          metrics: [{ field: metadata.source }],
+          sort: metadata.aggregation.sort,
+        },
+      };
+    }
+
+    return {
+      ...aggs,
+      [`entity.metadata.${metadata.destination ?? metadata.source}`]: agg,
+    };
+  }, {});
 }
 
 export function generateLatestMetadataAggregations(definition: EntityDefinition) {
@@ -46,7 +57,10 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
           data: {
             terms: {
               field: metadata.destination ?? metadata.source,
-              size: metadata.limit ?? ENTITY_DEFAULT_METADATA_LIMIT,
+              size:
+                metadata.aggregation?.type === 'terms'
+                  ? metadata.aggregation?.limit ?? ENTITY_DEFAULT_METADATA_LIMIT
+                  : 1,
             },
           },
         },

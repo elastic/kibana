@@ -82,13 +82,29 @@ export const keyMetricSchema = z.object({
 
 export type KeyMetric = z.infer<typeof keyMetricSchema>;
 
+export const metadataAggregation = z.union([
+  z.object({ type: z.literal('terms'), limit: z.number().default(1000) }),
+  z.object({
+    type: z.literal('top_metrics'),
+    sort: z.record(z.string(), z.union([z.literal('asc'), z.literal('desc')])),
+  }),
+]);
+
 export const metadataSchema = z
   .object({
     source: z.string(),
     destination: z.optional(z.string()),
-    limit: z.optional(z.number().default(1000)),
+    aggregation: z.optional(metadataAggregation).default({ type: 'terms', limit: 1000 }),
   })
-  .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })));
+  .or(
+    z.string().transform((value) => ({
+      source: value,
+      destination: value,
+      aggregation: { type: z.literal('terms'), limit: 1000 },
+    }))
+  );
+
+export type MetadataField = z.infer<typeof metadataSchema>;
 
 export const identityFieldsSchema = z
   .object({
