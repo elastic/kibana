@@ -14,12 +14,12 @@ import { getOnboardingStatus } from './get_onboarding_status';
 import { getInstalledIntegrations } from './get_installed_integrations';
 import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 
-const DASHBOARD_LIST = [
-  'apache-Logs-Apache-Dashboard',
-  'docker-AV4REOpp5NkDleZmzKkE',
-  'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519',
-  'system-79ffd6e0-faa0-11e6-947f-177f697178b8',
-];
+export const DASHBOARDS = {
+  'apache-Logs-Apache-Dashboard': { type: 'logs' },
+  'docker-AV4REOpp5NkDleZmzKkE': { type: 'metrics' },
+  'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519': { type: 'logs' },
+  'system-79ffd6e0-faa0-11e6-947f-177f697178b8': { type: 'metrics' },
+};
 
 export function useOnboardingFlow() {
   const {
@@ -71,7 +71,7 @@ export function useOnboardingFlow() {
         installedIntegrations
           .map((integration) => integration.kibanaAssets)
           .flat() as AssetSOObject[]
-      ).filter((asset) => DASHBOARD_LIST.includes(asset.id)),
+      ).filter((asset) => Object.keys(DASHBOARDS).includes(asset.id)),
     });
     return installedIntegrations.map((integration) => {
       return {
