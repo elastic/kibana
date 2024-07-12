@@ -776,332 +776,148 @@ describe('query tab with unified timeline', () => {
 
   describe('Leading actions - notes', () => {
     describe('securitySolutionNotesEnabled = true', () => {
-      describe('expandableFlyoutDisabled = false', () => {
-        beforeEach(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-            jest.fn((feature: keyof ExperimentalFeatures) => {
-              if (feature === 'unifiedComponentsInTimelineEnabled') {
-                return true;
-              }
-              if (feature === 'securitySolutionNotesEnabled') {
-                return true;
-              }
-              return allowedExperimentalValues[feature];
-            })
-          );
-        });
-
-        it(
-          'should have the notification dot & correct tooltip',
-          async () => {
-            renderTestComponents();
-
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-
-            expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
-
-            fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to view it & add more.'
-              );
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-        it(
-          'should be able to add notes through expandable flyout',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(mockOpenFlyout).toHaveBeenCalled();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
+      beforeEach(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+          jest.fn((feature: keyof ExperimentalFeatures) => {
+            if (feature === 'unifiedComponentsInTimelineEnabled') {
+              return true;
+            }
+            if (feature === 'securitySolutionNotesEnabled') {
+              return true;
+            }
+            return allowedExperimentalValues[feature];
+          })
         );
       });
 
-      describe('expandableFlyoutDisabled = true', () => {
-        beforeEach(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-            jest.fn((feature: keyof ExperimentalFeatures) => {
-              if (feature === 'unifiedComponentsInTimelineEnabled') {
-                return true;
-              }
-              if (feature === 'expandableFlyoutDisabled') {
-                return true;
-              }
-              if (feature === 'securitySolutionNotesEnabled') {
-                return true;
-              }
-              return allowedExperimentalValues[feature];
-            })
-          );
-        });
+      it(
+        'should have the notification dot & correct tooltip',
+        async () => {
+          renderTestComponents();
 
-        it(
-          'should have the notification dot & correct tooltip',
-          async () => {
-            renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+          expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
 
-            expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
+          expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
+
+          fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
+              '1 Note available. Click to view it & add more.'
+            );
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+      it(
+        'should be able to add notes through expandable flyout',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          await waitFor(() => {
             expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
 
-            expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
-            fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to view it & add more.'
-              );
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-        it(
-          'should be able to add notes using EuiFlyout',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-
-        it(
-          'should be cancel adding notes',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-
-            userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
-
-            expect(screen.getByTestId('cancel')).not.toBeDisabled();
-
-            fireEvent.click(screen.getByTestId('cancel'));
-
-            await waitFor(() => {
-              expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-      });
+          await waitFor(() => {
+            expect(mockOpenFlyout).toHaveBeenCalled();
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
     });
 
     describe('securitySolutionNotesEnabled = false', () => {
-      describe('expandableFlyoutDisabled = false', () => {
-        beforeEach(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-            jest.fn((feature: keyof ExperimentalFeatures) => {
-              if (feature === 'unifiedComponentsInTimelineEnabled') {
-                return true;
-              }
-              if (feature === 'securitySolutionNotesEnabled') {
-                return false;
-              }
-              return allowedExperimentalValues[feature];
-            })
-          );
-        });
-
-        it(
-          'should have the notification dot & correct tooltip',
-          async () => {
-            renderTestComponents();
-
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-
-            expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
-
-            fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to view it & add more.'
-              );
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-        it(
-          'should be able to add notes using EuiFlyout',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-
-        it(
-          'should be cancel adding notes',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-
-            userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
-
-            expect(screen.getByTestId('cancel')).not.toBeDisabled();
-
-            fireEvent.click(screen.getByTestId('cancel'));
-
-            await waitFor(() => {
-              expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
+      beforeEach(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+          jest.fn((feature: keyof ExperimentalFeatures) => {
+            if (feature === 'unifiedComponentsInTimelineEnabled') {
+              return true;
+            }
+            if (feature === 'securitySolutionNotesEnabled') {
+              return false;
+            }
+            return allowedExperimentalValues[feature];
+          })
         );
       });
 
-      describe('expandableFlyoutDisabled = true', () => {
-        beforeEach(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-            jest.fn((feature: keyof ExperimentalFeatures) => {
-              if (feature === 'unifiedComponentsInTimelineEnabled') {
-                return true;
-              }
-              if (feature === 'expandableFlyoutDisabled') {
-                return true;
-              }
-              if (feature === 'securitySolutionNotesEnabled') {
-                return true;
-              }
-              return allowedExperimentalValues[feature];
-            })
-          );
-        });
+      it(
+        'should have the notification dot & correct tooltip',
+        async () => {
+          renderTestComponents();
 
-        it(
-          'should have the notification dot & correct tooltip',
-          async () => {
-            renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+          expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
 
-            expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
+          expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
+
+          fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
+              '1 Note available. Click to view it & add more.'
+            );
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+      it(
+        'should be able to add notes using EuiFlyout',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          await waitFor(() => {
             expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
 
-            expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
-            fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
+          await waitFor(() => {
+            expect(screen.getByTestId('add-note-container')).toBeVisible();
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
 
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
-              expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to view it & add more.'
-              );
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-        it(
-          'should be able to add notes using EuiFlyout',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+      it(
+        'should be cancel adding notes',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
 
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
+          await waitFor(() => {
+            expect(screen.getByTestId('add-note-container')).toBeVisible();
+          });
 
-        it(
-          'should be cancel adding notes',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+          userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
 
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
+          expect(screen.getByTestId('cancel')).not.toBeDisabled();
 
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+          fireEvent.click(screen.getByTestId('cancel'));
 
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-
-            userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
-
-            expect(screen.getByTestId('cancel')).not.toBeDisabled();
-
-            fireEvent.click(screen.getByTestId('cancel'));
-
-            await waitFor(() => {
-              expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-      });
+          await waitFor(() => {
+            expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
     });
   });
 
