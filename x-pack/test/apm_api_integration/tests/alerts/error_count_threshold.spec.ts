@@ -103,8 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(() => apmSynthtraceEsClient.clean());
 
-    // FLAKY: https://github.com/elastic/kibana/issues/176948
-    describe.skip('create rule without kql filter', () => {
+    describe('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
       let actionId: string;
@@ -175,10 +174,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             environment: 'production',
             interval: '1 hr',
             reason:
-              'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.',
+              'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.',
             serviceName: 'opbeans-php',
             transactionName: 'tx-php',
-            errorGroupingKey: 'c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99',
+            errorGroupingKey: '000000000000000000000a php error',
             errorGroupingName: 'a php error',
             threshold: '1',
             triggerValue: '30',
@@ -192,8 +191,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const alertReasons = [alerts[0]['kibana.alert.reason'], alerts[1]['kibana.alert.reason']];
 
         expect(alertReasons).to.eql([
-          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.',
-          'Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: b6a4ac83620b34ae44dd98a13e144782f88698f827af7edb10690c5e6e7d8597, error name: a java error. Alert when > 1.',
+          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.',
+          'Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: 00000000000000000000a java error, error name: a java error. Alert when > 1.',
         ]);
       });
 
@@ -252,8 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/176964
-    describe.skip('create rule with kql filter for opbeans-php', () => {
+    describe('create rule with kql filter for opbeans-php', () => {
       let ruleId: string;
 
       before(async () => {
