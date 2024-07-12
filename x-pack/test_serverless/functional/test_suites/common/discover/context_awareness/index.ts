@@ -14,7 +14,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const from = '2024-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
 
-  describe('discover/context_awareness', () => {
+  describe('discover/context_awareness', function () {
+    this.tags(['esGate']);
+
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/discover/context_awareness');
       await kibanaServer.importExport.load(
