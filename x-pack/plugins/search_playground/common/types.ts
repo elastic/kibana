@@ -11,6 +11,7 @@ interface ModelField {
   field: string;
   model_id: string;
   indices: string[];
+  sparse_vector: boolean;
 }
 
 interface SemanticField {
