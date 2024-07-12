@@ -59,7 +59,7 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
 
-import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
+import type { RulePreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -149,8 +149,11 @@ export const patchRule = async ({
  *
  * @throws An error if response is not OK
  */
-export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
-  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+export const previewRule = async ({
+  rule,
+  signal,
+}: PreviewRulesProps): Promise<RulePreviewResponse> =>
+  KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
     method: 'POST',
     version: '2023-10-31',
     body: JSON.stringify(rule),
