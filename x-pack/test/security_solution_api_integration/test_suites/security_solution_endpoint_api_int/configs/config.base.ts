@@ -6,8 +6,8 @@
  */
 
 import { Config } from '@kbn/test';
-import { getRegistryUrlAsArray, createEndpointDockerConfig } from '../registry';
-import { SUITE_TAGS } from '../../security_solution_endpoint/configs/config.base';
+import { SecuritySolutionEndpointRegistryHelpers } from '../../../../common/services/security_solution';
+import { SUITE_TAGS } from '../../../../security_solution_endpoint/configs/config.base';
 
 export const generateConfig = async ({
   baseConfig,
@@ -22,6 +22,9 @@ export const generateConfig = async ({
   target: keyof typeof SUITE_TAGS;
   services: any;
 }): Promise<Config> => {
+  // services are not ready yet, so we need to import them here
+  const { createEndpointDockerConfig, getRegistryUrlAsArray } =
+    SecuritySolutionEndpointRegistryHelpers();
   return {
     ...baseConfig.getAll(),
     testFiles: [require.resolve('../apis')],

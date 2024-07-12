@@ -21,6 +21,18 @@ Array [
     },
   },
   Object {
+    "set": Object {
+      "field": "entity.definitionVersion",
+      "value": "999.999.999",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schemaVersion",
+      "value": "v1",
+    },
+  },
+  Object {
     "script": Object {
       "source": "if (ctx.entity?.metadata?.tags.data != null) {
   ctx[\\"tags\\"] = ctx.entity.metadata.tags.data.keySet();

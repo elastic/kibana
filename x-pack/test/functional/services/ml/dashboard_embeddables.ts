@@ -114,6 +114,13 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
+    async assertMlSectionExists(expectExist = true) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('ml', expectExist);
+      });
+    },
+
     async openAnomalyJobSelectionFlyout(
       mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts' | 'ml_single_metric_viewer'
     ) {
