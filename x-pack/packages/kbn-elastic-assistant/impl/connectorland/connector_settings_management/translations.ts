@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CONNECTOR_SETTINGS_MANAGEMENT_TITLE = i18n.translate(
   'xpack.elasticAssistant.connectors.connectorSettingsManagement.title',
   {
-    defaultMessage: 'Connector Settings',
+    defaultMessage: 'Settings',
   }
 );
 

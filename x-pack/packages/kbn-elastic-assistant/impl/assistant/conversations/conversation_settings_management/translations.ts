@@ -7,6 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CONVERSATIONS_SETTINGS_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.title',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+export const CONVERSATIONS_LIST_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.list.title',
+  {
+    defaultMessage: 'Conversation list',
+  }
+);
+
+export const CONVERSATIONS_LIST_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.list.description',
+  {
+    defaultMessage: 'Create and manage conversations with the Elastic AI Assistant.',
+  }
+);
+
 export const CONVERSATIONS_TABLE_COLUMN_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.column.Title',
   {

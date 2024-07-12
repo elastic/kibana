@@ -14,10 +14,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
 import {
   Conversation,
   mergeBaseWithPersistedConversations,
@@ -54,6 +56,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     baseConversations,
     toasts,
   } = useAssistantContext();
+  const { euiTheme } = useEuiTheme();
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -223,7 +226,13 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
+            <EuiText
+              css={css`
+                font-size: ${euiTheme.size.base};
+              `}
+            >
+              {i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={isTableLoading}>

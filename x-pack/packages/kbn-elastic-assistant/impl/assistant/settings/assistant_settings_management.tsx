@@ -126,7 +126,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
                 `}
               />
               <EuiTitle size="m" className="eui-displayInlineBlock">
-                <h2>{i18n.SECURITY_AI_SETTINGS}</h2>
+                <span>{i18n.SECURITY_AI_SETTINGS}</span>
               </EuiTitle>
             </>
           }

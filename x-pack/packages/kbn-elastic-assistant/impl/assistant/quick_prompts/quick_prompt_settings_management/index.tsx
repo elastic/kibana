@@ -14,8 +14,10 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { css } from '@emotion/react';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -37,6 +39,7 @@ import { useFetchPrompts } from '../../api';
 
 const QuickPromptSettingsManagementComponent = () => {
   const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
+  const { euiTheme } = useEuiTheme();
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
 
@@ -169,7 +172,13 @@ const QuickPromptSettingsManagementComponent = () => {
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
+            <EuiText
+              css={css`
+                font-size: ${euiTheme.size.base};
+              `}
+            >
+              {i18n.QUICK_PROMPTS_DESCRIPTION}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={!promptsLoaded}>

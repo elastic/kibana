@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiConfirmModal, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiConfirmModal,
+  EuiInMemoryTable,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Conversation } from '../../../assistant_context/types';
@@ -272,12 +279,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+        <EuiTitle size="xs">
+          <h2>{i18n.CONVERSATIONS_SETTINGS_TITLE}</h2>
+        </EuiTitle>
         <ConversationStreamingSwitch
           assistantStreamingEnabled={assistantStreamingEnabled}
           setAssistantStreamingEnabled={setAssistantStreamingEnabled}
           compressed={false}
         />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
+        <EuiTitle size="xs">
+          <h2>{i18n.CONVERSATIONS_LIST_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable
           items={conversationOptions}
           columns={columns}

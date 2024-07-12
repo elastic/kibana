@@ -23,6 +23,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -348,7 +349,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   `;
 
   return (
-    <>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
       <EuiTitle size={'s'}>
         <h2>{i18n.SETTINGS_TITLE}</h2>
       </EuiTitle>
@@ -630,7 +631,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-    </>
+    </EuiPanel>
   );
 });
 

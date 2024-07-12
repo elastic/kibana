@@ -8,20 +8,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFormRow,
-  EuiTitle,
   EuiText,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitchEvent,
   EuiLink,
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiButtonEmpty,
   EuiToolTip,
   EuiSwitch,
+  EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -53,13 +53,14 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     http,
     toasts,
   } = useAssistantContext();
-
+  const { euiTheme } = useEuiTheme();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
     useSettingsUpdater(
       DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
       DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
+      false, // Knowledge Base settings do not require prompts
       false // Knowledge Base settings do not require conversations
     );
 
@@ -260,15 +261,12 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   }, [esqlActionButton, isESQLEnabled]);
 
   return (
-    <>
-      <EuiTitle size={'s'}>
-        <h2>
-          {i18n.SETTINGS_TITLE}{' '}
-          <EuiBetaBadge iconType={'beaker'} label={i18n.SETTINGS_BADGE} size="s" color="hollow" />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size={'s'}>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+      <EuiText
+        css={css`
+          font-size: ${euiTheme.size.base};
+        `}
+      >
         <FormattedMessage
           id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription"
           defaultMessage="Powered by ELSER, the knowledge base enables the AI Assistant to recall documents and other relevant context within your conversation. For more information about user access refer to our {documentation}."
@@ -388,7 +386,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         onCancelClick={onCancelClick}
         onSaveButtonClicked={onSaveButtonClicked}
       />
-    </>
+    </EuiPanel>
   );
 });
 
