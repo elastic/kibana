@@ -10,11 +10,8 @@ import { has, isEmpty } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import {
-  KibanaFeature,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
 import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
@@ -82,80 +79,98 @@ export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
 }
 
 type IsAuthorizedAtProducerLevel = boolean;
-export interface ConstructorOptions {
+
+export interface CreateOptions {
   ruleTypeRegistry: RuleTypeRegistry;
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string | undefined;
-  authorization?: SecurityPluginSetup['authz'];
+  authorization?: SecurityPluginStart['authz'];
 }
+
+type ConstructorOptions = Pick<
+  CreateOptions,
+  'ruleTypeRegistry' | 'request' | 'authorization' | 'getSpaceId'
+> & {
+  allRegisteredConsumers: Set<string>;
+  ruleTypeConsumersMap: Map<string, Set<string>>;
+};
 
 export class AlertingAuthorization {
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly request: KibanaRequest;
-  private readonly authorization?: SecurityPluginSetup['authz'];
-  private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
-  private readonly ruleTypeConsumersMap: Promise<Map<string, Set<string>>>;
-  private readonly features: Promise<KibanaFeature[]>;
+  private readonly authorization?: SecurityPluginStart['authz'];
+  private readonly allRegisteredConsumers: Set<string>;
+  private readonly ruleTypeConsumersMap: Map<string, Set<string>>;
   private readonly spaceId: string | undefined;
+
   constructor({
     ruleTypeRegistry,
     request,
     authorization,
-    features,
-    getSpace,
     getSpaceId,
+    allRegisteredConsumers,
+    ruleTypeConsumersMap,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.ruleTypeRegistry = ruleTypeRegistry;
+    this.allRegisteredConsumers = allRegisteredConsumers;
+    this.ruleTypeConsumersMap = ruleTypeConsumersMap;
     this.spaceId = getSpaceId(request);
+  }
 
-    this.features = getSpace(request)
-      .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
-      .then((disabledFeatures) =>
-        features.getKibanaFeatures().filter(
-          ({ id, alerting }) =>
-            // ignore features which are disabled in the user's space
-            !disabledFeatures.has(id) &&
-            // ignore features which don't grant privileges to alerting
-            (alerting?.length ?? 0 > 0)
-        )
+  /**
+   * Creates an Authorization object.
+   */
+  static async create({
+    request,
+    features,
+    getSpace,
+    getSpaceId,
+    authorization,
+    ruleTypeRegistry,
+  }: CreateOptions): Promise<AlertingAuthorization> {
+    try {
+      const maybeSpace = await getSpace(request);
+      const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
+      const featuresWithAlertingConfigured = features.getKibanaFeatures().filter(
+        ({ id, alerting }) =>
+          // ignore features which are disabled in the user's space
+          !disabledFeatures.has(id) &&
+          // ignore features which don't grant privileges to alerting
+          Boolean(alerting?.length)
       );
 
-    this.allPossibleConsumers = this.features.then((alertingFeatures) => {
-      const consumers = alertingFeatures.flatMap(
-        (alertingFeature) =>
-          alertingFeature.alerting
-            ?.flatMap((feature) => feature.consumers ?? [])
-            .filter(Boolean) as string[]
-      );
+      const allRegisteredConsumers = new Set<string>();
+      const ruleTypeConsumersMap = new Map<string, Set<string>>();
 
-      return consumers.length
-        ? asAuthorizedConsumers([ALERTING_FEATURE_ID, ...consumers], {
-            read: true,
-            all: true,
-          })
-        : {};
-    });
-
-    this.ruleTypeConsumersMap = this.features.then((alertingFeatures) => {
-      const map = new Map<string, Set<string>>();
-
-      for (const feature of alertingFeatures) {
+      for (const feature of featuresWithAlertingConfigured) {
         if (feature.alerting) {
           for (const entry of feature.alerting) {
-            const consumers = map.get(entry.ruleTypeId) ?? new Set();
-            entry.consumers.forEach((consumer) => consumers.add(consumer));
+            const consumers = ruleTypeConsumersMap.get(entry.ruleTypeId) ?? new Set();
 
-            map.set(entry.ruleTypeId, consumers);
+            entry.consumers.forEach((consumer) => {
+              consumers.add(consumer);
+              allRegisteredConsumers.add(consumer);
+            });
+            ruleTypeConsumersMap.set(entry.ruleTypeId, consumers);
           }
         }
       }
 
-      return map;
-    });
+      return new AlertingAuthorization({
+        request,
+        authorization,
+        getSpaceId,
+        ruleTypeRegistry,
+        allRegisteredConsumers,
+        ruleTypeConsumersMap,
+      });
+    } catch (error) {
+      throw new Error(`Failed to create AlertingAuthorization class: ${error}`);
+    }
   }
 
   private shouldCheckAuthorization(): boolean {
@@ -202,7 +217,7 @@ export class AlertingAuthorization {
       producer: ruleType.producer,
     });
 
-    const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
+    const isAvailableConsumer = has(await this.allRegisteredConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
@@ -344,8 +359,8 @@ export class AlertingAuthorization {
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
     const ruleTypeConsumersMap = await this.ruleTypeConsumersMap;
-    const allPossibleConsumers = await this.allPossibleConsumers;
-    const consumersToAuthorize = consumers ?? new Set(Object.keys(allPossibleConsumers));
+    const allRegisteredConsumers = await this.allRegisteredConsumers;
+    const consumersToAuthorize = consumers ?? new Set(Object.keys(allRegisteredConsumers));
 
     const requiredPrivileges = new Map<
       string,
@@ -399,8 +414,8 @@ export class AlertingAuthorization {
             if (!isEmpty(ruleTypeWithAuth.validLegacyConsumers)) {
               ruleTypeWithAuth.validLegacyConsumers.forEach((legacyConsumer) => {
                 if (addLegacyConsumerPrivileges(legacyConsumer)) {
-                  if (!allPossibleConsumers[legacyConsumer]) {
-                    allPossibleConsumers[legacyConsumer] = {
+                  if (!allRegisteredConsumers[legacyConsumer]) {
+                    allRegisteredConsumers[legacyConsumer] = {
                       read: true,
                       all: true,
                     };
@@ -460,7 +475,7 @@ export class AlertingAuthorization {
         authorizedRuleTypes:
           hasAllRequested && consumers === undefined
             ? // has access to all features
-              this.augmentWithAuthorizedConsumers(authorizedRuleTypes, allPossibleConsumers)
+              this.augmentWithAuthorizedConsumers(authorizedRuleTypes, allRegisteredConsumers)
             : authorizedRuleTypes,
       };
     } else {
@@ -468,7 +483,7 @@ export class AlertingAuthorization {
         hasAllRequested: true,
         authorizedRuleTypes: this.augmentWithAuthorizedConsumers(
           new Set([...ruleTypes].filter((ruleType) => consumersToAuthorize.has(ruleType.producer))),
-          allPossibleConsumers
+          allRegisteredConsumers
         ),
       };
     }

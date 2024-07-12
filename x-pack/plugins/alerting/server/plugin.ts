@@ -171,7 +171,7 @@ export interface PluginStartContract {
 
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
-  ): PublicMethodsOf<AlertingAuthorization>;
+  ): Promise<PublicMethodsOf<AlertingAuthorization>>;
 
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
@@ -504,7 +504,6 @@ export class AlertingPlugin {
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
-      securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
@@ -567,7 +566,7 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
+    const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
     };
 

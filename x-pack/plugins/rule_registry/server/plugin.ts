@@ -188,7 +188,7 @@ export class RuleRegistryPlugin
     return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
       return {
         getAlertsClient: async () => {
-          const createdClient = alertsClientFactory.create(request);
+          const createdClient = await alertsClientFactory.create(request);
           return createdClient;
         },
       };

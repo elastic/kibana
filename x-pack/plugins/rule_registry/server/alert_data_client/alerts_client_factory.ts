@@ -19,7 +19,9 @@ import { AlertsClient } from './alerts_client';
 export interface AlertsClientFactoryProps {
   logger: Logger;
   esClient: ElasticsearchClient;
-  getAlertingAuthorization: (request: KibanaRequest) => PublicMethodsOf<AlertingAuthorization>;
+  getAlertingAuthorization: (
+    request: KibanaRequest
+  ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
   securityPluginSetup: SecurityPluginSetup | undefined;
   ruleDataService: IRuleDataService | null;
   getRuleType: RuleTypeRegistry['get'];
@@ -33,7 +35,7 @@ export class AlertsClientFactory {
   private esClient!: ElasticsearchClient;
   private getAlertingAuthorization!: (
     request: KibanaRequest
-  ) => PublicMethodsOf<AlertingAuthorization>;
+  ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
   private securityPluginSetup!: SecurityPluginSetup | undefined;
   private ruleDataService!: IRuleDataService | null;
   private getRuleType!: RuleTypeRegistry['get'];
@@ -61,10 +63,11 @@ export class AlertsClientFactory {
 
   public async create(request: KibanaRequest): Promise<AlertsClient> {
     const { securityPluginSetup, getAlertingAuthorization, logger } = this;
+    const authorization = await getAlertingAuthorization(request);
 
     return new AlertsClient({
       logger,
-      authorization: getAlertingAuthorization(request),
+      authorization,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
       ruleDataService: this.ruleDataService!,
