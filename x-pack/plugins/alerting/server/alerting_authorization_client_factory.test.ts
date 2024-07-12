@@ -17,7 +17,6 @@ jest.mock('./authorization/alerting_authorization');
 
 const features = featuresPluginMock.createStart();
 
-const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
 
 const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =
@@ -35,7 +34,6 @@ beforeEach(() => {
 test('creates an alerting authorization client with proper constructor arguments when security is enabled', async () => {
   const factory = new AlertingAuthorizationClientFactory();
   factory.initialize({
-    securityPluginSetup,
     securityPluginStart,
     ...alertingAuthorizationClientFactoryParams,
   });

@@ -98,7 +98,7 @@ test('creates a rules client with proper constructor arguments when security is 
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.create.mockReturnValue(
+  alertingAuthorizationClientFactory.create.mockResolvedValue(
     alertingAuthorization as unknown as AlertingAuthorization
   );
 
@@ -154,7 +154,7 @@ test('creates a rules client with proper constructor arguments', async () => {
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.create.mockReturnValue(
+  alertingAuthorizationClientFactory.create.mockResolvedValue(
     alertingAuthorization as unknown as AlertingAuthorization
   );
 

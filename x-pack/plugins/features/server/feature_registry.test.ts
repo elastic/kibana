@@ -851,13 +851,16 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
+        alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
         privileges: {
           all: {
             alerting: {
               rule: {
-                all: ['foo', 'bar'],
-                read: ['baz'],
+                all: [
+                  { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                  { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                ],
+                read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
               },
             },
             savedObject: {
@@ -870,7 +873,11 @@ describe('FeatureRegistry', () => {
           read: {
             alerting: {
               rule: {
-                read: ['foo', 'bar', 'baz'],
+                read: [
+                  { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                  { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                  { ruleTypeId: 'baz', consumers: ['test-feature'] },
+                ],
               },
             },
             savedObject: {
@@ -898,13 +905,16 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
+        alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
         privileges: {
           all: {
             alerting: {
               alert: {
-                all: ['foo', 'bar'],
-                read: ['baz'],
+                all: [
+                  { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                  { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                ],
+                read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
               },
             },
             savedObject: {
@@ -917,7 +927,11 @@ describe('FeatureRegistry', () => {
           read: {
             alerting: {
               alert: {
-                read: ['foo', 'bar', 'baz'],
+                read: [
+                  { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                  { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                  { ruleTypeId: 'baz', consumers: ['test-feature'] },
+                ],
               },
             },
             savedObject: {
@@ -945,12 +959,16 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
+        alerting: [
+          { ruleTypeId: 'foo', consumers: ['test-feature'] },
+          { ruleTypeId: 'bar', consumers: ['test-feature'] },
+          { ruleTypeId: 'baz', consumers: ['test-feature'] },
+        ],
         privileges: {
           all: {
             alerting: {
               rule: {
-                all: ['foo'],
+                all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
               },
             },
             savedObject: {
@@ -963,7 +981,7 @@ describe('FeatureRegistry', () => {
           read: {
             alerting: {
               rule: {
-                all: ['foo'],
+                all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
               },
             },
             savedObject: {
@@ -992,7 +1010,7 @@ describe('FeatureRegistry', () => {
                     ui: [],
                     alerting: {
                       rule: {
-                        all: ['bar'],
+                        all: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
                       },
                     },
                   },
@@ -1018,12 +1036,16 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
+        alerting: [
+          { ruleTypeId: 'foo', consumers: ['test-feature'] },
+          { ruleTypeId: 'bar', consumers: ['test-feature'] },
+          { ruleTypeId: 'baz', consumers: ['test-feature'] },
+        ],
         privileges: {
           all: {
             alerting: {
               alert: {
-                all: ['foo'],
+                all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
               },
             },
             savedObject: {
@@ -1036,7 +1058,7 @@ describe('FeatureRegistry', () => {
           read: {
             alerting: {
               alert: {
-                all: ['foo'],
+                all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
               },
             },
             savedObject: {
@@ -1065,7 +1087,7 @@ describe('FeatureRegistry', () => {
                     ui: [],
                     alerting: {
                       alert: {
-                        all: ['bar'],
+                        all: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
                       },
                     },
                   },
@@ -1091,7 +1113,7 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
+        alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
         privileges: null,
         reserved: {
           description: 'something',
@@ -1101,7 +1123,11 @@ describe('FeatureRegistry', () => {
               privilege: {
                 alerting: {
                   rule: {
-                    all: ['foo', 'bar', 'baz'],
+                    all: [
+                      { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                      { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                      { ruleTypeId: 'baz', consumers: ['test-feature'] },
+                    ],
                   },
                 },
                 savedObject: {
@@ -1131,7 +1157,7 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
+        alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
         privileges: null,
         reserved: {
           description: 'something',
@@ -1141,7 +1167,11 @@ describe('FeatureRegistry', () => {
               privilege: {
                 alerting: {
                   alert: {
-                    all: ['foo', 'bar', 'baz'],
+                    all: [
+                      { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                      { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                      { ruleTypeId: 'baz', consumers: ['test-feature'] },
+                    ],
                   },
                 },
                 savedObject: {
@@ -1171,7 +1201,11 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
+        alerting: [
+          { ruleTypeId: 'foo', consumers: ['test-feature'] },
+          { ruleTypeId: 'bar', consumers: ['test-feature'] },
+          { ruleTypeId: 'baz', consumers: ['test-feature'] },
+        ],
         privileges: null,
         reserved: {
           description: 'something',
@@ -1181,7 +1215,10 @@ describe('FeatureRegistry', () => {
               privilege: {
                 alerting: {
                   rule: {
-                    all: ['foo', 'bar'],
+                    all: [
+                      { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                      { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                    ],
                   },
                 },
                 savedObject: {
@@ -1211,7 +1248,11 @@ describe('FeatureRegistry', () => {
         name: 'Test Feature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
+        alerting: [
+          { ruleTypeId: 'foo', consumers: ['test-feature'] },
+          { ruleTypeId: 'bar', consumers: ['test-feature'] },
+          { ruleTypeId: 'baz', consumers: ['test-feature'] },
+        ],
         privileges: null,
         reserved: {
           description: 'something',
@@ -1221,7 +1262,10 @@ describe('FeatureRegistry', () => {
               privilege: {
                 alerting: {
                   alert: {
-                    all: ['foo', 'bar'],
+                    all: [
+                      { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                      { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                    ],
                   },
                 },
                 savedObject: {
@@ -2007,11 +2051,15 @@ describe('FeatureRegistry', () => {
               all: {
                 ui: [],
                 savedObject: { all: [], read: [] },
-                alerting: { alert: { all: ['one'] } },
+                alerting: {
+                  alert: {
+                    all: [{ ruleTypeId: 'one', consumers: ['featureE'] }],
+                  },
+                },
               },
               read: { ui: [], savedObject: { all: [], read: [] } },
             },
-            alerting: ['one'],
+            alerting: [{ ruleTypeId: 'one', consumers: ['featureE'] }],
           },
         ];
         features.forEach((f) => registry.registerKibanaFeature(f));

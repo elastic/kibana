@@ -14,7 +14,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
-import { PluginSetupContract, PluginStartContract } from './plugin';
+import { AlertingServerSetup, AlertingServerStart } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   AlertInstanceContext,
@@ -27,7 +27,7 @@ import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 export { rulesClientMock };
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<PluginSetupContract> = {
+  const mock: jest.Mocked<AlertingServerSetup> = {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
     getConfig: jest.fn(),
@@ -57,7 +57,7 @@ const createShareStartMock = () => {
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<PluginStartContract> = {
+  const mock: jest.Mocked<AlertingServerStart> = {
     listTypes: jest.fn(),
     getType: jest.fn(),
     getAllTypes: jest.fn(),

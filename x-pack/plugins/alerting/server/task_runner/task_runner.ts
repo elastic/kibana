@@ -511,7 +511,7 @@ export class TaskRunner<
         getDecryptedRule(this.context, ruleId, spaceId)
       );
 
-      const runRuleParams = validateRuleAndCreateFakeRequest({
+      const runRuleParams = await validateRuleAndCreateFakeRequest({
         ruleData,
         paramValidator: this.ruleType.validate.params,
         ruleId,

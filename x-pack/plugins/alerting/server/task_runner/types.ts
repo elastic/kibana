@@ -168,7 +168,7 @@ export interface TaskRunnerContext {
   eventLogger: IEventLogger;
   executionContext: ExecutionContextStart;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
   kibanaBaseUrl: string | undefined;
   logger: Logger;

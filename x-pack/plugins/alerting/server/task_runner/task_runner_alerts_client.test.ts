@@ -237,7 +237,7 @@ describe('Task Runner', () => {
         savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
         elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
         maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValue([]);
-        taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
+        taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockResolvedValue(rulesClient);
         taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
           actionsClient
         );

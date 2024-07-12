@@ -64,7 +64,9 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const rulesClient = (await context.alerting).getRulesClient();
+
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;

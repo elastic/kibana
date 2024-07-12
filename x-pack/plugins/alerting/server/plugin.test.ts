@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingPlugin, PluginSetupContract } from './plugin';
+import { AlertingPlugin, AlertingServerSetup } from './plugin';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -170,7 +170,7 @@ describe('Alerting Plugin', () => {
         });
 
         describe('registerType()', () => {
-          let setup: PluginSetupContract;
+          let setup: AlertingServerSetup;
           beforeEach(async () => {
             const context = coreMock.createPluginInitializerContext<AlertingConfig>(
               generateAlertingConfig()
@@ -244,7 +244,7 @@ describe('Alerting Plugin', () => {
         });
 
         describe('registerConnectorAdapter()', () => {
-          let setup: PluginSetupContract;
+          let setup: AlertingServerSetup;
 
           beforeEach(async () => {
             const context = coreMock.createPluginInitializerContext<AlertingConfig>(

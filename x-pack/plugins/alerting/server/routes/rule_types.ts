@@ -63,7 +63,8 @@ export const ruleTypesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const ruleTypes = Array.from(await rulesClient.listRuleTypes());
         return res.ok({
           body: rewriteBodyRes(ruleTypes),

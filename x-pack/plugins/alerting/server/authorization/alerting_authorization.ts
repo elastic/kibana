@@ -94,7 +94,7 @@ type ConstructorOptions = Pick<
   'ruleTypeRegistry' | 'request' | 'authorization' | 'getSpaceId'
 > & {
   allRegisteredConsumers: Set<string>;
-  ruleTypeConsumersMap: Map<string, Set<string>>;
+  ruleTypesConsumersMap: Map<string, Set<string>>;
 };
 
 export class AlertingAuthorization {
@@ -102,7 +102,7 @@ export class AlertingAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginStart['authz'];
   private readonly allRegisteredConsumers: Set<string>;
-  private readonly ruleTypeConsumersMap: Map<string, Set<string>>;
+  private readonly ruleTypesConsumersMap: Map<string, Set<string>>;
   private readonly spaceId: string | undefined;
 
   constructor({
@@ -111,18 +111,18 @@ export class AlertingAuthorization {
     authorization,
     getSpaceId,
     allRegisteredConsumers,
-    ruleTypeConsumersMap,
+    ruleTypesConsumersMap,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.allRegisteredConsumers = allRegisteredConsumers;
-    this.ruleTypeConsumersMap = ruleTypeConsumersMap;
+    this.ruleTypesConsumersMap = ruleTypesConsumersMap;
     this.spaceId = getSpaceId(request);
   }
 
   /**
-   * Creates an Authorization object.
+   * Creates an AlertingAuthorization object.
    */
   static async create({
     request,
@@ -144,18 +144,18 @@ export class AlertingAuthorization {
       );
 
       const allRegisteredConsumers = new Set<string>();
-      const ruleTypeConsumersMap = new Map<string, Set<string>>();
+      const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
       for (const feature of featuresWithAlertingConfigured) {
         if (feature.alerting) {
           for (const entry of feature.alerting) {
-            const consumers = ruleTypeConsumersMap.get(entry.ruleTypeId) ?? new Set();
+            const consumers = ruleTypesConsumersMap.get(entry.ruleTypeId) ?? new Set();
 
             entry.consumers.forEach((consumer) => {
               consumers.add(consumer);
               allRegisteredConsumers.add(consumer);
             });
-            ruleTypeConsumersMap.set(entry.ruleTypeId, consumers);
+            ruleTypesConsumersMap.set(entry.ruleTypeId, consumers);
           }
         }
       }
@@ -166,7 +166,7 @@ export class AlertingAuthorization {
         getSpaceId,
         ruleTypeRegistry,
         allRegisteredConsumers,
-        ruleTypeConsumersMap,
+        ruleTypesConsumersMap,
       });
     } catch (error) {
       throw new Error(`Failed to create AlertingAuthorization class: ${error}`);
@@ -358,10 +358,6 @@ export class AlertingAuthorization {
     hasAllRequested: boolean;
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    const ruleTypeConsumersMap = await this.ruleTypeConsumersMap;
-    const allRegisteredConsumers = await this.allRegisteredConsumers;
-    const consumersToAuthorize = consumers ?? new Set(Object.keys(allRegisteredConsumers));
-
     const requiredPrivileges = new Map<
       string,
       [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
@@ -381,12 +377,12 @@ export class AlertingAuthorization {
       );
 
       for (const ruleTypeWithAuth of ruleTypesWithAuthorization) {
-        if (!ruleTypeConsumersMap.has(ruleTypeWithAuth.id)) {
+        if (!this.ruleTypesConsumersMap.has(ruleTypeWithAuth.id)) {
           continue;
         }
 
-        for (const consumerToAuthorize of consumersToAuthorize) {
-          const ruleTypeConsumers = ruleTypeConsumersMap.get(ruleTypeWithAuth.id);
+        for (const consumerToAuthorize of this.allRegisteredConsumers) {
+          const ruleTypeConsumers = this.ruleTypesConsumersMap.get(ruleTypeWithAuth.id);
 
           if (!ruleTypeConsumers?.has(consumerToAuthorize)) {
             continue;

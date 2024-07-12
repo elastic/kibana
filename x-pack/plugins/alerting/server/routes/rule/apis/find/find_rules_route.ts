@@ -51,7 +51,8 @@ const buildFindRulesRoute = ({
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
 
         const query: FindRulesRequestQueryV1 = req.query;
 
@@ -99,7 +100,8 @@ const buildFindRulesRoute = ({
       },
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
 
           const body: FindRulesRequestQueryV1 = req.body;
 

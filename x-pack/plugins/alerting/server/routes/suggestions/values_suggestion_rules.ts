@@ -58,7 +58,8 @@ export function registerRulesValueSuggestionsRoute(
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const { savedObjects, elasticsearch } = await context.core;
 
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         let authorizationTuple;
         try {
           authorizationTuple = await rulesClient

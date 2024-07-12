@@ -78,10 +78,10 @@ describe('rule_loader', () => {
     jest.restoreAllMocks();
   });
 
-  describe('validateRuleAndCreateFakeRequest()', () => {
+  describe('await validateRuleAndCreateFakeRequest()', () => {
     describe('succeeds', () => {
-      test('validates and returns the results', () => {
-        const result = validateRuleAndCreateFakeRequest({
+      test('validates and returns the results', async () => {
+        const result = await validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(),
           context,
         });
@@ -100,7 +100,7 @@ describe('rule_loader', () => {
     test('throws when rule is not enabled', async () => {
       let outcome = 'success';
       try {
-        validateRuleAndCreateFakeRequest({
+        await validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(false),
           context,
         });
@@ -119,7 +119,7 @@ describe('rule_loader', () => {
 
       let outcome = 'success';
       try {
-        validateRuleAndCreateFakeRequest({
+        await validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(),
           context,
         });
@@ -137,7 +137,7 @@ describe('rule_loader', () => {
       context = contextMock as unknown as TaskRunnerContext;
       let outcome = 'success';
       try {
-        validateRuleAndCreateFakeRequest({
+        await validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(),
           context,
         });
@@ -292,7 +292,7 @@ function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) 
     getRulesClientWithRequest,
   };
 
-  function getRulesClientWithRequest() {
+  async function getRulesClientWithRequest() {
     // only need get() mocked
     rulesClient.getAlertFromRaw.mockReturnValue({
       name: ruleName,
@@ -304,6 +304,7 @@ function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) 
         },
       },
     } as Rule);
-    return rulesClient;
+
+    return Promise.resolve(rulesClient);
   }
 }

@@ -29,6 +29,8 @@ import { schema } from '@kbn/config-schema';
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
 const request = {} as KibanaRequest;
+const allRegisteredConsumers = new Set<string>();
+const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
 const getSpace = jest.fn();
 const getSpaceId = () => 'space1';
@@ -41,7 +43,7 @@ const mockAuthorizationAction = (
 ) => `${ruleType}/${consumer}/${entity}/${operation}`;
 
 function mockSecurity() {
-  const security = securityMock.createSetup();
+  const security = securityMock.createStart();
   const authorization = security.authz;
   // typescript is having trouble inferring jest's automocking
   (
@@ -53,28 +55,32 @@ function mockSecurity() {
   return { authorization };
 }
 
-function mockFeature(appName: string, typeName?: string | string[]) {
-  const typeNameArray = typeName ? (Array.isArray(typeName) ? typeName : [typeName]) : undefined;
+function mockFeature(appName: string, typeName?: string[]) {
+  const alertingFeatures = typeName?.map((ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [appName],
+  }));
+
   return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
     category: { id: 'foo', label: 'foo' },
-    ...(typeNameArray
+    ...(alertingFeatures
       ? {
-          alerting: { ruleTypeIds: typeNameArray, consumers: [appName] },
+          alerting: alertingFeatures,
         }
       : {}),
     privileges: {
       all: {
-        ...(typeNameArray
+        ...(alertingFeatures
           ? {
               alerting: {
                 rule: {
-                  all: { ruleTypeIds: typeNameArray, consumers: [appName] },
+                  all: alertingFeatures,
                 },
                 alert: {
-                  all: { ruleTypeIds: typeNameArray, consumers: [appName] },
+                  all: alertingFeatures,
                 },
               },
             }
@@ -86,14 +92,14 @@ function mockFeature(appName: string, typeName?: string | string[]) {
         ui: [],
       },
       read: {
-        ...(typeNameArray
+        ...(alertingFeatures
           ? {
               alerting: {
                 rule: {
-                  read: { ruleTypeIds: typeNameArray, consumers: [appName] },
+                  read: alertingFeatures,
                 },
                 alert: {
-                  read: { ruleTypeIds: typeNameArray, consumers: [appName] },
+                  read: alertingFeatures,
                 },
               },
             }
@@ -108,15 +114,20 @@ function mockFeature(appName: string, typeName?: string | string[]) {
   });
 }
 
-function mockFeatureWithSubFeature(appName: string, typeName: string) {
+function mockFeatureWithSubFeature(appName: string, typeName: string[]) {
+  const alertingFeatures = typeName?.map((ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [appName],
+  }));
+
   return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
     category: { id: 'foo', label: 'foo' },
-    ...(typeName
+    ...(alertingFeatures
       ? {
-          alerting: { ruleTypeIds: [typeName], consumers: [appName] },
+          alerting: alertingFeatures,
         }
       : {}),
     privileges: {
@@ -148,7 +159,7 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 includeIn: 'all',
                 alerting: {
                   rule: {
-                    all: { ruleTypeIds: [typeName], consumers: [appName] },
+                    all: alertingFeatures,
                   },
                 },
                 savedObject: {
@@ -163,7 +174,7 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 includeIn: 'read',
                 alerting: {
                   rule: {
-                    read: { ruleTypeIds: [typeName], consumers: [appName] },
+                    read: alertingFeatures,
                   },
                 },
                 savedObject: {
@@ -180,9 +191,9 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
   });
 }
 
-const myAppFeature = mockFeature('myApp', 'myType');
-const myOtherAppFeature = mockFeature('myOtherApp', 'myType');
-const myAppWithSubFeature = mockFeatureWithSubFeature('myAppWithSubFeature', 'myType');
+const myAppFeature = mockFeature('myApp', ['myType']);
+const myOtherAppFeature = mockFeature('myOtherApp', ['myType']);
+const myAppWithSubFeature = mockFeatureWithSubFeature('myAppWithSubFeature', ['myType']);
 const myFeatureWithoutAlerting = mockFeature('myOtherApp');
 
 beforeEach(() => {
@@ -227,9 +238,9 @@ describe('AlertingAuthorization', () => {
       new AlertingAuthorization({
         request,
         ruleTypeRegistry,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       expect(getSpace).toHaveBeenCalledWith(request);
@@ -241,9 +252,9 @@ describe('AlertingAuthorization', () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       await alertAuthorization.ensureAuthorized({
@@ -263,9 +274,9 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         authorization,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       await alertAuthorization.ensureAuthorized({
@@ -286,11 +297,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -328,11 +339,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -370,11 +381,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -412,11 +423,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -460,11 +471,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       await alertAuthorization.ensureAuthorized({
@@ -502,11 +513,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       await alertAuthorization.ensureAuthorized({
@@ -544,11 +555,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       await alertAuthorization.ensureAuthorized({
@@ -580,11 +591,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -624,11 +635,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -672,11 +683,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -716,11 +727,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -760,11 +771,11 @@ describe('AlertingAuthorization', () => {
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
 
       checkPrivileges.mockResolvedValueOnce({
@@ -850,9 +861,9 @@ describe('AlertingAuthorization', () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       const { filter, ensureRuleTypeIsAuthorized } =
         await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
@@ -869,9 +880,9 @@ describe('AlertingAuthorization', () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Rule,
@@ -889,7 +900,7 @@ describe('AlertingAuthorization', () => {
     test('creates a filter based on the privileged types', async () => {
       features.getKibanaFeatures.mockReturnValue([
         mockFeature('myApp', ['myAppAlertType', 'mySecondAppAlertType']),
-        mockFeature('alerts', 'myOtherAppAlertType'),
+        mockFeature('alerts', ['myOtherAppAlertType']),
         myOtherAppFeature,
         myAppWithSubFeature,
       ]);
@@ -981,11 +992,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
       expect(
@@ -1028,11 +1039,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
       await expect(
@@ -1089,11 +1100,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
@@ -1115,7 +1126,7 @@ describe('AlertingAuthorization', () => {
     test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
       features.getKibanaFeatures.mockReturnValue([
         mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
-        mockFeature('myOtherApp', 'myAppAlertType'),
+        mockFeature('myOtherApp', ['myAppAlertType']),
       ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -1153,11 +1164,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
@@ -1228,11 +1239,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
@@ -1259,9 +1270,9 @@ describe('AlertingAuthorization', () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       const { filter } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Alert,
@@ -1331,9 +1342,9 @@ describe('AlertingAuthorization', () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
-        features,
-        getSpace,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -1461,11 +1472,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -1560,11 +1571,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -1664,11 +1675,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -1780,11 +1791,11 @@ describe('AlertingAuthorization', () => {
 
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -1903,11 +1914,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -1980,11 +1991,11 @@ describe('AlertingAuthorization', () => {
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
-        authorization,
         ruleTypeRegistry,
-        features,
-        getSpace,
+        authorization,
         getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
@@ -2227,11 +2238,11 @@ describe('AlertingAuthorization', () => {
         authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
         alertAuthorization = new AlertingAuthorization({
           request,
-          authorization,
           ruleTypeRegistry,
-          features,
-          getSpace,
+          authorization,
           getSpaceId,
+          allRegisteredConsumers,
+          ruleTypesConsumersMap,
         });
       });
 
@@ -2378,11 +2389,11 @@ describe('AlertingAuthorization', () => {
         authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
         alertAuthorization = new AlertingAuthorization({
           request,
-          authorization,
           ruleTypeRegistry,
-          features,
-          getSpace,
+          authorization,
           getSpaceId,
+          allRegisteredConsumers,
+          ruleTypesConsumersMap,
         });
       });
 
@@ -2525,11 +2536,11 @@ describe('AlertingAuthorization', () => {
         authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
         alertAuthorization = new AlertingAuthorization({
           request,
-          authorization,
           ruleTypeRegistry,
-          features,
-          getSpace,
+          authorization,
           getSpaceId,
+          allRegisteredConsumers,
+          ruleTypesConsumersMap,
         });
       });
 
