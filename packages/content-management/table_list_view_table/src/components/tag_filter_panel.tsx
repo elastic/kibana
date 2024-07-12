@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import type { FC } from 'react';
 import {
   EuiPopover,
@@ -99,8 +99,6 @@ export const TagFilterPanel: FC<Props> = ({
     };
   }
 
-  const ref = useRef<HTMLButtonElement | null>(null);
-
   const button = (
     <EuiFilterButton
       iconType="arrowDown"
@@ -110,7 +108,6 @@ export const TagFilterPanel: FC<Props> = ({
       hasActiveFilters={totalActiveFilters > 0}
       numActiveFilters={totalActiveFilters}
       grow
-      buttonRef={ref}
     >
       Tags
     </EuiFilterButton>
@@ -120,14 +117,7 @@ export const TagFilterPanel: FC<Props> = ({
     <EuiPopover
       button={button}
       isOpen={isPopoverOpen}
-      closePopover={
-        closePopover
-        // () => {
-        // closePopover();
-        // console.log(ref.current);
-        // if (ref.current) ref.current.focus();
-        // }
-      }
+      closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downCenter"
       panelProps={{ css: { width: euiTheme.base * 18 } }}
