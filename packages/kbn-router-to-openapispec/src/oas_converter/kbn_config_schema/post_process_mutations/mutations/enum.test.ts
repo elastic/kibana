@@ -93,6 +93,23 @@ describe('processEnum', () => {
         ],
       },
     },
+    {
+      name: 'if anyOf contains non-enums does not change input',
+      input: {
+        anyOf: [
+          {
+            type: 'object',
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        anyOf: [
+          {
+            type: 'object',
+          },
+        ],
+      },
+    },
   ])('$name', ({ input, expected }) => {
     processEnum(input);
     expect(input).toEqual(expected);

@@ -14,12 +14,11 @@ export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   const result: unknown[] = [];
   let type: OpenAPIV3.SchemaObject['type'];
   for (const item of schema.anyOf!) {
-    if (isReferenceObject(item)) return;
+    if (isReferenceObject(item) || !item.enum || !item.type) return;
     if (type && type !== item.type) return;
+
     type = item.type;
-    if (item.enum) {
-      result.push(...item.enum);
-    }
+    result.push(...item.enum);
   }
   schema.type = type;
   schema.enum = result;
