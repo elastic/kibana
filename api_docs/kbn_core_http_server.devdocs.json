@@ -14344,6 +14344,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
               },
               {
