@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
+  const dataGrid = getService('dataGrid');
 
   describe('data source profile', () => {
     describe('ES|QL mode', () => {
@@ -58,6 +59,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await logLevels[2].getVisibleText()).to.be('Info');
         });
       });
+
+      describe('doc viewer extension', () => {
+        it('should not render custom doc viewer view', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-* | sort @timestamp desc' },
+          });
+          await PageObjects.common.navigateToApp('discover', {
+            hash: `/?_a=${state}`,
+          });
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Result');
+        });
+
+        it('should render custom doc viewer view', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-logs | sort @timestamp desc' },
+          });
+          await PageObjects.common.navigateToApp('discover', {
+            hash: `/?_a=${state}`,
+          });
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
+        });
+      });
     });
 
     describe('data view mode', () => {
@@ -90,6 +125,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(logLevels).to.have.length(3);
           expect(await logLevels[0].getVisibleText()).to.be('Debug');
           expect(await logLevels[2].getVisibleText()).to.be('Info');
+        });
+      });
+
+      describe('doc viewer extension', () => {
+        it('should not render custom doc viewer view', async () => {
+          await PageObjects.common.navigateToApp('discover');
+          await dataViews.switchTo('my-example-*');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Document');
+        });
+
+        it('should render custom doc viewer view', async () => {
+          await PageObjects.common.navigateToApp('discover');
+          await dataViews.switchTo('my-example-logs');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
+            'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
+          );
         });
       });
     });
