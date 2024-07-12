@@ -7,11 +7,7 @@ paths:
     post:
       x-labels: [serverless, ess]
       operationId: RulePreview
-      # Code generator changes are required to build a valid request body Zod schema
-      # TypeSpecificCreateProps gets transformed to a discriminated union which
-      # doesn't have `merge` method code generator uses for `allOf`
-      # `preview_rules_route.ts` contains manually written Zod schemas
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       summary: Preview rule alerts generated on specified time range
       tags:
         - Rule preview API
@@ -21,18 +17,33 @@ paths:
         content:
           application/json:
             schema:
-              allOf:
-                - type: object
-                  properties:
-                    invocationCount:
-                      type: integer
-                      minimum: 1
-                    timeframeEnd:
-                      type: string
-                      format: date-time
-                  required: [invocationCount, timeframeEnd]
-                - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/SharedCreateProps'
-                - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/TypeSpecificCreateProps'
+              discriminator:
+                propertyName: type
+              anyOf:
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/EqlRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/QueryRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/SavedQueryRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/ThresholdRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/ThreatMatchRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/MachineLearningRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/NewTermsRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/EsqlRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
       responses:
         200:
           description: Successful response
@@ -42,7 +53,9 @@ paths:
                 type: object
                 properties:
                   logs:
-                    $ref: '#/components/schemas/RulePreviewLogs'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RulePreviewLogs'
                   previewId:
                     $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
                   isAborted:
@@ -71,6 +84,16 @@ paths:
 
 components:
   schemas:
+    RulePreviewParams:
+      type: object
+      properties:
+        invocationCount:
+          type: integer
+        timeframeEnd:
+          type: string
+          format: date-time
+      required: [invocationCount, timeframeEnd]
+
     RulePreviewLogs:
       type: object
       properties:

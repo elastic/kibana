@@ -16,7 +16,23 @@
 
 import { z } from 'zod';
 
+import {
+  EqlRuleCreateProps,
+  QueryRuleCreateProps,
+  SavedQueryRuleCreateProps,
+  ThresholdRuleCreateProps,
+  ThreatMatchRuleCreateProps,
+  MachineLearningRuleCreateProps,
+  NewTermsRuleCreateProps,
+  EsqlRuleCreateProps,
+} from '../model/rule_schema/rule_schemas.gen';
 import { NonEmptyString } from '../../model/primitives.gen';
+
+export type RulePreviewParams = z.infer<typeof RulePreviewParams>;
+export const RulePreviewParams = z.object({
+  invocationCount: z.number().int(),
+  timeframeEnd: z.string().datetime(),
+});
 
 export type RulePreviewLogs = z.infer<typeof RulePreviewLogs>;
 export const RulePreviewLogs = z.object({
@@ -27,4 +43,24 @@ export const RulePreviewLogs = z.object({
    */
   duration: z.number().int(),
   startedAt: NonEmptyString.optional(),
+});
+
+export type RulePreviewRequestBody = z.infer<typeof RulePreviewRequestBody>;
+export const RulePreviewRequestBody = z.discriminatedUnion('type', [
+  EqlRuleCreateProps.merge(RulePreviewParams),
+  QueryRuleCreateProps.merge(RulePreviewParams),
+  SavedQueryRuleCreateProps.merge(RulePreviewParams),
+  ThresholdRuleCreateProps.merge(RulePreviewParams),
+  ThreatMatchRuleCreateProps.merge(RulePreviewParams),
+  MachineLearningRuleCreateProps.merge(RulePreviewParams),
+  NewTermsRuleCreateProps.merge(RulePreviewParams),
+  EsqlRuleCreateProps.merge(RulePreviewParams),
+]);
+export type RulePreviewRequestBodyInput = z.input<typeof RulePreviewRequestBody>;
+
+export type RulePreviewResponse = z.infer<typeof RulePreviewResponse>;
+export const RulePreviewResponse = z.object({
+  logs: z.array(RulePreviewLogs),
+  previewId: NonEmptyString.optional(),
+  isAborted: z.boolean().optional(),
 });
