@@ -7,10 +7,22 @@
 
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
+export enum MessageRole {
+  'user' = 'human',
+  'assistant' = 'assistant',
+  'system' = 'system',
+}
+
 interface ModelField {
   field: string;
   model_id: string;
   indices: string[];
+}
+
+export interface ChatMessage {
+  id: string;
+  role: MessageRole;
+  content: string;
 }
 
 interface SemanticField {
