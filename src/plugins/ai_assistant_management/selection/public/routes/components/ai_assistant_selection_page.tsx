@@ -38,7 +38,7 @@ export function AiAssistantSelectionPage() {
   const observabilityFeatureDisabledInSpaceMsg = i18n.translate(
     'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledInSpaceCallOutLabel',
     {
-      defaultMessage: 'This feature is disabled and can be enabled from Spaces > Features.',
+      defaultMessage: 'This feature is disabled. It can be enabled from Spaces > Features',
     }
   );
   useEffect(() => {
