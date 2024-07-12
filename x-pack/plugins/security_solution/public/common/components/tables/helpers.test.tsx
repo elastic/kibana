@@ -108,7 +108,7 @@ describe('Table Helpers', () => {
           fieldName="attrName"
           idPrefix="idPrefix"
           overflowIndexStart={1}
-          maxOverflowItems={5}
+          maxOverflowItems={1}
         />
       );
       expect(wrapper).toMatchSnapshot();

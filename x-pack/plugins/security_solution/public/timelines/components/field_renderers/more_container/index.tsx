@@ -8,6 +8,7 @@
 import React, { useContext, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
+import classNames from 'classnames';
 import { TimelineContext } from '../../timeline';
 import { getSourcererScopeId } from '../../../../helpers';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -74,15 +75,15 @@ export const MoreContainer = React.memo<MoreContainerProps>(
       [values, overflowIndexStart, idPrefix, fieldName, sourcererScopeId, defaultedScopeId, render]
     );
 
+    const moreContainerStyles = () => css`
+      max-height: ${moreMaxHeight};
+      padding-right: 2px;
+    `;
+
+    const moreContainerClasses = classNames(moreContainerStyles(), 'eui-yScroll');
+
     return (
-      <div
-        data-test-subj="more-container"
-        className="eui-yScroll"
-        css={css`
-          max-height: ${moreMaxHeight};
-          padding-right: 2px;
-        `}
-      >
+      <div data-test-subj="more-container" className={moreContainerClasses}>
         <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
           {moreItemsWithHoverActions}
         </EuiFlexGroup>
