@@ -229,6 +229,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     eventIdToNoteIds,
     refetch,
     timelineId,
+    activeTab,
   });
 
   const onToggleShowNotes = useCallback(
