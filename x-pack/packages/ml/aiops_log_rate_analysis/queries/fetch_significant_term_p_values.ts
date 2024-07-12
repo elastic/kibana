@@ -56,48 +56,49 @@ export const getSignificantTermRequest = (
     ];
   }
 
-  const pValueAggs = fieldNames.reduce<Record<string, estypes.AggregationsAggregationContainer>>(
-    (aggs, fieldName, index) => {
-      aggs[`distinct_count_${index}`] = {
-        cardinality: {
-          field: fieldName,
-        },
-      };
+  const fieldCandidateAggs = fieldNames.reduce<
+    Record<string, estypes.AggregationsAggregationContainer>
+  >((aggs, fieldName, index) => {
+    // Used to identify fields with only one distinct value which we'll ignore in the analysis.
+    aggs[`distinct_count_${index}`] = {
+      cardinality: {
+        field: fieldName,
+      },
+    };
 
-      aggs[`sig_term_p_value_${index}`] = {
-        significant_terms: {
-          field: fieldName,
-          background_filter: {
-            bool: {
-              filter: [
-                ...filter,
-                {
-                  range: {
-                    [timeFieldName]: {
-                      gte: params.baselineMin,
-                      lt: params.baselineMax,
-                      format: 'epoch_millis',
-                    },
+    // Used to calculate the p-value for the field.
+    aggs[`sig_term_p_value_${index}`] = {
+      significant_terms: {
+        field: fieldName,
+        background_filter: {
+          bool: {
+            filter: [
+              ...filter,
+              {
+                range: {
+                  [timeFieldName]: {
+                    gte: params.baselineMin,
+                    lt: params.baselineMax,
+                    format: 'epoch_millis',
                   },
                 },
-              ],
-            },
+              },
+            ],
           },
-          // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
-          p_value: { background_is_superset: false },
-          size: 1000,
         },
-      };
+        // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
+        p_value: { background_is_superset: false },
+        size: 1000,
+      },
+    };
 
-      return aggs;
-    },
-    {}
-  );
+    return aggs;
+  }, {});
 
   const body = {
     query,
     size: 0,
-    aggs: wrap(pValueAggs),
+    aggs: wrap(fieldCandidateAggs),
   };
 
   return {
