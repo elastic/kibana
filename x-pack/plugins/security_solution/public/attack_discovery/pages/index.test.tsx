@@ -29,6 +29,7 @@ import {
 } from '../mock/mock_use_attack_discovery';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from '../use_attack_discovery';
+import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
 jest.mock('react-use', () => {
   const actual = jest.requireActual('react-use');
@@ -44,6 +45,28 @@ jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
   () => ({
     useFetchAnonymizationFields: jest.fn(() => mockFindAnonymizationFieldsResponse),
+  })
+);
+
+const mockConnectors: unknown[] = [
+  {
+    id: 'test-id',
+    name: 'OpenAI connector',
+    actionTypeId: '.gen-ai',
+  },
+];
+
+jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors', () => ({
+  useLoadConnectors: jest.fn(() => ({
+    isFetched: true,
+    data: mockConnectors,
+  })),
+}));
+
+jest.mock(
+  '@kbn/elastic-assistant/impl/connectorland/connector_selector_inline/connector_selector_inline',
+  () => ({
+    ConnectorSelectorInline: () => null,
   })
 );
 
@@ -225,6 +248,10 @@ describe('AttackDiscovery', () => {
       );
     });
 
+    it('does NOT render the animated logo', () => {
+      expect(screen.queryByTestId('animatedLogo')).toBeNull();
+    });
+
     it('does NOT render the summary', () => {
       expect(screen.queryByTestId('summary')).toBeNull();
     });
@@ -235,6 +262,115 @@ describe('AttackDiscovery', () => {
 
     it('renders the empty prompt', () => {
       expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
+    });
+
+    it('does NOT render attack discoveries', () => {
+      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
+    });
+
+    it('does NOT render the upgrade call to action', () => {
+      expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('when connectors are configured and didInitialFetch is false', () => {
+    beforeEach(() => {
+      (useAttackDiscovery as jest.Mock).mockReturnValue({
+        approximateFutureTime: null,
+        attackDiscoveries: [],
+        cachedAttackDiscoveries: {},
+        didInitialFetch: false, // <-- didInitialFetch is false
+        fetchAttackDiscoveries: jest.fn(),
+        failureReason: null,
+        generationIntervals: undefined,
+        isLoading: false,
+        isLoadingPost: false,
+        lastUpdated: null,
+        replacements: {},
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('renders the animated logo, because connectors are configured and the initial fetch is pending', () => {
+      expect(screen.getByTestId('animatedLogo')).toBeInTheDocument();
+    });
+
+    it('does NOT render the summary', () => {
+      expect(screen.queryByTestId('summary')).toBeNull();
+    });
+
+    it('does NOT render the loading callout', () => {
+      expect(screen.queryByTestId('loadingCallout')).toBeNull();
+    });
+
+    it('does NOT render the empty prompt', () => {
+      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
+    });
+
+    it('does NOT render attack discoveries', () => {
+      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
+    });
+
+    it('does NOT render the upgrade call to action', () => {
+      expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('when connectors are NOT configured and didInitialFetch is false', () => {
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: [], // <-- connectors are NOT configured
+      });
+
+      (useAttackDiscovery as jest.Mock).mockReturnValue({
+        approximateFutureTime: null,
+        attackDiscoveries: [],
+        cachedAttackDiscoveries: {},
+        didInitialFetch: false, // <-- didInitialFetch is false
+        fetchAttackDiscoveries: jest.fn(),
+        failureReason: null,
+        generationIntervals: undefined,
+        isLoading: false,
+        isLoadingPost: false,
+        lastUpdated: null,
+        replacements: {},
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('does NOT render the animated logo, because connectors are NOT configured', () => {
+      expect(screen.queryByTestId('animatedLogo')).toBeNull();
+    });
+
+    it('does NOT render the summary', () => {
+      expect(screen.queryByTestId('summary')).toBeNull();
+    });
+
+    it('does NOT render the loading callout', () => {
+      expect(screen.queryByTestId('loadingCallout')).toBeNull();
+    });
+
+    it('does NOT render the empty prompt', () => {
+      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
     });
 
     it('does NOT render attack discoveries', () => {
@@ -264,6 +400,10 @@ describe('AttackDiscovery', () => {
           </Router>
         </TestProviders>
       );
+    });
+
+    it('does NOT render the animated logo', () => {
+      expect(screen.queryByTestId('animatedLogo')).toBeNull();
     });
 
     it('renders the summary', () => {
@@ -302,6 +442,10 @@ describe('AttackDiscovery', () => {
           </Router>
         </TestProviders>
       );
+    });
+
+    it('does NOT render the animated logo, because didInitialFetch is true', () => {
+      expect(screen.queryByTestId('animatedLogo')).toBeNull();
     });
 
     it('does NOT render the summary', () => {
@@ -346,6 +490,10 @@ describe('AttackDiscovery', () => {
           </Router>
         </TestProviders>
       );
+    });
+
+    it('does NOT render the animated logo', () => {
+      expect(screen.queryByTestId('animatedLogo')).toBeNull();
     });
 
     it('does NOT render the header', () => {
