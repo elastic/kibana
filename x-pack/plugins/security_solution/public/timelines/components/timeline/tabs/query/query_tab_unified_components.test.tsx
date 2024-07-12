@@ -916,82 +916,62 @@ describe('query tab with unified timeline', () => {
 
           fireEvent.click(screen.getByTestId('cancel'));
 
-<<<<<<< HEAD
-            await waitFor(() => {
-              expect(screen.getByTestId('add-note-container')).toBeVisible();
-            });
-
-            userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
-
-            expect(screen.getByTestId('cancel')).not.toBeDisabled();
-
-            fireEvent.click(screen.getByTestId('cancel'));
-
-            await waitFor(() => {
-              expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-
-        it(
-          'should be able to delete notes',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.getByTestId('delete-note')).toBeVisible();
-            });
-
-            const noteDeleteSpy = jest.spyOn(timelineActions, 'setConfirmingNoteId');
-
-            fireEvent.click(screen.getByTestId('delete-note'));
-
-            await waitFor(() => {
-              expect(noteDeleteSpy).toHaveBeenCalled();
-              expect(noteDeleteSpy).toHaveBeenCalledWith({
-                confirmingNoteId: '1',
-                id: TimelineId.test,
-              });
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-
-        it(
-          'should not show toggle event details action',
-          async () => {
-            renderTestComponents();
-            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-            await waitFor(() => {
-              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-            });
-
-            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-            await waitFor(() => {
-              expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
-            });
-          },
-          SPECIAL_TEST_TIMEOUT
-        );
-      });
-=======
           await waitFor(() => {
             expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
           });
         },
         SPECIAL_TEST_TIMEOUT
       );
->>>>>>> main
+
+      it(
+        'should be able to delete notes',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
+
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('delete-note')).toBeVisible();
+          });
+
+          const noteDeleteSpy = jest.spyOn(timelineActions, 'setConfirmingNoteId');
+
+          fireEvent.click(screen.getByTestId('delete-note'));
+
+          await waitFor(() => {
+            expect(noteDeleteSpy).toHaveBeenCalled();
+            expect(noteDeleteSpy).toHaveBeenCalledWith({
+              confirmingNoteId: '1',
+              id: TimelineId.test,
+            });
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should not show toggle event details action',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
+
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+          await waitFor(() => {
+            expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
     });
   });
 
