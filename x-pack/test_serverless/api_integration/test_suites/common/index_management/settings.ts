@@ -20,12 +20,12 @@ export default function ({ getService }: FtrProviderContext) {
   // see details: https://github.com/elastic/kibana/issues/187369
   describe.skip('settings', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
       await svlIndicesHelpers.deleteAllIndices();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should fetch an index settings', async () => {

@@ -79,10 +79,10 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const DEFAULT_ROLE = getDefaultRole();
 
   return {
-    async getSessionCookieForRole(role: string) {
-      return sessionManager.getSessionCookieForRole(role);
+    async getInteractiveUserSessionCookieWithRoleScope(role: string) {
+      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
-    async getApiCredentialsForRole(role: string) {
+    async getM2MApiCredentialsWithRoleScope(role: string) {
       return sessionManager.getApiCredentialsForRole(role);
     },
     async getEmail(role: string) {
@@ -92,13 +92,13 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     async getUserData(role: string) {
       return sessionManager.getUserData(role);
     },
-    async createApiKeyForDefaultRole() {
+    async createM2mApiKeyWithDefaultRoleScope() {
       log.debug(`Creating api key for default role: [${this.DEFAULT_ROLE}]`);
-      return this.createApiKeyForRole(this.DEFAULT_ROLE);
+      return this.createM2mApiKeyWithRoleScope(this.DEFAULT_ROLE);
     },
-    async createApiKeyForRole(role: string): Promise<RoleCredentials> {
+    async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
       // Get admin credentials in order to create the API key
-      const adminCookieHeader = await this.getApiCredentialsForRole('admin');
+      const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
 
       // Get the role descrtiptor for the role
       let roleDescriptors = {};
@@ -113,15 +113,9 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
           )}`
         );
         roleDescriptors = {
-          [role]: roleDescriptor ?? {
-            cluster: [],
-            index: [],
-            applications: [],
-          },
+          [role]: roleDescriptor,
         };
       }
-
-      log.debug(`Creating api key for default role: [${this.DEFAULT_ROLE}]`);
 
       const { body, status } = await supertestWithoutAuth
         .post('/internal/security/api_key')
@@ -140,7 +134,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       log.debug(`Created api key for role: [${role}]`);
       return { apiKey, apiKeyHeader, cookieHeader: adminCookieHeader };
     },
-    async invalidateApiKeyForRole(roleCredentials: RoleCredentials) {
+    async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
       const requestBody = {
         apiKeys: [
           {

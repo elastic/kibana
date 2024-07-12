@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
     const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     beforeEach(async () => {
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(dataArchive);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Deletion', () => {
