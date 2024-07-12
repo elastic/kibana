@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { FieldDescription, type FieldDescriptionProps } from './field_description';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { type FieldDescriptionProps } from './field_description';
+
+const LazyFieldDescription = React.lazy(() => import('./field_description'));
+export const FieldDescription = withSuspense<FieldDescriptionProps>(LazyFieldDescription, <></>);
