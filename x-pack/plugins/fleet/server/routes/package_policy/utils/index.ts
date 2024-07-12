@@ -93,23 +93,28 @@ export async function renameAgentlessAgentPolicy(
   if (!agentPolicy) {
     return;
   }
+  if (!agentPolicy.supports_agentless) {
+    return;
+  }
 
-  if (
-    agentPolicy.supports_agentless &&
-    agentPolicy.name !== getAgentlessAgentPolicyNameFromPackagePolicyName(name)
-  ) {
-    try {
-      await agentPolicyService.update(
-        soClient,
-        esClient,
-        agentPolicy.id,
-        { name: getAgentlessAgentPolicyNameFromPackagePolicyName(name) },
-        { force: true }
-      );
-    } catch (error) {
-      throw new PackagePolicyRequestError(
-        `Failed to update agent policy name for agentless policy: ${error.message}`
-      );
-    }
+  const agentlessAgentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(name);
+
+  // If the agent policy is already correct, we don't need to update it
+  if (agentPolicy.name === agentlessAgentPolicyName) {
+    return;
+  }
+
+  try {
+    await agentPolicyService.update(
+      soClient,
+      esClient,
+      agentPolicy.id,
+      { name: agentlessAgentPolicyName },
+      { force: true }
+    );
+  } catch (error) {
+    throw new PackagePolicyRequestError(
+      `Failed to update agent policy name for agentless policy: ${error.message}`
+    );
   }
 }
