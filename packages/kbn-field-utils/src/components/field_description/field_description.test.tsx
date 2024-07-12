@@ -120,4 +120,27 @@ describe('FieldDescription', () => {
     const desc = screen.queryByTestId('fieldDescription-bytes');
     expect(desc).toBeNull();
   });
+
+  it('should not show ECS metadata if none found', async () => {
+    const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
+      useFieldsMetadata: jest.fn(() => ({
+        fieldsMetadata: {},
+        loading: false,
+        error: undefined,
+        reload: jest.fn(),
+      })),
+    };
+    render(
+      <FieldDescription
+        field={{ name: 'extension.keyword', type: 'keyword', customDescription: undefined }}
+        fieldsMetadataService={fieldsMetadataService as FieldsMetadataPublicStart}
+      />
+    );
+    const desc = screen.queryByTestId('fieldDescription-extension.keyword');
+    expect(desc).toBeNull();
+    expect(fieldsMetadataService.useFieldsMetadata).toHaveBeenCalledWith({
+      attributes: ['description', 'type'],
+      fieldNames: ['extension'],
+    });
+  });
 });
