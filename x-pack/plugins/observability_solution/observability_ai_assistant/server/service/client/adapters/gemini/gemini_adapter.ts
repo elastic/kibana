@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { filter, tap } from 'rxjs';
-import { createInternalServerError } from '../../../../../common/conversation_complete';
-import {
-  BedrockChunkMember,
-  eventstreamSerdeIntoObservable,
-} from '../../../util/eventstream_serde_into_observable';
-import { processBedrockStream } from './process_bedrock_stream';
+import { map } from 'rxjs';
+import { processVertexStream } from './process_vertex_stream';
 import type { LlmApiAdapterFactory } from '../types';
 import { getMessagesWithSimulatedFunctionCalling } from '../simulate_function_calling/get_messages_with_simulated_function_calling';
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
 import { TOOL_USE_END } from '../simulate_function_calling/constants';
+import { eventsourceStreamIntoObservable } from '../../../util/eventsource_stream_into_observable';
+import { GoogleGenerateContentResponseChunk } from './types';
 
-// Most of the work here is to re-format OpenAI-compatible functions for Claude.
-// See https://github.com/anthropics/anthropic-tools/blob/main/tool_use_package/prompt_constructors.py
-
-export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
+export const createGeminiAdapter: LlmApiAdapterFactory = ({
   messages,
   functions,
   functionCall,
@@ -54,16 +48,12 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
       };
     },
     streamIntoObservable: (readable) =>
-      eventstreamSerdeIntoObservable(readable, logger).pipe(
-        tap((value) => {
-          if ('modelStreamErrorException' in value) {
-            throw createInternalServerError(value.modelStreamErrorException.originalMessage);
-          }
+      eventsourceStreamIntoObservable(readable).pipe(
+        map((value) => {
+          const response = JSON.parse(value) as GoogleGenerateContentResponseChunk;
+          return response;
         }),
-        filter((value): value is BedrockChunkMember => {
-          return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
-        }),
-        processBedrockStream(),
+        processVertexStream(),
         parseInlineFunctionCalls({ logger })
       ),
   };
