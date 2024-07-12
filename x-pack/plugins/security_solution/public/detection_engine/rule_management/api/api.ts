@@ -249,6 +249,7 @@ export const fetchRulesSnoozeSettings = async ({
 
   return response.data?.reduce((result, { id, ...snoozeSettings }) => {
     result[id] = {
+      name: snoozeSettings.name ?? '',
       muteAll: snoozeSettings.mute_all ?? false,
       activeSnoozes: snoozeSettings.active_snoozes ?? [],
       isSnoozedUntil: snoozeSettings.is_snoozed_until
