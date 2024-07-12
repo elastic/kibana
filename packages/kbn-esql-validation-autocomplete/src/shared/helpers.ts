@@ -24,7 +24,7 @@ import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, chronoLiterals } from '../definitions/literals';
+import { timeUnits } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -233,9 +233,6 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return false;
   }
 
-  if (argType === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
-  }
   // date-type parameters accept string literals because of ES auto-casting
   return ['string', 'date'].includes(argType);
 }
@@ -566,6 +563,10 @@ export function isRestartingExpression(text: string) {
   return getLastCharFromTrimmed(text) === ',';
 }
 
+export function shouldBeQuotedSource(text: string) {
+  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
+  return /[:"=|,[\]\/ \t\r\n]/.test(text);
+}
 export function shouldBeQuotedText(
   text: string,
   { dashSupported }: { dashSupported?: boolean } = {}
