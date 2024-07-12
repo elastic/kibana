@@ -178,7 +178,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
           ? // remove the default System Prompt if it is assigned to a conversation
             // but that conversation is not in the currentPromptConversationList
             // This means conversation was removed in the current transaction
-            systemPromptSettings?.[0].id
+            undefined
           : //  leave it as it is .. if that conversation was neither added nor removed.
             convo.apiConfig?.defaultSystemPromptId;
 
@@ -264,7 +264,10 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             ...updateOperation,
           };
         });
-
+        console.log(
+          'updatedConversationsSettingsBulkActions---',
+          updatedConversationsSettingsBulkActions
+        );
         setConversationsSettingsBulkActions(updatedConversationsSettingsBulkActions);
       }
     },

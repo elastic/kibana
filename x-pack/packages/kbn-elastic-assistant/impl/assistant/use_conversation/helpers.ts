@@ -116,7 +116,7 @@ export const getInitialDefaultSystemPrompt = ({
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );
 
-  return conversationSystemPrompt ?? allSystemPrompts?.[0];
+  return conversationSystemPrompt;
 };
 
 /**
