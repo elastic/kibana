@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {} from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
