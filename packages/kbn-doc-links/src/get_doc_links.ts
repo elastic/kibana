@@ -375,6 +375,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ilm: `${ELASTICSEARCH_DOCS}index-lifecycle-management.html`,
       ilmForceMerge: `${ELASTICSEARCH_DOCS}ilm-forcemerge.html`,
       ilmFreeze: `${ELASTICSEARCH_DOCS}ilm-freeze.html`,
+      ilmDelete: `${ELASTICSEARCH_DOCS}ilm-delete.html`,
       ilmPhaseTransitions: `${ELASTICSEARCH_DOCS}ilm-index-lifecycle.html#ilm-phase-transitions`,
       ilmReadOnly: `${ELASTICSEARCH_DOCS}ilm-readonly.html`,
       ilmRollover: `${ELASTICSEARCH_DOCS}ilm-rollover.html`,
