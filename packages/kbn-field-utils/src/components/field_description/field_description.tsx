@@ -22,6 +22,10 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 
 const MAX_VISIBLE_LENGTH = 110;
 
+const removeKeywordSuffix = (name: string) => {
+  return name.endsWith('.keyword') ? name.slice(0, -8) : name;
+};
+
 export interface FieldDescriptionContentProps {
   field: {
     name: string;
@@ -51,13 +55,14 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
 const EcsFieldDescriptionFallback: React.FC<
   FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
 > = ({ fieldsMetadataService, ...props }) => {
+  const fieldName = removeKeywordSuffix(props.field.name);
   const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
     attributes: ['description', 'type'],
-    fieldNames: [props.field.name],
+    fieldNames: [fieldName],
   });
 
-  const escFieldDescription = fieldsMetadata?.[props.field.name]?.description;
-  const escFieldType = fieldsMetadata?.[props.field.name]?.type;
+  const escFieldDescription = fieldsMetadata?.[fieldName]?.description;
+  const escFieldType = fieldsMetadata?.[fieldName]?.type;
 
   return (
     <EuiSkeletonText isLoading={loading} size="s">
