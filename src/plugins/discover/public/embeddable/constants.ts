@@ -38,4 +38,5 @@ export const EDITABLE_PANEL_KEYS = [
   'title', // panel title
   'description', // panel description
   'timeRange', // panel custom time range
+  'hidePanelTitles', // panel hidden title
 ] as const;
