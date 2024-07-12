@@ -37,13 +37,37 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should not register the space selector app when buildFlavor is serverless', () => {
+    it('should not register the space selector app when buildFlavor is serverless and maxSpaces is 1', () => {
       const coreSetup = coreMock.createSetup();
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        { maxSpaces: 1 },
+        { buildFlavor: 'serverless' }
+      );
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {});
 
       expect(coreSetup.application.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'space_selector',
+          chromeless: true,
+          appRoute: '/spaces/space_selector',
+          mount: expect.any(Function),
+        })
+      );
+    });
+
+    it('should register the space selector app when buildFlavor is serverless and and maxSpaces is >1', () => {
+      const coreSetup = coreMock.createSetup();
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        { maxSpaces: 2 },
+        { buildFlavor: 'serverless' }
+      );
+
+      const plugin = new SpacesPlugin(mockInitializerContext);
+      plugin.setup(coreSetup, {});
+
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'space_selector',
           chromeless: true,
@@ -88,7 +112,7 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should not register spaces in the management plugin or the feature catalog when the management and home plugins are both available when buildFlavor is serverless', () => {
+    it('should not register spaces in the management plugin or the feature catalog when the management and home plugins are both available when buildFlavor is serverless and maxSpaces is 1', () => {
       const coreSetup = coreMock.createSetup();
       const home = homePluginMock.createSetupContract();
 
@@ -98,7 +122,7 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
       plugin.setup(coreSetup, {
         management,
         home,
@@ -109,6 +133,36 @@ describe('Spaces plugin', () => {
       );
 
       expect(home.featureCatalogue.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'admin',
+          icon: 'spacesApp',
+          id: 'spaces',
+          showOnHomePage: false,
+        })
+      );
+    });
+
+    it('should register spaces in the management plugin or the feature catalog when the management and home plugins are both available when buildFlavor is serverless and maxSpaces is >1', () => {
+      const coreSetup = coreMock.createSetup();
+      const home = homePluginMock.createSetupContract();
+
+      const management = managementPluginMock.createSetupContract();
+      const mockSection = createManagementSectionMock();
+      mockSection.registerApp = jest.fn();
+
+      management.sections.section.kibana = mockSection;
+
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 2 }));
+      plugin.setup(coreSetup, {
+        management,
+        home,
+      });
+
+      expect(mockSection.registerApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'spaces' })
+      );
+
+      expect(home.featureCatalogue.register).toHaveBeenCalledWith(
         expect.objectContaining({
           category: 'admin',
           icon: 'spacesApp',
