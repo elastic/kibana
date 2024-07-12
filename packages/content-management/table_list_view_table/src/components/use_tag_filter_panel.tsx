@@ -120,12 +120,8 @@ export const useTagFilterPanel = ({
     setOptions(tagsToSelectOptions);
   }, [getTagList, tagsToTableItemMap, tagSelection, onOptionClick]);
 
-  const onFilterButtonClick = useCallback(() => {
+  const togglePopover = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);
-  }, []);
-
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
   }, []);
 
   useEffect(() => {
@@ -182,8 +178,8 @@ export const useTagFilterPanel = ({
     isInUse,
     options,
     totalActiveFilters,
-    onFilterButtonClick,
+    togglePopover,
     onSelectChange,
-    closePopover,
+    setIsPopoverOpen,
   };
 };

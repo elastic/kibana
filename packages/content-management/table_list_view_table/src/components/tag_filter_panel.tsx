@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import type { FC } from 'react';
 import {
   EuiPopover,
@@ -45,26 +45,30 @@ const saveBtnWrapperCSS = css`
 
 interface Props {
   clearTagSelection: () => void;
-  closePopover: () => void;
-  isPopoverOpen: boolean;
   isInUse: boolean;
   options: TagOptionItem[];
   totalActiveFilters: number;
-  onFilterButtonClick: () => void;
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
 }
 
 export const TagFilterPanel: FC<Props> = ({
-  isPopoverOpen,
   isInUse,
   options,
   totalActiveFilters,
-  onFilterButtonClick,
   onSelectChange,
-  closePopover,
   clearTagSelection,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const togglePopover = () => {
+    setIsPopoverOpen((prev) => !prev);
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
   const isSearchVisible = options.length > 10;
   const searchBoxCSS = css`
@@ -97,34 +101,39 @@ export const TagFilterPanel: FC<Props> = ({
 
   const ref = useRef<HTMLButtonElement | null>(null);
 
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopover}
+      data-test-subj="tagFilterPopoverButton"
+      hasActiveFilters={totalActiveFilters > 0}
+      numActiveFilters={totalActiveFilters}
+      grow
+      buttonRef={ref}
+    >
+      Tags
+    </EuiFilterButton>
+  );
+
   return (
-    <>
-      <EuiPopover
-        button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={onFilterButtonClick}
-            data-test-subj="tagFilterPopoverButton"
-            hasActiveFilters={totalActiveFilters > 0}
-            numActiveFilters={totalActiveFilters}
-            grow
-            buttonRef={ref}
-          >
-            Tags
-          </EuiFilterButton>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => {
-          setTimeout(() => closePopover(), 1000);
-          console.log(ref.current);
-          if (ref.current) ref.current.focus();
-        }}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        panelProps={{ css: { width: euiTheme.base * 18 } }}
-        panelStyle={isInUse ? { transition: 'none' } : undefined}
-      >
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={
+        closePopover
+        // () => {
+        // closePopover();
+        // console.log(ref.current);
+        // if (ref.current) ref.current.focus();
+        // }
+      }
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      panelProps={{ css: { width: euiTheme.base * 18 } }}
+      panelStyle={isInUse ? { transition: 'none' } : undefined}
+    >
+      <>
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
             <EuiFlexItem>Tags</EuiFlexItem>
@@ -209,7 +218,7 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverFooter>
-      </EuiPopover>
-    </>
+      </>
+    </EuiPopover>
   );
 };

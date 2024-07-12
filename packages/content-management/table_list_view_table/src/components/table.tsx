@@ -151,15 +151,7 @@ export function Table<T extends UserContentCommonSchema>({
     }
   }, [deleteItems, dispatch, tableItemsRowActions]);
 
-  const {
-    isPopoverOpen,
-    isInUse,
-    closePopover,
-    onFilterButtonClick,
-    onSelectChange,
-    options,
-    totalActiveFilters,
-  } = useTagFilterPanel({
+  const { isInUse, onSelectChange, options, totalActiveFilters } = useTagFilterPanel({
     query: searchQuery.query,
     getTagList,
     tagsToTableItemMap,
@@ -191,29 +183,16 @@ export function Table<T extends UserContentCommonSchema>({
       component: () => {
         return (
           <TagFilterPanel
-            isPopoverOpen={isPopoverOpen}
             isInUse={isInUse}
-            closePopover={closePopover}
             options={options}
             totalActiveFilters={totalActiveFilters}
-            onFilterButtonClick={onFilterButtonClick}
             onSelectChange={onSelectChange}
             clearTagSelection={clearTagSelection}
           />
         );
       },
     };
-  }, [
-    isPopoverOpen,
-    isInUse,
-    isTaggingEnabled,
-    closePopover,
-    options,
-    totalActiveFilters,
-    onFilterButtonClick,
-    onSelectChange,
-    clearTagSelection,
-  ]);
+  }, [isInUse, isTaggingEnabled, options, totalActiveFilters, onSelectChange, clearTagSelection]);
 
   const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     return createdByEnabled
