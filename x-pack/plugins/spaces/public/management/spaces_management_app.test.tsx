@@ -100,7 +100,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"solutionNavExperiment":{}}
+          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"serverBasePath":"","history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"solutionNavExperiment":{}}
         </div>
       </div>
     `);
@@ -150,7 +150,7 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Spaces' },
-      { text: `space with id some-space` },
+      { text: `Edit space with id some-space` },
     ]);
     expect(docTitle.change).toHaveBeenCalledWith('Spaces');
     expect(docTitle.reset).not.toHaveBeenCalled();
