@@ -493,6 +493,8 @@ export class DataView extends AbstractDataView implements DataViewBase {
         aggregatable: true,
         searchable: true,
         count: config.popularity ?? 0,
+        customLabel: config.customLabel,
+        customDescription: config.customDescription,
         readFromDocValues: false,
       });
     }

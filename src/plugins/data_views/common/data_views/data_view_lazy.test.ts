@@ -311,6 +311,7 @@ describe('DataViewLazy', () => {
       ...runtime,
       popularity: 5,
       customLabel: 'custom name',
+      customDescription: 'custom desc',
       format: {
         id: 'bytes',
       },
@@ -339,6 +340,7 @@ describe('DataViewLazy', () => {
           ...runtimeComposite.fields.a,
           popularity: 3,
           customLabel: 'custom name a',
+          customDescription: 'custom desc a',
           format: {
             id: 'bytes',
           },
@@ -347,6 +349,7 @@ describe('DataViewLazy', () => {
           ...runtimeComposite.fields.b,
           popularity: 4,
           customLabel: 'custom name b',
+          customDescription: 'custom desc b',
           format: {
             id: 'bytes',
           },
@@ -479,10 +482,12 @@ describe('DataViewLazy', () => {
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.a']).toEqual({
         count: 3,
         customLabel: 'custom name a',
+        customDescription: 'custom desc a',
       });
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.b']).toEqual({
         count: 4,
         customLabel: 'custom name b',
+        customDescription: 'custom desc b',
       });
 
       dataViewLazy.removeRuntimeField('new_field');
