@@ -11,7 +11,6 @@ import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
-import * as i18n from '../translations';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 
@@ -41,7 +40,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
 jest.mock('../use_load_connectors', () => ({
   useLoadConnectors: jest.fn(() => {
     return {
-      data: [],
+      data: mockConnectors,
       error: null,
       isSuccess: true,
     };
@@ -68,67 +67,61 @@ describe('ConnectorSelectorInline', () => {
     jest.clearAllMocks();
   });
   it('renders empty view if no selected conversation is provided', () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
-          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
-    expect(getByText(i18n.INLINE_CONNECTOR_PLACEHOLDER)).toBeInTheDocument();
+    fireEvent.click(getByTestId('connector-selector'));
+    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
 
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={defaultConvo}
-          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
-    expect(getByText(i18n.INLINE_CONNECTOR_PLACEHOLDER)).toBeInTheDocument();
+    fireEvent.click(getByTestId('connector-selector'));
+    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
-  it('Clicking add connector button opens the connector selector', () => {
-    const { getByTestId, queryByTestId } = render(
+  it('renders the connector selector', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          selectedConnectorId={'missing-connector-id'}
+          selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
-    expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
-    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
     expect(getByTestId('connector-selector')).toBeInTheDocument();
   });
   it('On connector change, update conversation API config', () => {
     const connectorTwo = mockConnectors[1];
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          selectedConnectorId={'missing-connector-id'}
+          selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId(connectorTwo.id));
-    expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
     expect(setApiConfig).toHaveBeenCalledWith({
       apiConfig: {
         actionTypeId: '.gen-ai',
@@ -151,16 +144,13 @@ describe('ConnectorSelectorInline', () => {
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          selectedConnectorId={'missing-connector-id'}
+          selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
     fireEvent.click(getByTestId('connector-selector'));
-    fireEvent.click(getByTestId('addNewConnectorButton'));
     expect(getByTestId('connector-selector')).toBeInTheDocument();
     expect(setApiConfig).not.toHaveBeenCalled();
   });

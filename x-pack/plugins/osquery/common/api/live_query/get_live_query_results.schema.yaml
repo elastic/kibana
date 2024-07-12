@@ -4,19 +4,6 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-    GetLiveQueryRequestResultsQueryParameter:
-      name: query
-      in: query
-      required: true
-      schema:
-        $ref: '#/components/schemas/GetLiveQueryResultsRequestQuery'
-    GetLiveQueryRequestResultsParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/GetLiveQueryResultsRequestParams'
   schemas:
     GetLiveQueryResultsRequestQuery:
       type: object
@@ -38,8 +25,3 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
         actionId:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
-
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

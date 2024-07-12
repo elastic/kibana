@@ -49,7 +49,6 @@ interface Props {
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
   selectedConversation: Conversation;
-  isFlyoutMode: boolean;
   refetchConversations: () => void;
 }
 
@@ -61,7 +60,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
   ({
     conversations,
     conversationsLoaded,
-    isFlyoutMode,
     refetchConversations,
     selectedConversation: defaultSelectedConversation,
   }) => {
@@ -304,7 +302,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               defaultConnector={defaultConnector}
               handleSave={handleSave}
-              isFlyoutMode={isFlyoutMode}
               onCancelClick={onCancelClick}
               onSelectedConversationChange={onHandleSelectedConversationChange}
               selectedConversation={selectedConversation}

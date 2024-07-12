@@ -70,9 +70,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
           ) : (
             <>
               {hasConnectors ? (
-                <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="s">
-                  <ConnectorSelector connectors={connectors} selectedConnectorId={connector?.id} />
-                </EuiFlexGroup>
+                <ConnectorSelector connectors={connectors} selectedConnectorId={connector?.id} />
               ) : (
                 <AuthorizationWrapper canCreateConnectors>
                   <ConnectorSetup
@@ -107,15 +105,22 @@ const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConn
   if (!canCreateConnectors) {
     return (
       <MissingPrivilegesTooltip canCreateConnectors>
-        <EuiLink disabled>{i18n.CREATE_CONNECTOR}</EuiLink>
+        <EuiLink data-test-subj="createConnectorPopoverButtonDisabled" disabled>
+          {i18n.CREATE_CONNECTOR}
+        </EuiLink>
       </MissingPrivilegesTooltip>
     );
   }
   return (
     <EuiPopover
-      button={<EuiLink onClick={openPopover}>{i18n.CREATE_CONNECTOR}</EuiLink>}
+      button={
+        <EuiLink data-test-subj="createConnectorPopoverButton" onClick={openPopover}>
+          {i18n.CREATE_CONNECTOR}
+        </EuiLink>
+      }
       isOpen={isOpen}
       closePopover={closePopover}
+      data-test-subj="createConnectorPopover"
     >
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={false}>

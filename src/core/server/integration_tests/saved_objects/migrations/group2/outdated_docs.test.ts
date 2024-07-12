@@ -41,8 +41,6 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('migrates the documents to the highest version', async () => {
