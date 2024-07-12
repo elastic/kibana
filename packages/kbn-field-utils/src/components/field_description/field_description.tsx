@@ -68,26 +68,21 @@ const EcsFieldDescriptionFallback: React.FC<
     <EuiSkeletonText isLoading={loading} size="s">
       <FieldDescriptionContent
         {...props}
-        field={{
-          ...props.field,
-          customDescription:
-            escFieldType && esFieldTypeToKibanaFieldType(escFieldType) === props.field.type
-              ? escFieldDescription
-              : undefined,
-        }}
+        ecsFieldDescription={
+          escFieldType && esFieldTypeToKibanaFieldType(escFieldType) === props.field.type
+            ? escFieldDescription
+            : undefined
+        }
       />
     </EuiSkeletonText>
   );
 };
 
-export const FieldDescriptionContent: React.FC<FieldDescriptionContentProps> = ({
-  field,
-  color,
-  truncate = true,
-  Wrapper,
-}) => {
+export const FieldDescriptionContent: React.FC<
+  FieldDescriptionContentProps & { ecsFieldDescription?: string }
+> = ({ field, color, truncate = true, ecsFieldDescription, Wrapper }) => {
   const { euiTheme } = useEuiTheme();
-  const customDescription = (field?.customDescription || '').trim();
+  const customDescription = (field?.customDescription || ecsFieldDescription || '').trim();
   const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
 
