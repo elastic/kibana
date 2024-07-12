@@ -333,8 +333,13 @@ const CurrentPageOfTotal = ({
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} \u2000|\u2000 Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
-              values={{ pageSize, total, selectedRulesAmount: selectedRules.length || 0 }}
+              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+              values={{
+                pageSize,
+                total,
+                selectedRulesAmount: selectedRules.length || 0,
+                pipe: '\u2000|\u2000',
+              }}
             />
           </EuiText>
         </EuiFlexItem>
