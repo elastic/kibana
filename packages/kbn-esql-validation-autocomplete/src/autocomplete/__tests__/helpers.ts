@@ -262,6 +262,11 @@ export function getPolicyFields(policyName: string) {
     );
 }
 
+export interface SuggestOptions {
+  ctx?: EditorContext;
+  callbacks?: ESQLCallbacks;
+}
+
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
@@ -269,10 +274,6 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  interface SuggestOptions {
-    ctx?: EditorContext;
-    callbacks?: ESQLCallbacks;
-  }
   const suggest = async (query: string, opts: SuggestOptions = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
