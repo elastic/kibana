@@ -15,10 +15,11 @@ import {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   TaskPriority,
+  TaskCost,
 } from '../task';
 import { StoreOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
-import { asOk, isOk, unwrap } from '../lib/result_type';
+import { asOk, asErr, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import {
@@ -33,6 +34,7 @@ import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -42,6 +44,7 @@ jest.mock('../constants', () => ({
     'anotherLimitedToOne',
     'limitedToTwo',
     'limitedToFive',
+    'yawn',
   ],
 }));
 
@@ -64,14 +67,18 @@ const taskDefinitions = new TaskTypeDictionary(taskManagerLogger);
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
+    cost: TaskCost.Normal,
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
     title: 'dernstraight',
+    cost: TaskCost.ExtraLarge,
     createTaskRunner: jest.fn(),
   },
   yawn: {
     title: 'yawn',
+    cost: TaskCost.Tiny,
+    maxConcurrency: 1,
     createTaskRunner: jest.fn(),
   },
 });
@@ -91,6 +98,17 @@ describe('TaskClaiming', () => {
   });
 
   describe('claimAvailableTasks', () => {
+    function getVersionMapsFromTasks(tasks: ConcreteTaskInstance[]) {
+      const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+      const docLatestVersions = new Map<string, ConcreteTaskInstanceVersion>();
+      for (const task of tasks) {
+        versionMap.set(task.id, { esId: task.id, seqNo: 32, primaryTerm: 32 });
+        docLatestVersions.set(`task:${task.id}`, { esId: task.id, seqNo: 32, primaryTerm: 32 });
+      }
+
+      return { versionMap, docLatestVersions };
+    }
+
     function initialiseTestClaiming({
       storeOpts = {},
       taskClaimingOpts = {},
@@ -111,20 +129,27 @@ describe('TaskClaiming', () => {
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
       if (hits == null) hits = [generateFakeTasks(1)];
+
+      const docVersion = [];
       if (versionMaps == null) {
-        versionMaps = [new Map<string, ConcreteTaskInstanceVersion>()];
+        versionMaps = [];
         for (const oneHit of hits) {
           const map = new Map<string, ConcreteTaskInstanceVersion>();
-          versionMaps.push(map);
+          const mapWithTaskPrefix = new Map<string, ConcreteTaskInstanceVersion>();
           for (const task of oneHit) {
             map.set(task.id, { esId: task.id, seqNo: 32, primaryTerm: 32 });
+            mapWithTaskPrefix.set(`task:${task.id}`, { esId: task.id, seqNo: 32, primaryTerm: 32 });
           }
+          versionMaps.push(map);
+          docVersion.push(mapWithTaskPrefix);
         }
       }
 
       for (let i = 0; i < hits.length; i++) {
         store.fetch.mockResolvedValueOnce({ docs: hits[i], versionMap: versionMaps[i] });
-        store.getDocVersions.mockResolvedValueOnce(versionMaps[i]);
+        store.getDocVersions.mockResolvedValueOnce(docVersion[i]);
+        const oneBulkGetResult = hits[i].map((hit) => asOk(hit));
+        store.bulkGet.mockResolvedValueOnce(oneBulkGetResult);
         const oneBulkResult = hits[i].map((hit) => asOk(hit));
         store.bulkUpdate.mockResolvedValueOnce(oneBulkResult);
       }
@@ -137,7 +162,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes,
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
-        getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 10),
         ...taskClaimingOpts,
       });
 
@@ -191,10 +216,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls).toMatchObject({});
       expect(store.getDocVersions.mock.calls).toMatchObject({});
-      return results.map((result, index) => ({
-        result,
-        args: {},
-      }));
+      return results;
     }
 
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
@@ -272,6 +294,1126 @@ describe('TaskClaiming', () => {
       });
       expect(result).toMatchObject({});
     });
+
+    test('should limit claimed tasks based on task cost and available capacity', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }), // total cost = 2
+        mockInstance({ id: `id-2`, taskType: 'report' }), // total cost = 4
+        mockInstance({ id: `id-3`, taskType: 'yawn' }), // total cost = 5
+        mockInstance({ id: `id-4`, taskType: 'dernstraight' }), // claiming this will exceed the available capacity
+        mockInstance({ id: `id-5`, taskType: 'report' }),
+        mockInstance({ id: `id-6`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2]].map(asOk)
+      );
+      store.bulkUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2]].map(asOk)
+      );
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+        'task:id-5',
+        'task:id-6',
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 3, tasksConflicted: 0, tasksUpdated: 3 });
+      expect(result.docs.length).toEqual(3);
+    });
+
+    test('should not claim tasks of removed type', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[0], fetchedTasks[1]].map(asOk));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: ['report'],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 2;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        [
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
+        2,
+        [
+          {
+            ...fetchedTasks[0],
+            status: 'unrecognized',
+          },
+          {
+            ...fetchedTasks[1],
+            status: 'unrecognized',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 1, tasksConflicted: 0, tasksUpdated: 1 });
+      expect(result.docs.length).toEqual(1);
+    });
+
+    test('should log warning if error updating single removed task as unrecognized', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
+        // @ts-expect-error
+        asErr({
+          type: 'task',
+          id: fetchedTasks[1].id,
+          error: SavedObjectsErrorHelpers.createBadRequestError(),
+        }),
+      ]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: ['report'],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Error updating task id-2:task to mark as unrecognized during claim: Bad Request',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 1;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        [
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
+        2,
+        [
+          {
+            ...fetchedTasks[0],
+            status: 'unrecognized',
+          },
+          {
+            ...fetchedTasks[1],
+            status: 'unrecognized',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 1, tasksConflicted: 0, tasksUpdated: 1 });
+      expect(result.docs.length).toEqual(1);
+    });
+
+    test('should log warning if error updating all removed tasks as unrecognized', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockRejectedValueOnce(new Error('Oh no'));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: ['report'],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Error updating tasks to mark as unrecognized during claim: Error: Oh no',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        [
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
+        2,
+        [
+          {
+            ...fetchedTasks[0],
+            status: 'unrecognized',
+          },
+          {
+            ...fetchedTasks[1],
+            status: 'unrecognized',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 1, tasksConflicted: 0, tasksUpdated: 1 });
+      expect(result.docs.length).toEqual(1);
+    });
+
+    test('should handle no tasks to claim', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks: ConcreteTaskInstance[] = [];
+
+      const { versionMap } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).not.toHaveBeenCalled();
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).not.toHaveBeenCalled();
+      expect(store.bulkGet).not.toHaveBeenCalled();
+      expect(store.bulkUpdate).not.toHaveBeenCalled();
+
+      expect(result.stats).toEqual({
+        tasksClaimed: 0,
+        tasksConflicted: 0,
+        tasksUpdated: 0,
+        tasksRejected: 0,
+      });
+      expect(result.docs.length).toEqual(0);
+    });
+
+    test('should handle tasks with no search version', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      versionMap.delete('id-1');
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-2', 'task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 2, tasksConflicted: 0, tasksUpdated: 2 });
+      expect(result.docs.length).toEqual(2);
+    });
+
+    test('should handle tasks with no latest version', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      docLatestVersions.delete('task:id-1');
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-2', 'task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 2, tasksConflicted: 0, tasksUpdated: 2 });
+      expect(result.docs.length).toEqual(2);
+    });
+
+    test('should handle stale tasks', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      docLatestVersions.set('task:id-1', { esId: 'task:id-1', seqNo: 33, primaryTerm: 33 });
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-2', 'task:id-3']);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 2, tasksConflicted: 1, tasksUpdated: 2 });
+      expect(result.docs.length).toEqual(2);
+    });
+
+    test('should correctly handle limited concurrency tasks', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'yawn' }),
+        mockInstance({ id: `id-5`, taskType: 'report' }),
+        mockInstance({ id: `id-6`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(asOk)
+      );
+      store.bulkUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(asOk)
+      );
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+        'task:id-5',
+        'task:id-6',
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-5',
+      ]);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[4],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 4, tasksConflicted: 0, tasksUpdated: 4 });
+      expect(result.docs.length).toEqual(4);
+    });
+
+    test('should handle individual errors when bulk getting the full task doc', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
+        // @ts-expect-error
+        asErr({
+          type: 'task',
+          id: fetchedTasks[1].id,
+          error: new Error('Oh no'),
+        }),
+        asOk(fetchedTasks[2]),
+        asOk(fetchedTasks[3]),
+      ]);
+      store.bulkUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[2], fetchedTasks[3]].map(asOk)
+      );
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Error getting full task id-2:task during claim: Oh no',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[3],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 3, tasksConflicted: 0, tasksUpdated: 3 });
+      expect(result.docs.length).toEqual(3);
+    });
+
+    test('should handle error when bulk getting all full task docs', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockRejectedValueOnce(new Error('oh no'));
+      store.bulkUpdate.mockResolvedValueOnce([]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 0; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Error getting full task documents during claim: Error: oh no',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
+
+      expect(result.stats).toEqual({ tasksClaimed: 0, tasksConflicted: 0, tasksUpdated: 0 });
+      expect(result.docs.length).toEqual(0);
+    });
+
+    test('should handle individual errors when bulk updating the task doc', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce(fetchedTasks.map(asOk));
+      store.bulkUpdate.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
+        // @ts-expect-error
+        asErr({
+          type: 'task',
+          id: fetchedTasks[1].id,
+          error: new Error('Oh no'),
+        }),
+        asOk(fetchedTasks[2]),
+        asOk(fetchedTasks[3]),
+      ]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Error updating task id-2:task during claim: Oh no',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[3],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false }
+      );
+
+      expect(result.stats).toEqual({ tasksClaimed: 3, tasksConflicted: 0, tasksUpdated: 3 });
+      expect(result.docs.length).toEqual(3);
+    });
+
+    test('should handle error when bulk updating all task docs', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce([]);
+      store.bulkUpdate.mockRejectedValueOnce(new Error('oh no'));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 0; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Error updating tasks during claim: Error: oh no',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
+
+      expect(result.stats).toEqual({ tasksClaimed: 0, tasksConflicted: 0, tasksUpdated: 0 });
+      expect(result.docs.length).toEqual(0);
+    });
   });
 
   describe('task events', () => {
@@ -337,9 +1479,9 @@ describe('TaskClaiming', () => {
     function instantiateStoreWithMockedApiResponses({
       taskManagerId = uuidv4(),
       definitions = taskDefinitions,
-      getCapacity = () => 10,
+      getAvailableCapacity = () => 10,
       tasksClaimed,
-    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getCapacity'>> & {
+    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getAvailableCapacity'>> & {
       taskManagerId?: string;
       tasksClaimed?: ConcreteTaskInstance[][];
     } = {}) {
@@ -372,7 +1514,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         taskStore,
         maxAttempts: 2,
-        getCapacity,
+        getAvailableCapacity,
       });
 
       return { taskManagerId, runAt, taskClaiming };

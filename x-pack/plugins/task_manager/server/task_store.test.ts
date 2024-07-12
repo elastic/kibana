@@ -290,12 +290,16 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
+    async function testFetch(
+      opts?: SearchOpts,
+      hits: Array<estypes.SearchHit<unknown>> = [],
+      limitResponse: boolean = false
+    ) {
       childEsClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
-      const result = await store.fetch(opts);
+      const result = await store.fetch(opts, limitResponse);
 
       expect(childEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -339,6 +343,18 @@ describe('TaskStore', () => {
       childEsClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('excludes state and params from source when excludeState is true', async () => {
+      const { args } = await testFetch({}, [], true);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: {
+          sort: [{ 'task.runAt': 'asc' }],
+          query: { term: { type: 'task' } },
+        },
+        _source_excludes: ['task.state', 'task.params'],
+      });
     });
   });
 

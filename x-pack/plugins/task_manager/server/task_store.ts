@@ -227,15 +227,13 @@ export class TaskStore {
    * Fetches a list of scheduled tasks with default sorting.
    *
    * @param opts - The query options used to filter tasks
+   * @param limitResponse - Whether to exclude the task state and params from the source for a smaller respose payload
    */
-  public async fetch({
-    sort = [{ 'task.runAt': 'asc' }],
-    ...opts
-  }: SearchOpts = {}): Promise<FetchResult> {
-    return this.search({
-      ...opts,
-      sort,
-    });
+  public async fetch(
+    { sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {},
+    limitResponse: boolean = false
+  ): Promise<FetchResult> {
+    return this.search({ ...opts, sort }, limitResponse);
   }
 
   /**
@@ -484,18 +482,20 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  private async search(
+    opts: SearchOpts = {},
+    limitResponse: boolean = false
+  ): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: {
-          ...opts,
-          query,
-        },
+        body: { ...opts, query },
+        ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
       });
+
       const {
         hits: { hits: tasks },
       } = result;
