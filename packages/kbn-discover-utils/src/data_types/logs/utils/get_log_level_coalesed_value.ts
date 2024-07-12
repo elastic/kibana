@@ -30,7 +30,7 @@ export const getLogLevelCoalescedValue = (
     return undefined;
   }
 
-  const logLevelLowerCase = logLevelUnfolded.toLowerCase();
+  const logLevelLowerCase = logLevelUnfolded.trim().toLowerCase();
 
   if (logLevelLowerCase.startsWith('trace')) {
     return LogLevelCoalescedValue.trace;

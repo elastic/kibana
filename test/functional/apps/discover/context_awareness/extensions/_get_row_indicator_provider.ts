@@ -81,6 +81,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rgba(190, 207, 227, 1)'
       );
       expect(await firstColorIndicator.getAttribute('title')).to.be('Debug');
+
+      const secondCell = await dataGrid.getCellElement(1, 0);
+      const secondColorIndicator = await secondCell.findByTestSubject(
+        'unifiedDataTableRowColorIndicatorCell'
+      );
+      expect(await secondColorIndicator.getComputedStyle('background-color')).to.be(
+        'rgba(223, 147, 82, 1)'
+      );
+      expect(await secondColorIndicator.getAttribute('title')).to.be('Error');
     });
   });
 }
