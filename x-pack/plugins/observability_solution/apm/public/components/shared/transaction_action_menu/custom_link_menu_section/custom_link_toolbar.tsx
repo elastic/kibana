@@ -20,7 +20,9 @@ export function CustomLinkToolbar({
   showCreateButton?: boolean;
 }) {
   const { core } = useApmPluginContext();
-  const canSave = !!core.application.capabilities.apm.save;
+  const canSave =
+    !!core.application.capabilities.apm.save ||
+    !!core.application.capabilities.observability?.['apm:save'];
 
   return (
     <EuiFlexGroup>

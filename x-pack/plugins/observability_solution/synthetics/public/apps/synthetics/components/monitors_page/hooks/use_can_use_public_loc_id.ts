@@ -21,8 +21,14 @@ export const useCanUsePublicLocById = (configId: string) => {
     (mon) => mon.configId === configId && mon.location.isServiceManaged
   );
 
+  const kibana = useKibana();
+
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+    (kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ||
+      kibana.services?.application?.capabilities.observability[
+        'synthetics:elasticManagedLocationsEnabled'
+      ]) ??
+    true;
 
   if (!isServiceAllowed) {
     return false;

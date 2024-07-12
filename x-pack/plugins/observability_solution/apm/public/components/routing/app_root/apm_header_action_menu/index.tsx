@@ -30,7 +30,8 @@ export function ApmHeaderActionMenu() {
     plugins,
     capabilities
   );
-  const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
+  const canSaveApmAlerts =
+    (capabilities.apm.save || capabilities.observability?.['apm:save']) && canSaveAlerts;
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });

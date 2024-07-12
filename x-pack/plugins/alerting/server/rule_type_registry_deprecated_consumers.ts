@@ -34,6 +34,7 @@ export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'logs.alert.document.count': [ALERTING_FEATURE_ID],
   'metrics.alert.inventory.threshold': [ALERTING_FEATURE_ID],
   'metrics.alert.threshold': [ALERTING_FEATURE_ID],
+  'observability.rules.custom_threshold': [ALERTING_FEATURE_ID],
   monitoring_alert_cluster_health: [ALERTING_FEATURE_ID],
   monitoring_alert_license_expiration: [ALERTING_FEATURE_ID],
   monitoring_alert_cpu_usage: [ALERTING_FEATURE_ID],

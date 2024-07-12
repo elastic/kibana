@@ -37,7 +37,9 @@ export function renderApp(
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = (capabilities.uptime.save ?? false) as boolean; // TODO: Determine for synthetics
+  const canSave =
+    ((capabilities.uptime.save ?? false) as boolean) || // TODO: Determine for synthetics
+    ((capabilities.observability?.['synthetics:save'] ?? false) as boolean);
   const darkMode = theme.getTheme().darkMode;
 
   const props: SyntheticsAppProps = {

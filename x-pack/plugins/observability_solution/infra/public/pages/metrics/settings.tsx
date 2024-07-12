@@ -15,7 +15,10 @@ export const MetricsSettingsPage = () => {
   return (
     <EuiErrorBoundary>
       <SourceConfigurationSettings
-        shouldAllowEdit={application?.capabilities?.infrastructure?.configureSource as boolean}
+        shouldAllowEdit={
+          (application?.capabilities?.infrastructure?.configureSource as boolean) ||
+          (application?.capabilities?.observability?.['infra:configureSource'] as boolean)
+        }
         http={http}
       />
     </EuiErrorBoundary>

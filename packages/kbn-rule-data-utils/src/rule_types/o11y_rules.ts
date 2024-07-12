@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_threshold';
 export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
 
@@ -19,3 +18,28 @@ export enum ApmRuleType {
   TransactionDuration = 'apm.transaction_duration',
   Anomaly = 'apm.anomaly',
 }
+
+//
+export const UPTIME_RULE_TYPES = [
+  'xpack.uptime.alerts.tls',
+  'xpack.uptime.alerts.tlsCertificate',
+  'xpack.uptime.alerts.monitorStatus',
+  'xpack.uptime.alerts.durationAnomaly',
+];
+
+export const SYNTHETICS_STATUS_RULE = 'xpack.synthetics.alerts.monitorStatus';
+export const SYNTHETICS_TLS_RULE = 'xpack.synthetics.alerts.tls';
+
+// rule groups
+export const SYNTHETICS_RULE_TYPES = [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE];
+
+export const UPTIME_SYNTHETICS_RULE_TYPES = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
+
+export const SLO_RULE_TYPES = [SLO_BURN_RATE_RULE_TYPE_ID];
+
+export const APM_RULE_TYPES = Object.values(ApmRuleType);
+
+export const INFRA_RULE_TYPES = [
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+];

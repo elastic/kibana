@@ -13,7 +13,9 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
   const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const canSave =
+    core.application.capabilities.apm.save ||
+    core.application.capabilities.observability?.['apm:save'];
   return (
     <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
       <EuiButton

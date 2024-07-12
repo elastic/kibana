@@ -11,9 +11,10 @@ export function useCapabilities() {
   const {
     application: { capabilities },
   } = useKibana().services;
-
   return {
-    hasReadCapabilities: !!capabilities[sloFeatureId].read ?? false,
-    hasWriteCapabilities: !!capabilities[sloFeatureId].write ?? false,
+    hasReadCapabilities:
+      (!!capabilities[sloFeatureId].read || !!capabilities.observability?.['slo:read']) ?? false,
+    hasWriteCapabilities:
+      (!!capabilities[sloFeatureId].write || !!capabilities.observability?.['slo:write']) ?? false,
   };
 }

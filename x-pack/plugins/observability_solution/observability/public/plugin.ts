@@ -372,17 +372,19 @@ export class Plugin
                     ]
                   : [];
 
-              const sloLink = coreStart.application.capabilities.slo?.read
-                ? [
-                    {
-                      label: i18n.translate('xpack.observability.sloLinkTitle', {
-                        defaultMessage: 'SLOs',
-                      }),
-                      app: 'slo',
-                      path: '/',
-                    },
-                  ]
-                : [];
+              const sloLink =
+                coreStart.application.capabilities.slo?.read ||
+                coreStart.application.capabilities.observability?.['slo:read']
+                  ? [
+                      {
+                        label: i18n.translate('xpack.observability.sloLinkTitle', {
+                          defaultMessage: 'SLOs',
+                        }),
+                        app: 'slo',
+                        path: '/',
+                      },
+                    ]
+                  : [];
 
               // Reformat the visible links to be NavigationEntry objects instead of
               // AppDeepLink objects.
