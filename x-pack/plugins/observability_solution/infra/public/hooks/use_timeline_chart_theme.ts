@@ -7,7 +7,7 @@
 
 import { SettingsProps } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export function useTimelineChartTheme(): Pick<SettingsProps, 'baseTheme' | 'theme'> {
   const { euiTheme } = useEuiTheme();
