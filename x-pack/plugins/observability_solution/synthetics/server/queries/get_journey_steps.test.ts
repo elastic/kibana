@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 import { getJourneySteps } from './get_journey_steps';
 import { getUptimeESMockClient } from './test_helpers';
 
@@ -76,11 +76,11 @@ describe('getJourneySteps request module', () => {
     });
 
     it('formats ES result', async () => {
-      const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
 
       mockEsClient.search.mockResolvedValueOnce(data);
       const result: JourneyStep[] = await getJourneySteps({
-        uptimeEsClient,
+        syntheticsEsClient,
         checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
       });
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -138,14 +138,14 @@ describe('getJourneySteps request module', () => {
     });
 
     it('notes screenshot exists when a document of type step/screenshot is included', async () => {
-      const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+      const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
 
       data.body.hits.hits[0]._source.synthetics.type = 'step/screenshot';
       data.body.hits.hits[0]._source.synthetics.step.index = 2;
       mockEsClient.search.mockResolvedValueOnce(data);
 
       const result: JourneyStep[] = await getJourneySteps({
-        uptimeEsClient,
+        syntheticsEsClient,
         checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
       });
 

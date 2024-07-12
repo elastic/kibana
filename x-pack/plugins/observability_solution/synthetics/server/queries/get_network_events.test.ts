@@ -169,7 +169,7 @@ describe('getNetworkEvents', () => {
   });
 
   it('Uses the correct query', async () => {
-    const { uptimeEsClient, esClient } = getUptimeESMockClient();
+    const { syntheticsEsClient, esClient } = getUptimeESMockClient();
 
     esClient.search.mockResponseOnce({
       hits: {
@@ -179,7 +179,7 @@ describe('getNetworkEvents', () => {
     } as any);
 
     await getNetworkEvents({
-      uptimeEsClient,
+      syntheticsEsClient,
       checkGroup: 'my-fake-group',
       stepIndex: '1',
     });
@@ -224,7 +224,7 @@ describe('getNetworkEvents', () => {
   });
 
   it('Returns the correct result', async () => {
-    const { esClient, uptimeEsClient } = getUptimeESMockClient();
+    const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
     esClient.search.mockResponseOnce({
       hits: {
@@ -234,7 +234,7 @@ describe('getNetworkEvents', () => {
     } as any);
 
     const result = await getNetworkEvents({
-      uptimeEsClient,
+      syntheticsEsClient,
       checkGroup: 'my-fake-group',
       stepIndex: '1',
     });

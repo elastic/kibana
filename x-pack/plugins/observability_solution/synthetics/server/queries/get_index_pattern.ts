@@ -6,8 +6,8 @@
  */
 
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
-import { UptimeEsClient } from '../../../lib';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import { SyntheticsEsClient } from '../lib';
 
 export interface IndexPatternTitleAndFields {
   title: string;
@@ -15,11 +15,11 @@ export interface IndexPatternTitleAndFields {
 }
 
 export const getUptimeIndexPattern = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
 }: {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<IndexPatternTitleAndFields | undefined> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(uptimeEsClient.baseESClient);
+  const indexPatternsFetcher = new IndexPatternsFetcher(syntheticsEsClient.baseESClient);
 
   try {
     const { fields } = await indexPatternsFetcher.getFieldsForWildcard({

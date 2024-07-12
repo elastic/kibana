@@ -26,7 +26,7 @@ describe('getJourneyScreenshot', () => {
     };
     expect(
       await getJourneyScreenshot({
-        uptimeEsClient: mockSearchResult([], {
+        syntheticsEsClient: mockSearchResult([], {
           step: {
             image: {
               hits: {
@@ -93,7 +93,7 @@ describe('getJourneyScreenshot', () => {
     };
     expect(
       await getJourneyScreenshot({
-        uptimeEsClient: mockSearchResult([], {
+        syntheticsEsClient: mockSearchResult([], {
           step: { image: { hits: { hits: [screenshotRefResult], total: 1 } } },
         }),
         checkGroup: 'checkGroup',

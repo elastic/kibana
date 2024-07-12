@@ -6,9 +6,9 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UptimeEsClient } from '../../../lib';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import { SyntheticsEsClient } from '../lib';
+import { asMutableArray } from '../../common/utils/as_mutable_array';
+import { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
@@ -17,10 +17,10 @@ export interface GetJourneyStepsParams {
 type ResultType = JourneyStep & { '@timestamp': string };
 
 export const getJourneySteps = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
   checkGroup,
 }: GetJourneyStepsParams & {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<JourneyStep[]> => {
   const params = {
     query: {
@@ -54,7 +54,7 @@ export const getJourneySteps = async ({
     },
     size: 500,
   };
-  const { body: result } = await uptimeEsClient.search({ body: params }, 'getJourneySteps');
+  const { body: result } = await syntheticsEsClient.search({ body: params }, 'getJourneySteps');
 
   const steps = result.hits.hits.map(
     ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType

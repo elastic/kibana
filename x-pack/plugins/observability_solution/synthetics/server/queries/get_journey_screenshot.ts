@@ -6,8 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UptimeEsClient } from '../../../lib';
-import { RefResult, FullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
+import { SyntheticsEsClient } from '../lib';
+import { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
   _source: RefResult | FullScreenshot;
@@ -20,12 +20,12 @@ export type ScreenshotReturnTypesUnion =
 export const getJourneyScreenshot = async ({
   checkGroup,
   stepIndex,
-  uptimeEsClient,
+  syntheticsEsClient,
 }: {
   checkGroup: string;
   stepIndex: number;
 } & {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotReturnTypesUnion> => {
   const body = {
     track_total_hits: true,
@@ -64,7 +64,7 @@ export const getJourneyScreenshot = async ({
     },
   };
 
-  const result = await uptimeEsClient.search({ body });
+  const result = await syntheticsEsClient.search({ body });
 
   const screenshotsOrRefs =
     (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;

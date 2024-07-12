@@ -12,7 +12,7 @@ describe('getJourneyScreenshotBlocks', () => {
   it('returns formatted blocks', async () => {
     expect(
       await getJourneyScreenshotBlocks({
-        uptimeEsClient: mockSearchResult([
+        syntheticsEsClient: mockSearchResult([
           {
             _id: 'hash1',
             _source: {

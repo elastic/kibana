@@ -48,7 +48,7 @@ describe('getJourneyFailedSteps', () => {
   it('formats failed steps', async () => {
     expect(
       await getJourneyFailedSteps({
-        uptimeEsClient: mockSearchResult(mockData),
+        syntheticsEsClient: mockSearchResult(mockData),
         checkGroups: ['chg1', 'chg2'],
       })
     ).toMatchInlineSnapshot(`
