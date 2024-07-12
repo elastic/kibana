@@ -7,6 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
+import { waitFor } from '@testing-library/react';
+
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
 import { SetupTechnology } from '../../../../../../../../common/types';
@@ -280,7 +282,7 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, rerender, waitFor } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -469,5 +471,41 @@ describe('useSetupTechnology', () => {
 
     expect(updateNewAgentPolicyMock).not.toHaveBeenCalled();
     expect(setSelectedPolicyTabMock).not.toHaveBeenCalled();
+  });
+
+  it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useSetupTechnology({
+        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+      })
+    );
+
+    await waitForNextUpdate();
+
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
+    });
+
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+
+    waitFor(() => {
+      expect(updateNewAgentPolicyMock).toHaveBeenCalledWith({
+        name: 'Agentless policy for endpoint-1',
+        supports_agentless: true,
+      });
+    });
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
+    });
+
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    expect(updateNewAgentPolicyMock).toHaveBeenCalledWith(newAgentPolicyMock);
   });
 });
