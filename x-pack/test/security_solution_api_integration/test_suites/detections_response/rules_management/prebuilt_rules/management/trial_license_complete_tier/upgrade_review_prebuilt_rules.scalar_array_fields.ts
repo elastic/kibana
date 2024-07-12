@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['one', 'two', 'four', 'five'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                has_conflict: false,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
                 has_update: true,
               },
               version: {
@@ -314,7 +314,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['one', 'three'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                has_conflict: false,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
                 has_update: true,
               },
               version: {
@@ -324,11 +324,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                has_conflict: false,
+                conflict: ThreeWayDiffConflictResolutionResult.NO,
                 has_update: true,
               },
             });
-            expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+            expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
           });
 
@@ -370,7 +370,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['ONE', 'one', 'THREE'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                has_conflict: false,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
                 has_update: true,
               },
               version: {
@@ -380,11 +380,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                has_conflict: false,
+                conflict: ThreeWayDiffConflictResolutionResult.NO,
                 has_update: true,
               },
             });
-            expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+            expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
           });
 
@@ -420,7 +420,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['five'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                has_conflict: false,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
                 has_update: true,
               },
               version: {
@@ -434,7 +434,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 has_update: true,
               },
             });
-            expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+            expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
           });
         });
@@ -479,7 +479,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   has_update: true,
                 },
               });
-              expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
               expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
             });
           });

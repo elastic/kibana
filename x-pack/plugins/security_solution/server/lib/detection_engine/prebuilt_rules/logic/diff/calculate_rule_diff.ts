@@ -8,7 +8,6 @@
 import type {
   DiffableRule,
   FullRuleDiff,
-  ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   MissingVersion,
@@ -78,19 +77,45 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     target_version: diffableTargetVersion,
   });
 
-  const numberFieldsWithUpdates = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).filter(
-    (fieldDiff) => fieldDiff.has_update
-  ).length;
-  const numberFieldsWithConflicts = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).filter(
-    (fieldDiff) => fieldDiff.conflict !== ThreeWayDiffConflictResolutionResult.NO
-  ).length;
+  const {
+    numberFieldsWithUpdates,
+    numberFieldsWithConflicts,
+    numberFieldsWithNonSolvableConflicts,
+  } = Object.values(fieldsDiff).reduce<{
+    numberFieldsWithUpdates: number;
+    numberFieldsWithConflicts: number;
+    numberFieldsWithNonSolvableConflicts: number;
+  }>(
+    (counts, fieldDiff) => {
+      if (fieldDiff.has_update) {
+        counts.numberFieldsWithUpdates += 1;
+      }
+
+      if (fieldDiff.conflict !== ThreeWayDiffConflictResolutionResult.NO) {
+        counts.numberFieldsWithConflicts += 1;
+
+        if (fieldDiff.conflict === ThreeWayDiffConflictResolutionResult.NON_SOLVABLE) {
+          counts.numberFieldsWithNonSolvableConflicts += 1;
+        }
+      }
+
+      return counts;
+    },
+    {
+      numberFieldsWithUpdates: 0,
+      numberFieldsWithConflicts: 0,
+      numberFieldsWithNonSolvableConflicts: 0,
+    }
+  );
 
   return {
     ruleDiff: {
       fields: fieldsDiff,
       has_conflict: numberFieldsWithConflicts > 0,
-      number_fields_with_updates: numberFieldsWithUpdates,
-      number_fields_with_conflicts: numberFieldsWithConflicts,
+      has_non_solvable_conflict: numberFieldsWithNonSolvableConflicts > 0,
+      num_fields_with_updates: numberFieldsWithUpdates,
+      num_fields_with_conflicts: numberFieldsWithConflicts,
+      num_fields_with_non_solvable_conflicts: numberFieldsWithNonSolvableConflicts,
     },
     ruleVersions: {
       input: {

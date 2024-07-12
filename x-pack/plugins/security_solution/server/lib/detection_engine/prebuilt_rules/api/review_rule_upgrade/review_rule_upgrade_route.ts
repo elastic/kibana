@@ -92,6 +92,10 @@ const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStat
   );
 
   return {
+    num_rules_with_conflicts: results.filter((result) => result.ruleDiff.has_conflict).length,
+    num_rules_with_non_solvable_conflicts: results.filter(
+      (result) => result.ruleDiff.has_non_solvable_conflict
+    ).length,
     num_rules_to_upgrade_total: results.length,
     tags: [...allTags].sort((a, b) => a.localeCompare(b)),
   };
@@ -116,6 +120,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     };
 
     return {
+      test: 'adfadfadfadf',
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
@@ -126,9 +131,10 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
           ruleDiff.fields,
           (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
         ),
-        has_conflict: ruleDiff.has_conflict,
-        number_fields_with_conflicts: ruleDiff.number_fields_with_conflicts,
-        number_fields_with_updates: ruleDiff.number_fields_with_updates,
+        has_conflict: ruleDiff.num_fields_with_conflicts > 0,
+        num_fields_with_updates: ruleDiff.num_fields_with_updates,
+        num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
+        num_fields_with_non_solvable_conflicts: ruleDiff.num_fields_with_non_solvable_conflicts,
       },
     };
   });
