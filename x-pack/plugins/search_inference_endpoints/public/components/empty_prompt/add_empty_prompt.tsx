@@ -73,6 +73,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
                   <EuiButton
                     iconType="plusInCircle"
                     onClick={() => setIsInferenceFlyoutVisible(true)}
+                    data-test-subj="createFirstElserInferenceEndpointDescription"
                   >
                     {i18n.ADD_ENDPOINT_LABEL}
                   </EuiButton>
@@ -88,6 +89,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
                   <EuiButton
                     iconType="plusInCircle"
                     onClick={() => setIsInferenceFlyoutVisible(true)}
+                    data-test-subj="createFirstE5InferenceEndpointDescription"
                   >
                     {i18n.ADD_ENDPOINT_LABEL}
                   </EuiButton>

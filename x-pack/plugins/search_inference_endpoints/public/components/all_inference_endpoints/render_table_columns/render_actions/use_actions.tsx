@@ -43,6 +43,7 @@ export const ActionColumn: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> 
             aria-label={'Actions'}
             color="text"
             disabled={false}
+            data-test-subj="inference-tableRow-action-button"
           />
         }
         isOpen={isPopoverOpen}
