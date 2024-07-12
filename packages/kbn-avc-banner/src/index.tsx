@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -10,8 +11,15 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import avcBannerBackground from './avc_banner_background.svg';
+
+// Logic to hide banner at EOY 2024
+export const useIsStillYear2024 = () => {
+  const year2025 = new Date('January 01, 2025 00:00:00');
+  const today = new Date(Date.now());
+  return today < year2025;
+};
 
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;

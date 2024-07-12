@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -24,7 +25,6 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
-import { AVCResultsBanner2024 } from '../../avc_banner/avc_results_banner_2024';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -66,15 +66,6 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     [telemetry]
   );
 
-  const year2025 = new Date('January, 1, 2025 00:00:00');
-  console.log('year2025', year2025);
-  // const today = new Date().getTime();
-  // const today = new Date('December, 30, 2024 00:00:00');
-  const today = new Date('January, 1, 2025 00:00:00');
-  console.log('today', today);
-
-  const isStillYear2024 = today < year2025;
-
   const [showAVCBanner, setShowAVCBanner] = useState(
     storage.get('securitySolution.showAvcBanner') ?? true
   );
@@ -87,7 +78,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
 
   return (
     <div className={wrapperStyles}>
-      {showAVCBanner && isStillYear2024 && (
+      {useIsStillYear2024() && showAVCBanner && (
         <KibanaPageTemplate.Section paddingSize="none" className={bannerStyles}>
           <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
         </KibanaPageTemplate.Section>
