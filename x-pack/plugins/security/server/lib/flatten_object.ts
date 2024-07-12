@@ -7,28 +7,25 @@
 
 import { compact, isObject } from 'lodash';
 
-// Inspired by x-pack/plugins/observability_solution/apm/public/utils/flatten_object.ts
-// Slighly modified to have key/value exposed as Object.
+// Slightly modified to have key/value exposed as Object.
 export const flattenObject = (
-  item: Record<any, any | any[]> | null | undefined,
-  accDefault: Record<string, any> = {},
+  item: Record<PropertyKey, unknown> | null | undefined,
+  accDefault: Record<PropertyKey, unknown> = {},
   parentKey?: string
-): Record<string, any> => {
+): Record<PropertyKey, unknown> => {
   if (item) {
     const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
     return Object.keys(item)
       .sort()
-      .reduce<Record<string, any>>((acc, key) => {
+      .reduce<Record<PropertyKey, unknown>>((acc, key) => {
         const childKey = isArrayWithSingleValue ? '' : key;
         const currentKey = compact([parentKey, childKey]).join('.');
-        // item[key] can be a primitive (string, number, boolean, null, undefined) or Object or Array
-        // @ts-expect-error upgrade typescript v5.1.6
-        if (isObject(item[key])) {
-          // @ts-expect-error upgrade typescript v5.1.6
-          flattenObject(item[key], acc, currentKey);
+
+        const value = item[key];
+        if (isObject(value)) {
+          flattenObject(value as Record<PropertyKey, unknown>, acc, currentKey);
         } else {
-          // @ts-expect-error upgrade typescript v5.1.6
-          acc[currentKey] = item[key];
+          acc[currentKey] = value;
         }
 
         return acc;
