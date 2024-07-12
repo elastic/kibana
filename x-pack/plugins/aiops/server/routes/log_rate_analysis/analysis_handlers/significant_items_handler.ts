@@ -74,8 +74,6 @@ export const significantItemsHandlerFactory =
       ) ?? [])
     );
 
-    const fieldsToSample = new Set<string>();
-
     let remainingFieldCandidates: string[];
     let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
 
@@ -129,13 +127,8 @@ export const significantItemsHandlerFactory =
         remainingFieldCandidates = remainingFieldCandidates.filter((d) => !fieldNames.includes(d));
 
         if (pValues.length > 0) {
-          pValues.forEach((d) => {
-            fieldsToSample.add(d.fieldName);
-          });
           significantTerms.push(...pValues);
-
           responseStream.push(addSignificantItems(pValues));
-
           fieldValuePairsCount += pValues.length;
         }
       } else if (isTextFieldCandidates(payload)) {
