@@ -69,7 +69,7 @@ export const OtelLogsPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const AGENT_CDN_BASE_URL = isServerless
-    ? 'snapshots.elastic.co/8.15.0-dd63864e/downloads/beats/elastic-agent'
+    ? 'snapshots.elastic.co/8.15.0-9bb1fcab/downloads/beats/elastic-agent'
     : 'artifacts.elastic.co/downloads/beats/elastic-agent';
   // TODO change once otel flow is shown on serverless
   // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
@@ -190,6 +190,8 @@ data:
         endpoints: 
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
+        logs_dynamic_index:
+          enabled: true
         mapping:
           mode: ecs
     processors:
@@ -213,6 +215,11 @@ data:
           - key: service.name
             from_attribute: app.label.component
             action: insert
+      attributes/k8s_logs_dataset:
+        actions:
+          - key: data_stream.dataset
+            value: "kubernetes.container_logs"
+            action: upsert
       attributes/dataset:
         actions:
           - key: event.dataset
@@ -444,6 +451,7 @@ data:
           - resource/cloud
           - attributes/dataset
           - resource/process
+          - attributes/k8s_logs_dataset
           receivers:
           - kubeletstats
           - hostmetrics
