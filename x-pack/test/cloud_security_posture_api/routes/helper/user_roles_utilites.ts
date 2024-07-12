@@ -5,7 +5,56 @@
  * 2.0.
  */
 
+import {
+  LATEST_FINDINGS_INDEX_PATTERN,
+  BENCHMARK_SCORE_INDEX_PATTERN,
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  ALERTS_INDEX_PATTERN,
+  FINDINGS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const alertsSecurityUserIndices = [
+  {
+    names: [FINDINGS_INDEX_PATTERN],
+    privileges: ['read'],
+  },
+  {
+    names: [LATEST_FINDINGS_INDEX_PATTERN],
+    privileges: ['read'],
+  },
+  {
+    names: [BENCHMARK_SCORE_INDEX_PATTERN],
+    privileges: ['read'],
+  },
+  {
+    names: [LATEST_VULNERABILITIES_INDEX_PATTERN],
+    privileges: ['all'],
+  },
+  {
+    names: [ALERTS_INDEX_PATTERN],
+    privileges: ['all'],
+  },
+];
+
+const securityUserIndinces = [
+  {
+    names: [FINDINGS_INDEX_PATTERN],
+    privileges: ['read'],
+  },
+  {
+    names: [LATEST_FINDINGS_INDEX_PATTERN],
+    privileges: ['read'],
+  },
+  {
+    names: [BENCHMARK_SCORE_INDEX_PATTERN],
+    privileges: ['read'],
+  },
+  {
+    names: [LATEST_VULNERABILITIES_INDEX_PATTERN],
+    privileges: ['all'],
+  },
+];
 
 export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -15,24 +64,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     {
       name: 'role_security_no_read',
       elasticsearch: {
-        indices: [
-          {
-            names: ['logs-cloud_security_posture.findings-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.findings_latest-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.scores-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
-            privileges: ['all'],
-          },
-        ],
+        indices: securityUserIndinces,
       },
       kibana: [
         {
@@ -49,24 +81,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     {
       name: 'role_security_read',
       elasticsearch: {
-        indices: [
-          {
-            names: ['logs-cloud_security_posture.findings-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.findings_latest-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.scores-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
-            privileges: ['all'],
-          },
-        ],
+        indices: securityUserIndinces,
       },
       kibana: [
         {
@@ -84,28 +99,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     {
       name: 'role_security_read_alerts',
       elasticsearch: {
-        indices: [
-          {
-            names: ['logs-cloud_security_posture.findings-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.findings_latest-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.scores-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
-            privileges: ['all'],
-          },
-          {
-            names: ['.alerts-security.alerts-*'],
-            privileges: ['all'],
-          },
-        ],
+        indices: alertsSecurityUserIndices,
       },
       kibana: [
         {
@@ -122,28 +116,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     {
       name: 'role_security_no_read_alerts',
       elasticsearch: {
-        indices: [
-          {
-            names: ['logs-cloud_security_posture.findings-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.findings_latest-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.scores-*'],
-            privileges: ['read'],
-          },
-          {
-            names: ['logs-cloud_security_posture.vulnerabilities_latest-*'],
-            privileges: ['all'],
-          },
-          {
-            names: ['.alerts-security.alerts-*'],
-            privileges: ['all'],
-          },
-        ],
+        indices: alertsSecurityUserIndices,
       },
       kibana: [
         {
