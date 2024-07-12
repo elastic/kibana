@@ -53,6 +53,7 @@ export const KubernetesPanel: React.FC = () => {
               onboardingId={data.onboardingId}
               elasticsearchUrl={data.elasticsearchUrl}
               elasticAgentVersion={data.elasticAgentVersion}
+              isCopyPrimaryAction={!isMonitoringStepActive}
             />
           )}
         </>

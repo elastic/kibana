@@ -7,6 +7,12 @@
 
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
+export enum MessageRole {
+  'user' = 'human',
+  'assistant' = 'assistant',
+  'system' = 'system',
+}
+
 interface ModelField {
   field: string;
   model_id: string;
@@ -15,6 +21,12 @@ interface ModelField {
 
 interface ELSERQueryFields extends ModelField {
   sparse_vector: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: MessageRole;
+  content: string;
 }
 
 interface SemanticField {
