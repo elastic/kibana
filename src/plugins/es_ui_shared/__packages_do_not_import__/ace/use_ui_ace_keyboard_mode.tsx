@@ -25,10 +25,12 @@ const OverlayText = (startServices: StartServices) => (
   // in this case
   //
   <KibanaRenderContextProvider {...startServices}>
-    <EuiText size="s" data-test-subj="a11y-overlay">
+    <EuiText size="s" data-test-subj="a11y-overlay" aria-live="polite">
       Press Enter to start editing.
     </EuiText>
-    <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
+    <EuiText size="s" aria-live="polite">
+      When you&rsquo;re done, press Escape to stop editing.
+    </EuiText>
   </KibanaRenderContextProvider>
 );
 
