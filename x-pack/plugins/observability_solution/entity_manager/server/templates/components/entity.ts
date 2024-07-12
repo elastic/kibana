@@ -14,6 +14,7 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
     description:
       "Component template for the entity fields used in the Elastic Entity Model's entity discovery framework",
     ecs_version: '8.0.0',
+    managed: true,
   },
   template: {
     mappings: {

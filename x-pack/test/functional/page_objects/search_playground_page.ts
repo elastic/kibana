@@ -10,16 +10,28 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const selectIndex = async () => {
+    await testSubjects.existOrFail('addDataSourcesButton');
+    await testSubjects.click('addDataSourcesButton');
+    await testSubjects.existOrFail('selectIndicesFlyout');
+    await testSubjects.click('sourceIndex-0');
+    await testSubjects.click('saveButton');
+  };
 
   return {
     PlaygroundStartChatPage: {
       async expectPlaygroundStartChatPageComponentsToExist() {
-        await testSubjects.existOrFail('startChatPage');
-        await testSubjects.existOrFail('connectToLLMChatPanel');
-        await testSubjects.existOrFail('selectIndicesChatPanel');
-        await testSubjects.existOrFail('startChatButton');
+        await testSubjects.existOrFail('setupPage');
+        await testSubjects.existOrFail('connectLLMButton');
+      },
+
+      async expectPlaygroundStartChatPageIndexButtonExists() {
+        await testSubjects.existOrFail('createIndexButton');
+      },
+
+      async expectPlaygroundStartChatPageIndexCalloutExists() {
+        await testSubjects.existOrFail('createIndexCallout');
       },
 
       async expectPlaygroundHeaderComponentsToExist() {
@@ -28,8 +40,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectPlaygroundHeaderComponentsToDisabled() {
-        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(false);
+        expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be('true');
+        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(false);
         expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
       },
 
@@ -37,66 +49,45 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('createIndexButton');
       },
 
-      async expectNoIndexCalloutExists() {
-        await testSubjects.existOrFail('createIndexCallout');
-      },
-
-      async expectSelectIndex(indexName: string) {
+      async expectOpenFlyoutAndSelectIndex() {
         await browser.refresh();
-        await testSubjects.missingOrFail('createIndexCallout');
-        await testSubjects.existOrFail('selectIndicesComboBox');
-        await comboBox.setCustom('selectIndicesComboBox', indexName);
+        await selectIndex();
+        await testSubjects.existOrFail('dataSourcesSuccessButton');
       },
 
-      async expectIndicesInDropdown() {
-        await testSubjects.existOrFail('selectIndicesComboBox');
-      },
-
-      async removeIndexFromComboBox() {
-        await testSubjects.click('removeIndexButton');
-      },
-
-      async expectToSelectIndicesAndStartButtonEnabled(indexName: string) {
-        await comboBox.setCustom('selectIndicesComboBox', indexName);
-        expect(await testSubjects.isEnabled('startChatButton')).to.be(true);
-        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(true);
-        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(true);
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
-
-        await testSubjects.click('startChatButton');
+      async expectToSelectIndicesAndLoadChat() {
+        await selectIndex();
         await testSubjects.existOrFail('chatPage');
       },
 
       async expectAddConnectorButtonExists() {
-        await testSubjects.existOrFail('setupGenAIConnectorButton');
+        await testSubjects.existOrFail('connectLLMButton');
       },
 
       async expectOpenConnectorPagePlayground() {
-        await testSubjects.click('setupGenAIConnectorButton');
+        await testSubjects.click('connectLLMButton');
         await testSubjects.existOrFail('create-connector-flyout');
       },
 
-      async expectHideGenAIPanelConnectorAfterCreatingConnector(
-        createConnector: () => Promise<void>
-      ) {
+      async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
-        await testSubjects.missingOrFail('connectToLLMChatPanel');
+        await testSubjects.existOrFail('successConnectLLMButton');
       },
 
-      async expectHideGenAIPanelConnector() {
-        await testSubjects.missingOrFail('connectToLLMChatPanel');
+      async expectShowSuccessLLMButton() {
+        await testSubjects.existOrFail('successConnectLLMButton');
       },
     },
     PlaygroundChatPage: {
-      async navigateToChatPage(indexName: string) {
-        await comboBox.setCustom('selectIndicesComboBox', indexName);
-        await testSubjects.click('startChatButton');
+      async navigateToChatPage() {
+        await selectIndex();
+        await testSubjects.existOrFail('chatPage');
       },
 
       async expectChatWindowLoaded() {
-        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(true);
-        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(true);
+        expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
+        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(true);
         expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
 
         expect(await testSubjects.isEnabled('regenerateActionButton')).to.be(false);
@@ -114,9 +105,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
           await (await testSubjects.find('manageConnectorsLink')).getAttribute('href')
         ).to.contain('/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/');
 
-        await testSubjects.click('sourcesAccordion');
-
-        expect(await testSubjects.findAll('indicesInAccordian')).to.have.length(1);
+        await testSubjects.existOrFail('editContextPanel');
+        await testSubjects.existOrFail('summarizationPanel');
       },
 
       async sendQuestion() {
@@ -145,9 +135,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectViewQueryHasFields() {
-        await testSubjects.click('viewQueryActionButton');
-        await testSubjects.existOrFail('viewQueryFlyout');
-        const fields = await testSubjects.findAll('queryField');
+        await testSubjects.existOrFail('queryMode');
+        await testSubjects.click('queryMode');
+        const fields = await testSubjects.findAll('fieldName');
 
         expect(fields.length).to.be(1);
 
@@ -156,18 +146,16 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(code.replace(/ /g, '')).to.be(
           '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
         );
-        await testSubjects.click('euiFlyoutCloseButton');
       },
 
       async expectEditContextOpens() {
-        await testSubjects.click('editContextActionButton');
-        await testSubjects.existOrFail('editContextFlyout');
-        await testSubjects.click('contextFieldsSelectable_basic_index');
+        await testSubjects.click('chatMode');
+        await testSubjects.existOrFail('contextFieldsSelectable-0');
+        await testSubjects.click('contextFieldsSelectable-0');
         await testSubjects.existOrFail('contextField');
         const fields = await testSubjects.findAll('contextField');
 
         expect(fields.length).to.be(1);
-        await testSubjects.click('euiFlyoutCloseButton');
       },
     },
   };
