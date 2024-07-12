@@ -74,7 +74,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
-  const { parsedResults, link, index } = searchSourceRule
+  const { parsedResults, link, index, query } = searchSourceRule
     ? await fetchSearchSourceQuery({
         ruleId,
         alertLimit,
@@ -126,7 +126,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     const value = result.value ?? result.count;
 
     // check hits for dates out of range
-    checkHitsForDateOutOfRange(logger, ruleId, result.hits, params.timeField, dateStart, dateEnd);
+    if (!esqlQueryRule) {
+      checkHitsForDateOutOfRange(
+        logger,
+        ruleId,
+        result.hits,
+        params.timeField,
+        dateStart,
+        dateEnd,
+        query
+      );
+    }
 
     // group aggregations use the bucket selector agg to compare conditions
     // within the ES query, so only 'met' results are returned, therefore we don't need
@@ -237,40 +247,58 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   return { state: { latestTimestamp } };
 }
 
+// diagnostic to help solve a puzzle of sometimes returning documents
+// not matching the expected time range; usually kql using ccs.
 function checkHitsForDateOutOfRange(
   logger: Logger,
   ruleId: string,
   hits: Array<estypes.SearchHit<unknown>>,
   timeField: string | undefined,
   dateStart: string,
-  dateEnd: string
+  dateEnd: string,
+  query: unknown
 ) {
   if (!timeField) return;
 
   const epochStart = new Date(dateStart).getTime();
   const epochEnd = new Date(dateEnd).getTime();
+  const messageMeta = { tags: ['query-result-out-of-time-range'] };
+
   const messagePrefix = `For rule "${ruleId}"`;
+  const usingQuery = `using query <${JSON.stringify(query)}>`;
+  const hitsWereReturned = 'hits were returned with invalid time range';
+
+  let errors = 0;
   if (isNaN(epochStart)) {
+    errors++;
     logger.error(
-      `${messagePrefix}, hits were returned with invalid time range start date "${dateStart}" from field "${timeField}"`
+      `${messagePrefix}, ${hitsWereReturned} start date "${dateStart}" from field "${timeField}" ${usingQuery}`,
+      messageMeta
     );
   }
 
   if (isNaN(epochEnd)) {
+    errors++;
     logger.error(
-      `${messagePrefix}, hits were returned with invalid time range end date "${dateEnd}" from field "${timeField}"`
+      `${messagePrefix}, ${hitsWereReturned} end date "${dateEnd}" from field "${timeField}"  ${usingQuery}`,
+      messageMeta
     );
   }
+
+  if (errors > 0) return;
+
+  const outsideTimeRange = 'outside the query time range';
 
   for (const hit of hits) {
     const dateVal = get(hit, `_source.${timeField}`);
     const epochDate = getEpochDateFromString(dateVal);
+
     if (epochDate) {
       if (epochDate < epochStart || epochDate > epochEnd) {
-        const meta = `id: ${hit._id}; index: ${hit._index}`;
-        logger.error(
-          `${messagePrefix}, the hit with date "${dateVal}" from field "${timeField}" is outside the range of the rule's time window. Document info: ${meta}`
-        );
+        const message = `the hit with date "${dateVal}" from field "${timeField}" is ${outsideTimeRange}`;
+        const queryString = `Query: <${JSON.stringify(query)}>`;
+        const document = `Document: <${JSON.stringify(hit)}>`;
+        logger.error(`${messagePrefix}, ${message}. ${queryString}. ${document}`, messageMeta);
       }
     }
   }
@@ -284,11 +312,17 @@ function getEpochDateFromString(dateString: string): number | null {
     return null;
   }
 
-  if (!isNaN(date.getTime())) return date.getTime();
+  const time = date.getTime();
+  if (!isNaN(time)) return time;
 
+  // if not a valid date string, try it as a stringified number
   const dateNum = parseInt(dateString, 10);
   if (isNaN(dateNum)) return null;
-  return new Date(dateNum).getTime();
+
+  const timeFromNumber = new Date(dateNum).getTime();
+  if (isNaN(timeFromNumber)) return null;
+
+  return timeFromNumber;
 }
 
 export function getValidTimefieldSort(
