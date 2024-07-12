@@ -25,6 +25,7 @@ import { buildResponse } from '../../lib/build_response';
 import {
   DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
+  createConversationWithUserInput,
   createOrUpdateConversationWithUserInput,
   getPluginNameFromRequest,
   langChainExecute,
@@ -150,7 +151,7 @@ export const chatCompleteRoute = (
             return transformedMessage;
           });
 
-          let updatedConversation: ConversationResponse | undefined | null;
+          let newConversation: ConversationResponse | undefined | null;
           // Fetch any tools registered by the request's originating plugin
           const pluginName = getPluginNameFromRequest({
             request,
@@ -160,31 +161,39 @@ export const chatCompleteRoute = (
           const enableKnowledgeBaseByDefault =
             ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           // TODO: remove non-graph persistance when KB will be enabled by default
-          if (
-            (!enableKnowledgeBaseByDefault || (enableKnowledgeBaseByDefault && !conversationId)) &&
-            request.body.persist &&
-            conversationsDataClient
-          ) {
-            updatedConversation = await createOrUpdateConversationWithUserInput({
-              actionsClient,
-              actionTypeId,
-              connectorId,
-              conversationId,
-              conversationsDataClient,
-              promptId: request.body.promptId,
-              logger,
-              replacements: latestReplacements,
-              newMessages: messages,
-              model: request.body.model,
-            });
-            if (updatedConversation == null) {
+          if (conversationsDataClient && !conversationId && request.body.persist) {
+            newConversation = enableKnowledgeBaseByDefault
+              ? await createConversationWithUserInput({
+                  actionTypeId,
+                  connectorId,
+                  conversationId,
+                  conversationsDataClient,
+                  promptId: request.body.promptId,
+                  replacements: latestReplacements,
+                  newMessages: messages,
+                  model: request.body.model,
+                })
+              : await createOrUpdateConversationWithUserInput({
+                  actionTypeId,
+                  connectorId,
+                  conversationId,
+                  conversationsDataClient,
+                  promptId: request.body.promptId,
+                  replacements: latestReplacements,
+                  newMessages: messages,
+                  model: request.body.model,
+                  actionsClient,
+                  responseLanguage: request.body.responseLanguage,
+                  logger,
+                });
+            if (newConversation == null) {
               return assistantResponse.error({
                 body: `conversation id: "${conversationId}" not updated`,
                 statusCode: 400,
               });
             }
             // messages are anonymized by conversationsDataClient
-            messages = updatedConversation?.messages?.map((c) => ({
+            messages = newConversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
@@ -195,9 +204,9 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (updatedConversation?.id && conversationsDataClient) {
+            if (newConversation?.id && conversationsDataClient) {
               await appendAssistantMessageToConversation({
-                conversationId: updatedConversation?.id,
+                conversationId: newConversation?.id,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,
@@ -214,7 +223,7 @@ export const chatCompleteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
-            conversationId,
+            conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,
             logger,

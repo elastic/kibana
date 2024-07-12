@@ -547,6 +547,49 @@ export const createOrUpdateConversationWithUserInput = async ({
   });
 };
 
+export interface CreateConversationWithParams {
+  conversationsDataClient: AIAssistantConversationsDataClient;
+  replacements: Replacements;
+  conversationId?: string;
+  promptId?: string;
+  actionTypeId: string;
+  connectorId: string;
+  newMessages?: Array<Pick<Message, 'content' | 'role'>>;
+  model?: string;
+}
+export const createConversationWithUserInput = async ({
+  conversationsDataClient,
+  replacements,
+  conversationId,
+  actionTypeId,
+  promptId,
+  connectorId,
+  newMessages,
+  model,
+}: CreateConversationWithParams) => {
+  if (!conversationId) {
+    if (newMessages && newMessages.length > 0) {
+      return conversationsDataClient.createConversation({
+        conversation: {
+          title: NEW_CHAT,
+          messages: newMessages.map((m) => ({
+            content: m.content,
+            role: m.role,
+            timestamp: new Date().toISOString(),
+          })),
+          replacements,
+          apiConfig: {
+            connectorId,
+            actionTypeId,
+            model,
+            defaultSystemPromptId: promptId,
+          },
+        },
+      });
+    }
+  }
+};
+
 export interface UpdateConversationWithParams {
   logger: Logger;
   conversationsDataClient: AIAssistantConversationsDataClient;

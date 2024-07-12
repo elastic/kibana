@@ -12,10 +12,12 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { Run } from '@langchain/core/tracers/base';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
+import { PERSIST_CONVERSATION_CHANGES_NODE } from './nodes/persist_conversation_changes';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
@@ -26,6 +28,15 @@ interface StreamGraphParams {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceOptions?: TraceOptions;
 }
+
+const handleEndRun = (run: Run) => {
+  const persistConversationChildRun = run.child_runs.find(
+    (c) => c.name === PERSIST_CONVERSATION_CHANGES_NODE
+  );
+  if (persistConversationChildRun && persistConversationChildRun.inputs.conversation) {
+    return persistConversationChildRun.inputs.conversation.id;
+  }
+};
 
 /**
  * Execute the graph in streaming mode
@@ -78,13 +89,20 @@ export const streamGraph = async ({
   };
 
   let finalMessage = '';
-  const stream = assistantGraph.streamEvents(inputs, {
-    callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-    runName: DEFAULT_ASSISTANT_GRAPH_ID,
-    streamMode: 'values',
-    tags: traceOptions?.tags ?? [],
-    version: 'v1',
-  });
+  let conversationId: string | undefined;
+  const stream = assistantGraph
+    .withListeners({
+      onEnd: (run: Run) => {
+        conversationId = handleEndRun(run);
+      },
+    })
+    .streamEvents(inputs, {
+      callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+      runName: DEFAULT_ASSISTANT_GRAPH_ID,
+      streamMode: 'values',
+      tags: traceOptions?.tags ?? [],
+      version: 'v1',
+    });
 
   const processEvent = async () => {
     try {
@@ -132,6 +150,9 @@ export const streamGraph = async ({
         return handleStreamEnd(finalMessage);
       }
       logger.error(`Error streaming from LangChain: ${error.message}`);
+      if (conversationId) {
+        push({ payload: `Conversation id: ${conversationId}`, type: 'content' });
+      }
       push({ payload: error.message, type: 'content' });
       handleStreamEnd(error.message, true);
     }
@@ -153,6 +174,7 @@ interface InvokeGraphParams {
 interface InvokeGraphResponse {
   output: string;
   traceData: TraceData;
+  conversationId?: string;
 }
 
 /**
@@ -173,6 +195,7 @@ export const invokeGraph = async ({
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
   return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
     let traceData: TraceData = {};
+    let conversationId: string | undefined;
     if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
       traceData = {
         // Transactions ID since this span is the parent
@@ -181,18 +204,23 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-
-    const r = await assistantGraph.invoke(inputs, {
-      callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      tags: traceOptions?.tags ?? [],
-    });
+    const r = await assistantGraph
+      .withListeners({
+        onEnd: (run: Run) => {
+          conversationId = handleEndRun(run);
+        },
+      })
+      .invoke(inputs, {
+        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+        runName: DEFAULT_ASSISTANT_GRAPH_ID,
+        tags: traceOptions?.tags ?? [],
+      });
     const output = r.agentOutcome.returnValues.output;
 
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }
 
-    return { output, traceData };
+    return { output, traceData, conversationId };
   });
 };
