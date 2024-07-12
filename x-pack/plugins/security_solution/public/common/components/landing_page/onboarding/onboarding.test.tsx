@@ -72,9 +72,13 @@ describe('OnboardingComponent', () => {
     expect(welcomeHeader).toBeInTheDocument();
     expect(togglePanel).toBeInTheDocument();
   });
-  describe.only('AVC 2024 Results banner', () => {
+  describe('AVC 2024 Results banner', () => {
+    beforeEach(() => {
+      (useKibana().services.storage.get as jest.Mock).mockReturnValue(true);
+    });
     afterEach(() => {
       jest.clearAllMocks();
+      jest.useRealTimers();
     });
     it('should render on the page', () => {
       render();
@@ -106,8 +110,13 @@ describe('OnboardingComponent', () => {
     });
 
     it('should not be shown if the current date is January 1, 2025', () => {
-      jest.useFakeTimers().setSystemTime(new Date('2025-01-01'));
-      (useKibana().services.storage.get as jest.Mock).mockReturnValue(true);
+      jest.useFakeTimers().setSystemTime(new Date('2025-01-01T05:00:00.000Z'));
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+      jest.useRealTimers();
+    });
+    it('should be shown if the current date is before January 1, 2025', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-12-31T05:00:00.000Z'));
       render();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeTruthy();
     });
