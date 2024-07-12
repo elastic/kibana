@@ -4457,10 +4457,81 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.titlesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titlesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.valuesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valuesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.iconAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.valueFontMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueFontMode",
+            "description": [],
+            "signature": [
+              "ValueFontMode",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.MetricVisualizationState.color",
             "type": "string",
             "tags": [],
             "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
             "description": [],
             "signature": [
               "string | undefined"

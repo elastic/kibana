@@ -231,10 +231,13 @@ The API returns the {data-source} object:
 .Properties of the fieldAttrs[fieldName] objects:
 [%collapsible%open]
 =====
-`customLabel`:::
+`customLabel`::
 (Optional, string) Custom label for the field.
 
-`count`:::
+`customDescription`::
+(Optional, string) Custom description for the field. Max length is 300 characters.
+
+`count`::
 (Optional, number) Popularity count for the field.
 =====
 
