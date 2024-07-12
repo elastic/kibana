@@ -7,48 +7,47 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
+import {
+  initializePathScript,
+  cleanScript,
+} from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateLatestIndexName } from '../helpers/generate_component_id';
 
-function mapDestinationToPainless(destination: string) {
-  const fieldParts = destination.split('.');
-  return fieldParts.reduce((acc, _part, currentIndex, parts) => {
-    if (currentIndex + 1 === parts.length) {
-      return `${acc}\n  ctx${parts
-        .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${destination}.data.keySet();`;
-    }
-    return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
-      .slice(0, currentIndex + 1)
-      .map((s) => `["${s}"]`)
-      .join('')} = new HashMap();`;
-  }, '');
+function mapDestinationToPainless(field: string) {
+  return `
+    ${initializePathScript(field)}
+    ctx.${field} = ctx.entity.metadata.${field}.data.keySet();
+  `;
 }
 
 function createMetadataPainlessScript(definition: EntityDefinition) {
   if (!definition.metadata) {
     return '';
   }
-  return definition.metadata.reduce((script, def) => {
+
+  return definition.metadata.reduce((acc, def) => {
     const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
-      '.',
-      '?.'
-    )}.data != null) {${mapDestinationToPainless(destination)}\n}\n`;
+    const optionalFieldPath = destination.replaceAll('.', '?.');
+    const next = `
+      if (ctx.entity?.metadata?.${optionalFieldPath}.data != null) {
+        ${mapDestinationToPainless(destination)}
+      }
+    `;
+    return `${acc}\n${next}`;
   }, '');
 }
 
 function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
-  return definition.identityFields.map((identityField) => ({
-    script: {
-      if: `ctx.entity.identity.${identityField.field.replaceAll(
-        '.',
-        '?.'
-      )} != null && ctx.entity.identity.${identityField.field}.size() != 0`,
-      source: `
-        ctx.${identityField.field} = ctx.entity.identity.${identityField.field}.keySet().toArray()[0];
-      `,
-    },
-  }));
+  return definition.identityFields.map((identityField) => {
+    const optionalFieldPath = identityField.field.replaceAll('.', '?.');
+    const assignValue = `ctx.${identityField.field} = ctx.entity.identity.${identityField.field}.keySet().toArray()[0];`;
+    return {
+      script: {
+        if: `ctx.entity.identity.${optionalFieldPath} != null && ctx.entity.identity.${identityField.field}.size() != 0`,
+        source: cleanScript(`${initializePathScript(identityField.field)}\n${assignValue}`),
+      },
+    };
+  });
 }
 
 export function generateLatestProcessors(definition: EntityDefinition) {
@@ -95,7 +94,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         }))
       : []),
     ...(definition.metadata != null
-      ? [{ script: { source: createMetadataPainlessScript(definition) } }]
+      ? [{ script: { source: cleanScript(createMetadataPainlessScript(definition)) } }]
       : []),
     {
       remove: {

@@ -7,33 +7,33 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
+import {
+  initializePathScript,
+  cleanScript,
+} from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
-function mapDestinationToPainless(destination: string) {
-  const fieldParts = destination.split('.');
-  return fieldParts.reduce((acc, _part, currentIndex, parts) => {
-    if (currentIndex + 1 === parts.length) {
-      return `${acc}\n  ctx${parts
-        .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${destination}.keySet();`;
-    }
-    return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
-      .slice(0, currentIndex + 1)
-      .map((s) => `["${s}"]`)
-      .join('')} = new HashMap();`;
-  }, '');
+function mapDestinationToPainless(field: string) {
+  return `
+    ${initializePathScript(field)}
+    ctx.${field} = ctx.entity.metadata.${field}.keySet();
+  `;
 }
 
 function createMetadataPainlessScript(definition: EntityDefinition) {
   if (!definition.metadata) {
     return '';
   }
-  return definition.metadata.reduce((script, def) => {
+
+  return definition.metadata.reduce((acc, def) => {
     const destination = def.destination || def.source;
-    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
-      '.',
-      '?.'
-    )} != null) {${mapDestinationToPainless(destination)}\n}\n`;
+    const optionalFieldPath = destination.replaceAll('.', '?.');
+    const next = `
+      if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
+        ${mapDestinationToPainless(destination)}
+      }
+    `;
+    return `${acc}\n${next}`;
   }, '');
 }
 
@@ -88,7 +88,7 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     {
       script: {
         description: 'Generated the entity.id field',
-        source: `
+        source: cleanScript(`
         // This function will recursively collect all the values of a HashMap of HashMaps
         Collection collectValues(HashMap subject) {
           Collection values = new ArrayList();
@@ -121,10 +121,10 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
             entityId.append(":");
           }
 
-            // Assign the slo.instanceId
+            // Assign the entity.id
           ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
         }
-       `,
+       `),
       },
     },
     {
@@ -140,7 +140,7 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         }))
       : []),
     ...(definition.metadata != null
-      ? [{ script: { source: createMetadataPainlessScript(definition) } }]
+      ? [{ script: { source: cleanScript(createMetadataPainlessScript(definition)) } }]
       : []),
     {
       remove: {
