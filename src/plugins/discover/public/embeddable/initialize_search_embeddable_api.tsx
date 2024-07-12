@@ -14,7 +14,11 @@ import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/co
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ROW_HEIGHT_OPTION, SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import type { PublishesDataViews, StateComparators } from '@kbn/presentation-publishing';
+import type {
+  PublishesDataViews,
+  PublishesUnifiedSearch,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
@@ -28,6 +32,7 @@ import {
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 const initializeSearchSource = async (
   dataService: DiscoverServices['data'],
@@ -65,7 +70,7 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  api: PublishesSavedSearch & PublishesDataViews;
+  api: PublishesSavedSearch & PublishesDataViews & Partial<PublishesUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
@@ -87,6 +92,18 @@ export const initializeSearchEmbeddableApi = async (
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
+
+  /**
+   * This is the state that comes from the search source that need their own publishing subjects for the API
+   * - Note that these subjects can't currently be changed on their own, and therefore we do not need to keep
+   *   then "in sync" with changes to the search source. This would change with inline editing.
+   */
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(
+    searchSource.getField('filter') as Filter[]
+  );
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+    searchSource.getField('query')
+  );
 
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
@@ -145,6 +162,8 @@ export const initializeSearchEmbeddableApi = async (
     api: {
       dataViews,
       savedSearch$,
+      filters$,
+      query$,
     },
     stateManager,
     comparators: {

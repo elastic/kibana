@@ -16,6 +16,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
+  PublishesUnifiedSearch,
   PublishesWritablePanelTitle,
   PublishingSubject,
   SerializedTimeRange,
@@ -77,6 +78,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesWritablePanelTitle &
   PublishesSavedSearch &
   PublishesDataViews &
+  PublishesUnifiedSearch &
   HasInPlaceLibraryTransforms &
   HasTimeRange &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
