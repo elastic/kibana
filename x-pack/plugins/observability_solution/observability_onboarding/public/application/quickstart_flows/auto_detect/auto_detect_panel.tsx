@@ -147,7 +147,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         title={i18n.translate(
                           'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
                           {
-                            defaultMessage: 'Get started with {title} logs',
+                            defaultMessage: 'Get started with {title}',
                             values: { title: integration.title },
                           }
                         )}
