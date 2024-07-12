@@ -264,7 +264,7 @@ function checkHitsForDateOutOfRange(
   const epochEnd = new Date(dateEnd).getTime();
   const messageMeta = { tags: ['query-result-out-of-time-range'] };
 
-  const messagePrefix = `For rule "${ruleId}"`;
+  const messagePrefix = `For rule '${ruleId}'`;
   const usingQuery = `using query <${JSON.stringify(query)}>`;
   const hitsWereReturned = 'hits were returned with invalid time range';
 
@@ -272,7 +272,7 @@ function checkHitsForDateOutOfRange(
   if (isNaN(epochStart)) {
     errors++;
     logger.error(
-      `${messagePrefix}, ${hitsWereReturned} start date "${dateStart}" from field "${timeField}" ${usingQuery}`,
+      `${messagePrefix}, ${hitsWereReturned} start date '${dateStart}' from field '${timeField}' ${usingQuery}`,
       messageMeta
     );
   }
@@ -280,7 +280,7 @@ function checkHitsForDateOutOfRange(
   if (isNaN(epochEnd)) {
     errors++;
     logger.error(
-      `${messagePrefix}, ${hitsWereReturned} end date "${dateEnd}" from field "${timeField}"  ${usingQuery}`,
+      `${messagePrefix}, ${hitsWereReturned} end date '${dateEnd}' from field '${timeField}' ${usingQuery}`,
       messageMeta
     );
   }
@@ -295,7 +295,7 @@ function checkHitsForDateOutOfRange(
 
     if (epochDate) {
       if (epochDate < epochStart || epochDate > epochEnd) {
-        const message = `the hit with date "${dateVal}" from field "${timeField}" is ${outsideTimeRange}`;
+        const message = `the hit with date '${dateVal}' from field '${timeField}' is ${outsideTimeRange}`;
         const queryString = `Query: <${JSON.stringify(query)}>`;
         const document = `Document: <${JSON.stringify(hit)}>`;
         logger.error(`${messagePrefix}, ${message}. ${queryString}. ${document}`, messageMeta);
