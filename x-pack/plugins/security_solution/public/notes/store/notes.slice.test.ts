@@ -506,7 +506,7 @@ describe('notesSlice', () => {
     });
 
     it('should return all notes for an existing document id', () => {
-      expect(selectNotesByDocumentId(mockGlobalState, 'document-id-1')).toEqual([
+      expect(selectNotesByDocumentId(mockGlobalState, '1')).toEqual([
         mockGlobalState.notes.entities['1'],
       ]);
     });

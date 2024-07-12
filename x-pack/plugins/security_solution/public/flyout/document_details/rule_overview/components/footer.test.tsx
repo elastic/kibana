@@ -34,7 +34,7 @@ describe('<RulePreviewFooter />', () => {
     expect(getByTestId(RULE_OVERVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID)).toHaveTextContent(
-      'Show rule details'
+      'Show full rule details'
     );
   });
 

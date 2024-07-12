@@ -199,6 +199,6 @@ export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';
 
-export const CLOUD_SECURITY_PLUGIN_VERSION = '1.8.1';
+export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 // Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
 export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.10.0-preview01';

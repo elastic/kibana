@@ -4,13 +4,6 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-    UpdateSavedQueryRequestQueryParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdateSavedQueryRequestParams'
   schemas:
     UpdateSavedQueryRequestParams:
       type: object
@@ -38,7 +31,3 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
         removed:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

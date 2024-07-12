@@ -301,7 +301,8 @@
     "metrics",
     "name",
     "staticFields",
-    "type"
+    "type",
+    "version"
   ],
   "entity-discovery-api-key": [
     "apiKey"
@@ -1028,6 +1029,13 @@
     "accessDate",
     "createDate",
     "slug"
+  ],
+  "usage-counter": [
+    "count",
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
   ],
   "usage-counters": [
     "domainId"

@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
@@ -44,6 +45,8 @@ export const Processes = () => {
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
+  const { sourceId } = useSourceContext();
+
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
@@ -75,6 +78,7 @@ export const Processes = () => {
     state.currentTimestamp,
     sortBy,
     parseSearchString(searchText),
+    sourceId,
     request$
   );
 

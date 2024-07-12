@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { Conversation, Prompt } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../../..';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { ConversationsBulkActions } from '../../api';
 import { AIConnector } from '../../../connectorland/connector_selector';
 
 interface Props {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnector?: AIConnector;

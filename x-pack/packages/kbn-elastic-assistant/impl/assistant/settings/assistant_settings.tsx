@@ -23,8 +23,9 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation, Prompt, QuickPrompt, useLoadConnectors } from '../../..';
+import { Conversation, useLoadConnectors } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -46,6 +47,7 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -57,7 +59,6 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  isFlyoutMode: boolean;
   onSave: (success: boolean) => Promise<void>;
   selectedConversationId?: string;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
@@ -78,7 +79,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     conversationsLoaded,
-    isFlyoutMode,
   }) => {
     const {
       actionTypeRegistry,
@@ -97,6 +97,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
+    const { data: allPrompts } = useFetchPrompts();
 
     const { data: connectors } = useLoadConnectors({
       http,
@@ -112,7 +113,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setUpdatedAssistantStreamingEnabled,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
-      setUpdatedSystemPromptSettings,
+      promptsBulkActions,
       saveSettings,
       conversationsSettingsBulkActions,
       updatedAnonymizationData,
@@ -120,7 +121,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       anonymizationFieldsBulkActions,
       setAnonymizationFieldsBulkActions,
       setUpdatedAnonymizationData,
-    } = useSettingsUpdater(conversations, conversationsLoaded, anonymizationFields);
+      setPromptsBulkActions,
+      setUpdatedSystemPromptSettings,
+    } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -137,21 +140,21 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     );
 
     // Quick Prompt Selection State
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
-    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
       setSelectedQuickPrompt(quickPrompt);
     }, []);
     useEffect(() => {
       if (selectedQuickPrompt != null) {
         setSelectedQuickPrompt(
-          quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
+          quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name)
         );
       }
     }, [quickPromptSettings, selectedQuickPrompt]);
 
     // System Prompt Selection State
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
-    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
       setSelectedSystemPrompt(systemPrompt);
     }, []);
     useEffect(() => {
@@ -333,7 +336,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                       setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
                       onSelectedConversationChange={onHandleSelectedConversationChange}
                       http={http}
-                      isFlyoutMode={isFlyoutMode}
                     />
                   ))}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (
@@ -342,6 +344,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
                     selectedQuickPrompt={selectedQuickPrompt}
                     setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+                    setPromptsBulkActions={setPromptsBulkActions}
+                    promptsBulkActions={promptsBulkActions}
                   />
                 )}
                 {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
@@ -356,6 +360,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
                     conversationsSettingsBulkActions={conversationsSettingsBulkActions}
                     setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
+                    setPromptsBulkActions={setPromptsBulkActions}
+                    promptsBulkActions={promptsBulkActions}
                   />
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (

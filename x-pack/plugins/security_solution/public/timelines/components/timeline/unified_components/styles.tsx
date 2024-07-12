@@ -22,7 +22,7 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
   }
 `;
 
-export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
+export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
   className: `${className}`,
 }))`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
@@ -54,6 +54,12 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
   display: flex;
   flex-direction: column;
   height: 100%;
+`;
+
+export const leadingActionsColumnStyles = `
+  .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
+    padding: 0;
+  }
 `;
 
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
@@ -167,6 +173,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     display: flex;
     align-items: baseline;
   }
+
+  ${leadingActionsColumnStyles}
 `;
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`

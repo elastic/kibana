@@ -83,6 +83,7 @@ export function InternalDashboardTopNav({
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
+    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -143,6 +144,11 @@ export function InternalDashboardTopNav({
         title,
         lastSavedId
       );
+      dashboardRecentlyAccessed.add(
+        getFullEditPath(lastSavedId, viewMode === ViewMode.EDIT),
+        title,
+        lastSavedId
+      );
     }
     return () => subscription.unsubscribe();
   }, [
@@ -152,6 +158,7 @@ export function InternalDashboardTopNav({
     lastSavedId,
     viewMode,
     title,
+    dashboardRecentlyAccessed,
   ]);
 
   /**

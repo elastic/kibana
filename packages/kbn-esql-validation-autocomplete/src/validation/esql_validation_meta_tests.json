@@ -8662,7 +8662,8 @@
     {
       "query": "from a_index | enrich `this``is fine`",
       "error": [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME"
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        "Unknown policy [`this``is]"
       ],
       "warning": []
     },
@@ -11006,6 +11007,13 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_extract(\"SOME_RANDOM_STRING\", now())",
+      "error": [],
+      "warning": [
+        "Invalid option [\"SOME_RANDOM_STRING\"] for date_extract. Supported options: [\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", \"ALIGNED_DAY_OF_WEEK_IN_YEAR\", \"ALIGNED_WEEK_OF_MONTH\", \"ALIGNED_WEEK_OF_YEAR\", \"AMPM_OF_DAY\", \"CLOCK_HOUR_OF_AMPM\", \"CLOCK_HOUR_OF_DAY\", \"DAY_OF_MONTH\", \"DAY_OF_WEEK\", \"DAY_OF_YEAR\", \"EPOCH_DAY\", \"ERA\", \"HOUR_OF_AMPM\", \"HOUR_OF_DAY\", \"INSTANT_SECONDS\", \"MICRO_OF_DAY\", \"MICRO_OF_SECOND\", \"MILLI_OF_DAY\", \"MILLI_OF_SECOND\", \"MINUTE_OF_DAY\", \"MINUTE_OF_HOUR\", \"MONTH_OF_YEAR\", \"NANO_OF_DAY\", \"NANO_OF_SECOND\", \"OFFSET_SECONDS\", \"PROLEPTIC_MONTH\", \"SECOND_OF_DAY\", \"SECOND_OF_MINUTE\", \"YEAR\", \"YEAR_OF_ERA\"]."
+      ]
+    },
+    {
       "query": "from a_index | eval var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField)",
       "error": [],
       "warning": []
@@ -11023,7 +11031,6 @@
     {
       "query": "from a_index | eval date_extract(stringField, stringField)",
       "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [stringField] type [string]",
         "Argument of [date_extract] must be [date], found value [stringField] type [string]"
       ],
       "warning": []
@@ -11043,7 +11050,7 @@
     {
       "query": "row var = date_extract(true, true)",
       "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [true] type [boolean]",
+        "Argument of [date_extract] must be [string], found value [true] type [boolean]",
         "Argument of [date_extract] must be [date], found value [true] type [boolean]"
       ],
       "warning": []
@@ -11056,7 +11063,7 @@
     {
       "query": "from a_index | eval date_extract(booleanField, booleanField)",
       "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [booleanField] type [boolean]",
+        "Argument of [date_extract] must be [string], found value [booleanField] type [boolean]",
         "Argument of [date_extract] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
@@ -25902,6 +25909,196 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = top(stringField, 3, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 1, \"desc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 3)",
+      "error": [
+        "Error: [top] function expects exactly 3 arguments, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField)",
+      "error": [
+        "Error: [top] function expects exactly 3 arguments, got 1."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, numberField, \"asc\")",
+      "error": [
+        "Argument of [=] must be a constant, received [top(stringField,numberField,\"asc\")]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 100 + numberField, \"asc\")",
+      "error": [
+        "Argument of [=] must be a constant, received [top(stringField,100+numberField,\"asc\")]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 1, stringField)",
+      "error": [
+        "Argument of [=] must be a constant, received [top(stringField,1,stringField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 1, \"asdf\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"asdf\"] for top. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
+      "query": "from a_index | sort top(stringField, numberField, \"asc\")",
+      "error": [
+        "SORT does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, numberField, \"asc\")",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, numberField, \"asc\") > 0",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, numberField, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, numberField, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, numberField, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, numberField, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort top(stringField, 5, \"asc\")",
+      "error": [
+        "SORT does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, 5, \"asc\")",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, 5, \"asc\") > 0",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, 5, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, 5, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, 5, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, 5, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, numberField, \"asc\")",
+      "error": [
+        "Argument of [top] must be a constant, received [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats top(nullVar, nullVar, nullVar)",
+      "error": [
+        "Argument of [top] must be a constant, received [nullVar]",
+        "Argument of [top] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = st_distance(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
@@ -26000,6 +26197,184 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(avg(numberField), avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(booleanField, booleanField)",
+      "error": [
+        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort weighted_avg(numberField, numberField)",
+      "error": [
+        "SORT does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(numberField, numberField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(numberField, numberField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "f",
       "error": [
         "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
@@ -26009,7 +26384,7 @@
     {
       "query": "from ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26020,6 +26395,16 @@
     },
     {
       "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"index\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"\"\"index\"\"\"",
       "error": [],
       "warning": []
     },
@@ -26171,14 +26556,14 @@
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
     {
       "query": "FROM index\n, \tother_index\t,\n \t ",
       "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
       ],
       "warning": []
     },
@@ -26193,8 +26578,7 @@
     {
       "query": "FROM `index`",
       "error": [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'"
+        "Unknown index [`index`]"
       ],
       "warning": []
     },

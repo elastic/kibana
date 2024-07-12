@@ -387,9 +387,10 @@ async function retryImportOnConflictError(
     const retryDelayMs = 1000 + Math.floor(Math.random() * 3000); // 1s + 0-3s of jitter
 
     logger?.debug(
-      `Retrying import operation after [${
-        retryDelayMs * 1000
-      }s] due to conflict errors: ${JSON.stringify(errors)}`
+      () =>
+        `Retrying import operation after [${
+          retryDelayMs * 1000
+        }s] due to conflict errors: ${JSON.stringify(errors)}`
     );
 
     await setTimeout(retryDelayMs);
@@ -458,9 +459,10 @@ export async function installKibanaSavedObjects({
     the integrations team. */
     if (referenceErrors.length) {
       logger.debug(
-        `Resolving ${
-          referenceErrors.length
-        } reference errors creating saved objects: ${formatImportErrorsForLog(referenceErrors)}`
+        () =>
+          `Resolving ${
+            referenceErrors.length
+          } reference errors creating saved objects: ${formatImportErrorsForLog(referenceErrors)}`
       );
 
       const retries = toBeSavedObjects.map(({ id, type }) => {

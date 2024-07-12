@@ -14,8 +14,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiButtonGroup,
-  EuiToolTip,
-  EuiIcon,
   useEuiTheme,
   EuiForm,
   EuiFormRow,
@@ -43,6 +41,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
+  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
@@ -84,6 +83,7 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
+import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -458,33 +458,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const filterTypeOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
-      const descendantsTooltip = (
-        <EuiToolTip
-          content={
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
-                  defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipVersionInfo"
-                  defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
-                />
-              </p>
-            </EuiText>
-          }
-          data-test-subj={getTestId('filterProcessDescendants-tooltipText')}
-        >
-          <EuiIcon
-            type="iInCircle"
-            data-test-subj={getTestId('filterProcessDescendants-tooltipIcon')}
-          />
-        </EuiToolTip>
-      );
-
       return [
         {
           id: 'events',
@@ -509,7 +482,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Process Descendants"
                 />
               </EuiText>
-              {descendantsTooltip}
+              <ProcessDescendantsTooltip
+                data-test-subj={getTestId('filterProcessDescendantsTooltip')}
+              />
             </EuiFlexGroup>
           ),
           iconType: isFilterProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
@@ -571,11 +546,19 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         const hasDuplicates =
           (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
           isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
+
         if (hasDuplicates) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+
+          if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
+            addedFields.push(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field);
+          }
+
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
           if (!hasFormChanged) setHasFormChanged(true);
           return;
+        } else {
+          setHasDuplicateFields(false);
         }
 
         // handle wildcard with wrong operator case
@@ -602,7 +585,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [
+        exception,
+        hasFormChanged,
+        isFilterProcessDescendantsFeatureEnabled,
+        isFilterProcessDescendantsSelected,
+        processChanged,
+      ]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>

@@ -7,6 +7,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PermissionsPolicyConfigType } from './permissions_policy';
 
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
@@ -38,6 +39,7 @@ export const securityResponseHeadersSchema = schema.object({
     defaultValue:
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
   }),
+  permissionsPolicyReportOnly: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
   crossOriginOpenerPolicy: schema.oneOf(
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy
@@ -58,7 +60,8 @@ export const securityResponseHeadersSchema = schema.object({
  * @internal
  */
 export function parseRawSecurityResponseHeadersConfig(
-  raw: TypeOf<typeof securityResponseHeadersSchema>
+  raw: TypeOf<typeof securityResponseHeadersSchema>,
+  rawPermissionsPolicyConfig: PermissionsPolicyConfigType
 ) {
   const securityResponseHeaders: Record<string, string | string[]> = {};
   const { disableEmbedding } = raw;
@@ -72,9 +75,21 @@ export function parseRawSecurityResponseHeadersConfig(
   if (raw.referrerPolicy) {
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
+
+  const reportTo = rawPermissionsPolicyConfig.report_to.length
+    ? `;report-to=${rawPermissionsPolicyConfig.report_to}`
+    : '';
+
   if (raw.permissionsPolicy) {
-    securityResponseHeaders['Permissions-Policy'] = raw.permissionsPolicy;
+    securityResponseHeaders['Permissions-Policy'] = `${raw.permissionsPolicy}${reportTo}`;
   }
+
+  if (raw.permissionsPolicyReportOnly && reportTo) {
+    securityResponseHeaders[
+      'Permissions-Policy-Report-Only'
+    ] = `${raw.permissionsPolicyReportOnly}${reportTo}`;
+  }
+
   if (raw.crossOriginOpenerPolicy) {
     securityResponseHeaders['Cross-Origin-Opener-Policy'] = raw.crossOriginOpenerPolicy;
   }

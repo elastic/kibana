@@ -133,6 +133,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
+          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+            ? timelineDefaults.excludedRowRendererIds
+            : [],
         })
       );
     }

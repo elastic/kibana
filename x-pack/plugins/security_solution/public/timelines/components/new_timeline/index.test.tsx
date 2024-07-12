@@ -64,6 +64,7 @@ describe('NewTimelineButton', () => {
         show: true,
         timelineType: TimelineType.default,
         updated: undefined,
+        excludedRowRendererIds: [],
       });
     });
   });
@@ -93,6 +94,7 @@ describe('NewTimelineButton', () => {
         show: true,
         timelineType: TimelineType.template,
         updated: undefined,
+        excludedRowRendererIds: [],
       });
     });
   });

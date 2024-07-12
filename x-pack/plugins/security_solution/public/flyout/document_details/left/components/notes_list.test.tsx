@@ -41,7 +41,7 @@ jest.mock('react-redux', () => {
 const renderNotesList = () =>
   render(
     <TestProviders>
-      <NotesList eventId={'document-id-1'} />
+      <NotesList eventId={'1'} />
     </TestProviders>
   );
 
@@ -69,7 +69,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -115,7 +115,7 @@ describe('NotesList', () => {
 
     render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -131,7 +131,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'document-id-1',
+            eventId: '1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',
@@ -147,7 +147,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
     const { getByText } = within(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`));
@@ -169,7 +169,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -203,7 +203,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -228,7 +228,7 @@ describe('NotesList', () => {
 
     render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -261,7 +261,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'document-id-1',
+            eventId: '1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',
@@ -277,7 +277,7 @@ describe('NotesList', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'document-id-1'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 

@@ -468,14 +468,25 @@ export const MachineLearningRuleRequiredFields = z.object({
   machine_learning_job_id: MachineLearningJobId,
 });
 
+export type MachineLearningRuleOptionalFields = z.infer<typeof MachineLearningRuleOptionalFields>;
+export const MachineLearningRuleOptionalFields = z.object({
+  alert_suppression: AlertSuppression.optional(),
+});
+
 export type MachineLearningRulePatchFields = z.infer<typeof MachineLearningRulePatchFields>;
-export const MachineLearningRulePatchFields = MachineLearningRuleRequiredFields.partial();
+export const MachineLearningRulePatchFields = MachineLearningRuleRequiredFields.partial().merge(
+  MachineLearningRuleOptionalFields
+);
 
 export type MachineLearningRuleResponseFields = z.infer<typeof MachineLearningRuleResponseFields>;
-export const MachineLearningRuleResponseFields = MachineLearningRuleRequiredFields;
+export const MachineLearningRuleResponseFields = MachineLearningRuleRequiredFields.merge(
+  MachineLearningRuleOptionalFields
+);
 
 export type MachineLearningRuleCreateFields = z.infer<typeof MachineLearningRuleCreateFields>;
-export const MachineLearningRuleCreateFields = MachineLearningRuleRequiredFields;
+export const MachineLearningRuleCreateFields = MachineLearningRuleRequiredFields.merge(
+  MachineLearningRuleOptionalFields
+);
 
 export type MachineLearningRule = z.infer<typeof MachineLearningRule>;
 export const MachineLearningRule = SharedResponseProps.merge(MachineLearningRuleResponseFields);

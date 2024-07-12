@@ -358,6 +358,9 @@ export const useQueryTimelineById = () => {
           show: openTimeline,
           initialized: true,
           savedSearchId: savedSearchId ?? null,
+          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+            ? timelineDefaults.excludedRowRendererIds
+            : [],
         },
       });
       resetDiscoverAppState();
