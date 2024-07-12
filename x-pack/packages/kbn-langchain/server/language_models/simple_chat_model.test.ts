@@ -13,8 +13,8 @@ import { ActionsClientSimpleChatModel } from './simple_chat_model';
 import { mockActionResponse } from './mocks';
 import { BaseMessage } from '@langchain/core/messages';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { parseBedrockStream } from '../utils/bedrock';
-import { parseGeminiStream } from '../utils/gemini';
+import { parseBedrockStream, parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
+import { parseGeminiStream, parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
 
 const connectorId = 'mock-connector-id';
 
@@ -343,6 +343,77 @@ describe('ActionsClientSimpleChatModel', () => {
       expect(handleLLMNewToken).toHaveBeenCalledTimes(2);
       expect(handleLLMNewToken).toHaveBeenCalledWith('token6');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token7');
+    });
+  });
+
+  describe('*_streamResponseChunks', () => {
+    it('iterates over bedrock chunks', async () => {
+      function* mockFetchData() {
+        yield 'token1';
+        yield 'token2';
+        yield 'token3';
+      }
+      (parseBedrockStreamAsAsyncIterator as jest.Mock).mockImplementation(mockFetchData);
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
+
+      const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
+        ...defaultArgs,
+        actionsClient,
+        llmType: 'bedrock',
+        streaming: true,
+      });
+
+      const gen = actionsClientSimpleChatModel._streamResponseChunks(
+        callMessages,
+        callOptions,
+        callRunManager
+      );
+
+      const chunks = [];
+
+      for await (const chunk of gen) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks.map((c) => c.text)).toEqual(['token1', 'token2', 'token3']);
+      expect(handleLLMNewToken).toHaveBeenCalledTimes(3);
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token1');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token2');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token3');
+    });
+    it('iterates over gemini chunks', async () => {
+      function* mockFetchData() {
+        yield 'token1';
+        yield 'token2';
+        yield 'token3';
+      }
+      (parseGeminiStreamAsAsyncIterator as jest.Mock).mockImplementation(mockFetchData);
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
+
+      const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
+        ...defaultArgs,
+        actionsClient,
+        llmType: 'gemini',
+        streaming: true,
+      });
+
+      const gen = actionsClientSimpleChatModel._streamResponseChunks(
+        callMessages,
+        callOptions,
+        callRunManager
+      );
+
+      const chunks = [];
+
+      for await (const chunk of gen) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks.map((c) => c.text)).toEqual(['token1', 'token2', 'token3']);
+      expect(handleLLMNewToken).toHaveBeenCalledTimes(3);
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token1');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token2');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token3');
     });
   });
 });

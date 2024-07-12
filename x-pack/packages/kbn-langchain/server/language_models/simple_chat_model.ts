@@ -240,10 +240,5 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       });
       await runManager?.handleLLMNewToken(token);
     }
-    // try sending empty chunk at end???
-    yield new ChatGenerationChunk({
-      message: new AIMessageChunk({ content: '' }),
-      text: '',
-    });
   }
 }
