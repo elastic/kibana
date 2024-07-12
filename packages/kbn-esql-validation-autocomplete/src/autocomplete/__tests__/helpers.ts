@@ -7,11 +7,15 @@
  */
 
 import { camelCase } from 'lodash';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { builtinFunctions } from '../../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
+import * as autocomplete from '../autocomplete';
+import type { ESQLCallbacks } from '../../shared/types';
+import type { EditorContext } from '../types';
 
 export interface Integration {
   name: string;
@@ -218,16 +222,14 @@ export function getLiteralsByType(_type: string | string[]) {
 }
 
 export function createCustomCallbackMocks(
-  customFields: Array<{ name: string; type: string }> | undefined,
-  customSources: Array<{ name: string; hidden: boolean }> | undefined,
-  customPolicies:
-    | Array<{
-        name: string;
-        sourceIndices: string[];
-        matchField: string;
-        enrichFields: string[];
-      }>
-    | undefined
+  customFields?: Array<{ name: string; type: string }>,
+  customSources?: Array<{ name: string; hidden: boolean }>,
+  customPolicies?: Array<{
+    name: string;
+    sourceIndices: string[];
+    matchField: string;
+    enrichFields: string[];
+  }>
 ) {
   const finalFields = customFields || fields;
   const finalSources = customSources || indexes;
@@ -259,3 +261,44 @@ export function getPolicyFields(policyName: string) {
       enrichFields.map((field) => (/[^a-zA-Z\d_\.@]/.test(field) ? `\`${field}\`` : field))
     );
 }
+
+export const setup = async (caret = '/') => {
+  if (caret.length !== 1) {
+    throw new Error('Caret must be a single character');
+  }
+
+  const callbacks = createCustomCallbackMocks();
+
+  interface SuggestOptions {
+    ctx?: EditorContext;
+    callbacks?: ESQLCallbacks;
+  }
+  const suggest = async (query: string, opts: SuggestOptions = {}) => {
+    const pos = query.indexOf(caret);
+    if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
+    const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
+    const ctx =
+      opts.ctx ??
+      (pos > 0 ? { triggerKind: 1, triggerCharacter: query[pos - 1] } : { triggerKind: 0 });
+    return await autocomplete.suggest(
+      querySansCaret,
+      pos,
+      ctx,
+      getAstAndSyntaxErrors,
+      opts.callbacks ?? callbacks
+    );
+  };
+
+  const assertSuggestions = async (query: string, expected: string[], opts?: SuggestOptions) => {
+    const result = await suggest(query, opts);
+    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+
+    expect(resultTexts).toEqual([...expected].sort());
+  };
+
+  return {
+    callbacks,
+    suggest,
+    assertSuggestions,
+  };
+};
