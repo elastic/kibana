@@ -9,9 +9,10 @@ import type { Client } from '@elastic/elasticsearch';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
-import { Message, experimental_StreamData } from 'ai';
+import { experimental_StreamData } from 'ai';
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain, clipContext } from './conversational_chain';
+import { ChatMessage, MessageRole } from '../types';
 
 describe('conversational chain', () => {
   const createTestChain = async ({
@@ -28,7 +29,7 @@ describe('conversational chain', () => {
     modelLimit,
   }: {
     responses: string[];
-    chat: Message[];
+    chat: ChatMessage[];
     expectedFinalAnswer: string;
     expectedDocs: any;
     expectedTokens: any;
@@ -146,7 +147,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -180,7 +181,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -215,7 +216,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -266,17 +267,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -310,17 +311,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -354,17 +355,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -399,17 +400,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
