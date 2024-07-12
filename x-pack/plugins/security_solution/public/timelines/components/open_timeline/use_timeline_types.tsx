@@ -18,6 +18,7 @@ import * as i18n from './translations';
 import type { TimelineTab } from './types';
 import { TimelineTabsStyle } from './types';
 import { useKibana } from '../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;
@@ -42,8 +43,18 @@ export const useTimelineTypes = ({
       : TimelineType.default
   );
 
-  const timelineUrl = formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch));
-  const templateUrl = formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
+  const notesEnabled = useIsExperimentalFeatureEnabled('securitySolutionNotesEnabled');
+
+  const timelineUrl = useMemo(() => {
+    return formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch));
+  }, [formatUrl, urlSearch]);
+  const templateUrl = useMemo(() => {
+    return formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
+  }, [formatUrl, urlSearch]);
+
+  const notesUrl = useMemo(() => {
+    return formatUrl(getTimelineTabsUrl('notes', urlSearch));
+  }, [formatUrl, urlSearch]);
 
   const goToTimeline = useCallback(
     (ev) => {
@@ -60,6 +71,15 @@ export const useTimelineTypes = ({
     },
     [navigateToUrl, templateUrl]
   );
+
+  const goToNotes = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToUrl(notesUrl);
+    },
+    [navigateToUrl, notesUrl]
+  );
+
   const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
     (timelineTabsStyle: TimelineTabsStyle) => [
       {
@@ -113,6 +133,17 @@ export const useTimelineTypes = ({
               {tab.name}
             </EuiTab>
           ))}
+          {notesEnabled && (
+            <EuiTab
+              data-test-subj="timeline-notes"
+              isSelected={tabName === 'notes'}
+              key="timeline-notes"
+              href={notesUrl}
+              onClick={goToNotes}
+            >
+              {'Notes'}
+            </EuiTab>
+          )}
         </EuiTabs>
         <EuiSpacer size="m" />
       </>

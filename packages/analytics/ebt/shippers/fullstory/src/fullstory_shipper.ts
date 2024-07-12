@@ -130,7 +130,7 @@ export class FullStoryShipper implements IShipper {
         )
         .subscribe((pageVars) => {
           this.initContext.logger.debug(
-            `Calling FS.setVars with context ${JSON.stringify(pageVars)}`
+            () => `Calling FS.setVars with context ${JSON.stringify(pageVars)}`
           );
           this.fullStoryApi.setVars('page', {
             ...formatPayload(pageVars),
@@ -145,7 +145,7 @@ export class FullStoryShipper implements IShipper {
    * @param newContext The full new context to set {@link EventContext}
    */
   public extendContext(newContext: EventContext): void {
-    this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
+    this.initContext.logger.debug(() => `Received context ${JSON.stringify(newContext)}`);
 
     // FullStory requires different APIs for different type of contexts:
     // User-level context.
@@ -226,7 +226,9 @@ export class FullStoryShipper implements IShipper {
         cloudIsElasticStaffOwned,
         cloudTrialEndDate,
       };
-      this.initContext.logger.debug(`Calling FS.setUserVars with ${JSON.stringify(userVars)}`);
+      this.initContext.logger.debug(
+        () => `Calling FS.setUserVars with ${JSON.stringify(userVars)}`
+      );
       this.fullStoryApi.setUserVars(formatPayload(userVars));
     }
   }

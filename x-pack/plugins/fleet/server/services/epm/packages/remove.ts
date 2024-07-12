@@ -14,6 +14,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import minVersion from 'semver/ranges/min-version';
 
 import { updateIndexSettings } from '../elasticsearch/index/update_settings';
 
@@ -43,6 +44,7 @@ import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
+import * as Registry from '../registry';
 
 import { getInstallation, kibanaSavedObjectTypes } from '.';
 
@@ -112,7 +114,14 @@ export async function removeInstallation(options: {
   return installedAssets;
 }
 
-async function deleteKibanaAssets(
+/**
+ * This method resolves saved objects before deleting them. It is needed when
+ * deleting assets that were installed in 7.x to mitigate the breaking change
+ * that occurred in 8.0. This is a memory-intensive operation as it requires
+ * loading all the saved objects into memory. It is generally better to delete
+ * assets directly if the package is known to be installed in 8.x or later.
+ */
+async function resolveAndDeleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
   spaceId: string = DEFAULT_SPACE_ID
 ) {
@@ -140,6 +149,26 @@ async function deleteKibanaAssets(
   // in the case of a partial install, it is expected that some assets will be not found
   // we filter these out before calling delete
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
+
+  for (const asset of assetsToDelete) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: asset.id,
+      savedObjectType: asset.type,
+    });
+  }
+
+  return savedObjectsClient.bulkDelete(assetsToDelete, { namespace });
+}
+
+async function deleteKibanaAssets(
+  assetsToDelete: KibanaAssetReference[],
+  spaceId: string = DEFAULT_SPACE_ID
+) {
+  const savedObjectsClient = new SavedObjectsClient(
+    appContextService.getSavedObjects().createInternalRepository()
+  );
+  const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
 
   for (const asset of assetsToDelete) {
     auditLoggingService.writeCustomSoAuditLog({
@@ -181,6 +210,7 @@ async function deleteAssets(
     installed_es: installedEs,
     installed_kibana: installedKibana,
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
+    additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
   }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
@@ -236,7 +266,10 @@ async function deleteAssets(
     // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
-      deleteKibanaAssets(installedKibana, spaceId),
+      resolveAndDeleteKibanaAssets(installedKibana, spaceId),
+      Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
+        resolveAndDeleteKibanaAssets(kibanaAssets, additionalSpaceId)
+      ),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -271,21 +304,49 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 export async function deleteKibanaSavedObjectsAssets({
   savedObjectsClient,
   installedPkg,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   installedPkg: SavedObject<Installation>;
+  spaceId?: string;
 }) {
-  const { installed_kibana: installedRefs, installed_kibana_space_id: spaceId } =
-    installedPkg.attributes;
-  if (!installedRefs.length) return;
+  const { installed_kibana_space_id: installedSpaceId } = installedPkg.attributes;
+
+  let refsToDelete: KibanaAssetReference[];
+  let spaceIdToDelete: string | undefined;
+  if (!spaceId || spaceId === installedSpaceId) {
+    refsToDelete = installedPkg.attributes.installed_kibana;
+    spaceIdToDelete = installedSpaceId;
+  } else {
+    refsToDelete = installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [];
+    spaceIdToDelete = spaceId;
+  }
+  if (!refsToDelete.length) return;
 
   const logger = appContextService.getLogger();
-  const assetsToDelete = installedRefs
+  const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
+  const registryInfo = await Registry.fetchInfo(
+    installedPkg.attributes.name,
+    installedPkg.attributes.version
+  );
+
+  const minKibana = registryInfo.conditions?.kibana?.version
+    ? minVersion(registryInfo.conditions.kibana.version)
+    : null;
+
   try {
-    await deleteKibanaAssets(assetsToDelete, spaceId);
+    // Compare Kibana versions to determine if the package could been installed
+    // only in 8.x or later. If so, we can skip SO resolution step altogether
+    // and delete the assets directly. Otherwise, we need to resolve the assets
+    // which might create high memory pressure if a package has a lot of assets.
+    if (minKibana && minKibana.major >= 8) {
+      await deleteKibanaAssets(assetsToDelete, spaceIdToDelete);
+    } else {
+      await resolveAndDeleteKibanaAssets(assetsToDelete, spaceIdToDelete);
+    }
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

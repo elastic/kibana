@@ -77,12 +77,15 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
             field.setValue(changedOptions.map((option) => option.value as string));
           };
 
-          const selectedOptions = (field.value ?? []).map((incidentType) => ({
-            value: incidentType,
-            label:
-              (allIncidentTypes ?? []).find((type) => incidentType === type.id.toString())?.name ??
-              '',
-          }));
+          const selectedOptions =
+            field.value && allIncidentTypes?.length
+              ? field.value.map((incidentType) => ({
+                  value: incidentType,
+                  label:
+                    allIncidentTypes.find((type) => incidentType === type.id.toString())?.name ??
+                    '',
+                }))
+              : [];
 
           return (
             <EuiFormRow

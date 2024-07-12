@@ -22,7 +22,7 @@ we have introduced the `detection_response` directory to consolidate all the int
 
    * `@serverless`: Runs in the first quality gate and in the periodic pipeline.
 
-   * `@serverlessQA`: Runs in the second quality gate.
+   * `@serverlessQA`: Runs in the Kibana QA quality gate.
 
    * `@skipInEss`: Skipped for ESS environment.
 

@@ -8,18 +8,31 @@
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import type { RoleCredentials } from '../../../../shared/services';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
 
   describe('post_case', () => {
+    let roleAuthc: RoleCredentials;
+
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
     it('403 when trying to create case', async () => {
-      await supertest
+      await supertestWithoutAuth
         .post(CASES_URL)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           description: 'This is a brand new case of a bad meanie defacing data',
           title: 'Super Bad Observability Issue',

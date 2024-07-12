@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { difference } from 'lodash';
 import React, { Component } from 'react';
-import type { Observable, Subscription } from 'rxjs';
 
 import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -56,7 +55,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
-  isSolutionNavEnabled$?: Observable<boolean>;
+  solutionNavExperiment?: Promise<boolean>;
 }
 
 interface State {
@@ -76,7 +75,6 @@ interface State {
 export class ManageSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
   private initialSpaceState: State['space'] | null = null;
-  private subscription: Subscription | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -115,22 +113,14 @@ export class ManageSpacePage extends Component<Props, State> {
       });
     }
 
-    if (this.props.isSolutionNavEnabled$) {
-      this.subscription = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
-        this.setState({ isSolutionNavEnabled: isEnabled });
-      });
-    }
+    this.props.solutionNavExperiment?.then((isEnabled) => {
+      this.setState({ isSolutionNavEnabled: isEnabled });
+    });
   }
 
   public async componentDidUpdate(previousProps: Props) {
     if (this.props.spaceId !== previousProps.spaceId && this.props.spaceId) {
       await this.loadSpace(this.props.spaceId, Promise.resolve(this.state.features));
-    }
-  }
-
-  public componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
     }
   }
 

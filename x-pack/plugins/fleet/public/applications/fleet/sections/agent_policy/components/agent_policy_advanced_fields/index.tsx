@@ -308,7 +308,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
+      <CustomFields
+        updateAgentPolicy={updateAgentPolicy}
+        agentPolicy={agentPolicy}
+        isDisabled={disabled || agentPolicy.is_managed === true}
+      />
       <EuiDescribedFormGroup
         fullWidth
         title={

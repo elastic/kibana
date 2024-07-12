@@ -2098,7 +2098,7 @@
             }
           }
         },
-        "enterpriseSearchInferenceEndpoints": {
+        "enterpriseSearchRelevance": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -10335,6 +10335,15 @@
           }
         },
         "observability:logsExplorer:allowedDataViews": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
+          }
+        },
+        "observability:logSources": {
           "type": "array",
           "items": {
             "type": "keyword",

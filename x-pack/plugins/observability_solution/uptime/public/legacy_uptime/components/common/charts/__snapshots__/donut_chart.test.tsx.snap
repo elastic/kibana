@@ -51,6 +51,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -440,6 +441,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,

@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 
 /** TODO: This file is duplicated from the controls plugin to avoid exporting it */
@@ -24,13 +24,15 @@ export const ControlError = ({ error }: ControlErrorProps) => {
 
   const popoverButton = (
     <EuiButtonEmpty
+      flush="left"
       color="danger"
       iconSize="m"
       iconType="error"
       data-test-subj="control-frame-error"
       onClick={() => setPopoverOpen((open) => !open)}
-      className={'errorEmbeddableCompact__button'}
+      className="errorEmbeddableCompact__button controlErrorButton"
       textProps={{ className: 'errorEmbeddableCompact__text' }}
+      contentProps={{ className: 'controlErrorButton--content' }}
     >
       <FormattedMessage
         id="controls.frame.error.message"
@@ -40,17 +42,15 @@ export const ControlError = ({ error }: ControlErrorProps) => {
   );
 
   return (
-    <I18nProvider>
-      <EuiPopover
-        button={popoverButton}
-        isOpen={isPopoverOpen}
-        className="errorEmbeddableCompact__popover"
-        closePopover={() => setPopoverOpen(false)}
-      >
-        <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-          {errorMessage}
-        </Markdown>
-      </EuiPopover>
-    </I18nProvider>
+    <EuiPopover
+      button={popoverButton}
+      isOpen={isPopoverOpen}
+      className="controlPanel errorEmbeddableCompact__popover"
+      closePopover={() => setPopoverOpen(false)}
+    >
+      <Markdown data-test-subj="errorMessageMarkdown" readOnly>
+        {errorMessage}
+      </Markdown>
+    </EuiPopover>
   );
 };

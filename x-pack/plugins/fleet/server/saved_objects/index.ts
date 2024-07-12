@@ -86,7 +86,10 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
-import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
+import {
+  packagePolicyV13AdvancedFields,
+  packagePolicyV10OnWriteScanFix,
+} from './model_versions/security_solution';
 import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
@@ -611,6 +614,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '13': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV13AdvancedFields,
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -669,6 +680,10 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          additional_spaces_installed_kibana: {
+            type: 'flattened',
+            index: false,
+          },
           install_started_at: { type: 'date' },
           install_version: { type: 'keyword' },
           install_status: { type: 'keyword' },
@@ -707,6 +722,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 latest_executed_state: { type: 'object', enabled: false },
+              },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                additional_spaces_installed_kibana: { type: 'flattened', index: false },
               },
             },
           ],

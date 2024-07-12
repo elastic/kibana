@@ -20,6 +20,7 @@ import {
   PostEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   GetEnrollmentSettingsResponse,
+  GetInfoResponse,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -169,6 +170,55 @@ export class SpaceTestApiClient {
   async getEnrollmentSettings(spaceId?: string): Promise<GetEnrollmentSettingsResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/internal/fleet/settings/enrollment`)
+      .expect(200);
+
+    return res;
+  }
+  // Package install
+  async getPackage(
+    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    spaceId?: string
+  ): Promise<GetInfoResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .expect(200);
+
+    return res;
+  }
+  async installPackage(
+    { pkgName, pkgVersion, force }: { pkgName: string; pkgVersion: string; force?: boolean },
+    spaceId?: string
+  ) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force })
+      .expect(200);
+
+    return res;
+  }
+  async deletePackageKibanaAssets(
+    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    spaceId?: string
+  ) {
+    const { body: res } = await this.supertest
+      .delete(
+        `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}/kibana_assets`
+      )
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async installPackageKibanaAssets(
+    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    spaceId?: string
+  ) {
+    const { body: res } = await this.supertest
+      .post(
+        `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}/kibana_assets`
+      )
+      .set('kbn-xsrf', 'xxxx')
       .expect(200);
 
     return res;

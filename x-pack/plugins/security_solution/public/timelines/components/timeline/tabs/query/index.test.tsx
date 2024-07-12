@@ -59,6 +59,8 @@ jest.mock('../../../../containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
 }));
 
+jest.mock('../../../../../common/hooks/use_experimental_features');
+
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
   const sort: Sort[] = [

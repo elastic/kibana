@@ -290,7 +290,25 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-definition": [
+    "description",
+    "filter",
+    "id",
+    "identityFields",
+    "indexPatterns",
+    "managed",
+    "metadata",
+    "metrics",
+    "name",
+    "staticFields",
+    "type",
+    "version"
+  ],
+  "entity-discovery-api-key": [
+    "apiKey"
+  ],
   "epm-packages": [
+    "additional_spaces_installed_kibana",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -1011,6 +1029,13 @@
     "accessDate",
     "createDate",
     "slug"
+  ],
+  "usage-counter": [
+    "count",
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
   ],
   "usage-counters": [
     "domainId"

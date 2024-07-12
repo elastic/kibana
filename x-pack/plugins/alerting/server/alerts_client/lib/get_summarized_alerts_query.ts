@@ -417,7 +417,7 @@ const getHitsWithCount = <AlertData extends RuleAlertData>(
 
       const expandedSource = expandFlattenedAlert(formattedSource as object) as Alert & AlertData;
       return {
-        _id,
+        _id: _id!,
         _index,
         ...expandedSource,
       };

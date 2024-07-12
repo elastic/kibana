@@ -60,7 +60,7 @@ export const HeatmapToolbar = memo(
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <ToolbarPopover
-              title={i18n.translate('xpack.lens.shared.curveLabel', {
+              title={i18n.translate('xpack.lens.shared.visualOptionsLabel', {
                 defaultMessage: 'Visual options',
               })}
               type="visualOptions"

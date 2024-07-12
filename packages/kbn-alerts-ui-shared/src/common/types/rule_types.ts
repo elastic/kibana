@@ -30,8 +30,18 @@ export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>
 
 export type RuleTypeParams = Record<string, unknown>;
 
-export interface RuleFormErrors {
-  [key: string]: string | string[] | RuleFormErrors;
+export interface RuleFormBaseErrors {
+  name?: string[];
+  interval?: string[];
+  consumer?: string[];
+  ruleTypeId?: string[];
+  actionConnectors?: string[];
+  alertDelay?: string[];
+  tags?: string[];
+}
+
+export interface RuleFormParamsErrors {
+  [key: string]: string | string[] | RuleFormParamsErrors;
 }
 
 export interface MinimumScheduleInterval {
@@ -81,7 +91,7 @@ export interface RuleTypeParamsExpressionProps<
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;
-  errors: RuleFormErrors;
+  errors: RuleFormParamsErrors;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;

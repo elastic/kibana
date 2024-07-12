@@ -816,7 +816,8 @@ describe('AllCasesListGeneric', () => {
       });
     });
 
-    describe('Row actions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/148095
+    describe.skip('Row actions', () => {
       const statusTests = [
         [CaseStatuses.open],
         [CaseStatuses['in-progress']],

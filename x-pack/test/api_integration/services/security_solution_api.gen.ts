@@ -22,11 +22,18 @@ import {
 import { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
 import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
+import { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
 import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import {
+  CreateUpdateProtectionUpdatesNoteRequestParamsInput,
+  CreateUpdateProtectionUpdatesNoteRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import { EndpointIsolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/isolate_route.gen';
+import { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/unisolate_route.gen';
 import {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
@@ -40,6 +47,7 @@ import {
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
+import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import {
   GetRuleExecutionEventsRequestQueryInput,
   GetRuleExecutionEventsRequestParamsInput,
@@ -56,6 +64,7 @@ import {
   PerformBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
+import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -100,6 +109,17 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     bulkDeleteRules(props: BulkDeleteRulesProps) {
       return supertest
         .delete('/api/detection_engine/rules/_bulk_delete')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Deletes multiple rules.
+     */
+    bulkDeleteRulesPost(props: BulkDeleteRulesPostProps) {
+      return supertest
+        .post('/api/detection_engine/rules/_bulk_delete')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -153,6 +173,16 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
+      return supertest
+        .post(
+          replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', props.params)
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     deleteAlertsIndex() {
       return supertest
         .delete('/api/detection_engine/index')
@@ -170,6 +200,22 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
+      return supertest
+        .post('/api/endpoint/isolate')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
+      return supertest
+        .post('/api/endpoint/unisolate')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
@@ -250,6 +296,29 @@ finalize it.
     getPrebuiltRulesAndTimelinesStatus() {
       return supertest
         .get('/api/detection_engine/rules/prepackaged/_status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+      * Retrieves whether or not the user is authenticated, and the user's Kibana
+space and index privileges, which determine if the user can create an
+index for the Elastic Security alerts generated by
+detection engine rules.
+
+      */
+    getPrivileges() {
+      return supertest
+        .get('/api/detection_engine/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
+      return supertest
+        .get(
+          replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', props.params)
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -341,6 +410,14 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    rulePreview(props: RulePreviewProps) {
+      return supertest
+        .post('/api/detection_engine/rules/preview')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     searchAlerts(props: SearchAlertsProps) {
       return supertest
         .post('/api/detection_engine/signals/search')
@@ -402,6 +479,9 @@ export interface BulkCreateRulesProps {
 export interface BulkDeleteRulesProps {
   body: BulkDeleteRulesRequestBodyInput;
 }
+export interface BulkDeleteRulesPostProps {
+  body: BulkDeleteRulesPostRequestBodyInput;
+}
 export interface BulkPatchRulesProps {
   body: BulkPatchRulesRequestBodyInput;
 }
@@ -414,8 +494,18 @@ export interface CreateAlertsMigrationProps {
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
+export interface CreateUpdateProtectionUpdatesNoteProps {
+  params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
+  body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface EndpointIsolateRedirectProps {
+  body: EndpointIsolateRedirectRequestBodyInput;
+}
+export interface EndpointUnisolateRedirectProps {
+  body: EndpointUnisolateRedirectRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -440,6 +530,9 @@ export interface GetEndpointSuggestionsProps {
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
+export interface GetProtectionUpdatesNoteProps {
+  params: GetProtectionUpdatesNoteRequestParamsInput;
+}
 export interface GetRuleExecutionEventsProps {
   query: GetRuleExecutionEventsRequestQueryInput;
   params: GetRuleExecutionEventsRequestParamsInput;
@@ -463,6 +556,9 @@ export interface PerformBulkActionProps {
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface RulePreviewProps {
+  body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;

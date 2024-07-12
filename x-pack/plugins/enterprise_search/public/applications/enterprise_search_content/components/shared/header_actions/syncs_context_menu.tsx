@@ -34,7 +34,11 @@ import { IndexViewLogic } from '../../search_index/index_view_logic';
 
 import { SyncsLogic } from './syncs_logic';
 
-export const SyncsContextMenu: React.FC = () => {
+export interface SyncsContextMenuProps {
+  disabled?: boolean;
+}
+
+export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = false }) => {
   const { config, productFeatures } = useValues(KibanaLogic);
   const { ingestionStatus, isCanceling, isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
@@ -171,6 +175,7 @@ export const SyncsContextMenu: React.FC = () => {
     <EuiPopover
       button={
         <EuiButton
+          disabled={disabled}
           data-test-subj="enterpriseSearchSyncsContextMenuButton"
           data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"
           iconType="arrowDown"

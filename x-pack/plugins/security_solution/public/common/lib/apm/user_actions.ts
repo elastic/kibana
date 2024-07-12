@@ -13,7 +13,7 @@ export const SINGLE_RULE_ACTIONS = {
   DUPLICATE: `${APP_UI_ID} singleRuleActions duplicate`,
   EXPORT: `${APP_UI_ID} singleRuleActions export`,
   DELETE: `${APP_UI_ID} singleRuleActions delete`,
-  MANUAL_RULE_RUN: `${APP_UI_ID} singleRuleActions manual run`,
+  MANUAL_RULE_RUN: `${APP_UI_ID} singleRuleActions manual rule run`,
   PREVIEW: `${APP_UI_ID} singleRuleActions preview`,
   SAVE: `${APP_UI_ID} singleRuleActions save`,
 };
@@ -23,6 +23,7 @@ export const BULK_RULE_ACTIONS = {
   DISABLE: `${APP_UI_ID} bulkRuleActions disable`,
   DUPLICATE: `${APP_UI_ID} bulkRuleActions duplicate`,
   EXPORT: `${APP_UI_ID} bulkRuleActions export`,
+  MANUAL_RULE_RUN: `${APP_UI_ID} bulkRuleActions manual rule run`,
   DELETE: `${APP_UI_ID} bulkRuleActions delete`,
   EDIT: `${APP_UI_ID} bulkRuleActions edit`,
 };

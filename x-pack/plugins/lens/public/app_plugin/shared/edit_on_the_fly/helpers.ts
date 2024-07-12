@@ -42,7 +42,7 @@ export const getSuggestions = async (
       signal: abortController?.signal,
     });
     const context = {
-      dataViewSpec: dataView?.toSpec(),
+      dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
       textBasedColumns: columns,
       query,

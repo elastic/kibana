@@ -45,6 +45,10 @@ export const getLicenseFetcher = ({
         ? normalizeFeatures(response.features)
         : undefined;
 
+      if (!normalizedLicense) {
+        logger.warn('License information fetched from Elasticsearch, but no license is available');
+      }
+
       const signature = sign({
         license: normalizedLicense,
         features: normalizedFeatures,

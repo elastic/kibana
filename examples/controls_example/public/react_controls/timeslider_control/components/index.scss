@@ -1,11 +1,9 @@
-
-.timeSlider__popoverOverride {
-  width: 100%;
-  max-inline-size: 100% !important;
-}
-
 .timeSlider-playToggle:enabled {
   background-color: $euiColorPrimary !important;
+}
+
+.timeSlider-prependButton {
+  background-color: transparent !important;
 }
 
 .timeSlider__anchor {
@@ -13,11 +11,9 @@
   height: 100%;
   box-shadow: none;
   overflow: hidden;
-  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
 
   .euiText {
-    background-color: $euiFormBackgroundColor !important;
-    // background-color: transparent !important; TODO revert to this rule once control group provides background color
+    background-color: transparent !important;
 
     &:hover {
       text-decoration: underline;

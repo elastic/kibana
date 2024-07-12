@@ -30,7 +30,15 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import {
+  ControlWidth,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '@kbn/controls-plugin/common';
+import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/public';
+import { DataControlFieldRegistry } from '@kbn/controls-plugin/public/types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
@@ -38,13 +46,6 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 
-import {
-  ControlWidth,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-plugin/common';
-import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { ControlGroupApi } from '../control_group/types';
 import { ControlStateManager } from '../types';
@@ -68,6 +69,65 @@ export interface ControlEditorProps<
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
+
+const CompatibleControlTypesComponent = ({
+  fieldRegistry,
+  selectedFieldName,
+  selectedControlType,
+  setSelectedControlType,
+}: {
+  fieldRegistry?: DataControlFieldRegistry;
+  selectedFieldName: string;
+  selectedControlType?: string;
+  setSelectedControlType: (type: string) => void;
+}) => {
+  const dataControlFactories = useMemo(() => {
+    return getAllControlTypes()
+      .map((type) => getControlFactory(type))
+      .filter((factory) => {
+        return isDataControlFactory(factory);
+      });
+  }, []);
+
+  return (
+    <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
+      {dataControlFactories.map((factory) => {
+        const disabled =
+          fieldRegistry && selectedFieldName
+            ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
+            : true;
+        const keyPadMenuItem = (
+          <EuiKeyPadMenuItem
+            key={factory.type}
+            id={`create__${factory.type}`}
+            aria-label={factory.getDisplayName()}
+            data-test-subj={`create__${factory.type}`}
+            isSelected={factory.type === selectedControlType}
+            disabled={disabled}
+            onClick={() => setSelectedControlType(factory.type)}
+            label={factory.getDisplayName()}
+          >
+            <EuiIcon type={factory.getIconType()} size="l" />
+          </EuiKeyPadMenuItem>
+        );
+
+        return disabled ? (
+          <EuiToolTip
+            key={`disabled__${factory.type}`}
+            content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage({
+              fieldSelected: Boolean(selectedFieldName),
+              controlType: factory.getDisplayName(),
+            })}
+          >
+            {keyPadMenuItem}
+          </EuiToolTip>
+        ) : (
+          keyPadMenuItem
+        );
+      })}
+    </EuiKeyPadMenu>
+  );
+};
 
 export const DataControlEditor = ({
   controlId,
@@ -139,57 +199,6 @@ export const DataControlEditor = ({
     );
   }, [selectedFieldName, setControlEditorValid, selectedDataView, selectedControlType]);
 
-  const dataControlFactories = useMemo(() => {
-    return getAllControlTypes()
-      .map((type) => getControlFactory(type))
-      .filter((factory) => {
-        return isDataControlFactory(factory);
-      });
-  }, []);
-
-  const CompatibleControlTypesComponent = useMemo(() => {
-    return (
-      <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
-        {dataControlFactories.map((factory) => {
-          const disabled =
-            fieldRegistry && selectedFieldName
-              ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
-              : true;
-          const keyPadMenuItem = (
-            <EuiKeyPadMenuItem
-              key={factory.type}
-              id={`create__${factory.type}`}
-              aria-label={factory.getDisplayName()}
-              data-test-subj={`create__${factory.type}`}
-              isSelected={factory.type === selectedControlType}
-              disabled={disabled}
-              onClick={() => setSelectedControlType(factory.type)}
-              label={factory.getDisplayName()}
-            >
-              <EuiIcon type={factory.getIconType()} size="l" />
-            </EuiKeyPadMenuItem>
-          );
-
-          return disabled ? (
-            <EuiToolTip
-              key={`disabled__${controlType}`}
-              content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
-                {
-                  fieldSelected: Boolean(selectedFieldName),
-                  controlType,
-                }
-              )}
-            >
-              {keyPadMenuItem}
-            </EuiToolTip>
-          ) : (
-            keyPadMenuItem
-          );
-        })}
-      </EuiKeyPadMenu>
-    );
-  }, [selectedFieldName, fieldRegistry, selectedControlType, controlType, dataControlFactories]);
-
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType || !selectedFieldName || !fieldRegistry) return;
 
@@ -254,6 +263,7 @@ export const DataControlEditor = ({
                   selectedDataViewId={selectedDataViewId}
                   onChangeDataViewId={(newDataViewId) => {
                     stateManager.dataViewId.next(newDataViewId);
+                    setSelectedControlType(undefined);
                   }}
                   trigger={{
                     label:
@@ -300,7 +310,15 @@ export const DataControlEditor = ({
             <EuiFormRow
               label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
             >
-              {CompatibleControlTypesComponent}
+              {/* wrapping in `div` so that focus gets passed properly to the form row */}
+              <div>
+                <CompatibleControlTypesComponent
+                  fieldRegistry={fieldRegistry}
+                  selectedFieldName={selectedFieldName}
+                  selectedControlType={selectedControlType}
+                  setSelectedControlType={setSelectedControlType}
+                />
+              </div>
             </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup

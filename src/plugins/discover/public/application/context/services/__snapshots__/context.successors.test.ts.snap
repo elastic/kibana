@@ -1,0 +1,274 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`context successors function fetchSuccessors should perform multiple queries until the expected hit count is returned 1`] = `
+Array [
+  Array [
+    "index",
+    Object {
+      "fields": Object {
+        "getByName": [MockFunction] {
+          "calls": Array [
+            Array [
+              "@timestamp",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
+      "id": "DATA_VIEW_ID",
+      "isTimeNanosBased": [Function],
+      "popularizeField": [Function],
+      "timeFieldName": "@timestamp",
+    },
+  ],
+  Array [
+    "filter",
+    Array [],
+  ],
+  Array [
+    "trackTotalHits",
+    false,
+  ],
+  Array [
+    "size",
+    4,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1978-03-19T00:00:00.000Z",
+                    "lte": "1978-03-20T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1978-03-20T00:00:00.000Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "desc",
+        },
+      },
+      Object {
+        "_doc": "desc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+  Array [
+    "size",
+    1,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1978-03-13T00:00:00.000Z",
+                    "lte": "1978-03-19T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1978-03-19T23:59:59.998Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "desc",
+        },
+      },
+      Object {
+        "_doc": "desc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+  Array [
+    "size",
+    1,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1978-02-18T00:00:00.000Z",
+                    "lte": "1978-03-13T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1978-03-19T23:59:59.998Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "desc",
+        },
+      },
+      Object {
+        "_doc": "desc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+  Array [
+    "size",
+    1,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1977-03-20T00:00:00.000Z",
+                    "lte": "1978-02-18T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1978-03-19T23:59:59.998Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "desc",
+        },
+      },
+      Object {
+        "_doc": "desc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+]
+`;

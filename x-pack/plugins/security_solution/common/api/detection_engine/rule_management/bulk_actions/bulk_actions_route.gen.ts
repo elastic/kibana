@@ -54,6 +54,8 @@ export const BulkActionsDryRunErrCode = z.enum([
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',
   'INVESTIGATION_FIELDS_FEATURE',
+  'MANUAL_RULE_RUN_FEATURE',
+  'MANUAL_RULE_RUN_DISABLED_RULE',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -157,6 +159,23 @@ export const BulkDuplicateRules = BulkActionBase.merge(
   })
 );
 
+export type BulkManualRuleRun = z.infer<typeof BulkManualRuleRun>;
+export const BulkManualRuleRun = BulkActionBase.merge(
+  z.object({
+    action: z.literal('run'),
+    run: z.object({
+      /**
+       * Start date of the manual rule run
+       */
+      start_date: z.string(),
+      /**
+       * End date of the manual rule run
+       */
+      end_date: z.string().optional(),
+    }),
+  })
+);
+
 /**
  * The condition for throttling the notification: 'rule', 'no_actions', or time duration
  */
@@ -173,6 +192,7 @@ export const BulkActionType = z.enum([
   'delete',
   'duplicate',
   'edit',
+  'run',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
 export const BulkActionTypeEnum = BulkActionType.enum;
@@ -302,6 +322,7 @@ export const PerformBulkActionRequestBody = z.union([
   BulkEnableRules,
   BulkExportRules,
   BulkDuplicateRules,
+  BulkManualRuleRun,
   BulkEditRules,
 ]);
 export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;

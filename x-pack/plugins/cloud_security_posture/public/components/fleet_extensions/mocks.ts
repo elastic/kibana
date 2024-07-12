@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import {
   CLOUDBEAT_GCP,
@@ -29,9 +29,6 @@ export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
-export const getMockAgentlessAgentPolicy = () => {
-  return createAgentPolicyMock({ id: 'agentless' });
-};
 export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoVulnMgmtAWS = () => {

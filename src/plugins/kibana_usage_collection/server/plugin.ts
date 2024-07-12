@@ -72,7 +72,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     registerEbtCounters(coreSetup.analytics, usageCollection);
-    usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
     this.registerUsageCollectors(
@@ -127,14 +126,14 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerUiCountersUsageCollector(usageCollection);
+    registerUiCountersUsageCollector(usageCollection, this.logger);
 
     registerUsageCountersRollups(
       this.logger.get('usage-counters-rollup'),
       getSavedObjectsClient,
       pluginStop$
     );
-    registerUsageCountersUsageCollector(usageCollection);
+    registerUsageCountersUsageCollector(usageCollection, this.logger);
 
     registerOpsStatsCollector(usageCollection, metric$);
 
