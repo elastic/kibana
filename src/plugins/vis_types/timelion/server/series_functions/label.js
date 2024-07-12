@@ -41,7 +41,9 @@ export default new Chainable('label', {
     const config = args.byName;
     return alter(args, function (eachSeries) {
       if (config.regex) {
-        eachSeries.label = RE2JS.compile(config.regex).matcher(eachSeries.label).replaceAll(config.label);
+        eachSeries.label = RE2JS.compile(config.regex)
+          .matcher(eachSeries.label)
+          .replaceAll(config.label);
       } else if (config.label) {
         eachSeries.label = config.label;
       }
