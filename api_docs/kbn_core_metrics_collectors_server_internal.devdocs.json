@@ -318,8 +318,8 @@
                     "pluginId": "@kbn/core-metrics-collectors-server-internal",
                     "scope": "common",
                     "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-                    "section": "def-common.OpsMetricsCollectorOptions",
-                    "text": "OpsMetricsCollectorOptions"
+                    "section": "def-common.OsMetricsCollectorOptions",
+                    "text": "OsMetricsCollectorOptions"
                   }
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
@@ -625,10 +625,10 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.OpsMetricsCollectorOptions",
+        "id": "def-common.OsMetricsCollectorOptions",
         "type": "Interface",
         "tags": [],
-        "label": "OpsMetricsCollectorOptions",
+        "label": "OsMetricsCollectorOptions",
         "description": [],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
         "deprecated": false,
@@ -636,7 +636,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OpsMetricsCollectorOptions.logger",
+            "id": "def-common.OsMetricsCollectorOptions.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -656,7 +656,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OpsMetricsCollectorOptions.cpuPath",
+            "id": "def-common.OsMetricsCollectorOptions.cpuPath",
             "type": "string",
             "tags": [],
             "label": "cpuPath",
@@ -670,7 +670,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OpsMetricsCollectorOptions.cpuAcctPath",
+            "id": "def-common.OsMetricsCollectorOptions.cpuAcctPath",
             "type": "string",
             "tags": [],
             "label": "cpuAcctPath",
