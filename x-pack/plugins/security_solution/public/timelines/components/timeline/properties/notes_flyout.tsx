@@ -10,6 +10,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
+  EuiOutsideClickDetector,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -55,35 +56,37 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
   }
 
   return (
-    <NotesFlyoutContainer
-      ownFocus={false}
-      className="timeline-notes-flyout"
-      data-test-subj="timeline-notes-flyout"
-      onClose={onClose}
-      aria-labelledby={notesFlyoutTitleId}
-      minWidth={500}
-      maxWidth={1400}
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{i18n.NOTES}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <NoteCards
-          ariaRowindex={0}
-          associateNote={associateNote}
-          className="notes-in-flyout"
-          data-test-subj="note-cards"
-          notes={notes}
-          showAddNote={true}
-          toggleShowAddNote={toggleShowAddNote}
-          eventId={eventId}
-          timelineId={timelineId}
-          onCancel={onCancel}
-          showToggleEventDetailsAction={false}
-        />
-      </EuiFlyoutBody>
-    </NotesFlyoutContainer>
+    <EuiOutsideClickDetector onOutsideClick={onClose}>
+      <NotesFlyoutContainer
+        ownFocus={false}
+        className="timeline-notes-flyout"
+        data-test-subj="timeline-notes-flyout"
+        onClose={onClose}
+        aria-labelledby={notesFlyoutTitleId}
+        minWidth={500}
+        maxWidth={1400}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>{i18n.NOTES}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <NoteCards
+            ariaRowindex={0}
+            associateNote={associateNote}
+            className="notes-in-flyout"
+            data-test-subj="note-cards"
+            notes={notes}
+            showAddNote={true}
+            toggleShowAddNote={toggleShowAddNote}
+            eventId={eventId}
+            timelineId={timelineId}
+            onCancel={onCancel}
+            showToggleEventDetailsAction={false}
+          />
+        </EuiFlyoutBody>
+      </NotesFlyoutContainer>
+    </EuiOutsideClickDetector>
   );
 });
