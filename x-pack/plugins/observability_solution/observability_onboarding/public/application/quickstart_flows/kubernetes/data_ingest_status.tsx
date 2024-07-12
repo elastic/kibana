@@ -115,8 +115,18 @@ export function DataIngestStatus({ onboardingId }: Props) {
             dashboardLinks={[
               {
                 id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                label: 'Explore Kubernetes cluster',
-                title: 'Overview your Kubernetes cluster with this pre-made dashboard',
+                label: i18n.translate(
+                  'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+                  {
+                    defaultMessage: 'Explore Kubernetes cluster',
+                  }
+                ),
+                title: i18n.translate(
+                  'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+                  {
+                    defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
+                  }
+                ),
               },
             ]}
           />
