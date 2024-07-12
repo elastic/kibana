@@ -64,7 +64,9 @@ export const setupMlModulesWithRetry = async ({
     });
 
     if (!allJobsSucceeded) {
-      throw new Error(`Expected all jobs to set up successfully, but got ${JSON.stringify(body)}`);
+      throw new Error(
+        `Expected all jobs to set up successfully, but got ${JSON.stringify(response)}`
+      );
     }
 
     return response;
