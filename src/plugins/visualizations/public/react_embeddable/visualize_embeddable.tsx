@@ -212,7 +212,7 @@ export const getVisualizeEmbeddableFactory: (
         },
         canLinkToLibrary: () => !state.linkedToLibrary,
         canUnlinkFromLibrary: () => !!state.linkedToLibrary,
-        checkForDuplicateTitle: () => false,
+        checkForDuplicateTitle: () => false, // Handled by saveToLibrary action
         getByValueState: () => ({
           savedVis: vis$.getValue().serialize(),
           ...serializeTitles(),

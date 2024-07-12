@@ -24,7 +24,12 @@ import type {
 } from '../../types';
 import { VISUALIZE_APP_NAME } from '../../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../../utils';
-import { NavigateToLensFn, OpenInspectorFn } from '../../utils/use/use_embeddable_api_handler';
+import {
+  NavigateToLensFn,
+  OpenInspectorFn,
+  SerializeStateFn,
+} from '../../utils/use/use_embeddable_api_handler';
+import { VisualizeRuntimeState } from '../../../react_embeddable/types';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -46,6 +51,8 @@ interface VisualizeTopNavProps {
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
   navigateToLensFn?: NavigateToLensFn;
+  serializeStateFn: SerializeStateFn;
+  snapshotStateFn: () => VisualizeRuntimeState;
 }
 
 const TopNav = ({
@@ -66,6 +73,8 @@ const TopNav = ({
   eventEmitter,
   openInspectorFn,
   navigateToLensFn,
+  serializeStateFn,
+  snapshotStateFn,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -122,7 +131,6 @@ const TopNav = ({
           originatingPath,
           visInstance,
           stateContainer,
-          visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
           displayEditInLensItem,
@@ -132,6 +140,8 @@ const TopNav = ({
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
           eventEmitter,
           hasInspector: !!openInspectorFn,
+          serializeState: serializeStateFn,
+          snapshotState: snapshotStateFn,
         },
         services
       );
@@ -147,7 +157,6 @@ const TopNav = ({
     originatingPath,
     visInstance,
     stateContainer,
-    visualizationIdFromUrl,
     services,
     embeddableId,
     displayEditInLensItem,
@@ -156,6 +165,8 @@ const TopNav = ({
     eventEmitter,
     openInspectorFn,
     navigateToLensFn,
+    serializeStateFn,
+    snapshotStateFn,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {

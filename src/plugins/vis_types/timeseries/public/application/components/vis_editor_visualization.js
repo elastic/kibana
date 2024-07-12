@@ -210,17 +210,29 @@ class VisEditorVisualizationUI extends Component {
             })}
             onApiAvailable={(api) => {
               this.updateVis = () => api.updateVis(this.getSavedVis());
+              const {
+                openInspector: [, setOpenInspector],
+                navigateToLens: [, setNavigateToLens],
+                serializeState: [, setSerializeState],
+                snapshotState: [, setSnapshotState],
+                getVis: [, setGetVis],
+              } = this.props.embeddableApiHandler;
+
+              console.log('SERIALIZE STATE FN', api.serializeState);
+
+              setSerializeState(() => api.serializeState);
+              setSnapshotState(() => api.snapshotRuntimeState);
+              setGetVis(() => api.getVis);
+
               api.subscribeToInitialRender(() =>
                 this.props.eventEmitter.emit('embeddableRendered')
               );
               api.subscribeToHasInspector((hasInspector) => {
                 if (!hasInspector) return;
-                const [, setOpenInspector] = this.props.embeddableApiHandler.openInspector;
                 setOpenInspector(() => api.openInspector);
               });
               api.subscribeToNavigateToLens((navigateToLens) => {
                 if (!navigateToLens) return;
-                const [, setNavigateToLens] = this.props.embeddableApiHandler.navigateToLens;
                 setNavigateToLens(() => navigateToLens);
               });
               api.subscribeToVisData((data) => {

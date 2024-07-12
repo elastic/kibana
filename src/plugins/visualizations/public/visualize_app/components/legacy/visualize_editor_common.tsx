@@ -32,7 +32,12 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../../utils/split_chart_warning_helpers';
-import { NavigateToLensFn, OpenInspectorFn } from '../../utils/use/use_embeddable_api_handler';
+import {
+  NavigateToLensFn,
+  OpenInspectorFn,
+  SerializeStateFn,
+} from '../../utils/use/use_embeddable_api_handler';
+import { VisualizeRuntimeState } from '../../../react_embeddable/types';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -53,6 +58,8 @@ interface VisualizeEditorCommonProps {
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
   navigateToLensFn?: NavigateToLensFn;
+  serializeStateFn?: SerializeStateFn;
+  snapshotStateFn?: () => VisualizeRuntimeState;
 }
 
 export const VisualizeEditorCommon = ({
@@ -74,6 +81,8 @@ export const VisualizeEditorCommon = ({
   eventEmitter,
   openInspectorFn,
   navigateToLensFn,
+  serializeStateFn,
+  snapshotStateFn,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -150,7 +159,7 @@ export const VisualizeEditorCommon = ({
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
-      {visInstance && appState && currentAppState && (
+      {visInstance && serializeStateFn && snapshotStateFn && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
           hasUnsavedChanges={hasUnsavedChanges}
@@ -169,6 +178,8 @@ export const VisualizeEditorCommon = ({
           eventEmitter={eventEmitter}
           openInspectorFn={openInspectorFn}
           navigateToLensFn={navigateToLensFn}
+          serializeStateFn={serializeStateFn}
+          snapshotStateFn={snapshotStateFn}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&
