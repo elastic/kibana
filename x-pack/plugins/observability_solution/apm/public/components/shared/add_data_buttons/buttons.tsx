@@ -27,7 +27,7 @@ export function AddApmAgent({ basePath }: { basePath: IBasePath }) {
 export function AssociateServiceLogs() {
   return (
     <EuiButton
-      data-test-subj="associateLogsButton"
+      data-test-subj="associateServiceLogsButton"
       size="s"
       target="_blank"
       href="https://ela.st/new-experience-associate-service-logs"

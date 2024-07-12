@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import { Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 
-export async function hasEntitiesData(entitiesESClient: EntitiesESClient) {
+export async function hasEntitiesData(entitiesESClient: EntitiesESClient, logger: Logger) {
   const params = {
     body: {
       terminate_after: 1,
@@ -27,9 +28,9 @@ export async function hasEntitiesData(entitiesESClient: EntitiesESClient) {
     ) {
       const type = error.originalError.body.error.type;
 
-      if (type === 'index_not_found_exception') {
-        return [];
-      }
+      logger.error(type);
+
+      return false;
     }
   }
 }

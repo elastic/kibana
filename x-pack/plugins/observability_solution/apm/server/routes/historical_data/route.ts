@@ -35,7 +35,7 @@ const hasEntitiesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_entities',
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ hasData: boolean }> => {
-    const { context, request } = resources;
+    const { context, request, logger } = resources;
     const coreContext = await context.core;
 
     const [entitiesESClient] = await Promise.all([
@@ -45,7 +45,7 @@ const hasEntitiesRoute = createApmServerRoute({
       }),
     ]);
 
-    const hasData = await hasEntitiesData(entitiesESClient);
+    const hasData = await hasEntitiesData(entitiesESClient, logger);
     return { hasData };
   },
 });
