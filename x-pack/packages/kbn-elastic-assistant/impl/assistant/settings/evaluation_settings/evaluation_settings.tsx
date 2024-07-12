@@ -350,11 +350,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-      <EuiTitle size={'s'}>
-        <h2>{i18n.SETTINGS_TITLE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
+      <EuiText size={'m'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
       <EuiHorizontalRule margin={'s'} />
       {/* Run Details*/}
       <EuiAccordion

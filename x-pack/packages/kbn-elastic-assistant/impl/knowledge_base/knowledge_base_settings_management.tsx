@@ -21,7 +21,6 @@ import {
   EuiToolTip,
   EuiSwitch,
   EuiPanel,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -53,7 +52,6 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     http,
     toasts,
   } = useAssistantContext();
-  const { euiTheme } = useEuiTheme();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
@@ -262,11 +260,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-      <EuiText
-        css={css`
-          font-size: ${euiTheme.size.base};
-        `}
-      >
+      <EuiText size="m">
         <FormattedMessage
           id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription"
           defaultMessage="Powered by ELSER, the knowledge base enables the AI Assistant to recall documents and other relevant context within your conversation. For more information about user access refer to our {documentation}."

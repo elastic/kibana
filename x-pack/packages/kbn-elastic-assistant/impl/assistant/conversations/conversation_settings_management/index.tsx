@@ -292,7 +292,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           <h2>{i18n.CONVERSATIONS_LIST_TITLE}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiText size="s">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
+        <EuiText size="m">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
           items={conversationOptions}

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
@@ -31,7 +30,6 @@ export interface Props {
 
 const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
   const { toasts } = useAssistantContext();
-  const { euiTheme } = useEuiTheme();
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
@@ -97,13 +95,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-        <EuiText
-          css={css`
-            font-size: ${euiTheme.size.base};
-          `}
-        >
-          {i18n.SETTINGS_DESCRIPTION}
-        </EuiText>
+        <EuiText size="m">{i18n.SETTINGS_DESCRIPTION}</EuiText>
 
         <EuiSpacer size="m" />
 
