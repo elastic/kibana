@@ -20,6 +20,7 @@ describe('configureTextCustomFieldFactory ', () => {
       label: 'Text',
       getEuiTableColumn: expect.any(Function),
       build: expect.any(Function),
+      convertNullToEmpty: expect.any(Function),
     });
   });
 });
