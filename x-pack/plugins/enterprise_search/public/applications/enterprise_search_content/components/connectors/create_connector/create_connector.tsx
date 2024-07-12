@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // import { useLocation } from 'react-router-dom';
 
@@ -30,6 +30,10 @@ import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { connectorsBreadcrumbs } from '../connectors';
 
 import connectorsBackgroundImage from './assets/connector_logos_comp.png';
+
+import { ConfigurationStep } from './configuration_step';
+import { DeploymentStep } from './deployment_step';
+import { FinishUpStep } from './finish_up_step';
 import { StartStep } from './start_step';
 
 export const CreateConnector: React.FC = () => {
@@ -37,81 +41,175 @@ export const CreateConnector: React.FC = () => {
 
   const [selfManaged, setSelfManaged] = useState(false);
 
-  /*   const stepsData = [
+  const [startStepStatus, setStartStepStatus] = useState<
+    | 'current'
+    | 'incomplete'
+    | 'disabled'
+    | 'loading'
+    | 'warning'
+    | 'danger'
+    | 'complete'
+    | undefined
+  >('current');
+
+  const [deploymentStepStatus, setDeploymentStepStatus] = useState<
+    | 'current'
+    | 'incomplete'
+    | 'disabled'
+    | 'loading'
+    | 'warning'
+    | 'danger'
+    | 'complete'
+    | undefined
+  >('incomplete');
+
+  const [configurationStepStatus, setConfigurationStepStatus] = useState<
+    | 'current'
+    | 'incomplete'
+    | 'disabled'
+    | 'loading'
+    | 'warning'
+    | 'danger'
+    | 'complete'
+    | undefined
+  >('incomplete');
+
+  const [finishUpStepStatus, setFinishUpStepStatus] = useState<
+    | 'current'
+    | 'incomplete'
+    | 'disabled'
+    | 'loading'
+    | 'warning'
+    | 'danger'
+    | 'complete'
+    | undefined
+  >('incomplete');
+
+  interface CustomEuiStepInterface extends EuiStepInterface {
+    content: JSX.Element;
+  }
+  const selfManagedSteps: CustomEuiStepInterface[] = [
     {
       title: 'Start',
-      children: '',
-      content: <StartStep onRadioButtonChange={setSelfManaged} />,
-      status: 'current',
+      children: <EuiSpacer size="xs" />,
+      status: startStepStatus,
+      content: <StartStep title="Start" onRadioButtonChange={setSelfManaged} />,
     },
     {
       title: 'Deployment',
       children: '',
-      content: '',
-      status: 'incomplete',
+      status: deploymentStepStatus,
+      content: <DeploymentStep title="Configuration" />,
     },
     {
       title: 'Configuration',
       children: '',
-      content: '',
-      status: 'incomplete',
+      status: configurationStepStatus,
+      content: <ConfigurationStep title="Configuration" />,
     },
     {
       title: 'Finish up',
       children: '',
-      content: '',
-      status: 'incomplete ',
-    },
-  ]; */
-
-  const selfManagedSteps: EuiStepInterface[] = [
-    /*     ...stepsData.map(
-      (step): EuiStepInterface => ({
-        title: step.title,
-        children: step.children,
-        status: step.status,
-        content: step.content,
-      })
-    ), */
-    {
-      title: 'Start',
-      children: <EuiSpacer size="xs" />,
-      status: 'current',
-    },
-    {
-      title: 'Deployment',
-      children: '',
-      status: 'incomplete',
-    },
-    {
-      title: 'Configuration',
-      children: '',
-      status: 'incomplete',
-    },
-    {
-      title: 'Finish up',
-      children: '',
-      status: 'incomplete',
+      status: finishUpStepStatus,
+      content: <FinishUpStep title="Finish up" />,
     },
   ];
 
-  const elasticManagedSteps: EuiStepInterface[] = [
+  const elasticManagedSteps: CustomEuiStepInterface[] = [
     {
       title: 'Start',
       children: <EuiSpacer size="xs" />,
-      status: 'current',
+      status: startStepStatus,
+      content: <StartStep title="Start" onRadioButtonChange={setSelfManaged} />,
     },
     {
       title: 'Configuration',
       children: '',
-      status: 'incomplete',
+      status: configurationStepStatus,
+      content: <ConfigurationStep title="Configuration" />,
     },
     {
       title: 'Finish up',
       children: '',
-      status: 'incomplete',
+      status: finishUpStepStatus,
+      content: <FinishUpStep title="Finish up" />,
     },
   ];
+
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const updateStep = (action: string) => {
+    const allSteps = selfManaged === true ? selfManagedSteps : elasticManagedSteps;
+    switch (action) {
+      case 'next':
+        if (currentStep === allSteps.length - 1) {
+          return;
+        }
+        setCurrentStep(currentStep + 1);
+        break;
+      case 'back':
+        if (currentStep === 0) {
+          return;
+        }
+        setCurrentStep(currentStep - 1);
+        break;
+      default:
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (selfManaged === true) {
+      switch (currentStep) {
+        case 0:
+          setStartStepStatus('current');
+          setDeploymentStepStatus('incomplete');
+          setConfigurationStepStatus('incomplete');
+          setFinishUpStepStatus('incomplete');
+          break;
+        case 1:
+          setStartStepStatus('complete');
+          setDeploymentStepStatus('current');
+          setConfigurationStepStatus('incomplete');
+          setFinishUpStepStatus('incomplete');
+          break;
+        case 2:
+          setStartStepStatus('complete');
+          setDeploymentStepStatus('complete');
+          setConfigurationStepStatus('current');
+          setFinishUpStepStatus('incomplete');
+          break;
+        case 3:
+          setStartStepStatus('complete');
+          setDeploymentStepStatus('complete');
+          setConfigurationStepStatus('complete');
+          setFinishUpStepStatus('current');
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (currentStep) {
+        case 0:
+          setStartStepStatus('current');
+          setConfigurationStepStatus('incomplete');
+          setFinishUpStepStatus('incomplete');
+          break;
+        case 1:
+          setStartStepStatus('complete');
+          setConfigurationStepStatus('current');
+          setFinishUpStepStatus('incomplete');
+          break;
+        case 2:
+          setStartStepStatus('complete');
+          setConfigurationStepStatus('complete');
+          setFinishUpStepStatus('current');
+          break;
+        default:
+          break;
+      }
+    }
+  }, [currentStep]);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -151,13 +249,24 @@ export const CreateConnector: React.FC = () => {
               background-position: bottom center;
             `}
           >
-            <EuiButtonEmpty iconType="arrowLeft" size="s">
-              Back
-            </EuiButtonEmpty>
+            <EuiFlexGroup>
+              <EuiButtonEmpty iconType="arrowLeft" size="s" onClick={() => updateStep('back')}>
+                Back
+              </EuiButtonEmpty>
+              <EuiButtonEmpty
+                iconSide="right"
+                iconType="arrowRight"
+                size="s"
+                onClick={() => updateStep('next')}
+              >
+                Next
+              </EuiButtonEmpty>
+            </EuiFlexGroup>
+
             <EuiSpacer size="xl" />
             <EuiSteps
               titleSize="xxs"
-              steps={selfManaged === true ? elasticManagedSteps : selfManagedSteps}
+              steps={selfManaged === true ? selfManagedSteps : elasticManagedSteps}
               css={({ euiTheme }) => css`
                 .euiStep__content {
                   padding-block-end: ${euiTheme.size.m};
@@ -168,7 +277,9 @@ export const CreateConnector: React.FC = () => {
         </EuiFlexItem>
         {/* Col 2 */}
         <EuiFlexItem grow={7}>
-          <StartStep onRadioButtonChange={setSelfManaged} />
+          {selfManaged === true
+            ? selfManagedSteps[currentStep].content
+            : elasticManagedSteps[currentStep].content}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>

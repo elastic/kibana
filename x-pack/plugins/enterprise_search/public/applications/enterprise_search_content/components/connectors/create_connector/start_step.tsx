@@ -18,10 +18,8 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiIcon,
-  EuiInputPopover,
   EuiPanel,
   EuiRadio,
   EuiSelectable,
@@ -43,9 +41,10 @@ import { ConnectorDescriptionPopover } from './connector_description_popover';
 
 interface StartStepProps {
   onRadioButtonChange: (selfManaged: boolean) => void;
+  title: string;
 }
 
-export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => {
+export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange, title }) => {
   const { euiTheme } = useEuiTheme();
 
   const connectorsData = [
@@ -113,16 +112,6 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
     ]);
 
     return (
-      /*       <EuiFormControlLayout
-        clear={{ onClick: () => setInputValue('') }}
-        icon={{ type: 'stopFilled', color: 'success', side: 'left', size: 'xl' }}
-        css={({ euiTheme }) => css`
-          .euiFormControlLayoutIcons--absolute {
-            left: ${euiTheme.size.xs};
-          }
-        `}
-      > */
-      // TODO - When select update the input value with the connectors icon
       <EuiSelectable
         aria-label="Selectable + input popover example"
         options={options}
@@ -144,7 +133,6 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
           </>
         )}
       </EuiSelectable>
-      // </EuiFormControlLayout>
     );
   };
 
@@ -163,7 +151,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="m">
-              <h3>Start</h3>
+              <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFlexGroup>
