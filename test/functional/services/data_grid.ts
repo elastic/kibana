@@ -267,9 +267,17 @@ export class DataGridService extends FtrService {
 
     const toggle = await rowColumns[options.columnIndex ?? 0].findByTestSubject(testSubj);
 
-    await toggle.scrollIntoViewIfNecessary();
-    await toggle.click();
+    await this.retry.waitFor('doc viewer to open', async () => {
+      await toggle.scrollIntoViewIfNecessary();
+      await toggle.click();
+      return this.isShowingDocViewer();
+    });
+
     await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+  }
+
+  public async isShowingDocViewer() {
+    return await this.testSubjects.exists('kbnDocViewer');
   }
 
   public async clickDocViewerTab(id: string) {

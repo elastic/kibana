@@ -17,7 +17,6 @@ export default function (ctx: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
   const dataGrid = getService('dataGrid');
-  const find = getService('find');
   const indexPatterns = getService('indexPatterns');
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
