@@ -13,27 +13,21 @@ import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../../common/components/assistant_settings_management/row_actions';
-import {
-  getConversationApiConfig,
-  getInitialDefaultSystemPrompt,
-} from '../../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../../use_conversation/helpers';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../system_prompt_modal/translations';
 import * as i18n from './translations';
 import { getSelectedConversations } from './utils';
-
-type ConversationsWithSystemPrompt = Record<
-  string,
-  Conversation & { systemPrompt: PromptResponse | undefined }
->;
 
 type SystemPromptTableItem = PromptResponse & { defaultConversations: string[] };
 
 export const useSystemPromptTable = () => {
   const getColumns = useCallback(
     ({
+      isActionsDisabled,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
+      isActionsDisabled: boolean;
       onEditActionClicked: (prompt: SystemPromptTableItem) => void;
       onDeleteActionClicked: (prompt: SystemPromptTableItem) => void;
     }): Array<EuiBasicTableColumn<SystemPromptTableItem>> => [
@@ -43,7 +37,7 @@ export const useSystemPromptTable = () => {
         truncateText: { lines: 3 },
         render: (prompt: SystemPromptTableItem) =>
           prompt?.name ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>
+            <EuiLink onClick={() => onEditActionClicked(prompt)} disabled={isActionsDisabled}>
               {prompt?.name}
               {prompt.isNewConversationDefault && (
                 <EuiIcon
@@ -88,6 +82,7 @@ export const useSystemPromptTable = () => {
           const isDeletable = !prompt.isDefault;
           return (
             <RowActions<SystemPromptTableItem>
+              disabled={isActionsDisabled}
               rowItem={prompt}
               onEdit={onEditActionClicked}
               onDelete={isDeletable ? onDeleteActionClicked : undefined}
@@ -111,14 +106,9 @@ export const useSystemPromptTable = () => {
     defaultConnector: AIConnector | undefined;
     systemPromptSettings: PromptResponse[];
   }): SystemPromptTableItem[] => {
-    const conversationsWithApiConfig = Object.entries(
-      conversationSettings
-    ).reduce<ConversationsWithSystemPrompt>((acc, [key, conversation]) => {
-      const defaultSystemPrompt = getInitialDefaultSystemPrompt({
-        allSystemPrompts: systemPromptSettings,
-        conversation,
-      });
-
+    const conversationsWithApiConfig = Object.entries(conversationSettings).reduce<
+      Record<string, Conversation>
+    >((acc, [key, conversation]) => {
       acc[key] = {
         ...conversation,
         ...getConversationApiConfig({
@@ -127,15 +117,14 @@ export const useSystemPromptTable = () => {
           conversation,
           defaultConnector,
         }),
-        systemPrompt: defaultSystemPrompt,
       };
+
       return acc;
     }, {});
     return systemPromptSettings.map((systemPrompt) => {
       return {
         ...systemPrompt,
         defaultConversations: getSelectedConversations(
-          systemPromptSettings,
           conversationsWithApiConfig,
           systemPrompt?.id
         ).map(({ title }) => title),

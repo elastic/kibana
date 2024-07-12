@@ -17,10 +17,12 @@ import * as i18n from './translations';
 export const useQuickPromptTable = () => {
   const getColumns = useCallback(
     ({
+      isActionsDisabled,
       basePromptContexts,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
+      isActionsDisabled: boolean;
       basePromptContexts: PromptContextTemplate[];
       onEditActionClicked: (prompt: PromptResponse) => void;
       onDeleteActionClicked: (prompt: PromptResponse) => void;
@@ -30,7 +32,9 @@ export const useQuickPromptTable = () => {
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_NAME,
         render: (prompt: PromptResponse) =>
           prompt?.name ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.name}</EuiLink>
+            <EuiLink onClick={() => onEditActionClicked(prompt)} disabled={isActionsDisabled}>
+              {prompt?.name}
+            </EuiLink>
           ) : null,
         sortable: ({ name }: PromptResponse) => name,
       },
@@ -76,6 +80,7 @@ export const useQuickPromptTable = () => {
           const isDeletable = !prompt.isDefault;
           return (
             <RowActions<PromptResponse>
+              disabled={isActionsDisabled}
               rowItem={prompt}
               onDelete={isDeletable ? onDeleteActionClicked : undefined}
               onEdit={onEditActionClicked}

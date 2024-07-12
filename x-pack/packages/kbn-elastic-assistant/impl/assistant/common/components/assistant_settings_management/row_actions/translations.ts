@@ -20,3 +20,10 @@ export const DELETE_BUTTON = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const ACTIONS_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.actionsButtonTitle',
+  {
+    defaultMessage: 'Actions',
+  }
+);

@@ -65,7 +65,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [baseConversations]
   );
 
-  const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
+  const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
 
   const {
     data: conversations,
@@ -76,6 +76,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
+
+  const refetchAll = useCallback(() => {
+    refetchPrompts();
+    refetchConversations();
+  }, [refetchPrompts, refetchConversations]);
 
   const {
     systemPromptSettings: allSystemPrompts,
@@ -117,8 +122,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   );
 
   const onSaveButtonClicked = useCallback(() => {
-    handleSave({ callback: refetchConversations });
-  }, [handleSave, refetchConversations]);
+    handleSave({ callback: refetchAll });
+  }, [handleSave, refetchAll]);
 
   const onCancelClick = useCallback(() => {
     resetSettings();
@@ -199,13 +204,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       return;
     }
     closeConfirmModal();
-    handleSave({ callback: refetchConversations });
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
   }, [
     closeConfirmModal,
     conversationsSettingsBulkActions,
     handleSave,
-    refetchConversations,
+    refetchAll,
     setConversationsSettingsBulkActions,
   ]);
 
@@ -238,9 +243,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onSaveConfirmed = useCallback(() => {
     closeEditFlyout();
-    handleSave({ callback: refetchConversations });
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
-  }, [closeEditFlyout, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
+  }, [closeEditFlyout, handleSave, refetchAll, setConversationsSettingsBulkActions]);
 
   const columns = useMemo(
     () =>

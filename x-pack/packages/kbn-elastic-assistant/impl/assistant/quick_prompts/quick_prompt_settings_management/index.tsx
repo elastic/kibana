@@ -38,7 +38,7 @@ import { useFetchPrompts } from '../../api';
 const QuickPromptSettingsManagementComponent = () => {
   const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
-  const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
+  const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
 
   const {
     promptsBulkActions,
@@ -121,9 +121,9 @@ const QuickPromptSettingsManagementComponent = () => {
   }, [closeConfirmModal, onCancelClick]);
 
   const onDeleteConfirmed = useCallback(() => {
-    handleSave();
+    handleSave({ callback: refetchPrompts });
     closeConfirmModal();
-  }, [closeConfirmModal, handleSave]);
+  }, [closeConfirmModal, handleSave, refetchPrompts]);
 
   const onCreate = useCallback(() => {
     onSelectedQuickPromptChange();
@@ -137,13 +137,14 @@ const QuickPromptSettingsManagementComponent = () => {
   }, [closeFlyout, onSelectedQuickPromptChange, onCancelClick]);
 
   const onSaveConfirmed = useCallback(() => {
-    handleSave();
+    handleSave({ callback: refetchPrompts });
     onSelectedQuickPromptChange();
     closeFlyout();
-  }, [closeFlyout, handleSave, onSelectedQuickPromptChange]);
+  }, [closeFlyout, handleSave, onSelectedQuickPromptChange, refetchPrompts]);
 
   const { getColumns } = useQuickPromptTable();
   const columns = getColumns({
+    isActionsDisabled: !promptsLoaded,
     basePromptContexts,
     onEditActionClicked,
     onDeleteActionClicked,
@@ -171,7 +172,7 @@ const QuickPromptSettingsManagementComponent = () => {
             <EuiText size="s">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate}>
+            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={!promptsLoaded}>
               {i18n.QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>

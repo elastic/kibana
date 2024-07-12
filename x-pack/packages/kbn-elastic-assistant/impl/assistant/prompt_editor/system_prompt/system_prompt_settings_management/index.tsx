@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import {
   Conversation,
   mergeBaseWithPersistedConversations,
@@ -63,12 +63,22 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const { data: allPrompts, refetch: refetchPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
-  const { data: conversations, isFetched: conversationsLoaded } = useFetchCurrentUserConversations({
+  const {
+    data: conversations,
+    isFetched: conversationsLoaded,
+    refetch: refetchConversations,
+  } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
 
+  const refetchAll = useCallback(() => {
+    refetchPrompts();
+    refetchConversations();
+  }, [refetchPrompts, refetchConversations]);
+
+  const isTableLoading = !conversationsLoaded || !promptsLoaded;
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -161,9 +171,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const onDeleteConfirmed = useCallback(() => {
     closeConfirmModal();
-    handleSave({ callback: refetchPrompts });
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
-  }, [closeConfirmModal, handleSave, refetchPrompts, setConversationsSettingsBulkActions]);
+  }, [closeConfirmModal, handleSave, refetchAll, setConversationsSettingsBulkActions]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -172,9 +182,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const onSaveConfirmed = useCallback(() => {
     closeFlyout();
-    handleSave({ callback: refetchPrompts });
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
-  }, [closeFlyout, handleSave, refetchPrompts, setConversationsSettingsBulkActions]);
+  }, [closeFlyout, handleSave, refetchAll, setConversationsSettingsBulkActions]);
 
   const confirmationTitle = useMemo(
     () =>
@@ -193,8 +203,9 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   });
 
   const columns = useMemo(
-    () => getColumns({ onEditActionClicked, onDeleteActionClicked }),
-    [getColumns, onEditActionClicked, onDeleteActionClicked]
+    () =>
+      getColumns({ isActionsDisabled: isTableLoading, onEditActionClicked, onDeleteActionClicked }),
+    [getColumns, isTableLoading, onEditActionClicked, onDeleteActionClicked]
   );
   const systemPromptListItems = useMemo(
     () =>
@@ -215,7 +226,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
             <EuiText size="s">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate}>
+            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={isTableLoading}>
               {i18n.CREATE_SYSTEM_PROMPT_LABEL}
             </EuiButton>
           </EuiFlexItem>

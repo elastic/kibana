@@ -99,7 +99,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
         });
         const existingPrompt = systemPromptSettings.find((sp) => sp.id === selectedSystemPrompt.id);
         if (existingPrompt) {
-          setPromptsBulkActions({
+          const newBulkActions = {
             ...promptsBulkActions,
             ...(selectedSystemPrompt.name !== selectedSystemPrompt.id
               ? {
@@ -124,7 +124,9 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                     },
                   ],
                 }),
-          });
+          };
+
+          setPromptsBulkActions(newBulkActions);
         }
       }
     },
@@ -159,13 +161,9 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
 
   const selectedConversations = useMemo(() => {
     return selectedSystemPrompt != null
-      ? getSelectedConversations(
-          systemPromptSettings,
-          conversationsWithApiConfig,
-          selectedSystemPrompt.id
-        )
+      ? getSelectedConversations(conversationsWithApiConfig, selectedSystemPrompt.id)
       : [];
-  }, [conversationsWithApiConfig, selectedSystemPrompt, systemPromptSettings]);
+  }, [conversationsWithApiConfig, selectedSystemPrompt]);
 
   const handleConversationSelectionChange = useCallback(
     (currentPromptConversations: Conversation[]) => {
@@ -291,9 +289,21 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   const handleNewConversationDefaultChange = useCallback(
     (e) => {
       const isChecked = e.target.checked;
-      const existingDefaultNewSystemPrompt = systemPromptSettings.filter(
+      const defaultNewSystemPrompts = systemPromptSettings.filter(
         (p) => p.isNewConversationDefault
       );
+
+      const shouldCreateNewDefaultSystemPrompts = (sp?: { name: string; id: string }) =>
+        sp?.name === sp?.id; // Prompts before preserving have the SAME name and id
+
+      const shouldUpdateNewDefaultSystemPrompts = (sp?: { name: string; id: string }) =>
+        sp?.name !== sp?.id; // Prompts after preserving have different name and id
+
+      const shouldCreateSelectedSystemPrompt =
+        selectedSystemPrompt?.name === selectedSystemPrompt?.id;
+
+      const shouldUpdateSelectedSystemPrompt =
+        selectedSystemPrompt?.name !== selectedSystemPrompt?.id;
 
       if (selectedSystemPrompt != null) {
         setUpdatedSystemPromptSettings((prev) => {
@@ -304,56 +314,56 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             };
           });
         });
-        console.log('selectedSystemPrompt----', selectedSystemPrompt);
-        setPromptsBulkActions({
-          ...(selectedSystemPrompt.name !== selectedSystemPrompt.id
-            ? {
-                ...promptsBulkActions,
-                update: [
-                  ...(promptsBulkActions.update ?? [])
-                    .filter((p) => p.id !== selectedSystemPrompt.id)
-                    .map((sp) => ({
-                      ...sp,
-                      isNewConversationDefault: false,
-                    })),
-                  ...existingDefaultNewSystemPrompt
-                    .filter((sp) => sp.id !== selectedSystemPrompt.id && sp.name !== sp.id)
-                    .map((sp) => ({
-                      ...sp,
-                      isNewConversationDefault: false,
-                    })),
-                  {
-                    ...selectedSystemPrompt,
-                    isNewConversationDefault: isChecked,
-                  },
-                ],
-              }
-            : {
-                ...promptsBulkActions,
-                create: [
-                  ...(promptsBulkActions.create ?? [])
-                    .filter((p) => p.name !== selectedSystemPrompt.name)
-                    .map((sp) => ({
-                      ...sp,
-                      isNewConversationDefault: false,
-                    })),
-                  ...existingDefaultNewSystemPrompt
-                    .filter((sp) => sp.id !== selectedSystemPrompt.id && sp.name === sp.id)
-                    .map((sp) => ({
-                      ...sp,
-                      isNewConversationDefault: false,
-                    })),
-                  {
-                    ...selectedSystemPrompt,
-                    isNewConversationDefault: isChecked,
-                  },
-                ],
-              }),
+        // Update and Create prompts can happen at the same time, as we have to unchecked the previous default prompt
+        // Each prompt can be updated or created
+        setPromptsBulkActions(() => {
+          const newBulkActions = {
+            update: [
+              ...defaultNewSystemPrompts
+                .filter(
+                  (p) => p.id !== selectedSystemPrompt.id && shouldUpdateNewDefaultSystemPrompts(p)
+                )
+                .map((p) => ({
+                  ...p,
+                  isNewConversationDefault: false,
+                })),
+
+              ...(shouldUpdateSelectedSystemPrompt
+                ? [
+                    {
+                      ...selectedSystemPrompt,
+                      isNewConversationDefault: isChecked,
+                    },
+                  ]
+                : []),
+            ],
+            create: [
+              ...defaultNewSystemPrompts
+                .filter(
+                  (p) =>
+                    p.name !== selectedSystemPrompt.name && shouldCreateNewDefaultSystemPrompts(p)
+                )
+                .map((p) => ({
+                  ...p,
+                  isNewConversationDefault: false,
+                })),
+
+              ...(shouldCreateSelectedSystemPrompt
+                ? [
+                    {
+                      ...selectedSystemPrompt,
+                      isNewConversationDefault: isChecked,
+                    },
+                  ]
+                : []),
+            ],
+          };
+
+          return newBulkActions;
         });
       }
     },
     [
-      promptsBulkActions,
       selectedSystemPrompt,
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,

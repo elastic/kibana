@@ -125,6 +125,7 @@ export const useSettingsUpdater = (
     setUpdatedSystemPromptSettings(
       allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
     );
+    setPromptsBulkActions({});
     setUpdatedAnonymizationData(anonymizationFields);
   }, [allPrompts, anonymizationFields, assistantStreamingEnabled, conversations, knowledgeBase]);
 
@@ -198,6 +199,8 @@ export const useSettingsUpdater = (
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
 
+    setPromptsBulkActions({});
+    setConversationsSettingsBulkActions({});
     return (
       (bulkResult?.success ?? true) &&
       (bulkAnonymizationFieldsResult?.success ?? true) &&

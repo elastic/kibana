@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
 
 interface Props<T> {
+  disabled?: boolean;
   isDeletable?: boolean;
   isEditable?: boolean;
   onDelete?: (rowItem: T) => void;
@@ -20,6 +21,7 @@ interface Props<T> {
 type RowActionsComponentType = <T>(props: Props<T>) => JSX.Element;
 
 const RowActionsComponent = <T,>({
+  disabled = false,
   isDeletable = true,
   isEditable = true,
   onDelete,
@@ -46,8 +48,9 @@ const RowActionsComponent = <T,>({
         <EuiButtonIcon
           color="success"
           iconType="boxesHorizontal"
-          disabled={rowItem == null}
+          disabled={rowItem == null || disabled}
           onClick={onButtonClick}
+          aria-label={i18n.ACTIONS_BUTTON}
         />
       }
       isOpen={isPopoverOpen}
