@@ -28,6 +28,7 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -110,9 +111,6 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
         })
       ),
     ]);
-    const [isOpen, setIsOpen] = useState(false);
-    const [inputValue, setInputValue] = useState('');
-    const [isSearching, setIsSearching] = useState(true);
 
     return (
       /*       <EuiFormControlLayout
@@ -128,51 +126,22 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
       <EuiSelectable
         aria-label="Selectable + input popover example"
         options={options}
-        onChange={(newOptions, event, changedOption) => {
-          setOptions(newOptions);
-          setIsOpen(false);
-          if (changedOption.checked === 'on') {
-            setInputValue(changedOption.label);
-            setIsSearching(false);
-          } else {
-            setInputValue('');
-          }
-        }}
+        onChange={() => setOptions(options)}
         listProps={{
           rowHeight: 50,
           showIcons: false,
           css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
+          bordered: true,
         }}
         singleSelection
         searchable
-        searchProps={{
-          // isClearable: true,
-          placeholder: 'Choose a data source',
-          value: inputValue,
-          onChange: (value) => {
-            setInputValue(value);
-            setIsSearching(true);
-          },
-          onKeyDown: (event) => {
-            if (event.key === 'Tab') return setIsOpen(false);
-            if (event.key !== 'Escape') return setIsOpen(true);
-          },
-          onClick: () => setIsOpen(true),
-          onFocus: () => setIsOpen(true),
-        }}
-        isPreFiltered={isSearching ? false : { highlightSearch: false }} // Shows the full list when not actively typing to search
+        height={240}
       >
         {(list, search) => (
-          <EuiInputPopover
-            closePopover={() => setIsOpen(false)}
-            disableFocusTrap
-            closeOnScroll
-            isOpen={isOpen}
-            input={search!}
-            panelPaddingSize="none"
-          >
+          <>
+            {search}
             {list}
-          </EuiInputPopover>
+          </>
         )}
       </EuiSelectable>
       // </EuiFormControlLayout>
@@ -204,17 +173,21 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow fullWidth label="Connector name">
-                  <EuiFieldText fullWidth name="first" />
-                </EuiFormRow>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiFormRow fullWidth label="Connector name">
+                      <EuiFieldText fullWidth name="first" />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow fullWidth label="Description">
+                      <EuiTextArea fullWidth name="first" />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <EuiFlexItem>
-              <EuiFormRow fullWidth label="Description">
-                <EuiFieldText fullWidth name="first" />
-              </EuiFormRow>
-            </EuiFlexItem>
           </EuiPanel>
         </EuiFlexItem>
         {/* Set up */}
