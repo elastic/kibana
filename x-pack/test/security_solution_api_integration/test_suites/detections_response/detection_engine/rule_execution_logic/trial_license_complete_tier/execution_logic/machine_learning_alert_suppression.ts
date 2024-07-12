@@ -87,7 +87,8 @@ export default ({ getService }: FtrProviderContext) => {
   // The tests described in this file rely on the
   // 'alertSuppressionForMachineLearningRuleEnabled' feature flag, and are thus
   // skipped in MKI
-  describe('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Alert Suppression', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/187478
+  describe.skip('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with an active ML Job', () => {
       before(async () => {
         // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
