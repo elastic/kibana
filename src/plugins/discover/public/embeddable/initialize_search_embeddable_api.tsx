@@ -94,9 +94,9 @@ export const initializeSearchEmbeddableApi = async (
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
   /**
-   * This is the state that comes from the search source that need their own publishing subjects for the API
+   * This is the state that comes from the search source that needs individual publishing subjects for the API
    * - Note that these subjects can't currently be changed on their own, and therefore we do not need to keep
-   *   then "in sync" with changes to the search source. This would change with inline editing.
+   *   them "in sync" with changes to the search source. This would change with inline editing.
    */
   const filters$ = new BehaviorSubject<Filter[] | undefined>(
     searchSource.getField('filter') as Filter[]
