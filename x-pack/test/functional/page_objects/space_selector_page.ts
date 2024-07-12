@@ -213,6 +213,8 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async clickOnDeleteSpaceButton(spaceName: string) {
+    const collapsedButtonSelector = '[data-test-subj=euiCollapsedItemActionsButton]';
+    await this.find.clickByCssSelector(`#${spaceName}-actions ${collapsedButtonSelector}`);
     await this.testSubjects.click(`${spaceName}-deleteSpace`);
   }
 
