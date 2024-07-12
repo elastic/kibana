@@ -17,6 +17,7 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
+      forwardCompatibility: taskSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV1,
     },
   },
