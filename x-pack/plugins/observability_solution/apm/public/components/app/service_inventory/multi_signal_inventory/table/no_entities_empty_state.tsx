@@ -87,10 +87,9 @@ export function NoEntitiesEmptyState() {
                     <EuiCallOut
                       css={{ textAlign: 'left' }}
                       onDismiss={() => setUserHasDismissedCallout(true)}
-                      title={i18n.translate('xpack.apm.noEntitiesEmptyState.title', {
+                      title={i18n.translate('xpack.apm.noEntitiesEmptyState.callout.title', {
                         defaultMessage: 'Trying for the first time?',
                       })}
-                      size={'s'}
                     >
                       <p>
                         {i18n.translate('xpack.apm.noEntitiesEmptyState.description', {
