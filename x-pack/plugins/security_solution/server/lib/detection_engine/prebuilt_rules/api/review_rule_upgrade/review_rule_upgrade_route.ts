@@ -120,7 +120,6 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     };
 
     return {
-      test: 'adfadfadfadf',
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
@@ -131,7 +130,8 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
           ruleDiff.fields,
           (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
         ),
-        has_conflict: ruleDiff.num_fields_with_conflicts > 0,
+        has_conflict: ruleDiff.has_conflict,
+        has_non_solvable_conflict: ruleDiff.has_non_solvable_conflict,
         num_fields_with_updates: ruleDiff.num_fields_with_updates,
         num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
         num_fields_with_non_solvable_conflicts: ruleDiff.num_fields_with_non_solvable_conflicts,

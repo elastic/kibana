@@ -76,6 +76,7 @@ export interface FullRuleDiff {
 export interface PartialRuleDiff {
   fields: Partial<RuleFieldsDiff>;
   has_conflict: boolean;
+  has_non_solvable_conflict: boolean;
   num_fields_with_updates: number;
   num_fields_with_conflicts: number;
   num_fields_with_non_solvable_conflicts: number;

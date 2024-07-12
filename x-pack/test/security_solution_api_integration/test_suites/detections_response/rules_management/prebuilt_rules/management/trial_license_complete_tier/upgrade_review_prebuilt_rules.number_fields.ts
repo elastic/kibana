@@ -71,7 +71,14 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
           expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
           expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
       });
 
@@ -122,7 +129,14 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
           expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
           expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
       });
 
@@ -167,7 +181,14 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
           expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
           expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
 
         describe('when rule field has an update and a custom value that are the same - scenario ABB', () => {
@@ -217,7 +238,14 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             });
             expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+            expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(false);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
           });
         });
 
@@ -269,7 +297,14 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             });
             expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
+            expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(true);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
           });
         });
 
@@ -314,7 +349,14 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               });
               expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+              expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+              expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
               expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+              expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+              expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
             });
           });
 
@@ -367,7 +409,14 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               });
               expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.has_non_solvable_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+              expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+              expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
               expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+              expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+              expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
             });
           });
         });
