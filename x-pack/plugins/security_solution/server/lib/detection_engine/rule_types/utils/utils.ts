@@ -430,7 +430,6 @@ export const getRuleRangeTuples = async ({
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
-  let wroteWarningStatus = false;
   let warningStatusMessage;
   if (originalFrom == null || originalTo == null) {
     throw new Error('Failed to parse date math of rule.from or rule.to');
@@ -445,7 +444,6 @@ export const getRuleRangeTuples = async ({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
-    wroteWarningStatus = true;
   }
 
   const tuples = [
@@ -463,7 +461,7 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), wroteWarningStatus, warningStatusMessage };
+    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
   }
 
   const gap = getGapBetweenRuns({
@@ -495,7 +493,6 @@ export const getRuleRangeTuples = async ({
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
-    wroteWarningStatus,
     warningStatusMessage,
   };
 };

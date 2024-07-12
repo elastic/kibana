@@ -268,7 +268,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 uiSettingsClient,
               });
 
-              if (readIndexWarningMessage != null) wrapperWarnings.push(readIndexWarningMessage);
+              if (readIndexWarningMessage != null) {
+                wrapperWarnings.push(readIndexWarningMessage);
+              }
 
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
@@ -307,7 +309,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const {
             tuples,
             remainingGap,
-            wroteWarningStatus: rangeTuplesWarningStatus,
             warningStatusMessage: rangeTuplesWarningMessage,
           } = await getRuleRangeTuples({
             startedAt,
@@ -319,7 +320,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleExecutionLogger,
             alerting,
           });
-          if (rangeTuplesWarningStatus) {
+          if (rangeTuplesWarningMessage != null) {
             wrapperWarnings.push(rangeTuplesWarningMessage);
           }
 
@@ -492,7 +493,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               // as the current status of the rule.
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList([...result.warningMessages, ...wrapperWarnings]).join(', '),
+                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join(', '),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -503,7 +504,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (wrapperErrors.length > 0 || result.errors.length > 0) {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
-                message: truncateList([...result.errors, ...wrapperErrors]).join(', '),
+                message: truncateList(result.errors.concat(wrapperErrors)).join(', '),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
