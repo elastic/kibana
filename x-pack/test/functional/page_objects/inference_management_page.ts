@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlInferenceManagementPage({ getService }: FtrProviderContext) {
+export function InferenceManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 

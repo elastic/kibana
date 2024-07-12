@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'svlCommonNavigation',
-    'svlInferenceManagementPage',
+    'inferenceManagement',
   ]);
   const browser = getService('browser');
   const ml = getService('ml');
@@ -36,10 +36,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('endpoint empty view', () => {
       it('is loaded successfully', async () => {
-        await pageObjects.svlInferenceManagementPage.InferenceEmptyPage.expectComponentsToBeExist();
+        await pageObjects.inferenceManagement.InferenceEmptyPage.expectComponentsToBeExist();
       });
       it('opens add inference flyout', async () => {
-        await pageObjects.svlInferenceManagementPage.InferenceEmptyPage.expectFlyoutTobeOpened();
+        await pageObjects.inferenceManagement.InferenceEmptyPage.expectFlyoutTobeOpened();
       });
     });
 
@@ -57,16 +57,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('is loaded successfully', async () => {
-        await pageObjects.svlInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
-        await pageObjects.svlInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
+        await pageObjects.inferenceManagement.InferenceTabularPage.expectHeaderToBeExist();
+        await pageObjects.inferenceManagement.InferenceTabularPage.expectTabularViewToBeLoaded();
       });
 
       it('can copy an endpoint id', async () => {
-        await pageObjects.svlInferenceManagementPage.InferenceTabularPage.expectToCopyEndpoint();
+        await pageObjects.inferenceManagement.InferenceTabularPage.expectToCopyEndpoint();
       });
 
       it('can delete an endpoint', async () => {
-        await pageObjects.svlInferenceManagementPage.InferenceTabularPage.expectEndPointTobeDeleted();
+        await pageObjects.inferenceManagement.InferenceTabularPage.expectEndPointTobeDeleted();
       });
     });
 

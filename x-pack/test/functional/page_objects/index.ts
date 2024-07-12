@@ -22,6 +22,7 @@ import { GraphPageObject } from './graph_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
+import { InferenceManagementPageProvider } from './inference_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
@@ -73,6 +74,7 @@ export const pageObjects = {
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
+  inferenceManagement: InferenceManagementPageProvider,
   infraHome: InfraHomePageProvider,
   infraHostsView: InfraHostsViewProvider,
   infraLogs: InfraLogsPageProvider,
