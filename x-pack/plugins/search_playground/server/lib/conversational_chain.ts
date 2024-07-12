@@ -18,7 +18,7 @@ import { createStreamDataTransformer, experimental_StreamData } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
-import { ChatMessage } from '../types';
+import { ChatMessage, MessageRole } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
@@ -51,9 +51,9 @@ interface ContextInputs {
 
 const getSerialisedMessages = (chatHistory: ChatMessage[]) => {
   const formattedDialogueTurns = chatHistory.map((message) => {
-    if (message.role === 'human') {
+    if (message.role === MessageRole.user) {
       return `Human: ${message.content}`;
-    } else if (message.role === 'assistant') {
+    } else if (message.role === MessageRole.assistant) {
       return `Assistant: ${message.content}`;
     }
   });
