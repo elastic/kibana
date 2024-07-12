@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiSteps,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
@@ -36,10 +35,44 @@ import { StartStep } from './start_step';
 export const CreateConnector: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  
   const [selfManaged, setSelfManaged] = useState(false);
 
+  /*   const stepsData = [
+    {
+      title: 'Start',
+      children: '',
+      content: <StartStep onRadioButtonChange={setSelfManaged} />,
+      status: 'current',
+    },
+    {
+      title: 'Deployment',
+      children: '',
+      content: '',
+      status: 'incomplete',
+    },
+    {
+      title: 'Configuration',
+      children: '',
+      content: '',
+      status: 'incomplete',
+    },
+    {
+      title: 'Finish up',
+      children: '',
+      content: '',
+      status: 'incomplete ',
+    },
+  ]; */
+
   const selfManagedSteps: EuiStepInterface[] = [
+    /*     ...stepsData.map(
+      (step): EuiStepInterface => ({
+        title: step.title,
+        children: step.children,
+        status: step.status,
+        content: step.content,
+      })
+    ), */
     {
       title: 'Start',
       children: <EuiSpacer size="xs" />,

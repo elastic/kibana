@@ -39,7 +39,6 @@ import { i18n } from '@kbn/i18n';
 import dropbox from './assets/dropbox.svg';
 
 import { ConnectorDescriptionPopover } from './connector_description_popover';
-import { props } from 'cypress/types/bluebird';
 
 interface StartStepProps {
   onRadioButtonChange: (selfManaged: boolean) => void;
@@ -70,28 +69,47 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
       icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
       techPreview: true,
     },
+    {
+      name: 'Azure Blob Storage',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: false,
+    },
+    {
+      name: 'Confluence Cloud & Server',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
+    {
+      name: 'Confluence Data Center',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: false,
+    },
+    {
+      name: 'Dropbox',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
   ];
 
   interface OptionData {
     secondaryContent?: string;
   }
 
-  const [options, setOptions] = useState<Array<EuiSelectableOption<OptionData>>>([
-    ...connectorsData.map(
-      (connector): EuiSelectableOption => ({
-        label: `${connector.name}`,
-        prepend: connector.icon,
-        append: connector.techPreview ? (
-          <EuiBadge iconType="beaker" color="hollow">
-            Thech preview
-          </EuiBadge>
-        ) : null,
-      })
-    ),
-  ]);
-
   const SelectableInputPopover = () => {
     // const [options, setOptions] = useState<EuiSelectableOption[]>(OPTIONS);
+    const [options, setOptions] = useState<Array<EuiSelectableOption<OptionData>>>([
+      ...connectorsData.map(
+        (connector): EuiSelectableOption => ({
+          label: `${connector.name}`,
+          prepend: connector.icon,
+          append: connector.techPreview ? (
+            <EuiBadge iconType="beaker" color="hollow">
+              Thech preview
+            </EuiBadge>
+          ) : null,
+        })
+      ),
+    ]);
     const [isOpen, setIsOpen] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [isSearching, setIsSearching] = useState(true);
@@ -128,7 +146,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange }) => 
         singleSelection
         searchable
         searchProps={{
-          isClearable: true,
+          // isClearable: true,
           placeholder: 'Choose a data source',
           value: inputValue,
           onChange: (value) => {
