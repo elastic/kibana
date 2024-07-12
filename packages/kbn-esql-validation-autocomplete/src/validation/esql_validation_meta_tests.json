@@ -24122,9 +24122,7 @@
     },
     {
       "query": "from a_index | stats max(booleanField)",
-      "error": [
-        "Argument of [max] must be [number], found value [booleanField] type [boolean]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -24395,9 +24393,7 @@
     },
     {
       "query": "from a_index | stats min(booleanField)",
-      "error": [
-        "Argument of [min] must be [number], found value [booleanField] type [boolean]"
-      ],
+      "error": [],
       "warning": []
     },
     {
