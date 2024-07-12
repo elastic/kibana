@@ -115,6 +115,7 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
     searchSource,
     searchSourceFields,
     savedSearchId,
+    savedSearchRefName,
     ...savedObjectProperties
   } = await getSavedVisualization(
     {
@@ -194,7 +195,7 @@ export const serializeState = ({
             ? {
                 savedSearchRefName: references.find(
                   (r) => r.id === serializedVis.data.savedSearchId
-                ),
+                )?.name,
               }
             : {}),
         },

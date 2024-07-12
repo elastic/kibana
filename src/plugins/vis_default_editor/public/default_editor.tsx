@@ -36,7 +36,7 @@ import { SerializeStateFn } from '@kbn/visualizations-plugin/public/visualize_ap
 import { BehaviorSubject } from 'rxjs';
 import { DefaultEditorSideBar } from './components/sidebar';
 
-export type DefaultEditorProps = EditorRenderProps & {
+export type DefaultEditorProps = Omit<EditorRenderProps, 'linked'> & {
   initialState: VisualizeSerializedState;
   eventEmitter: EventEmitter;
   embeddableApiHandler: EmbeddableApiHandler;
@@ -54,7 +54,6 @@ function DefaultEditor({
   dataView,
   embeddableApiHandler,
   eventEmitter,
-  linked,
   savedSearchService,
   references = [],
 }: DefaultEditorProps) {
@@ -98,6 +97,15 @@ function DefaultEditor({
   useEffect(() => {
     parentApi.dataView$.next(dataView);
   }, [parentApi, dataView]);
+
+  const unlinkFromSavedSearch = useCallback(() => {
+    setSavedSearch(undefined);
+    onUpdateVis({
+      data: {
+        savedSearchId: undefined,
+      },
+    });
+  }, [setSavedSearch, onUpdateVis]);
 
   const editorInitialWidth = 30; // getInitialWidth(vis.type.editorConfig.defaultSize);
 
@@ -189,10 +197,11 @@ function DefaultEditor({
                   onUpdateVis={onUpdateVis}
                   vis={vis}
                   uiState={uiState}
-                  isLinkedSearch={linked}
+                  isLinkedSearch={Boolean(savedSearch)}
                   savedSearch={savedSearch}
                   timeRange={timeRange}
                   eventEmitter={eventEmitter}
+                  unlinkFromSavedSearch={unlinkFromSavedSearch}
                 />
               )}
             </EuiResizablePanel>

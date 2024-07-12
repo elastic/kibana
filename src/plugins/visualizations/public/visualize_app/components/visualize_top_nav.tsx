@@ -128,6 +128,7 @@ const TopNav = ({
           visInstance,
           stateContainer,
           stateTransfer: services.stateTransferService,
+          savedSearchService: services.savedSearch,
           embeddableId,
           displayEditInLensItem,
           hideLensBadge,

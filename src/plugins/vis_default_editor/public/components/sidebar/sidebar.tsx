@@ -42,6 +42,7 @@ interface DefaultEditorSideBarProps {
   eventEmitter: EventEmitter;
   savedSearch?: SavedSearch;
   timeRange: TimeRange;
+  unlinkFromSavedSearch: () => void;
 }
 
 function DefaultEditorSideBarComponent({
@@ -54,6 +55,7 @@ function DefaultEditorSideBarComponent({
   eventEmitter,
   savedSearch,
   timeRange,
+  unlinkFromSavedSearch,
 }: DefaultEditorSideBarProps) {
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
@@ -191,6 +193,7 @@ function DefaultEditorSideBarComponent({
                 savedSearch={savedSearch}
                 vis={vis}
                 eventEmitter={eventEmitter}
+                unlinkFromSavedSearch={unlinkFromSavedSearch}
               />
             )}
 

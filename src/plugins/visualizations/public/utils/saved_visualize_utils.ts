@@ -342,6 +342,7 @@ export async function saveVisualization(
     uiStateJSON: savedObject.uiStateJSON,
     description: savedObject.description,
     savedSearchId: savedObject.savedSearchId,
+    savedSearchRefName: savedObject.savedSearchRefName,
     version: savedObject.version ?? '1',
     kibanaSavedObjectMeta: {},
   };

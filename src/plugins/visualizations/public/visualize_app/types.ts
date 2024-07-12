@@ -123,7 +123,6 @@ export interface VisInstance {
   savedVis: SerializedVis;
   savedObjectProperties?: Partial<ExtraSavedObjectProperties>;
   references?: Reference[];
-  savedSearch?: SavedSearch;
   panelTitle?: string;
   panelDescription?: string;
   panelTimeRange?: TimeRange;

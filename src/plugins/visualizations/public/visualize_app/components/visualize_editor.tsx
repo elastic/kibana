@@ -79,6 +79,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const savedVisInstance = useMemo(() => {
     if (!getVis || !serializeStateFn) return;
     const { savedVis, managed, sharingSavedObjectProps } = serializeStateFn().rawState;
+
     return {
       vis: getVis(),
       savedVis,
@@ -162,7 +163,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
           dataView={currentAppState?.dataView}
           uiState={uiState}
           savedSearchService={savedSearch}
-          linked={Boolean(currentAppState?.linked)}
         />
       </EuiErrorBoundary>
     </VisualizeEditorCommon>

@@ -27,6 +27,7 @@ import {
   SavedObjectSaveOpts,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getFullPath, VISUALIZE_EMBEDDABLE_TYPE } from '../..';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 
@@ -42,9 +43,9 @@ import {
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
+import { VisualizeRuntimeState } from '../../react_embeddable/types';
 import { NavigateToLensFn, SerializeStateFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
-import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -71,6 +72,7 @@ export interface TopNavConfigParams {
   visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
   stateTransfer: EmbeddableStateTransfer;
+  savedSearchService: SavedSearchPublicPluginStart;
   embeddableId?: string;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
@@ -105,6 +107,7 @@ export const getTopNavConfig = (
     visInstance,
     stateContainer,
     stateTransfer,
+    savedSearchService,
     embeddableId,
     displayEditInLensItem,
     hideLensBadge,
@@ -418,11 +421,14 @@ export const getTopNavConfig = (
         defaultMessage: 'Share Visualization',
       }),
       testId: 'shareTopNavButton',
-      run: (anchorElement) => {
+      run: async (anchorElement) => {
         if (share) {
           const currentState = stateContainer.getState();
           const searchParams = parse(history.location.search);
           const serializedVis = serializeState().rawState.savedVis;
+          const savedSearch = visInstance.vis.data.savedSearchId
+            ? await savedSearchService.get(visInstance.vis.data.savedSearchId)
+            : undefined;
           const params: VisualizeLocatorParams = {
             visId: serializedVis.id,
             filters: currentState.filters,
@@ -433,9 +439,9 @@ export const getTopNavConfig = (
             vis: currentState.vis,
             linked: currentState.linked,
             indexPattern:
-              visInstance.savedSearch?.searchSource?.getField('index')?.id ??
+              savedSearch?.searchSource?.getField('index')?.id ??
               (searchParams.indexPattern as string),
-            savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
+            savedSearchId: savedSearch?.id ?? (searchParams.savedSearchId as string),
           };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
