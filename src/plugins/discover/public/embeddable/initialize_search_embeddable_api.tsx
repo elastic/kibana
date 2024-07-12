@@ -23,6 +23,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { getDefaultRowsPerPage } from '../../common/constants';
 import { DiscoverServices } from '../build_services';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, EDITABLE_SAVED_SEARCH_KEYS } from './constants';
@@ -32,7 +33,6 @@ import {
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 const initializeSearchSource = async (
   dataService: DiscoverServices['data'],
