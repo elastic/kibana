@@ -27,7 +27,6 @@ import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDispatch } from 'react-redux';
-import { timelineActions } from '../../../../store';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -36,6 +35,7 @@ import { defaultColumnHeaderType } from '../../body/column_headers/default_heade
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import userEvent from '@testing-library/user-event';
+import * as timelineActions from '../../../../store/actions';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -172,6 +172,10 @@ describe('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      value: true,
+      writable: false,
+    });
     useTimelineEventsMock = jest.fn(() => [
       false,
       {
@@ -1097,6 +1101,56 @@ describe('query tab with unified timeline', () => {
 
             await waitFor(() => {
               expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
+            });
+          },
+          SPECIAL_TEST_TIMEOUT
+        );
+
+        it(
+          'should be able to delete notes',
+          async () => {
+            renderTestComponents();
+            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+            await waitFor(() => {
+              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            });
+
+            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+            await waitFor(() => {
+              expect(screen.getByTestId('delete-note')).toBeVisible();
+            });
+
+            const noteDeleteSpy = jest.spyOn(timelineActions, 'setConfirmingNoteId');
+
+            fireEvent.click(screen.getByTestId('delete-note'));
+
+            await waitFor(() => {
+              expect(noteDeleteSpy).toHaveBeenCalled();
+              expect(noteDeleteSpy).toHaveBeenCalledWith({
+                confirmingNoteId: '1',
+                id: TimelineId.test,
+              });
+            });
+          },
+          SPECIAL_TEST_TIMEOUT
+        );
+
+        it(
+          'should not show toggle event details action',
+          async () => {
+            renderTestComponents();
+            expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+            await waitFor(() => {
+              expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            });
+
+            fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+            await waitFor(() => {
+              expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
             });
           },
           SPECIAL_TEST_TIMEOUT
