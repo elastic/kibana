@@ -52,7 +52,7 @@ export const QueryMode: React.FC = () => {
 
   const {
     field: { onChange: elasticsearchQueryChange },
-  } = useController({
+  } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
     name: ChatFormFields.elasticsearchQuery,
   });
 

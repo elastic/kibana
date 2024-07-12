@@ -9,7 +9,7 @@ import {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
-  QueryDslQueryContainer,
+  RetrieverContainer,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -74,7 +74,7 @@ export interface ChatForm {
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
+  [ChatFormFields.elasticsearchQuery]: { retriever: RetrieverContainer };
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
