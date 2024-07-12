@@ -181,7 +181,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
@@ -205,7 +204,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+      if (eventId && securitySolutionNotesEnabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -242,7 +241,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       }
     },
     [
-      expandableFlyoutDisabled,
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
