@@ -15,8 +15,8 @@ import {
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
