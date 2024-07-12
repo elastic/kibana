@@ -32,6 +32,7 @@ interface UseFilterParams {
   options: MultiSelectFilterOption[];
   renderOption?: (option: MultiSelectFilterOption) => React.ReactNode;
   selectedOptionKeys?: string[];
+  dataTestSubj: string;
 }
 
 export const MultiSelectFilter: React.FC<UseFilterParams> = ({
@@ -40,6 +41,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   options: rawOptions,
   selectedOptionKeys = [],
   renderOption,
+  dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -51,7 +53,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   }));
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         ownFocus
         button={

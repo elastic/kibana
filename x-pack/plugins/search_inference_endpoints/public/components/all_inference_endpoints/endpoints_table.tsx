@@ -35,6 +35,7 @@ export const EndpointsTable: React.FC<EndpointsTableProps> = ({
       onChange={onChange}
       pagination={pagination}
       sorting={sorting}
+      data-test-subj="inferenceEndpointTable"
     />
   );
 };
