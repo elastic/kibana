@@ -228,4 +228,18 @@ describe('When using processes action from response actions console', () => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('and when agent type is SentinelOne', () => {
+    // FIXME:PT implement tests
+
+    it.todo('should display processes command in console help');
+
+    it.todo('should call the api with agentType of SentinelOne');
+
+    describe('and `responseActionsSentinelOneProcessesEnabled` feature flag is disabled', () => {
+      it.todo('should not display `processes` command in console help');
+
+      it.todo('should error if user enters `process` command');
+    });
+  });
 });
