@@ -28,7 +28,7 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
-import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
+import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
@@ -181,6 +181,7 @@ export function SearchEmbeddableGridComponent({
       headerRowHeightState={savedSearch.headerRowHeight}
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
+      maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearch.searchSource.getField('query')}
       rowHeightState={savedSearch.rowHeight}
       savedSearchId={savedSearchId}
