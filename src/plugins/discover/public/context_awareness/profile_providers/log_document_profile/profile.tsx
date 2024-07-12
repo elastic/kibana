@@ -7,36 +7,16 @@
  */
 
 import { DataTableRecord } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import React from 'react';
 import { DocumentProfileProvider, DocumentType } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
+import { getDocViewer } from './accessors';
 
 export const createLogDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
   profileId: 'log-document-profile',
   profile: {
-    getDocViewer: (prev) => (params) => {
-      const prevValue = prev(params);
-
-      return {
-        ...prevValue,
-        docViewsRegistry: (registry) => {
-          registry.add({
-            id: 'doc_view_logs_overview',
-            title: i18n.translate('discover.docViews.logsOverview.title', {
-              defaultMessage: 'Log overview',
-            }),
-            order: 0,
-            component: (props) => <UnifiedDocViewerLogsOverview {...props} />,
-          });
-
-          return prevValue.docViewsRegistry(registry);
-        },
-      };
-    },
+    getDocViewer,
   },
   resolve: ({ record }) => {
     const isLogRecord = getIsLogRecord(record, services.logsContextService.isLogsIndexPattern);
