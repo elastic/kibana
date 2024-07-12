@@ -39,12 +39,14 @@ import {
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
-
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DataViewsServerPluginStart, DataViewsService } from '@kbn/data-views-plugin/server';
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import { ElasticsearchStore } from './lib/langchain/elasticsearch_store/elasticsearch_store';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -99,6 +101,8 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  data: DataPluginStart;
+  dataViews: DataViewsServerPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
 }
@@ -106,6 +110,8 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  search: ReturnType<DataPluginStart['search']['asScoped']>;
+  dataViews: DataViewsService;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
@@ -219,6 +225,7 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
+  esStore?: ElasticsearchStore;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
@@ -232,4 +239,6 @@ export interface AssistantToolParams {
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
+  dataViews?: DataViewsService;
+  search?: ReturnType<DataPluginStart['search']['asScoped']>;
 }

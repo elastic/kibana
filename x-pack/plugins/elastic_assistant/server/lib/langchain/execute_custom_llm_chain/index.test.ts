@@ -12,6 +12,8 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
@@ -106,6 +108,8 @@ const defaultProps: AgentExecutorParams<true> = {
   logger: mockLogger,
   onNewReplacements: jest.fn(),
   request: mockRequest,
+  search: dataPluginMock.createRequestHandlerContext().search,
+  dataViews: dataViewsServiceMock,
   replacements: {},
 };
 const bedrockProps = {

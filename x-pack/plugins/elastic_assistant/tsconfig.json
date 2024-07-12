@@ -44,6 +44,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/langchain",
     "@kbn/stack-connectors-plugin",
+    "@kbn/data-views-plugin",
     "@kbn/security-plugin",
     "@kbn/apm-utils",
   ],

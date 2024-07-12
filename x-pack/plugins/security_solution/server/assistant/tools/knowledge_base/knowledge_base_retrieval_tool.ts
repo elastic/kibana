@@ -10,6 +10,7 @@ import { z } from 'zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { APP_UI_ID } from '../../../../common';
+import type { LangchainZodAny } from '..';
 
 export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {
   kbDataClient: AIAssistantKnowledgeBaseDataClient;
@@ -39,7 +40,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       description: toolDetails.description,
       schema: z.object({
         query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
-      }),
+      }) as unknown as LangchainZodAny,
       func: async (input, _, cbManager) => {
         logger.debug(
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
