@@ -10,7 +10,7 @@ import type {
   ResponseActionParametersWithProcessName,
 } from '../../../../../common/endpoint/types';
 
-export const parsedPidOrEntityIdParameter = (parameters: {
+export const parsedKillOrSuspendParameter = (parameters: {
   pid?: string[];
   entityId?: string[];
   processName?: string[];

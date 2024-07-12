@@ -553,7 +553,7 @@ const adjustCommandsForSentinelOne = ({
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
 
   return commandList.map((command) => {
-    // Kill-Process: adjust command to accept only `processName
+    // Kill-Process: adjust command to accept only `processName`
     if (command.name === 'kill-process') {
       command.args = {
         ...commandCommentArgument(),

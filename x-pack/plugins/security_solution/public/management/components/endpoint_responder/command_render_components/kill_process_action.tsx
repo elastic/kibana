@@ -6,7 +6,7 @@
  */
 
 import { memo, useMemo } from 'react';
-import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import { parsedKillOrSuspendParameter } from '../lib/utils';
 import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -20,7 +20,7 @@ export const KillProcessActionResult = memo<
   const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const agentType = command.commandDefinition?.meta?.agentType;
-    const parameters = parsedPidOrEntityIdParameter(command.args.args);
+    const parameters = parsedKillOrSuspendParameter(command.args.args);
 
     return endpointId
       ? {

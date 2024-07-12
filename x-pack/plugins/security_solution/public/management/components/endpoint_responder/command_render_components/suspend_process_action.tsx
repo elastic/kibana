@@ -6,7 +6,7 @@
  */
 
 import { memo, useMemo } from 'react';
-import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
   SuspendProcessActionOutputContent,
   SuspendProcessRequestBody,
@@ -24,7 +24,7 @@ export const SuspendProcessActionResult = memo<
 
   const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const parameters = parsedPidOrEntityIdParameter(command.args.args) as
+    const parameters = parsedKillOrSuspendParameter(command.args.args) as
       | ResponseActionParametersWithPid
       | ResponseActionParametersWithEntityId;
 
