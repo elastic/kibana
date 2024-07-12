@@ -68,7 +68,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "app_search_telemetry": "36234f19573ad397ac30197c45ac219921cc3106",
         "application_usage_daily": "20142d23fe5d05ba22b4bc46614d99883bc488f0",
         "application_usage_totals": "a29ab014edc20382b9ce22ede221b18cee5d93a6",
-        "background_task_node": "bab8bb3dccfbe77fd2dc24e6a583153dfaa77343",
+        "background-task-node": "e61f0ea9923fa05b3af0aae6c6baf2f0283e14b3",
         "canvas-element": "cdedc2123eb8a1506b87a56b0bcce60f4ec08bc8",
         "canvas-workpad": "9d82aafb19586b119e5c9382f938abe28c26ca5c",
         "canvas-workpad-template": "c077b0087346776bb3542b51e1385d172cb24179",

@@ -55,7 +55,7 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         perPage: 10000,
         page: 1,
-        filter: 'background_task_node.attributes.last_seen < now-5m',
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen < now-5m`,
       });
 
     if (inactiveNodes.length > 0) {
@@ -82,7 +82,7 @@ export class KibanaDiscoveryService {
     } catch (e) {
       if (!this.cleanupStarted) {
         this.logger.error(
-          `Kibana Discovery Service - Cleanup - couldn't be started. Error: ${e.message}`
+          `Kibana Discovery Service - Cleanup - couldn't be started and will be retried in 1m. Error: ${e.message}`
         );
       } else {
         this.logger.error(`Deleting inactive nodes failed. Error: ${e.message} `);
@@ -102,7 +102,9 @@ export class KibanaDiscoveryService {
       }
     } catch (e) {
       if (!this.discoveryStarted) {
-        this.logger.error(`Kibana Discovery Service couldn't be started, error:${e.message}`);
+        this.logger.error(
+          `Kibana Discovery Service couldn't be started and will be retried in 10s, error:${e.message}`
+        );
       } else {
         this.logger.error(
           `Background Task Node couldn't be updated. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
@@ -139,7 +141,7 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         perPage: 10000,
         page: 1,
-        filter: 'background_task_node.attributes.last_seen > now-30s',
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-30s`,
       });
 
     return activeNodes;

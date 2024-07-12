@@ -107,7 +107,7 @@
     "timestamp"
   ],
   "application_usage_totals": [],
-  "background_task_node": [
+  "background-task-node": [
     "id",
     "last_seen"
   ],

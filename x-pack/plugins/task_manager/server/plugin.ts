@@ -241,8 +241,8 @@ export class TaskManagerPlugin
       logger: this.logger,
       currentNode: this.taskManagerId!,
     });
-    this.kibanaDiscoveryService.startDiscovery();
-    this.kibanaDiscoveryService.startCleanup();
+    this.kibanaDiscoveryService.startDiscovery().catch(() => {});
+    this.kibanaDiscoveryService.startCleanup().catch(() => {});
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
@@ -350,7 +350,7 @@ export class TaskManagerPlugin
 
   public stop() {
     if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isDiscoveryStarted()) {
-      this.kibanaDiscoveryService.deleteCurrentNode();
+      this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
     }
   }
 }

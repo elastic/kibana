@@ -33,7 +33,7 @@ const createFindSO = (
   lastSeen: string = now
 ): SavedObjectsFindResult<BackgroundTaskNode> => ({
   attributes: createNodeRecord(id, lastSeen),
-  id: `background_task_node:${id}`,
+  id: `${BACKGROUND_TASK_NODE_SO_NAME}:${id}`,
   namespaces: ['default'],
   references: [],
   score: 1,
@@ -142,7 +142,7 @@ describe('KibanaDiscoveryService', () => {
 
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
-        "Kibana Discovery Service couldn't be started, error:foo"
+        "Kibana Discovery Service couldn't be started and will be retried in 10s, error:foo"
       );
       expect(logger.info).not.toHaveBeenCalled();
       expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -193,10 +193,10 @@ describe('KibanaDiscoveryService', () => {
 
       expect(savedObjectsRepository.find).toHaveBeenCalledTimes(1);
       expect(savedObjectsRepository.find).toHaveBeenCalledWith({
-        filter: 'background_task_node.attributes.last_seen < now-5m',
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen < now-5m`,
         page: 1,
         perPage: 10000,
-        type: 'background_task_node',
+        type: BACKGROUND_TASK_NODE_SO_NAME,
       });
       expect(savedObjectsRepository.bulkDelete).not.toHaveBeenCalled();
 
@@ -261,7 +261,7 @@ describe('KibanaDiscoveryService', () => {
 
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
-        "Kibana Discovery Service - Cleanup - couldn't be started. Error: foo"
+        "Kibana Discovery Service - Cleanup - couldn't be started and will be retried in 1m. Error: foo"
       );
       expect(logger.info).not.toHaveBeenCalled();
       expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -315,10 +315,10 @@ describe('KibanaDiscoveryService', () => {
       const activeNodes = await kibanaDiscoveryService.getActiveKibanaNodes();
 
       expect(savedObjectsRepository.find).toHaveBeenCalledWith({
-        filter: 'background_task_node.attributes.last_seen > now-30s',
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-30s`,
         page: 1,
         perPage: 10000,
-        type: 'background_task_node',
+        type: BACKGROUND_TASK_NODE_SO_NAME,
       });
       expect(activeNodes).toEqual(mockActiveNodes);
     });
@@ -337,7 +337,7 @@ describe('KibanaDiscoveryService', () => {
       await kibanaDiscoveryService.deleteCurrentNode();
 
       expect(savedObjectsRepository.delete).toHaveBeenCalledWith(
-        'background_task_node',
+        BACKGROUND_TASK_NODE_SO_NAME,
         'current-node-id'
       );
 
