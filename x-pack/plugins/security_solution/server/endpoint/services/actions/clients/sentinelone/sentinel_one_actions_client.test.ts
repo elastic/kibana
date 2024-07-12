@@ -707,7 +707,7 @@ describe('SentinelOneActionsClient class', () => {
       it('should generate an action success response doc', async () => {
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
-        expect(`processPendingActionsOptions.addToQueue`).toHaveBeenCalledWith({
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
             action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
