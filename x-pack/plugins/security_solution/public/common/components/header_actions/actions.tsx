@@ -220,8 +220,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     'securitySolutionNotesEnabled'
   );
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
-
   /* only applicable for new event based notes */
   const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
 
@@ -232,18 +230,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const notesCount = useMemo(
-    () =>
-      securitySolutionNotesEnabled && !expandableFlyoutDisabled
-        ? documentBasedNotes.length
-        : timelineNoteIds.length,
-    [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled, expandableFlyoutDisabled]
+    () => (securitySolutionNotesEnabled ? documentBasedNotes.length : timelineNoteIds.length),
+    [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
   );
 
   const noteIds = useMemo(() => {
-    return securitySolutionNotesEnabled && !expandableFlyoutDisabled
+    return securitySolutionNotesEnabled
       ? documentBasedNotes.map((note) => note.noteId)
       : timelineNoteIds;
-  }, [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled, expandableFlyoutDisabled]);
+  }, [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]);
 
   return (
     <ActionsContainer>
