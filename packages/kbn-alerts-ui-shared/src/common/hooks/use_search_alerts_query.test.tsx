@@ -75,8 +75,6 @@ const searchResponse = {
   isRestored: false,
 };
 
-// jest.useFakeTimers();
-
 const searchResponse$ = of<IKibanaSearchResponse>(searchResponse);
 
 const expectedResponse: ReturnType<typeof useSearchAlertsQuery>['data'] = {
@@ -97,7 +95,6 @@ const queryClient = new QueryClient({
 });
 
 describe('useSearchAlertsQuery', () => {
-  // let clock: sinon.SinonFakeTimers;
   const mockDataPlugin = {
     search: {
       search: jest.fn().mockReturnValue(searchResponse$),
@@ -126,20 +123,13 @@ describe('useSearchAlertsQuery', () => {
     </QueryClientProvider>
   );
 
-  // beforeAll(() => {
-  //   clock = sinon.useFakeTimers(new Date('2021-01-01T12:00:00.000Z'));
-  // });
-
   beforeEach(() => {
     jest.clearAllMocks();
-    // clock.reset();
   });
 
   afterEach(() => {
     queryClient.removeQueries();
   });
-
-  // afterAll(() => clock.restore());
 
   it('returns the response correctly', async () => {
     const { result, waitForValueToChange } = renderHook(() => useSearchAlertsQuery(params), {
@@ -392,76 +382,4 @@ describe('useSearchAlertsQuery', () => {
       })
     );
   });
-
-  // it('reset pagination when query is used', async () => {
-  //   const useWrapperHook = ({ query }: { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'> }) => {
-  //     const [pagination, setPagination] = useState({ pageIndex: 5, pageSize: 10 });
-  //     const handlePagination = (newPagination: { pageIndex: number; pageSize: number }) => {
-  //       onPageChangeMock(newPagination);
-  //       setPagination(newPagination);
-  //     };
-  //     const result = useSearchAlertsQuery({
-  //       ...params,
-  //       pageSize: pagination.pageSize,
-  //       pageIndex: pagination.pageIndex,
-  //       onPageChange: handlePagination,
-  //       query,
-  //     });
-  //     return result;
-  //   };
-  //
-  //   const { rerender } = renderHook(
-  //     ({ initialValue }) =>
-  //       useWrapperHook({
-  //         query: initialValue,
-  //       }),
-  //     {
-  //       initialProps: { initialValue: {} },
-  //     }
-  //   );
-  //
-  //   expect(mockDataPlugin.search.search).lastCalledWith(
-  //     {
-  //       featureIds: params.featureIds,
-  //       fields: [...params.fields!],
-  //       pagination: {
-  //         pageIndex: 5,
-  //         pageSize: 10,
-  //       },
-  //       query: {},
-  //       sort: params.sort,
-  //     },
-  //     { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
-  //   );
-  //
-  //   rerender({
-  //     initialValue: {
-  //       ids: {
-  //         values: ['alert-id-1'],
-  //       },
-  //     },
-  //   });
-  //
-  //   expect(mockDataPlugin.search.search).lastCalledWith(
-  //     {
-  //       featureIds: params.featureIds,
-  //       fields: [...params.fields!],
-  //       pagination: {
-  //         pageIndex: 0,
-  //         pageSize: 10,
-  //       },
-  //       query: {
-  //         ids: {
-  //           values: ['alert-id-1'],
-  //         },
-  //       },
-  //       sort: params.sort,
-  //     },
-  //     { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
-  //   );
-  //   expect(onPageChangeMock).lastCalledWith({
-  //     pageIndex: 0,
-  //     pageSize: 10,
-  //   });
-  // });
 });
