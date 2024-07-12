@@ -17,6 +17,7 @@ export {
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
   type ServerlessProjectType,
+  readRolesFromResource,
   readRolesDescriptorsFromResource,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
