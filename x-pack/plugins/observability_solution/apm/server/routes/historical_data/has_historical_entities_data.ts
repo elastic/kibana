@@ -32,5 +32,6 @@ export async function hasEntitiesData(entitiesESClient: EntitiesESClient, logger
 
       return false;
     }
+    return false;
   }
 }
