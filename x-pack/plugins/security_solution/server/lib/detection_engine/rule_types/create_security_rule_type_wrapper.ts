@@ -294,8 +294,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
-              if (warningMissingTimestampFieldsMessage != null)
+              if (warningMissingTimestampFieldsMessage != null) {
                 wrapperWarnings.push(warningMissingTimestampFieldsMessage);
+              }
               skipExecution = foundNoIndices;
             }
           } catch (exc) {
