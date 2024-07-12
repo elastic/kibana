@@ -87,6 +87,21 @@ export class VisualizeEditorPageObject extends FtrService {
     );
 
     await this.testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+
+    this.log.warning(
+      `Nick -- visualizeEditorRenderButton-exists: ${await this.testSubjects.exists('visualizeEditorRenderButton')}`
+    );
+
+    this.log.warning(
+      `Nick -- visualizeEditorRenderButton-isDisplayed: ${await this.testSubjects.isDisplayed('visualizeEditorRenderButton')}`
+    );
+
+    this.log.warning(
+      `Nick -- visualizeEditorRenderButton-isEnabled: ${await this.testSubjects.isEnabled('visualizeEditorRenderButton')}`
+    );
+
+    await this.testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+    
     await this.visChart.waitForRenderingCount(prevRenderingCount + 1);
   }
 
