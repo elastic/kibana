@@ -46,6 +46,12 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
+  const overrides = JSON.parse(localStorage.getItem('kbn-theme-overrides') || '{}');
+  const { modify } = props;
+  props.modify = {
+    ...modify,
+    ...overrides,
+  };
 
   if (hasEuiProvider) {
     emitEuiProviderWarning(
