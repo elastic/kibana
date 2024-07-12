@@ -22,18 +22,18 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/deeplinks-observability",
-        "id": "def-common.DatasetQualityLocatorParams",
+        "id": "def-common.DataQualityLocatorParams",
         "type": "Interface",
         "tags": [],
-        "label": "DatasetQualityLocatorParams",
+        "label": "DataQualityLocatorParams",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.DatasetQualityLocatorParams",
-            "text": "DatasetQualityLocatorParams"
+            "section": "def-common.DataQualityLocatorParams",
+            "text": "DataQualityLocatorParams"
           },
           " extends ",
           {
@@ -50,13 +50,27 @@
         "children": [
           {
             "parentPluginId": "@kbn/deeplinks-observability",
-            "id": "def-common.DatasetQualityLocatorParams.filters",
+            "id": "def-common.DataQualityLocatorParams.filters",
             "type": "Object",
             "tags": [],
             "label": "filters",
             "description": [],
             "signature": [
               "Filters | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityLocatorParams.flyout",
+            "type": "Object",
+            "tags": [],
+            "label": "flyout",
+            "description": [],
+            "signature": [
+              "{ dataset: DatasetConfig; } | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
             "deprecated": false,
@@ -754,13 +768,13 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
-        "id": "def-common.DATASET_QUALITY_LOCATOR_ID",
+        "id": "def-common.DATA_QUALITY_LOCATOR_ID",
         "type": "string",
         "tags": [],
-        "label": "DATASET_QUALITY_LOCATOR_ID",
+        "label": "DATA_QUALITY_LOCATOR_ID",
         "description": [],
         "signature": [
-          "\"DATASET_QUALITY_LOCATOR\""
+          "\"DATA_QUALITY_LOCATOR\""
         ],
         "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
         "deprecated": false,
