@@ -17,8 +17,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type {
-  AlertSuppression,
-  AlertSuppressionCamel,
   InvestigationFields,
   RequiredField,
   RequiredFieldInput,
@@ -33,7 +31,7 @@ import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -346,28 +344,6 @@ export const getInvalidConnectors = async (
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
-
-export const convertAlertSuppressionToCamel = (
-  input: AlertSuppression | undefined
-): AlertSuppressionCamel | undefined =>
-  input
-    ? {
-        groupBy: input.group_by,
-        duration: input.duration,
-        missingFieldsStrategy: input.missing_fields_strategy,
-      }
-    : undefined;
-
-export const convertAlertSuppressionToSnake = (
-  input: AlertSuppressionCamel | undefined
-): AlertSuppression | undefined =>
-  input
-    ? {
-        group_by: input.groupBy,
-        duration: input.duration,
-        missing_fields_strategy: input.missingFieldsStrategy,
-      }
-    : undefined;
 
 /**
  * In ESS 8.10.x "investigation_fields" are mapped as string[].

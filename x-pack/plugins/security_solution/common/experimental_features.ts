@@ -81,6 +81,9 @@ export const allowedExperimentalValues = Object.freeze({
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: true,
 
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: false,
+
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
@@ -238,11 +241,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
   unifiedManifestEnabled: true,
-
-  /**
-   *  Enables Security AI Assistant's Flyout mode
-   */
-  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items

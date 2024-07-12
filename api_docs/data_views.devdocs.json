@@ -12993,6 +12993,10 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
+              },
+              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
@@ -13115,10 +13119,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "@kbn/ml-data-view-utils",

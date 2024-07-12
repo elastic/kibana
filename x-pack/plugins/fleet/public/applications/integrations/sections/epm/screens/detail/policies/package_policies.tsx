@@ -230,7 +230,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.policy_ids',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentPolicy', {
-          defaultMessage: 'Agent policy',
+          defaultMessage: 'Agent policies',
         }),
         truncateText: true,
         render(id, { agentPolicies, packagePolicy }) {

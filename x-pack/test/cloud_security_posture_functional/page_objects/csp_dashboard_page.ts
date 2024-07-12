@@ -52,6 +52,11 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     },
   };
 
+  const TAB_TYPES = {
+    CLOUD: 'Cloud',
+    KUBERNETES: 'Kubernetes',
+  } as const;
+
   const dashboard = {
     getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
 
@@ -63,23 +68,57 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
 
     getCloudTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
-      return await tabs.findByXpath(`//span[text()="Cloud"]`);
+      return await tabs.findByXpath(`//span[text()="${TAB_TYPES.CLOUD}"]`);
     },
 
     getKubernetesTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
-      return await tabs.findByXpath(`//span[text()="Kubernetes"]`);
+      return await tabs.findByXpath(`//span[text()="${TAB_TYPES.KUBERNETES}"]`);
     },
 
-    clickTab: async (tab: 'Cloud' | 'Kubernetes') => {
-      if (tab === 'Cloud') {
+    clickTab: async (tab: typeof TAB_TYPES[keyof typeof TAB_TYPES]) => {
+      if (tab === TAB_TYPES.CLOUD) {
         const cloudTab = await dashboard.getCloudTab();
         await cloudTab.click();
       }
-      if (tab === 'Kubernetes') {
+      if (tab === TAB_TYPES.KUBERNETES) {
         const k8sTab = await dashboard.getKubernetesTab();
         await k8sTab.click();
       }
+    },
+
+    getAllComplianceScoresByCisSection: async (tab: typeof TAB_TYPES[keyof typeof TAB_TYPES]) => {
+      await dashboard.getDashoard(tab);
+      const pageContainer = await testSubjects.find('pageContainer');
+      return await pageContainer.findAllByTestSubject('cloudSecurityFindingsComplianceScore');
+    },
+
+    getDashoard: async (tab: typeof TAB_TYPES[keyof typeof TAB_TYPES]) => {
+      if (tab === TAB_TYPES.CLOUD) {
+        return await dashboard.getCloudDashboard();
+      }
+      if (tab === TAB_TYPES.KUBERNETES) {
+        return await dashboard.getKubernetesDashboard();
+      }
+    },
+
+    getFindingsLinks: async (tab: typeof TAB_TYPES[keyof typeof TAB_TYPES]) => {
+      await dashboard.getDashoard(tab);
+      const pageContainer = await testSubjects.find('pageContainer');
+      return await pageContainer.findAllByXpath(`//button[contains(@class, 'euiLink')]`);
+    },
+
+    getFindingsLinkAtIndex: async (
+      tab: typeof TAB_TYPES[keyof typeof TAB_TYPES],
+      linkIndex = 0
+    ) => {
+      const allLinks = await dashboard.getFindingsLinks(tab);
+      return await allLinks[linkIndex];
+    },
+
+    getFindingsLinksCount: async (tab: typeof TAB_TYPES[keyof typeof TAB_TYPES]) => {
+      const allLinks = await dashboard.getFindingsLinks(tab);
+      return await allLinks.length;
     },
 
     getIntegrationDashboardContainer: () => testSubjects.find('dashboard-container'),
@@ -87,7 +126,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     // Cloud Dashboard
 
     getCloudDashboard: async () => {
-      await dashboard.clickTab('Cloud');
+      await dashboard.clickTab(TAB_TYPES.CLOUD);
       return await testSubjects.find('cloud-dashboard-container');
     },
 
@@ -119,7 +158,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     // Kubernetes Dashboard
 
     getKubernetesDashboard: async () => {
-      await dashboard.clickTab('Kubernetes');
+      await dashboard.clickTab(TAB_TYPES.KUBERNETES);
       return await testSubjects.find('kubernetes-dashboard-container');
     },
 
@@ -161,5 +200,6 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     navigateToComplianceDashboardPage,
     dashboard,
     index,
+    TAB_TYPES,
   };
 }
