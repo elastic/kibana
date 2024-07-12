@@ -51,7 +51,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome } = coreStart;
+        const { notifications, application, chrome, http } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -63,6 +63,7 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
