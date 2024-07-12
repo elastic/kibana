@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
   Metric,
@@ -18,7 +19,6 @@ import {
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
 } from '../../../../../common/http_api/infra_ml';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
