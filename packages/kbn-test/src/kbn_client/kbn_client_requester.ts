@@ -116,13 +116,13 @@ export class KbnClientRequester {
 
   async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
     const url = this.resolveUrl(options.path);
+    const redacted = redactUrl(url);
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
-
     while (true) {
       attempt += 1;
-
       try {
+        this.log.info(`Requesting url [${redacted}]`);
         return await Axios.request(buildRequest(url, this.httpsAgent, options));
       } catch (ex) {
         if (isIgnorableError(ex, options.ignoreErrors)) return ex.response;
@@ -130,24 +130,31 @@ export class KbnClientRequester {
           await delay(1000 * attempt);
           continue;
         }
-
-        throw new Error(buildErrMsg(redactUrl(url), options.path, options.retries, ex));
-
-        function buildErrMsg(redactedUrl: string, path: any, retries: any, err: any) {
-          const conflictOnGet: boolean = isConcliftOnGetError(err);
-          const requestedRetries: boolean = retries !== undefined;
-          const failedToGetResponse: boolean = isAxiosRequestError(err);
-
-          if (conflictOnGet)
-            return `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`;
-          else if (requestedRetries || failedToGetResponse)
-            return `${err.code} ${err.name} [${redactedUrl}] request failed (attempt=${attempt}/${maxAttempts})`;
-          else throw err;
-        }
+        throw new Error(
+          buildErrMsg(attempt, maxAttempts, redacted, options.path, options.retries, ex)
+        );
       }
     }
   }
 }
+
+function buildErrMsg(
+  current: number,
+  ceiling: number,
+  redactedUrl: string,
+  path: any,
+  retries: any,
+  err: any
+) {
+  const conflictOnGet: boolean = isConcliftOnGetError(err);
+  const requestedRetries: boolean = retries !== undefined;
+  const failedToGetResponse: boolean = isAxiosRequestError(err);
+
+  if (conflictOnGet) return `Conflict on GET (path=${path}, attempt=${current}/${ceiling})`;
+  else if (requestedRetries || failedToGetResponse)
+    return `${err.code} ${err.name} [${redactedUrl}] request failed (attempt=${current}/${ceiling})`;
+}
+
 function hasMoreAttempts(current: number, ceiling: number) {
   return current < ceiling;
 }
@@ -176,7 +183,8 @@ function buildRequest(
     paramsSerializer: (params: any) => Qs.stringify(params),
   };
 }
-const redactUrl = (_: string): string => {
+
+function redactUrl(_: string): string {
   const url = new URL(_);
   return url.password ? `${url.protocol}//${url.host}${url.pathname}` : _;
-};
+}
