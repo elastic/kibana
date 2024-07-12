@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Dispatch, useCallback, useMemo, useRef } from 'react';
+import React, { Dispatch, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTableColumn,
@@ -99,7 +99,6 @@ export function Table<T extends UserContentCommonSchema>({
   createdByEnabled,
 }: Props<T>) {
   const { getTagList, isTaggingEnabled } = useServices();
-  const focusRef = useRef<HTMLButtonElement>(null);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -194,11 +193,7 @@ export function Table<T extends UserContentCommonSchema>({
           <TagFilterPanel
             isPopoverOpen={isPopoverOpen}
             isInUse={isInUse}
-            closePopover={() => {
-              setTimeout(() => closePopover(), 10);
-              console.log(focusRef.current);
-              focusRef.current?.focus();
-            }}
+            closePopover={closePopover}
             options={options}
             totalActiveFilters={totalActiveFilters}
             onFilterButtonClick={onFilterButtonClick}
