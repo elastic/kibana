@@ -61,7 +61,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
-  const cloudSetup = appContextService.getCloud();
 
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
