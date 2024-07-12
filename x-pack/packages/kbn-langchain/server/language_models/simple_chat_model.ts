@@ -166,7 +166,9 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
           finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
           const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
           extraOutput = currentOutput.substring(contentStartIndex);
-          await runManager?.handleLLMNewToken(extraOutput);
+          if (extraOutput.length > 0) {
+            await runManager?.handleLLMNewToken(extraOutput);
+          }
         }
       } else if (!streamingFinished) {
         const finalOutputEndIndex = token.search(finalOutputStopRegex);

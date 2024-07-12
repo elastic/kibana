@@ -301,5 +301,48 @@ describe('ActionsClientSimpleChatModel', () => {
       expect(handleLLMNewToken).toHaveBeenCalledTimes(1);
       expect(handleLLMNewToken).toHaveBeenCalledWith('token6');
     });
+    it('extra tokens in the final answer start chunk get pushed to handleLLMNewToken', async () => {
+      (parseBedrockStream as jest.Mock).mockImplementation((_1, _2, _3, handleToken) => {
+        handleToken('token1');
+        handleToken(`"action":`);
+        handleToken(`"Final Answer"`);
+        handleToken(`, "action_input": "token5 `);
+        handleToken('token6');
+      });
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
+
+      const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
+        ...defaultArgs,
+        actionsClient,
+        llmType: 'bedrock',
+        streaming: true,
+      });
+      await actionsClientSimpleChatModel._call(callMessages, callOptions, callRunManager);
+      expect(handleLLMNewToken).toHaveBeenCalledTimes(2);
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token5 ');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token6');
+    });
+    it('extra tokens in the final answer end chunk get pushed to handleLLMNewToken', async () => {
+      (parseBedrockStream as jest.Mock).mockImplementation((_1, _2, _3, handleToken) => {
+        handleToken('token5');
+        handleToken(`"action":`);
+        handleToken(`"Final Answer"`);
+        handleToken(`, "action_input": "`);
+        handleToken('token6');
+        handleToken('token7"');
+        handleToken('token8');
+      });
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
+      const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
+        ...defaultArgs,
+        actionsClient,
+        llmType: 'bedrock',
+        streaming: true,
+      });
+      await actionsClientSimpleChatModel._call(callMessages, callOptions, callRunManager);
+      expect(handleLLMNewToken).toHaveBeenCalledTimes(2);
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token6');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token7');
+    });
   });
 });
