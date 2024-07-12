@@ -15,6 +15,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -154,7 +155,7 @@ export const createMockEndpointAppContextServiceStartContract =
 
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
-    const security = securityMock.createStart();
+    const security = securityServiceMock.createStart();
     const agentService = createMockAgentService();
     const agentPolicyService = createMockAgentPolicyService();
     const packagePolicyService = createPackagePolicyServiceMock();
@@ -194,10 +195,6 @@ export const createMockEndpointAppContextServiceStartContract =
     // Make current user have `superuser` role by default
     security.authc.getCurrentUser.mockReturnValue(
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
-    );
-
-    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-      jest.fn(() => ({ privileges: { kibana: [] } }))
     );
 
     const casesMock = casesPluginMock.createStartContract();

@@ -144,6 +144,13 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
+  // make form dirty if new agent policy is selected
+  useEffect(() => {
+    if (newAgentPolicyName) {
+      setIsEdited(true);
+    }
+  }, [newAgentPolicyName, setIsEdited]);
+
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
   // Retrieve agent count

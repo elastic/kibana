@@ -5,6 +5,8 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
+print_if_dry_run
+
 echo "--- Download and verify artifacts"
 function download {
   download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
@@ -60,6 +62,7 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
   download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   export BEATS_MANIFEST_URL=$(jq -r .manifest_url /tmp/beats_manifest.json)
 
+  PUBLISH_CMD=$(cat << EOF
   docker run --rm \
     --name release-manager \
     -e VAULT_ADDR \
@@ -76,6 +79,13 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
         --qualifier "$VERSION_QUALIFIER" \
         --dependency "beats:$BEATS_MANIFEST_URL" \
         --artifact-set main
+EOF
+)
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
+    PUBLISH_CMD+=(" --dry-run")
+  fi
+
+  "${PUBLISH_CMD[@]}"
 
   KIBANA_SUMMARY=$(curl -s "$KIBANA_MANIFEST_LATEST" | jq -re '.summary_url')
 

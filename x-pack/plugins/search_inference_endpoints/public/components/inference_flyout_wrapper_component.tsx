@@ -47,8 +47,10 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
   const queryClient = useQueryClient();
 
   const {
-    services: { ml },
+    services: { ml, notifications },
   } = useKibana();
+
+  const toasts = notifications?.toasts;
 
   const createInferenceEndpointMutation = useMutation(
     async ({
@@ -64,6 +66,10 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
         throw new Error(i18n.UNABLE_TO_CREATE_INFERENCE_ENDPOINT);
       }
       await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(inferenceId, taskType, modelConfig);
+      toasts?.addSuccess({
+        title: i18n.ENDPOINT_ADDED_SUCCESS,
+        text: i18n.ENDPOINT_ADDED_SUCCESS_DESCRIPTION(inferenceId),
+      });
     },
     {
       onSuccess: () => {
@@ -87,17 +93,26 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsCreateInferenceApiLoading(true);
-      try {
-        await createInferenceEndpointMutation.mutateAsync({ inferenceId, taskType, modelConfig });
-        setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-      } catch (error) {
-        const errorObj = extractErrorProperties(error);
-        setInferenceAddError(errorObj.message);
-      } finally {
-        setIsCreateInferenceApiLoading(false);
-      }
+
+      createInferenceEndpointMutation
+        .mutateAsync({ inferenceId, taskType, modelConfig })
+        .catch((error) => {
+          const errorObj = extractErrorProperties(error);
+          notifications?.toasts?.addError(errorObj.message ? new Error(error.message) : error, {
+            title: i18n.ENDPOINT_CREATION_FAILED,
+          });
+        })
+        .finally(() => {
+          setIsCreateInferenceApiLoading(false);
+        });
+      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
     },
-    [createInferenceEndpointMutation, isInferenceFlyoutVisible, setIsInferenceFlyoutVisible]
+    [
+      createInferenceEndpointMutation,
+      isInferenceFlyoutVisible,
+      setIsInferenceFlyoutVisible,
+      notifications,
+    ]
   );
 
   const onFlyoutClose = useCallback(() => {
