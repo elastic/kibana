@@ -32,33 +32,47 @@ import { preventParallelCalls } from './prevent_parallel_calls';
 import { Browsers } from './browsers';
 import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
 
+interface Configuration {
+  throttleOption: string;
+  headlessBrowser: string;
+  browserBinaryPath: string;
+  remoteDebug: string;
+  certValidation: string;
+  noCache: string;
+  chromiumUserPrefs: Record<string, any>;
+}
+
 const now = Date.now();
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
+let runtimeEnvVariables: Configuration | undefined;
 
 // ENV variables may be injected dynamically by the test runner CLI script
 // so do not read on module load, rather read on demand.
-function getConfiguration() {
-  return {
-    throttleOption: process.env.TEST_THROTTLE_NETWORK as string,
-    headlessBrowser: process.env.TEST_BROWSER_HEADLESS as string,
-    browserBinaryPath: process.env.TEST_BROWSER_BINARY_PATH as string,
-    remoteDebug: process.env.TEST_REMOTE_DEBUG as string,
-    certValidation: process.env.NODE_TLS_REJECT_UNAUTHORIZED as string,
-    noCache: process.env.TEST_DISABLE_CACHE as string,
-    chromiumUserPrefs: {
-      'download.default_directory': downloadDir,
-      'download.prompt_for_download': false,
-      'profile.content_settings.exceptions.clipboard': {
-        '[*.],*': {
-          last_modified: now,
-          setting: 1,
+function getConfiguration(): Configuration {
+  if (!runtimeEnvVariables) {
+    runtimeEnvVariables = {
+      throttleOption: process.env.TEST_THROTTLE_NETWORK as string,
+      headlessBrowser: process.env.TEST_BROWSER_HEADLESS as string,
+      browserBinaryPath: process.env.TEST_BROWSER_BINARY_PATH as string,
+      remoteDebug: process.env.TEST_REMOTE_DEBUG as string,
+      certValidation: process.env.NODE_TLS_REJECT_UNAUTHORIZED as string,
+      noCache: process.env.TEST_DISABLE_CACHE as string,
+      chromiumUserPrefs: {
+        'download.default_directory': downloadDir,
+        'download.prompt_for_download': false,
+        'profile.content_settings.exceptions.clipboard': {
+          '[*.],*': {
+            last_modified: now,
+            setting: 1,
+          },
         },
       },
-    },
-  };
+    };
+  }
+  return runtimeEnvVariables;
 }
 
 const sleep$ = (ms: number) => Rx.timer(ms).pipe(ignoreElements());
