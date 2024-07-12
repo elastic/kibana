@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getNetworkEvents } from '../../legacy_uptime/lib/requests/get_network_events';
+import { getNetworkEvents } from '../../queries/get_network_events';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -19,11 +19,11 @@ export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
       stepIndex: schema.number(),
     }),
   },
-  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+  handler: async ({ syntheticsEsClient, request }): Promise<any> => {
     const { checkGroup, stepIndex } = request.query;
 
     return await getNetworkEvents({
-      uptimeEsClient,
+      syntheticsEsClient,
       checkGroup,
       stepIndex,
     });
