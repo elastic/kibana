@@ -162,6 +162,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     eventIdToNoteIds,
     refetch,
     timelineId,
+    activeTab: TimelineTabs.eql,
   });
 
   const onToggleShowNotes = useCallback(
