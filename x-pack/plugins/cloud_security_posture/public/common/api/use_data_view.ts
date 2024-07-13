@@ -21,7 +21,7 @@ export const useDataView = (indexPattern: string) => {
     const [dataView] = await dataViews.find(indexPattern);
 
     if (!dataView) {
-      throw new Error(`Data view not found [${indexPattern}]`);
+      return null;
     }
 
     return dataView;
