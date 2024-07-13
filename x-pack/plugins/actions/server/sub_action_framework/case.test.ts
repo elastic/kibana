@@ -60,7 +60,7 @@ describe('CaseConnector', () => {
       pushToServiceIncidentParamsSchema
     );
 
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
 
   describe('Sub actions', () => {

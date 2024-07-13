@@ -38,6 +38,7 @@ describe('BedrockConnector', () => {
     completion: mockResponseString,
     stop_reason: 'stop_sequence',
   };
+  const logger = loggingSystemMock.createLogger();
 
   const claude3Response = {
     id: 'compl_01E7D3vTBHdNdKWCe6zALmLH',
@@ -66,7 +67,7 @@ describe('BedrockConnector', () => {
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
     });
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
 
   const connector = new BedrockConnector({
@@ -77,7 +78,7 @@ describe('BedrockConnector', () => {
       defaultModel: DEFAULT_BEDROCK_MODEL,
     },
     secrets: { accessKey: '123', secret: 'secret' },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
 
@@ -89,7 +90,7 @@ describe('BedrockConnector', () => {
 
     describe('runApi', () => {
       it('the aws signature has non-streaming headers', async () => {
-        await connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsCollector());
+        await connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsCollector(logger));
         expect(mockSigner).toHaveBeenCalledWith(
           {
             body: DEFAULT_BODY,
@@ -156,7 +157,7 @@ describe('BedrockConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsCollector())
+          connector.runApi({ body: DEFAULT_BODY }, new ConnectorMetricsCollector(logger))
         ).rejects.toThrow('API Error');
       });
     });

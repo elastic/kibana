@@ -62,6 +62,7 @@ describe('GeminiConnector', () => {
     mockRequest = connector.request = jest.fn().mockResolvedValue(defaultResponse);
   });
 
+  const logger = loggingSystemMock.createLogger();
   const connector = new GeminiConnector({
     connector: { id: '1', type: '.gemini' },
     configurationUtilities: actionsConfigMock.create(),
@@ -85,7 +86,7 @@ describe('GeminiConnector', () => {
         client_x509_cert_url: '',
       }),
     },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
   let connectorMetricsCollector: ConnectorMetricsCollector;
@@ -94,7 +95,7 @@ describe('GeminiConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      connectorMetricsCollector = new ConnectorMetricsCollector();
+      connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     });
 
     describe('runApi', () => {

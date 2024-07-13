@@ -14,14 +14,16 @@ import {
 import { API_PATH } from './sentinelone';
 import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
 import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('SentinelOne Connector', () => {
   let connectorInstance: ReturnType<typeof sentinelOneConnectorMocks.create>;
   let connectorMetricsCollector: ConnectorMetricsCollector;
+  const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     connectorInstance = sentinelOneConnectorMocks.create();
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
 
   describe('#fetchAgentFiles()', () => {

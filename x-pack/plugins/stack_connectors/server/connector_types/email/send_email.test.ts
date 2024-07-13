@@ -55,7 +55,7 @@ describe('send_email module', () => {
       };
     });
 
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(mockLogger);
   });
 
   test('handles authenticated email using service', async () => {

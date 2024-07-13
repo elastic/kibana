@@ -17,12 +17,13 @@ const hostPath = 'https://api.crowdstrike.com/devices/entities/devices/v2';
 const onlineStatusPath = 'https://api.crowdstrike.com/devices/entities/online-state/v1';
 const actionsPath = 'https://api.crowdstrike.com/devices/entities/devices-actions/v2';
 describe('CrowdstrikeConnector', () => {
+  const logger = loggingSystemMock.createLogger();
   const connector = new CrowdstrikeConnector({
     configurationUtilities: actionsConfigMock.create(),
     connector: { id: '1', type: CROWDSTRIKE_CONNECTOR_ID },
     config: { url: 'https://api.crowdstrike.com' },
     secrets: { clientId: '123', clientSecret: 'secret' },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
   let mockedRequest: jest.Mock;
@@ -33,7 +34,7 @@ describe('CrowdstrikeConnector', () => {
     CrowdstrikeConnector.token = null;
     // @ts-expect-error
     mockedRequest = connector.request = jest.fn() as jest.Mock;
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
   afterEach(() => {
     jest.clearAllMocks();

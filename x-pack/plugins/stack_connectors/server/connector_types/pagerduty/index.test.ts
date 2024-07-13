@@ -36,7 +36,7 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector();
+  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
 });
 
 describe('get()', () => {

@@ -139,7 +139,7 @@ describe('Jira service', () => {
   let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     service = createExternalService(
       {
         // The trailing slash at the end of the url is intended.

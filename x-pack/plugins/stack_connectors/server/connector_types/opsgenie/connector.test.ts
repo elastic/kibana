@@ -77,7 +77,7 @@ describe('OpsgenieConnector', () => {
       logger,
       services,
     });
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
 
   it('calls request with the correct arguments for creating an alert', async () => {

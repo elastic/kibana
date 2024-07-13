@@ -99,18 +99,19 @@ const agentsGetRequestExpected = {
 let connectorMetricsCollector: ConnectorMetricsCollector;
 
 describe('TinesConnector', () => {
+  const logger = loggingSystemMock.createLogger();
   const connector = new TinesConnector({
     configurationUtilities: actionsConfigMock.create(),
     config: { url },
     connector: { id: '1', type: TINES_CONNECTOR_ID },
     secrets: { email, token },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
 
   describe('getStories', () => {

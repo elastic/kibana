@@ -90,7 +90,7 @@ describe('request', () => {
         headers: { 'Content-Length': contentLength },
       },
     }));
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     await request({
       axios,
       url: '/test',
@@ -111,7 +111,7 @@ describe('request', () => {
           headers: { 'Content-Length': contentLength },
         })
     );
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
 
     try {
       await request({
@@ -127,7 +127,7 @@ describe('request', () => {
   });
 
   test('adds request body bytes from data when request header does not exist', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     const data = { test: 12345 };
 
     await request({

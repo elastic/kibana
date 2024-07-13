@@ -49,6 +49,7 @@ describe('OpenAIConnector', () => {
   let mockError: jest.Mock;
   let connectorMetricsCollector: ConnectorMetricsCollector;
 
+  const logger = loggingSystemMock.createLogger();
   const mockResponseString = 'Hello! How can I assist you today?';
   const mockResponse = {
     headers: {},
@@ -75,7 +76,7 @@ describe('OpenAIConnector', () => {
     },
   };
   beforeEach(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
@@ -96,7 +97,7 @@ describe('OpenAIConnector', () => {
         },
       },
       secrets: { apiKey: '123' },
-      logger: loggingSystemMock.createLogger(),
+      logger,
       services: actionsMock.createServices(),
     });
 

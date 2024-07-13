@@ -76,7 +76,7 @@ describe('Cases webhook service', () => {
   let sslService: ExternalService;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     service = createExternalService(
       actionId,
       {
@@ -249,6 +249,18 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -527,6 +539,30 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"1234\\": [HTTP 200] OK",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -799,6 +835,18 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "metrics": Object {
               "requestBodyBytes": 0,
             },
@@ -1033,6 +1081,18 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "metrics": Object {
               "requestBodyBytes": 0,
             },

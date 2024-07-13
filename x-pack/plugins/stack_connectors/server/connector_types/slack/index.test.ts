@@ -45,7 +45,7 @@ beforeEach(() => {
       return { status: 'ok', actionId: options.actionId };
     },
   });
-  connectorMetricsCollector = new ConnectorMetricsCollector();
+  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
 });
 
 describe('connector registration', () => {

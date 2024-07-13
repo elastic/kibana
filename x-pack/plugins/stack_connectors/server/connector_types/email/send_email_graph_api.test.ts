@@ -28,7 +28,7 @@ describe('sendEmailGraphApi', () => {
   const configurationUtilities = actionsConfigMock.create();
 
   test('email contains the proper message', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
 
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
@@ -121,7 +121,7 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('email was sent on behalf of the user "from" mailbox', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
@@ -215,7 +215,7 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('sendMail request was sent to the custom configured Graph API URL', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
@@ -308,7 +308,7 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('throw the exception and log the proper error if message was not sent successfuly', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     axiosInstanceMock.mockReturnValueOnce({
       status: 400,
       data: {

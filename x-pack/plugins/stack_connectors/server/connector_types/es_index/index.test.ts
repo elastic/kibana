@@ -37,7 +37,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector();
+  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
 });
 
 describe('connector registration', () => {

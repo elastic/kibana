@@ -87,11 +87,12 @@ const mockIncidentUpdate = (withUpdateError = false) => {
 let connectorMetricsCollector: ConnectorMetricsCollector;
 
 describe('IBM Resilient connector', () => {
+  const logger = loggingSystemMock.createLogger();
   const connector = new ResilientConnector(
     {
       connector: { id: '1', type: RESILIENT_CONNECTOR_ID },
       configurationUtilities: actionsConfigMock.create(),
-      logger: loggingSystemMock.createLogger(),
+      logger,
       services: actionsMock.createServices(),
       config: { orgId, apiUrl },
       secrets: { apiKeyId, apiKeySecret },
@@ -109,7 +110,7 @@ describe('IBM Resilient connector', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.setSystemTime(TIMESTAMP);
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
   });
 
   describe('getIncident', () => {

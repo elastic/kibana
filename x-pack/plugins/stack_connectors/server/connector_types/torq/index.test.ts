@@ -47,7 +47,7 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 beforeAll(() => {
   actionType = getActionType();
   configurationUtilities = actionsConfigMock.create();
-  connectorMetricsCollector = new ConnectorMetricsCollector();
+  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
 });
 
 describe('actionType', () => {
@@ -186,6 +186,30 @@ describe('execute Torq action', () => {
       Object {
         "axios": [MockFunction],
         "connectorMetricsCollector": ConnectorMetricsCollector {
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "response from Torq action \\"some-id\\": [HTTP 200] ",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
           "metrics": Object {
             "requestBodyBytes": 0,
           },

@@ -37,7 +37,7 @@ describe('ServiceNow SIR service', () => {
   let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeEach(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     service = createExternalService({
       credentials: {
         config: { apiUrl: 'https://example.com/', isOAuth: false },

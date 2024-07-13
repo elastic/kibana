@@ -156,7 +156,7 @@ describe('ServiceNow service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorMetricsCollector = new ConnectorMetricsCollector();
+    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     service = createExternalService({
       credentials: {
         // The trailing slash at the end of the url is intended.

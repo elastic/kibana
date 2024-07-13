@@ -107,7 +107,7 @@ describe('execute()', () => {
       secrets: {},
       configurationUtilities,
       logger: mockedLogger,
-      connectorMetricsCollector: new ConnectorMetricsCollector(),
+      connectorMetricsCollector: new ConnectorMetricsCollector(mockedLogger),
     };
     await connectorType.executor(executorOptions);
     expect(mockedLogger.info).toHaveBeenCalledWith('Server log: message text here');

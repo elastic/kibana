@@ -39,7 +39,7 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector();
+  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
 });
 
 describe('connector registration', () => {
@@ -176,6 +176,30 @@ describe('execute()', () => {
       Object {
         "axios": undefined,
         "connectorMetricsCollector": ConnectorMetricsCollector {
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "response from teams action \\"some-id\\": [HTTP 200] ",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
           "metrics": Object {
             "requestBodyBytes": 0,
           },
@@ -238,6 +262,30 @@ describe('execute()', () => {
       Object {
         "axios": undefined,
         "connectorMetricsCollector": ConnectorMetricsCollector {
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "response from teams action \\"some-id\\": [HTTP 200] ",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
           "metrics": Object {
             "requestBodyBytes": 0,
           },

@@ -29,6 +29,7 @@ describe('D3SecurityConnector', () => {
   const mockError = jest.fn().mockImplementation(() => {
     throw new Error('API Error');
   });
+  const logger = loggingSystemMock.createLogger();
 
   describe('D3 Security', () => {
     const connector = new D3SecurityConnector({
@@ -36,7 +37,7 @@ describe('D3SecurityConnector', () => {
       connector: { id: '1', type: D3_SECURITY_CONNECTOR_ID },
       config: { url: 'https://example.com/api' },
       secrets: { token: '123' },
-      logger: loggingSystemMock.createLogger(),
+      logger,
       services: actionsMock.createServices(),
     });
     let connectorMetricsCollector: ConnectorMetricsCollector;
@@ -45,7 +46,7 @@ describe('D3SecurityConnector', () => {
       // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
-      connectorMetricsCollector = new ConnectorMetricsCollector();
+      connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     });
     it('the D3 Security API call is successful with correct parameters', async () => {
       const response = await connector.runApi({ body: sampleBody }, connectorMetricsCollector);
