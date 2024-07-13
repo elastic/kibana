@@ -136,8 +136,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     // If there is only one connector, set it as the selected connector
     if (aiConnectors != null && aiConnectors.length === 1) {
       setConnectorId(aiConnectors[0].id);
+    } else if (aiConnectors != null && aiConnectors.length === 0) {
+      // connectors have been removed, reset the connectorId and cached Attack discoveries
+      setConnectorId(undefined);
+      setSelectedConnectorAttackDiscoveries([]);
     }
-  }, [aiConnectors, setConnectorId]);
+  }, [aiConnectors]);
 
   const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
   const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
