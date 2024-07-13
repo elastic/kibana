@@ -183,7 +183,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           />
           <EuiSpacer size="m" />
         </HeaderPage>
-        {connectorsAreConfigured && !didInitialFetch ? (
+        {connectorsAreConfigured && connectorId != null && !didInitialFetch ? (
           <EuiEmptyPrompt data-test-subj="animatedLogo" icon={animatedLogo} />
         ) : (
           <>

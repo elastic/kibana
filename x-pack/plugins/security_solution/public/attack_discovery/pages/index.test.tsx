@@ -14,6 +14,7 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { useLocalStorage } from 'react-use';
 
 import { TestProviders } from '../../common/mock';
 import { MockAssistantProvider } from '../../common/mock/mock_assistant_provider';
@@ -31,12 +32,20 @@ import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from '../use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
+const mockConnectors: unknown[] = [
+  {
+    id: 'test-id',
+    name: 'OpenAI connector',
+    actionTypeId: '.gen-ai',
+  },
+];
+
 jest.mock('react-use', () => {
   const actual = jest.requireActual('react-use');
 
   return {
     ...actual,
-    useLocalStorage: jest.fn().mockReturnValue([undefined, jest.fn()]),
+    useLocalStorage: jest.fn().mockReturnValue(['test-id', jest.fn()]),
     useSessionStorage: jest.fn().mockReturnValue([undefined, jest.fn()]),
   };
 });
@@ -47,14 +56,6 @@ jest.mock(
     useFetchAnonymizationFields: jest.fn(() => mockFindAnonymizationFieldsResponse),
   })
 );
-
-const mockConnectors: unknown[] = [
-  {
-    id: 'test-id',
-    name: 'OpenAI connector',
-    actionTypeId: '.gen-ai',
-  },
-];
 
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
@@ -209,6 +210,13 @@ const historyMock = {
 describe('AttackDiscovery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      isFetched: true,
+      data: mockConnectors,
+    });
+
+    (useLocalStorage as jest.Mock).mockReturnValue(['test-id', jest.fn()]);
   });
 
   describe('page layout', () => {
@@ -314,6 +322,81 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render the empty prompt', () => {
       expect(screen.queryByTestId('emptyPrompt')).toBeNull();
+    });
+
+    it('does NOT render attack discoveries', () => {
+      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
+    });
+
+    it('does NOT render the upgrade call to action', () => {
+      expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('when connectors are configured, connectorId is undefined, and didInitialFetch is false', () => {
+    // At least two connectors are required for this scenario,
+    // because a single connector will be automatically selected,
+    // which will set connectorId to a non-undefined value:
+    const multipleMockConnectors: unknown[] = [
+      {
+        id: 'mock-connector-1',
+        name: 'OpenAI connector 1',
+        actionTypeId: '.gen-ai',
+      },
+      {
+        id: 'mock-connector-2',
+        name: 'OpenAI connector 2',
+        actionTypeId: '.gen-ai',
+      },
+    ];
+
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: multipleMockConnectors, // <-- multiple connectors, so none are auto-selected
+      });
+
+      (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]); // <-- connectorId is undefined
+
+      (useAttackDiscovery as jest.Mock).mockReturnValue({
+        approximateFutureTime: null,
+        attackDiscoveries: [],
+        cachedAttackDiscoveries: {},
+        didInitialFetch: false, // <-- didInitialFetch is false
+        fetchAttackDiscoveries: jest.fn(),
+        failureReason: null,
+        generationIntervals: undefined,
+        isLoading: false,
+        isLoadingPost: false,
+        lastUpdated: null,
+        replacements: {},
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('does NOT render the animated logo, because connectorId is undefined', () => {
+      expect(screen.queryByTestId('animatedLogo')).toBeNull();
+    });
+
+    it('does NOT render the summary', () => {
+      expect(screen.queryByTestId('summary')).toBeNull();
+    });
+
+    it('does NOT render the loading callout', () => {
+      expect(screen.queryByTestId('loadingCallout')).toBeNull();
+    });
+
+    it('renders the empty prompt', () => {
+      expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
     });
 
     it('does NOT render attack discoveries', () => {
