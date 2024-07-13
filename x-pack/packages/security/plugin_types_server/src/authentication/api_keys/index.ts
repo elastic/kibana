@@ -5,23 +5,6 @@
  * 2.0.
  */
 
-export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  GrantAPIKeyResult,
-  APIKeys,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-  UpdateCrossClusterAPIKeyParams,
-  UpdateRestAPIKeyParams,
-  UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './api_keys';
 export {
   crossClusterApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
