@@ -12,9 +12,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface PopoverPlaceholderProps {
   basePath: string;
+  customPlaceholderMessage?: React.ReactNode;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath }) => {
+export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
+  basePath,
+  customPlaceholderMessage,
+}) => {
   const { colorMode } = useEuiTheme();
 
   return (
@@ -37,21 +41,25 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath }) =>
           }.svg`}
         />
 
-        <EuiText size="m">
-          <p>
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResultsHeading"
-              defaultMessage="No results found"
-            />
-          </p>
-        </EuiText>
+        {customPlaceholderMessage ?? (
+          <>
+            <EuiText size="m">
+              <p>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.noResultsHeading"
+                  defaultMessage="No results found"
+                />
+              </p>
+            </EuiText>
 
-        <p>
-          <FormattedMessage
-            id="xpack.globalSearchBar.searchBar.noResults"
-            defaultMessage="Try searching for applications, dashboards, visualizations, and more."
-          />
-        </p>
+            <p>
+              <FormattedMessage
+                id="xpack.globalSearchBar.searchBar.noResults"
+                defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+              />
+            </p>
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
