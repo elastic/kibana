@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEmpty } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
@@ -14,52 +13,13 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
-import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
+import { RuleTypeRegistry } from '../types';
 import {
   asFiltersByRuleTypeAndConsumer,
   asFiltersBySpaceId,
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
-
-export enum AlertingAuthorizationEntity {
-  Rule = 'rule',
-  Alert = 'alert',
-}
-
-export enum ReadOperations {
-  Get = 'get',
-  GetRuleState = 'getRuleState',
-  GetAlertSummary = 'getAlertSummary',
-  GetExecutionLog = 'getExecutionLog',
-  GetActionErrorLog = 'getActionErrorLog',
-  Find = 'find',
-  GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
-  GetRuleExecutionKPI = 'getRuleExecutionKPI',
-  GetBackfill = 'getBackfill',
-  FindBackfill = 'findBackfill',
-}
-
-export enum WriteOperations {
-  Create = 'create',
-  Delete = 'delete',
-  Update = 'update',
-  UpdateApiKey = 'updateApiKey',
-  Enable = 'enable',
-  Disable = 'disable',
-  MuteAll = 'muteAll',
-  UnmuteAll = 'unmuteAll',
-  MuteAlert = 'muteAlert',
-  UnmuteAlert = 'unmuteAlert',
-  Snooze = 'snooze',
-  BulkEdit = 'bulkEdit',
-  BulkDelete = 'bulkDelete',
-  BulkEnable = 'bulkEnable',
-  BulkDisable = 'bulkDisable',
-  Unsnooze = 'unsnooze',
-  RunSoon = 'runSoon',
-  ScheduleBackfill = 'scheduleBackfill',
-  DeleteBackfill = 'deleteBackfill',
-}
+import { ReadOperations, WriteOperations, AlertingAuthorizationEntity } from './types';
 
 export interface EnsureAuthorizedOpts {
   ruleTypeId: string;
@@ -73,12 +33,13 @@ interface HasPrivileges {
   read: boolean;
   all: boolean;
 }
+
 type AuthorizedConsumers = Record<string, HasPrivileges>;
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
 }
 
-type IsAuthorizedAtProducerLevel = boolean;
+export type AuthorizedRuleTypes = Map<string, { authorizedConsumers: AuthorizedConsumers }>;
 
 export interface CreateOptions {
   ruleTypeRegistry: RuleTypeRegistry;
@@ -146,6 +107,24 @@ export class AlertingAuthorization {
       const allRegisteredConsumers = new Set<string>();
       const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
+      /**
+       * Each feature configures a set of rule types. Each
+       * rule type configures its valid consumers. For example,
+       *
+       * { id: 'my-feature-id-1', alerting: [{ ruleTypeId: 'my-rule-type', consumers: ['consumer-a', 'consumer-b'] }] }
+       * { id: 'my-feature-id-2', alerting: [{ ruleTypeId: 'my-rule-type-2', consumers: ['consumer-a', 'consumer-d'] }] }
+       *
+       * In this loop we iterate over all features and we construct:
+       * a) a set that contains all registered consumers and
+       * b) a map that contains all valid consumers per rule type.
+       * We remove duplicates in the process. For example,
+       *
+       * allRegisteredConsumers: Set(1) { 'consumer-a', 'consumer-b', 'consumer-d' }
+       * ruleTypesConsumersMap: Map(1) {
+       *  'my-rule-type' => Set(1) { 'consumer-a', 'consumer-b' }
+       *  'my-rule-type-2' => Set(1) { 'consumer-a', 'consumer-d' }
+       * }
+       */
       for (const feature of featuresWithAlertingConfigured) {
         if (feature.alerting) {
           for (const entry of feature.alerting) {
@@ -182,20 +161,20 @@ export class AlertingAuthorization {
   }
 
   /*
-   * This method exposes the private 'augmentRuleTypesWithAuthorization' to be
+   * This method exposes the private '_getAuthorizedRuleTypesWithAuthorizedConsumers' to be
    * used by the RAC/Alerts client
    */
-  public async getAugmentedRuleTypesWithAuthorization(
+  public async getAuthorizedRuleTypesWithAuthorizedConsumers(
     featureIds: readonly string[],
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
-    authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
+    authorizedRuleTypes: AuthorizedRuleTypes;
   }> {
-    return this.augmentRuleTypesWithAuthorization(
-      this.ruleTypeRegistry.list(),
+    return this._getAuthorizedRuleTypesWithAuthorizedConsumers(
+      new Set(this.ruleTypeRegistry.getAllTypes()),
       operations,
       authorizationEntity,
       new Set(featureIds)
@@ -204,18 +183,12 @@ export class AlertingAuthorization {
 
   public async ensureAuthorized({
     ruleTypeId,
-    consumer: legacyConsumer,
+    consumer,
     operation,
     entity,
     additionalPrivileges = [],
   }: EnsureAuthorizedOpts) {
     const { authorization } = this;
-    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
-    const consumer = getValidConsumer({
-      validLegacyConsumers: ruleType.validLegacyConsumers,
-      legacyConsumer,
-      producer: ruleType.producer,
-    });
 
     const isAvailableConsumer = this.allRegisteredConsumers.has(consumer);
     if (authorization && this.shouldCheckAuthorization()) {
@@ -236,7 +209,7 @@ export class AlertingAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, legacyConsumer, operation, entity));
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
       }
 
       if (!hasAllRequested) {
@@ -266,14 +239,15 @@ export class AlertingAuthorization {
   public async getAuthorizedRuleTypes(
     authorizationEntity: AlertingAuthorizationEntity,
     featuresIds?: Set<string>
-  ): Promise<RegistryAlertTypeWithAuth[]> {
-    const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-      this.ruleTypeRegistry.list(),
+  ): Promise<AuthorizedRuleTypes> {
+    const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers(
+      new Set(this.ruleTypeRegistry.getAllTypes()),
       [ReadOperations.Find],
       authorizationEntity,
       featuresIds
     );
-    return Array.from(authorizedRuleTypes);
+
+    return authorizedRuleTypes;
   }
 
   public async getAuthorizationFilter(
@@ -286,27 +260,19 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
-      const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-        this.ruleTypeRegistry.list(),
+      const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers(
+        new Set(this.ruleTypeRegistry.getAllTypes()),
         [operation],
         authorizationEntity,
         featuresIds
       );
 
       if (!authorizedRuleTypes.size) {
-        throw Boom.forbidden(`Unauthorized to find ${authorizationEntity}s for any rule types`);
+        throw Boom.forbidden(
+          `Unauthorized to ${operation} ${authorizationEntity}s for any rule types`
+        );
       }
 
-      const authorizedRuleTypeIdsToConsumers = new Set<string>(
-        [...authorizedRuleTypes].reduce<string[]>((ruleTypeIdConsumerPairs, ruleType) => {
-          for (const consumer of Object.keys(ruleType.authorizedConsumers)) {
-            ruleTypeIdConsumerPairs.push(`${ruleType.id}/${consumer}/${authorizationEntity}`);
-          }
-          return ruleTypeIdConsumerPairs;
-        }, [])
-      );
-
-      const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
         filter: asFiltersByRuleTypeAndConsumer(
           authorizedRuleTypes,
@@ -314,16 +280,17 @@ export class AlertingAuthorization {
           this.spaceId
         ) as JsonObject,
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
-          if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
+          if (!authorizedRuleTypes.has(ruleTypeId) || authType !== authorizationEntity) {
+            throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, authType));
+          }
+
+          const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId)!;
+          const authorizedConsumers = authorizedRuleType.authorizedConsumers;
+
+          if (!authorizedConsumers[consumer]) {
             throw Boom.forbidden(
-              getUnauthorizedMessage(ruleTypeId, consumer, 'find', authorizationEntity)
+              getUnauthorizedMessage(ruleTypeId, consumer, operation, authorizationEntity)
             );
-          } else {
-            if (authorizedEntries.has(ruleTypeId)) {
-              authorizedEntries.get(ruleTypeId)!.add(consumer);
-            } else {
-              authorizedEntries.set(ruleTypeId, new Set([consumer]));
-            }
           }
         },
       };
@@ -336,99 +303,78 @@ export class AlertingAuthorization {
   }
 
   public async filterByRuleTypeAuthorization(
-    ruleTypes: Set<RegistryRuleType>,
+    ruleTypeIds: Set<string>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity
-  ): Promise<Set<RegistryAlertTypeWithAuth>> {
-    const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-      ruleTypes,
+  ): Promise<AuthorizedRuleTypes> {
+    const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers(
+      ruleTypeIds,
       operations,
       authorizationEntity
     );
     return authorizedRuleTypes;
   }
 
-  private async augmentRuleTypesWithAuthorization(
-    ruleTypes: Set<RegistryRuleType>,
+  private async _getAuthorizedRuleTypesWithAuthorizedConsumers(
+    ruleTypeIds: Set<string>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity,
     consumers?: Set<string>
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
-    authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
+    authorizedRuleTypes: Map<string, { authorizedConsumers: AuthorizedConsumers }>;
   }> {
     const requiredPrivileges = new Map<
       string,
-      [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
+      { ruleTypeId: string; consumer: string; operation: ReadOperations | WriteOperations }
     >();
-    const authorizedRuleTypes = new Set<RegistryAlertTypeWithAuth>();
 
-    const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
-      legacyConsumer === ALERTING_FEATURE_ID || isEmpty(consumers);
+    const consumersToAuthorize: Set<string> = consumers ?? this.allRegisteredConsumers;
 
     if (this.authorization && this.shouldCheckAuthorization()) {
+      const authorizedRuleTypes = new Map<string, { authorizedConsumers: AuthorizedConsumers }>();
+
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
       );
 
-      const ruleTypesWithAuthorization = Array.from(
-        this.augmentWithAuthorizedConsumers(ruleTypes, {})
-      );
-
-      for (const ruleTypeWithAuth of ruleTypesWithAuthorization) {
-        if (!this.ruleTypesConsumersMap.has(ruleTypeWithAuth.id)) {
+      for (const ruleTypeId of ruleTypeIds) {
+        /**
+         * Skip if the ruleTypeId is not configured in any feature
+         * or it is not set int the rule type registry.
+         */
+        if (!this.ruleTypesConsumersMap.has(ruleTypeId) || !this.ruleTypeRegistry.has(ruleTypeId)) {
           continue;
         }
 
-        for (const consumerToAuthorize of this.allRegisteredConsumers) {
-          const ruleTypeConsumers = this.ruleTypesConsumersMap.get(ruleTypeWithAuth.id);
+        const ruleType = this.ruleTypeRegistry.get(ruleTypeId)!;
 
+        for (const consumerToAuthorize of consumersToAuthorize) {
+          const ruleTypeConsumers = this.ruleTypesConsumersMap.get(ruleTypeId);
+
+          /**
+           * Skip if the consumer is not configured for the
+           * specific rule type when configuring a feature
+           */
           if (!ruleTypeConsumers?.has(consumerToAuthorize)) {
             continue;
           }
 
           for (const operation of operations) {
             requiredPrivileges.set(
-              this.authorization!.actions.alerting.get(
-                ruleTypeWithAuth.id,
+              this.authorization.actions.alerting.get(
+                ruleTypeId,
                 consumerToAuthorize,
                 authorizationEntity,
                 operation
               ),
-              [
-                ruleTypeWithAuth,
-                consumerToAuthorize,
-                hasPrivilegeByOperation(operation),
-                ruleTypeWithAuth.producer === consumerToAuthorize,
-              ]
+              {
+                ruleTypeId: ruleType.id,
+                consumer: consumerToAuthorize,
+                operation,
+              }
             );
-
-            // FUTURE ENGINEER
-            // We are just trying to add back the legacy consumers associated
-            // to the rule type to get back the privileges that was given at one point
-            if (!isEmpty(ruleTypeWithAuth.validLegacyConsumers)) {
-              ruleTypeWithAuth.validLegacyConsumers.forEach((legacyConsumer) => {
-                if (addLegacyConsumerPrivileges(legacyConsumer)) {
-                  if (!allRegisteredConsumers[legacyConsumer]) {
-                    allRegisteredConsumers[legacyConsumer] = {
-                      read: true,
-                      all: true,
-                    };
-                  }
-
-                  requiredPrivileges.set(
-                    this.authorization!.actions.alerting.get(
-                      ruleTypeWithAuth.id,
-                      legacyConsumer,
-                      authorizationEntity,
-                      operation
-                    ),
-                    [ruleTypeWithAuth, legacyConsumer, hasPrivilegeByOperation(operation), false]
-                  );
-                }
-              });
-            }
           }
         }
       }
@@ -439,62 +385,56 @@ export class AlertingAuthorization {
 
       for (const { authorized, privilege } of privileges.kibana) {
         if (authorized && requiredPrivileges.has(privilege)) {
-          const [ruleType, consumer, hasPrivileges, isAuthorizedAtProducerLevel] =
-            requiredPrivileges.get(privilege)!;
+          const { ruleTypeId, consumer, operation } = requiredPrivileges.get(privilege)!;
 
-          if (consumersToAuthorize.has(consumer)) {
-            ruleType.authorizedConsumers[consumer] = mergeHasPrivileges(
-              hasPrivileges,
-              ruleType.authorizedConsumers[consumer]
-            );
+          const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId) ?? {
+            authorizedConsumers: {},
+          };
 
-            if (isAuthorizedAtProducerLevel) {
-              // granting privileges under the producer automatically authorized the Rules Management UI as well
-              ruleType.validLegacyConsumers.forEach((legacyConsumer) => {
-                if (addLegacyConsumerPrivileges(legacyConsumer)) {
-                  ruleType.authorizedConsumers[legacyConsumer] = mergeHasPrivileges(
-                    hasPrivileges,
-                    ruleType.authorizedConsumers[legacyConsumer]
-                  );
-                }
-              });
-            }
+          const authorizedConsumers = authorizedRuleType.authorizedConsumers;
+          const mergedOperations = mergeHasPrivileges(
+            getPrivilegesFromOperation(operation),
+            authorizedConsumers[consumer]
+          );
 
-            authorizedRuleTypes.add(ruleType);
-          }
+          authorizedRuleTypes.set(ruleTypeId, {
+            authorizedConsumers: {
+              ...authorizedConsumers,
+              [consumer]: mergedOperations,
+            },
+          });
         }
       }
 
       return {
         username,
         hasAllRequested,
-        authorizedRuleTypes:
-          hasAllRequested && consumers === undefined
-            ? // has access to all features
-              this.augmentWithAuthorizedConsumers(authorizedRuleTypes, allRegisteredConsumers)
-            : authorizedRuleTypes,
+        authorizedRuleTypes,
       };
     } else {
       return {
         hasAllRequested: true,
-        authorizedRuleTypes: this.augmentWithAuthorizedConsumers(
-          new Set([...ruleTypes].filter((ruleType) => consumersToAuthorize.has(ruleType.producer))),
-          allRegisteredConsumers
-        ),
+        authorizedRuleTypes: this.getRegisteredRuleTypesWithAllRegisteredConsumers(ruleTypeIds),
       };
     }
   }
 
-  private augmentWithAuthorizedConsumers(
-    ruleTypes: Set<RegistryRuleType>,
-    authorizedConsumers: AuthorizedConsumers
-  ): Set<RegistryAlertTypeWithAuth> {
-    return new Set(
-      Array.from(ruleTypes).map((ruleType) => ({
-        ...ruleType,
-        authorizedConsumers: { ...authorizedConsumers },
-      }))
-    );
+  private getRegisteredRuleTypesWithAllRegisteredConsumers(ruleTypeIds: Set<string>) {
+    const authorizedRuleTypes = new Map<string, { authorizedConsumers: AuthorizedConsumers }>();
+    const authorizedConsumers = getConsumersWithPrivileges(this.allRegisteredConsumers, {
+      all: true,
+      read: true,
+    });
+
+    Array.from(this.ruleTypesConsumersMap.keys())
+      .filter((ruleTypeId) => ruleTypeIds.has(ruleTypeId))
+      .forEach((ruleTypeId) => {
+        authorizedRuleTypes.set(ruleTypeId, {
+          authorizedConsumers,
+        });
+      });
+
+    return authorizedRuleTypes;
   }
 }
 
@@ -505,7 +445,7 @@ function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPriv
   };
 }
 
-function hasPrivilegeByOperation(operation: ReadOperations | WriteOperations): HasPrivileges {
+function getPrivilegesFromOperation(operation: ReadOperations | WriteOperations): HasPrivileges {
   const read = Object.values(ReadOperations).includes(operation as unknown as ReadOperations);
   const all = Object.values(WriteOperations).includes(operation as unknown as WriteOperations);
   return {
@@ -514,11 +454,11 @@ function hasPrivilegeByOperation(operation: ReadOperations | WriteOperations): H
   };
 }
 
-function asAuthorizedConsumers(
-  consumers: string[],
+function getConsumersWithPrivileges(
+  consumers: Set<string>,
   hasPrivileges: HasPrivileges
 ): AuthorizedConsumers {
-  return consumers.reduce<AuthorizedConsumers>((acc, feature) => {
+  return Array.from(consumers).reduce<AuthorizedConsumers>((acc, feature) => {
     acc[feature] = hasPrivileges;
     return acc;
   }, {});
@@ -532,16 +472,3 @@ function getUnauthorizedMessage(
 ): string {
   return `Unauthorized by "${scope}" to ${operation} "${alertTypeId}" ${entity}`;
 }
-
-export const getValidConsumer = ({
-  validLegacyConsumers,
-  legacyConsumer,
-  producer,
-}: {
-  validLegacyConsumers: string[];
-  legacyConsumer: string;
-  producer: string;
-}): string =>
-  legacyConsumer === ALERTING_FEATURE_ID || validLegacyConsumers.includes(legacyConsumer)
-    ? producer
-    : legacyConsumer;

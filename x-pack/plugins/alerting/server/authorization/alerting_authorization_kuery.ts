@@ -9,7 +9,7 @@ import { remove } from 'lodash';
 import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RegistryAlertTypeWithAuth } from './alerting_authorization';
+import { AuthorizedRuleTypes } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
   KQL = 'kql',
@@ -35,36 +35,39 @@ const esQueryConfig: EsQueryConfig = {
 };
 
 export function asFiltersByRuleTypeAndConsumer(
-  ruleTypes: Set<RegistryAlertTypeWithAuth>,
+  ruleTypes: AuthorizedRuleTypes,
   opts: AlertingAuthorizationFilterOpts,
   spaceId: string | undefined
 ): KueryNode | estypes.QueryDslQueryContainer {
   const kueryNode = nodeBuilder.or(
-    Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
-      ensureFieldIsSafeForQuery('ruleTypeId', id);
+    Array.from(ruleTypes.entries()).reduce<KueryNode[]>(
+      (filters, [id, { authorizedConsumers }]) => {
+        ensureFieldIsSafeForQuery('ruleTypeId', id);
 
-      const andNodes: KueryNode[] = [nodeBuilder.is(opts.fieldNames.ruleTypeId, id)];
+        const andNodes: KueryNode[] = [nodeBuilder.is(opts.fieldNames.ruleTypeId, id)];
 
-      const authorizedConsumersKeys = Object.keys(authorizedConsumers);
-      if (authorizedConsumersKeys.length) {
-        andNodes.push(
-          nodeBuilder.or(
-            authorizedConsumersKeys.map((consumer) => {
-              ensureFieldIsSafeForQuery('consumer', consumer);
-              return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-            })
-          )
-        );
-      }
+        const authorizedConsumersKeys = Object.keys(authorizedConsumers);
+        if (authorizedConsumersKeys.length) {
+          andNodes.push(
+            nodeBuilder.or(
+              authorizedConsumersKeys.map((consumer) => {
+                ensureFieldIsSafeForQuery('consumer', consumer);
+                return nodeBuilder.is(opts.fieldNames.consumer, consumer);
+              })
+            )
+          );
+        }
 
-      if (opts.fieldNames.spaceIds != null && spaceId != null) {
-        andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));
-      }
+        if (opts.fieldNames.spaceIds != null && spaceId != null) {
+          andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));
+        }
 
-      filters.push(nodeBuilder.and(andNodes));
+        filters.push(nodeBuilder.and(andNodes));
 
-      return filters;
-    }, [])
+        return filters;
+      },
+      []
+    )
   );
 
   if (opts.type === AlertingAuthorizationFilterType.ESDSL) {

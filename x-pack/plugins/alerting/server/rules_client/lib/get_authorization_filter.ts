@@ -6,11 +6,11 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import { AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { BulkAction } from '../types';
+import { AlertingAuthorizationEntity } from '../../authorization/types';
 
 export const getAuthorizationFilter = async (
   context: RulesClientContext,

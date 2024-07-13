@@ -13,7 +13,7 @@ import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import {
   ReadOperations,
-  PluginStartContract as AlertingStart,
+  AlertingServerStart,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -38,7 +38,7 @@ const EXCLUDED_RULE_TYPE_IDS = ['siem.notifications'];
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
-  alerting: AlertingStart,
+  alerting: AlertingServerStart,
   logger: Logger,
   security?: SecurityPluginSetup,
   spaces?: SpacesPluginStart

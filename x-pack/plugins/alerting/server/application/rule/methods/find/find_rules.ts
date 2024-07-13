@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import { isEmpty, pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertingAuthorizationEntity } from '../../../../authorization/types';
 import { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
-import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
