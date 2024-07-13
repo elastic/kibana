@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import FieldDescription from './field_description';
+import { FieldDescription } from './field_description';
 import { render, screen } from '@testing-library/react';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
