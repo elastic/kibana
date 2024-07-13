@@ -6,6 +6,7 @@
  */
 
 import { AxiosError, AxiosResponse } from 'axios';
+import { Logger } from '@kbn/core/server';
 
 interface ConnectorMetrics {
   requestBodyBytes: number;
@@ -16,9 +17,27 @@ export class ConnectorMetricsCollector {
     requestBodyBytes: 0,
   };
 
+  private logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
+
   public addRequestBodyBytes(result?: AxiosError | AxiosResponse, body: string | object = '') {
-    const sBody = typeof body === 'string' ? body : JSON.stringify(body);
-    const bytes = result?.request?.headers?.['Content-Length'] || Buffer.byteLength(sBody, 'utf8');
+    const contentLength = result?.request?.headers?.['Content-Length'];
+    let bytes = 0;
+
+    if (!!contentLength) {
+      bytes = contentLength;
+    } else {
+      try {
+        const sBody = typeof body === 'string' ? body : JSON.stringify(body);
+        bytes = Buffer.byteLength(sBody, 'utf8');
+      } catch (e) {
+        this.logger.error(`Request body bytes couldn't be calculated, Error: ${e.message}`);
+      }
+    }
+
     this.metrics.requestBodyBytes = this.metrics.requestBodyBytes + bytes;
   }
 

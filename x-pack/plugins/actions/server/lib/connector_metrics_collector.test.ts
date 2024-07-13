@@ -7,10 +7,13 @@
 
 import { ConnectorMetricsCollector } from '../types';
 import { AxiosHeaders, AxiosResponse } from 'axios';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('ConnectorMetricsCollector', () => {
+  const logger = loggingSystemMock.createLogger();
+
   test('it collects requestBodyBytes from response.request.headers', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     const data = { test: 'foo' };
     const contentLength = Buffer.byteLength(JSON.stringify(data), 'utf8');
 
@@ -34,7 +37,7 @@ describe('ConnectorMetricsCollector', () => {
     expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
   });
   test('it collects requestBodyBytes from data when response.request.headers is missing', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector();
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
     const data = { test: 'foo' };
     const contentLength = Buffer.byteLength(JSON.stringify(data), 'utf8');
 
@@ -53,5 +56,31 @@ describe('ConnectorMetricsCollector', () => {
     connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
 
     expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
+  });
+
+  test('it logs an error when the body cannot be stringified ', async () => {
+    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+
+    const data = {
+      name: 'arun',
+    };
+
+    // @ts-ignore
+    data.foo = data; // this is to force JSON.stringify to throw
+
+    const axiosResponse: AxiosResponse = {
+      data,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: { headers: new AxiosHeaders() },
+    };
+
+    connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining("Request body bytes couldn't be calculated, Error: ")
+    );
   });
 });

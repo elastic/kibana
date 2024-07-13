@@ -391,11 +391,15 @@ export class ActionExecutor {
       },
       async (span) => {
         const { actionTypeRegistry, analyticsService, eventLogger } = this.actionExecutorContext!;
-        const connectorMetricsCollector = new ConnectorMetricsCollector();
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
         const { actionTypeId, name, config, secrets } = actionInfo;
+
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        const logger = this.actionExecutorContext!.logger.get(loggerId);
+
+        const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
@@ -436,9 +440,6 @@ export class ActionExecutor {
         } catch (err) {
           return err.result;
         }
-
-        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
-        const logger = this.actionExecutorContext!.logger.get(loggerId);
 
         if (span) {
           span.name = `${executeLabel} ${actionTypeId}`;
