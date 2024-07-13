@@ -22,8 +22,9 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
     'system',
     'Respond to the human as helpfully and accurately as possible. You have access to the following tools:\n\n' +
       '{tools}\n\n' +
-      'Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args).\n\n' +
+      `The tool action_input should ALWAYS follow the tool JSON schema args.\n\n` +
       'Valid "action" values: "Final Answer" or {tool_names}\n\n' +
+      'Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args).\n\n' +
       'Provide only ONE action per $JSON_BLOB, as shown:\n\n' +
       '```\n\n' +
       '{{\n\n' +
@@ -45,9 +46,10 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       '```\n\n' +
       '{{\n\n' +
       '  "action": "Final Answer",\n\n' +
-      '  "action_input": "Final response to human"\n\n' +
+      // important, no new line here
+      '  "action_input": "Final response to human"' +
       '}}\n\n' +
-      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. Your answer will be parsed as JSON, so avoid using quotes and instead use backticks. When using tools, ALWAYS input the expected JSON schema args. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation',
+      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Response format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
   [
