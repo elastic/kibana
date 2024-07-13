@@ -28,7 +28,7 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       '```\n\n' +
       '{{\n\n' +
       '  "action": $TOOL_NAME,\n\n' +
-      '  "action_input": Tool input strictly matching the  tool schema.\n\n' +
+      '  "action_input": $TOOL_INPUT\n\n' +
       '}}\n\n' +
       '```\n\n' +
       'Follow this format:\n\n' +
