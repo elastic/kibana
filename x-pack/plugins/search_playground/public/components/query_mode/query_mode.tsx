@@ -158,6 +158,7 @@ export const QueryMode: React.FC = () => {
                               checked={checked}
                               onChange={(e) => updateFields(index, field.name, e.target.checked)}
                               compressed
+                              data-test-subj={`field-${field.name}-${checked}`}
                             />
                           );
                         },
