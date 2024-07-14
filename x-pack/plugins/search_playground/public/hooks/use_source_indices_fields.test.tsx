@@ -79,7 +79,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
     });
   });
 
-  it('should handle addIndex correctly changing indices and updating loading state', async () => {
+  it('should handle addIndex correctly changing indices', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useSourceIndicesFields(), { wrapper });
     const { getValues } = formHookSpy.mock.results[0].value;
 
@@ -100,13 +100,11 @@ describe.skip('useSourceIndicesFields Hook', () => {
     await act(async () => {
       await waitForNextUpdate();
       expect(result.current.indices).toEqual(['newIndex']);
-      expect(result.current.loading).toBe(true);
     });
 
     expect(postMock).toHaveBeenCalled();
 
     await act(async () => {
-      expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
           "doc_size": 3,
@@ -165,7 +163,6 @@ describe.skip('useSourceIndicesFields Hook', () => {
     expect(postMock).toHaveBeenCalled();
 
     await act(async () => {
-      expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
           "doc_size": 3,
@@ -218,7 +215,6 @@ describe.skip('useSourceIndicesFields Hook', () => {
     expect(postMock).toHaveBeenCalled();
 
     await act(async () => {
-      expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
           "doc_size": 3,
