@@ -8,12 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { XYState } from '../../types';
-import { hasHistogramSeries } from '../../state_helpers';
+import { hasHistogramSeries, isHorizontalChart } from '../../state_helpers';
 import type { FramePublicAPI } from '../../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
@@ -75,6 +76,14 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
   });
 
   const isDisabled = !isValueLabelsEnabled && !isFittingEnabled && !isCurveTypeEnabled;
+  console.log('MMMMMM', state.shape);
+  console.log(dataLayers, hasNonBarSeries);
+
+  const isHorizontal = isHorizontalChart(state.layers);
+  const opposites = {
+    vertical: ['bar', 'bar_stacked', 'bar_percentage_stacked'],
+    horizontal: ['bar_horizontal', 'bar_horizontal_stacked', 'bar_horizontal_percentage_stacked'],
+  };
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
@@ -87,6 +96,28 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         buttonDataTestSubj="lnsVisualOptionsButton"
         isDisabled={isDisabled}
       >
+        <BarOrientationSettings
+          isVisible={!hasNonBarSeries}
+          barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
+          onBarOrientationChange={(newMode) => {
+            let newSeriesType;
+            if (newMode === 'horizontal') {
+              const index = opposites.vertical.indexOf(state.layers[0].seriesType);
+              newSeriesType = opposites.horizontal[index];
+            } else {
+              const index = opposites.horizontal.indexOf(state.layers[0].seriesType);
+              newSeriesType = opposites.vertical[index];
+            }
+            // for each layer, change the series type
+            setState({
+              ...state,
+              layers: state.layers.map((layer) => ({
+                ...layer,
+                seriesType: newSeriesType,
+              })),
+            });
+          }}
+        />
         <LineCurveOption
           enabled={isCurveTypeEnabled}
           value={state?.curveType}

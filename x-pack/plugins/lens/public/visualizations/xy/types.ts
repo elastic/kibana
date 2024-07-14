@@ -347,5 +347,6 @@ export const chartSwitchOptions = [
     description: i18n.translate('xpack.lens.line.visualizationDescription', {
       defaultMessage: 'Reveal variations in data over time or categorically.',
     }),
+    subtypes: ['line'],
   },
 ];

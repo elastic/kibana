@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StaticHeader } from '../../../shared_components';
 import {
   DatasourceMap,
@@ -53,7 +54,23 @@ export function LayerHeader({
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 
-  return (
+  const SubtypeSwitch = activeVisualization.getSubtypeSwitch?.(layerConfigProps);
+
+  return SubtypeSwitch ? (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <ChartSwitch
+          datasourceMap={datasourceMap}
+          visualizationMap={availableVisualizationMap}
+          framePublicAPI={layerConfigProps.frame}
+          layerId={layerConfigProps.layerId}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <SubtypeSwitch />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
     <ChartSwitch
       datasourceMap={datasourceMap}
       visualizationMap={availableVisualizationMap}

@@ -1185,6 +1185,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationLayerWidgetProps<T>
   ) => undefined | ReactElement<VisualizationLayerWidgetProps<T>>;
 
+  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => (() => JSX.Element) | null;
+
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,
    * like a custom dataview switch

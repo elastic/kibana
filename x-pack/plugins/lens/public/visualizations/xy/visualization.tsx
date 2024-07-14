@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Position } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,15 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+} from '@elastic/eui';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { DataLayerConfig } from '@kbn/expression-xy-plugin/common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -37,7 +46,7 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar } from './xy_config_panel';
+import { XyToolbar, updateLayer } from './xy_config_panel';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -53,6 +62,7 @@ import type {
   Suggestion,
   UserMessage,
   AnnotationGroups,
+  VisualizationLayerWidgetProps,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
@@ -673,6 +683,23 @@ export const getXyVisualization = ({
     return (
       (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) ||
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
+    );
+  },
+  getSubtypeSwitch({ state, setState, layerId }) {
+    const index = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[index];
+    // todo: test this: do not show subtype for non data, no split or seriestype line
+    if (!layer || !isDataLayer(layer) || !layer.splitAccessor || layer.seriesType === 'line') {
+      return null;
+    }
+
+    return () => (
+      <SubtypeSwitch
+        layer={layer}
+        setLayerState={(newLayer: XYDataLayerConfig) =>
+          setState(updateLayer(state, newLayer, index))
+        }
+      />
     );
   },
 
@@ -1298,3 +1325,95 @@ function getNotifiableFeatures(
     },
   ];
 }
+
+const stackingTypes = [
+  {
+    type: 'stacked',
+    label: 'Stacked',
+    subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
+  },
+  { type: 'unstacked', label: 'Unstacked', subtypes: ['bar', 'area', 'bar_horizontal'] },
+  {
+    type: 'percentage',
+    label: 'Percentage',
+    subtypes: [
+      'bar_percentage_stacked',
+      'area_percentage_stacked',
+      'bar_horizontal_percentage_stacked',
+    ],
+  },
+];
+
+const SubtypeSwitch = ({
+  layer,
+  setLayerState,
+}: {
+  layer: XYDataLayerConfig;
+  setLayerState: (l: XYDataLayerConfig) => void;
+}): JSX.Element | null => {
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+
+  const stackingType = stackingTypes.find(({ subtypes }) => subtypes.includes(layer.seriesType));
+  if (!stackingType) {
+    return null;
+  }
+  const subTypeIndex = stackingType.subtypes.indexOf(layer.seriesType);
+  const options = stackingTypes.map(({ label, subtypes }) => ({
+    label,
+    value: subtypes[subTypeIndex],
+    checked: subtypes[subTypeIndex] === layer.seriesType ? ('on' as const) : undefined,
+  }));
+
+  return (
+    <>
+      <EuiPopover
+        ownFocus
+        panelPaddingSize="none"
+        button={
+          <ToolbarButton
+            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {
+              defaultMessage: 'Stacking',
+            })}
+            onClick={() => setFlyoutOpen(true)}
+            fullWidth
+            size="s"
+            label={stackingType.label}
+          />
+        }
+        isOpen={flyoutOpen}
+        closePopover={() => setFlyoutOpen(false)}
+        anchorPosition="downLeft"
+      >
+        <EuiPopoverTitle>
+          <EuiFlexGroup alignItems="center" responsive={false} css={{ padding: `4px 12px` }}>
+            <EuiFlexItem>
+              {i18n.translate('xpack.lens.xyChart.stackingOptions', {
+                defaultMessage: 'Stacking',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        <EuiSelectable
+          listProps={{ paddingSize: 's' }}
+          css={{ width: 200 }}
+          singleSelection
+          data-test-subj="lnsChartSwitchList"
+          options={options}
+          onChange={(newOptions) => {
+            setFlyoutOpen(false);
+            const chosenType = newOptions.find(({ checked }) => checked === 'on');
+            if (!chosenType) {
+              return;
+            }
+            setLayerState({
+              ...layer,
+              seriesType: chosenType.value as SeriesType,
+            });
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    </>
+  );
+};

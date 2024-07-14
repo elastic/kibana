@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import { SeriesType, XYState, visualizationTypes } from './types';
+import { SeriesType, XYState, chartSwitchOptions, visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
@@ -100,7 +100,7 @@ export function AddLayerButton({
 
   const horizontalOnly = isHorizontalChart(state.layers);
 
-  const availableVisTypes = visualizationTypes.filter(
+  const availableVisTypes = chartSwitchOptions.filter(
     (t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly
   );
 
@@ -148,7 +148,22 @@ export function AddLayerButton({
                 if (type === LayerTypes.ANNOTATIONS) {
                   return annotationPanel(props);
                 } else if (type === LayerTypes.DATA) {
-                  return dataPanel(props);
+                  if (horizontalOnly) {
+                    return {
+                      toolTipContent,
+                      disabled,
+                      name: <span className="lnsLayerAddButtonLabel">{label}</span>,
+                      className: 'lnsLayerAddButton',
+                      icon: icon && <EuiIcon size="m" type={icon} />,
+                      ['data-test-subj']: `lnsLayerAddButton-${type}`,
+                      onClick: () => {
+                        addLayer(type);
+                        toggleLayersChoice(false);
+                      },
+                    };
+                  } else {
+                    return dataPanel(props);
+                  }
                 }
                 return {
                   toolTipContent,
@@ -202,22 +217,33 @@ export function AddLayerButton({
                 defaultMessage: 'Compatible visualization types',
               }),
               width: 300,
-              items: availableVisTypes.map((t) => ({
-                renderItem: () => {
-                  return (
-                    <ChartOptionWrapper
-                      type={t.id}
-                      label={t.fullLabel || t.label}
-                      description={t.description}
-                      icon={t.icon}
-                      onClick={() => {
-                        addLayer(LayerTypes.DATA, undefined, undefined, t.id as SeriesType);
-                        toggleLayersChoice(false);
-                      }}
-                    />
-                  );
-                },
-              })),
+              items: availableVisTypes.map((t) => {
+                const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
+
+                return {
+                  renderItem: () => {
+                    return (
+                      <ChartOptionWrapper
+                        type={t.id}
+                        label={t.label}
+                        description={t.description}
+                        icon={t.icon}
+                        onClick={() => {
+                          addLayer(
+                            LayerTypes.DATA,
+                            undefined,
+                            undefined,
+                            t.subtypes.includes(firstLayerSubtype)
+                              ? firstLayerSubtype
+                              : (t.subtypes[0] as SeriesType)
+                          );
+                          toggleLayersChoice(false);
+                        }}
+                      />
+                    );
+                  },
+                };
+              }),
             },
           ]}
         />
