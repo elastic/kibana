@@ -53,13 +53,9 @@ const renderFormatSelector = (propsOverrides?: Partial<FormatSelectorProps>) => 
       </I18nProvider>
     );
   };
-  const rtlRender = render(<FormatSelector {...props} {...propsOverrides} />, {
+  return render(<FormatSelector {...props} {...propsOverrides} />, {
     wrapper: WrappingComponent,
   });
-
-  return {
-    ...rtlRender,
-  };
 };
 
 describe('FormatSelector', () => {

@@ -192,10 +192,8 @@ describe('Lens Field Item', () => {
   it('should show gauge icon for gauge fields', async () => {
     render(
       <InnerFieldItemWrapper
-        {...{
-          ...defaultProps,
-          field: { ...defaultProps.field, timeSeriesMetric: 'gauge' },
-        }}
+        {...defaultProps}
+        field={{ ...defaultProps.field, timeSeriesMetric: 'gauge' }}
       />
     );
     expect(screen.getByText('Gauge metric')).toBeInTheDocument();
@@ -478,9 +476,7 @@ describe('Lens Field Item', () => {
   });
   const clickFieldRtl = async (fieldname: string) => {
     userEvent.click(screen.getByTestId(`field-${fieldname}-showDetails`));
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   };
 
   it('should display Explore in discover button', async () => {
