@@ -40,7 +40,7 @@ const isQueryFieldSelected = (
 export const QueryMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const usageTracker = useUsageTracker();
-  const { fields, isFieldsLoading } = useSourceIndicesFields();
+  const { fields } = useSourceIndicesFields();
   const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
     name: ChatFormFields.sourceFields,
   });
@@ -49,9 +49,8 @@ export const QueryMode: React.FC = () => {
   } = useController<ChatForm, ChatFormFields.queryFields>({
     name: ChatFormFields.queryFields,
   });
-
   const {
-    field: { onChange: elasticsearchQueryChange },
+    field: { onChange: elasticsearchQueryChange, value: elasticsearchQuery },
   } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
     name: ChatFormFields.elasticsearchQuery,
   });
@@ -70,12 +69,7 @@ export const QueryMode: React.FC = () => {
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.queryModeLoaded);
   }, [usageTracker]);
-
-  const query = useMemo(
-    () =>
-      !isFieldsLoading && JSON.stringify(createQuery(queryFields, sourceFields, fields), null, 2),
-    [isFieldsLoading, queryFields, sourceFields, fields]
-  );
+  const query = useMemo(() => JSON.stringify(elasticsearchQuery, null, 2), [elasticsearchQuery]);
 
   return (
     <EuiFlexGroup>

@@ -9,7 +9,6 @@ import {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
-  RetrieverContainer,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -74,7 +73,7 @@ export interface ChatForm {
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { retriever: RetrieverContainer };
+  [ChatFormFields.elasticsearchQuery]: { retriever: unknown }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };

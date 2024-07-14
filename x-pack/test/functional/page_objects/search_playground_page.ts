@@ -162,7 +162,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectSaveFieldsBetweenModes() {
         await testSubjects.click('queryMode');
-        const fields = await testSubjects.findAll('fieldName');
         await testSubjects.existOrFail('field-baz-true');
         await testSubjects.click('field-baz-true');
         await testSubjects.existOrFail('field-baz-false');
