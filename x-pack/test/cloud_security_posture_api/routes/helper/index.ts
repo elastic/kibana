@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export interface ReadPrivilegesResponse {
-  is_authenticated: boolean;
-  has_encryption_key: boolean;
-}
+import { CspSecurityCommonProvider } from './user_roles_utilites';
+
+export const cloudSecurityPosturePageObjects = {
+  cspSecurity: CspSecurityCommonProvider,
+};
+export const pageObjects = {
+  ...cloudSecurityPosturePageObjects,
+};
