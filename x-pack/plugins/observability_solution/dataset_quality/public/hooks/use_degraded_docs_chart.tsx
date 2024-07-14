@@ -8,7 +8,7 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
-
+import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -53,10 +53,22 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     services: { lens },
   } = useKibanaContextForPlugin();
   const { service } = useDatasetQualityContext();
-  const { trackDetailsNavigated, navigationTargets, navigationSources } =
-    useDatasetDetailsTelemetry();
+
+  const {
+    trackDatasetDetailsBreakdownFieldChanged,
+    trackDetailsNavigated,
+    navigationTargets,
+    navigationSources,
+  } = useDatasetDetailsTelemetry();
 
   const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
+
+  const isBreakdownFieldEcsAsserted = useSelector(
+    service,
+    (state) =>
+      state.matches('flyout.initializing.dataStreamDetails.done') &&
+      state.history?.matches('flyout.initializing.dataStreamDetails.assertBreakdownFieldIsEcs')
+  );
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
@@ -96,12 +108,15 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
       breakdownFieldName: breakdownDataViewField?.name,
     });
     setAttributes(lensAttributes);
+    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
   }, [
     breakdownDataViewField?.name,
     euiTheme.colors.danger,
     setAttributes,
     dataStream,
     dataStreamStat?.title,
+    trackDatasetDetailsBreakdownFieldChanged,
+    isBreakdownFieldEcsAsserted,
   ]);
 
   const openInLensCallback = useCallback(() => {

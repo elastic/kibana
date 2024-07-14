@@ -76,6 +76,7 @@ export interface WithFlyoutOptions {
     degradedFields: DegradedFields;
     isNonAggregatable?: boolean;
     integration?: DataStreamIntegrations;
+    isBreakdownFieldEcs: boolean;
   };
 }
 
@@ -167,6 +168,14 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
+      value: 'flyout.initializing.dataStreamDetails.done';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.dataStreamDetails.assertBreakdownFieldIsEcs';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
       value: 'flyout.initializing.dataStreamDegradedFields.fetching';
       context: DefaultDatasetQualityStateContext;
     }
@@ -244,4 +253,5 @@ export type DatasetQualityControllerEvent =
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<Integration>
+  | DoneInvokeEvent<boolean>
   | DoneInvokeEvent<Error>;

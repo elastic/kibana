@@ -11,6 +11,7 @@ import { useSelector } from '@xstate/react';
 import { getDateISORange } from '@kbn/timerange';
 import { AggregateQuery, Query } from '@kbn/es-query';
 
+import { MASKED_FIELD_PLACEHOLDER } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats';
 import { DataStreamDetails } from '../../common/api_types';
 import { mapPercentageToQuality } from '../../common/utils';
@@ -143,6 +144,7 @@ export const useDatasetDetailsTelemetry = () => {
     insightsTimeRange,
     breakdownField,
     isNonAggregatable,
+    isBreakdownFieldEcs,
   } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const loadingState = useSelector(service, (state) => ({
@@ -173,6 +175,7 @@ export const useDatasetDetailsTelemetry = () => {
         isNonAggregatable ?? false,
         canUserViewIntegrations,
         canUserAccessDashboards,
+        isBreakdownFieldEcs,
         breakdownField
       );
     }
@@ -186,6 +189,7 @@ export const useDatasetDetailsTelemetry = () => {
     isNonAggregatable,
     canUserViewIntegrations,
     canUserAccessDashboards,
+    isBreakdownFieldEcs,
     breakdownField,
   ]);
 
@@ -225,6 +229,15 @@ export const useDatasetDetailsTelemetry = () => {
     [ebtProps, telemetryClient]
   );
 
+  const trackDatasetDetailsBreakdownFieldChanged = useCallback(() => {
+    const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
+    if (datasetDetailsTrackingState === 'opened' && ebtProps) {
+      telemetryClient.trackDatasetDetailsBreakdownFieldChanged({
+        breakdown_field: ebtProps.breakdown_field,
+      });
+    }
+  }, [ebtProps, telemetryClient]);
+
   const wrapLinkPropsForTelemetry = useCallback(
     (
       props: RouterLinkProps,
@@ -251,6 +264,7 @@ export const useDatasetDetailsTelemetry = () => {
     wrapLinkPropsForTelemetry,
     navigationTargets: NavigationTarget,
     navigationSources: NavigationSource,
+    trackDatasetDetailsBreakdownFieldChanged,
   };
 };
 
@@ -318,6 +332,7 @@ function getDatasetDetailsEbtProps(
   isNonAggregatable: boolean,
   canUserViewIntegrations: boolean,
   canUserAccessDashboards: boolean,
+  isBreakdownFieldEcs: boolean,
   breakdownField?: string
 ): DatasetDetailsEbtProps {
   const indexName = flyoutDataset.rawName;
@@ -347,6 +362,12 @@ function getDatasetDetailsEbtProps(
     to,
     degraded_percentage: degradedPercentage,
     integration: flyoutDataset.integration?.name,
-    breakdown_field: breakdownField,
+    breakdown_field: breakdownField
+      ? getMaskedBreakdownField(breakdownField, isBreakdownFieldEcs)
+      : breakdownField,
   };
+}
+
+function getMaskedBreakdownField(breakdownField: string, isBreakdownFieldEcs: boolean) {
+  return isBreakdownFieldEcs ? breakdownField : MASKED_FIELD_PLACEHOLDER;
 }

@@ -56,7 +56,12 @@ export function DegradedDocs({
     if (breakdown.dataViewField && !breakdown.fieldSupportsBreakdown) {
       // TODO: If needed, notify user that the field is not breakable
     }
-  }, [setBreakdownDataViewField, breakdown.dataViewField, breakdown.fieldSupportsBreakdown]);
+  }, [
+    setBreakdownDataViewField,
+    breakdown.dataViewField,
+    breakdown.fieldSupportsBreakdown,
+    breakdown,
+  ]);
 
   return (
     <EuiPanel hasBorder grow={false}>

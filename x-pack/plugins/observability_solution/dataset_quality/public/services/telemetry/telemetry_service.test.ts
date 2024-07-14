@@ -16,6 +16,7 @@ import {
   WithDuration,
   DatasetEbtProps,
   DatasetNavigatedEbtProps,
+  DatasetDetailsBreakdownFieldEbtProps,
 } from './types';
 
 // Mock uuidv4
@@ -172,6 +173,21 @@ describe('TelemetryService', () => {
     );
     expect((secondCall[1] as DatasetDetailsNavigatedEbtProps).breakdown_field).toEqual(
       'example_field'
+    );
+  });
+
+  it('should report dataset details breakdown field change event', async () => {
+    const telemetry = service.start();
+    const exampleEventData: DatasetDetailsBreakdownFieldEbtProps = {
+      breakdown_field: 'service_name',
+    };
+
+    telemetry.trackDatasetDetailsBreakdownFieldChanged(exampleEventData);
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      datasetQualityEbtEvents.datasetDetailsBreakdownFieldChangedEventType.eventType,
+      expect.objectContaining(exampleEventData)
     );
   });
 });

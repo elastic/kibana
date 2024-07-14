@@ -254,8 +254,22 @@ const datasetDetailsNavigatedEventType: DatasetQualityTelemetryEvent = {
   },
 };
 
+const datasetDetailsBreakdownFieldChangedEventType: DatasetQualityTelemetryEvent = {
+  eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED,
+  schema: {
+    breakdown_field: {
+      type: 'keyword',
+      _meta: {
+        description: 'Field used for chart breakdown, if any',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const datasetQualityEbtEvents = {
   datasetNavigatedEventType,
   datasetDetailsOpenedEventType,
   datasetDetailsNavigatedEventType,
+  datasetDetailsBreakdownFieldChangedEventType,
 };

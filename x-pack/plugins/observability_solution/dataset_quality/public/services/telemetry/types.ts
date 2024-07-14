@@ -83,7 +83,11 @@ export interface DatasetNavigatedEbtProps extends DatasetEbtProps {
   };
 }
 
-export interface DatasetDetailsEbtProps extends DatasetEbtProps {
+export interface DatasetDetailsEbtProps
+  extends DatasetDetailsBreakdownFieldEbtProps,
+    DatasetEbtProps {}
+
+export interface DatasetDetailsBreakdownFieldEbtProps {
   breakdown_field?: string;
 }
 
@@ -101,12 +105,16 @@ export interface ITelemetryClient {
   getDatasetDetailsTrackingState: () => DatasetDetailsTrackingState;
   trackDatasetDetailsOpened: (eventProps: DatasetDetailsEbtProps) => void;
   trackDatasetDetailsNavigated: (eventProps: DatasetDetailsNavigatedEbtProps) => void;
+  trackDatasetDetailsBreakdownFieldChanged: (
+    eventProps: DatasetDetailsBreakdownFieldEbtProps
+  ) => void;
 }
 
 export enum DatasetQualityTelemetryEventTypes {
   NAVIGATED = 'Dataset Quality Navigated',
   DETAILS_OPENED = 'Dataset Quality Dataset Details Opened',
   DETAILS_NAVIGATED = 'Dataset Quality Dataset Details Navigated',
+  BREAKDOWN_FIELD_CHANGED = 'Dataset Quality Dataset Details Breakdown Field Changed',
 }
 
 export type DatasetQualityTelemetryEvent =
@@ -121,4 +129,8 @@ export type DatasetQualityTelemetryEvent =
   | {
       eventType: DatasetQualityTelemetryEventTypes.DETAILS_NAVIGATED;
       schema: RootSchema<DatasetDetailsNavigatedEbtProps & WithTrackingId>;
+    }
+  | {
+      eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED;
+      schema: RootSchema<DatasetDetailsBreakdownFieldEbtProps>;
     };
