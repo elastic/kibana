@@ -21,6 +21,7 @@ import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
+import { getEcsGroups } from './lib/get_ecs_groups';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
@@ -45,7 +46,6 @@ import {
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
-import { Group } from '../../../../common/typings';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -242,7 +242,7 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const groups: Group[] = groupByKeysObjectMapping[group];
+        const groups = groupByKeysObjectMapping[group];
 
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
@@ -253,6 +253,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(additionalContext),
+            ...getEcsGroups(groups),
           },
         });
 
@@ -317,6 +318,7 @@ export const createCustomThresholdExecutor = ({
           startedAt: indexedStartedAt,
         }),
         ...additionalContext,
+        ...getEcsGroups(group),
       };
 
       alertsClient.setAlertData({
