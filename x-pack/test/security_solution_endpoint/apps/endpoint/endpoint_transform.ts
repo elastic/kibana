@@ -15,13 +15,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const esClient: Client = getService('es');
 
-  const transformAggregation = {
+  const transformAggregation = () => ({
     init_script: 'state.docs = []',
     map_script: "state.docs.add(new HashMap(params['_source']))",
     combine_script: 'return state.docs',
     reduce_script:
       "def ret = new HashMap(); for (s in states) { for (d in s) { if (d.containsKey('Endpoint')) { ret.endpoint = d } else { ret.agent = d } }} return ret",
-  };
+  });
 
   describe('endpoint transforms', function () {
     targetTags(this, ['@ess', '@serverless', '@serverlessQA']);
@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           pivot: {
             aggs: {
               join: {
-                scripted_metric: transformAggregation,
+                scripted_metric: transformAggregation(),
               },
             },
             group_by: {
