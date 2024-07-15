@@ -512,6 +512,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
                 },
+                userError: result.userError,
               });
             } else if (
               !(result.warningMessages.length > 0) &&
