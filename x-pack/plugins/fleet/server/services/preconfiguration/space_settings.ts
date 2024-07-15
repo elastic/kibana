@@ -70,7 +70,13 @@ export async function ensureSpaceSettings(
   }
 
   for (const spaceId of existingConfigSpaceSettingsSOMap.keys()) {
-    if (!configSpaceSettingsArray.some((config) => config.space_id === spaceId)) {
+    if (
+      !configSpaceSettingsArray.some(
+        (config) =>
+          config.space_id === spaceId &&
+          existingConfigSpaceSettingsSOMap.get(spaceId)?.attributes?.managed_by === 'kibana_config'
+      )
+    ) {
       await saveSpaceSettings({
         spaceId,
         settings: {
@@ -80,6 +86,4 @@ export async function ensureSpaceSettings(
       });
     }
   }
-
-  // TODO
 }
