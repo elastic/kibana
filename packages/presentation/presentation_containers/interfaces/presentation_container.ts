@@ -15,7 +15,7 @@ export interface PanelPackage<SerializedState extends object = object> {
   initialState?: SerializedState;
 }
 
-export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel<object, ApiType> {
+export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */

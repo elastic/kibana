@@ -135,8 +135,8 @@ export const getControlGroupEmbeddableFactory = (services: {
             defaultMessage: 'Controls',
           }),
         getSerializedStateForChild: (childId) => {
-          const childControlState = controlsManager.controlsInOrder$.getValue().find(controlPanelState => controlPanelState.id === childId);
-          return childControlState ? { rawState: childControlState } : undefined;
+          const controlPanelState = controlsManager.controlsInOrder$.getValue().find(controlPanelState => controlPanelState.id === childId);
+          return controlPanelState ? { rawState: controlPanelState } : undefined;
         },
         serializeState: () => {
           return serializeControlGroup(
