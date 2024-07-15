@@ -36,7 +36,7 @@ export const CACHING_KEYS = [
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
   QUERY.page,
   QUERY.per_page,
-  API_VERSIONS.internal.v1,
+  API_VERSIONS.public.v1,
 ];
 
 export const useFetchAnonymizationFields = (payload?: UseFetchAnonymizationFieldsParams) => {
@@ -50,7 +50,7 @@ export const useFetchAnonymizationFields = (payload?: UseFetchAnonymizationField
     async () =>
       http.fetch(ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND, {
         method: 'GET',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         query: QUERY,
         signal: payload?.signal,
       }),
