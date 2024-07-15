@@ -37,84 +37,82 @@ export function NoEntitiesEmptyState() {
   );
 
   return (
-    <>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            hasShadow={false}
-            hasBorder={false}
-            id="apmNewExperienceEmptyState"
-            icon={<EuiImage size="fullWidth" src={dashboardsLight} alt="" />}
-            title={
-              <h2>
-                {i18n.translate('xpack.apm.noEntitiesEmptyState.title', {
-                  defaultMessage: 'No services available.',
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiEmptyPrompt
+          hasShadow={false}
+          hasBorder={false}
+          id="apmNewExperienceEmptyState"
+          icon={<EuiImage size="fullWidth" src={dashboardsLight} alt="" />}
+          title={
+            <h2>
+              {i18n.translate('xpack.apm.noEntitiesEmptyState.title', {
+                defaultMessage: 'No services available.',
+              })}
+            </h2>
+          }
+          layout="horizontal"
+          color="plain"
+          body={
+            <>
+              <p>
+                {i18n.translate('xpack.apm.noEntitiesEmptyState.body.description', {
+                  defaultMessage:
+                    'The services inventory provides an overview of the health and general performance of your services. To add data to this page, instrument your services using the APM agent or detect services from your logs.',
                 })}
-              </h2>
-            }
-            layout="horizontal"
-            color="plain"
-            body={
-              <>
-                <p>
-                  {i18n.translate('xpack.apm.noEntitiesEmptyState.body.description', {
-                    defaultMessage:
-                      'The services inventory provides an overview of the health and general performance of your services. To add data to this page, instrument your services using the APM agent or detect services from your logs.',
-                  })}
-                </p>
-                <EuiHorizontalRule margin="m" />
-                <EuiText textAlign="left">
-                  <h5>
-                    <EuiTextColor color="default">
-                      {i18n.translate('xpack.apm.noEntitiesEmptyState.actions.title', {
-                        defaultMessage: 'Start observing your services:',
-                      })}
-                    </EuiTextColor>
-                  </h5>
-                </EuiText>
-              </>
-            }
-            actions={
-              <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
-                <EuiFlexGroup direction="row" gutterSize="xs">
-                  <AddApmAgent basePath={basePath} />
-                  <AssociateServiceLogs />
-                  <CollectServiceLogs basePath={basePath} />
-                </EuiFlexGroup>
-
-                {!userHasDismissedCallout && (
-                  <EuiFlexItem>
-                    <EuiCallOut
-                      css={{ textAlign: 'left' }}
-                      onDismiss={() => setUserHasDismissedCallout(true)}
-                      title={i18n.translate('xpack.apm.noEntitiesEmptyState.callout.title', {
-                        defaultMessage: 'Trying for the first time?',
-                      })}
-                    >
-                      <p>
-                        {i18n.translate('xpack.apm.noEntitiesEmptyState.description', {
-                          defaultMessage:
-                            'It can take up to a couple of minutes for your services to show. Try refreshing the page in a minute. ',
-                        })}
-                      </p>
-                      <EuiLink
-                        external
-                        target="_blank"
-                        data-test-subj="apmNewExperienceEmptyStateLink"
-                        href="https://ela.st/elastic-entity-model-first-time"
-                      >
-                        {i18n.translate('xpack.apm.noEntitiesEmptyState.learnMore.link', {
-                          defaultMessage: 'Learn more',
-                        })}
-                      </EuiLink>
-                    </EuiCallOut>
-                  </EuiFlexItem>
-                )}
+              </p>
+              <EuiHorizontalRule margin="m" />
+              <EuiText textAlign="left">
+                <h5>
+                  <EuiTextColor color="default">
+                    {i18n.translate('xpack.apm.noEntitiesEmptyState.actions.title', {
+                      defaultMessage: 'Start observing your services:',
+                    })}
+                  </EuiTextColor>
+                </h5>
+              </EuiText>
+            </>
+          }
+          actions={
+            <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
+              <EuiFlexGroup direction="row" gutterSize="xs">
+                <AddApmAgent basePath={basePath} />
+                <AssociateServiceLogs />
+                <CollectServiceLogs basePath={basePath} />
               </EuiFlexGroup>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+
+              {!userHasDismissedCallout && (
+                <EuiFlexItem>
+                  <EuiCallOut
+                    css={{ textAlign: 'left' }}
+                    onDismiss={() => setUserHasDismissedCallout(true)}
+                    title={i18n.translate('xpack.apm.noEntitiesEmptyState.callout.title', {
+                      defaultMessage: 'Trying for the first time?',
+                    })}
+                  >
+                    <p>
+                      {i18n.translate('xpack.apm.noEntitiesEmptyState.description', {
+                        defaultMessage:
+                          'It can take up to a couple of minutes for your services to show. Try refreshing the page in a minute. ',
+                      })}
+                    </p>
+                    <EuiLink
+                      external
+                      target="_blank"
+                      data-test-subj="apmNewExperienceEmptyStateLink"
+                      href="https://ela.st/elastic-entity-model-first-time"
+                    >
+                      {i18n.translate('xpack.apm.noEntitiesEmptyState.learnMore.link', {
+                        defaultMessage: 'Learn more',
+                      })}
+                    </EuiLink>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -38,12 +38,10 @@ const hasEntitiesRoute = createApmServerRoute({
     const { context, request, logger } = resources;
     const coreContext = await context.core;
 
-    const [entitiesESClient] = await Promise.all([
-      createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      }),
-    ]);
+    const entitiesESClient = await createEntitiesESClient({
+      request,
+      esClient: coreContext.elasticsearch.client.asCurrentUser,
+    });
 
     const hasData = await hasEntitiesData(entitiesESClient, logger);
     return { hasData };
