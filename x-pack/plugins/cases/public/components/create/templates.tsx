@@ -65,7 +65,6 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
           `}
           responsive={false}
         >
-          <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
           <EuiFlexItem
             grow={false}
             css={css`
@@ -74,6 +73,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
           >
             <ExperimentalBadge compact={isSmallScreen} />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
         </EuiFlexGroup>
       }
       helpText={TEMPLATE_HELP_TEXT}
