@@ -40,19 +40,28 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
   return definition.identityFields
     .map((identityField) => {
+      const setProcessor = {
+        set: {
+          if: `ctx.entity.identity.${identityField.field}.${identityField.field} != "null"`,
+          field: identityField.field,
+          value: `{{entity.identity.${identityField.field}.${identityField.field}}}`,
+        },
+      };
+
+      if (!identityField.field.includes('.')) {
+        return [setProcessor];
+      }
+
       return [
         {
           dot_expander: {
+            if: `ctx.entity.identity.${identityField.field}.${identityField.field} != "null"`,
             field: identityField.field,
             path: `entity.identity.${identityField.field}`,
           },
         },
-        {
-          set: {
-            field: identityField.field,
-            value: `{{entity.identity.${identityField.field}.${identityField.field}}}`,
-          },
-        },
+        setProcessor,
+        ,
       ];
     })
     .flat();
@@ -111,12 +120,12 @@ export function generateLatestProcessors(definition: EntityDefinition) {
       },
     },
     ...liftIdentityFieldsToDocumentRoot(definition),
-    {
-      remove: {
-        field: 'entity.identity',
-        ignore_missing: true,
-      },
-    },
+    // {
+    //   remove: {
+    //     field: 'entity.identity',
+    //     ignore_missing: true,
+    //   },
+    // },
     {
       // This must happen AFTER we lift the identity fields into the root of the document
       set: {
