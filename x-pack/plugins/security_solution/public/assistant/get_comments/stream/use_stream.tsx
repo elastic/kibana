@@ -64,7 +64,7 @@ export const useStream = ({
       subscription?.unsubscribe();
       setLoading(false);
       if (!didAbort) {
-        refetchCurrentConversation();
+        refetchCurrentConversation({ isStreamRefetch: true });
       }
     },
     [refetchCurrentConversation, subscription]
