@@ -8,10 +8,7 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
-  [
-    'system',
-    'You are a helpful assistant\n\nUse the below context as a sample of information about the user from their knowledge base:\n\n```{knowledge_history}```',
-  ],
+  ['system', 'You are a helpful assistant'],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
   ['placeholder', '{agent_scratchpad}'],
@@ -52,8 +49,4 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
-  [
-    'human',
-    'Use the below context as a sample of information about the user from their knowledge base:\n\n```\n{knowledge_history}\n```\n\n{input}\n\n{agent_scratchpad}\n(reminder to respond in a JSON blob with no additional output no matter what)',
-  ],
 ]);

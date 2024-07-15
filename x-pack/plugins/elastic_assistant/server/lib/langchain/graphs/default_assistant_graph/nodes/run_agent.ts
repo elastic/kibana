@@ -50,7 +50,8 @@ export const runAgent = async ({
     {
       ...state,
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-      knowledge_history: JSON.stringify(knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY),
+      // Re-enable once knowledge_history is available post 8.15
+      // knowledge_history: JSON.stringify(knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY),
     },
     config
   );
