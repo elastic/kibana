@@ -16,10 +16,10 @@ import {
 import React, { useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { CreateIndexButton } from './create_index_button';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { docLinks } from '../../../common/doc_links';
-import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { ConnectLLMButton } from './connect_llm_button';
@@ -30,13 +30,13 @@ export const SetupPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { indices, isLoading: isIndicesLoading } = useQueryIndices();
   const index = useMemo(() => searchParams.get('default-index'), [searchParams]);
-  const { setIndices } = useSourceIndicesFields();
+  const { addIndex } = useSourceIndicesFields();
 
   useEffect(() => {
     if (index) {
-      setIndices([index]);
+      addIndex(index);
     }
-  }, [index, setIndices]);
+  }, [index, addIndex]);
 
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.setupChatPageLoaded);
