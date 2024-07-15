@@ -35,7 +35,7 @@ import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_a
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
-import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';

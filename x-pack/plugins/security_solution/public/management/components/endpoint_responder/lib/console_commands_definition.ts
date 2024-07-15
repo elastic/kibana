@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
@@ -136,6 +137,16 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
+const commandCommentArgument = (): { comment: CommandArgDefinition } => {
+  return {
+    comment: {
+      required: false,
+      allowMultiples: false,
+      about: COMMENT_ARG_ABOUT,
+    },
+  };
+};
+
 export interface GetEndpointConsoleCommandsOptions {
   endpointAgentId: string;
   agentType: ResponseActionAgentType;
@@ -189,11 +200,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -219,11 +226,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -232,7 +235,6 @@ export const getEndpointConsoleCommands = ({
       helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
     {
-      //
       name: 'kill-process',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.killProcess.about,
@@ -250,11 +252,7 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
         pid: {
           required: false,
           allowMultiples: false,
@@ -294,11 +292,7 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
         pid: {
           required: false,
           allowMultiples: false,
@@ -351,11 +345,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -389,11 +379,7 @@ export const getEndpointConsoleCommands = ({
             return emptyArgumentValidator(argData);
           },
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -435,11 +421,7 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'non-empty-string',
           validate: executeTimeoutValidator,
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -529,11 +511,7 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.scan.args.path.about,
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -575,6 +553,24 @@ const adjustCommandsForSentinelOne = ({
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
 
   return commandList.map((command) => {
+    // Kill-Process: adjust command to accept only `processName`
+    if (command.name === 'kill-process') {
+      command.args = {
+        ...commandCommentArgument(),
+        processName: {
+          required: true,
+          allowMultiples: false,
+          about: CONSOLE_COMMANDS.killProcess.args.processName.about,
+          mustHaveValue: 'non-empty-string',
+        },
+      };
+      command.exampleUsage = 'kill-process --processName="notepad" --comment="kill malware"';
+      command.exampleInstruction = i18n.translate(
+        'xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions',
+        { defaultMessage: 'Enter a process name to execute' }
+      );
+    }
+
     if (
       command.name === 'status' ||
       (command.name === 'kill-process' && !isKillProcessEnabled) ||
