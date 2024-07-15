@@ -38,33 +38,16 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 }
 
 function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
-  return definition.identityFields
-    .map((identityField) => {
-      const setProcessor = {
-        set: {
-          if: `ctx.entity.identity.${identityField.field}.${identityField.field} != "null"`,
-          field: identityField.field,
-          value: `{{entity.identity.${identityField.field}.${identityField.field}}}`,
-        },
-      };
-
-      if (!identityField.field.includes('.')) {
-        return [setProcessor];
-      }
-
-      return [
-        {
-          dot_expander: {
-            if: `ctx.entity.identity.${identityField.field}.${identityField.field} != "null"`,
-            field: identityField.field,
-            path: `entity.identity.${identityField.field}`,
-          },
-        },
-        setProcessor,
-        ,
-      ];
-    })
-    .flat();
+  return definition.identityFields.map((identityField) => {
+    const optionalFieldPath = identityField.field.replaceAll('.', '?.');
+    const assignValue = `ctx.${identityField.field} = ctx.entity.identity.${identityField.field}.keySet().toArray()[0];`;
+    return {
+      script: {
+        if: `ctx.entity.identity.${optionalFieldPath} != null && ctx.entity.identity.${identityField.field}.size() != 0`,
+        source: cleanScript(`${initializePathScript(identityField.field)}\n${assignValue}`),
+      },
+    };
+  });
 }
 
 export function generateLatestProcessors(definition: EntityDefinition) {
@@ -120,12 +103,12 @@ export function generateLatestProcessors(definition: EntityDefinition) {
       },
     },
     ...liftIdentityFieldsToDocumentRoot(definition),
-    // {
-    //   remove: {
-    //     field: 'entity.identity',
-    //     ignore_missing: true,
-    //   },
-    // },
+    {
+      remove: {
+        field: 'entity.identity',
+        ignore_missing: true,
+      },
+    },
     {
       // This must happen AFTER we lift the identity fields into the root of the document
       set: {

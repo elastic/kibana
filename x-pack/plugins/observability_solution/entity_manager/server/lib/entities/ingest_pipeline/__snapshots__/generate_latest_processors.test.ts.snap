@@ -73,27 +73,21 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
     },
   },
   Object {
-    "dot_expander": Object {
-      "field": "log.logger",
-      "path": "entity.identity.log.logger",
+    "script": Object {
+      "if": "ctx.entity.identity.log?.logger != null && ctx.entity.identity.log.logger.size() != 0",
+      "source": "if (ctx.log == null) {
+  ctx.log = new HashMap();
+}
+ctx.log.logger = ctx.entity.identity.log.logger.keySet().toArray()[0];",
     },
   },
   Object {
-    "set": Object {
-      "field": "log.logger",
-      "value": "{{entity.identity.log.logger.log.logger}}",
-    },
-  },
-  Object {
-    "dot_expander": Object {
-      "field": "event.category",
-      "path": "entity.identity.event.category",
-    },
-  },
-  Object {
-    "set": Object {
-      "field": "event.category",
-      "value": "{{entity.identity.event.category.event.category}}",
+    "script": Object {
+      "if": "ctx.entity.identity.event?.category != null && ctx.entity.identity.event.category.size() != 0",
+      "source": "if (ctx.event == null) {
+  ctx.event = new HashMap();
+}
+ctx.event.category = ctx.entity.identity.event.category.keySet().toArray()[0];",
     },
   },
   Object {
