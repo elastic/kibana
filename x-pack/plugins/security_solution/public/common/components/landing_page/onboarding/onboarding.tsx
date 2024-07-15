@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
+import { AVCResultsBanner2024 } from '@kbn/avc-banner';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -78,7 +78,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
 
   return (
     <div className={wrapperStyles}>
-      {useIsStillYear2024() && showAVCBanner && (
+      {showAVCBanner && (
         <KibanaPageTemplate.Section paddingSize="none" className={bannerStyles}>
           <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
         </KibanaPageTemplate.Section>

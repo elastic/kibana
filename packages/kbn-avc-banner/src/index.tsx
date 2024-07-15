@@ -14,13 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import avcBannerBackground from './avc_banner_background.svg';
 
-// Logic to hide banner at EOY 2024
-export const useIsStillYear2024 = () => {
-  const year2025 = new Date('January 01, 2025 00:00:00');
-  const today = new Date(Date.now());
-  return today < year2025;
-};
-
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
   const { euiTheme } = useEuiTheme();
