@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
 import { Listr } from 'listr2';
-
-import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -24,6 +21,7 @@ import {
   validateTranslationFiles,
 } from '../tasks';
 import { TaskReporter } from '../utils/task_reporter';
+import { flagFailError, isDefined, undefinedOrBoolean } from '../utils/verify_bin_flags';
 
 const toolingLog = new ToolingLog({
   level: 'info',
@@ -56,43 +54,34 @@ run(
   }) => {
     if (
       fix &&
-      (ignoreIncompatible !== undefined ||
-        ignoreUnused !== undefined ||
-        ignoreUntracked !== undefined ||
-        ignoreMalformed !== undefined)
+      (isDefined(ignoreIncompatible) ||
+        isDefined(ignoreUnused) ||
+        isDefined(ignoreUntracked) ||
+        isDefined(ignoreMalformed))
     ) {
-      throw createFailError(
-        `${chalk.white.bgRed(
-          ' I18N ERROR '
-        )} none of the --ignore-incompatible, --namespace, --ignore-unused, --ignore-malformed, --ignore-untracked is allowed when --fix is set.`
+      throw flagFailError(
+        `none of the --ignore-incompatible, --namespace, --ignore-unused, --ignore-malformed, --ignore-untracked is allowed when --fix is set.`
       );
     }
 
     if (typeof path === 'boolean' || typeof includeConfig === 'boolean') {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
-      );
-    }
-
-    if (typeof fix !== 'boolean') {
-      throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
+      throw flagFailError(`--path and --include-config require a value`);
     }
 
     if (
-      (typeof ignoreIncompatible !== 'undefined' && typeof ignoreIncompatible !== 'boolean') ||
-      (typeof ignoreUnused !== 'undefined' && typeof ignoreUnused !== 'boolean') ||
-      (typeof ignoreMalformed !== 'undefined' && typeof ignoreMalformed !== 'boolean') ||
-      (typeof ignoreUntracked !== 'undefined' && typeof ignoreUntracked !== 'boolean')
+      !undefinedOrBoolean(fix) ||
+      !undefinedOrBoolean(ignoreIncompatible) ||
+      !undefinedOrBoolean(ignoreUnused) ||
+      !undefinedOrBoolean(ignoreMalformed) ||
+      !undefinedOrBoolean(ignoreUntracked)
     ) {
-      throw createFailError(
-        `${chalk.white.bgRed(
-          ' I18N ERROR '
-        )} --ignore-incompatible, --ignore-malformed, --ignore-unused, and --ignore-untracked can't have a value`
+      throw flagFailError(
+        `--fix, --ignore-incompatible, --ignore-malformed, --ignore-unused, and --ignore-untracked can't have a value`
       );
     }
 
     if (typeof namespace === 'boolean') {
-      throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --namespace require a value`);
+      throw flagFailError(`--namespace require a value`);
     }
 
     const filterNamespaces = typeof namespace === 'string' ? [namespace] : namespace;
@@ -147,7 +136,7 @@ run(
 
     try {
       const messages: Map<string, MessageDescriptor[]> = new Map();
-      const taskReporter = new TaskReporter();
+      const taskReporter = new TaskReporter({ toolingLog });
       await list.run({ messages, taskReporter });
 
       reportTime(runStartTime, 'total', {

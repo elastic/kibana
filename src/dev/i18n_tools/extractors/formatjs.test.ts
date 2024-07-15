@@ -175,6 +175,21 @@ describe('formatJS Runner', () => {
       `);
     });
 
+    it('parses renamed i18n imports as expected', async () => {
+      const { extractedMessages } = await formatJsFixtureRunner('renamed_i18n.ts');
+      expect(extractedMessages).toMatchInlineSnapshot(`
+        Map {
+          "renamed_i18n" => Object {
+            "defaultMessage": "renamed I18n.translate is parsed!",
+            "end": -1,
+            "file": "renamed_i18n.ts",
+            "id": "renamed_i18n",
+            "start": -1,
+          },
+        }
+      `);
+    });
+
     it('throws when ICU message with values does not have defined { values }', async () => {
       const { extractedMessages } = await formatJsFixtureRunner('not_defined_value.ts');
 
@@ -217,7 +232,7 @@ describe('formatJS Runner', () => {
         Map {
           "wrong_select_icu_syntax" => Object {
             "VerifyError": "MISSING_OTHER_CLAUSE",
-            "defaultMessage": "This is a malformed select ICU {MISSING_VALUE, select, one { one} two {two}} no other",
+            "defaultMessage": "This is a malformed select ICU {MISSING_VALUE, select, one {one} two {two}} no other",
             "end": -1,
             "file": "malformed_icu.ts",
             "id": "wrong_select_icu_syntax",

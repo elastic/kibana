@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
+
 export class TaskReporter {
+  readonly toolingLog: ToolingLog;
+
+  constructor({ toolingLog }: { toolingLog: ToolingLog }) {
+    this.toolingLog = toolingLog;
+  }
+
   /**
    * A very simple wrapper around logging. The reason behind this is to avoid
    * calling console.log directly and we can generate a report in the CI
@@ -14,7 +22,6 @@ export class TaskReporter {
    * @param message Message to log
    */
   public log(message: string) {
-    // eslint-disable-next-line no-console
-    console.log(message);
+    this.toolingLog.write(message);
   }
 }

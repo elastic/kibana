@@ -158,7 +158,7 @@
                 "section": "def-common.LoggerFactory",
                 "text": "LoggerFactory"
               },
-              ") => { debug: [message: string, meta?: ",
+              ") => { debug: ([string] | [string, ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -166,7 +166,7 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              " | undefined][]; error: [errorOrMessage: string | Error, meta?: ",
+              " | undefined])[]; error: ([string | Error] | [string | Error, ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -174,7 +174,7 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              " | undefined][]; fatal: [errorOrMessage: string | Error, meta?: ",
+              " | undefined])[]; fatal: ([string | Error] | [string | Error, ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -182,7 +182,7 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              " | undefined][]; info: [message: string, meta?: ",
+              " | undefined])[]; info: ([string] | [string, ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -190,9 +190,9 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              " | undefined][]; log: [record: ",
+              " | undefined])[]; log: [record: ",
               "LogRecord",
-              "][]; trace: [message: string, meta?: ",
+              "][]; trace: ([string] | [string, ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -200,7 +200,7 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              " | undefined][]; warn: [errorOrMessage: string | Error, meta?: ",
+              " | undefined])[]; warn: ([string | Error] | [string | Error, ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -208,7 +208,7 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              " | undefined][]; }"
+              " | undefined])[]; }"
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,

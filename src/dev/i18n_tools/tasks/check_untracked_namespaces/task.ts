@@ -56,9 +56,12 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
                   `The file ${untrackedFilePath} contains i18n messages but is not defined in the .i18nrc namespaces paths`
                 );
                 errorReporter.report(error);
-                throw error;
               }
             }
+          }
+
+          if (errorReporter.hasErrors()) {
+            throw errorReporter.throwErrors();
           }
           const formattedRootPaths = rootPaths.map((rootPath) => `"${rootPath}"`).join(', ');
           parent.title = `Check all untracked messages inside [${formattedRootPaths}]`;

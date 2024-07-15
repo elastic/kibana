@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
 import { Listr } from 'listr2';
-
-import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from '../utils';
-import { I18nCheckTaskContext } from '../types';
+import { I18nCheckTaskContext, MessageDescriptor } from '../types';
 import {
   checkConfigs,
   mergeConfigs,
   extractDefaultMessagesTask,
   writeExtractedMessagesToFile,
 } from '../tasks';
+import { flagFailError } from '../utils/verify_bin_flags';
+import { TaskReporter } from '../utils/task_reporter';
 
 const toolingLog = new ToolingLog({
   level: 'info',
@@ -36,9 +35,7 @@ run(
     log,
   }) => {
     if (!outputDir || typeof outputDir !== 'string') {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} --output-dir option should be specified.`
-      );
+      throw flagFailError(`--output-dir option should be specified.`);
     }
 
     if (
@@ -46,15 +43,9 @@ run(
       typeof includeConfig === 'boolean' ||
       typeof namespace === 'boolean'
     ) {
-      throw createFailError(
-        `${chalk.white.bgRed(
-          ' I18N ERROR '
-        )} --namespace --path and --include-config require a value`
-      );
+      throw flagFailError(`--namespace --path and --include-config require a value`);
     }
 
-    const kibanaRootPaths = ['./src', './packages', './x-pack'];
-    const rootPaths = Array().concat(path || kibanaRootPaths);
     const filterNamespaces = typeof namespace === 'string' ? [namespace] : namespace;
 
     const list = new Listr<I18nCheckTaskContext>(
@@ -87,8 +78,9 @@ run(
     );
 
     try {
-      const messages: Map<string, { message: string }> = new Map();
-      await list.run({ messages });
+      const messages: Map<string, MessageDescriptor[]> = new Map();
+      const taskReporter = new TaskReporter({ toolingLog });
+      await list.run({ messages, taskReporter });
 
       reportTime(runStartTime, 'total', {
         success: true,

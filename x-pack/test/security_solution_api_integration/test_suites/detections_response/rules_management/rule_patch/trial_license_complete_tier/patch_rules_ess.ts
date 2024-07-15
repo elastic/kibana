@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('should patch a rule with a legacy investigation field and transform response', async () => {
+        it('should patch a rule with a legacy investigation field and migrate field', async () => {
           const { body } = await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -152,12 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare.investigation_fields).to.eql({
             field_names: ['client.address', 'agent.name'],
           });
-          /**
-           * Confirm type on SO so that it's clear in the tests whether it's expected that
-           * the SO itself is migrated to the inteded object type, or if the transformation is
-           * happening just on the response. In this case, change should
-           * NOT include a migration on SO.
-           */
+
           const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
             undefined,
             {
@@ -166,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
             es,
             body.id
           );
-          expect(isInvestigationFieldMigratedInSo).to.eql(false);
+          expect(isInvestigationFieldMigratedInSo).to.eql(true);
         });
 
         it('should patch a rule with a legacy investigation field - empty array - and transform response', async () => {

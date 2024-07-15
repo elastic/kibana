@@ -10,5 +10,5 @@ import { i18n } from '@kbn/i18n';
 
 i18n.translate('wrong_select_icu_syntax', {
   defaultMessage:
-    'This is a malformed select ICU  {MISSING_VALUE, select, one { one} two {two}} no other',
+    'This is a malformed select ICU  {MISSING_VALUE, select, one {one} two {two}} no other',
 });

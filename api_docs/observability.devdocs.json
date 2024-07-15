@@ -4881,7 +4881,7 @@
         "signature": [
           "\"UPTIME_OVERVIEW_LOCATOR\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
+        "path": "packages/deeplinks/observability/locators/uptime.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14633,7 +14633,7 @@
         "signature": [
           "\"UPTIME_OVERVIEW_LOCATOR\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
+        "path": "packages/deeplinks/observability/locators/uptime.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

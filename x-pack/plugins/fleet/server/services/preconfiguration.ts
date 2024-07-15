@@ -296,12 +296,13 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       });
       logger.debug(
-        `Adding preconfigured package policies ${JSON.stringify(
-          packagePoliciesToAdd.map((pol) => ({
-            name: pol.packagePolicy.name,
-            package: pol.installedPackage.name,
-          }))
-        )}`
+        () =>
+          `Adding preconfigured package policies ${JSON.stringify(
+            packagePoliciesToAdd.map((pol) => ({
+              name: pol.packagePolicy.name,
+              package: pol.installedPackage.name,
+            }))
+          )}`
       );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(

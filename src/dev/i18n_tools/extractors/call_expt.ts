@@ -107,9 +107,8 @@ export function extractMessagesFromCallExpression(
 
     const hasValuesObject = valuesKeys.length;
     if (restArgs.length) {
-      // TODO: support parsing ignoreTag from 3rd argument.
       throw new Error(
-        'We do not suppor a 3rd argument for formatMessage, please use i18n.translate instead.'
+        'We do not support a 3rd argument for formatMessage, please use i18n.translate instead.'
       );
     }
 

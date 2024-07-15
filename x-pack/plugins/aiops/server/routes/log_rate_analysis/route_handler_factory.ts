@@ -58,14 +58,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
       return response.forbidden();
     }
 
-    const client = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
       const { analysis, logDebugMessage, stateHandler, responseStream, responseWithHeaders } =
         responseStreamFactory<T>({
           version,
-          client,
+          esClient,
           requestBody: request.body,
           events: request.events,
           headers: request.headers,

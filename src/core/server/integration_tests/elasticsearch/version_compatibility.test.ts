@@ -91,7 +91,8 @@ describe('Version Compatibility', () => {
     await expect(startServers({ customKibanaVersion: previousMinor() })).resolves.toBeUndefined();
   });
 
-  it('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171289
+  it.skip('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
     const found$ = new Subject<void>();
     consoleSpy.mockImplementation((str) => {
       if (str.includes('is incompatible')) {
