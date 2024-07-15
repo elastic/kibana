@@ -131,11 +131,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             rest_total_hits_as_int: true,
           });
           expect(search.hits.total).to.be(1);
-          expect(search.hits.hits[0]._source).to.have.key('join');
-          expect(search.hits.hits[0]._source.join).to.have.key('endpoint');
-          expect(search.hits.hits[0]._source.join).to.have.key('agent');
-          expect(search.hits.hits[0]._source.join.endpoint.a_value).to.be('A');
-          expect(search.hits.hits[0]._source.join.agent.b_value).to.be('B');
+          const result = search.hits.hits[0]._source as any;
+          expect(result).to.have.key('join');
+          expect(result.join).to.have.key('endpoint');
+          expect(result.join).to.have.key('agent');
+          expect(result.join.endpoint.a_value).to.be('A');
+          expect(result.join.agent.b_value).to.be('B');
           return true;
         });
       });
