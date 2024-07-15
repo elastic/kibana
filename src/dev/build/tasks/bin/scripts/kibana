@@ -32,11 +32,11 @@ fi
 NODE="${DIR}/node/default/bin/node"
 {{/darwin}}
 {{#linux}}
-NODE="${DIR}/node/glibc-217/bin/node"
+NODE="${DIR}/pointer-compression/bin/node"
 {{#serverless}}
-if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
-  NODE="${DIR}/node/pointer-compression/bin/node"
-fi
+# if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
+#   NODE="${DIR}/node/pointer-compression/bin/node"
+# fi
 {{/serverless}}
 {{/linux}}
 test_node
