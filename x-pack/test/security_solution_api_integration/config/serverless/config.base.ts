@@ -44,6 +44,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*@skipInServerless).*@serverless.*/',
+        //   '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/'
       },
     };
   };
