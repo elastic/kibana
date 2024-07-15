@@ -1304,7 +1304,7 @@ const locateDefinition: FunctionDefinition = {
   name: 'locate',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.locate', {
     defaultMessage:
-      'Returns an integer that indicates the position of a keyword substring within another string',
+      'Returns an integer that indicates the position of a keyword substring within another string.',
   }),
   alias: undefined,
   signatures: [
@@ -3901,7 +3901,7 @@ const substringDefinition: FunctionDefinition = {
   name: 'substring',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.substring', {
     defaultMessage:
-      'Returns a substring of a string, specified by a start position and an optional length',
+      'Returns a substring of a string, specified by a start position and an optional length.',
   }),
   alias: undefined,
   signatures: [
