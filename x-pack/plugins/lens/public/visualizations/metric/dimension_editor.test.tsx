@@ -13,7 +13,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { MetricVisualizationState } from './visualization';
+import { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
@@ -59,6 +59,10 @@ describe('dimension editor', () => {
     palette,
     icon: 'tag',
     showBar: true,
+    titlesTextAlign: 'left',
+    valuesTextAlign: 'right',
+    iconAlign: 'left',
+    valueFontMode: 'default',
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',

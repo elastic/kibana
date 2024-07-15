@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { SnapshotNodeResponse } from '../../../../../../common/http_api';
-import { InfraWaffleMapNode } from '../../../../../lib/lib';
+import { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),

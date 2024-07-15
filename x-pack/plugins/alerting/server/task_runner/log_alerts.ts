@@ -58,7 +58,7 @@ export function logAlerts<
     });
   }
 
-  if (activeAlertIds.length > 0) {
+  if (activeAlertIds.length > 0 && logger.isLevelEnabled('debug')) {
     logger.debug(
       `rule ${ruleLogPrefix} has ${activeAlertIds.length} active alerts: ${JSON.stringify(
         activeAlertIds.map((alertId) => ({
@@ -68,7 +68,7 @@ export function logAlerts<
       )}`
     );
   }
-  if (recoveredAlertIds.length > 0) {
+  if (recoveredAlertIds.length > 0 && logger.isLevelEnabled('debug')) {
     logger.debug(
       `rule ${ruleLogPrefix} has ${recoveredAlertIds.length} recovered alerts: ${JSON.stringify(
         recoveredAlertIds
