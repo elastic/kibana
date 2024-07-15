@@ -18,6 +18,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
 
 import { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
@@ -574,19 +575,4 @@ export interface SuggestUserProfilesProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
-}
-
-/**
- * Replaces placeholders in a path string with provided param value
- *
- * @param path Path string with placeholders for params
- * @param params Object with params to replace
- * @returns Path string with params replaced
- */
-function replaceParams(path: string, params: Record<string, string | number>): string {
-  let output = path;
-  Object.entries(params).forEach(([param, value]) => {
-    output = path.replace(`{${param}}`, `${value}`);
-  });
-  return output;
 }
