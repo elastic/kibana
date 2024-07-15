@@ -24,7 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { Observable } from 'rxjs';
-import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
+import { DefaultControlApi, DefaultControlState, PublishesControlDisplaySettings } from '../types';
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
@@ -49,7 +49,7 @@ export interface DataControlFetchContext {
   timeRange?: TimeRange | undefined;
 }
 
-export type ControlGroupApi = PresentationContainer &
+export type ControlGroupApi = PresentationContainer<DefaultControlApi> &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
   PublishesDataViews &

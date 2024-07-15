@@ -8,7 +8,6 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -32,13 +31,11 @@ import {
   PublishesDataViews,
   PublishesFilters,
   PublishesTimeslice,
-  PublishingSubject,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { ControlRenderer } from '../control_renderer';
-import { DefaultControlApi } from '../types';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import {
@@ -48,6 +45,7 @@ import {
   ControlGroupUnsavedChanges,
 } from './types';
 import { dataControlFetch$ } from './data_control_fetch';
+import { initControlsManager } from './init_controls_manager';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -62,7 +60,7 @@ export const getControlGroupEmbeddableFactory = (services: {
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi, setApi) => {
       const {
-        initialChildControlState: childControlState,
+        initialChildControlState,
         defaultControlGrow,
         defaultControlWidth,
         labelPosition,
@@ -71,9 +69,9 @@ export const getControlGroupEmbeddableFactory = (services: {
         ignoreParentSettings,
       } = initialState;
 
+      const controlsManager = initControlsManager(initialChildControlState);
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
@@ -105,16 +103,8 @@ export const getControlGroupEmbeddableFactory = (services: {
         undefined
       );
 
-      const controlOrder = new BehaviorSubject<Array<{ id: string; order: number; type: string }>>(
-        Object.keys(childControlState)
-          .map((key) => ({
-            id: key,
-            order: childControlState[key].order,
-            type: childControlState[key].type,
-          }))
-          .sort((a, b) => (a.order > b.order ? 1 : -1))
-      );
       const api = setApi({
+        ...controlsManager.api,
         dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
         ignoreParentSettings$,
         autoApplySelections$,
@@ -127,9 +117,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           return {} as unknown as ControlGroupRuntimeState;
         },
         dataLoading: dataLoading$,
-        children$: children$ as PublishingSubject<{
-          [key: string]: unknown;
-        }>,
         onEdit: async () => {
           openEditControlGroupFlyout(
             api,
@@ -148,12 +135,13 @@ export const getControlGroupEmbeddableFactory = (services: {
             defaultMessage: 'Controls',
           }),
         getSerializedStateForChild: (childId) => {
-          return { rawState: childControlState[childId] };
+          const childControlState = controlsManager.controlsInOrder$.getValue().find(controlPanelState => controlPanelState.id === childId);
+          return childControlState ? { rawState: childControlState } : undefined;
         },
         serializeState: () => {
           return serializeControlGroup(
-            children$.getValue(),
-            controlOrder.getValue().map(({ id }) => id),
+            controlsManager.api.children$.getValue(),
+            controlsManager.controlsInOrder$.getValue().map(({ id }) => id),
             {
               labelPosition: labelPosition$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
@@ -161,20 +149,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               ignoreParentSettings: ignoreParentSettings$.getValue(),
             }
           );
-        },
-        getPanelCount: () => {
-          return (Object.keys(children$.getValue()) ?? []).length;
-        },
-        addNewPanel: (panel) => {
-          // TODO: Add a new child control
-          return Promise.resolve(undefined);
-        },
-        removePanel: (panelId) => {
-          // TODO: Remove a child control
-        },
-        replacePanel: async (panelId, newPanel) => {
-          // TODO: Replace a child control
-          return Promise.resolve(panelId);
         },
         grow,
         width,
@@ -231,7 +205,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const controlsInOrder = useStateFromPublishingSubject(controlOrder);
+          const controlsInOrder = useStateFromPublishingSubject(controlsManager.controlsInOrder$);
 
           useEffect(() => {
             return () => {
@@ -246,14 +220,11 @@ export const getControlGroupEmbeddableFactory = (services: {
               {controlsInOrder.map(({ id, type }) => (
                 <ControlRenderer
                   key={id}
-                  maybeId={id}
+                  uuid={id}
                   type={type}
                   getParentApi={() => api}
                   onApiAvailable={(controlApi) => {
-                    children$.next({
-                      ...children$.getValue(),
-                      [id]: controlApi,
-                    });
+                    controlsManager.setControlApi(id, controlApi);
                   }}
                 />
               ))}
