@@ -40,7 +40,7 @@ import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 
-const feedbackUrl = 'https://ela.st/otel-onboarding-feedback';
+const feedbackUrl = 'https://ela.st/otelcollector';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
