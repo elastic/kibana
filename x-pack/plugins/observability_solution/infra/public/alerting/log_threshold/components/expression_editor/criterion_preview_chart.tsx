@@ -23,7 +23,7 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,

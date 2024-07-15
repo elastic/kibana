@@ -14,6 +14,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-artifacts-staging.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-artifacts-trigger.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-serverless-snapshots.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-esql-grammar-sync.yml
@@ -41,3 +42,4 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-gen-ai.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-investigations.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-rule-management.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/trigger-version-dependent-jobs.yml

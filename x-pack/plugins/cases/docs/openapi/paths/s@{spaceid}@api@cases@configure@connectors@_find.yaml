@@ -1,10 +1,9 @@
 get:
-  summary: Retrieves information about connectors.
+  summary: Get case connectors
   operationId: findCaseConnectors
   description: >
-    In particular, only the connectors that are supported for use in cases are
-    returned. You must have `read` privileges for the **Actions and Connectors**
-    feature in the **Management** section of the Kibana feature privileges.
+    Retrieves information about connectors that are supported for use in cases.
+    You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   tags:
     - cases
   parameters:

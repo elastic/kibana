@@ -2,6 +2,10 @@
 
 exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
 Object {
+  "_meta": Object {
+    "definitionVersion": "999.999.999",
+    "managed": false,
+  },
   "defer_validation": true,
   "dest": Object {
     "index": ".entities.v1.latest.noop",
@@ -43,6 +47,18 @@ Object {
           "field": "@timestamp",
         },
       },
+      "entity.identity.event.category": Object {
+        "terms": Object {
+          "field": "event.category",
+          "size": 1,
+        },
+      },
+      "entity.identity.log.logger": Object {
+        "terms": Object {
+          "field": "log.logger",
+          "size": 1,
+        },
+      },
       "entity.lastSeenTimestamp": Object {
         "max": Object {
           "field": "entity.lastSeenTimestamp",
@@ -70,6 +86,23 @@ Object {
           "data": Object {
             "terms": Object {
               "field": "host.os.name",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "event.ingested": Object {
+              "gte": "now-1m",
+            },
+          },
+        },
+      },
+      "entity.metadata.sourceIndex": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "sourceIndex",
               "size": 1000,
             },
           },
@@ -117,26 +150,9 @@ Object {
       },
     },
     "group_by": Object {
-      "entity.displayName": Object {
-        "terms": Object {
-          "field": "entity.displayName.keyword",
-        },
-      },
       "entity.id": Object {
         "terms": Object {
           "field": "entity.id",
-        },
-      },
-      "entity.identityFields.event.category": Object {
-        "terms": Object {
-          "field": "entity.identityFields.event.category",
-          "missing_bucket": true,
-        },
-      },
-      "entity.identityFields.log.logger": Object {
-        "terms": Object {
-          "field": "entity.identityFields.log.logger",
-          "missing_bucket": false,
         },
       },
     },

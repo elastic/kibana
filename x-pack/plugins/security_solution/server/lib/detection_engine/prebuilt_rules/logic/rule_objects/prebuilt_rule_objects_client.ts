@@ -13,7 +13,7 @@ import type {
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 export interface IPrebuiltRuleObjectsClient {
   fetchAllInstalledRules(): Promise<RuleResponse[]>;
