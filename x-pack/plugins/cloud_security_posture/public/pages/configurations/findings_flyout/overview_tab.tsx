@@ -187,7 +187,7 @@ export const OverviewTab = ({
           },
         ],
       }),
-    [discover.locator, latestFindingsDataView.data?.id]
+    [data.data_stream?.dataset, discover.locator, latestFindingsDataView.data?.id]
   );
 
   const hasEvidence = !isEmpty(data.result?.evidence);
