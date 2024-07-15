@@ -1540,9 +1540,13 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    if (existingFields.size > 0 && filteredMetaFields.length > 0) {
-      suggestions.push(commaCompleteItem);
+    if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
     }
+
     suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
   }
 
