@@ -10,7 +10,7 @@ import type { Subscription } from 'rxjs';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
-  refetchCurrentConversation: () => void;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   isEnabledLangChain: boolean;
   isError: boolean;
   content?: string;
