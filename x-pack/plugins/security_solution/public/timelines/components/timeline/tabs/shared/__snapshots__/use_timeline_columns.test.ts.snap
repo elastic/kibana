@@ -14,11 +14,6 @@ Array [
     ],
     "format": "",
     "id": "source.ip",
-    "indexes": Array [
-      "auditbeat",
-      "filebeat",
-      "packetbeat",
-    ],
     "initialWidth": 150,
     "name": "source.ip",
     "searchable": true,
