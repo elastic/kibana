@@ -601,6 +601,11 @@ describe('CommonFlyout ', () => {
                 value: true,
               },
               {
+                key: 'test_key_3',
+                type: 'text',
+                value: null,
+              },
+              {
                 key: 'test_key_4',
                 type: 'toggle',
                 value: false,
