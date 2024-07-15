@@ -305,17 +305,40 @@ export class JourneyFtrHarness {
     ]);
   }
 
+  private async takeScreenshots(step: AnyStep) {
+    let screenshot;
+    let fs;
+    if (!this.page) {
+      return { screenshot, fs };
+    }
+    // screenshots taking might crash the browser
+    try {
+      screenshot = await this.page.screenshot({ animations: 'disabled' });
+      fs = await this.page.screenshot({ animations: 'disabled', fullPage: true });
+    } catch (e) {
+      if (!screenshot) {
+        this.log.error(`Failed to take screenshot of the visible viewport: ${e.message}`);
+      } else if (screenshot && !fs) {
+        this.log.error(`Failed to take screenshot of the full scrollable page: ${e.message}`);
+      } else {
+        this.log.error(`Unknown error on taking screenshots`);
+      }
+    }
+
+    return { screenshot, fs };
+  }
+
   private async onStepSuccess(step: AnyStep) {
     if (!this.page) {
       return;
     }
 
-    const [screenshot, fs] = await Promise.all([
-      this.page.screenshot(),
-      this.page.screenshot({ fullPage: true }),
-    ]);
-
-    await this.screenshots.addSuccess(step, screenshot, fs);
+    if (this.journeyConfig.takeScreenshotOnSuccess()) {
+      const { screenshot, fs } = await this.takeScreenshots(step);
+      if (screenshot && fs) {
+        await this.screenshots.addSuccess(step, screenshot, fs);
+      }
+    }
   }
 
   private async onStepError(step: AnyStep, err: Error) {
@@ -325,12 +348,10 @@ export class JourneyFtrHarness {
     }
 
     if (this.page) {
-      const [screenshot, fs] = await Promise.all([
-        this.page.screenshot(),
-        this.page.screenshot({ fullPage: true }),
-      ]);
-
-      await this.screenshots.addError(step, screenshot, fs);
+      const { screenshot, fs } = await this.takeScreenshots(step);
+      if (screenshot && fs) {
+        await this.screenshots.addError(step, screenshot, fs);
+      }
     }
   }
 
