@@ -26,11 +26,11 @@ describe('useLoadFieldsByIndices', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useUsageTracker.mockReturnValue(mockUsageTracker);
-    useIndicesFields.mockReturnValue({ fields: {} });
-    getDefaultQueryFields.mockReturnValue({ newIndex: ['title', 'body'] });
-    getDefaultSourceFields.mockReturnValue({ testIndex: ['content'] });
-    createQuery.mockReturnValue('mocked query');
+    (useUsageTracker as jest.Mock).mockReturnValue(mockUsageTracker);
+    (useIndicesFields as jest.Mock).mockReturnValue({ fields: {} });
+    (getDefaultQueryFields as jest.Mock).mockReturnValue({ newIndex: ['title', 'body'] });
+    (getDefaultSourceFields as jest.Mock).mockReturnValue({ testIndex: ['content'] });
+    (createQuery as jest.Mock).mockReturnValue('mocked query');
   });
 
   const setup = () => {
@@ -44,7 +44,7 @@ describe('useLoadFieldsByIndices', () => {
   };
 
   it('sets values and tracks usage on fields change', () => {
-    useIndicesFields.mockReturnValue({ fields: { newIndex: {}, testIndex: {} } });
+    (useIndicesFields as jest.Mock).mockReturnValue({ fields: { newIndex: {}, testIndex: {} } });
     mockGetValues.mockReturnValueOnce([{}, {}]);
     mockWatch.mockReturnValue(['index1']);
 
@@ -62,8 +62,8 @@ describe('useLoadFieldsByIndices', () => {
 
   describe('merge fields', () => {
     it('save changed fields', () => {
-      getDefaultQueryFields.mockReturnValue({ index: ['title', 'body'] });
-      getDefaultSourceFields.mockReturnValue({ index: ['title'] });
+      (getDefaultQueryFields as jest.Mock).mockReturnValue({ index: ['title', 'body'] });
+      (getDefaultSourceFields as jest.Mock).mockReturnValue({ index: ['title'] });
       mockGetValues.mockReturnValueOnce([{ index: [] }, { index: ['body'] }]);
 
       setup();
@@ -77,8 +77,8 @@ describe('useLoadFieldsByIndices', () => {
     });
 
     it('remove old indices from fields', () => {
-      getDefaultQueryFields.mockReturnValue({ index: ['title', 'body'] });
-      getDefaultSourceFields.mockReturnValue({ index: ['title'] });
+      (getDefaultQueryFields as jest.Mock).mockReturnValue({ index: ['title', 'body'] });
+      (getDefaultSourceFields as jest.Mock).mockReturnValue({ index: ['title'] });
       mockGetValues.mockReturnValueOnce([
         { index: [], oldIndex: ['title'] },
         { index: ['body'], oldIndex: ['title'] },
@@ -95,8 +95,14 @@ describe('useLoadFieldsByIndices', () => {
     });
 
     it('add new indices to fields', () => {
-      getDefaultQueryFields.mockReturnValue({ index: ['title', 'body'], newIndex: ['content'] });
-      getDefaultSourceFields.mockReturnValue({ index: ['title'], newIndex: ['content'] });
+      (getDefaultQueryFields as jest.Mock).mockReturnValue({
+        index: ['title', 'body'],
+        newIndex: ['content'],
+      });
+      (getDefaultSourceFields as jest.Mock).mockReturnValue({
+        index: ['title'],
+        newIndex: ['content'],
+      });
       mockGetValues.mockReturnValueOnce([
         { index: [], oldIndex: ['title'] },
         { index: ['body'], oldIndex: ['title'] },
