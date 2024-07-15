@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { SNAPSHOT_API_MAX_METRICS } from '../../../common/constants';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
@@ -31,28 +32,34 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      const snapshotRequest = pipe(
-        SnapshotRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        snapshotRequest.sourceId
-      );
-      const compositeSize = libs.configuration.inventory.compositeSize;
-      const logQueryFields = await libs
-        .getLogQueryFields(
-          snapshotRequest.sourceId,
-          requestContext.core.savedObjects.client,
-          requestContext.core.elasticsearch.client.asCurrentUser
-        )
-        .catch(() => undefined);
-
-      UsageCollector.countNode(snapshotRequest.nodeType);
-      const client = createSearchClient(requestContext, framework);
-
       try {
+        const snapshotRequest = pipe(
+          SnapshotRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
+        if (snapshotRequest.metrics.length > SNAPSHOT_API_MAX_METRICS) {
+          throw Boom.badRequest(
+            `'metrics' size is greater than maximum of ${SNAPSHOT_API_MAX_METRICS} allowed.`
+          );
+        }
+
+        const source = await libs.sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          snapshotRequest.sourceId
+        );
+        const compositeSize = libs.configuration.inventory.compositeSize;
+        const logQueryFields = await libs
+          .getLogQueryFields(
+            snapshotRequest.sourceId,
+            requestContext.core.savedObjects.client,
+            requestContext.core.elasticsearch.client.asCurrentUser
+          )
+          .catch(() => undefined);
+
+        UsageCollector.countNode(snapshotRequest.nodeType);
+        const client = createSearchClient(requestContext, framework);
+
         const snapshotResponse = await getNodes(
           client,
           snapshotRequest,
@@ -64,6 +71,12 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           body: SnapshotNodeResponseRT.encode(snapshotResponse),
         });
       } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
         return handleEsError({ error: err, response });
       }
     }
