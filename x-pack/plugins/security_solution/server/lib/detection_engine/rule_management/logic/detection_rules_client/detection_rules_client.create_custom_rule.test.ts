@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
   getCreateRulesSchemaMock,
@@ -44,7 +45,13 @@ describe('DetectionRulesClient.createCustomRule', () => {
     // creates a rule with a system action and a connector action
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
+    const savedObjectsClient = savedObjectsClientMock.create();
+    detectionRulesClient = createDetectionRulesClient({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      savedObjectsClient,
+    });
   });
 
   it('should create a rule with the correct parameters and options', async () => {

@@ -421,6 +421,10 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       throw new PackagePolicyRequestError(errorMessage);
     }
 
+    if (newData.policy_ids && newData.policy_ids.length === 0) {
+      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
+    }
+
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,

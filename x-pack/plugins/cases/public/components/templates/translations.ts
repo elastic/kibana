@@ -14,8 +14,7 @@ export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
 });
 
 export const TEMPLATE_DESCRIPTION = i18n.translate('xpack.cases.templates.description', {
-  defaultMessage:
-    'Add Case Templates to automatically define the case fields while creating a new case. A user can choose to create an empty case or based on a preset template. Templates allow to auto-populate values when creating new cases.',
+  defaultMessage: 'Create templates that automatically populate values in new cases.',
 });
 
 export const NO_TEMPLATES = i18n.translate('xpack.cases.templates.noTemplates', {
@@ -37,7 +36,7 @@ export const REQUIRED = i18n.translate('xpack.cases.templates.required', {
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.templates.requiredField', {
     values: { fieldName },
-    defaultMessage: 'A {fieldName} is required.',
+    defaultMessage: '{fieldName} is required.',
   });
 
 export const TEMPLATE_NAME = i18n.translate('xpack.cases.templates.templateName', {
@@ -45,8 +44,7 @@ export const TEMPLATE_NAME = i18n.translate('xpack.cases.templates.templateName'
 });
 
 export const TEMPLATE_TAGS_HELP = i18n.translate('xpack.cases.templates.templateTagsHelp', {
-  defaultMessage:
-    'Type one or more custom identifying tags for this template. Please enter after each tag to begin a new one',
+  defaultMessage: 'Separate tags with a line break.',
 });
 
 export const TEMPLATE_FIELDS = i18n.translate('xpack.cases.templates.templateFields', {

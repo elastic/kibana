@@ -4,15 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  SanitizedRuleConfig,
-  RuleSystemAction as AlertingRuleSystemAction,
-} from '@kbn/alerting-plugin/common';
-import type {
-  RuleActionArrayCamel,
-  RuleActionNotifyWhen,
-  RuleActionThrottle,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import type {
   EQL_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
@@ -25,12 +17,9 @@ import type {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import * as z from 'zod';
+import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
+import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
 import { RuleResponseAction } from '../../../../../common/api/detection_engine';
-import type {
-  IsRuleEnabled,
-  RuleName,
-  RuleTagArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
@@ -337,31 +326,8 @@ export type AllRuleTypes =
   | typeof THRESHOLD_RULE_TYPE_ID
   | typeof NEW_TERMS_RULE_TYPE_ID;
 
-export interface InternalRuleCreate {
-  name: RuleName;
-  tags: RuleTagArray;
-  alertTypeId: AllRuleTypes;
+export type InternalRuleCreate = CreateRuleData<RuleParams> & {
   consumer: typeof SERVER_APP_ID;
-  schedule: {
-    interval: string;
-  };
-  enabled: IsRuleEnabled;
-  actions: RuleActionArrayCamel;
-  systemActions?: AlertingRuleSystemAction[];
-  params: RuleParams;
-  throttle?: RuleActionThrottle | null;
-  notifyWhen?: RuleActionNotifyWhen | null;
-}
+};
 
-export interface InternalRuleUpdate {
-  name: RuleName;
-  tags: RuleTagArray;
-  schedule: {
-    interval: string;
-  };
-  actions: RuleActionArrayCamel;
-  systemActions?: AlertingRuleSystemAction[];
-  params: RuleParams;
-  throttle?: RuleActionThrottle | null;
-  notifyWhen?: RuleActionNotifyWhen | null;
-}
+export type InternalRuleUpdate = UpdateRuleData<RuleParams>;

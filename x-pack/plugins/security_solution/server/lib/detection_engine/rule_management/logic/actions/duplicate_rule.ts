@@ -13,7 +13,6 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
-import { convertImmutableToRuleSource } from '../../normalization/rule_converters';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -49,7 +48,9 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
     params: {
       ...rule.params,
       immutable,
-      ruleSource: convertImmutableToRuleSource(immutable),
+      ruleSource: {
+        type: 'internal',
+      },
       ruleId,
       relatedIntegrations,
       requiredFields,
