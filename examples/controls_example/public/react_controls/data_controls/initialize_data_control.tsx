@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -131,7 +132,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
           // apply the changes from the new state via the state manager
           (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
             (key) => {
-              if (mergedStateManager[key].getValue() !== newState[key]) {
+              if (!isEqual(mergedStateManager[key].getValue(), newState[key])) {
                 mergedStateManager[key].next(newState[key]);
               }
             }
