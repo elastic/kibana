@@ -223,7 +223,7 @@ const AssistantComponent: React.FC<Props> = ({
           retries < maxRetries
         ) {
           retries++;
-          await sleep(5000);
+          await sleep(2000);
           updatedConversation = await getConversation(conversationId);
         }
 
