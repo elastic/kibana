@@ -37,7 +37,11 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexLink?: string) => [
+const getDetailsList = (
+  data: CspFinding,
+  ruleFlyoutLink: string,
+  discoverDataviewLink?: string
+) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
@@ -106,9 +110,8 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
       defaultMessage: 'Index',
     }),
-    description: discoverIndexLink ? (
-      // TODO: find a way to get index name
-      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+    description: discoverDataviewLink ? (
+      <EuiLink href={discoverDataviewLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
     ) : (
       LATEST_FINDINGS_INDEX_DEFAULT_NS
     ),
@@ -173,19 +176,22 @@ export const OverviewTab = ({
   const { discover } = useKibana().services;
   const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
-  const discoverIndexLink = useMemo(
+  // link will navigate to our dataview in discover, filtered by the data source of the finding
+  const discoverDataviewLink = useMemo(
     () =>
       discover.locator?.getRedirectUrl({
         dataViewId: latestFindingsDataView.data?.id,
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'data_stream.dataset': data.data_stream?.dataset,
+        ...(data.data_stream?.dataset && {
+          filters: [
+            {
+              query: {
+                match_phrase: {
+                  'data_stream.dataset': data.data_stream.dataset,
+                },
               },
             },
-          },
-        ],
+          ],
+        }),
       }),
     [data.data_stream?.dataset, discover.locator, latestFindingsDataView.data?.id]
   );
@@ -201,7 +207,7 @@ export const OverviewTab = ({
             defaultMessage: 'Details',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, ruleFlyoutLink, discoverIndexLink),
+          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataviewLink),
         },
         {
           initialIsOpen: true,
@@ -222,7 +228,7 @@ export const OverviewTab = ({
             listItems: getEvidenceList(data),
           },
       ].filter(truthy),
-    [data, discoverIndexLink, hasEvidence, ruleFlyoutLink]
+    [data, discoverDataviewLink, hasEvidence, ruleFlyoutLink]
   );
 
   return (
