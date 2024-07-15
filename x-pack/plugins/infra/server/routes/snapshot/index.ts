@@ -32,36 +32,33 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-try {
-  try {
-      const snapshotRequest = pipe(
-        SnapshotRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
-      if (snapshotRequest.metrics.length > SNAPSHOT_API_MAX_METRICS) {
-        throw Boom.badRequest(
-          `'metrics' size is greater than maximum of ${SNAPSHOT_API_MAX_METRICS} allowed.`
+      try {
+        const snapshotRequest = pipe(
+          SnapshotRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
         );
-      }
 
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        snapshotRequest.sourceId
-      );
-      const compositeSize = libs.configuration.inventory.compositeSize;
-      const logQueryFields = await libs
-        .getLogQueryFields(
-          snapshotRequest.sourceId,
+        if (snapshotRequest.metrics.length > SNAPSHOT_API_MAX_METRICS) {
+          throw Boom.badRequest(
+            `'metrics' size is greater than maximum of ${SNAPSHOT_API_MAX_METRICS} allowed.`
+          );
+        }
+
+        const source = await libs.sources.getSourceConfiguration(
           requestContext.core.savedObjects.client,
-          requestContext.core.elasticsearch.client.asCurrentUser
-        )
-        .catch(() => undefined);
+          snapshotRequest.sourceId
+        );
+        const compositeSize = libs.configuration.inventory.compositeSize;
+        const logQueryFields = await libs
+          .getLogQueryFields(
+            snapshotRequest.sourceId,
+            requestContext.core.savedObjects.client,
+            requestContext.core.elasticsearch.client.asCurrentUser
+          )
+          .catch(() => undefined);
 
-      UsageCollector.countNode(snapshotRequest.nodeType);
-      const client = createSearchClient(requestContext, framework);
-
-      
+        UsageCollector.countNode(snapshotRequest.nodeType);
+        const client = createSearchClient(requestContext, framework);
 
         const snapshotResponse = await getNodes(
           client,
