@@ -14,7 +14,7 @@ import { RouteDependencies } from '../../types';
 import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   ...pipelineSchema,
 });
 
