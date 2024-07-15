@@ -63,8 +63,6 @@ You can add optional and required fields for customized case collaboration.
 
 To create a custom field:
 
-. Go to *{stack-manage-app} > Cases* and click *Settings*.
-
 . In the *Custom fields* section, click *Add field*.
 +
 --
@@ -90,8 +88,6 @@ You can make the case creation process faster and more consistent by adding temp
 A template defines values for one or all of the case fields (such as severity, tags, description, and title) as well as any custom fields.
 
 To create a template:
-
-. Go to *{stack-manage-app} > Cases* and click *Settings*.
 
 . In the *Templates* section, click *Add template*.
 +

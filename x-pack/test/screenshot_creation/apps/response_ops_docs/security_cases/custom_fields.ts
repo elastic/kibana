@@ -19,6 +19,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('configure-case-button');
       await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories);
+      await testSubjects.click('add-template');
+      await commonScreenshots.takeScreenshot(
+        'cases-add-template',
+        screenshotDirectories,
+        1400,
+        1000
+      );
+      await testSubjects.click('common-flyout-cancel');
       await testSubjects.click('add-custom-field');
       await commonScreenshots.takeScreenshot(
         'cases-add-custom-field',
