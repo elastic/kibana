@@ -43,5 +43,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/rule-registry-plugin",
+    "@kbn/triggers-actions-ui-plugin",
   ]
 }
