@@ -67,7 +67,7 @@ export interface HostEntityOverviewProps {
 
 export const HOST_PREVIEW_BANNER = {
   title: i18n.translate('xpack.securitySolution.flyout.right.host.hostPreviewTitle', {
-    defaultMessage: 'Preview host',
+    defaultMessage: 'Preview host details',
   }),
   backgroundColor: 'warning',
   textColor: 'warning',
@@ -187,7 +187,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+              <RiskScoreDocTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

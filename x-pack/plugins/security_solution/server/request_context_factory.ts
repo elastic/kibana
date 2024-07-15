@@ -65,8 +65,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [, startPlugins] = await core.getStartServices();
-    const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    const [_, startPlugins] = await core.getStartServices();
+    const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
 
@@ -122,10 +122,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
         });
 
-        return createDetectionRulesClient(
-          startPlugins.alerting.getRulesClientWithRequest(request),
-          mlAuthz
-        );
+        return createDetectionRulesClient({
+          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          savedObjectsClient: coreContext.savedObjects.client,
+          mlAuthz,
+        });
       }),
 
       getDetectionEngineHealthClient: memoize(() =>
@@ -148,7 +149,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           return null;
         }
 
-        const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
+        const username = coreContext.security.authc.getCurrentUser()?.username || 'elastic';
         return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
 

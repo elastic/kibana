@@ -86,7 +86,7 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
                 });
 
                 const patchedRule = await detectionRulesClient.patchRule({
-                  nextParams: payloadRule,
+                  rulePatch: payloadRule,
                 });
 
                 return patchedRule;
