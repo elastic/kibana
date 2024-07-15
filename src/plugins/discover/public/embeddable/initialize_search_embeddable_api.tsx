@@ -192,7 +192,7 @@ export const initializeSearchEmbeddableApi = async (
         (a, b) => (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
       ],
 
-      /** The following can't currently be changed froom the dashboard */
+      /** The following can't currently be changed from the dashboard */
       serializedSearchSource: [serializedSearchSource$, (value) => {}, () => true],
       viewMode: [savedSearchViewMode$, (value) => {}, () => true],
       grid: [grid$, (value) => {}, () => true],
