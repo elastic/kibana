@@ -49,7 +49,7 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       // important, no new line here
       '  "action_input": "Final response to human"' +
       '}}\n\n' +
-      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Response format is Action:```$JSON_BLOB```then Observation',
+      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
   [
