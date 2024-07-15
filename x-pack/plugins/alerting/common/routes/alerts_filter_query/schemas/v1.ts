@@ -12,8 +12,25 @@ export const alertsFilterQuerySchema = schema.object({
   kql: schema.string({ meta: { description: 'A filter written in Kibana Query Language (KQL).' } }),
   filters: schema.arrayOf(
     schema.object({
-      query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-      meta: schema.recordOf(schema.string(), schema.any()),
+      query: schema.maybe(
+        schema.recordOf(
+          schema.string(),
+          schema.any({
+            meta: {
+              description: 'A query for the filter.',
+            },
+          })
+        )
+      ),
+      meta: schema.recordOf(
+        schema.string(),
+        schema.any({
+          meta: {
+            description:
+              'An object with fields such as "controlledBy", "disabled", "field", "group", "index", "isMultiIndex", "key", "negate", "params",  "type", "value"',
+          },
+        })
+      ),
       $state: schema.maybe(
         schema.object({
           store: schema.oneOf(

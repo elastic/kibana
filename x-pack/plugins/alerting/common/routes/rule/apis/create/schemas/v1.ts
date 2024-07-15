@@ -114,7 +114,13 @@ export const actionSchema = schema.object(
       })
     ),
     alerts_filter: schema.maybe(actionAlertsFilterSchema),
-    use_alert_data_for_template: schema.maybe(schema.boolean()),
+    use_alert_data_for_template: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether to use alert data as template or not.',
+        },
+      })
+    ),
   },
   {
     meta: { description: 'An action that runs under defined conditions.' },
