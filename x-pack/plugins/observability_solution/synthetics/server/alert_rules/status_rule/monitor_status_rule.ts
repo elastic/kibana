@@ -93,11 +93,8 @@ export const registerSyntheticsStatusCheckRule = (
         params.condition
       );
 
-      if (isLocationBased) {
-        // for location based we need to make sure ,monitor is down for the threshold for all locations
-        // lets build a map of monitors for each location
+      const getConfigsByIds = () => {
         const downConfigsById = new Map<string, AlertStatusMetaDataCodec[]>();
-
         Object.entries(downConfigs).forEach(([_, config]) => {
           const { configId } = config;
           if (!downConfigsById.has(configId)) {
@@ -105,6 +102,13 @@ export const registerSyntheticsStatusCheckRule = (
           }
           downConfigsById.get(configId)?.push(config);
         });
+        return downConfigsById;
+      };
+
+      if (isLocationBased) {
+        // for location based we need to make sure ,monitor is down for the threshold for all locations
+        // lets build a map of monitors for each location
+        const downConfigsById = getConfigsByIds();
         for (const [configId, configs] of downConfigsById) {
           const totalLocations = monitorLocationsMap[configId]?.length ?? 0;
           const locationThreshold = Math.ceil((percentOfLocations / 100) * totalLocations);
@@ -132,24 +136,46 @@ export const registerSyntheticsStatusCheckRule = (
           }
         }
       } else {
-        Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
-          const { checks } = statusConfig;
-          if (checks.down >= downThreshold) {
-            const alertId = isCustomRule ? `${idWithLocation}_custom` : idWithLocation;
-            const monitorSummary = statusRule.getMonitorDownSummary({
-              statusConfig,
-              downThreshold,
-            });
+        const groupByLocation = Boolean(params.condition?.groupByLocation);
+        if (groupByLocation) {
+          Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
+            const { checks } = statusConfig;
+            if (checks.down >= downThreshold) {
+              const alertId = isCustomRule ? `${idWithLocation}_custom` : idWithLocation;
+              const monitorSummary = statusRule.getMonitorDownSummary({
+                statusConfig,
+                downThreshold,
+              });
 
-            statusRule.scheduleAlert({
-              idWithLocation,
-              alertId,
-              monitorSummary,
-              statusConfig,
-              downThreshold,
-            });
+              statusRule.scheduleAlert({
+                idWithLocation,
+                alertId,
+                monitorSummary,
+                statusConfig,
+                downThreshold,
+              });
+            }
+          });
+        } else {
+          const downConfigsById = getConfigsByIds();
+          for (const [configId, configs] of downConfigsById) {
+            const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
+            if (totalDownChecks > downThreshold) {
+              const alertId = configId;
+              const monitorSummary = statusRule.getUngroupedDownSummary({
+                statusConfigs: configs,
+                downThreshold,
+              });
+              statusRule.scheduleAlert({
+                idWithLocation: configId,
+                alertId,
+                monitorSummary,
+                statusConfig: configs[0],
+                downThreshold,
+              });
+            }
           }
-        });
+        }
       }
 
       if (params.condition?.alertOnNoData && Object.keys(pendingConfigs).length > 0) {

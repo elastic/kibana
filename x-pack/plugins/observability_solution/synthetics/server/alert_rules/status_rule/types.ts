@@ -46,6 +46,7 @@ export interface MonitorSummaryStatusRule {
   monitorType: string;
   monitorName: string;
   locationName: string;
+  locationNames: string;
   lastErrorMessage: string;
   stateId: string | null;
   monitorUrlLabel: string;

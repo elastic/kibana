@@ -389,6 +389,73 @@ export class StatusRuleExecutor {
     }
   }
 
+  getUngroupedDownSummary({
+    statusConfigs,
+    downThreshold,
+  }: {
+    statusConfigs: AlertStatusMetaDataCodec[];
+    downThreshold: number;
+  }) {
+    const sampleConfig = statusConfigs[0];
+    const { ping, configId, locationId, checks } = sampleConfig;
+    const baseSummary = getMonitorSummary(
+      ping,
+      DOWN_LABEL,
+      locationId,
+      configId,
+      this.dateFormat!,
+      this.tz!,
+      checks,
+      downThreshold
+    );
+    if (statusConfigs.length === 1) {
+      const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name);
+      baseSummary.reason = i18n.translate(
+        'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped',
+        {
+          defaultMessage: `Monitor "{name}" is {status} from {locName}. Alert when down {threshold} times.`,
+          values: {
+            locName: locNames[0],
+            name: baseSummary.monitorName,
+            status: baseSummary.status,
+            threshold: downThreshold,
+          },
+        }
+      );
+    } else {
+      const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name).join(' | ');
+      baseSummary.reason = i18n.translate(
+        'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple',
+        {
+          defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} times.`,
+          values: {
+            locNames,
+            name: baseSummary.monitorName,
+            status: baseSummary.status,
+            threshold: downThreshold,
+            locationDetails: statusConfigs
+              .map((c) => {
+                return i18n.translate(
+                  'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
+                  {
+                    defaultMessage: ' {downTimes} times from {locName}',
+                    values: {
+                      locName: c.ping.observer.geo?.name,
+                      downTimes: c.checks?.down,
+                    },
+                  }
+                );
+              })
+              .join(' | '),
+          },
+        }
+      );
+      baseSummary.locationNames = locNames;
+    }
+
+    return baseSummary;
+  }
+
   scheduleAlert({
     idWithLocation,
     alertId,
