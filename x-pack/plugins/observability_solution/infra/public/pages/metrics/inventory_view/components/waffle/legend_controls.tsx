@@ -194,7 +194,6 @@ export const LegendControls = ({
       button={buttonComponent}
       anchorPosition="leftCenter"
       data-test-subj="legendControls"
-      // panelStyle={{ width: '100%', maxWidth: 375 }}
     >
       <EuiPopoverTitle>
         {i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTitleLabel', {
