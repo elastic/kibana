@@ -6,7 +6,6 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
@@ -17,6 +16,7 @@ import {
 } from '../../lib/auth';
 import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
+import { getClientsFromAPIKey } from '../../lib/utils';
 
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
@@ -48,9 +48,7 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_VALID } });
         }
 
-        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-        const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-        const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+        const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
 
         await uninstallBuiltInEntityDefinitions({
           soClient,
