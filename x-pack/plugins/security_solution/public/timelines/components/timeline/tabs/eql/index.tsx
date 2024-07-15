@@ -102,8 +102,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -138,14 +138,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: 'eql',
-    limit: unifiedComponentsInTimelineEnabled ? sampleSize : itemsPerPage,
+    limit: !unifiedComponentsInTimelineDisabled ? sampleSize : itemsPerPage,
     runtimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,
   });
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
@@ -163,12 +162,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     eventIdToNoteIds,
     refetch,
     timelineId,
+    activeTab: TimelineTabs.eql,
   });
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+      if (eventId && securitySolutionNotesEnabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -205,7 +205,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       }
     },
     [
-      expandableFlyoutDisabled,
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
@@ -278,10 +277,12 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      {unifiedComponentsInTimelineEnabled ? (
+      {!unifiedComponentsInTimelineDisabled ? (
         <>
           <InPortal node={eqlEventsCountPortalNode}>
-            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+            {totalCount >= 0 ? (
+              <EventsCountBadge data-test-subj="eql-events-count">{totalCount}</EventsCountBadge>
+            ) : null}
           </InPortal>
           {NotesFlyoutMemo}
           <FullWidthFlexGroup>

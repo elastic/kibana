@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getJourneyScreenshot } from '../../legacy_uptime/lib/requests/get_journey_screenshot';
+import { getJourneyScreenshot } from '../../queries/get_journey_screenshot';
+import { getLastSuccessfulCheck } from '../../queries/get_last_successful_check';
 import { isFullScreenshot, isRefResult, Ping } from '../../../common/runtime_types';
-import { getLastSuccessfulCheck } from '../../legacy_uptime/lib/requests/get_last_successful_check';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
@@ -31,12 +31,12 @@ export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () 
 export const getLastSuccessfulCheckScreenshot = async ({
   response,
   request,
-  uptimeEsClient,
+  syntheticsEsClient,
 }: RouteContext) => {
   const { timestamp, monitorId, stepIndex, location } = request.query;
 
   const check: Ping | null = await getLastSuccessfulCheck({
-    uptimeEsClient,
+    syntheticsEsClient,
     monitorId,
     timestamp,
     location,
@@ -51,7 +51,7 @@ export const getLastSuccessfulCheckScreenshot = async ({
   }
 
   const screenshot = await getJourneyScreenshot({
-    uptimeEsClient,
+    syntheticsEsClient,
     checkGroup: check.monitor.check_group,
     stepIndex,
   });

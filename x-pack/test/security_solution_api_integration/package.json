@@ -20,6 +20,7 @@
     "initialize-server:dr": "node ./scripts/index.js server detections_response trial_license_complete_tier",
     "run-tests:dr": "node ./scripts/index.js runner detections_response trial_license_complete_tier",
 
+
     "initialize-server:de": "node ./scripts/index.js server detections_response/detection_engine trial_license_complete_tier",
     "run-tests:de": "node ./scripts/index.js runner detections_response/detection_engine trial_license_complete_tier",
 
@@ -34,6 +35,9 @@
 
     "initialize-server:lists:complete": "node ./scripts/index.js server lists_and_exception_lists trial_license_complete_tier",
     "run-tests:lists:complete": "node ./scripts/index.js runner lists_and_exception_lists trial_license_complete_tier",
+
+    "initialize-server:edr-workflows": "node ./scripts/index.js server edr_workflows trial_license_complete_tier",
+    "run-tests:edr-workflows": "node ./scripts/index.js runner edr_workflows trial_license_complete_tier",
 
     "initialize-server:investigations": "node scripts/index.js server investigation trial_license_complete_tier",
     "run-tests:investigations": "node scripts/index.js runner investigation trial_license_complete_tier",
@@ -71,6 +75,55 @@
     "entity_analytics:essentials:qa:serverless:release": "npm run run-tests:ea:basic_essentials risk_engine serverless qaEnv",
     "entity_analytics:essentials:server:ess": "npm run initialize-server:ea:basic_essentials risk_engine ess",
     "entity_analytics:essentials:runner:ess": "npm run run-tests:ea:basic_essentials risk_engine ess essEnv",
+
+    "edr_workflows:artifacts:server:serverless": "npm run initialize-server:edr-workflows artifacts serverless",
+    "edr_workflows:artifacts:runner:serverless": "npm run run-tests:edr-workflows artifacts serverless serverlessEnv",
+    "edr_workflows:artifacts:qa:serverless": "npm run run-tests:edr-workflows artifacts serverless qaPeriodicEnv",
+    "edr_workflows:artifacts:qa:serverless:release": "npm run run-tests:edr-workflows artifacts serverless qaEnv",
+    "edr_workflows:artifacts:server:ess": "npm run initialize-server:edr-workflows artifacts ess",
+    "edr_workflows:artifacts:runner:ess": "npm run run-tests:edr-workflows artifacts ess essEnv",
+
+    "edr_workflows:authentication:server:serverless": "npm run initialize-server:edr-workflows authentication serverless",
+    "edr_workflows:authentication:runner:serverless": "npm run run-tests:edr-workflows authentication serverless serverlessEnv",
+    "edr_workflows:authentication:qa:serverless": "npm run run-tests:edr-workflows authentication serverless qaPeriodicEnv",
+    "edr_workflows:authentication:qa:serverless:release": "npm run run-tests:edr-workflows authentication serverless qaEnv",
+    "edr_workflows:authentication:server:ess": "npm run initialize-server:edr-workflows authentication ess",
+    "edr_workflows:authentication:runner:ess": "npm run run-tests:edr-workflows authentication ess essEnv",
+
+    "edr_workflows:metadata:server:serverless": "npm run initialize-server:edr-workflows metadata serverless",
+    "edr_workflows:metadata:runner:serverless": "npm run run-tests:edr-workflows metadata serverless serverlessEnv",
+    "edr_workflows:metadata:qa:serverless": "npm run run-tests:edr-workflows metadata serverless qaPeriodicEnv",
+    "edr_workflows:metadata:qa:serverless:release": "npm run run-tests:edr-workflows metadata serverless qaEnv",
+    "edr_workflows:metadata:server:ess": "npm run initialize-server:edr-workflows metadata ess",
+    "edr_workflows:metadata:runner:ess": "npm run run-tests:edr-workflows metadata ess essEnv",
+
+    "edr_workflows:package:server:serverless": "npm run initialize-server:edr-workflows package serverless",
+    "edr_workflows:package:runner:serverless": "npm run run-tests:edr-workflows package serverless serverlessEnv",
+    "edr_workflows:package:qa:serverless": "npm run run-tests:edr-workflows package serverless qaPeriodicEnv",
+    "edr_workflows:package:qa:serverless:release": "npm run run-tests:edr-workflows package serverless qaEnv",
+    "edr_workflows:package:server:ess": "npm run initialize-server:edr-workflows package ess",
+    "edr_workflows:package:runner:ess": "npm run run-tests:edr-workflows package ess essEnv",
+
+    "edr_workflows:policy_response:server:serverless": "npm run initialize-server:edr-workflows policy_response serverless",
+    "edr_workflows:policy_response:runner:serverless": "npm run run-tests:edr-workflows policy_response serverless serverlessEnv",
+    "edr_workflows:policy_response:qa:serverless": "npm run run-tests:edr-workflows policy_response serverless qaPeriodicEnv",
+    "edr_workflows:policy_response:qa:serverless:release": "npm run run-tests:edr-workflows policy_response serverless qaEnv",
+    "edr_workflows:policy_response:server:ess": "npm run initialize-server:edr-workflows policy_response ess",
+    "edr_workflows:policy_response:runner:ess": "npm run run-tests:edr-workflows policy_response ess essEnv",
+
+    "edr_workflows:resolver:server:serverless": "npm run initialize-server:edr-workflows resolver serverless",
+    "edr_workflows:resolver:runner:serverless": "npm run run-tests:edr-workflows resolver serverless serverlessEnv",
+    "edr_workflows:resolver:qa:serverless": "npm run run-tests:edr-workflows resolver serverless qaPeriodicEnv",
+    "edr_workflows:resolver:qa:serverless:release": "npm run run-tests:edr-workflows resolver serverless qaEnv",
+    "edr_workflows:resolver:server:ess": "npm run initialize-server:edr-workflows resolver ess",
+    "edr_workflows:resolver:runner:ess": "npm run run-tests:edr-workflows resolver ess essEnv",
+
+    "edr_workflows:response_actions:server:serverless": "npm run initialize-server:edr-workflows response_actions serverless",
+    "edr_workflows:response_actions:runner:serverless": "npm run run-tests:edr-workflows response_actions serverless serverlessEnv",
+    "edr_workflows:response_actions:qa:serverless": "npm run run-tests:edr-workflows response_actions serverless qaPeriodicEnv",
+    "edr_workflows:response_actions:qa:serverless:release": "npm run run-tests:edr-workflows response_actions serverless qaEnv",
+    "edr_workflows:response_actions:server:ess": "npm run initialize-server:edr-workflows response_actions ess",
+    "edr_workflows:response_actions:runner:ess": "npm run run-tests:edr-workflows response_actions ess essEnv",
 
     "exception_lists_items:server:serverless": "npm run initialize-server:lists:complete exception_lists_items serverless",
     "exception_lists_items:runner:serverless": "npm run run-tests:lists:complete exception_lists_items serverless serverlessEnv",
