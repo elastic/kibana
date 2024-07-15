@@ -70,7 +70,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     /**
       * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
 the migration process. A successful migration will result in both the old and new indices being present.
-As such, the old, orphaned index can (and likely should) be deleted. While you can delete these indices manually,
+As such, the old, orphaned index can (and likely should) be deleted.
+
+While you can delete these indices manually,
 the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
 after 30 days. It also deletes other artifacts specific to the migration implementation.
 
@@ -84,7 +86,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Creates new detection rules in bulk.
+     * Create new detection rules in bulk.
      */
     bulkCreateRules(props: BulkCreateRulesProps) {
       return supertest
@@ -95,7 +97,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Deletes multiple rules.
+     * Delete detection rules in bulk.
      */
     bulkDeleteRules(props: BulkDeleteRulesProps) {
       return supertest
@@ -106,7 +108,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Updates multiple rules using the `PATCH` method.
+     * Update specific fields of existing detection rules using the `rule_id` or `id` field.
      */
     bulkPatchRules(props: BulkPatchRulesProps) {
       return supertest
@@ -117,8 +119,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Updates multiple rules using the `PUT` method.
-     */
+      * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` or `rule_id` values.
+
+      */
     bulkUpdateRules(props: BulkUpdateRulesProps) {
       return supertest
         .put('/api/detection_engine/rules/_bulk_update')
@@ -134,6 +139,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Initiate a migration of detection alerts.
+Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
+
+      */
     createAlertsMigration(props: CreateAlertsMigrationProps) {
       return supertest
         .post('/api/detection_engine/signals/migration')
@@ -143,7 +153,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Create a single detection rule
+     * Create a new detection rule.
      */
     createRule(props: CreateRuleProps) {
       return supertest
@@ -161,7 +171,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Deletes a single rule using the `rule_id` or `id` field.
+     * Delete a detection rule using the `rule_id` or `id` field.
      */
     deleteRule(props: DeleteRuleProps) {
       return supertest
@@ -172,8 +182,13 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .query(props.query);
     },
     /**
-     * Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
-     */
+      * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
+- Actions
+- Exception lists
+> info
+> You cannot export prebuilt rules.
+
+      */
     exportRules(props: ExportRulesProps) {
       return supertest
         .post('/api/detection_engine/rules/_export')
@@ -184,7 +199,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .query(props.query);
     },
     /**
-      * The finalization endpoint replaces the original index's alias with the successfully migrated index's alias.
+      * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
 The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
 finalize it.
 
@@ -198,7 +213,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Finds rules that match the given query.
+     * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
      */
     findRules(props: FindRulesProps) {
       return supertest
@@ -223,6 +238,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
+     */
     getAlertsMigrationStatus(props: GetAlertsMigrationStatusProps) {
       return supertest
         .post('/api/detection_engine/signals/migration_status')
@@ -247,6 +265,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+     */
     getPrebuiltRulesAndTimelinesStatus() {
       return supertest
         .get('/api/detection_engine/rules/prepackaged/_status')
@@ -275,8 +296,11 @@ finalize it.
         .query(props.query);
     },
     /**
-     * Imports rules from an `.ndjson` file, including actions and exception lists.
-     */
+      * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
+- The `Content-Type: multipart/form-data` HTTP header.
+- A link to the `.ndjson` file containing the rules.
+
+      */
     importRules(props: ImportRulesProps) {
       return supertest
         .post('/api/detection_engine/rules/_import')
@@ -285,6 +309,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Install and update all Elastic prebuilt detection rules and Timelines.
+     */
     installPrebuiltRulesAndTimelines() {
       return supertest
         .put('/api/detection_engine/rules/prepackaged')
@@ -292,6 +319,12 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * And tags to detection alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+      */
     manageAlertTags(props: ManageAlertTagsProps) {
       return supertest
         .post('/api/detection_engine/signals/tags')
@@ -301,7 +334,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Patch a single rule
+     * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
      */
     patchRule(props: PatchRuleProps) {
       return supertest
@@ -312,7 +345,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
+     * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
      */
     performBulkAction(props: PerformBulkActionProps) {
       return supertest
@@ -324,7 +357,7 @@ finalize it.
         .query(props.query);
     },
     /**
-     * Read a single rule
+     * Retrieve a detection rule using the `rule_id` or `id` field.
      */
     readRule(props: ReadRuleProps) {
       return supertest
@@ -334,6 +367,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * List all unique tags from all detection rules.
+     */
     readTags() {
       return supertest
         .get('/api/detection_engine/tags')
@@ -341,6 +377,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Find and/or aggregate detection alerts that match the given query.
+     */
     searchAlerts(props: SearchAlertsProps) {
       return supertest
         .post('/api/detection_engine/signals/search')
@@ -350,8 +389,11 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Assigns users to alerts.
-     */
+      * Assign users to detection alerts, and unassign them from alerts.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+      */
     setAlertAssignees(props: SetAlertAssigneesProps) {
       return supertest
         .post('/api/detection_engine/signals/assignees')
@@ -360,6 +402,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Set the status of one or more detection alerts.
+     */
     setAlertsStatus(props: SetAlertsStatusProps) {
       return supertest
         .post('/api/detection_engine/signals/status')
@@ -380,8 +425,11 @@ finalize it.
         .query(props.query);
     },
     /**
-     * Update a single rule
-     */
+      * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` or `rule_id` values.
+
+      */
     updateRule(props: UpdateRuleProps) {
       return supertest
         .put('/api/detection_engine/rules')
