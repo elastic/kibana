@@ -32,7 +32,7 @@ fi
 NODE="${DIR}/node/default/bin/node"
 {{/darwin}}
 {{#linux}}
-NODE="${DIR}/pointer-compression/bin/node"
+NODE="${DIR}/node/pointer-compression/bin/node"
 {{#serverless}}
 # if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
 #   NODE="${DIR}/node/pointer-compression/bin/node"
