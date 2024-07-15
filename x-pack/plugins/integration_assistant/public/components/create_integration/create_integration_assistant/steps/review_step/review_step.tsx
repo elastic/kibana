@@ -73,12 +73,15 @@ export const ReviewStep = React.memo<ReviewStepProps>(
         title={i18n.TITLE}
         subtitle={i18n.DESCRIPTION}
         right={
-          <EuiButton onClick={() => setIsPipelineEditionVisible(true)}>
+          <EuiButton
+            onClick={() => setIsPipelineEditionVisible(true)}
+            data-test-subj="editPipelineButton"
+          >
             {i18n.EDIT_PIPELINE_BUTTON}
           </EuiButton>
         }
       >
-        <EuiPanel hasShadow={false} hasBorder>
+        <EuiPanel hasShadow={false} hasBorder data-test-subj="reviewStep">
           {isGenerating ? (
             <EuiLoadingSpinner size="l" />
           ) : (
@@ -106,7 +109,7 @@ export const ReviewStep = React.memo<ReviewStepProps>(
                   responsive={false}
                   css={{ height: '100%' }}
                 >
-                  <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
+                  <EuiFlexItem grow={true}>
                     <CodeEditor
                       languageId={XJsonLang.ID}
                       value={JSON.stringify(result?.pipeline, null, 2)}
@@ -129,7 +132,11 @@ export const ReviewStep = React.memo<ReviewStepProps>(
               <EuiFlyoutFooter>
                 <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={saveCustomPipeline}>
+                    <EuiButton
+                      fill
+                      onClick={saveCustomPipeline}
+                      data-test-subj="savePipelineButton"
+                    >
                       {i18n.SAVE_BUTTON}
                     </EuiButton>
                   </EuiFlexItem>
