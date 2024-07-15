@@ -52,9 +52,9 @@ export const removeOutdatedTranslations = ({
 
 export const removeOutdatedMessages = (
   extractedMessages: MessageDescriptor[],
-  translationMessages: Array<[string, string]>,
+  translationMessages: Array<[string, string | { message: string }]>,
   taskReporter: TaskReporter
-): Array<[string, string]> => {
+): Array<[string, string | { message: string }]> => {
   return translationMessages.filter(([translatedId, translatedMessage]) => {
     const messageDescriptor = extractedMessages.find(({ id }) => id === translatedId);
     if (!messageDescriptor?.hasValuesObject) {

@@ -103,9 +103,13 @@ export function extractMessagesFromCallExpression(
     }
 
     const msg = extractMessageDescriptor(typescript, descriptorsObj, opts, sf);
+    if (!msg) {
+      throw new Error('No message extracted from descriptor');
+    }
+
     const valuesKeys = getObjectKeys(typescript, valuesObj);
 
-    const hasValuesObject = valuesKeys.length;
+    const hasValuesObject = valuesKeys.length > 0;
     if (restArgs.length) {
       throw new Error(
         'We do not support a 3rd argument for formatMessage, please use i18n.translate instead.'
@@ -157,19 +161,36 @@ export function extractMessagesFromCallExpression(
   return node;
 }
 
-function getObjectKeys(typescript: TypeScript, node: ts.ObjectLiteralExpression) {
-  return node.properties.map((prop) => {
+function getObjectKeys(
+  typescript: TypeScript,
+  node: ts.ObjectLiteralExpression | ts.Expression
+): string[] {
+  if (!typescript.isObjectLiteralExpression(node)) {
+    throw new Error(`Expecting object literal expression. Got ${node}`);
+  }
+
+  const valuesKeys = node.properties.map((prop) => {
     if (typescript.isPropertyAssignment(prop) || typescript.isShorthandPropertyAssignment(prop)) {
       if (typescript.isIdentifier(prop.name)) {
         return prop.name.getText();
       }
     }
   });
+
+  if (valuesKeys.some((valuesKey) => typeof valuesKey === 'undefined')) {
+    throw new Error('Unexpected undefined value inside values.');
+  }
+
+  return valuesKeys as string[];
 }
 
 export function extractMessageDescriptor(
   typescript: TypeScript,
-  node: ts.ObjectLiteralExpression | ts.JsxOpeningElement | ts.JsxSelfClosingElement,
+  node:
+    | ts.ObjectLiteralExpression
+    | ts.JsxOpeningElement
+    | ts.JsxSelfClosingElement
+    | ts.Expression,
   { overrideIdFn, extractSourceLocation, preserveWhitespace }: any,
   sf: ts.SourceFile
 ): MessageDescriptor | undefined {
@@ -213,7 +234,7 @@ export function extractMessageDescriptor(
       else if (ts.isObjectLiteralExpression(initializer)) {
         msg.hasValuesObject = true;
         const valuesKeys = getObjectKeys(typescript, initializer);
-        msg.valuesKeys = valuesKeys;
+        msg.valuesKeys = valuesKeys as string[];
       } else if (ts.isStringLiteral(initializer)) {
         switch (name.text) {
           case 'id':
@@ -267,7 +288,7 @@ export function extractMessageDescriptor(
         ) {
           msg.hasValuesObject = true;
           const valuesKeys = getObjectKeys(typescript, initializer.expression);
-          msg.valuesKeys = valuesKeys;
+          msg.valuesKeys = valuesKeys as string[];
         }
         // <FormattedMessage foo={`bar`} />
         else if (typescript.isNoSubstitutionTemplateLiteral(initializer.expression)) {

@@ -12,7 +12,9 @@ import _ from 'lodash';
 
 const i18nErrorTag = chalk.white.bgRed(' I18N ERROR ');
 
-export const flagFailError = (message: string) => createFailError(`${i18nErrorTag} ${message}`);
+export const flagFailError = (message: string) => {
+  throw createFailError(`${i18nErrorTag} ${message}`);
+};
 
 export const isDefined = _.negate(_.isUndefined);
 

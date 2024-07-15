@@ -52,9 +52,9 @@ export const removeUnusedTranslations = ({
 
 export const removeUnusedMessages = (
   extractedMessages: MessageDescriptor[],
-  translationMessages: Array<[string, string]>,
+  translationMessages: Array<[string, string | { message: string }]>,
   taskReporter: TaskReporter
-): Array<[string, string]> => {
+): Array<[string, string | { message: string }]> => {
   const extractedMessagesIds = [...extractedMessages].map(({ id }) => id);
   const translationMessagesIds = [...translationMessages.map(([id]) => id)];
   const unusedTranslations = difference(translationMessagesIds, extractedMessagesIds);

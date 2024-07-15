@@ -9,7 +9,7 @@
 import type { TranslationInput } from '@kbn/i18n';
 
 // Map<namespace, [id, translatedMessage]>
-export type GroupedMessagesByNamespace = Map<string, Array<[string, { message: string }]>>;
+export type GroupedMessagesByNamespace = Map<string, Array<[string, string | { message: string }]>>;
 
 export function groupMessagesByNamespace(
   translationInput: TranslationInput,

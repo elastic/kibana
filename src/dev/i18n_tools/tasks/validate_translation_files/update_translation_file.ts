@@ -31,7 +31,7 @@ export async function updateTranslationFile({
       .map(([id, details]) => {
         return {
           id,
-          defaultMessage: details.message,
+          defaultMessage: typeof details === 'string' ? details : details.message,
         };
       })
       .sort(({ id: key1 }, { id: key2 }) => key1.localeCompare(key2));

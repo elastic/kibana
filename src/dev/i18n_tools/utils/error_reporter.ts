@@ -33,7 +33,7 @@ export class ErrorReporter {
 
   public reportFailure(err: string | Error) {
     const failureMessage = this.formatErrorMessage(typeof err === 'string' ? err : err.message);
-    return createFailError(failureMessage);
+    throw createFailError(failureMessage);
   }
 
   public hasErrors() {
