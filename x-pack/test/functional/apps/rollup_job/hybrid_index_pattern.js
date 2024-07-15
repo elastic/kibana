@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
         defaultIndex: 'rollup',
       });
 
-      // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+      // The step below is done for the 7.17 ES 8.x forward compatibility tests
       // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
       // We will simulate rollup usage by creating a mock-up rollup index
       await createMockRollupIndex(es);
