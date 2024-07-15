@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { EuiThemeComputed } from '@elastic/eui';
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
 import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
+import { getLogLevelColor, getLogLevelCoalescedValue } from '@kbn/discover-utils';
+import type { ColorMapping } from '@kbn/coloring';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -69,12 +71,14 @@ interface Services {
 interface LensVisServiceParams {
   services: Services;
   lensSuggestionsApi: LensSuggestionsApi;
+  euiTheme: EuiThemeComputed;
 }
 
 export class LensVisService {
   private state$: BehaviorSubject<LensVisServiceState>;
   private services: Services;
   private lensSuggestionsApi: LensSuggestionsApi;
+  private euiTheme: EuiThemeComputed;
   status$: Observable<LensVisServiceState['status']>;
   currentSuggestionContext$: Observable<LensVisServiceState['currentSuggestionContext']>;
   allSuggestions$: Observable<LensVisServiceState['allSuggestions']>;
@@ -95,9 +99,10 @@ export class LensVisService {
       }
     | undefined;
 
-  constructor({ services, lensSuggestionsApi }: LensVisServiceParams) {
+  constructor({ services, lensSuggestionsApi, euiTheme }: LensVisServiceParams) {
     this.services = services;
     this.lensSuggestionsApi = lensSuggestionsApi;
+    this.euiTheme = euiTheme;
 
     this.state$ = new BehaviorSubject<LensVisServiceState>({
       status: LensVisServiceStatus.initial,
@@ -522,7 +527,7 @@ export class LensVisService {
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}),  log_level = CASE(to_lower(log.level) LIKE "trace*" , "Trace",    to_lower(log.level) LIKE "deb*" , "Debug", to_lower(log.level) LIKE "info*" , "Info", to_lower(log.level) LIKE "not*" , "Notice",  to_lower(log.level) LIKE "warn*" , "Warning",  to_lower(log.level) LIKE "err*" , "Error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "Critical",  to_lower(log.level) LIKE "ale*" , "Alert",  to_lower(log.level) LIKE "emer*" , "Emergency",  to_lower(log.level) LIKE "fatal*" , "Fatal", "Other") | INLINESTATS results = count(*) by timestamp | RENAME timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}),  log_level = CASE(to_lower(log.level) LIKE "trace*" , "trace",    to_lower(log.level) LIKE "deb*" , "debug", to_lower(log.level) LIKE "info*" , "info", to_lower(log.level) LIKE "not*" , "notice",  to_lower(log.level) LIKE "warn*" , "warning",  to_lower(log.level) LIKE "err*" , "error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "critical",  to_lower(log.level) LIKE "ale*" , "alert",  to_lower(log.level) LIKE "emer*" , "emergency",  to_lower(log.level) LIKE "fatal*" , "fatal", "Other") | INLINESTATS results = count(*) by timestamp | RENAME timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
@@ -540,6 +545,55 @@ export class LensVisService {
       : [];
 
     return allSuggestions;
+  };
+
+  private getColorMapping = () => {
+    const terms = [
+      'trace',
+      'debug',
+      'info',
+      'notice',
+      'warning',
+      'error',
+      'critical',
+      'alert',
+      'emergency',
+      'fatal',
+    ];
+    const assignments = terms.map((term, index) => {
+      const logLevelCoalescedValue = getLogLevelCoalescedValue(term);
+      return {
+        rule: {
+          type: 'matchExactly',
+          values: [term],
+        },
+        color: {
+          type: 'colorCode',
+          colorCode: logLevelCoalescedValue
+            ? getLogLevelColor(logLevelCoalescedValue, this.euiTheme)
+            : '#ffffff',
+        },
+        touched: true,
+      };
+    });
+    return {
+      assignments,
+      specialAssignments: [
+        {
+          rule: {
+            type: 'other',
+          },
+          color: {
+            type: 'loop',
+          },
+          touched: false,
+        },
+      ],
+      paletteId: 'eui_amsterdam_color_blind',
+      colorMode: {
+        type: 'categorical',
+      },
+    } as ColorMapping.Config;
   };
 
   private getLensAttributesState = ({
@@ -616,6 +670,7 @@ export class LensVisService {
         filters,
         suggestion,
         dataView,
+        colorMapping: this.getColorMapping(),
       }) as TypedLensByValueInput['attributes'];
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
