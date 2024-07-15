@@ -168,14 +168,14 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                 title:
                                   dashboard.type === 'metrics'
                                     ? i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
+                                        'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
                                         {
                                           defaultMessage:
                                             'Overview your metrics data with this pre-made dashboard',
                                         }
                                       )
                                     : i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
+                                        'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
                                         {
                                           defaultMessage:
                                             'Overview your logs data with this pre-made dashboard',
