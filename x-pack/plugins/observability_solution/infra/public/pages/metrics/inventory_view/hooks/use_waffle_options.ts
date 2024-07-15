@@ -24,7 +24,7 @@ import type {
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '../../../../hooks/use_url_state';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',

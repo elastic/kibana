@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '../../../../hooks/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
