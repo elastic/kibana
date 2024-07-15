@@ -485,6 +485,13 @@ export class LensVisService {
               type: 'number',
             },
           },
+          {
+            id: 'log_level',
+            name: 'log_level',
+            meta: {
+              type: 'string',
+            },
+          },
         ] as DatatableColumn[],
         query: {
           esql: esqlQuery,
@@ -515,7 +522,7 @@ export class LensVisService {
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}),  log_level = CASE(to_lower(log.level) LIKE "trace*" , "Trace",    to_lower(log.level) LIKE "deb*" , "Debug", to_lower(log.level) LIKE "info*" , "Info", to_lower(log.level) LIKE "not*" , "Notice",  to_lower(log.level) LIKE "warn*" , "Warning",  to_lower(log.level) LIKE "err*" , "Error",  to_lower(log.level) LIKE "sev*" OR to_lower(log.level) LIKE "cri*" , "Critical",  to_lower(log.level) LIKE "ale*" , "Alert",  to_lower(log.level) LIKE "emer*" , "Emergency",  to_lower(log.level) LIKE "fatal*" , "Fatal", "Other") | INLINESTATS results = count(*) by timestamp | RENAME timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
