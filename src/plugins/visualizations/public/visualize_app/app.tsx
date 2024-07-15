@@ -169,12 +169,18 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
           <VisualizeByValueEditor onAppLeave={onAppLeave} />
         )}
       </Route>
-      <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
+      <Route path={VisualizeConstants.CREATE_PATH}>
         {searchParams.type === 'metrics' ? (
           <LegacyVisualizeEditor onAppLeave={onAppLeave} />
         ) : (
           <VisualizeEditor onAppLeave={onAppLeave} />
         )}
+      </Route>
+      <Route path={`${VisualizeConstants.LEGACY_EDIT_PATH}/:id`}>
+        <LegacyVisualizeEditor onAppLeave={onAppLeave} />
+      </Route>
+      <Route path={`${VisualizeConstants.EDIT_PATH}/:id`}>
+        <VisualizeEditor onAppLeave={onAppLeave} />
       </Route>
       <Route
         exact

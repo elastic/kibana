@@ -67,7 +67,6 @@ const TopNav = ({
   originatingPath,
   visInstance,
   stateContainer,
-  visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
   eventEmitter,
@@ -142,6 +141,7 @@ const TopNav = ({
           hasInspector: !!openInspectorFn,
           serializeState: serializeStateFn,
           snapshotState: snapshotStateFn,
+          savedSearchService: services.savedSearch,
         },
         services
       );

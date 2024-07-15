@@ -178,7 +178,9 @@ export const getTopNavConfig = (
         title: serializedVis.title,
       },
       savedSearchId: serializedVis.data.savedSearchId,
-      savedSearchRefName: String(serializedVis.data.savedSearchRefName),
+      ...(serializedVis.data.savedSearchRefName
+        ? { savedSearchRefName: String(serializedVis.data.savedSearchRefName) }
+        : {}),
       searchSourceFields: serializedVis.data.searchSource,
       uiStateJSON: vis.uiState.toString(),
       lastSavedTitle: lastSavedTitle ?? '',

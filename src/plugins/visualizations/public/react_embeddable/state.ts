@@ -163,6 +163,7 @@ export const serializeState = ({
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
 }) => {
+  console.error('SERIALIZE STATE', id);
   const titlesWithDefaults = {
     title: '',
     description: '',
@@ -181,6 +182,10 @@ export const serializeState = ({
     };
   }
 
+  const savedSearchRefName = serializedVis.data.savedSearchId
+    ? references.find((r) => r.id === serializedVis.data.savedSearchId)?.name
+    : undefined;
+
   return {
     rawState: {
       ...titlesWithDefaults,
@@ -191,11 +196,9 @@ export const serializeState = ({
         data: {
           ...omit(serializedVis.data, 'savedSearchId'),
           searchSource: serializedSearchSource,
-          ...(serializedVis.data.savedSearchId
+          ...(savedSearchRefName
             ? {
-                savedSearchRefName: references.find(
-                  (r) => r.id === serializedVis.data.savedSearchId
-                )?.name,
+                savedSearchRefName,
               }
             : {}),
         },

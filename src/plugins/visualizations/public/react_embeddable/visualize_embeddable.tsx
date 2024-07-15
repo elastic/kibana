@@ -68,7 +68,9 @@ export const getVisualizeEmbeddableFactory: (
       vis$.next(await createVisInstance(serializedVis));
     });
 
-    const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
+    const savedObjectId$ = new BehaviorSubject<string | undefined>(
+      state.savedObjectId ?? state.serializedVis.id
+    );
     const savedObjectProperties$ = new BehaviorSubject<ExtraSavedObjectProperties | undefined>(
       undefined
     );

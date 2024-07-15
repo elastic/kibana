@@ -8,14 +8,14 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import './visualize_editor.scss';
 
 import { Query } from '@kbn/es-query';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { DefaultEditor } from '@kbn/vis-default-editor-plugin/public';
-import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants, VISUALIZE_APP_NAME } from '../../../common/constants';
 import { VisualizeAppProps } from '../app';
 import { VisualizeServices } from '../types';
 import {
@@ -45,7 +45,18 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     filterManager,
     queryString,
   } = services.data.query;
-  const { savedSearch } = services;
+  const {
+    savedSearch,
+    core: {
+      application: { navigateToApp },
+    },
+  } = services;
+
+  const onRedirectToLegacy = useCallback(() => {
+    navigateToApp(VISUALIZE_APP_NAME, {
+      path: `#${VisualizeConstants.LEGACY_EDIT_PATH}/${visualizationIdFromUrl}`,
+    });
+  }, [visualizationIdFromUrl, navigateToApp]);
 
   const embeddableApiHandler = useEmbeddableApiHandler();
   const {
@@ -163,6 +174,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
           dataView={currentAppState?.dataView}
           uiState={uiState}
           savedSearchService={savedSearch}
+          onRedirectToLegacy={onRedirectToLegacy}
         />
       </EuiErrorBoundary>
     </VisualizeEditorCommon>

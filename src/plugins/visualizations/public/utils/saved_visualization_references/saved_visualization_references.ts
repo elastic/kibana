@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import { Reference } from '@kbn/content-management-utils';
+import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
-import { isObject } from 'lodash';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { isObject } from 'lodash';
 import { VisualizeSavedVisInputState } from '../../react_embeddable/types';
 import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
@@ -24,15 +24,31 @@ import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './times
 const isValidSavedVis = (savedVis: unknown): savedVis is SavedVisState =>
   isObject(savedVis) && 'type' in savedVis && 'params' in savedVis;
 
+// Data plugin's `isSerializedSearchSource` does not actually rule out objects that aren't serialized search source fields
+function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields {
+  return (
+    typeof maybeSerializedSearchSource === 'object' &&
+    maybeSerializedSearchSource !== null &&
+    !maybeSerializedSearchSource.hasOwnProperty('dependencies') &&
+    !maybeSerializedSearchSource.hasOwnProperty('fields')
+  );
+}
+
 export function serializeReferences(savedVis: SerializedVis) {
   const { searchSource, savedSearchId } = savedVis.data;
   const references: Reference[] = [];
   let serializedSearchSource = searchSource;
 
+  // TSVB uses legacy visualization state, which doesn't serialize search source properly
+  if (!isSerializedSearchSource(searchSource)) {
+    serializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
+  }
+
   if (searchSource) {
-    const [extractedSearchSource, searchSourceReferences] = extractSearchSourceReferences(
-      searchSource as SerializedSearchSourceFields
-    );
+    const [extractedSearchSource, searchSourceReferences] =
+      extractSearchSourceReferences(serializedSearchSource);
     serializedSearchSource = extractedSearchSource;
     searchSourceReferences.forEach((r) => references.push(r));
   }
