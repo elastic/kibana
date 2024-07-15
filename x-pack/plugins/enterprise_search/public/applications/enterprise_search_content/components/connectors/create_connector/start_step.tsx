@@ -13,20 +13,15 @@ import { css } from '@emotion/react';
 // import { useValues } from 'kea';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiPanel,
   EuiRadio,
-  EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -35,15 +30,15 @@ import {
 import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
 
-import dropbox from './assets/dropbox.svg';
-
-import { ConnectorDescriptionPopover } from './connector_description_popover';
+import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
+import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 
 interface StartStepProps {
   setSelfManaged: Function;
   title: string;
   selfManaged: boolean;
   setConnectorSelected: Function;
+  connectorSelected: string;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -51,100 +46,9 @@ export const StartStep: React.FC<StartStepProps> = ({
   title,
   selfManaged,
   setConnectorSelected,
+  connectorSelected,
 }) => {
   const { euiTheme } = useEuiTheme();
-
-  const connectorsData = [
-    {
-      name: 'Azure Blob Storage',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: false,
-      checked: 'on',
-    },
-    {
-      name: 'Confluence Cloud & Server',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: true,
-    },
-    {
-      name: 'Confluence Data Center',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: false,
-    },
-    {
-      name: 'Dropbox',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: true,
-    },
-    {
-      name: 'Azure Blob Storage',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: false,
-    },
-    {
-      name: 'Confluence Cloud & Server',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: true,
-    },
-    {
-      name: 'Confluence Data Center',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: false,
-    },
-    {
-      name: 'Dropbox',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: true,
-    },
-  ];
-
-  interface OptionData {
-    secondaryContent?: string;
-  }
-
-  const SelectableInputPopover = () => {
-    // const [options, setOptions] = useState<EuiSelectableOption[]>(OPTIONS);
-    const [options, setOptions] = useState<Array<EuiSelectableOption<OptionData>>>([
-      ...connectorsData.map(
-        (connector): EuiSelectableOption => ({
-          label: `${connector.name}`,
-          prepend: connector.icon,
-          append: connector.techPreview ? (
-            <EuiBadge iconType="beaker" color="hollow">
-              Thech preview
-            </EuiBadge>
-          ) : null,
-        })
-      ),
-    ]);
-
-    return (
-      <EuiSelectable
-        aria-label="Selectable + input popover example"
-        options={options}
-        onChange={(e) => {
-          setOptions(options);
-          setConnectorSelected(options[0].label);
-        }}
-        listProps={{
-          rowHeight: 50,
-          showIcons: false,
-          css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
-          bordered: true,
-        }}
-        singleSelection
-        searchable
-        height={240}
-      >
-        {(list, search) => (
-          <>
-            {search}
-            {list}
-          </>
-        )}
-      </EuiSelectable>
-    );
-  };
 
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
@@ -169,25 +73,24 @@ export const StartStep: React.FC<StartStepProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFormRow fullWidth label="Connector">
-                  <SelectableInputPopover />
+                  <ChooseConnectorSelectable
+                    setConnectorSelected={setConnectorSelected}
+                    connectorSelected={connectorSelected}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem>
-                    <EuiFormRow fullWidth label="Connector name">
-                      <EuiFieldText fullWidth name="first" />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow fullWidth label="Description">
-                      <EuiTextArea fullWidth name="first" />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiFormRow fullWidth label="Connector name">
+                  <EuiFieldText fullWidth name="first" />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label="Description">
+                <EuiFieldText fullWidth name="first" />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiPanel>
         </EuiFlexItem>
         {/* Set up */}

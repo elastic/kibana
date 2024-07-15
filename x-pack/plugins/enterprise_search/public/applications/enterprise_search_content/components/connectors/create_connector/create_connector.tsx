@@ -107,6 +107,7 @@ export const CreateConnector: React.FC = () => {
           setSelfManaged={setSelfManaged}
           selfManaged={selfManaged}
           setConnectorSelected={setConnectorSelected}
+          connectorSelected={connectorSelected}
         />
       ),
     },
