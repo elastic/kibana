@@ -9,12 +9,15 @@
 import { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
+import { getDocViewer } from './accessors';
 
 export const createLogDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
   profileId: 'log-document-profile',
-  profile: {},
+  profile: {
+    getDocViewer,
+  },
   resolve: ({ record }) => {
     const isLogRecord = getIsLogRecord(record, services.logsContextService.isLogsIndexPattern);
 
