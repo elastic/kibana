@@ -40,8 +40,6 @@ export const loadSecurityLabs = async (
 
     logger.info(`Loading ${docs.length} Security Labs docs into the Knowledge Base`);
 
-    console.log('security-labs', JSON.stringify(docs, null, 2));
-
     const response = await esStore.addDocuments([...docs]);
 
     logger.info(`Loaded ${response?.length ?? 0} Security Labs docs into the Knowledge Base`);

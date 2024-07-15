@@ -6,6 +6,7 @@
  */
 
 import { Document } from 'langchain/document';
+import { Metadata } from '@kbn/elastic-assistant-common';
 
 /**
  * Transforms a set of documents by adding metadata that indicates those documents are required
@@ -27,7 +28,7 @@ export const addRequiredKbResourceMetadata = ({
   docs: Array<Document<Record<string, unknown>>>;
   kbResource: string;
   required: boolean;
-}): Array<Document<Record<string, unknown>>> =>
+}): Array<Document<Metadata>> =>
   docs.map((doc) => ({
     ...doc,
     metadata: {
