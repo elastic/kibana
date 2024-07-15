@@ -54,6 +54,15 @@
       "enabled": true
     },
     {
+      "groupName": "OpenFeature",
+      "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
+      "reviewers": ["team:kibana-security", "team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "APM",
       "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
       "reviewers": ["team:kibana-core"],

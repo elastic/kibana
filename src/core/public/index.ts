@@ -37,6 +37,11 @@ export type {
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
 export type {
+  EvaluationContext,
+  FeatureFlagsSetup,
+  FeatureFlagsStart,
+} from '@kbn/core-feature-flags-browser';
+export type {
   UiSettingsState,
   IUiSettingsClient,
   PublicUiSettingsParams,
