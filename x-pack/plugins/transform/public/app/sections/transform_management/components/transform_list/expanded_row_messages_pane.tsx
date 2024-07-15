@@ -11,7 +11,6 @@ import React, { useState, type FC } from 'react';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { formatDate, EuiPanel, EuiBasicTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
@@ -81,7 +80,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
         ''
       ),
       render: (message: TransformMessage) => <JobIcon message={message} />,
-      width: theme.euiSizeXL,
+      width: '6%',
     },
     {
       field: 'timestamp',
