@@ -43,9 +43,15 @@ interface StartStepProps {
   setSelfManaged: Function;
   title: string;
   selfManaged: boolean;
+  setConnectorSelected: Function;
 }
 
-export const StartStep: React.FC<StartStepProps> = ({ setSelfManaged, title, selfManaged }) => {
+export const StartStep: React.FC<StartStepProps> = ({
+  setSelfManaged,
+  title,
+  selfManaged,
+  setConnectorSelected,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const connectorsData = [
@@ -116,7 +122,10 @@ export const StartStep: React.FC<StartStepProps> = ({ setSelfManaged, title, sel
       <EuiSelectable
         aria-label="Selectable + input popover example"
         options={options}
-        onChange={() => setOptions(options)}
+        onChange={(e) => {
+          setOptions(options);
+          setConnectorSelected(options[0].label);
+        }}
         listProps={{
           rowHeight: 50,
           showIcons: false,

@@ -13,12 +13,17 @@ import { css } from '@emotion/react';
 // import { useValues } from 'kea';
 
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
+  EuiSuperSelect,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -85,6 +90,8 @@ export const CreateConnector: React.FC = () => {
     | undefined
   >('incomplete');
 
+  const [currentStep, setCurrentStep] = useState(0);
+  const [connectorSelected, setConnectorSelected] = useState('');
 
   interface CustomEuiStepInterface extends EuiStepInterface {
     content: JSX.Element;
@@ -94,7 +101,14 @@ export const CreateConnector: React.FC = () => {
       title: 'Start',
       children: <EuiSpacer size="xs" />,
       status: startStepStatus,
-      content: <StartStep title="Start" setSelfManaged={setSelfManaged} selfManaged={selfManaged}  />,
+      content: (
+        <StartStep
+          title="Start"
+          setSelfManaged={setSelfManaged}
+          selfManaged={selfManaged}
+          setConnectorSelected={setConnectorSelected}
+        />
+      ),
     },
     {
       title: 'Deployment',
@@ -121,7 +135,14 @@ export const CreateConnector: React.FC = () => {
       title: 'Start',
       children: <EuiSpacer size="xs" />,
       status: startStepStatus,
-      content: <StartStep title="Start" setSelfManaged={setSelfManaged} selfManaged={selfManaged} />,
+      content: (
+        <StartStep
+          title="Start"
+          setSelfManaged={setSelfManaged}
+          selfManaged={selfManaged}
+          setConnectorSelected={setConnectorSelected}
+        />
+      ),
     },
     {
       title: 'Configuration',
@@ -136,8 +157,6 @@ export const CreateConnector: React.FC = () => {
       content: <FinishUpStep title="Finish up" />,
     },
   ];
-
-  const [currentStep, setCurrentStep] = useState(0);
 
   const updateStep = (action: string) => {
     const allSteps = selfManaged === true ? selfManagedSteps : elasticManagedSteps;
@@ -275,6 +294,28 @@ export const CreateConnector: React.FC = () => {
                 }
               `}
             />
+            {currentStep > 0 && (
+              <>
+                <EuiSpacer size="xl" />
+                <EuiFormRow label="Connector">
+                  <EuiSuperSelect
+                    readOnly
+                    valueOfSelected="item1"
+                    options={[{ value: 'item1', inputDisplay: connectorSelected }]}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <p>
+                    <EuiLink href="http://www.elastic.co" target="_blank">
+                      Dropbox connector docs
+                    </EuiLink>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiBadge color="hollow">Native connector</EuiBadge>
+              </>
+            )}
           </EuiPanel>
         </EuiFlexItem>
         {/* Col 2 */}
