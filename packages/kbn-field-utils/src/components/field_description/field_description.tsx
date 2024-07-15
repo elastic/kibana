@@ -41,7 +41,10 @@ export interface FieldDescriptionProps extends FieldDescriptionContentProps {
   fieldsMetadataService?: FieldsMetadataPublicStart;
 }
 
-const FieldDescription: React.FC<FieldDescriptionProps> = ({ fieldsMetadataService, ...props }) => {
+export const FieldDescription: React.FC<FieldDescriptionProps> = ({
+  fieldsMetadataService,
+  ...props
+}) => {
   if (fieldsMetadataService && !props.field.customDescription) {
     return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
   }
@@ -141,7 +144,3 @@ export const FieldDescriptionContent: React.FC<
 
   return Wrapper ? <Wrapper>{result}</Wrapper> : result;
 };
-
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FieldDescription;
