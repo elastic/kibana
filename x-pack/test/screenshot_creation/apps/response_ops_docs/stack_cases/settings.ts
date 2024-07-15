@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const cases = getService('cases');
   const commonScreenshots = getService('commonScreenshots');
-  const find = getService('find');
-  const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
 
@@ -18,6 +16,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('case settings screenshot', async () => {
       await cases.navigation.navigateToApp();
       await cases.navigation.navigateToConfigurationPage();
+      await testSubjects.click('add-template');
+      await commonScreenshots.takeScreenshot(
+        'cases-templates-add',
+        screenshotDirectories,
+        1400,
+        1000
+      );
+      await testSubjects.click('common-flyout-cancel');
       await testSubjects.click('add-custom-field');
       await commonScreenshots.takeScreenshot(
         'cases-custom-fields-add',
@@ -27,23 +33,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
       await testSubjects.setValue('custom-field-label-input', 'my-field');
       await testSubjects.click('common-flyout-save');
-      await commonScreenshots.takeScreenshot(
-        'cases-custom-fields-view',
-        screenshotDirectories,
-        1400,
-        1024
-      );
-      await cases.navigation.navigateToApp();
-      await cases.casesTable.waitForCasesToBeListed();
-      await cases.casesTable.goToFirstListedCase();
-      await header.waitUntilLoadingHasFinished();
-      await find.byCssSelector('[data-test-subj="no-custom-field-value"]');
-      await commonScreenshots.takeScreenshot(
-        'cases-custom-fields',
-        screenshotDirectories,
-        1400,
-        1400
-      );
+      await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories, 1400, 1024);
       await cases.navigation.navigateToApp();
       await testSubjects.click('createNewCaseBtn');
       await commonScreenshots.takeScreenshot('cases-create', screenshotDirectories, 1400, 1900);
