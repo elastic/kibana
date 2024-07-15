@@ -83,11 +83,7 @@ export interface DatasetNavigatedEbtProps extends DatasetEbtProps {
   };
 }
 
-export interface DatasetDetailsEbtProps
-  extends DatasetDetailsBreakdownFieldEbtProps,
-    DatasetEbtProps {}
-
-export interface DatasetDetailsBreakdownFieldEbtProps {
+export interface DatasetDetailsEbtProps extends DatasetEbtProps {
   breakdown_field?: string;
 }
 
@@ -105,9 +101,7 @@ export interface ITelemetryClient {
   getDatasetDetailsTrackingState: () => DatasetDetailsTrackingState;
   trackDatasetDetailsOpened: (eventProps: DatasetDetailsEbtProps) => void;
   trackDatasetDetailsNavigated: (eventProps: DatasetDetailsNavigatedEbtProps) => void;
-  trackDatasetDetailsBreakdownFieldChanged: (
-    eventProps: DatasetDetailsBreakdownFieldEbtProps
-  ) => void;
+  trackDatasetDetailsBreakdownFieldChanged: (eventProps: DatasetDetailsEbtProps) => void;
 }
 
 export enum DatasetQualityTelemetryEventTypes {
@@ -132,5 +126,5 @@ export type DatasetQualityTelemetryEvent =
     }
   | {
       eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED;
-      schema: RootSchema<DatasetDetailsBreakdownFieldEbtProps>;
+      schema: RootSchema<DatasetDetailsEbtProps>;
     };

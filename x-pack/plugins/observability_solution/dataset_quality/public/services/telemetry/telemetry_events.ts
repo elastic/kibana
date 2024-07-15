@@ -257,6 +257,7 @@ const datasetDetailsNavigatedEventType: DatasetQualityTelemetryEvent = {
 const datasetDetailsBreakdownFieldChangedEventType: DatasetQualityTelemetryEvent = {
   eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED,
   schema: {
+    ...datasetCommonSchema,
     breakdown_field: {
       type: 'keyword',
       _meta: {

@@ -14,7 +14,6 @@ import {
   DatasetDetailsNavigatedEbtProps,
   DatasetDetailsTrackingState,
   DatasetNavigatedEbtProps,
-  DatasetDetailsBreakdownFieldEbtProps,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -57,9 +56,7 @@ export class TelemetryClient implements ITelemetryClient {
     });
   };
 
-  public trackDatasetDetailsBreakdownFieldChanged = (
-    eventProps: DatasetDetailsBreakdownFieldEbtProps
-  ) => {
+  public trackDatasetDetailsBreakdownFieldChanged = (eventProps: DatasetDetailsEbtProps) => {
     this.analytics.reportEvent(DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED, {
       ...eventProps,
     });

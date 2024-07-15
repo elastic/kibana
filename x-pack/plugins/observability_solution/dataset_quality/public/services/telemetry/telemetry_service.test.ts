@@ -16,7 +16,6 @@ import {
   WithDuration,
   DatasetEbtProps,
   DatasetNavigatedEbtProps,
-  DatasetDetailsBreakdownFieldEbtProps,
 } from './types';
 
 // Mock uuidv4
@@ -178,8 +177,9 @@ describe('TelemetryService', () => {
 
   it('should report dataset details breakdown field change event', async () => {
     const telemetry = service.start();
-    const exampleEventData: DatasetDetailsBreakdownFieldEbtProps = {
-      breakdown_field: 'service_name',
+    const exampleEventData: DatasetDetailsEbtProps = {
+      ...defaultEbtProps,
+      breakdown_field: 'service.name',
     };
 
     telemetry.trackDatasetDetailsBreakdownFieldChanged(exampleEventData);

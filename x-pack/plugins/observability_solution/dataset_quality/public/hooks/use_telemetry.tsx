@@ -233,6 +233,7 @@ export const useDatasetDetailsTelemetry = () => {
     const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
     if (datasetDetailsTrackingState === 'opened' && ebtProps) {
       telemetryClient.trackDatasetDetailsBreakdownFieldChanged({
+        ...ebtProps,
         breakdown_field: ebtProps.breakdown_field,
       });
     }
