@@ -14,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const endpointTestResources = getService('endpointTestResources');
   const esClient: Client = getService('es');
-  const sleep = (ms: number) => new Promise((f) => setTimeout(f, ms));
 
   const transformAggregation = {
     init_script: 'state.docs = []',
@@ -123,9 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await endpointTestResources.startTransform(transformName);
 
-        await sleep(1000);
-
-        await retry.waitForWithTimeout('transform to run', 9000, async () => {
+        await retry.waitForWithTimeout('transform to run', 10000, async () => {
           const search = await esClient.search({
             index: transformDest,
             query: {
