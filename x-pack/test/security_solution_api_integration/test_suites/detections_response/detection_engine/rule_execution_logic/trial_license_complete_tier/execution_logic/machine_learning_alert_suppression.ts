@@ -27,7 +27,6 @@ import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder'
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   dataGeneratorFactory,
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   getAlerts,
   getOpenAlerts,
@@ -36,6 +35,7 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
   setAlertStatus,
+  setupMlModulesWithRetry,
 } from '../../../../utils';
 import {
   createRule,
@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const config = getService('config');
+  const retry = getService('retry');
 
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -93,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
         // as the job looks for certain indices on start
         await esArchiver.load(auditbeatArchivePath);
-        await executeSetupModuleRequest({ module: mlModuleName, rspCode: 200, supertest });
+        await setupMlModulesWithRetry({ module: mlModuleName, retry, supertest });
         await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
         await deleteAllAnomalies(log, es);
@@ -112,8 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAnomalies(log, es);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/187478
-      describe.skip('with per-execution suppression duration', () => {
+      describe('with per-execution suppression duration', () => {
         beforeEach(() => {
           ruleProps = {
             ...baseRuleProps,
