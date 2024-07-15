@@ -223,6 +223,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('rel4tedContent.art');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '4 available fields. 0 meta fields.'
+          );
+        });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be(
+          'relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag'
+        );
+      });
+
       it('should ignore empty search', async function () {
         await PageObjects.unifiedFieldList.findFieldByName('   '); // only spaces
 

@@ -520,6 +520,17 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             ),
           },
         },
+        delete: {
+          delete_searchable_snapshot: {
+            label: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.deleteSearchableSnapshotFieldLabel',
+              {
+                defaultMessage: 'Delete searchable snapshot',
+              }
+            ),
+            defaultValue: true,
+          },
+        },
       },
     },
   },
