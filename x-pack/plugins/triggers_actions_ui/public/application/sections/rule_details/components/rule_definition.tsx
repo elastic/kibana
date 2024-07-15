@@ -163,6 +163,26 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         </EuiFlexGroup>
       ),
     },
+    {
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
+        defaultMessage: 'Actions',
+      }),
+      description: canReadActions ? (
+        <RuleActions
+          ruleActions={rule.actions}
+          actionTypeRegistry={actionTypeRegistry}
+          legacyNotifyWhen={rule.notifyWhen}
+        />
+      ) : (
+        <EuiFlexItem>
+          <EuiText size="s">
+            {i18n.translate('xpack.triggersActionsUI.ruleDetails.cannotReadActions', {
+              defaultMessage: 'Connector feature privileges are required to view actions',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      ),
+    },
   ];
 
   return (
@@ -193,40 +213,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
           )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={true}>
-          <EuiFlexItem>
-            <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiDescriptionList
-              type="column"
-              compressed={true}
-              listItems={[
-                {
-                  title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
-                    defaultMessage: 'Actions',
-                  }),
-                  description: canReadActions ? (
-                    <RuleActions
-                      ruleActions={rule.actions}
-                      actionTypeRegistry={actionTypeRegistry}
-                      legacyNotifyWhen={rule.notifyWhen}
-                    />
-                  ) : (
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        {i18n.translate('xpack.triggersActionsUI.ruleDetails.cannotReadActions', {
-                          defaultMessage:
-                            'Connector feature privileges are required to view actions',
-                        })}
-                      </EuiText>
-                    </EuiFlexItem>
-                  ),
-                },
-              ]}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
       </EuiPanel>
       {editFlyoutVisible && (
         <RuleEdit
