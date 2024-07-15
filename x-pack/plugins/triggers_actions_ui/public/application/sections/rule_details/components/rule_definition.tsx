@@ -231,9 +231,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   );
 };
 
-export interface ItemTitleRuleSummaryProps {
-  children: string;
-}
 export interface ItemValueRuleSummaryProps {
   itemValue: string;
   extraSpace?: boolean;
