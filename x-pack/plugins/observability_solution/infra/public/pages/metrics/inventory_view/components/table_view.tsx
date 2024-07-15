@@ -13,7 +13,7 @@ import React, { useState, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/inventory/types';
 import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';

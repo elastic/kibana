@@ -12,7 +12,7 @@ import moment from 'moment';
 import * as rt from 'io-ts';
 import type { TimeRange as KibanaTimeRange } from '@kbn/es-query';
 import { TimeRange } from '../../../../common/time/time_range';
-import { useUrlState } from '../../../utils/use_url_state';
+import { useUrlState } from '../../../hooks/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
