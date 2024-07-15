@@ -124,7 +124,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
-        builtInDefinitions,
+        definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
 
@@ -166,7 +166,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
-        builtInDefinitions,
+        definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
 
@@ -206,7 +206,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
-        builtInDefinitions,
+        definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
 

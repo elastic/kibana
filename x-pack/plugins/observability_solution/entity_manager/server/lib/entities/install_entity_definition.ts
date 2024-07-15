@@ -107,21 +107,21 @@ export async function installBuiltInEntityDefinitions({
   esClient,
   soClient,
   logger,
-  builtInDefinitions,
+  definitions,
 }: Omit<InstallDefinitionParams, 'definition'> & {
-  builtInDefinitions: EntityDefinition[];
+  definitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
-  if (builtInDefinitions.length === 0) return [];
+  if (definitions.length === 0) return [];
 
-  logger.debug(`Starting installation of ${builtInDefinitions.length} built-in definitions`);
-  const installPromises = builtInDefinitions.map(async (builtInDefinition) => {
-    const definitions = await findEntityDefinitions({
+  logger.debug(`Starting installation of ${definitions.length} built-in definitions`);
+  const installPromises = definitions.map(async (builtInDefinition) => {
+    const installedDefinitions = await findEntityDefinitions({
       esClient,
       soClient,
       id: builtInDefinition.id,
     });
 
-    if (definitions.length === 0) {
+    if (installedDefinitions.length === 0) {
       return await installAndStartDefinition({
         definition: builtInDefinition,
         esClient,
@@ -130,7 +130,7 @@ export async function installBuiltInEntityDefinitions({
       });
     }
 
-    const definition = definitions[0];
+    const definition = installedDefinitions[0];
     // verify current installation
     if (!definition.state.installed) {
       logger.debug(`Detected partial installation of definition [${definition.id}], reinstalling`);
