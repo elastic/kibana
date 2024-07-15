@@ -341,7 +341,13 @@
                 "text": "ESQLAstNode"
               },
               "[]) => ",
-              "ESQLParamLiteral",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLParamLiteral",
+                "text": "ESQLParamLiteral"
+              },
               "<string>[]"
             ],
             "path": "packages/kbn-esql-ast/src/walker/walker.ts",
@@ -1510,6 +1516,88 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLParamLiteral",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLParamLiteral",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
+          "<ParamType> extends ",
+          "ESQLAstBaseItem",
+          "<string>"
+        ],
+        "path": "packages/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLParamLiteral.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"literal\""
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLParamLiteral.literalType",
+            "type": "string",
+            "tags": [],
+            "label": "literalType",
+            "description": [],
+            "signature": [
+              "\"param\""
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLParamLiteral.paramType",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "paramType",
+            "description": [],
+            "signature": [
+              "ParamType"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLParamLiteral.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLSource",
         "type": "Interface",
         "tags": [],
@@ -2015,7 +2103,13 @@
           " | ",
           "ESQLStringLiteral",
           " | ",
-          "ESQLParamLiteral",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLParamLiteral",
+            "text": "ESQLParamLiteral"
+          },
           "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",

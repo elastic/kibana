@@ -8,11 +8,18 @@
 
 import React, { useState } from 'react';
 import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
-import { render, screen, waitFor } from '@testing-library/react';
 
 describe('UnifiedFieldList <FieldNameSearch />', () => {
-  it('should render correctly', async () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('should render correctly', () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
       onChange: jest.fn(),
@@ -23,11 +30,12 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     const input = screen.getByRole('searchbox', { name: 'Search field names' });
     expect(input).toHaveAttribute('aria-describedby', 'htmlId');
     userEvent.type(input, 'hey');
-    await waitFor(() => expect(props.onChange).toHaveBeenCalledWith('hey'), { timeout: 256 });
+    jest.advanceTimersByTime(256);
+    expect(props.onChange).toHaveBeenCalledWith('hey');
     expect(props.onChange).toBeCalledTimes(1);
   });
 
-  it('should accept the updates from the top', async () => {
+  it('should accept the updates from the top', () => {
     const FieldNameSearchWithWrapper = ({ defaultNameFilter = '' }) => {
       const [nameFilter, setNameFilter] = useState(defaultNameFilter);
       const props: FieldNameSearchProps = {

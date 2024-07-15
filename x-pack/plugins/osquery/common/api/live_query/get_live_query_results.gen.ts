@@ -39,6 +39,3 @@ export const GetLiveQueryResultsRequestParams = z.object({
   id: Id.optional(),
   actionId: Id.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

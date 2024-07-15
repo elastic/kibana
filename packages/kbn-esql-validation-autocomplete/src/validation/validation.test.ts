@@ -12,7 +12,7 @@ import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
-import { chronoLiterals, timeUnits, timeUnitsToSuggest } from '../definitions/literals';
+import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
@@ -58,13 +58,9 @@ const nestedFunctions = {
 };
 
 const literals = {
-  chrono_literal: chronoLiterals[0].name,
   time_literal: timeUnitsToSuggest[0].name,
 };
-function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
-  if (typeString === 'chrono_literal') {
-    return literals[typeString];
-  }
+function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
@@ -144,7 +140,7 @@ function getFieldMapping(
     }
     if (/literal$/.test(typeString) && useLiterals) {
       return {
-        name: getLiteralType(typeString as 'chrono_literal' | 'time_literal'),
+        name: getLiteralType(typeString as 'time_literal'),
         type,
         ...rest,
       };
@@ -1359,7 +1355,8 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy `, []);
       testErrorsAndWarnings('from a_index | enrich `this``is fine`', [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME",
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        'Unknown policy [`this``is]',
       ]);
       testErrorsAndWarnings('from a_index | enrich this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
@@ -2609,6 +2606,13 @@ describe('validation logic', () => {
       describe('date_extract', () => {
         testErrorsAndWarnings('row var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", now())', []);
         testErrorsAndWarnings('row date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", now())', []);
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("SOME_RANDOM_STRING", now())',
+          [],
+          [
+            'Invalid option ["SOME_RANDOM_STRING"] for date_extract. Supported options: ["ALIGNED_DAY_OF_WEEK_IN_MONTH", "ALIGNED_DAY_OF_WEEK_IN_YEAR", "ALIGNED_WEEK_OF_MONTH", "ALIGNED_WEEK_OF_YEAR", "AMPM_OF_DAY", "CLOCK_HOUR_OF_AMPM", "CLOCK_HOUR_OF_DAY", "DAY_OF_MONTH", "DAY_OF_WEEK", "DAY_OF_YEAR", "EPOCH_DAY", "ERA", "HOUR_OF_AMPM", "HOUR_OF_DAY", "INSTANT_SECONDS", "MICRO_OF_DAY", "MICRO_OF_SECOND", "MILLI_OF_DAY", "MILLI_OF_SECOND", "MINUTE_OF_DAY", "MINUTE_OF_HOUR", "MONTH_OF_YEAR", "NANO_OF_DAY", "NANO_OF_SECOND", "OFFSET_SECONDS", "PROLEPTIC_MONTH", "SECOND_OF_DAY", "SECOND_OF_MINUTE", "YEAR", "YEAR_OF_ERA"].',
+          ]
+        );
 
         testErrorsAndWarnings(
           'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField)',
@@ -2626,7 +2630,6 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(stringField, stringField)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [stringField] type [string]',
           'Argument of [date_extract] must be [date], found value [stringField] type [string]',
         ]);
 
@@ -2641,7 +2644,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('row var = date_extract(true, true)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [true] type [boolean]',
+          'Argument of [date_extract] must be [string], found value [true] type [boolean]',
           'Argument of [date_extract] must be [date], found value [true] type [boolean]',
         ]);
 
@@ -2651,7 +2654,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(booleanField, booleanField)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [booleanField] type [boolean]',
+          'Argument of [date_extract] must be [string], found value [booleanField] type [boolean]',
           'Argument of [date_extract] must be [date], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_extract(null, null)', []);

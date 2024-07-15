@@ -10,7 +10,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,

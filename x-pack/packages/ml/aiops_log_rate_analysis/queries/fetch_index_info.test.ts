@@ -46,7 +46,7 @@ describe('fetch_index_info', () => {
       } as unknown as ElasticsearchClient;
 
       const { baselineTotalDocCount, deviationTotalDocCount, fieldCandidates } =
-        await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
+        await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
       expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
       expect(baselineTotalDocCount).toEqual(5000000);
@@ -76,7 +76,7 @@ describe('fetch_index_info', () => {
         deviationTotalDocCount,
         fieldCandidates,
         textFieldCandidates,
-      } = await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
+      } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
       expect(fieldCandidates).toEqual([
         '_metadata.elastic_apm_trace_id',
@@ -258,7 +258,7 @@ describe('fetch_index_info', () => {
         deviationTotalDocCount,
         fieldCandidates,
         textFieldCandidates,
-      } = await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
+      } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
       expect(fieldCandidates).toEqual([
         'category.keyword',
@@ -315,7 +315,7 @@ describe('fetch_index_info', () => {
         deviationTotalDocCount,
         fieldCandidates,
         textFieldCandidates,
-      } = await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
+      } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
       expect(fieldCandidates).toEqual(['items']);
       expect(textFieldCandidates).toEqual([]);
