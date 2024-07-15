@@ -13,6 +13,8 @@ import {
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../common/constants';
 
+export const ENTITY_DEFINITION_ID = 'secsol-ea-entity-store';
+
 export const useEntityModel = () => {
   const http = useKibana().services.http;
 
@@ -39,7 +41,7 @@ export const useEntityModel = () => {
       version: '1',
       method: 'GET',
       query: {
-        id: 'secsol-ea-entity-store',
+        id: ENTITY_DEFINITION_ID,
       },
     });
   }, [http]);
@@ -49,7 +51,7 @@ export const useEntityModel = () => {
 
     if (!http) return Promise.resolve([]);
 
-    return http.fetch('/internal/api/entities/definition/secsol-ea-entity-store', {
+    return http.fetch(`/internal/api/entities/definition/${ENTITY_DEFINITION_ID}`, {
       version: '1',
       method: 'DELETE',
     });
@@ -59,7 +61,7 @@ export const useEntityModel = () => {
 };
 
 const entityDefinition = {
-  id: 'secsol-ea-entity-store',
+  id: ENTITY_DEFINITION_ID,
   name: 'EA store',
   type: 'node',
   indexPatterns: [

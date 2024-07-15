@@ -29,7 +29,7 @@ import { useVectorSearch } from '../common/vector_search';
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
   const { initialize, get, deleteAPI } = useEntityModel();
-  const { install: installVectorSearch } = useVectorSearch();
+  const { installModel: installVectorSearch, installVectorSearchSettings } = useVectorSearch();
   const [state, setState] = useState('loading');
 
   useEffect(() => {
@@ -46,11 +46,12 @@ export const EntityAnalyticsManagementPage = () => {
   const handleInitialize = () => {
     setState('loading');
 
-    initialize()
-      .then((response) => {
+    installVectorSearchSettings()
+      .then(initialize)
+      .then(installVectorSearch)
+      .then((_) => {
         setState('installed');
-      })
-      .then(installVectorSearch);
+      });
   };
 
   const handleDelete = () => {

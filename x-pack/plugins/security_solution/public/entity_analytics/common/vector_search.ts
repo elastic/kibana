@@ -8,13 +8,13 @@
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
+import { ENTITY_DEFINITION_ID } from './entity_model';
 
-const PIPELINE_ID = 'e5_pipeline';
+const PIPELINE_ID = `${ENTITY_DEFINITION_ID}@custom`;
 const MODEL_FIELD = 'text_field';
 const TARGET_INDEX_FIELD = 'entity.identityFields.user.name';
 const TARGET_INDEX_EMBEDDINGS_FIELD = `test_user_name_embeddings`;
 const MODEL_ID = '.multilingual-e5-small';
-const DEST_INDEX = '.entities.v1.latest.noop';
 
 export const useVectorSearch = () => {
   const http = useKibana().services.http;
@@ -24,41 +24,48 @@ export const useVectorSearch = () => {
     return installModel(http);
   }, [http]);
 
-  return { install };
+  const installSettings = useCallback(() => {
+    if (!http) return Promise.resolve();
+    return installModelSettings(http);
+  }, [http]);
+
+  return { installModel: install, installSettings };
 };
 
-// const updateIndexMappings = async (http: HttpSetup) => {
-// http://localhost:5601/api/index_management/mapping/.entities.v1.latest.secsol-ea-entity-store
-// {test: {type: "text"}}
-
-const updateIndexMappingsAPI = async (http: HttpSetup) =>
-  http.fetch(`/api/index_management/mapping/${DEST_INDEX}`, {
-    method: 'PUT',
+const createComponentTemplate = async (http: HttpSetup) =>
+  http.fetch(`/api/index_management/component_templates`, {
+    method: 'POST',
     body: JSON.stringify({
-      [TARGET_INDEX_EMBEDDINGS_FIELD]: {
-        properties: {
-          predicted_value: {
-            type: 'dense_vector',
-            index: true,
-            similarity: 'cosine',
-          },
-          model_id: {
-            type: 'text',
+      name: `${ENTITY_DEFINITION_ID}@custom`,
+      template: {
+        mappings: {
+          properties: {
+            [TARGET_INDEX_EMBEDDINGS_FIELD]: {
+              properties: {
+                predicted_value: {
+                  type: 'dense_vector',
+                  index: true,
+                  similarity: 'cosine',
+                },
+                model_id: {
+                  type: 'text',
+                },
+              },
+            },
           },
         },
       },
+      _kbnMeta: { usedBy: [ENTITY_DEFINITION_ID], isManaged: true },
     }),
   });
 
-const updateIndexSettingsAPI = async (http: HttpSetup) =>
-  http.fetch(`/api/index_management/settings/${DEST_INDEX}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-      settings: {
-        default_pipeline: PIPELINE_ID,
-      },
-    }),
-  });
+const installModelSettings = async (http: HttpSetup) => {
+  console.log('create ingest pipeline');
+  await createIngestPipelineAPI(http);
+
+  console.log('create component template');
+  await createComponentTemplate(http);
+};
 
 const installModel = async (http: HttpSetup) => {
   const [model] = await getModelAPI(http);
@@ -74,17 +81,6 @@ const installModel = async (http: HttpSetup) => {
 
   console.log('deploy model api call');
   await deployModelAPI(http);
-
-  console.log('create ingest pipeline');
-  await createIngestPipelineAPI(http);
-
-  // TODO It doesn't work because it depends on the transform and transform pipeline to create the index before we can update it.
-  // The transform also creates 4 indices.
-  // console.log('update index mappings');
-  // await updateIndexMappingsAPI(http);
-
-  // console.log('update index settings');
-  // await updateIndexSettingsAPI(http);
 };
 
 const waitForModelInstallation = async (http: HttpSetup) => {
