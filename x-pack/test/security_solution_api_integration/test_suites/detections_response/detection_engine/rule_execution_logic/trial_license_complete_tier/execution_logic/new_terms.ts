@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
 
-      expect(alerts.hits.hits.length).toEqual(1);
+      expect(alerts.hits.hits).toHaveLength(1);
       expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).toEqual({
         'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
@@ -1174,7 +1174,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).toEqual(1);
+        expect(alerts.hits.hits).toHaveLength(1);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1183,7 +1183,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).toEqual(2);
+        expect(allNewAlerts.hits.hits).toHaveLength(2);
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1222,7 +1222,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).toEqual(1);
+        expect(alerts.hits.hits).toHaveLength(1);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1231,7 +1231,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).toEqual(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {
@@ -1277,7 +1277,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).toEqual(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1286,7 +1286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).toEqual(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression with time window should work for manual rule runs and update alert', async () => {
@@ -1322,7 +1322,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).toEqual(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         // generate alert in the past
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
@@ -1332,7 +1332,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).toEqual(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
         // now we will ingest new event, and manual rule run should update original alert
         const secondDocument = {
@@ -1352,9 +1352,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(updatedAlerts.hits.hits.length).toEqual(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
 
-        expect(updatedAlerts.hits.hits.length).toEqual(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
         expect(updatedAlerts.hits.hits[0]._source).toEqual({
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
