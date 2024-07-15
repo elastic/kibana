@@ -5,110 +5,69 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  getFieldValidityAndErrorMessage,
-  UseField,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { OWNER_INFO } from '../../../common/constants';
 
 import * as i18n from './translations';
 
-interface OwnerSelectorProps {
-  field: FieldHook<string>;
-  isLoading: boolean;
-  availableOwners: string[];
-}
-
 interface Props {
+  selectedOwner: string;
   availableOwners: string[];
   isLoading: boolean;
+  onOwnerChange: (owner: string) => void;
 }
 
-const DEFAULT_SELECTABLE_OWNERS = Object.keys(OWNER_INFO) as Array<keyof typeof OWNER_INFO>;
-
-const FIELD_NAME = 'selectedOwner';
-
-const FullWidthKeyPadMenu = euiStyled(EuiKeyPadMenu)`
-  width: 100%;
-`;
-
-const FullWidthKeyPadItem = euiStyled(EuiKeyPadMenuItem)`
-
-  width: 100%;
-`;
-
-const OwnerSelector = ({
+const CaseOwnerSelector: React.FC<Props> = ({
   availableOwners,
-  field,
-  isLoading = false,
-}: OwnerSelectorProps): JSX.Element => {
-  const { errorMessage, isInvalid } = getFieldValidityAndErrorMessage(field);
-  const radioGroupName = useGeneratedHtmlId({ prefix: 'caseOwnerRadioGroup' });
+  isLoading,
+  onOwnerChange,
+  selectedOwner,
+}) => {
+  const onChange = (owner: string) => {
+    onOwnerChange(owner);
+  };
 
-  const onChange = useCallback((val: string) => field.setValue(val), [field]);
+  const options = Object.entries(OWNER_INFO)
+    .filter(([owner]) => availableOwners.includes(owner))
+    .map(([owner, definition]) => ({
+      value: owner,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={definition.iconType}
+              size="m"
+              title={definition.label}
+              className="eui-alignMiddle"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <small>{definition.label}</small>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': `${definition.id}OwnerOption`,
+    }));
 
   return (
     <EuiFormRow
+      display="columnCompressed"
+      label={i18n.SOLUTION_SELECTOR_LABEL}
       data-test-subj="caseOwnerSelector"
       fullWidth
-      isInvalid={isInvalid}
-      error={errorMessage}
-      helpText={field.helpText}
-      label={field.label}
-      labelAppend={field.labelAppend}
     >
-      <FullWidthKeyPadMenu checkable={{ ariaLegend: i18n.ARIA_KEYPAD_LEGEND }}>
-        <EuiFlexGroup>
-          {DEFAULT_SELECTABLE_OWNERS.map((owner) => (
-            <EuiFlexItem key={owner}>
-              <FullWidthKeyPadItem
-                data-test-subj={`${owner}RadioButton`}
-                onChange={onChange}
-                checkable="single"
-                name={radioGroupName}
-                id={owner}
-                label={OWNER_INFO[owner].label}
-                isSelected={field.value === owner}
-                isDisabled={isLoading || !availableOwners.includes(owner)}
-              >
-                <EuiIcon type={OWNER_INFO[owner].iconType} size="xl" />
-              </FullWidthKeyPadItem>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </FullWidthKeyPadMenu>
+      <EuiSuperSelect
+        data-test-subj="caseOwnerSuperSelect"
+        options={options}
+        isLoading={isLoading}
+        fullWidth
+        valueOfSelected={selectedOwner}
+        onChange={(owner) => onChange(owner)}
+        compressed
+      />
     </EuiFormRow>
-  );
-};
-
-OwnerSelector.displayName = 'OwnerSelector';
-
-const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
-  const defaultValue = availableOwners.includes(SECURITY_SOLUTION_OWNER)
-    ? SECURITY_SOLUTION_OWNER
-    : availableOwners[0] ?? SECURITY_SOLUTION_OWNER;
-
-  return (
-    <UseField
-      path={FIELD_NAME}
-      config={{ defaultValue }}
-      component={OwnerSelector}
-      componentProps={{ availableOwners, isLoading }}
-    />
   );
 };
 

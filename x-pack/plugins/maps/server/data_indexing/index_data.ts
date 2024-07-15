@@ -19,7 +19,7 @@ export async function writeDataToIndex(
     if (!indexExists) {
       throw new Error(
         i18n.translate('xpack.maps.indexData.indexExists', {
-          defaultMessage: `Index: '{index}' not found. A valid index must be provided`,
+          defaultMessage: `Index: ''{index}'' not found. A valid index must be provided`,
           values: {
             index,
           },

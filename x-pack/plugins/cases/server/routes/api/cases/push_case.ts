@@ -18,7 +18,7 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
   path: CASE_PUSH_URL,
   routerOptions: {
     access: 'public',
-    description: `Push a case to an external service`,
+    summary: `Push a case to an external service`,
   },
   handler: async ({ context, request, response }) => {
     try {

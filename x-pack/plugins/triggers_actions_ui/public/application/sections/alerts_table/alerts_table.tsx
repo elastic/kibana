@@ -343,6 +343,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
       refresh: alertsRefresh,
       featureIds,
+      hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
     };
   }, [alerts, alertsTableConfiguration, query, alertsRefresh, featureIds]);
 

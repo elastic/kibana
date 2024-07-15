@@ -15,13 +15,14 @@ import { TimelineId } from '../../../common/types/timeline';
 import type { TimelineTypeLiteral } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
-import { sourcererActions, sourcererSelectors } from '../../common/store/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { timelineDefaults } from '../store/defaults';
 
 export interface UseCreateTimelineParams {
   /**
@@ -75,6 +76,7 @@ export const useCreateTimeline = ({
           selectedPatterns,
         })
       );
+
       dispatch(
         timelineActions.createTimeline({
           columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
@@ -84,6 +86,9 @@ export const useCreateTimeline = ({
           show,
           timelineType,
           updated: undefined,
+          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+            ? timelineDefaults.excludedRowRendererIds
+            : [],
         })
       );
 

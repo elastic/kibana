@@ -160,6 +160,7 @@ export class EndpointTestResources extends FtrService {
           undefined,
           undefined,
           undefined,
+          undefined,
           this.log
         );
 

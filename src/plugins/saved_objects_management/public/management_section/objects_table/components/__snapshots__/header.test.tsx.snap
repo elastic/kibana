@@ -4,17 +4,15 @@ exports[`Header should render normally 1`] = `
 <EuiPageHeader
   bottomBorder={true}
   description={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Manage and share your saved objects. To edit the underlying data of an object, go to its associated application."
       id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
-      values={Object {}}
     />
   }
   pageTitle={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Saved Objects"
       id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
-      values={Object {}}
     />
   }
   rightSideItems={
@@ -25,7 +23,7 @@ exports[`Header should render normally 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
           id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
           values={
@@ -41,10 +39,9 @@ exports[`Header should render normally 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Import"
           id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-          values={Object {}}
         />
       </EuiButtonEmpty>,
       <EuiButtonEmpty
@@ -52,10 +49,9 @@ exports[`Header should render normally 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Refresh"
           id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-          values={Object {}}
         />
       </EuiButtonEmpty>,
     ]

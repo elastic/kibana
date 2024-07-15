@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { enableInfrastructureContainerAssetView } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, INVENTORY_PATH } from './constants';
 import { generateDockerContainersData } from './helpers';
@@ -45,6 +46,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
+
+  const setInfrastructureContainerAssetViewUiSetting = async (value: boolean = true) => {
+    await kibanaServer.uiSettings.update({ [enableInfrastructureContainerAssetView]: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
 
   describe('Home page', function () {
     this.tags('includeFirefox');
@@ -137,12 +144,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
-      describe('Asset Details flyout', () => {
+      describe('Asset Details flyout for a host', () => {
         before(async () => {
           await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await pageObjects.infraHome.getWaffleMap();
           await pageObjects.infraHome.inputAddHostNameFilter('demo-stack-nginx-01');
           await pageObjects.infraHome.clickOnNode();
+        });
+
+        after(async () => {
+          await retry.try(async () => {
+            await pageObjects.infraHome.clickCloseFlyoutButton();
+          });
         });
 
         describe('Overview Tab', () => {
@@ -231,6 +244,134 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const url = parse(await browser.getCurrentUrl());
             const query = decodeURIComponent(url.query ?? '');
             const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
+
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
+            await returnTo(INVENTORY_PATH);
+          });
+        });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
+        });
+      });
+
+      describe('Asset Details flyout for a container', () => {
+        let synthEsClient: InfraSynthtraceEsClient;
+        before(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(true);
+          const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
+          await infraSynthtraceKibanaClient.installSystemPackage(version);
+          synthEsClient = await getInfraSynthtraceEsClient(esClient);
+          await synthEsClient.index(
+            generateDockerContainersData({
+              from: DATE_WITH_DOCKER_DATA_FROM,
+              to: DATE_WITH_DOCKER_DATA_TO,
+              count: 5,
+            })
+          );
+
+          await pageObjects.infraHome.goToContainer();
+          await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
+          await pageObjects.infraHome.clickOnFirstNode();
+        });
+
+        after(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(false);
+          return await synthEsClient.clean();
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '25.0%' },
+            { metric: 'memoryUsage', value: '20.0%' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.tryForTime(3 * 1000, async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
+            });
+          });
+
+          [
+            { metric: 'cpu', chartsCount: 1 },
+            { metric: 'memory', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
+                metric
+              );
+              expect(containers.length).to.equal(chartsCount);
+            });
+          });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+            await pageObjects.assetDetails.overviewLinkToAlertsExist();
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
+          });
+        });
+
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('APM Link Tab', () => {
+          before(async () => {
+            await pageObjects.infraHome.clickOnNode();
+            await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
+          });
+
+          it('should navigate to APM traces', async () => {
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=container.id:"container-id-4"';
 
             await retry.try(async () => {
               expect(url.pathname).to.eql('/app/apm/traces');
@@ -413,6 +554,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await returnTo(INVENTORY_PATH);
           });
         });
+      });
+
+      it('should not allow adding more than 20 custom metrics', async () => {
+        // open
+        await pageObjects.infraHome.clickCustomMetricDropdown();
+
+        const fields = [
+          'process.cpu.pct',
+          'process.memory.pct',
+          'system.core.total.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+          'system.cpu.idle.pct',
+          'system.cpu.iowait.pct',
+          'system.cpu.irq.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraHome.addCustomMetric(field);
+        }
+        const metricsCount = await pageObjects.infraHome.getMetricsContextMenuItemsCount();
+        // there are 6 default metrics in the context menu for hosts
+        expect(metricsCount).to.eql(20);
+
+        await pageObjects.infraHome.ensureCustomMetricAddButtonIsDisabled();
+        // close
+        await pageObjects.infraHome.clickCustomMetricDropdown();
       });
     });
 

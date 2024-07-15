@@ -18,7 +18,7 @@ import type { TimeRange } from '../../../store/inputs/model';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders, setFilters } from '../../../../timelines/store/actions';
 import { sourcererActions } from '../../../store/actions';
-import { SourcererScopeName } from '../../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';

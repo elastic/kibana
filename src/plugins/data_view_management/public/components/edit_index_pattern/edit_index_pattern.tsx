@@ -31,6 +31,7 @@ import {
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type * as CSS from 'csstype';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -292,6 +293,10 @@ export const EditIndexPattern = withRouter(
                   >
                     {tag.name}
                   </EuiBadge>
+                ) : tag.key === 'rollup' ? (
+                  <RollupDeprecationTooltip>
+                    <EuiBadge color="warning">{tag.name}</EuiBadge>
+                  </RollupDeprecationTooltip>
                 ) : (
                   <EuiBadge color="hollow">{tag.name}</EuiBadge>
                 )}

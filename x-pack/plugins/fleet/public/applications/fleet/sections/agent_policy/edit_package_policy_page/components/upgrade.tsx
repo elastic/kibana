@@ -36,6 +36,7 @@ import type {
 
 import type { UpgradePackagePolicyDryRunResponse } from '../../../../../../../common/types/rest_spec';
 import { useStartServices } from '../../../../hooks';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -167,13 +168,16 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
     <>
       {isPreviousVersionFlyoutOpen && currentPackagePolicy && (
         <EuiPortal>
-          <EuiFlyout onClose={() => setIsPreviousVersionFlyoutOpen(false)} size="l" maxWidth={640}>
+          <EuiFlyout
+            onClose={() => setIsPreviousVersionFlyoutOpen(false)}
+            maxWidth={MAX_FLYOUT_WIDTH}
+          >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' integration policy"
+                    defaultMessage="''{name}'' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>

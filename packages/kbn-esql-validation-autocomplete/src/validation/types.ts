@@ -167,6 +167,26 @@ export interface ValidationErrors {
     message: string;
     type: { value: string | number };
   };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

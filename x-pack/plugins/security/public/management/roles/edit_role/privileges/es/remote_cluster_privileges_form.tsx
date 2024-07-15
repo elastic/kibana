@@ -9,17 +9,20 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Fragment, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 import type { RoleRemoteClusterPrivilege } from '../../../../../../common';
@@ -92,7 +95,14 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
       >
         <EuiFlexItem>
           <EuiPanel color="subdued">
-            <EuiFlexGroup>
+            <EuiFlexGrid
+              css={css`
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                @media (max-width: ${euiThemeVars.euiBreakpoints.s}px) {
+                  grid-template-columns: repeat(1, minmax(0, 1fr));
+                }
+              `}
+            >
               <EuiFlexItem>
                 <EuiFormRow
                   label={
@@ -147,7 +157,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiFlexGrid>
           </EuiPanel>
         </EuiFlexItem>
         {!isRoleReadOnly && (

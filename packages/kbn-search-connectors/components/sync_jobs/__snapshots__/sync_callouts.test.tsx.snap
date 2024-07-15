@@ -8,7 +8,7 @@ exports[`SyncCalloutsPanel renders 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Completed at {date}"
         id="searchConnectors.syncJobs.flyout.completedDescription"
         values={
@@ -27,7 +27,7 @@ exports[`SyncCalloutsPanel renders 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Started at {date}"
         id="searchConnectors.syncJobs.flyout.startedAtDescription"
         values={
@@ -51,7 +51,7 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Completed at {date}"
         id="searchConnectors.syncJobs.flyout.completedDescription"
         values={
@@ -77,7 +77,7 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Started at {date}"
         id="searchConnectors.syncJobs.flyout.startedAtDescription"
         values={
@@ -101,7 +101,7 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Completed at {date}"
         id="searchConnectors.syncJobs.flyout.completedDescription"
         values={
@@ -129,7 +129,7 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
       iconType="iInCircle"
       title="Sync started by schedule"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Started at {date}"
         id="searchConnectors.syncJobs.flyout.startedAtDescription"
         values={
@@ -153,7 +153,7 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Completed at {date}"
         id="searchConnectors.syncJobs.flyout.completedDescription"
         values={
@@ -181,7 +181,7 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Started at {date}"
         id="searchConnectors.syncJobs.flyout.startedAtDescription"
         values={
@@ -205,7 +205,7 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Completed at {date}"
         id="searchConnectors.syncJobs.flyout.completedDescription"
         values={
@@ -233,7 +233,7 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Started at {date}"
         id="searchConnectors.syncJobs.flyout.startedAtDescription"
         values={

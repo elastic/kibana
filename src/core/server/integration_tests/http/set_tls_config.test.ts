@@ -14,12 +14,14 @@ import {
   config as httpConfig,
   cspConfig,
   externalUrlConfig,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { flattenCertificateChain, fetchPeerCertificate, isServerTLS } from './tls_utils';
 
 describe('setTlsConfig', () => {
   const CSP_CONFIG = cspConfig.schema.validate({});
   const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+  const PERMISSIONS_POLICY_CONFIG = permissionsPolicyConfig.schema.validate({});
 
   beforeAll(() => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -39,7 +41,12 @@ describe('setTlsConfig', () => {
       },
       shutdownTimeout: '1s',
     });
-    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const firstConfig = new HttpConfig(
+      rawHttpConfig,
+      CSP_CONFIG,
+      EXTERNAL_URL_CONFIG,
+      PERMISSIONS_POLICY_CONFIG
+    );
 
     const serverOptions = getServerOptions(firstConfig);
     const server = createServer(serverOptions);
@@ -74,6 +81,7 @@ describe('setTlsConfig', () => {
       name: 'kibana',
       host: '127.0.0.1',
       port: 10002,
+      protocol: 'http1',
       ssl: {
         enabled: true,
         certificate: ES_CERT_PATH,
@@ -84,7 +92,12 @@ describe('setTlsConfig', () => {
       shutdownTimeout: '1s',
     });
 
-    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const secondConfig = new HttpConfig(
+      secondRawConfig,
+      CSP_CONFIG,
+      EXTERNAL_URL_CONFIG,
+      PERMISSIONS_POLICY_CONFIG
+    );
 
     setTlsConfig(server, secondConfig.ssl);
 

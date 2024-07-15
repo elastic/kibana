@@ -34,7 +34,7 @@ export const errors = {
   columnNotFound: (column: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.joinRows.columnNotFoundErrorMessage', {
-        defaultMessage: "Column not found: '{column}'",
+        defaultMessage: "Column not found: ''{column}''",
         values: {
           column,
         },

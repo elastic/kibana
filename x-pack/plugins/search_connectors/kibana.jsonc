@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-connectors-plugin",
-  "owner": "@elastic/enterprise-search-frontend",
+  "owner": "@elastic/search-kibana",
   "description": "Plugin hosting shared features for connectors",
   "plugin": {
     "id": "searchConnectors",

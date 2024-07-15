@@ -6166,44 +6166,52 @@
             "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "alerting",
@@ -13806,6 +13814,18 @@
         "type": "string",
         "tags": [],
         "label": "TASK_MANAGER_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.USAGE_COUNTERS_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "USAGE_COUNTERS_SAVED_OBJECT_INDEX",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
         "deprecated": false,

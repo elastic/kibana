@@ -28,7 +28,7 @@ export const getAllCommentsRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Gets all comments for a case`,
+    summary: `Gets all comments for a case`,
   },
   handler: async ({ context, request, response }) => {
     try {

@@ -8,6 +8,9 @@ paths:
       summary: Get File Action
       operationId: EndpointGetFileAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -30,7 +33,6 @@ components:
         - type: object
           required:
             - parameters
-            - file
           properties:
             parameters:
               required:

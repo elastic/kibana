@@ -17,7 +17,8 @@
     "@kbn/hapi-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/logging",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/logging-mocks"
   ],
   "exclude": [
     "target/**/*",

@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   CreateRuleRequestBody,
@@ -14,12 +15,11 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
   router.versioned
@@ -57,7 +57,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
@@ -89,12 +89,12 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
 
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
-          const createdRule = await rulesManagementClient.createCustomRule({
+          const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,
           });
 
           return response.ok({
-            body: transformValidate(createdRule),
+            body: createdRule,
           });
         } catch (err) {
           const error = transformError(err as Error);

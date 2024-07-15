@@ -1437,7 +1437,7 @@
             "label": "set",
             "description": [],
             "signature": [
-              "(key: string, value: any) => false | void"
+              "(key: string, value: any, includeUndefined?: boolean) => false | void"
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
@@ -1467,6 +1467,21 @@
                 "description": [],
                 "signature": [
                   "any"
+                ],
+                "path": "src/plugins/kibana_utils/public/storage/storage.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.Storage.set.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeUndefined",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,

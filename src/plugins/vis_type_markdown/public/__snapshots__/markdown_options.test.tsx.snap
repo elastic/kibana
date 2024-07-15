@@ -42,10 +42,9 @@ exports[`MarkdownOptions should match snapshot 1`] = `
               href="https://docs.github.com/en/get-started/writing-on-github/"
               target="_blank"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Help"
                 id="visTypeMarkdown.params.helpLinkLabel"
-                values={Object {}}
               />
             </EuiLink>
           </EuiText>

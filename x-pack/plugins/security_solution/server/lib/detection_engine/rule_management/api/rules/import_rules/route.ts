@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -18,7 +19,6 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
@@ -74,7 +74,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -154,7 +154,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ruleChunks: chunkParseObjects,
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             overwriteRules: request.query.overwrite,
-            rulesManagementClient,
+            detectionRulesClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });

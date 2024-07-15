@@ -101,9 +101,9 @@ export const Footer: FunctionComponent = () => {
   ];
 
   return (
-    <EuiFlexGroup justifyContent="center" gutterSize="xl">
+    <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
       {sections.map((section, index) => (
-        <EuiFlexItem key={index}>
+        <EuiFlexItem key={index} grow={false}>
           <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
           <EuiSpacer size="m" />
           <EuiText size="s">

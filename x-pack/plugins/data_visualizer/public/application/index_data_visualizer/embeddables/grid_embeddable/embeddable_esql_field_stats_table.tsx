@@ -21,51 +21,68 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
-const EmbeddableESQLFieldStatsTableWrapper = (props: ESQLDataVisualizerGridEmbeddableState) => {
-  const { onTableUpdate, ...state } = props;
-  const [dataVisualizerListState, setDataVisualizerListState] =
-    useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
+const EmbeddableESQLFieldStatsTableWrapper = React.memo(
+  (props: ESQLDataVisualizerGridEmbeddableState) => {
+    const { onTableUpdate, onRenderComplete } = props;
+    const [dataVisualizerListState, setDataVisualizerListState] =
+      useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 
-  const onTableChange = useCallback(
-    (update: DataVisualizerTableState) => {
-      setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onTableUpdate) {
-        onTableUpdate(update);
+    const onTableChange = useCallback(
+      (update: DataVisualizerTableState) => {
+        setDataVisualizerListState({ ...dataVisualizerListState, ...update });
+        if (onTableUpdate) {
+          onTableUpdate(update);
+        }
+      },
+      [dataVisualizerListState, onTableUpdate]
+    );
+
+    const {
+      configs,
+      extendedColumns,
+      progress,
+      overallStatsProgress,
+      setLastRefresh,
+      getItemIdToExpandedRowMap,
+      resetData,
+    } = useESQLDataVisualizerData(props, dataVisualizerListState);
+
+    useEffect(() => {
+      setLastRefresh(Date.now());
+    }, [props?.lastReloadRequestTime, setLastRefresh]);
+
+    useEffect(() => {
+      const subscription = props.resetData$?.subscribe(() => {
+        resetData();
+      });
+      return () => subscription?.unsubscribe();
+    }, [props.resetData$, resetData]);
+
+    useEffect(() => {
+      if (progress === 100 && onRenderComplete) {
+        onRenderComplete();
       }
-    },
-    [dataVisualizerListState, onTableUpdate]
-  );
+    }, [progress, onRenderComplete]);
 
-  const {
-    configs,
-    extendedColumns,
-    progress,
-    overallStatsProgress,
-    setLastRefresh,
-    getItemIdToExpandedRowMap,
-  } = useESQLDataVisualizerData(state, dataVisualizerListState);
+    if (progress === 100 && configs.length === 0) {
+      return <EmbeddableNoResultsEmptyPrompt />;
+    }
 
-  useEffect(() => {
-    setLastRefresh(Date.now());
-  }, [state?.lastReloadRequestTime, setLastRefresh]);
-
-  if (progress === 100 && configs.length === 0) {
-    return <EmbeddableNoResultsEmptyPrompt />;
+    return (
+      <DataVisualizerTable<FieldVisConfig>
+        items={configs}
+        pageState={dataVisualizerListState}
+        updatePageState={onTableChange}
+        getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+        extendedColumns={extendedColumns}
+        showPreviewByDefault={props?.showPreviewByDefault}
+        onChange={onTableUpdate}
+        loading={progress < 100}
+        overallStatsRunning={overallStatsProgress.isRunning}
+      />
+    );
   }
-  return (
-    <DataVisualizerTable<FieldVisConfig>
-      items={configs}
-      pageState={dataVisualizerListState}
-      updatePageState={onTableChange}
-      getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-      extendedColumns={extendedColumns}
-      showPreviewByDefault={state?.showPreviewByDefault}
-      onChange={onTableUpdate}
-      loading={progress < 100}
-      overallStatsRunning={overallStatsProgress.isRunning}
-    />
-  );
-};
+);
 // exporting as default so it be lazy-loaded
 // eslint-disable-next-line import/no-default-export
 export default EmbeddableESQLFieldStatsTableWrapper;

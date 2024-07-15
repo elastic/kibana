@@ -81,7 +81,6 @@ const withCore = makeDecorator({
     const config: ConfigSchema = {
       unsafe: {
         alertDetails: {
-          metrics: { enabled: false },
           uptime: { enabled: false },
           observability: { enabled: false },
         },

@@ -16,6 +16,7 @@ import {
   EuiI18nNumber,
   EuiDescriptionList,
   EuiTextColor,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext } from 'react-hook-form';
@@ -26,9 +27,14 @@ import { ChatForm, ChatFormFields } from '../../types';
 interface TokenEstimateTooltipProps {
   context: number;
   total: number;
+  clipped?: number;
 }
 
-export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ context, total }) => {
+export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
+  context,
+  total,
+  clipped,
+}) => {
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const models = useLLMsModels();
   const { getValues } = useFormContext<ChatForm>();
@@ -84,6 +90,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ cont
         panels={[
           {
             id: 0,
+            width: 300,
             items: [
               {
                 name: (
@@ -125,37 +132,6 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ cont
                           ),
                           title: <EuiI18nNumber value={total - context} />,
                         },
-                      ]}
-                      type="column"
-                      columnWidths={[2, 4]}
-                    />
-                  </EuiPanel>
-                ),
-              },
-              {
-                isSeparator: true,
-              },
-              {
-                renderItem: () => (
-                  <EuiPanel
-                    paddingSize="s"
-                    hasShadow={false}
-                    data-test-subj="token-tooltip-breakdown-2"
-                  >
-                    <EuiDescriptionList
-                      compressed
-                      rowGutterSize="s"
-                      columnGutterSize="s"
-                      listItems={[
-                        {
-                          description: (
-                            <FormattedMessage
-                              id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.totalTokens"
-                              defaultMessage="Total tokens"
-                            />
-                          ),
-                          title: <EuiI18nNumber value={total} />,
-                        },
                         ...(modelLimit
                           ? [
                               {
@@ -185,18 +161,59 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ cont
               {
                 renderItem: () => (
                   <>
-                    <EuiPanel paddingSize="s" hasShadow={false}>
-                      <EuiLink
-                        href={docLinks.chatPlayground}
-                        target="_blank"
-                        data-test-subj="context-optimization-documentation-link"
-                      >
-                        <FormattedMessage
-                          id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.learnMoreLink"
-                          defaultMessage=" Learn more."
-                        />
-                      </EuiLink>
-                    </EuiPanel>
+                    {clipped ? (
+                      <EuiPanel paddingSize="s" hasShadow={false} color="warning">
+                        <EuiCallOut
+                          data-test-subj="clipped-tokens-callout"
+                          title={
+                            <FormattedMessage
+                              id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokensTitle"
+                              defaultMessage="Context tokens exceed model limit"
+                            />
+                          }
+                          color="warning"
+                          iconType="iInCircle"
+                          size="s"
+                        >
+                          <FormattedMessage
+                            id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokensDescription"
+                            defaultMessage="Approximately {clipped} tokens within your context was removed to fit within the model's limit. Learn how to {optimizeLink} to improve your model's performance and avoid clipping."
+                            values={{
+                              clipped: (
+                                <strong data-test-subj="clipped-tokens-description">
+                                  <EuiI18nNumber value={clipped} />
+                                </strong>
+                              ),
+                              optimizeLink: (
+                                <EuiLink
+                                  href={docLinks.retrievalOptimize}
+                                  target="_blank"
+                                  data-test-subj="context-optimization-documentation-link"
+                                >
+                                  <FormattedMessage
+                                    id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.optimizeYourIndex"
+                                    defaultMessage="optimize your context"
+                                  />
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiCallOut>
+                      </EuiPanel>
+                    ) : (
+                      <EuiPanel paddingSize="s" hasShadow={false}>
+                        <EuiLink
+                          href={docLinks.chatPlayground}
+                          target="_blank"
+                          data-test-subj="context-optimization-documentation-link"
+                        >
+                          <FormattedMessage
+                            id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.learnMoreLink"
+                            defaultMessage="Learn more"
+                          />
+                        </EuiLink>
+                      </EuiPanel>
+                    )}
                   </>
                 ),
               },

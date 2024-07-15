@@ -93,10 +93,9 @@ describe('ResolveAllConflicts', () => {
             className="spcCopyToSpace__resolveAllConflictsLink"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="(resolve all)"
               id="xpack.spaces.management.copyToSpace.resolveAllConflictsLink"
-              values={Object {}}
             />
           </EuiLink>
         }

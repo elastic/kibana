@@ -10,6 +10,8 @@ import {
   getServerTLSOptionsMock,
   createHttpServerMock,
   createHttpsServerMock,
+  createHttp2UnsecureServerMock,
+  createHttp2SecureServerMock,
 } from './get_listener.test.mocks';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -18,6 +20,7 @@ import { getServerListener } from './get_listener';
 
 const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   host: 'localhost',
+  protocol: 'http1',
   port: 5601,
   socketTimeout: 120000,
   keepaliveTimeout: 120000,
@@ -41,99 +44,195 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
 describe('getServerListener', () => {
   beforeEach(() => {
     getServerTLSOptionsMock.mockReset();
+
     createHttpServerMock.mockClear();
     createHttpsServerMock.mockClear();
+    createHttp2UnsecureServerMock.mockClear();
+    createHttp2SecureServerMock.mockClear();
   });
 
-  describe('when TLS is enabled', () => {
-    it('calls getServerTLSOptions with the correct parameters', () => {
-      const config = createConfig({ ssl: { enabled: true } });
+  describe('When protocol is `http1`', () => {
+    describe('when TLS is enabled', () => {
+      it('calls getServerTLSOptions with the correct parameters', () => {
+        const config = createConfig({ ssl: { enabled: true } });
 
-      getServerListener(config);
+        getServerListener(config);
 
-      expect(getServerTLSOptionsMock).toHaveBeenCalledTimes(1);
-      expect(getServerTLSOptionsMock).toHaveBeenCalledWith(config.ssl);
-    });
+        expect(getServerTLSOptionsMock).toHaveBeenCalledTimes(1);
+        expect(getServerTLSOptionsMock).toHaveBeenCalledWith(config.ssl);
+      });
 
-    it('calls https.createServer with the correct parameters', () => {
-      const config = createConfig({ ssl: { enabled: true } });
+      it('calls https.createServer with the correct parameters', () => {
+        const config = createConfig({ ssl: { enabled: true } });
 
-      getServerTLSOptionsMock.mockReturnValue({ stub: true });
+        getServerTLSOptionsMock.mockReturnValue({ stub: true });
 
-      getServerListener(config);
+        getServerListener(config);
 
-      expect(createHttpsServerMock).toHaveBeenCalledTimes(1);
-      expect(createHttpsServerMock).toHaveBeenCalledWith({
-        stub: true,
-        keepAliveTimeout: config.keepaliveTimeout,
+        expect(createHttpsServerMock).toHaveBeenCalledTimes(1);
+        expect(createHttpsServerMock).toHaveBeenCalledWith({
+          stub: true,
+          keepAliveTimeout: config.keepaliveTimeout,
+        });
+      });
+
+      it('properly configures the listener', () => {
+        const config = createConfig({ ssl: { enabled: true } });
+        const server = getServerListener(config);
+
+        expect(server.setTimeout).toHaveBeenCalledTimes(1);
+        expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
+
+        expect(server.on).toHaveBeenCalledTimes(2);
+        expect(server.on).toHaveBeenCalledWith('clientError', expect.any(Function));
+        expect(server.on).toHaveBeenCalledWith('timeout', expect.any(Function));
+      });
+
+      it('returns the https server', () => {
+        const config = createConfig({ ssl: { enabled: true } });
+
+        const server = getServerListener(config);
+
+        const expectedServer = createHttpsServerMock.mock.results[0].value;
+
+        expect(server).toBe(expectedServer);
       });
     });
 
-    it('properly configures the listener', () => {
-      const config = createConfig({ ssl: { enabled: true } });
-      const server = getServerListener(config);
+    describe('when TLS is disabled', () => {
+      it('does not call getServerTLSOptions', () => {
+        const config = createConfig({ ssl: { enabled: false } });
 
-      expect(server.setTimeout).toHaveBeenCalledTimes(1);
-      expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
+        getServerListener(config);
 
-      expect(server.on).toHaveBeenCalledTimes(2);
-      expect(server.on).toHaveBeenCalledWith('clientError', expect.any(Function));
-      expect(server.on).toHaveBeenCalledWith('timeout', expect.any(Function));
-    });
+        expect(getServerTLSOptionsMock).not.toHaveBeenCalled();
+      });
 
-    it('returns the https server', () => {
-      const config = createConfig({ ssl: { enabled: true } });
+      it('calls http.createServer with the correct parameters', () => {
+        const config = createConfig({ ssl: { enabled: false } });
 
-      const server = getServerListener(config);
+        getServerTLSOptionsMock.mockReturnValue({ stub: true });
 
-      const expectedServer = createHttpsServerMock.mock.results[0].value;
+        getServerListener(config);
 
-      expect(server).toBe(expectedServer);
+        expect(createHttpServerMock).toHaveBeenCalledTimes(1);
+        expect(createHttpServerMock).toHaveBeenCalledWith({
+          keepAliveTimeout: config.keepaliveTimeout,
+        });
+      });
+
+      it('properly configures the listener', () => {
+        const config = createConfig({ ssl: { enabled: false } });
+        const server = getServerListener(config);
+
+        expect(server.setTimeout).toHaveBeenCalledTimes(1);
+        expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
+
+        expect(server.on).toHaveBeenCalledTimes(2);
+        expect(server.on).toHaveBeenCalledWith('clientError', expect.any(Function));
+        expect(server.on).toHaveBeenCalledWith('timeout', expect.any(Function));
+      });
+
+      it('returns the http server', () => {
+        const config = createConfig({ ssl: { enabled: false } });
+
+        const server = getServerListener(config);
+
+        const expectedServer = createHttpServerMock.mock.results[0].value;
+
+        expect(server).toBe(expectedServer);
+      });
     });
   });
 
-  describe('when TLS is disabled', () => {
-    it('does not call getServerTLSOptions', () => {
-      const config = createConfig({ ssl: { enabled: false } });
+  describe('When protocol is `http2`', () => {
+    const createHttp2Config = (parts: Partial<IHttpConfig>) =>
+      createConfig({ ...parts, protocol: 'http2' });
 
-      getServerListener(config);
+    describe('when TLS is enabled', () => {
+      it('calls getServerTLSOptions with the correct parameters', () => {
+        const config = createHttp2Config({ ssl: { enabled: true } });
 
-      expect(getServerTLSOptionsMock).not.toHaveBeenCalled();
-    });
+        getServerListener(config);
 
-    it('calls http.createServer with the correct parameters', () => {
-      const config = createConfig({ ssl: { enabled: false } });
+        expect(getServerTLSOptionsMock).toHaveBeenCalledTimes(1);
+        expect(getServerTLSOptionsMock).toHaveBeenCalledWith(config.ssl);
+      });
 
-      getServerTLSOptionsMock.mockReturnValue({ stub: true });
+      it('calls http2.createSecureServer with the correct parameters', () => {
+        const config = createHttp2Config({ ssl: { enabled: true } });
 
-      getServerListener(config);
+        getServerTLSOptionsMock.mockReturnValue({ stub: true });
 
-      expect(createHttpServerMock).toHaveBeenCalledTimes(1);
-      expect(createHttpServerMock).toHaveBeenCalledWith({
-        keepAliveTimeout: config.keepaliveTimeout,
+        getServerListener(config);
+
+        expect(createHttp2SecureServerMock).toHaveBeenCalledTimes(1);
+        expect(createHttp2SecureServerMock).toHaveBeenCalledWith({
+          stub: true,
+          allowHTTP1: true,
+        });
+      });
+
+      it('properly configures the listener', () => {
+        const config = createHttp2Config({ ssl: { enabled: true } });
+        const server = getServerListener(config);
+
+        expect(server.setTimeout).toHaveBeenCalledTimes(1);
+        expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
+
+        expect(server.on).not.toHaveBeenCalled();
+      });
+
+      it('returns the http2 secure server', () => {
+        const config = createHttp2Config({ ssl: { enabled: true } });
+
+        const server = getServerListener(config);
+
+        const expectedServer = createHttp2SecureServerMock.mock.results[0].value;
+
+        expect(server).toBe(expectedServer);
       });
     });
 
-    it('properly configures the listener', () => {
-      const config = createConfig({ ssl: { enabled: false } });
-      const server = getServerListener(config);
+    describe('when TLS is disabled', () => {
+      it('does not call getServerTLSOptions', () => {
+        const config = createHttp2Config({ ssl: { enabled: false } });
 
-      expect(server.setTimeout).toHaveBeenCalledTimes(1);
-      expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
+        getServerListener(config);
 
-      expect(server.on).toHaveBeenCalledTimes(2);
-      expect(server.on).toHaveBeenCalledWith('clientError', expect.any(Function));
-      expect(server.on).toHaveBeenCalledWith('timeout', expect.any(Function));
-    });
+        expect(getServerTLSOptionsMock).not.toHaveBeenCalled();
+      });
 
-    it('returns the http server', () => {
-      const config = createConfig({ ssl: { enabled: false } });
+      it('calls http2.createServer with the correct parameters', () => {
+        const config = createHttp2Config({ ssl: { enabled: false } });
 
-      const server = getServerListener(config);
+        getServerTLSOptionsMock.mockReturnValue({ stub: true });
 
-      const expectedServer = createHttpServerMock.mock.results[0].value;
+        getServerListener(config);
 
-      expect(server).toBe(expectedServer);
+        expect(createHttp2UnsecureServerMock).toHaveBeenCalledTimes(1);
+        expect(createHttp2UnsecureServerMock).toHaveBeenCalledWith({});
+      });
+
+      it('properly configures the listener', () => {
+        const config = createHttp2Config({ ssl: { enabled: false } });
+        const server = getServerListener(config);
+
+        expect(server.setTimeout).toHaveBeenCalledTimes(1);
+        expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
+
+        expect(server.on).not.toHaveBeenCalled();
+      });
+
+      it('returns the http2 unsecure server', () => {
+        const config = createHttp2Config({ ssl: { enabled: false } });
+
+        const server = getServerListener(config);
+
+        const expectedServer = createHttp2UnsecureServerMock.mock.results[0].value;
+
+        expect(server).toBe(expectedServer);
+      });
     });
   });
 });

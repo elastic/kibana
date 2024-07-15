@@ -131,7 +131,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           <h2>
             <FormattedMessage
               id="xpack.ingestPipelines.edit.fetchPipelineError"
-              defaultMessage="Unable to load '{name}'"
+              defaultMessage="Unable to load ''{name}''"
               values={{ name: decodedPipelineName }}
             />
           </h2>
@@ -157,7 +157,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.edit.pageTitle"
-              defaultMessage="Edit pipeline '{name}'"
+              defaultMessage="Edit pipeline ''{name}''"
               values={{ name: decodedPipelineName }}
             />
           </span>

@@ -46,6 +46,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
         'xpack.enterpriseSearch.appSearch.documents.search.multiCheckboxFacetsView.noValue.selectOption',
         {
           defaultMessage: '<No value>',
+          ignoreTag: true,
         }
       ),
   });
@@ -83,7 +84,6 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
         options={checkboxGroupOptions}
         idToSelectedMap={idToSelectedMap}
         onChange={onChange}
-        compressed
       />
       {showMore && (
         <>

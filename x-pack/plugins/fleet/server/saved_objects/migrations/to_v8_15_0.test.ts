@@ -27,7 +27,8 @@ const getPolicyDoc = (packageName: string): SavedObject<PackagePolicy> => {
         version: '',
       },
       id: 'package-policy-1',
-      policy_id: '',
+      policy_id: 'agent-policy-1',
+      policy_ids: [],
       enabled: true,
       namespace: '',
       revision: 0,
@@ -80,6 +81,18 @@ describe('8.15.0 Requires Root Package Policy migration', () => {
       });
 
       expect(migratedPolicyConfigSO.attributes.package!.requires_root).toBe(undefined);
+    });
+  });
+
+  describe('backfilling `policy_ids`', () => {
+    it('should backfill `policy_ids` field as `[policy_id]` on Kibana update', () => {
+      const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+        document: getPolicyDoc('endpoint'),
+        fromVersion: 11,
+        toVersion: 12,
+      });
+
+      expect(migratedPolicyConfigSO.attributes.policy_ids).toEqual(['agent-policy-1']);
     });
   });
 });

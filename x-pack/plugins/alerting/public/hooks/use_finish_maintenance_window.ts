@@ -25,7 +25,7 @@ export function useFinishMaintenanceWindow() {
     onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsFinishedSuccess', {
-          defaultMessage: "Cancelled running maintenance window '{title}'",
+          defaultMessage: "Cancelled running maintenance window ''{title}''",
           values: {
             title: data.title,
           },

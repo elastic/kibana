@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_update:
     put:
-      operationId: BulkUpdateRules
+      x-labels: [ess]
       x-codegen-enabled: true
+      operationId: BulkUpdateRules
       deprecated: true
       description: Updates multiple rules using the `PUT` method.
       tags:

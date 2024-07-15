@@ -40,9 +40,10 @@ describe('Security Plugin', () => {
         })
       ).toEqual({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
-        authz: { isRoleManagementEnabled: expect.any(Function) },
+        authz: { isRoleManagementEnabled: expect.any(Function), roles: expect.any(Object) },
         license: {
           isLicenseAvailable: expect.any(Function),
+          getLicenseType: expect.any(Function),
           isEnabled: expect.any(Function),
           getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
@@ -71,6 +72,7 @@ describe('Security Plugin', () => {
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
+          getLicenseType: expect.any(Function),
           isEnabled: expect.any(Function),
           getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
@@ -127,6 +129,12 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "isRoleManagementEnabled": [Function],
+            "roles": Object {
+              "deleteRole": [Function],
+              "getRole": [Function],
+              "getRoles": [Function],
+              "saveRole": [Function],
+            },
           },
           "navControlService": Object {
             "addUserMenuLinks": [Function],

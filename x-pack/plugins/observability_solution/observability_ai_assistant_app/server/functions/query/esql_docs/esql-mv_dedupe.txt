@@ -1,14 +1,29 @@
-MV_DEDUPE
+## MV_DEDUPE
 
-Syntax
-Parameters
-field
-Multivalue expression.
-DescriptionRemove duplicate values from a multivalued field.
-MV_DEDUPE may, but won’t always, sort the values in the column.
-Supported types
-Example
+The `MV_DEDUPE` function is used to remove duplicate values from a multivalued field. It's important to note that while `MV_DEDUPE` may sort the values in the column, it's not guaranteed to always do so.
+
+### Syntax
+
+`MV_DEDUPE(field)`
+
+#### Parameters
+
+- `field`: Multivalue expression.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_DEDUPE` function in your ES|QL queries:
+
 ```esql
 ROW a=["foo", "foo", "bar", "foo"]
 | EVAL dedupe_a = MV_DEDUPE(a)
 ```
+
+In this example, the `MV_DEDUPE` function is used to remove duplicate values from the multivalued field `a`. The resulting `dedupe_a` field will contain the values `["foo", "bar"]`.
+
+```esql
+ROW b=["apple", "banana", "apple", "orange", "banana"]
+| EVAL dedupe_b = MV_DEDUPE(b)
+```
+
+In this second example, the `MV_DEDUPE` function is used to remove duplicate values from the multivalued field `b`. The resulting `dedupe_b` field will contain the values `["apple", "banana", "orange"]`.

@@ -22,7 +22,7 @@ interface Opts<H> {
   logger: Logger;
   initialPollInterval: number;
   pollInterval$: Observable<number>;
-  pollIntervalDelay$: Observable<number>;
+  pollIntervalDelay$?: Observable<number>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -99,10 +99,12 @@ export function createTaskPoller<T, H>({
       pollInterval = interval;
       logger.debug(`Task poller now using interval of ${interval}ms`);
     });
-    pollIntervalDelay$.subscribe((delay) => {
-      pollIntervalDelay = delay;
-      logger.debug(`Task poller now delaying emission by ${delay}ms`);
-    });
+    if (pollIntervalDelay$) {
+      pollIntervalDelay$.subscribe((delay) => {
+        pollIntervalDelay = delay;
+        logger.debug(`Task poller now delaying emission by ${delay}ms`);
+      });
+    }
     hasSubscribed = true;
   }
 

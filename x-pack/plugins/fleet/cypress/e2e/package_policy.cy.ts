@@ -14,6 +14,7 @@ describe('Edit package policy', () => {
     package: { name: 'fleet_server', title: 'Fleet Server', version: '1.1.0' },
     enabled: true,
     policy_id: 'fleet-server-policy',
+    policy_ids: ['fleet-server-policy'],
     output_id: 'fleet-default-output',
     inputs: [
       {
@@ -56,17 +57,19 @@ describe('Edit package policy', () => {
         hasErrors: false,
       },
     ]);
+    const agentPolicy = {
+      id: 'fleet-server-policy',
+      name: 'Fleet server policy 1',
+      description: '',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      status: 'active',
+      package_policies: [{ id: 'policy-1', name: 'fleet_server-1' }],
+    };
     cy.intercept('/api/fleet/agent_policies/fleet-server-policy', {
-      item: {
-        id: 'fleet-server-policy',
-        name: 'Fleet server policy 1',
-        description: '',
-        namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
-        status: 'active',
-        package_policies: [{ id: 'policy-1', name: 'fleet_server-1' }],
-      },
+      item: agentPolicy,
     });
+    cy.intercept('/api/fleet/agent_policies/_bulk_get', { items: [agentPolicy] });
     cy.intercept('/api/fleet/epm/packages/fleet_server*', {
       item: {
         name: 'fleet_server',

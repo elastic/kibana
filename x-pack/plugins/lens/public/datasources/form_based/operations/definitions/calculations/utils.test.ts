@@ -10,6 +10,10 @@ import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
+import {
+  CALCULATIONS_MISSING_COLUMN_REFERENCE,
+  CALCULATIONS_WRONG_DIMENSION_CONFIG,
+} from '../../../../../user_messages_ids';
 
 // Mock prevents issue with circular loading
 jest.mock('..');
@@ -47,7 +51,12 @@ describe('utils', () => {
           },
           'ref'
         )
-      ).toEqual(['"Label" is not fully configured']);
+      ).toEqual([
+        {
+          uniqueId: CALCULATIONS_MISSING_COLUMN_REFERENCE,
+          message: '"Label" is not fully configured',
+        },
+      ]);
     });
 
     it('should show an error if the reference is not allowed per the requirements', () => {
@@ -76,7 +85,12 @@ describe('utils', () => {
           },
           'ref'
         )
-      ).toEqual(['Dimension "Label" is configured incorrectly']);
+      ).toEqual([
+        {
+          uniqueId: CALCULATIONS_WRONG_DIMENSION_CONFIG,
+          message: 'Dimension "Label" is configured incorrectly',
+        },
+      ]);
     });
   });
 });

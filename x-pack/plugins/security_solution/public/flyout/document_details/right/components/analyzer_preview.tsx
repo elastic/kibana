@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
@@ -41,7 +41,7 @@ export const AnalyzerPreview: React.FC = () => {
     scopeId,
     eventId,
     isPreview,
-  } = useRightPanelContext();
+  } = useDocumentDetailsContext();
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
   const documentId = isPreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 

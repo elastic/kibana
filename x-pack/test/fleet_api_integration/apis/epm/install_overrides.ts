@@ -7,18 +7,16 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
-  const dockerServers = getService('dockerServers');
 
   const mappingsPackage = 'overrides';
   const mappingsPackageVersion = '0.1.0';
-  const server = dockerServers.get('registry');
 
   const deletePackage = async (pkg: string, version: string) =>
     supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -28,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     after(async () => {
-      if (server.enabled) {
+      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(mappingsPackage, mappingsPackageVersion);
       }

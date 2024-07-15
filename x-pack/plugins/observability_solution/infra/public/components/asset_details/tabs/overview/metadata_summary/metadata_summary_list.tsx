@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -29,10 +30,12 @@ import { Section } from '../../../components/section';
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   loading: boolean;
+  assetType: InventoryItemType;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
   loading: boolean;
+  assetType: InventoryItemType;
 }
 
 export interface MetadataData {
@@ -42,7 +45,7 @@ export interface MetadataData {
   tooltipLink?: string;
 }
 
-const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+const hostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'cloudProvider',
     value: metadataInfo?.cloud?.provider,
@@ -56,7 +59,7 @@ const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] =
   },
 ];
 
-const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+const hostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'hostIp',
     value: metadataInfo?.host?.ip,
@@ -70,9 +73,51 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   },
 ];
 
+const containerExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'runtime',
+    value: metadataInfo?.container?.runtime,
+    tooltipFieldLabel: 'container.runtime',
+  },
+  {
+    field: 'cloudInstanceId',
+    value: metadataInfo?.cloud?.instance?.id,
+    tooltipFieldLabel: 'cloud.instance.id',
+  },
+  {
+    field: 'cloudImageId',
+    value: metadataInfo?.cloud?.imageId,
+    tooltipFieldLabel: 'cloud.image.id',
+  },
+  {
+    field: 'cloudProvider',
+    value: metadataInfo?.cloud?.provider,
+    tooltipFieldLabel: 'cloud.provider',
+  },
+];
+
+const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'containerId',
+    value: metadataInfo?.container?.id,
+    tooltipFieldLabel: 'container.id',
+  },
+  {
+    field: 'containerImageName',
+    value: metadataInfo?.container?.image?.name,
+    tooltipFieldLabel: 'container.image.name',
+  },
+  {
+    field: 'hostName',
+    value: metadataInfo?.host?.name,
+    tooltipFieldLabel: 'host.name',
+  },
+];
+
 const MetadataSummaryListWrapper = ({
   loading: metadataLoading,
   visibleMetadata,
+  assetType,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
@@ -114,13 +159,13 @@ const MetadataSummaryListWrapper = ({
       }
     >
       <>
-        <MetadataExplanationMessage />
+        <MetadataExplanationMessage assetType={assetType} />
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {visibleMetadata
             .filter((metadataValue) => metadataValue)
             .map((metadataValue) => (
-              <EuiFlexItem key={metadataValue.field} grow={false}>
+              <EuiFlexItem key={metadataValue.field} grow={false} style={{ width: '200px' }}>
                 <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
                   <MetadataHeader metadataValue={metadataValue} />
                   <EuiDescriptionListDescription>
@@ -138,13 +183,62 @@ const MetadataSummaryListWrapper = ({
     </Section>
   );
 };
-export const MetadataSummaryList = ({ metadata, loading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper
-    visibleMetadata={[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]}
-    loading={loading}
-  />
-);
+export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSummaryProps) => {
+  switch (assetType) {
+    case 'host':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={[
+            ...hostMetadataData(metadata?.info),
+            ...hostExtendedMetadata(metadata?.info),
+          ]}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    case 'container':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={[
+            ...containerMetadataData(metadata?.info),
+            ...containerExtendedMetadata(metadata?.info),
+          ]}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    default:
+      return (
+        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+      );
+  }
+};
 
-export const MetadataSummaryListCompact = ({ metadata, loading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper visibleMetadata={metadataData(metadata?.info)} loading={loading} />
-);
+export const MetadataSummaryListCompact = ({
+  metadata,
+  loading,
+  assetType,
+}: MetadataSummaryProps) => {
+  switch (assetType) {
+    case 'host':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={hostMetadataData(metadata?.info)}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    case 'container':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={containerMetadataData(metadata?.info)}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    default:
+      return (
+        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+      );
+  }
+};

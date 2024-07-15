@@ -21,13 +21,18 @@ import { createBlankOpenApiDocument } from './bundler/merge_documents/create_bla
 export interface BundlerConfig {
   sourceGlob: string;
   outputFilePath: string;
+  options?: BundleOptions;
+}
+
+interface BundleOptions {
+  includeLabels?: string[];
   specInfo?: Omit<Partial<OpenAPIV3.InfoObject>, 'version'>;
 }
 
 export const bundle = async ({
   sourceGlob,
   outputFilePath = 'bundled-{version}.schema.yaml',
-  specInfo,
+  options,
 }: BundlerConfig) => {
   logger.debug(chalk.bold(`Bundling API route schemas`));
   logger.debug(`👀  Searching for source files in ${chalk.underline(sourceGlob)}`);
@@ -46,20 +51,20 @@ export const bundle = async ({
 
   logger.debug(`Processing schemas...`);
 
-  const resolvedDocuments = await resolveDocuments(schemaFilePaths);
+  const resolvedDocuments = await resolveDocuments(schemaFilePaths, options);
 
   logger.success(`Processed ${resolvedDocuments.length} schemas`);
 
   const blankOasFactory = (oasVersion: string, apiVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
       version: apiVersion,
-      title: specInfo?.title ?? 'Bundled OpenAPI specs',
+      title: options?.specInfo?.title ?? 'Bundled OpenAPI specs',
       ...omitBy(
         {
-          description: specInfo?.description,
-          termsOfService: specInfo?.termsOfService,
-          contact: specInfo?.contact,
-          license: specInfo?.license,
+          description: options?.specInfo?.description,
+          termsOfService: options?.specInfo?.termsOfService,
+          contact: options?.specInfo?.contact,
+          license: options?.specInfo?.license,
         },
         isUndefined
       ),
@@ -75,11 +80,16 @@ function logSchemas(schemaFilePaths: string[]): void {
   }
 }
 
-async function resolveDocuments(schemaFilePaths: string[]): Promise<BundledDocument[]> {
+async function resolveDocuments(
+  schemaFilePaths: string[],
+  options?: BundleOptions
+): Promise<BundledDocument[]> {
   const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
-        const resolvedDocument = await bundleDocument(schemaFilePath);
+        const resolvedDocument = await bundleDocument(schemaFilePath, {
+          includeLabels: options?.includeLabels,
+        });
 
         logger.debug(`Processed ${chalk.bold(basename(schemaFilePath))}`);
 

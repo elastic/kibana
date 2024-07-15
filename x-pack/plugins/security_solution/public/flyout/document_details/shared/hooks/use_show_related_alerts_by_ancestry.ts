@@ -8,7 +8,6 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ANCESTOR_ID } from '../constants/field_names';
 import { getField } from '../utils';
@@ -52,9 +51,6 @@ export const useShowRelatedAlertsByAncestry = ({
   eventId,
   isPreview,
 }: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
-  const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
-    'insightsRelatedAlertsByProcessAncestry'
-  );
   const hasProcessEntityInfo = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
@@ -62,8 +58,7 @@ export const useShowRelatedAlertsByAncestry = ({
 
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
 
-  const show =
-    isRelatedAlertsByProcessAncestryEnabled && hasProcessEntityInfo && hasAtLeastPlatinum;
+  const show = hasProcessEntityInfo && hasAtLeastPlatinum;
 
   return {
     show,

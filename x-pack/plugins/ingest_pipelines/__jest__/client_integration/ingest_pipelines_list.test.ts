@@ -103,7 +103,7 @@ describe('<PipelinesList />', () => {
       expect(tableCellsValues.length).toEqual(pipelinesWithoutDeprecated.length);
 
       // Enable filtering by deprecated pipelines
-      const searchInput = component.find('.euiFieldSearch').first();
+      const searchInput = component.find('input.euiFieldSearch').first();
       (searchInput.instance() as unknown as HTMLInputElement).value = 'is:deprecated';
       searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
       component.update();

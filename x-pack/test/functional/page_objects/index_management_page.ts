@@ -146,7 +146,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickCreateIndexSaveButton() {
       await testSubjects.click('createIndexSaveButton');
       // Wait for modal to close
-      await testSubjects.missingOrFail('createIndexSaveButton');
+      await testSubjects.missingOrFail('createIndexSaveButton', {
+        timeout: 30_000,
+      });
     },
     async expectIndexToExist(indexName: string) {
       const table = await find.byCssSelector('table');

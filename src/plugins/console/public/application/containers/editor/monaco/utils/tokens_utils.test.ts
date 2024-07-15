@@ -25,6 +25,11 @@ describe('tokens_utils', () => {
       const result = removeTrailingWhitespaces(url);
       expect(result).toBe('_search');
     });
+    it(`doesn't split a query parameter with whitespaces`, () => {
+      const url = '_search?q="with whitespace"';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe(url);
+    });
   });
 
   describe('parseBody', () => {
@@ -116,6 +121,10 @@ describe('tokens_utils', () => {
       },
       {
         value: '{"property1":{"nested1":"value","nested2":{}},"',
+        tokens: ['{'],
+      },
+      {
+        value: '{\n  "explain": false,\n  "',
         tokens: ['{'],
       },
     ];

@@ -57,7 +57,9 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerBulkUpdateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerBulkUpdateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

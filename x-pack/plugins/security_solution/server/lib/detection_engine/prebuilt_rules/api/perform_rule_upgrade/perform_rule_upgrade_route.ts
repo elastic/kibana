@@ -21,7 +21,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
@@ -60,7 +59,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
           const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
@@ -157,7 +156,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
 
           // Perform the upgrade
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
-            rulesManagementClient,
+            detectionRulesClient,
             targetRules
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];
@@ -182,7 +181,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
               failed: ruleErrors.length,
             },
             results: {
-              updated: updatedRules.map(({ result }) => internalRuleToAPIResponse(result)),
+              updated: updatedRules.map(({ result }) => result),
               skipped: skippedRules,
             },
             errors: allErrors,

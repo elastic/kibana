@@ -22,9 +22,11 @@ export const formatTimelineData = async (
   uniq([...ecsFields, ...dataFields]).reduce<Promise<TimelineEdges>>(
     async (acc, fieldName) => {
       const flattenedFields: TimelineEdges = await acc;
-      flattenedFields.node._id = hit._id;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      flattenedFields.node._id = hit._id!;
       flattenedFields.node._index = hit._index;
-      flattenedFields.node.ecs._id = hit._id;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      flattenedFields.node.ecs._id = hit._id!;
       flattenedFields.node.ecs.timestamp = getTimestamp(hit);
       flattenedFields.node.ecs._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {

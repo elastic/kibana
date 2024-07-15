@@ -1051,4 +1051,41 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
     });
   });
+
+  describe('requests aborted due to maximum response size exceeded errors', () => {
+    const requestAbortedErrorMessage = `The content length (9000) is bigger than the maximum allowed buffer (42)`;
+
+    it('logs warning when the client emits a RequestAbortedError error due to excessive response length ', () => {
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      client.diagnostic.emit(
+        'response',
+        new errors.RequestAbortedError(requestAbortedErrorMessage),
+        null
+      );
+
+      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
+        `"Request was aborted: The content length (9000) is bigger than the maximum allowed buffer (42)"`
+      );
+    });
+
+    it('does not log warning for other type of errors', () => {
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      const response = createApiResponse({ body: {} });
+      client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
+
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
+    });
+  });
 });

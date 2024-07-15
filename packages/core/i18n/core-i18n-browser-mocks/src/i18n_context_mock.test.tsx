@@ -21,14 +21,4 @@ describe('I18nProviderMock', () => {
       ).html()
     ).toMatchInlineSnapshot(`"default message"`);
   });
-
-  it('interpolates to id if default message is not present', () => {
-    expect(
-      shallow(
-        <I18nProviderMock>
-          <FormattedMessage id="id" />
-        </I18nProviderMock>
-      ).html()
-    ).toMatchInlineSnapshot(`"id"`);
-  });
 });

@@ -8,25 +8,31 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import React from 'react';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
-import { timelineActions } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../common/mock';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
-const mockDispatch = jest.fn();
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../../store');
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...original,
-    useDispatch: () => mockDispatch,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        telemetry: mockedTelemetry,
+      },
+    }),
   };
 });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../common/hooks/use_selector');
+jest.mock('../../../store');
+
+jest.mock('../../../../sourcerer/containers', () => {
   const mockSourcererReturn = {
     browserFields: {},
     loading: true,
@@ -70,18 +76,6 @@ describe('useDetailPanel', () => {
       expect(result.current.openEventDetailsPanel).toBeDefined();
       expect(result.current.shouldShowDetailsPanel).toBe(false);
       expect(result.current.DetailsPanel).toBeNull();
-    });
-  });
-
-  test('should fire redux action to open event details panel', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderUseDetailPanel();
-      await waitForNextUpdate();
-
-      result.current?.openEventDetailsPanel('123');
-
-      expect(mockDispatch).toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
     });
   });
 

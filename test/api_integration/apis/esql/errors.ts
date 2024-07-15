@@ -152,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       for (const policy of policies) {
         log.info(`deleting policy "${policy}"...`);
+        // TODO: Maybe `policy` -> `policy.name`?
         await es.enrich.deletePolicy({ name: policy }, { ignore: [404] });
       }
     }
@@ -236,7 +237,8 @@ export default function ({ getService }: FtrProviderContext) {
             await cleanup();
           });
 
-          it(`Checking error messages`, async () => {
+          // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/188109
+          it.skip(`Checking error messages`, async () => {
             for (const { query, error } of queryToErrors) {
               const jsonBody = await sendESQLQuery(query);
 

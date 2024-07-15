@@ -16,8 +16,8 @@ import { useNavigationProps } from '../../../hooks/use_navigation_props';
 interface TableRowDetailsProps {
   children: JSX.Element;
   colLength: number;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   isTimeBased: boolean;
   dataView: DataView;
@@ -58,7 +58,7 @@ export const TableRowDetails = ({
               <EuiIcon type="folderOpen" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
+              <EuiTitle size="xxs" data-test-subj="docViewerRowDetailsTitle">
                 <h4>
                   {isEsqlMode && (
                     <FormattedMessage

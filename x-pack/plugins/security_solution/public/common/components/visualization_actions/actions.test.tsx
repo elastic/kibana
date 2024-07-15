@@ -15,7 +15,7 @@ import { TestProviders } from '../../mock';
 
 import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 jest.mock('./use_actions');
 

@@ -25,6 +25,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -60,6 +61,7 @@ export interface PluginStart {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  dataViews: DataViewsServerPluginStart;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -147,6 +149,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
         pluginsSetup: {
           ...plugins,
           core,
+        },
+        getDataViewsStart: async () => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.dataViews;
         },
         getSpacesStart: async () => {
           const [, pluginStart] = await core.getStartServices();

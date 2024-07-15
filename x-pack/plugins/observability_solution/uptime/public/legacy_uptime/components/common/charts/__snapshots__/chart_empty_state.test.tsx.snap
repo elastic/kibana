@@ -4,7 +4,7 @@ exports[`ChartEmptyState renders JSX values 1`] = `
 <EuiEmptyPrompt
   body={
     <p>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="This is the default with a {val} included"
         id="test.body"
         values={
@@ -20,10 +20,9 @@ exports[`ChartEmptyState renders JSX values 1`] = `
   title={
     <EuiTitle>
       <h5>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="The title"
           id="test.title"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>

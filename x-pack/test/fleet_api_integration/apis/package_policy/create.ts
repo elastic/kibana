@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('Package Policy - create', () => {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
+    let agentPolicyId2: string;
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').load(
@@ -50,6 +51,16 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       agentPolicyId = agentPolicyResponse.item.id;
+
+      const { body: agentPolicyResponse2 } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `Test policy ${uuidv4()}`,
+          namespace: 'default',
+        })
+        .expect(200);
+      agentPolicyId2 = agentPolicyResponse2.item.id;
     });
 
     after(async function () {
@@ -57,6 +68,10 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId });
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId: agentPolicyId2 });
     });
 
     it('can only add to hosted agent policies using the force parameter', async function () {
@@ -148,6 +163,27 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
       expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
+    });
+
+    it('should work with multiple policy ids', async function () {
+      const response = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-6',
+          description: '',
+          namespace: 'default',
+          policy_ids: [agentPolicyId, agentPolicyId2],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+      expect(response.body.item.policy_ids).to.eql([agentPolicyId, agentPolicyId2]);
     });
 
     it('should allow to pass an empty namespace', async function () {

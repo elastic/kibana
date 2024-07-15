@@ -203,7 +203,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
           "managed": true,
           "managed_by": "observability",
-          "version": 3.2,
+          "version": 3.3,
         },
         "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.summary.pipeline-irrelevant-1",
@@ -366,6 +366,93 @@ exports[`ResetSLO resets all associated resources 8`] = `
               "value": "http://myhost.com/mock-server-basepath",
             },
           },
+          Object {
+            "script": Object {
+              "description": "Computes the last five minute burn rate value",
+              "lang": "painless",
+              "params": Object {
+                "isTimeslice": false,
+                "totalSlicesInRange": 0,
+              },
+              "source": "def totalEvents = ctx[\\"fiveMinuteBurnRate\\"][\\"totalEvents\\"];
+  def goodEvents = ctx[\\"fiveMinuteBurnRate\\"][\\"goodEvents\\"];
+  def errorBudgetInitial = ctx[\\"errorBudgetInitial\\"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[\\"fiveMinuteBurnRate\\"][\\"value\\"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params[\\"totalSlicesInRange\\"];
+  def isTimeslice = params[\\"isTimeslice\\"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[\\"fiveMinuteBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[\\"fiveMinuteBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  }",
+            },
+          },
+          Object {
+            "script": Object {
+              "description": "Computes the last hour burn rate value",
+              "lang": "painless",
+              "params": Object {
+                "isTimeslice": false,
+                "totalSlicesInRange": 0,
+              },
+              "source": "def totalEvents = ctx[\\"oneHourBurnRate\\"][\\"totalEvents\\"];
+  def goodEvents = ctx[\\"oneHourBurnRate\\"][\\"goodEvents\\"];
+  def errorBudgetInitial = ctx[\\"errorBudgetInitial\\"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[\\"oneHourBurnRate\\"][\\"value\\"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params[\\"totalSlicesInRange\\"];
+  def isTimeslice = params[\\"isTimeslice\\"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[\\"oneHourBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[\\"oneHourBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  }",
+            },
+          },
+          Object {
+            "script": Object {
+              "description": "Computes the last day burn rate value",
+              "lang": "painless",
+              "params": Object {
+                "isTimeslice": false,
+                "totalSlicesInRange": 0,
+              },
+              "source": "def totalEvents = ctx[\\"oneDayBurnRate\\"][\\"totalEvents\\"];
+  def goodEvents = ctx[\\"oneDayBurnRate\\"][\\"goodEvents\\"];
+  def errorBudgetInitial = ctx[\\"errorBudgetInitial\\"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[\\"oneDayBurnRate\\"][\\"value\\"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params[\\"totalSlicesInRange\\"];
+  def isTimeslice = params[\\"isTimeslice\\"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[\\"oneDayBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[\\"oneDayBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  }",
+            },
+          },
         ],
       },
     ],
@@ -468,6 +555,11 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "errorBudgetEstimated": false,
           "errorBudgetInitial": 0.0010000000000000009,
           "errorBudgetRemaining": 1,
+          "fiveMinuteBurnRate": Object {
+            "goodEvents": 0,
+            "totalEvents": 0,
+            "value": 0,
+          },
           "goodEvents": 0,
           "isTempDoc": true,
           "kibanaUrl": "http://myhost.com/mock-server-basepath",
@@ -481,6 +573,16 @@ exports[`ResetSLO resets all associated resources 11`] = `
               "name": null,
             },
             "name": null,
+          },
+          "oneDayBurnRate": Object {
+            "goodEvents": 0,
+            "totalEvents": 0,
+            "value": 0,
+          },
+          "oneHourBurnRate": Object {
+            "goodEvents": 0,
+            "totalEvents": 0,
+            "value": 0,
           },
           "service": Object {
             "environment": "irrelevant",
@@ -534,7 +636,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
           },
         },
         "id": "slo-irrelevant",
-        "index": ".slo-observability.summary-v3.2.temp",
+        "index": ".slo-observability.summary-v3.3.temp",
         "refresh": true,
       },
     ],

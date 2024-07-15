@@ -131,7 +131,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(8);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(10);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -163,19 +163,40 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         5,
         expect.objectContaining({
+          id: '.gemini',
+          name: 'Google Gemini',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        6,
+        expect.objectContaining({
           id: '.d3security',
           name: 'D3 Security',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        6,
+        7,
         expect.objectContaining({
           id: '.resilient',
           name: 'IBM Resilient',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        7,
+        8,
+        expect.objectContaining({
+          id: '.sentinelone',
+          name: 'Sentinel One',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        9,
+        expect.objectContaining({
+          id: '.crowdstrike',
+          name: 'CrowdStrike',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        10,
         expect.objectContaining({
           id: '.thehive',
           name: 'TheHive',

@@ -72,6 +72,15 @@ export const convert = (kbnConfigSchema: unknown) => {
   return { schema: result, shared };
 };
 
+export const getParamSchema = (knownParameters: KnownParameters, schemaKey: string) => {
+  return (
+    knownParameters[schemaKey] ??
+    // Handle special path parameters
+    knownParameters[schemaKey + '*'] ??
+    knownParameters[schemaKey + '?*']
+  );
+};
+
 const convertObjectMembersToParameterObjects = (
   ctx: IContext,
   schema: joi.Schema,
@@ -85,7 +94,11 @@ const convertObjectMembersToParameterObjects = (
     const anyOf = (result as OpenAPIV3.SchemaObject).anyOf as OpenAPIV3.SchemaObject[];
     properties = anyOf.find((s) => s.type === 'object')!.properties!;
   } else if (isObjectType(schema)) {
-    const { result } = parse({ schema, ctx }) as { result: OpenAPIV3.SchemaObject };
+    const { result } = parse({ schema, ctx });
+    if ('$ref' in result)
+      throw new Error(
+        `Found a reference to "${result.$ref}". Runtime types with IDs are not supported in path or query parameters.`
+      );
     properties = (result as OpenAPIV3.SchemaObject).properties!;
     (result.required ?? []).forEach((key) => required.set(key, true));
   } else if (isRecordType(schema)) {
@@ -95,7 +108,8 @@ const convertObjectMembersToParameterObjects = (
   }
 
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {
-    if (!knownParameters[schemaKey] && isPathParameter) {
+    const paramSchema = getParamSchema(knownParameters, schemaKey);
+    if (!paramSchema && isPathParameter) {
       throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
     }
     const isSubSchemaRequired = required.has(schemaKey);
@@ -111,7 +125,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !knownParameters[schemaKey].optional : isSubSchemaRequired,
+      required: isPathParameter ? !paramSchema.optional : isSubSchemaRequired,
       schema: finalSchema,
       description,
     };

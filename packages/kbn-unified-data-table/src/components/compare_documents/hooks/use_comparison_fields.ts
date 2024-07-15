@@ -8,10 +8,11 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { AdditionalFieldGroups, convertFieldsToFallbackFields } from '@kbn/unified-field-list';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
-export const MAX_COMPARISON_FIELDS = 100;
+export const MAX_COMPARISON_FIELDS = 250;
 
 export interface UseComparisonFieldsProps {
   dataView: DataView;
@@ -20,6 +21,7 @@ export interface UseComparisonFieldsProps {
   showAllFields: boolean;
   showMatchingValues: boolean;
   getDocById: (id: string) => DataTableRecord | undefined;
+  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 export const useComparisonFields = ({
@@ -29,6 +31,7 @@ export const useComparisonFields = ({
   showAllFields,
   showMatchingValues,
   getDocById,
+  additionalFieldGroups,
 }: UseComparisonFieldsProps) => {
   const { baseDoc, comparisonDocs } = useMemo(() => {
     const [baseDocId, ...comparisonDocIds] = selectedDocs;
@@ -42,7 +45,10 @@ export const useComparisonFields = ({
   }, [getDocById, selectedDocs]);
 
   return useMemo(() => {
-    let comparisonFields = selectedFieldNames;
+    let comparisonFields = convertFieldsToFallbackFields({
+      fields: selectedFieldNames,
+      additionalFieldGroups,
+    });
 
     if (showAllFields) {
       const sortedFields = dataView.fields
@@ -79,5 +85,13 @@ export const useComparisonFields = ({
     }
 
     return { comparisonFields, totalFields };
-  }, [baseDoc, comparisonDocs, dataView, selectedFieldNames, showAllFields, showMatchingValues]);
+  }, [
+    additionalFieldGroups,
+    baseDoc,
+    comparisonDocs,
+    dataView,
+    selectedFieldNames,
+    showAllFields,
+    showMatchingValues,
+  ]);
 };

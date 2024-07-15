@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check it in the doc viewer too
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      await testSubjects.click('fieldDescriptionPopoverButton-agent');
+      await dataGrid.expandFieldNameCellInFlyout('agent');
       await retry.waitFor('doc viewer popover text', async () => {
         return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription2;
       });

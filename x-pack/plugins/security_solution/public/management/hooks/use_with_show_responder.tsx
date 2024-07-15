@@ -18,7 +18,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointConsoleCommands,
-  HeaderEndpointInfo,
   OfflineCallout,
 } from '../components/endpoint_responder';
 import { useConsoleManager } from '../components/console';
@@ -51,11 +50,17 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
 
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName, platform } = props;
+      const isExternalEdr =
+        (isSentinelOneV1Enabled && agentType === 'sentinel_one') ||
+        (responseActionsCrowdstrikeManualHostIsolationEnabled && agentType === 'crowdstrike');
+
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
@@ -82,22 +87,14 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
-            if (agentStatusClientEnabled || agentType !== 'endpoint') {
-              return (
-                <AgentInfo
-                  agentId={agentId}
-                  agentType={agentType}
-                  hostName={hostName}
-                  platform={platform}
-                />
-              );
-            }
-            // TODO: 8.15 remove this if block when agentStatusClientEnabled is enabled/removed
-            if (agentType === 'endpoint') {
-              return <HeaderEndpointInfo endpointId={agentId} />;
-            }
-
-            return null;
+            return (
+              <AgentInfo
+                agentId={agentId}
+                agentType={agentType}
+                hostName={hostName}
+                platform={platform}
+              />
+            );
           },
         };
 
@@ -112,7 +109,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (isSentinelOneV1Enabled && agentType === 'sentinel_one') {
+              if (isExternalEdr) {
                 return (
                   <EuiFlexGroup>
                     <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
@@ -145,11 +142,11 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
       }
     },
     [
+      isSentinelOneV1Enabled,
+      responseActionsCrowdstrikeManualHostIsolationEnabled,
       endpointPrivileges,
       isEnterpriseLicense,
       consoleManager,
-      agentStatusClientEnabled,
-      isSentinelOneV1Enabled,
     ]
   );
 };

@@ -8,16 +8,7 @@
 import { z } from 'zod';
 import moment from 'moment';
 
-export enum EntityType {
-  service = 'service',
-  host = 'host',
-  pod = 'pod',
-  node = 'node',
-}
-
 export const arrayOfStringsSchema = z.array(z.string());
-
-export const entityTypeSchema = z.nativeEnum(EntityType);
 
 export enum BasicAggregations {
   avg = 'avg',
@@ -63,7 +54,8 @@ export const durationSchema = z
     const value = parseInt(parts[1], 10);
     const unit = parts[2] as 'm' | 's' | 'h' | 'd';
     const duration = moment.duration(value, unit);
-    return { ...duration, toJSON: () => val };
+    duration.toJSON = () => val;
+    return duration;
   });
 
 export const percentileMetricSchema = z.object({
@@ -104,3 +96,9 @@ export const identityFieldsSchema = z
     optional: z.boolean(),
   })
   .or(z.string().transform((value) => ({ field: value, optional: false })));
+
+const semVerRegex = new RegExp(/^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$/);
+export const semVerSchema = z.string().refine((maybeSemVer) => semVerRegex.test(maybeSemVer), {
+  message:
+    'The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.',
+});

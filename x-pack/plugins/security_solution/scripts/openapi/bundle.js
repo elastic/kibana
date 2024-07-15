@@ -9,12 +9,36 @@ require('../../../../../src/setup_node_env');
 const { bundle } = require('@kbn/openapi-bundler');
 const { join, resolve } = require('path');
 
-const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
+const ROOT = resolve(__dirname, '../..');
 
 bundle({
-  sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/**/*.schema.yaml'),
+  sourceGlob: join(ROOT, 'common/api/detection_engine/**/*.schema.yaml'),
   outputFilePath: join(
-    SECURITY_SOLUTION_ROOT,
-    'target/openapi/security_solution-{version}.bundled.schema.yaml'
+    ROOT,
+    'docs/openapi/serverless/security_solution_detections_api_{version}.bundled.schema.yaml'
   ),
+  options: {
+    includeLabels: ['serverless'],
+    specInfo: {
+      title: 'Security Solution Detections API (Elastic Cloud Serverless)',
+      description:
+        'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+    },
+  },
+});
+
+bundle({
+  sourceGlob: join(ROOT, 'common/api/detection_engine/**/*.schema.yaml'),
+  outputFilePath: join(
+    ROOT,
+    'docs/openapi/ess/security_solution_detections_api_{version}.bundled.schema.yaml'
+  ),
+  options: {
+    includeLabels: ['ess'],
+    specInfo: {
+      title: 'Security Solution Detections API (Elastic Cloud and self-hosted)',
+      description:
+        'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+    },
+  },
 });

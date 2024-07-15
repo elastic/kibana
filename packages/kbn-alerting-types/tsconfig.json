@@ -18,6 +18,9 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/licensing-plugin",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/rrule",
+    "@kbn/core",
+    "@kbn/es-query"
   ]
 }

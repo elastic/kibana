@@ -28,10 +28,9 @@ exports[`should render a Welcome screen 1`] = `
           size="l"
         >
           <h1>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Welcome to Elastic"
               id="home.welcomeTitle"
-              values={Object {}}
             />
           </h1>
         </EuiTitle>

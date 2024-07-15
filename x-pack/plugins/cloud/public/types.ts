@@ -6,6 +6,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
+import type { OnBoardingDefaultSolution } from '../common';
 
 export interface CloudStart {
   /**
@@ -174,6 +175,15 @@ export interface CloudSetup {
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * Onboarding configuration
+   */
+  onboarding: {
+    /**
+     * The default solution selected during onboarding.
+     */
+    defaultSolution?: OnBoardingDefaultSolution;
+  };
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.

@@ -87,10 +87,10 @@ export const parseAggregationResults = ({
 
     sourceFieldsParams.forEach((field) => {
       if (generateSourceFieldsFromHits) {
-        const fieldsSet = new Set<string>();
+        const fieldsSet: string[] = [];
         groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
           if (hit._source && hit._source[field.label]) {
-            fieldsSet.add(hit._source[field.label]);
+            fieldsSet.push(hit._source[field.label]);
           }
         });
         sourceFields[field.label] = Array.from(fieldsSet);

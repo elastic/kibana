@@ -6,21 +6,21 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { NoData } from '.';
 
 const enabler = {};
 
 describe('NoData', () => {
   test('should show text next to the spinner while checking a setting', () => {
-    const component = renderWithIntl(
+    const component = renderWithI18nProvider(
       <NoData isLoading={true} checkMessage="checking something to test" enabler={enabler} />
     );
     expect(component).toMatchSnapshot();
   });
 
   test('should show a default message if reason is unknown', () => {
-    const component = renderWithIntl(
+    const component = renderWithI18nProvider(
       <NoData
         isLoading={false}
         reason={{

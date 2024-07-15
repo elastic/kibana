@@ -90,9 +90,6 @@ import { registerObservabilityRuleTypes } from './rules/register_observability_r
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
-      metrics: {
-        enabled: boolean;
-      };
       logs?: {
         enabled: boolean;
       };

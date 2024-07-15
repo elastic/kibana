@@ -13,45 +13,41 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
-import { mount, ReactWrapper, render, shallow } from 'enzyme';
-import React, { ComponentType, ReactElement, ValidationMap } from 'react';
+import { I18nProvider, IntlShape } from '@kbn/i18n-react';
+import {
+  mount,
+  ReactWrapper,
+  render,
+  shallow,
+  MountRendererProps,
+  ShallowRendererProps,
+} from 'enzyme';
+import React, { ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
+import propTypes from 'prop-types';
+import { createIntl } from '@formatjs/intl';
+import { i18n } from '@kbn/i18n';
 
-// Use fake component to extract `intl` property to use in tests.
-const { intl } = (
-  mount(
-    <I18nProvider>
-      <br />
-    </I18nProvider>
-  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
-)
-  .instance()
-  .getChildContext();
+const intl = createIntl(i18n.getTranslation());
 
-function getOptions(context = {}, childContextTypes = {}, props = {}) {
+/**
+ * When using @kbn/i18n `injectI18n` on components, props.intl is required.
+ */
+export function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: IntlShape }> {
+  return React.cloneElement<any>(node, { intl });
+}
+
+function getOptions(context = {}, props = {}) {
   return {
     context: {
       ...context,
       intl,
     },
     childContextTypes: {
-      ...childContextTypes,
-      intl: intlShape,
+      intl: propTypes.object,
     },
     ...props,
   };
-}
-
-/**
- * When using @kbn/i18n `injectI18n` on components, props.intl is required.
- */
-// This function is exported solely to fix the types output in TS 4.5.2, likely a bug
-// Otherwise, InjectedIntl is missing from the output
-export function nodeWithIntlProp<T>(
-  node: ReactElement<T>
-): ReactElement<T & { intl: InjectedIntl }> {
-  return React.cloneElement<any>(node, { intl });
 }
 
 /**
@@ -61,20 +57,15 @@ export function nodeWithIntlProp<T>(
  *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl<T>(
-  node: ReactElement<T>,
-  {
-    context,
-    childContextTypes,
-    ...props
-  }: {
-    context?: any;
-    childContextTypes?: ValidationMap<any>;
-  } = {}
-) {
-  const options = getOptions(context, childContextTypes, props);
+export function shallowWithIntl(node: React.ReactElement, options?: ShallowRendererProps) {
+  const { context, ...props } = options || {};
 
-  return shallow(nodeWithIntlProp(node), options);
+  const optionsWithIntl = getOptions(context, props);
+
+  return shallow(nodeWithIntlProp(node), {
+    wrappingComponent: I18nProvider,
+    ...optionsWithIntl,
+  });
 }
 
 /**
@@ -84,23 +75,15 @@ export function shallowWithIntl<T>(
  *  @param options properties to pass into mount wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function mountWithIntl<T>(
-  node: ReactElement<T>,
-  {
-    context,
-    childContextTypes,
-    ...props
-  }: {
-    attachTo?: HTMLElement;
-    context?: any;
-    childContextTypes?: ValidationMap<any>;
-    wrappingComponent?: ComponentType<any> | undefined;
-    wrappingComponentProps?: {} | undefined;
-  } = {}
-) {
-  const options = getOptions(context, childContextTypes, props);
+export function mountWithIntl(node: React.ReactElement, options?: MountRendererProps) {
+  const { context, ...props } = options || {};
 
-  return mount(nodeWithIntlProp(node), options);
+  const optionsWithIntl = getOptions(context, props);
+
+  return mount(nodeWithIntlProp(node), {
+    wrappingComponent: I18nProvider,
+    ...optionsWithIntl,
+  });
 }
 
 /**
@@ -110,20 +93,15 @@ export function mountWithIntl<T>(
  *  @param options properties to pass into render wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function renderWithIntl<T>(
-  node: ReactElement<T>,
-  {
-    context,
-    childContextTypes,
-    ...props
-  }: {
-    context?: any;
-    childContextTypes?: ValidationMap<any>;
-  } = {}
-): any {
-  const options = getOptions(context, childContextTypes, props);
+export function renderWithIntl<T>(node: React.ReactElement<T>, options?: any) {
+  const { context, ...props } = options || {};
 
-  return render(nodeWithIntlProp(node), options);
+  const optionsWithIntl = getOptions(context, props);
+
+  return render(nodeWithIntlProp(node), {
+    wrappingComponent: I18nProvider,
+    ...optionsWithIntl,
+  });
 }
 
 /**
@@ -203,14 +181,16 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
 };
 
-export function shallowWithI18nProvider<T>(child: ReactElement<T>) {
-  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>);
-  const name = typeof child.type === 'string' ? child.type : child.type.name;
-  return wrapped.find(name).dive();
+export function shallowWithI18nProvider<T>(child: ReactElement<T>, options?: ShallowRendererProps) {
+  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>, options);
+  return wrapped.children().dive();
 }
 
-export function mountWithI18nProvider<T>(child: ReactElement<T>) {
-  const wrapped = mount(<I18nProvider>{child}</I18nProvider>);
-  const name = typeof child.type === 'string' ? child.type : child.type.name;
-  return wrapped.find(name);
+export function mountWithI18nProvider<T>(child: ReactElement<T>, options?: MountRendererProps) {
+  const wrapped = mount(<I18nProvider>{child}</I18nProvider>, options);
+  return wrapped.children().childAt(0);
+}
+
+export function renderWithI18nProvider<T>(child: ReactElement<T>, options?: MountRendererProps) {
+  return render(<I18nProvider>{child}</I18nProvider>, options);
 }

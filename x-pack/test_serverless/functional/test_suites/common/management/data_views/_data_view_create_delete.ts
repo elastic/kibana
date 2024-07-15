@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', undefined, true);
         await retry.try(async () => {
           // verify updated field list
-          expect(await testSubjects.exists('field-name-agent')).to.be(true);
+          expect(await testSubjects.exists('field-name-@message')).to.be(true);
         });
       });
 

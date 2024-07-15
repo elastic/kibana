@@ -31,7 +31,7 @@ import {
 import type { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { FieldEditorActions } from '../../../fields_browser';
 import { useFieldBrowserOptions } from '../../../fields_browser';
 

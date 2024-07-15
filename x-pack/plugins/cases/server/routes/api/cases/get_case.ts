@@ -32,7 +32,7 @@ export const getCaseRoute = createCasesRoute({
   params,
   routerOptions: {
     access: 'public',
-    description: `Get a case`,
+    summary: `Get a case`,
   },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {

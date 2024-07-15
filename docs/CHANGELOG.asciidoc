@@ -10,6 +10,9 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.14.3>>
+* <<release-notes-8.14.2>>
+* <<release-notes-8.14.1>>
 * <<release-notes-8.14.0>>
 * <<release-notes-8.13.4>>
 * <<release-notes-8.13.3>>
@@ -66,6 +69,59 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.14.3]]
+== {kib} 8.14.3
+
+The 8.14.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.14.3]]
+=== Bug Fixes
+Dashboard::
+* Fixes controls getting overwritten on navigation ({kibana-pull}187509[#187509]).
+Elastic Security::
+For the Elastic Security 8.14.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Logs::
+* Fixes log entry fly-out when response is slow ({kibana-pull}187303[#187303]).
+
+[[release-notes-8.14.2]]
+== {kib} 8.14.2
+
+The 8.14.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.14.2]]
+=== Bug Fixes
+
+Alerting::
+* Rule runs recovered actions without ever running active actions ({kibana-pull}183646[#183646]).
+Fleet::
+* Updates health_check endpoint to accept hosts ids ({kibana-pull}185014[#185014]).
+Machine Learning::
+* AIOps Log Rate Analysis: Fixes text field selection ({kibana-pull}186176[#186176]).
+Presentation::
+* Fixes PresentationPanelError component throwing when error.message is empty string ({kibana-pull}186098[#186098]).
+
+[[release-notes-8.14.1]]
+== {kib} 8.14.1
+
+The 8.14.1 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.14.1]]
+=== Bug Fixes
+Data Discovery::
+* Notify the user about issues with access to the default data view ({kibana-pull}184740[#184740]).
+Discover::
+* Fixes resetting of breakdown field in a saved search ({kibana-pull}184668[#184668]).
+Elastic Security::
+For the Elastic Security 8.14.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes restart upgrade disabled condition ({kibana-pull}184586[#184586]).
+Observability::
+* Fixes editing enabled state for project monitor ({kibana-pull}184775[#184775]).
+
 [[release-notes-8.14.0]]
 == {kib} 8.14.0
 
@@ -6227,7 +6283,7 @@ Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impa
 The `/api/reporting/generate/csv` endpoint has been removed. For more information, refer to {kibana-pull}121435[#121435].
 
 *Impact* +
-If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatatically generate CSV reports.
+If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatically generate CSV reports.
 ====
 
 [discrete]

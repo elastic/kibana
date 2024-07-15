@@ -7,15 +7,14 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import type { SetAlertTagsRequestBodyDecoded } from '../../../../../common/api/detection_engine/alert_tags';
-import { setAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ManageAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { validateAlertTagsArrays } from './helpers';
 
 export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
@@ -32,10 +31,7 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidation<
-              typeof setAlertTagsRequestBody,
-              SetAlertTagsRequestBodyDecoded
-            >(setAlertTagsRequestBody),
+            body: buildRouteValidationWithZod(ManageAlertTagsRequestBody),
           },
         },
       },

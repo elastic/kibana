@@ -6882,23 +6882,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.UserIdGetter",
-        "type": "Type",
-        "tags": [],
-        "label": "UserIdGetter",
-        "description": [],
-        "signature": [
-          "() => Promise<string | undefined>"
-        ],
-        "path": "src/plugins/data_views/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -13010,6 +12993,10 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
+              },
+              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
@@ -13134,10 +13121,6 @@
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
-              },
-              {
                 "plugin": "@kbn/ml-data-view-utils",
                 "path": "x-pack/packages/ml/data_view_utils/actions/data_view_handler.ts"
               },
@@ -13226,24 +13209,24 @@
                 "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
+                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
+                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/eql_query_bar/validators.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -17493,7 +17476,15 @@
                 "section": "def-common.DataViewField",
                 "text": "DataViewField"
               },
-              "; }; getFieldMapSorted: () => {}; }>"
+              "; }; getFieldMapSorted: () => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">; }>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
             "deprecated": false,

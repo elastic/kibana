@@ -8,7 +8,7 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 
-const trimTrailingStar = (str: string) => str.replace(/\*$/, '');
+export const trimTrailingStar = (str: string) => str.replace(/\*$/, '');
 
 export const validatePathParameters = (pathParameters: string[], schemaKeys: string[]) => {
   if (pathParameters.length !== schemaKeys.length) {

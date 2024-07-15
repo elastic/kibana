@@ -6,21 +6,27 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/module_migration
-export type { InjectedIntl, InjectedIntlProps } from 'react-intl';
-
-export {
-  intlShape,
+import type { IntlShape, WrappedComponentProps } from 'react-intl';
+import {
   FormattedDate,
   FormattedTime,
-  FormattedRelative,
   FormattedNumber,
   FormattedPlural,
   FormattedMessage,
-  FormattedHTMLMessage,
-  // Only used for testing. Use I18nProvider otherwise.
-  IntlProvider as __IntlProvider, // eslint-disable-next-line @kbn/eslint/module_migration
+  FormattedRelativeTime,
 } from 'react-intl';
 
+export type { IntlShape, WrappedComponentProps };
+export {
+  FormattedDate,
+  FormattedTime,
+  FormattedNumber,
+  FormattedPlural,
+  FormattedMessage,
+  FormattedRelativeTime,
+};
+
+export { FormattedRelative, __IntlProvider } from './src/compatiblity_layer';
+export type { FormattedRelativeProps, InjectedIntl } from './src/compatiblity_layer';
 export { I18nProvider } from './src/provider';
-export { injectI18n } from './src/inject';
+export { injectI18n, useI18n } from './src/inject';

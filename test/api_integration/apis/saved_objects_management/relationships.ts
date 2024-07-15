@@ -342,7 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('index patterns', () => {
-      it('should validate visualization response schema', async () => {
+      it('should validate index-pattern response schema', async () => {
         const resp = await supertest
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
           .expect(200);

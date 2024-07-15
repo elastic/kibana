@@ -21,7 +21,7 @@ export function throwSerializedChatCompletionErrors<
   return (source$) =>
     source$.pipe(
       tap((event) => {
-        // de-serialise error
+        // de-serialize error
         if (event.type === StreamingChatResponseEventType.ChatCompletionError) {
           const code = event.error.code ?? ChatCompletionErrorCode.InternalError;
           const message = event.error.message;

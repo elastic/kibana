@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useMemo, useCallback } from 'react';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { ExpandedDetailType } from '../../../../../common/types';
-import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
+import { isInTableScope, isTimelineScope } from '../../../../helpers';
 import { timelineSelectors } from '../../../store';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 export interface UseDetailPanelConfig {
@@ -46,10 +42,8 @@ export const useDetailPanel = ({
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
   const { telemetry } = useKibana().services;
   const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
-  const dispatch = useDispatch();
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
@@ -63,8 +57,6 @@ export const useDetailPanel = ({
   const expandedDetail = useDeepEqualSelector(
     (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
   );
-  const onPanelClose = useRef(() => {});
-  const noopPanelClose = () => {};
 
   const shouldShowDetailsPanel = useMemo(() => {
     if (
@@ -77,60 +69,26 @@ export const useDetailPanel = ({
     }
     return false;
   }, [expandedDetail, tabType]);
-  const scopedActions = getScopedActions(scopeId);
-
-  // We could just surface load details panel, but rather than have users be concerned
-  // of the config for a panel, they can just pass the base necessary values to a panel specific function
-  const loadDetailsPanel = useCallback(
-    (panelConfig?: ExpandedDetailType) => {
-      if (panelConfig && scopedActions) {
-        dispatch(
-          scopedActions.toggleDetailPanel({
-            ...panelConfig,
-            tabType,
-            id: scopeId,
-          })
-        );
-      }
-    },
-    [scopedActions, scopeId, dispatch, tabType]
-  );
 
   const openEventDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
-      if (isSecurityFlyoutEnabled) {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventId,
-              indexName: eventDetailsIndex,
-              scopeId,
-            },
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName: eventDetailsIndex,
+            scopeId,
           },
-        });
-        telemetry.reportDetailsFlyoutOpened({
-          location: scopeId,
-          panel: 'right',
-        });
-      } else if (eventId) {
-        loadDetailsPanel({
-          panelView: 'eventDetail',
-          params: { eventId, indexName: eventDetailsIndex },
-        });
-        onPanelClose.current = onClose ?? noopPanelClose;
-      }
+        },
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: scopeId,
+        panel: 'right',
+      });
     },
-    [isSecurityFlyoutEnabled, openFlyout, eventDetailsIndex, scopeId, telemetry, loadDetailsPanel]
+    [openFlyout, eventDetailsIndex, scopeId, telemetry]
   );
-
-  const handleOnDetailsPanelClosed = useCallback(() => {
-    if (isSecurityFlyoutEnabled) return;
-    if (onPanelClose.current) onPanelClose.current();
-    if (scopedActions) {
-      dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
-    }
-  }, [isSecurityFlyoutEnabled, scopedActions, dispatch, tabType, scopeId]);
 
   const DetailsPanel = useMemo(
     () =>
@@ -138,7 +96,7 @@ export const useDetailPanel = ({
         <DetailsPanelComponent
           browserFields={browserFields}
           entityType={entityType}
-          handleOnPanelClosed={handleOnDetailsPanelClosed}
+          handleOnPanelClosed={() => {}}
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
           tabType={tabType}
@@ -148,7 +106,6 @@ export const useDetailPanel = ({
     [
       browserFields,
       entityType,
-      handleOnDetailsPanelClosed,
       isFlyoutView,
       runtimeMappings,
       shouldShowDetailsPanel,

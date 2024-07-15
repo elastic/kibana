@@ -35,14 +35,14 @@ import {
 const bookSerializedStateIsByReference = (
   state?: BookSerializedState
 ): state is BookByReferenceSerializedState => {
-  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId !== undefined);
+  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId);
 };
 
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: ReactEmbeddableFactory<
     BookSerializedState,
-    BookApi,
-    BookRuntimeState
+    BookRuntimeState,
+    BookApi
   > = {
     type: SAVED_BOOK_ID,
     deserializeState: async (serializedState) => {
@@ -86,7 +86,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               defaultMessage: 'book',
             }),
           serializeState: async () => {
-            if (savedBookId$.value === undefined) {
+            if (!Boolean(savedBookId$.value)) {
               // if this book is currently by value, we serialize the entire state.
               const bookByValueState: BookByValueSerializedState = {
                 attributes: serializeBookAttributes(bookAttributesManager),
@@ -97,7 +97,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
 
             // if this book is currently by reference, we serialize the reference and write to the external store.
             const bookByReferenceState: BookByReferenceSerializedState = {
-              savedBookId: savedBookId$.value,
+              savedBookId: savedBookId$.value!,
               ...serializeTitles(),
             };
 
@@ -122,6 +122,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           checkForDuplicateTitle: async (title) => {},
           unlinkFromLibrary: () => {
             savedBookId$.next(undefined);
+          },
+          getByValueRuntimeSnapshot: () => {
+            const snapshot = api.snapshotRuntimeState();
+            delete snapshot.savedBookId;
+            return snapshot;
           },
         },
         {

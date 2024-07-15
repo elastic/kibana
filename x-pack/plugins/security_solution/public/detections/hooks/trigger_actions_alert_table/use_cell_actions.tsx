@@ -13,7 +13,7 @@ import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';

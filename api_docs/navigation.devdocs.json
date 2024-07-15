@@ -80,9 +80,7 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<",
-                  "ConfigSchema",
-                  ">"
+                  "<object>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
@@ -814,7 +812,8 @@
             "label": "intl",
             "description": [],
             "signature": [
-              "ReactIntl.InjectedIntl | undefined"
+              "IntlShape",
+              " | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
@@ -1172,21 +1171,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "navigation",
-        "id": "def-common.ENABLE_SOLUTION_NAV_UI_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "ENABLE_SOLUTION_NAV_UI_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"solutionNav:enable\""
-        ],
-        "path": "src/plugins/navigation/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "navigation",
         "id": "def-common.SOLUTION_NAV_FEATURE_FLAG_NAME",

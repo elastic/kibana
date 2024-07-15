@@ -2,9 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/fips/build.sh
     label: 'Build FIPS Image'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
       preemptible: true
     depends_on:

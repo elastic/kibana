@@ -8,8 +8,14 @@
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type {
+  BulkDeleteRulesPostResponse,
+  BulkDeleteRulesResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkCrudRulesResponse,
+  BulkDeleteRulesPostRequestBody,
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
 } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -18,13 +24,12 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import {
   buildSiemResponse,
   createBulkErrorObject,
   transformBulkError,
 } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
@@ -33,7 +38,7 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 type Handler = RequestHandler<
   unknown,
   unknown,
-  BulkDeleteRulesRequestBody,
+  BulkDeleteRulesRequestBody | BulkDeleteRulesPostRequestBody,
   SecuritySolutionRequestHandlerContext,
   'delete' | 'post'
 >;
@@ -46,7 +51,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     context,
     request,
     response
-  ): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
+  ): Promise<IKibanaResponse<BulkDeleteRulesResponse | BulkDeleteRulesPostResponse>> => {
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);
@@ -55,7 +60,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+      const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -76,7 +81,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
               return getIdBulkError({ id, ruleId });
             }
 
-            await rulesManagementClient.deleteRule({
+            await detectionRulesClient.deleteRule({
               ruleId: rule.id,
             });
 
@@ -111,14 +116,26 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       },
     },
   };
-  const versionConfig = {
-    version: '2023-10-31',
-    validate: {
-      request: {
-        body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
+  router.versioned.delete(routeConfig).addVersion(
+    {
+      version: '2023-10-31',
+      validate: {
+        request: {
+          body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
+        },
       },
     },
-  };
-  router.versioned.delete(routeConfig).addVersion(versionConfig, handler);
-  router.versioned.post(routeConfig).addVersion(versionConfig, handler);
+    handler
+  );
+  router.versioned.post(routeConfig).addVersion(
+    {
+      version: '2023-10-31',
+      validate: {
+        request: {
+          body: buildRouteValidationWithZod(BulkDeleteRulesPostRequestBody),
+        },
+      },
+    },
+    handler
+  );
 };

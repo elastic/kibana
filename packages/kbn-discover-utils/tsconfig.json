@@ -18,6 +18,7 @@
   "kbn_references": [
     "@kbn/data-service",
     "@kbn/data-views-plugin",
+    "@kbn/data-view-utils",
     "@kbn/es-query",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",

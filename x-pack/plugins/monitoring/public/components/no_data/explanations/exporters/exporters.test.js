@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ExplainExporters, ExplainExportersCloud } from './exporters';
 
 jest.mock('../../../../legacy_shims', () => ({
@@ -27,14 +27,14 @@ describe('ExplainExporters', () => {
       context: 'esProd001',
     };
 
-    const component = renderWithIntl(<ExplainExporters {...{ reason }} />);
+    const component = renderWithI18nProvider(<ExplainExporters {...{ reason }} />);
     expect(component).toMatchSnapshot();
   });
 });
 
 describe('ExplainExportersCloud', () => {
   test('should explain about xpack.monitoring.exporters setting in a cloud environment', () => {
-    const component = renderWithIntl(<ExplainExportersCloud />);
+    const component = renderWithI18nProvider(<ExplainExportersCloud />);
     expect(component).toMatchSnapshot();
   });
 });

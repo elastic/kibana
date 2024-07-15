@@ -81,18 +81,47 @@ export function createWrappedScopedClusterClientFactory(
   };
 }
 
+class WrappedScopedClusterClientImpl implements IScopedClusterClient {
+  #asInternalUser?: ElasticsearchClient;
+  #asCurrentUser?: ElasticsearchClient;
+  #asSecondaryAuthUser?: ElasticsearchClient;
+
+  constructor(private readonly opts: WrapScopedClusterClientOpts) {}
+
+  public get asInternalUser() {
+    if (this.#asInternalUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asInternalUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asInternalUser,
+      });
+    }
+    return this.#asInternalUser;
+  }
+  public get asCurrentUser() {
+    if (this.#asCurrentUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asCurrentUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asCurrentUser,
+      });
+    }
+    return this.#asCurrentUser;
+  }
+  public get asSecondaryAuthUser() {
+    if (this.#asSecondaryAuthUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asSecondaryAuthUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asSecondaryAuthUser,
+      });
+    }
+    return this.#asSecondaryAuthUser;
+  }
+}
+
 function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClusterClient {
-  const { scopedClusterClient, ...rest } = opts;
-  return {
-    asInternalUser: wrapEsClient({
-      ...rest,
-      esClient: scopedClusterClient.asInternalUser,
-    }),
-    asCurrentUser: wrapEsClient({
-      ...rest,
-      esClient: scopedClusterClient.asCurrentUser,
-    }),
-  };
+  return new WrappedScopedClusterClientImpl(opts);
 }
 
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
@@ -138,11 +167,12 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
         const requestOptions = options ?? {};
         const start = Date.now();
         opts.logger.debug(
-          `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-            opts.rule.spaceId
-          } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}${
-            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-          }`
+          () =>
+            `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+              opts.rule.spaceId
+            } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}${
+              requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+            }`
         );
         const result = (await originalRequestFn.call(opts.esClient.transport, params, {
           ...requestOptions,
@@ -206,11 +236,12 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
       const searchOptions = options ?? {};
       const start = Date.now();
       opts.logger.debug(
-        `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-          opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-        }`
+        () =>
+          `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+          }`
       );
       const result = (await originalEqlSearch.call(opts.esClient, params, {
         ...searchOptions,
@@ -287,11 +318,12 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       const searchOptions = options ?? {};
       const start = Date.now();
       opts.logger.debug(
-        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-          opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-        }`
+        () =>
+          `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+          }`
       );
       const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,

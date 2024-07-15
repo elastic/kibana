@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { InfraMetadata } from '../../../../../common/http_api';
 
 export interface Field {
@@ -18,7 +19,10 @@ interface FieldsByCategory {
 export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
 
-  const mapNestedProperties = (category: 'cloud' | 'host' | 'agent', property: string) => {
+  const mapNestedProperties = (
+    category: 'cloud' | 'host' | 'agent' | 'container',
+    property: string
+  ) => {
     const fieldsByCategory: FieldsByCategory = metadata?.info?.[`${category}`] ?? {};
     if (fieldsByCategory.hasOwnProperty(property)) {
       const value = fieldsByCategory[property];
@@ -36,10 +40,17 @@ export const getAllFields = (metadata: InfraMetadata | null) => {
           value,
         };
       } else {
-        return Object.entries(value ?? {}).map(([prop, subProp]) => ({
-          name: `${category}.${property}.${prop}`,
-          value: subProp,
-        }));
+        return Object.entries(value ?? {})
+          .map(([prop, subProp]) => {
+            if (!Array.isArray(subProp) && isPlainObject(subProp)) {
+              return { name: '', value: '' };
+            }
+            return {
+              name: `${category}.${property}.${prop}`,
+              value: subProp,
+            };
+          })
+          .filter(({ name }) => name);
       }
     }
     return [];
@@ -54,8 +65,11 @@ export const getAllFields = (metadata: InfraMetadata | null) => {
   const host = Object.keys(metadata?.info?.host ?? {}).flatMap((prop) =>
     mapNestedProperties('host', prop)
   );
+  const container = Object.keys(metadata?.info?.container ?? {}).flatMap((prop) =>
+    mapNestedProperties('container', prop)
+  );
 
-  return prune([...host, ...agent, ...cloud]);
+  return prune([...host, ...container, ...agent, ...cloud]);
 };
 
 const prune = (fields: Field[]) => fields.filter((f) => !!f?.value);

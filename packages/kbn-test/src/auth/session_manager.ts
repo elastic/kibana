@@ -13,7 +13,12 @@ import { resolve } from 'path';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { readCloudUsersFromFile } from './helper';
-import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
+import {
+  createCloudSAMLSession,
+  createLocalSAMLSession,
+  getSecurityProfile,
+  Session,
+} from './saml_auth';
 import { Role, User } from './types';
 
 export interface HostOptions {
@@ -146,8 +151,14 @@ export class SamlSessionManager {
     return session.getCookieValue();
   }
 
+  async getEmail(role: string) {
+    const session = await this.getSessionByRole(role);
+    return session.email;
+  }
+
   async getUserData(role: string) {
-    const { email, fullname } = await this.getSessionByRole(role);
-    return { email, fullname };
+    const { cookie } = await this.getSessionByRole(role);
+    const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
+    return profileData;
   }
 }

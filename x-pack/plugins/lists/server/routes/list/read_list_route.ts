@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { GetListRequestQuery, GetListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import { readListRequestQuery, readListResponse } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const readListRoute = (router: ListsPluginRouter): void => {
@@ -27,7 +27,7 @@ export const readListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation(readListRequestQuery),
+            query: buildRouteValidationWithZod(GetListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -44,12 +44,7 @@ export const readListRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(list, readListResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({ body: GetListResponse.parse(list) });
           }
         } catch (err) {
           const error = transformError(err);

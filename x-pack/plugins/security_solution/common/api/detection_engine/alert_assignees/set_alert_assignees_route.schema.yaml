@@ -6,8 +6,9 @@ paths:
   /api/detection_engine/signals/assignees:
     summary: Assigns users to alerts
     post:
-      operationId: SetAlertAssignees
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
+      operationId: SetAlertAssignees
       description: Assigns users to alerts.
       requestBody:
         required: true

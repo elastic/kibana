@@ -30,94 +30,90 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('route access', () => {
-      describe('disabled', () => {
-        it('#delete', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .delete('/api/spaces/space/default')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader);
+      it('#delete', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .delete('/api/spaces/space/default')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader);
 
-          // normally we'd get a 400 bad request if we tried to delete the default space
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(400, status, body);
+      });
 
-        it('#create', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post('/api/spaces/space')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader)
-            .send({
-              id: 'custom',
-              name: 'Custom',
-              disabledFeatures: [],
-            });
+      it('#create', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .post('/api/spaces/space')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            id: 'custom',
+            name: 'Custom',
+            disabledFeatures: [],
+          });
 
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(400, status, body);
+      });
 
-        it('#update requires internal header', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .put('/api/spaces/space/default')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader)
-            .send({
-              id: 'default',
-              name: 'UPDATED!',
-              disabledFeatures: [],
-            });
+      it('#update requires internal header', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .put('/api/spaces/space/default')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            id: 'default',
+            name: 'UPDATED!',
+            disabledFeatures: [],
+          });
 
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+      });
 
-        it('#copyToSpace', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post('/api/spaces/_copy_saved_objects')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader);
+      it('#copyToSpace', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .post('/api/spaces/_copy_saved_objects')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader);
 
-          // without a request body we would normally a 400 bad request if the endpoint was registered
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(400, status, body);
+      });
 
-        it('#resolveCopyToSpaceErrors', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post('/api/spaces/_resolve_copy_saved_objects_errors')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader);
+      it('#resolveCopyToSpaceErrors', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .post('/api/spaces/_resolve_copy_saved_objects_errors')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader);
 
-          // without a request body we would normally a 400 bad request if the endpoint was registered
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(400, status, body);
+      });
 
-        it('#updateObjectsSpaces', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post('/api/spaces/_update_objects_spaces')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader);
+      it('#updateObjectsSpaces', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .post('/api/spaces/_update_objects_spaces')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader);
 
-          // without a request body we would normally a 400 bad request if the endpoint was registered
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(400, status, body);
+      });
 
-        it('#getShareableReferences', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post('/api/spaces/_get_shareable_references')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader);
+      it('#getShareableReferences', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .post('/api/spaces/_get_shareable_references')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            objects: [{ type: 'a', id: 'a' }],
+          });
 
-          // without a request body we would normally a 400 bad request if the endpoint was registered
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+      });
 
-        it('#disableLegacyUrlAliases', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post('/api/spaces/_disable_legacy_url_aliases')
-            .set(internalRequestHeader)
-            .set(roleAuthc.apiKeyHeader);
+      it('#disableLegacyUrlAliases', async () => {
+        const { body, status } = await supertestWithoutAuth
+          .post('/api/spaces/_disable_legacy_url_aliases')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader);
 
-          // without a request body we would normally a 400 bad request if the endpoint was registered
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // without a request body we would normally a 400 bad request if the endpoint was registered
+        svlCommonApi.assertApiNotFound(body, status);
       });
 
       describe('internal', () => {

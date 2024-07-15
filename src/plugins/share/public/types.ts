@@ -155,6 +155,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   embedUrlParamExtensions?: UrlParamExtension[];
   snapshotShareWarning?: string;
   onClose?: () => void;
+  publicAPIEnabled?: boolean;
 }
 
 export interface ClientConfigType {

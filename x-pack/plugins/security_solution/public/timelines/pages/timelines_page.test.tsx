@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPage } from './timelines_page';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -23,7 +23,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../overview/components/events_by_dataset');
-jest.mock('../../common/containers/sourcerer');
+jest.mock('../../sourcerer/containers');
 jest.mock('../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../common/lib/kibana');
 

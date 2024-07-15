@@ -6,46 +6,36 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import parser from 'intl-messageformat-parser';
+import { parse, isSelectElement, SelectElement } from '@formatjs/icu-messageformat-parser';
+import { ErrorKind } from '@formatjs/icu-messageformat-parser/error';
+
 // @ts-ignore
 import { createParserErrorMessage } from './utils';
-import { SelectFormatNode } from './intl_types';
 
 export function checkEnglishOnly(message: string) {
   return /^[a-z]*$/i.test(message);
 }
 
-export function verifySelectFormatNode(node: SelectFormatNode) {
-  if (node.type !== 'selectFormat') {
-    throw new parser.SyntaxError(
-      'Unable to verify select format icu-syntax',
-      'selectFormat',
-      node.type,
-      node.location
-    );
-  }
-
-  for (const option of node.options) {
-    if (option.type === 'optionalFormatPattern') {
-      if (!checkEnglishOnly(option.selector)) {
-        throw new parser.SyntaxError(
-          'selectFormat Selector must be in english',
-          'English only selector',
-          option.selector,
-          node.location
-        );
-      }
+export function verifySelectFormatElement(element: SelectElement) {
+  for (const optionKey of Object.keys(element.options)) {
+    if (!checkEnglishOnly(optionKey)) {
+      const error = new SyntaxError('EXPECT_SELECT_ARGUMENT_OPTIONS');
+      // @ts-expect-error Assign to error object
+      error.kind = ErrorKind.EXPECT_SELECT_ARGUMENT_OPTIONS;
+      // @ts-expect-error Assign to error object
+      error.location = element.location;
+      error.message = `English only selector required. selectFormat options must be in english, got ${optionKey}`;
+      throw error;
     }
   }
 }
 
 export function verifyICUMessage(message: string) {
   try {
-    const results = parser.parse(message);
-    for (const node of results.elements) {
-      if (node.type === 'argumentElement' && node.format?.type === 'selectFormat') {
-        verifySelectFormatNode(node.format);
+    const elements = parse(message, { captureLocation: true });
+    for (const element of elements) {
+      if (isSelectElement(element)) {
+        verifySelectFormatElement(element);
       }
     }
   } catch (error) {
@@ -57,7 +47,9 @@ export function verifyICUMessage(message: string) {
         },
         message: error.message,
       });
-      throw errorWithContext;
+      throw new Error(errorWithContext);
     }
+
+    throw error;
   }
 }

@@ -28,6 +28,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     error: 'MISSING_SECURITY',
   };
 
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
   const isSubfeaturePrivilegesEnabled =
     appContextService.getExperimentalFeatures().subfeaturePrivileges ?? false;
 
@@ -47,7 +48,9 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
           error: 'MISSING_PRIVILEGES',
         } as CheckPermissionsResponse,
       });
-    } else if (request.query.fleetServerSetup) {
+    }
+    // check the manage_service_account cluster privilege only on stateful
+    else if (request.query.fleetServerSetup && !isServerless) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
@@ -74,8 +77,8 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
         } as CheckPermissionsResponse,
       });
     }
-    // check the manage_service_account cluster privilege
-    else if (request.query.fleetServerSetup) {
+    // check the manage_service_account cluster privilege only on stateful
+    else if (request.query.fleetServerSetup && !isServerless) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
@@ -158,6 +161,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      description: `Create a service token`,
     })
     .addVersion(
       {
@@ -175,6 +179,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      description: `Create a service token`,
     })
     .addVersion(
       {

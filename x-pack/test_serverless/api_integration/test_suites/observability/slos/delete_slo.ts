@@ -18,9 +18,9 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '@kbn/slo-plugin/common/constants';
-import { ElasticsearchClient } from '@kbn/core/server';
-
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const logger = getService('log');
@@ -31,12 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const dataViewApi = getService('dataViewApi');
+  const svlUserManager = getService('svlUserManager');
 
-  const fetchSloSummaryPipeline = async (
-    client: ElasticsearchClient,
-    sloId: string,
-    sloRevision: number
-  ) => {
+  const fetchSloSummaryPipeline = async (sloId: string, sloRevision: number) => {
     try {
       return await esClient.ingest.getPipeline({
         id: getSLOSummaryPipelineId(sloId, sloRevision),
@@ -55,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
     let sloId: string;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
       await sloApi.deleteAllSLOs();
@@ -70,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
@@ -79,34 +78,38 @@ export default function ({ getService }: FtrProviderContext) {
       await sloApi.deleteAllSLOs();
       await esDeleteAllIndices([infraDataIndex]);
       await cleanup({ esClient, logger });
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
       it('deletes the SLO definition, transforms, ingest pipeline and data', async () => {
-        const createdSlo = await sloApi.create({
-          name: 'my custom name',
-          description: 'my custom description',
-          indicator: {
-            type: 'sli.kql.custom',
-            params: {
-              index: infraDataIndex,
-              good: 'system.cpu.total.norm.pct > 1',
-              total: 'system.cpu.total.norm.pct: *',
-              timestampField: '@timestamp',
+        const createdSlo = await sloApi.create(
+          {
+            name: 'my custom name',
+            description: 'my custom description',
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: infraDataIndex,
+                good: 'system.cpu.total.norm.pct > 1',
+                total: 'system.cpu.total.norm.pct: *',
+                timestampField: '@timestamp',
+              },
             },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            budgetingMethod: 'occurrences',
+            objective: {
+              target: 0.999,
+            },
+            groupBy: ALL_VALUE,
           },
-          timeWindow: {
-            duration: '7d',
-            type: 'rolling',
-          },
-          budgetingMethod: 'occurrences',
-          objective: {
-            target: 0.999,
-          },
-          groupBy: ALL_VALUE,
-        });
+          roleAuthc
+        );
         sloId = createdSlo.id;
-        await sloApi.waitForSloCreated({ sloId });
+        await sloApi.waitForSloCreated({ sloId, roleAuthc });
 
         // Saved Object
         const savedObject = await kibanaServer.savedObjects.find({
@@ -123,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.waitForTransformToExist(sloSummaryTransformId);
 
         // Ingest pipeline
-        const pipelineResponse = await fetchSloSummaryPipeline(esClient, sloId, sloRevision);
+        const pipelineResponse = await fetchSloSummaryPipeline(sloId, sloRevision);
         expect(pipelineResponse[getSLOSummaryPipelineId(sloId, sloRevision)]).not.to.be(undefined);
 
         // RollUp and Summary data
@@ -140,7 +143,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(sloSummaryData.hits.hits.length > 0).to.be(true);
 
         // Delete the SLO
-        const response = await sloApi.waitForSloToBeDeleted(sloId);
+        const response = await sloApi.waitForSloToBeDeleted({
+          sloId,
+          roleAuthc,
+        });
         expect(response.status).to.be(204);
 
         // Saved object definition

@@ -109,7 +109,10 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   /** This method assumes that one or more versions handlers are registered  */
   private getDefaultVersion(): undefined | ApiVersion {
-    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
+    return resolvers[this.router.defaultHandlerResolutionStrategy](
+      [...this.handlers.keys()],
+      this.options.access
+    );
   }
 
   private versionsToString(): string {

@@ -61,7 +61,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';

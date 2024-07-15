@@ -10,9 +10,9 @@ import { queue } from 'async';
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
 import {
-  addSignificantItemsAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+  addSignificantItems,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
@@ -46,7 +46,7 @@ type Candidate = FieldCandidate | TextFieldCandidate;
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -110,15 +110,17 @@ export const significantItemsHandlerFactory =
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
-          pValues = await fetchSignificantTermPValues(
-            client,
-            requestBody,
-            [fieldCandidate],
+          pValues = await fetchSignificantTermPValues({
+            esClient,
+            abortSignal,
             logger,
-            stateHandler.sampleProbability(),
-            responseStream.pushError,
-            abortSignal
-          );
+            emitError: responseStream.pushError,
+            arguments: {
+              ...requestBody,
+              fieldNames: [fieldCandidate],
+              sampleProbability: stateHandler.sampleProbability(),
+            },
+          });
         } catch (e) {
           if (!isRequestAbortedError(e)) {
             logger.error(
@@ -137,26 +139,28 @@ export const significantItemsHandlerFactory =
           });
           significantTerms.push(...pValues);
 
-          responseStream.push(addSignificantItemsAction(pValues));
+          responseStream.push(addSignificantItems(pValues));
 
           fieldValuePairsCount += pValues.length;
         }
       } else if (isTextFieldCandidate(payload)) {
         const { textFieldCandidate } = payload;
 
-        const significantCategoriesForField = await fetchSignificantCategories(
-          client,
-          requestBody,
-          [textFieldCandidate],
+        const significantCategoriesForField = await fetchSignificantCategories({
+          esClient,
           logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        );
+          emitError: responseStream.pushError,
+          abortSignal,
+          arguments: {
+            ...requestBody,
+            fieldNames: [textFieldCandidate],
+            sampleProbability: stateHandler.sampleProbability(),
+          },
+        });
 
         if (significantCategoriesForField.length > 0) {
           significantCategories.push(...significantCategoriesForField);
-          responseStream.push(addSignificantItemsAction(significantCategoriesForField));
+          responseStream.push(addSignificantItems(significantCategoriesForField));
           fieldValuePairsCount += significantCategoriesForField.length;
         }
       }
@@ -164,7 +168,7 @@ export const significantItemsHandlerFactory =
       stateHandler.loaded(loadingStep, false);
 
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(

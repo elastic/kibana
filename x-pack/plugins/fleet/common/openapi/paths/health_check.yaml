@@ -10,12 +10,14 @@ post:
           schema:
             type: object
             properties:
-              name:
-                type: string
               status:
                 type: string
+              id:
+                type: string
+                description: Fleet Server host id
               host:
                 type: string
+                deprecated: true
     '400':
       $ref: ../components/responses/error.yaml
   operationId: fleet-server-health-check
@@ -28,5 +30,10 @@ post:
         schema:
           type: object
           properties:
+            id:
+              type: string
             host:
               type: string
+              deprecated: true
+          required:
+            - id

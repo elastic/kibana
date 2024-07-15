@@ -9,6 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -199,11 +200,25 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   protected getResponseErrorMessage(
-    error: AxiosError<{ errors: [{ message: string; code: number }] }>
+    error: AxiosError<{ errors: Array<{ message: string; code: number }> }>
   ): string {
     const errorData = error.response?.data?.errors?.[0];
     if (errorData) {
       return errorData.message;
+    }
+
+    const cause: NodeSystemError = isAggregateError(error.cause)
+      ? error.cause.errors[0]
+      : error.cause;
+    if (cause) {
+      // ENOTFOUND is the error code for when the host is unreachable eg. api.crowdstrike.com111
+      if (cause.code === 'ENOTFOUND') {
+        return `URL not found: ${cause.hostname}`;
+      }
+      // ECONNREFUSED is the error code for when the host is unreachable eg. http://MacBook-Pro-Tomasz.local:55555
+      if (cause.code === 'ECONNREFUSED') {
+        return `Connection Refused: ${cause.address}:${cause.port}`;
+      }
     }
 
     if (!error.response?.status) {

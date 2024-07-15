@@ -52,10 +52,10 @@ const Component = (props) => (
 const initTestBed = registerTestBed(Component, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
-  it('should render empty prompt when loading is complete and there are no jobs', () => {
+  it('should render deprecated prompt when loading is complete and there are no rollup jobs', () => {
     const { exists } = initTestBed();
 
-    expect(exists('jobListEmptyPrompt')).toBeTruthy();
+    expect(exists('jobListDeprecatedPrompt')).toBeTruthy();
   });
 
   it('should display a loading message when loading the jobs', () => {

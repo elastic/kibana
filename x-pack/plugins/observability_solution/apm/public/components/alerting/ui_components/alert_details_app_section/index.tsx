@@ -74,37 +74,6 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationThreshold),
       },
-      {
-        label: (
-          <FormattedMessage
-            id="xpack.apm.pages.alertDetails.alertSummary.serviceEnv"
-            defaultMessage="Service environment"
-          />
-        ),
-        value: environment,
-      },
-      {
-        label: (
-          <FormattedMessage
-            id="xpack.apm.pages.alertDetails.alertSummary.serviceName"
-            defaultMessage="Service name"
-          />
-        ),
-        value: serviceName,
-      },
-      ...(transactionName
-        ? [
-            {
-              label: (
-                <FormattedMessage
-                  id="xpack.apm.pages.alertDetails.alertSummary.transactionName"
-                  defaultMessage="Transaction name"
-                />
-              ),
-              value: transactionName,
-            },
-          ]
-        : []),
     ];
     setAlertSummaryFields(alertSummaryFields);
   }, [

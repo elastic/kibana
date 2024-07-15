@@ -20,8 +20,8 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -36,8 +36,8 @@ jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../../common/containers/sourcerer');
-jest.mock('../../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 

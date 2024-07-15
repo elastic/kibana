@@ -6,11 +6,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 
 const EMPTY_TIMELINE_FLYOUT_SEARCH_PARAMS = '()';
@@ -22,12 +19,6 @@ interface UseUnifiedTableExpandableFlyoutArgs {
 export const useUnifiedTableExpandableFlyout = ({
   onClose,
 }: UseUnifiedTableExpandableFlyoutArgs) => {
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
-
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
-
   const location = useLocation();
 
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
@@ -39,7 +30,7 @@ export const useUnifiedTableExpandableFlyout = ({
 
   const isFlyoutOpen = useMemo(() => {
     /**
-     *  Currently, if new expanable flyout is closed, there is not way for
+     *  Currently, if new expandable flyout is closed, there is no way for
      *  consumer to trigger an effect `onClose` of flyout. So, we are using
      *  this hack to know if flyout is open or not.
      *
@@ -77,6 +68,5 @@ export const useUnifiedTableExpandableFlyout = ({
     isTimelineExpandableFlyoutOpen,
     openFlyout,
     closeFlyout: closeFlyoutWithEffect,
-    isTimelineExpandableFlyoutEnabled: expandableTimelineFlyoutEnabled && isSecurityFlyoutEnabled,
   };
 };

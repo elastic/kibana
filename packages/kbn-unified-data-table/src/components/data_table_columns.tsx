@@ -27,6 +27,24 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
 
+const getColumnDisplayName = (
+  columnName: string,
+  dataViewFieldDisplayName: string | undefined,
+  columnDisplay: string | undefined
+) => {
+  if (columnDisplay) {
+    return columnDisplay;
+  }
+
+  if (columnName === '_source') {
+    return i18n.translate('unifiedDataTable.grid.documentHeader', {
+      defaultMessage: 'Document',
+    });
+  }
+
+  return dataViewFieldDisplayName || columnName;
+};
+
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 
@@ -97,6 +115,7 @@ function buildEuiGridColumn({
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
+  columnDisplay,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -117,6 +136,7 @@ function buildEuiGridColumn({
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  columnDisplay?: string;
 }) {
   const dataViewField = !isPlainRecord
     ? dataView.getFieldByName(columnName)
@@ -133,12 +153,12 @@ function buildEuiGridColumn({
     editField &&
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
-  const columnDisplayName =
-    columnName === '_source'
-      ? i18n.translate('unifiedDataTable.grid.documentHeader', {
-          defaultMessage: 'Document',
-        })
-      : dataViewField?.displayName || columnName;
+
+  const columnDisplayName = getColumnDisplayName(
+    columnName,
+    dataViewField?.displayName,
+    columnDisplay
+  );
 
   let cellActions: EuiDataGridColumnCellAction[];
 
@@ -212,6 +232,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
+        columnLabel={columnDisplay}
       />
     );
     if (numberOfColumns > 1) {
@@ -306,6 +327,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
+      columnDisplay: settings?.columns?.[column]?.display,
     })
   );
 }

@@ -61,11 +61,7 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import {
-  getDetails,
-  assertDetailsNotExist,
-  waitForTheRuleToBeExecuted,
-} from '../../../../tasks/rule_details';
+import { getDetails, assertDetailsNotExist } from '../../../../tasks/rule_details';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
@@ -147,7 +143,6 @@ describe(
           .should('have.text', `${humanizedDuration}`);
       });
 
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));

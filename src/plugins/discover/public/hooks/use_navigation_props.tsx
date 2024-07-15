@@ -15,8 +15,8 @@ import { useDiscoverServices } from './use_discover_services';
 
 export interface UseNavigationProps {
   dataView: DataView;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   savedSearchId?: string;
   // provided by embeddable only
@@ -95,6 +95,9 @@ export const useNavigationProps = ({
   );
 
   useEffect(() => {
+    if (!rowIndex || !rowId) {
+      return;
+    }
     const dataViewId = typeof index === 'object' ? index.id : index;
     services.locator
       .getUrl({ dataViewId, ...buildParams() })
@@ -113,6 +116,9 @@ export const useNavigationProps = ({
   ]);
 
   useEffect(() => {
+    if (!rowIndex || !rowId) {
+      return;
+    }
     const params = buildParams();
     const dataViewId = typeof index === 'object' ? index.id : index;
     services.locator
@@ -139,7 +145,7 @@ export const useNavigationProps = ({
 
   const onOpenSingleDoc: MouseEventHandler = useCallback(
     (event) => {
-      if (isModifiedEvent(event)) {
+      if (isModifiedEvent(event) || !rowIndex || !rowId) {
         return;
       }
       event.preventDefault();
@@ -155,11 +161,11 @@ export const useNavigationProps = ({
 
   const onOpenContextView: MouseEventHandler = useCallback(
     (event) => {
-      const params = buildParams();
-      if (isModifiedEvent(event)) {
+      if (isModifiedEvent(event) || !rowId) {
         return;
       }
       event.preventDefault();
+      const params = buildParams();
       const dataViewId = typeof index === 'object' ? index.id : index;
       services.locator.getUrl({ dataViewId, ...params }).then((referrer) =>
         services.contextLocator.navigate({

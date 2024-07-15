@@ -163,7 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        `Rule '{{rule.name}}' is active for group '{{context.group}}':
+        `Rule {{rule.name}} is active for group {{context.group}}:
 
 - Value: {{context.value}}
 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}

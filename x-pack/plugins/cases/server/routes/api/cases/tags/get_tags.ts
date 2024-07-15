@@ -15,7 +15,7 @@ export const getTagsRoute = createCasesRoute({
   path: CASE_TAGS_URL,
   routerOptions: {
     access: 'public',
-    description: `Get case tags`,
+    summary: `Get case tags`,
   },
   handler: async ({ context, request, response }) => {
     try {

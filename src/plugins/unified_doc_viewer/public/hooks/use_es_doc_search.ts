@@ -26,7 +26,7 @@ export interface EsDocSearchProps {
   /**
    * Index in ES to query
    */
-  index: string;
+  index: string | undefined;
   /**
    * DataView entity
    */
@@ -57,6 +57,10 @@ export function useEsDocSearch({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const requestData = useCallback(async () => {
+    if (!index) {
+      return;
+    }
+
     const singleDocFetchingStartTime = window.performance.now();
     try {
       const result = await lastValueFrom(
@@ -140,8 +144,7 @@ export function buildSearchBody(
     return undefined;
   }
   if (useNewFieldsApi) {
-    // @ts-expect-error
-    request.body.fields = [{ field: '*', include_unmapped: 'true' }];
+    request.body.fields = [{ field: '*', include_unmapped: true }];
     request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
     if (requestAllFields) {
       request.body._source = true;

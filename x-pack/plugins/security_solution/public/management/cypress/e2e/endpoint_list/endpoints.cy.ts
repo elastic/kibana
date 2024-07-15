@@ -41,7 +41,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
         return enableAllPolicyProtections(policy.id).then(() => {
           // Create and enroll a new Endpoint host
-          return createEndpointHost(policy.policy_id).then((host) => {
+          return createEndpointHost(policy.policy_ids[0]).then((host) => {
             createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });
@@ -125,7 +125,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get<number>('@originalPolicyRevision').then((originalRevision: number) => {
       const revisionRegex = new RegExp(`^rev\\. ${originalRevision + 1}$`);
-      cy.get('@endpointRow').findByTestSubj('policyListRevNo').contains(revisionRegex);
+      cy.get('@endpointRow').findByTestSubj('policyNameCellLink-revision').contains(revisionRegex);
     });
   });
 

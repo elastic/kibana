@@ -26,7 +26,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -117,8 +117,7 @@ export function LensEditConfigurationFlyout({
         // there are cases where a query can return a big amount of columns
         // at this case we don't suggest all columns in a table but the first
         // MAX_NUM_OF_COLUMNS
-        const columns = Object.keys(table.rows?.[0]) ?? [];
-        setSuggestsLimitedColumns(columns.length >= MAX_NUM_OF_COLUMNS);
+        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
         layers.forEach((layer) => {
           activeData[layer] = table;
         });
@@ -434,6 +433,12 @@ export function LensEditConfigurationFlyout({
                 flex: 1;
               }
             }
+            .lnsIndexPatternDimensionEditor-advancedOptions {
+              .euiAccordion__childWrapper {
+                flex: none;
+                overflow: hidden !important;
+              }
+            }
           `}
           direction="column"
           gutterSize="none"
@@ -477,18 +482,13 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                .euiAccordion__childWrapper {
-                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
-                }
+              .euiAccordion__childWrapper {
+                flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
+              padding: 0 ${euiThemeVars.euiSize};
             `}
           >
             <EuiAccordion
-              css={css`
-                .euiAccordion__triggerWrapper {
-                  padding: 0 ${euiThemeVars.euiSize};
-                }
-              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle

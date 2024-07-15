@@ -10,7 +10,7 @@ import type { PackagePolicy, OnSaveQueryParamKeys } from '../../../../types';
 
 import { appendOnSaveQueryParamsToPath } from '.';
 
-const mockPolicy: PackagePolicy = { policy_id: '1234' } as PackagePolicy;
+const mockPolicy: PackagePolicy = { policy_id: '1234', policy_ids: ['1234'] } as PackagePolicy;
 
 function parseHref(href: string) {
   const [basePath, queryString] = href.split('?');

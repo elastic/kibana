@@ -142,10 +142,9 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             onClick={[MockFunction]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="New event"
               id="xpack.ml.calendarsEdit.eventsTable.newEventButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
           <EuiButton
@@ -155,10 +154,9 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             onClick={[MockFunction]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Import events"
               id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
         ],

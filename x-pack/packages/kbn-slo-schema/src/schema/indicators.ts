@@ -25,6 +25,7 @@ const filtersSchema = t.array(
       isMultiIndex: t.boolean,
       type: t.string,
       key: t.string,
+      field: t.string,
       params: t.any,
       value: t.string,
     }),
@@ -53,6 +54,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -70,6 +72,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -86,6 +89,7 @@ const kqlCustomIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -163,6 +167,7 @@ const timesliceMetricIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -204,6 +209,7 @@ const metricCustomIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -249,6 +255,7 @@ const histogramIndicatorSchema = t.type({
     }),
     t.partial({
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
@@ -269,6 +276,7 @@ const syntheticsAvailabilityIndicatorSchema = t.type({
       tags: t.array(syntheticsParamSchema),
       projects: t.array(syntheticsParamSchema),
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });

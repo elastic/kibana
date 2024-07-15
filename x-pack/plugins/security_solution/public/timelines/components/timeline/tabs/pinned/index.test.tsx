@@ -18,8 +18,8 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
@@ -38,7 +38,7 @@ jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../sourcerer/containers');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');

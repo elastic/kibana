@@ -12,11 +12,11 @@ import { InputsModelId } from '../../../../../../common/store/inputs/constants';
 import { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../../../common/components/super_date_picker';
-import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
 import { TimelineDatePickerLock } from '../../../date_picker_lock';
 import type { TimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { EqlQueryBarTimeline } from '../../../query_bar/eql';
-import { Sourcerer } from '../../../../../../common/components/sourcerer';
+import { Sourcerer } from '../../../../../../sourcerer/components';
 import { StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
 
 export type EqlTabHeaderProps = {

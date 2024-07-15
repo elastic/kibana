@@ -91,7 +91,7 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
           error: i18n.translate(
             'xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesMessage',
             {
-              defaultMessage: `The repository type '{type}' is not supported.`,
+              defaultMessage: `The repository type ''{type}'' is not supported.`,
               values: {
                 type: repositoryType,
               },

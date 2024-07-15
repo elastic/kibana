@@ -14,6 +14,8 @@ servers:
 paths:
   /internal/risk_score/preview:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Preview the calculation of Risk Scores
       description: Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
       requestBody:

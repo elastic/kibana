@@ -49,13 +49,11 @@ export const putSettingsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
-      user: user || undefined,
-    });
+    await agentPolicyService.bumpAllAgentPolicies(esClient, { user });
     const body = {
       item: settings,
     };
@@ -78,6 +76,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: `Get settings`,
     })
     .addVersion(
       {
@@ -92,6 +91,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: `Update settings`,
     })
     .addVersion(
       {
@@ -106,6 +106,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.addAgents || authz.fleet.addFleetServers;
       },
+      description: `Get enrollment settings`,
     })
     .addVersion(
       {

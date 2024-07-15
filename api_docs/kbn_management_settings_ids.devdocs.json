@@ -1404,6 +1404,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
+        "description": [],
+        "signature": [
+          "\"observability:logSources\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
         "type": "string",
         "tags": [],
@@ -1653,23 +1668,6 @@
         "description": [],
         "signature": [
           "\"securitySolution:enableCcsWarning\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
-        "description": [
-          "This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout"
-        ],
-        "signature": [
-          "\"securitySolution:enableExpandableFlyout\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

@@ -1,6 +1,7 @@
 get:
-  summary: Retrieve a single Kibana saved object by identifier.
+  summary: Get a saved object
   operationId: getSavedObject
+  description: Retrieve a single Kibana saved object by identifier.
   deprecated: true
   tags:
     - saved objects
@@ -22,8 +23,9 @@ get:
             $ref: '../components/schemas/400_response.yaml'
 
 post:
-  summary: Create Kibana saved objects.
+  summary: Create a saved object
   operationId: createSavedObjectId
+  description: Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
   deprecated: true
   tags:
     - saved objects
@@ -66,8 +68,9 @@ post:
             type: object
 
 put:
-  summary: Update the attributes for Kibana saved objects.
+  summary: Update a saved object
   operationId: updateSavedObject
+  description: Update the attributes for Kibana saved objects.
   deprecated: true
   tags:
     - saved objects

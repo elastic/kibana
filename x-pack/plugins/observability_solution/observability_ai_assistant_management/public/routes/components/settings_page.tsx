@@ -15,13 +15,17 @@ import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/u
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 import type { TabsRt } from '../config';
 import { SearchConnectorTab } from './search_connector_tab';
+import { useKibana } from '../../hooks/use_kibana';
+
 export function SettingsPage() {
+  const { setBreadcrumbs } = useAppContext();
   const {
-    application: { navigateToApp },
-    serverless,
-    enterpriseSearch,
-    setBreadcrumbs,
-  } = useAppContext();
+    services: {
+      application: { navigateToApp },
+      serverless,
+      enterpriseSearch,
+    },
+  } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
 

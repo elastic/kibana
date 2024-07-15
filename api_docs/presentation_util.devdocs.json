@@ -666,7 +666,7 @@
         "label": "FloatingActions",
         "description": [],
         "signature": [
-          "({ children, viewMode, isEnabled, embeddable, className, disabledActions, }: React.PropsWithChildren<",
+          "({ children, viewMode, isEnabled, api, className, disabledActions, }: React.PropsWithChildren<",
           "FloatingActionsProps",
           ">) => JSX.Element"
         ],
@@ -679,7 +679,7 @@
             "id": "def-public.FloatingActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  viewMode,\n  isEnabled,\n  embeddable,\n  className = '',\n  disabledActions,\n}",
+            "label": "{\n  children,\n  viewMode,\n  isEnabled,\n  api,\n  className = '',\n  disabledActions,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

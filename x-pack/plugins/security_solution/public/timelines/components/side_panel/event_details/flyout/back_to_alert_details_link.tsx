@@ -18,7 +18,7 @@ import React from 'react';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
-} from '../../../../../detections/components/host_isolation/translations';
+} from '../../../../../common/components/endpoint/host_isolation';
 import { ALERT_DETAILS, TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_DESCRIPTION } from '../translations';
 
 const BackToAlertDetailsLinkComponent = ({

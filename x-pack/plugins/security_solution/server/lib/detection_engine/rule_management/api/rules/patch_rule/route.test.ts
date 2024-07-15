@@ -20,6 +20,11 @@ import {
 
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
 
+import {
+  getRulesSchemaMock,
+  getRulesMlSchemaMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+
 import { patchRuleRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
@@ -34,7 +39,7 @@ describe('Patch rule route', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.rulesManagementClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.patchRule.mockResolvedValue(getRulesSchemaMock());
 
     patchRuleRoute(server.router);
   });
@@ -76,7 +81,7 @@ describe('Patch rule route', () => {
     });
 
     test('catches error if update throws error', async () => {
-      clients.rulesManagementClient.patchRule.mockImplementation(async () => {
+      clients.detectionRulesClient.patchRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
@@ -99,14 +104,11 @@ describe('Patch rule route', () => {
 
       const anomalyThreshold = 4;
       const machineLearningJobId = 'some_job_id';
-      clients.rulesManagementClient.patchRule.mockResolvedValueOnce(
-        getRuleMock(
-          getMlRuleParams({
-            anomalyThreshold,
-            machineLearningJobId: [machineLearningJobId],
-          })
-        )
-      );
+      clients.detectionRulesClient.patchRule.mockResolvedValueOnce({
+        ...getRulesMlSchemaMock(),
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: [machineLearningJobId],
+      });
 
       const request = requestMock.create({
         method: 'patch',
@@ -125,7 +127,7 @@ describe('Patch rule route', () => {
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {
-      clients.rulesManagementClient.patchRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -144,7 +146,7 @@ describe('Patch rule route', () => {
     });
 
     it('rejects patching an ML rule if mlAuthz fails', async () => {
-      clients.rulesManagementClient.patchRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 

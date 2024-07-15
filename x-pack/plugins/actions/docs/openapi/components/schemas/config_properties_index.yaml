@@ -7,9 +7,8 @@ properties:
   executionTimeField:
     description: A field that indicates when the document was indexed.
     default: null
-    type:
-      - "string"
-      - "null"
+    type: string
+    nullable: true
   index:
     description: The Elasticsearch index to be written to.
     type: string

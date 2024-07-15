@@ -1,12 +1,31 @@
-MV_FIRST
+## MV_FIRST
 
-Syntax
-Parameters
-field
-Multivalue expression.
-DescriptionConverts a multivalued expression into a single valued column containing the first value. This is most useful when reading from a function that emits multivalued columns in a known order like SPLIT.  The order that multivalued fields are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum value use MV_MIN instead of MV_FIRST. MV_MIN has optimizations for sorted values so there isn’t a performance benefit to MV_FIRST.Supported types
-Example
+The `MV_FIRST` function in ES|QL is used to convert a multivalued expression into a single valued column containing the first value. This function is most useful when reading from a function that emits multivalued columns in a known order like `SPLIT`. 
+
+It's important to note that the order that multivalued fields are read from underlying storage is not guaranteed. It is frequently ascending, but this should not be relied upon. If you need the minimum value, use `MV_MIN` instead of `MV_FIRST`. `MV_MIN` has optimizations for sorted values so there isn’t a performance benefit to `MV_FIRST`.
+
+### Syntax:
+
+`MV_FIRST(field)`
+
+#### Parameters:
+
+- `field`: Multivalue expression.
+
+### Examples:
+
+Here are a couple of examples of how you can use the `MV_FIRST` function in your ES|QL queries:
+
 ```esql
 ROW a="foo;bar;baz"
 | EVAL first_a = MV_FIRST(SPLIT(a, ";"))
 ```
+
+In this example, the `SPLIT` function is used to split the string "foo;bar;baz" into a multivalued field. The `MV_FIRST` function is then used to select the first value from this multivalued field.
+
+```esql
+ROW numbers=[10, 20, 30, 40, 50]
+| EVAL first_num = MV_FIRST(numbers)
+```
+
+In this second example, the `MV_FIRST` function is used to select the first value from the multivalued field "numbers".

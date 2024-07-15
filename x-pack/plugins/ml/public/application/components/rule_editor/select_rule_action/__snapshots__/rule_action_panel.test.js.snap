@@ -16,10 +16,9 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
       Array [
         Object {
           "description": "skip result when actual is less than 1",
-          "title": <FormattedMessage
+          "title": <Memo(MemoizedFormattedMessage)
             defaultMessage="Rule"
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
-            values={Object {}}
           />,
         },
         Object {
@@ -46,20 +45,18 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
             conditionValue={1}
             updateConditionValue={[Function]}
           />,
-          "title": <FormattedMessage
+          "title": <Memo(MemoizedFormattedMessage)
             defaultMessage="Actions"
             id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
-            values={Object {}}
           />,
         },
         Object {
           "description": <EuiLink
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Edit rule"
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
-              values={Object {}}
             />
           </EuiLink>,
           "title": "",
@@ -94,10 +91,9 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
       Array [
         Object {
           "description": "skip model update when airline is not in eu-airlines",
-          "title": <FormattedMessage
+          "title": <Memo(MemoizedFormattedMessage)
             defaultMessage="Rule"
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
-            values={Object {}}
           />,
         },
         Object {
@@ -106,20 +102,18 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
             fieldValue="AAL"
             filterId="eu-airlines"
           />,
-          "title": <FormattedMessage
+          "title": <Memo(MemoizedFormattedMessage)
             defaultMessage="Actions"
             id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
-            values={Object {}}
           />,
         },
         Object {
           "description": <EuiLink
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Edit rule"
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
-              values={Object {}}
             />
           </EuiLink>,
           "title": "",
@@ -154,26 +148,23 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
       Array [
         Object {
           "description": "skip model update when airline is not in eu-airlines",
-          "title": <FormattedMessage
+          "title": <Memo(MemoizedFormattedMessage)
             defaultMessage="Rule"
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
-            values={Object {}}
           />,
         },
         Object {
           "description": <EuiLink
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Edit rule"
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
-              values={Object {}}
             />
           </EuiLink>,
-          "title": <FormattedMessage
+          "title": <Memo(MemoizedFormattedMessage)
             defaultMessage="Actions"
             id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
-            values={Object {}}
           />,
         },
         Object {
