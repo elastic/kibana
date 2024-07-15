@@ -15,7 +15,7 @@ paths:
         - name: list_id
           in: query
           required: true
-          description: List's ide
+          description: List's id
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
         - name: page

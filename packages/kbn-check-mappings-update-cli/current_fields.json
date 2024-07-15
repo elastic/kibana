@@ -480,6 +480,7 @@
     "status",
     "uuid"
   ],
+  "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"
