@@ -51,8 +51,10 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
     // Resource enabled state
     const isElserEnabled = kbStatus?.elser_exists ?? false;
-    const isKnowledgeBaseSetup = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
     const isESQLEnabled = kbStatus?.esql_exists ?? false;
+    const isKnowledgeBaseSetup =
+      (isElserEnabled && isESQLEnabled && kbStatus?.index_exists && kbStatus?.pipeline_exists) ??
+      false;
     const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
 
     // Resource availability state
