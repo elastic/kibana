@@ -84,7 +84,7 @@ describe('KibanaDiscoveryService', () => {
         BACKGROUND_TASK_NODE_SO_NAME,
         currentNode,
         { id: 'current-node-id', last_seen: '2024-08-10T10:00:00.000Z' },
-        { upsert: { id: 'current-node-id', last_seen: '2024-08-10T10:00:00.000Z' }, refresh: true }
+        { upsert: { id: 'current-node-id', last_seen: '2024-08-10T10:00:00.000Z' }, refresh: false }
       );
       expect(savedObjectsRepository.find).not.toHaveBeenCalled();
       expect(savedObjectsRepository.bulkDelete).not.toHaveBeenCalled();
@@ -261,7 +261,7 @@ describe('KibanaDiscoveryService', () => {
 
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
-        "Kibana Discovery Service - Cleanup - couldn't be started and will be retried in 1m. Error: foo"
+        "Kibana Discovery Service - Cleanup - couldn't be started and will be retried in 60000ms. Error: foo"
       );
       expect(logger.info).not.toHaveBeenCalled();
       expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -355,9 +355,7 @@ describe('KibanaDiscoveryService', () => {
 
       await kibanaDiscoveryService.deleteCurrentNode();
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'Deleting current node has been failed. error: bar'
-      );
+      expect(logger.error).toHaveBeenCalledWith('Deleting current node has failed. error: bar');
     });
   });
 });
