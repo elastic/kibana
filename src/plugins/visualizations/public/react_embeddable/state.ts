@@ -163,7 +163,6 @@ export const serializeState = ({
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
 }) => {
-  console.error('SERIALIZE STATE', id);
   const titlesWithDefaults = {
     title: '',
     description: '',

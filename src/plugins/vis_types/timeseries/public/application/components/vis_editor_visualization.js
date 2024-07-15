@@ -218,8 +218,6 @@ class VisEditorVisualizationUI extends Component {
                 getVis: [, setGetVis],
               } = this.props.embeddableApiHandler;
 
-              console.log('SERIALIZE STATE FN', api.serializeState);
-
               setSerializeState(() => api.serializeState);
               setSnapshotState(() => api.snapshotRuntimeState);
               setGetVis(() => api.getVis);

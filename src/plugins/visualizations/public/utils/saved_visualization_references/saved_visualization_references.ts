@@ -80,9 +80,13 @@ export function deserializeReferences(
   const updatedReferences: Reference[] = [...references];
   let deserializedSearchSource = searchSource;
   if (searchSource) {
+    // TSVB uses legacy visualization state, which doesn't serialize search source properly
+    if (!isSerializedSearchSource(searchSource)) {
+      deserializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
+    }
     try {
       deserializedSearchSource = injectSearchSourceReferences(
-        searchSource as any,
+        deserializedSearchSource as any,
         updatedReferences
       );
     } catch (e) {
