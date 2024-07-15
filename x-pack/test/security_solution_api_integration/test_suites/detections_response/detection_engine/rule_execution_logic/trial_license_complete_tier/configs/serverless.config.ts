@@ -20,7 +20,6 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'bulkCustomHighlightedFieldsEnabled',
       'alertSuppressionForMachineLearningRuleEnabled',
-      'alertSuppressionForEsqlRuleEnabled',
     ])}`,
   ],
 });
