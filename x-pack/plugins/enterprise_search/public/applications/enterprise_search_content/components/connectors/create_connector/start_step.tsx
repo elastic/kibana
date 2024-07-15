@@ -40,11 +40,12 @@ import dropbox from './assets/dropbox.svg';
 import { ConnectorDescriptionPopover } from './connector_description_popover';
 
 interface StartStepProps {
-  onRadioButtonChange: (selfManaged: boolean) => void;
+  setSelfManaged: Function;
   title: string;
+  selfManaged: boolean;
 }
 
-export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange, title }) => {
+export const StartStep: React.FC<StartStepProps> = ({ setSelfManaged, title, selfManaged }) => {
   const { euiTheme } = useEuiTheme();
 
   const connectorsData = [
@@ -138,10 +139,12 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange, title
 
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
-  const [radioIdSelected, setRadioIdSelected] = useState(elasticManagedRadioButtonId);
+  const [radioIdSelected, setRadioIdSelected] = useState(
+    selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId
+  );
 
   useEffect(() => {
-    onRadioButtonChange(radioIdSelected === selfManagedRadioButtonId ? true : false);
+    setSelfManaged(radioIdSelected === selfManagedRadioButtonId ? true : false);
   }, [radioIdSelected]);
 
   return (
@@ -194,7 +197,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange, title
                 <EuiRadio
                   id={elasticManagedRadioButtonId}
                   label="Elastic managed"
-                  checked={radioIdSelected === elasticManagedRadioButtonId}
+                  checked={!selfManaged}
                   onChange={() => setRadioIdSelected(elasticManagedRadioButtonId)}
                   name="setUp"
                 />
@@ -207,7 +210,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onRadioButtonChange, title
                 <EuiRadio
                   id={selfManagedRadioButtonId}
                   label="Self managed"
-                  checked={radioIdSelected === selfManagedRadioButtonId}
+                  checked={selfManaged}
                   onChange={() => setRadioIdSelected(selfManagedRadioButtonId)}
                   name="setUp"
                 />

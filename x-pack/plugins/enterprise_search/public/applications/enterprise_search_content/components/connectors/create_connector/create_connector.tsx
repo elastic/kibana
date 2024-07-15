@@ -85,6 +85,7 @@ export const CreateConnector: React.FC = () => {
     | undefined
   >('incomplete');
 
+
   interface CustomEuiStepInterface extends EuiStepInterface {
     content: JSX.Element;
   }
@@ -93,13 +94,13 @@ export const CreateConnector: React.FC = () => {
       title: 'Start',
       children: <EuiSpacer size="xs" />,
       status: startStepStatus,
-      content: <StartStep title="Start" onRadioButtonChange={setSelfManaged} />,
+      content: <StartStep title="Start" setSelfManaged={setSelfManaged} selfManaged={selfManaged}  />,
     },
     {
       title: 'Deployment',
       children: '',
       status: deploymentStepStatus,
-      content: <DeploymentStep title="Configuration" />,
+      content: <DeploymentStep title="Deployment" />,
     },
     {
       title: 'Configuration',
@@ -120,7 +121,7 @@ export const CreateConnector: React.FC = () => {
       title: 'Start',
       children: <EuiSpacer size="xs" />,
       status: startStepStatus,
-      content: <StartStep title="Start" onRadioButtonChange={setSelfManaged} />,
+      content: <StartStep title="Start" setSelfManaged={setSelfManaged} selfManaged={selfManaged} />,
     },
     {
       title: 'Configuration',
@@ -247,6 +248,7 @@ export const CreateConnector: React.FC = () => {
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
+              min-height: 600px;
             `}
           >
             <EuiFlexGroup>
