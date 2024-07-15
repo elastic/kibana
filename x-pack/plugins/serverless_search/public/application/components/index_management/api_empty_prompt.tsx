@@ -40,7 +40,7 @@ import { languageDefinitions } from '../languages/languages';
 import { LanguageGrid } from '../languages/language_grid';
 
 import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
-import { DEFAULT_INGESTION_PIPELINE } from '../../constants';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../../common';
 
 import {
   API_KEY_PLACEHOLDER,
