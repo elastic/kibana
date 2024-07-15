@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
       if (esVersion.matchRange('>=8.15')) {
         // Remove `_type` field from expected fields array.
         expectedFieldsArr.splice(expectedFieldsArr.indexOf('_type'), 1);
-        // Add `_ignored_source` and `_nested_path` fields to expected fields arra.
+        // Add `_ignored_source` and `_nested_path` fields to expected fields array.
         // https://github.com/elastic/elasticsearch/pull/107567
         expectedFieldsArr.push('_ignored_source', '_nested_path');
         expectedFieldsArr.sort();
