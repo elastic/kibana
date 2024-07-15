@@ -10,11 +10,19 @@ import { UseFormReturn } from 'react-hook-form/dist/types';
 import { useUsageTracker } from './use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../types';
 import { useIndicesFields } from './use_indices_fields';
-import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+  IndexFields,
+} from '../utils/create_query';
 import { AnalyticsEvents } from '../analytics/constants';
 
-const mergeDefaultAndCurrentValues = (defaultFields, currentFields) =>
-  Object.keys(defaultFields).reduce((result, key) => {
+const mergeDefaultAndCurrentValues = (
+  defaultFields: IndexFields,
+  currentFields: IndexFields
+): IndexFields =>
+  Object.keys(defaultFields).reduce<IndexFields>((result, key) => {
     result[key] = currentFields?.[key] ?? defaultFields[key];
 
     return result;
