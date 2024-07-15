@@ -135,8 +135,8 @@ export const getSavedObjectTypes = (
       mappings: {
         dynamic: false,
         properties: {
-          allowed_namespace_prefixes: { enabled: false },
-          managed_by: { type: 'keyword', index: false },
+          // allowed_namespace_prefixes: { enabled: false },
+          // managed_by: { type: 'keyword', index: false },
         },
       },
     },
