@@ -21,7 +21,6 @@ export const AGENT_NODE = 'agent';
 
 export const AGENT_NODE_TAG = 'agent_run';
 
-const NO_HISTORY = '[No existing knowledge history]';
 /**
  * Node to run the agent
  *
@@ -40,18 +39,10 @@ export const runAgent = async ({
 }: RunAgentParams) => {
   logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const knowledgeHistory = await dataClients?.kbDataClient?.getKnowledgeBaseDocuments({
-    kbResource: 'user',
-    required: true,
-    query: '',
-  });
-
   const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-      // Re-enable once knowledge_history is available post 8.15
-      // knowledge_history: JSON.stringify(knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY),
     },
     config
   );
