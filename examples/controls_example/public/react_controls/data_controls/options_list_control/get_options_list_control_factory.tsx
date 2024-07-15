@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter } from 'rxjs';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
@@ -16,9 +16,10 @@ import {
   OptionsListSuggestions,
 } from '@kbn/controls-plugin/common/options_list/types';
 import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
@@ -73,12 +74,19 @@ export const getOptionsListControlFactory = ({
       const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
       const excludeSelected$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
       const searchString$ = new BehaviorSubject<string>('');
+      const searchStringValid$ = new BehaviorSubject<boolean>(true);
       const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
+
+      /** Creation options state - cannot currently be changed after creation, but need subjects for comparators */
+      const placeholder = new BehaviorSubject<string | undefined>(initialState.placeholder);
+      const hideActionBar = new BehaviorSubject<boolean | undefined>(initialState.hideActionBar);
+      const hideExclude = new BehaviorSubject<boolean | undefined>(initialState.hideExclude);
+      const hideExists = new BehaviorSubject<boolean | undefined>(initialState.hideExists);
+      const hideSort = new BehaviorSubject<boolean | undefined>(initialState.hideSort);
 
       /** State that is reliant on fetching */
       const availableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(undefined);
       const invalidSelections$ = new BehaviorSubject<Set<string>>(new Set());
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
       const totalCardinality$ = new BehaviorSubject<number>(0);
 
       const dataControl = initializeDataControl<
@@ -104,20 +112,53 @@ export const getOptionsListControlFactory = ({
         singleSelect: singleSelect$,
         sort: sort$,
         searchString: searchString$,
+        searchStringValid: searchStringValid$,
         runPastTimeout: runPastTimeout$,
         requestSize: requestSize$,
       };
 
+      /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
-      const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
-      const dataLoadingSubscription = combineLatest([loadingSuggestions$, loadingHasNoResults$])
+      const dataLoadingSubscription = loadingSuggestions$
         .pipe(
-          debounceTime(100), // debounce set loading so that it doesn't flash as the user types
-          map((values) => values.some((value) => value))
+          debounceTime(100) // debounce set loading so that it doesn't flash as the user types
         )
         .subscribe((isLoading) => {
           dataControl.api.setDataLoading(isLoading);
         });
+
+      /** Fetch the allowExpensiveQuries setting to determine how suggestion fetching happens */
+      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
+      core.http
+        .get<{
+          allowExpensiveQueries: boolean;
+        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+          version: '1',
+        })
+        .catch(() => {
+          return { allowExpensiveQueries: true }; // default to true on error
+        })
+        .then((result) => {
+          allowExpensiveQueries$.next(result.allowExpensiveQueries);
+        });
+
+      /** Debounce the search string changes to reduce the number of fetch requests */
+      const debouncedSearchString = stateManager.searchString.pipe(debounceTime(100));
+
+      /** Validate the search string as the user types */
+      const validSearchStringSubscription = combineLatest([
+        debouncedSearchString,
+        dataControl.api.fieldSpec,
+        searchTechnique$,
+      ]).subscribe(([newSearchString, fieldSpec, searchTechnique]) => {
+        searchStringValid$.next(
+          isValidSearch({
+            searchString: newSearchString,
+            fieldType: fieldSpec?.type,
+            searchTechnique,
+          })
+        );
+      });
 
       /** Fetch the suggestions and perform validation */
       const fetchSubscription = fetchAndValidate$({
@@ -125,12 +166,16 @@ export const getOptionsListControlFactory = ({
         api: {
           loadingSuggestions$,
           dataViews: dataControl.api.dataViews,
+          fieldSpec: dataControl.api.fieldSpec,
           dataControlFetch$: controlGroupApi.dataControlFetch$,
+          allowExpensiveQueries$,
+          debouncedSearchString,
         },
         stateManager,
       }).subscribe((result) => {
         if (Object(result).hasOwnProperty('error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
+          return;
         }
         const successResponse = result as OptionsListSuccessResponse;
         availableOptions$.next(successResponse.suggestions);
@@ -138,12 +183,13 @@ export const getOptionsListControlFactory = ({
         invalidSelections$.next(new Set(successResponse.invalidSelections ?? []));
       });
 
-      // const selectedOptionsSubscription = selections$
-      //   .pipe(skip(1), debounceTime(100))
-      //   .subscribe((newSelections) => {
-      //     console.log('NEW SELECTIONS', newSelections);
-      //     selectedOptions$.next(new Set<string>(newSelections));
-      //   });
+      /** Remove all other selections if this control is single select */
+      const singleSelectSubscription = singleSelect$
+        .pipe(filter((singleSelect) => Boolean(singleSelect)))
+        .subscribe(() => {
+          const currentSelections = selections$.getValue() ?? [];
+          if (currentSelections.length > 1) selections$.next([currentSelections[0]]);
+        });
 
       const api = buildApi(
         {
@@ -173,6 +219,13 @@ export const getOptionsListControlFactory = ({
           selectedOptions: [selections$, (selections) => selections$.next(selections)],
           singleSelect: [singleSelect$, (selected) => singleSelect$.next(selected)],
           sort: [sort$, (sort) => sort$.next(sort)],
+
+          /** This state cannot be changed once the control is created */
+          placeholder: [placeholder, () => {}, () => true],
+          hideActionBar: [hideActionBar, () => {}, () => true],
+          hideExclude: [hideExclude, () => {}, () => true],
+          hideExists: [hideExists, () => {}, () => true],
+          hideSort: [hideSort, () => {}, () => true],
         }
       );
 
@@ -219,8 +272,16 @@ export const getOptionsListControlFactory = ({
         },
         invalidSelections$,
         totalCardinality$,
-        allowExpensiveQueries$,
         availableOptions$,
+        allowExpensiveQueries$,
+      };
+
+      const displaySettings = {
+        placeholder: placeholder.getValue(),
+        hideActionBar: hideActionBar.getValue(),
+        hideExclude: hideExclude.getValue(),
+        hideExists: hideExists.getValue(),
+        hideSort: hideSort.getValue(),
       };
 
       return {
@@ -230,7 +291,8 @@ export const getOptionsListControlFactory = ({
             return () => {
               dataLoadingSubscription.unsubscribe();
               fetchSubscription.unsubscribe();
-              // selectedOptionsSubscription.unsubscribe();
+              singleSelectSubscription.unsubscribe();
+              validSearchStringSubscription.unsubscribe();
             };
           }, []);
 
@@ -239,6 +301,7 @@ export const getOptionsListControlFactory = ({
               {...controlPanelClassNames}
               stateManager={stateManager}
               api={componentApi}
+              displaySettings={displaySettings}
             />
           );
         },

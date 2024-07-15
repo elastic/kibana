@@ -26,7 +26,11 @@ import {
 import classNames from 'classnames';
 import { ControlStateManager } from '../../../types';
 import { MIN_POPOVER_WIDTH } from '../constants';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import {
+  OptionsListComponentApi,
+  OptionsListComponentState,
+  OptionsListDisplaySettings,
+} from '../types';
 import './options_list.scss';
 import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from './options_list_strings';
@@ -34,10 +38,12 @@ import { OptionsListStrings } from './options_list_strings';
 export const OptionsListControl = ({
   api,
   stateManager,
+  displaySettings,
   ...rest
 }: {
   api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
+  displaySettings: OptionsListDisplaySettings;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -45,10 +51,8 @@ export const OptionsListControl = ({
   const [
     excludeSelected,
     existsSelected,
-    singleSelect,
     selectedOptions,
     invalidSelections,
-    dataViews,
     fieldSpec,
     loading,
     panelTitle,
@@ -56,10 +60,8 @@ export const OptionsListControl = ({
   ] = useBatchedPublishingSubjects(
     stateManager.exclude,
     stateManager.existsSelected,
-    stateManager.singleSelect,
     stateManager.selectedOptions,
     api.invalidSelections$,
-    api.dataViews,
     api.fieldSpec,
     api.dataLoading,
     api.panelTitle,
@@ -67,19 +69,9 @@ export const OptionsListControl = ({
   );
   const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
 
-  // const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
-  // const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
-
-  // // remove all other selections if this control is single select
-  // useEffect(() => {
-  //   if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-  //     stateManager.selectedOptions.next([selectedOptions[0]]);
-  //   }
-  // }, [singleSelect, selectedOptions, stateManager.selectedOptions]);
-
   const delimiter = useMemo(
     () => OptionsListStrings.control.getSeparator(fieldSpec?.type),
-    [fieldSpec?.type]
+    [fieldSpec]
   );
 
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
@@ -184,20 +176,13 @@ export const OptionsListControl = ({
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
-          : OptionsListStrings.control.getPlaceholder()}
-        {/* : placeholder ?? OptionsListStrings.control.getPlaceholder()} */}
+          : displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </>
   );
 
   return (
-    <EuiFilterGroup
-      fullWidth
-      {...rest}
-      // className={classNames('optionsList--filterGroup', {
-      //   'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
-      // })}
-    >
+    <EuiFilterGroup fullWidth {...rest}>
       <EuiInputPopover
         id={popoverId}
         ownFocus
@@ -211,11 +196,15 @@ export const OptionsListControl = ({
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={() => setPopoverOpen(false)}
         panelClassName="optionsList__popoverOverride"
-        // panelProps={{
-        //   'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
-        // }}
+        panelProps={{
+          'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
+        }}
       >
-        <OptionsListPopover api={api} stateManager={stateManager} />
+        <OptionsListPopover
+          api={api}
+          stateManager={stateManager}
+          displaySettings={displaySettings}
+        />
       </EuiInputPopover>
     </EuiFilterGroup>
   );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
@@ -24,9 +24,10 @@ import {
 } from '../types';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: string) => string);
-interface PublishesFieldSpec {
-  fieldSpec: PublishingSubject<DataViewField | undefined>;
-  fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
+
+export interface PublishesFieldSpec {
+  fieldSpec: PublishingSubject<FieldSpec | undefined>;
+  fieldFormatter: PublishingSubject<FieldFormatConvertFunction | ((toFormat: string) => string)>;
 }
 
 export type DataControlApi = DefaultControlApi &

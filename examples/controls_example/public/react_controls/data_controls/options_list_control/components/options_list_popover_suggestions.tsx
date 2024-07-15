@@ -10,12 +10,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ControlStateManager } from '../../../types';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 import { OptionsListStrings } from './options_list_strings';
 
@@ -34,13 +36,12 @@ export const OptionsListPopoverSuggestions = ({
     sort,
     searchString,
     existsSelected,
-    singleSelect,
     searchTechnique,
     selectedOptions,
+    fieldName,
     invalidSelections,
     availableOptions,
     totalCardinality,
-    fieldSpec,
     loading,
     allowExpensiveQueries,
     fieldFormatter,
@@ -48,13 +49,12 @@ export const OptionsListPopoverSuggestions = ({
     stateManager.sort,
     stateManager.searchString,
     stateManager.existsSelected,
-    stateManager.singleSelect,
     stateManager.searchTechnique,
     stateManager.selectedOptions,
+    stateManager.fieldName,
     api.invalidSelections$,
     api.availableOptions$,
     api.totalCardinality$,
-    api.fieldSpec,
     api.dataLoading,
     api.allowExpensiveQueries$,
     api.fieldFormatter
@@ -71,13 +71,13 @@ export const OptionsListPopoverSuggestions = ({
     [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
   );
 
-  const suggestions = useMemo<OptionsListSuggestions>(() => {
-    return showOnlySelected ? selectedOptions : availableOptions ?? [];
+  const suggestions = useMemo<OptionsListSuggestions | string[]>(() => {
+    return (showOnlySelected ? selectedOptions : availableOptions) ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
     // if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
-    if (!existsSelected && (showOnlySelected || suggestions?.length === 0)) return;
+    if (!existsSelected && (showOnlySelected || suggestions.length === 0)) return;
 
     return {
       key: 'exists-option',
@@ -91,7 +91,7 @@ export const OptionsListPopoverSuggestions = ({
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
-    const options: EuiSelectableOption[] = (suggestions ?? []).map((suggestion) => {
+    const options: EuiSelectableOption[] = suggestions.map((suggestion) => {
       if (typeof suggestion !== 'object') {
         // this means that `showOnlySelected` is true, and doc count is not known when this is the case
         suggestion = { value: suggestion };
@@ -189,10 +189,16 @@ export const OptionsListPopoverSuggestions = ({
           renderOption={(option) => renderOption(option, searchString)}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-            fieldSpec?.displayName ?? fieldSpec?.name ?? '',
+            fieldName,
             selectableOptions.length
           )}
-          // emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
+          emptyMessage={
+            <OptionsListPopoverEmptyMessage
+              api={api}
+              stateManager={stateManager}
+              showOnlySelected={showOnlySelected}
+            />
+          }
           onChange={(newSuggestions, _, changedOption) => {
             const key = changedOption.key ?? changedOption.label;
             setSelectableOptions(newSuggestions);

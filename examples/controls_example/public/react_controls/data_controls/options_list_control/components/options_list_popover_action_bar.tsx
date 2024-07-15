@@ -20,15 +20,21 @@ import {
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
-import { OptionsListStrings } from './options_list_strings';
-import { OptionsListComponentState, OptionsListComponentApi } from '../types';
 import { ControlStateManager } from '../../../types';
+import {
+  OptionsListComponentApi,
+  OptionsListComponentState,
+  OptionsListDisplaySettings,
+} from '../types';
+import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
+import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
   api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
+  displaySettings: OptionsListDisplaySettings;
 }
 
 export const OptionsListPopoverActionBar = ({
@@ -36,10 +42,12 @@ export const OptionsListPopoverActionBar = ({
   setShowOnlySelected,
   api,
   stateManager,
+  displaySettings,
 }: OptionsListPopoverProps) => {
   const [
     searchString,
     searchTechnique,
+    searchStringValid,
     invalidSelections,
     totalCardinality,
     fieldSpec,
@@ -47,25 +55,12 @@ export const OptionsListPopoverActionBar = ({
   ] = useBatchedPublishingSubjects(
     stateManager.searchString,
     stateManager.searchTechnique,
+    stateManager.searchStringValid,
     api.invalidSelections$,
     api.totalCardinality$,
     api.fieldSpec,
     api.allowExpensiveQueries$
   );
-
-  // const optionsList = useOptionsList();
-
-  // const totalCardinality =
-  //   optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
-  // const fieldSpec = optionsList.select((state) => state.componentState.field);
-  // const searchString = optionsList.select((state) => state.componentState.searchString);
-  // const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-  // const allowExpensiveQueries = optionsList.select(
-  //   (state) => state.componentState.allowExpensiveQueries
-  // );
-
-  // const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
-  // const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
 
   const compatibleSearchTechniques = useMemo(() => {
     if (!fieldSpec) return [];
@@ -82,12 +77,11 @@ export const OptionsListPopoverActionBar = ({
       {compatibleSearchTechniques.length > 0 && (
         <EuiFormRow className="optionsList__searchRow" fullWidth>
           <EuiFieldSearch
-            // isInvalid={!searchString.valid}
+            isInvalid={!searchStringValid}
             compressed
             disabled={showOnlySelected}
             fullWidth
             onChange={(event) => {
-              console.log('CHANGE STRING');
               stateManager.searchString.next(event.target.value);
             }}
             value={searchString}
@@ -112,7 +106,7 @@ export const OptionsListPopoverActionBar = ({
               </EuiText>
             </EuiFlexItem>
           )}
-          {invalidSelections && invalidSelections.length > 0 && (
+          {invalidSelections && invalidSelections.size > 0 && (
             <>
               {allowExpensiveQueries && (
                 <EuiFlexItem grow={false}>
@@ -121,7 +115,7 @@ export const OptionsListPopoverActionBar = ({
               )}
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.length)}
+                  {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.size)}
                 </EuiText>
               </EuiFlexItem>
             </>
@@ -158,11 +152,15 @@ export const OptionsListPopoverActionBar = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {/* {!hideSort && (
+              {!displaySettings.hideSort && (
                 <EuiFlexItem grow={false}>
-                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
+                  <OptionsListPopoverSortingButton
+                    api={api}
+                    stateManager={stateManager}
+                    showOnlySelected={showOnlySelected}
+                  />
                 </EuiFlexItem>
-              )} */}
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

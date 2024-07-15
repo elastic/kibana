@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { memoize } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -22,11 +23,10 @@ import {
   type OptionsListResponse,
 } from '@kbn/controls-plugin/common/options_list/types';
 import { CoreStart } from '@kbn/core/public';
-import dateMath from '@kbn/datemath';
-
 import { DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
+import dateMath from '@kbn/datemath';
 import { buildEsQuery } from '@kbn/es-query';
-import { memoize } from 'lodash';
+
 import { ControlGroupApi } from '../../control_group/types';
 import { ControlStateManager } from '../../types';
 import { OptionsListComponentState, OptionsListControlApi } from './types';
@@ -36,9 +36,11 @@ export function fetchAndValidate$({
   services,
   stateManager,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews'> & {
+  api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec'> & {
     dataControlFetch$: ControlGroupApi['dataControlFetch$'];
     loadingSuggestions$: BehaviorSubject<boolean>;
+    allowExpensiveQueries$: BehaviorSubject<boolean>;
+    debouncedSearchString: Observable<string>;
   };
   services: {
     http: CoreStart['http'];
@@ -49,7 +51,6 @@ export function fetchAndValidate$({
     Pick<
       OptionsListComponentState,
       | 'fieldName'
-      | 'searchString'
       | 'runPastTimeout'
       | 'sort'
       | 'searchTechnique'
@@ -59,17 +60,18 @@ export function fetchAndValidate$({
   >;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   let prevRequestAbortController: AbortController | undefined;
-  const searchStringDebounced = stateManager.searchString.pipe(debounceTime(100));
 
   return combineLatest([
     api.dataViews,
+    api.fieldSpec,
     api.dataControlFetch$,
-    stateManager.fieldName,
-    searchStringDebounced,
+    api.allowExpensiveQueries$,
+    api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,
     stateManager.requestSize,
   ]).pipe(
+    debounceTime(0),
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
@@ -81,8 +83,9 @@ export function fetchAndValidate$({
       async ([
         [
           dataViews,
+          fieldSpec,
           dataControlFetchContext,
-          fieldName,
+          allowExpensiveQueries,
           searchString,
           sort,
           searchTechnique,
@@ -91,22 +94,16 @@ export function fetchAndValidate$({
         runPastTimeout,
         selectedOptions,
       ]) => {
-        api.loadingSuggestions$.next(true);
         const dataView = dataViews?.[0];
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        if (!dataView || !dataViewField) {
+        if (!dataView || !fieldSpec) {
           return { suggestions: [] };
         }
-
-        const abortController = new AbortController();
-        prevRequestAbortController = abortController;
 
         /** Fetch the suggestions list + perform validation */
         const request = {
           sort,
           size: requestSize,
-          field: dataViewField.toSpec(),
+          field: fieldSpec,
           query: dataControlFetchContext.query,
           filters: dataControlFetchContext.unifiedSearchFilters,
           dataView,
@@ -114,11 +111,15 @@ export function fetchAndValidate$({
           searchTechnique,
           runPastTimeout,
           selectedOptions,
-          allowExpensiveQueries: true,
+          allowExpensiveQueries,
           searchString,
         };
 
         try {
+          const abortController = new AbortController();
+          prevRequestAbortController = abortController;
+
+          api.loadingSuggestions$.next(true);
           return await cachedOptionsListRequest(request, abortController.signal, services);
         } catch (error) {
           // Remove rejected results from memoize cache

@@ -9,30 +9,36 @@
 import React, { useMemo } from 'react';
 
 import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { ControlStateManager } from '../../../types';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 
 export const OptionsListPopoverEmptyMessage = ({
+  api,
+  stateManager,
   showOnlySelected,
 }: {
   showOnlySelected: boolean;
+  api: OptionsListComponentApi;
+  stateManager: ControlStateManager<OptionsListComponentState>;
 }) => {
-  const optionsList = useOptionsList();
-
-  const searchString = optionsList.select((state) => state.componentState.searchString);
-  const fieldSpec = optionsList.select((state) => state.componentState.field);
-  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
+  const [searchTechnique, searchStringValid, fieldSpec] = useBatchedPublishingSubjects(
+    stateManager.searchTechnique,
+    stateManager.searchStringValid,
+    api.fieldSpec
+  );
 
   const noResultsMessage = useMemo(() => {
     if (showOnlySelected) {
       return OptionsListStrings.popover.getSelectionsEmptyMessage();
     }
-    if (!searchString.valid && fieldSpec && searchTechnique) {
+    if (!searchStringValid && fieldSpec && searchTechnique) {
       return OptionsListStrings.popover.getInvalidSearchMessage(fieldSpec.type);
     }
     return OptionsListStrings.popover.getEmptyMessage();
-  }, [showOnlySelected, fieldSpec, searchString.valid, searchTechnique]);
+  }, [showOnlySelected, fieldSpec, searchStringValid, searchTechnique]);
 
   return (
     <EuiSelectableMessage
@@ -42,8 +48,8 @@ export const OptionsListPopoverEmptyMessage = ({
       }`}
     >
       <EuiIcon
-        type={searchString.valid ? 'minusInCircle' : 'alert'}
-        color={searchString.valid ? 'default' : 'danger'}
+        type={searchStringValid ? 'minusInCircle' : 'alert'}
+        color={searchStringValid ? 'default' : 'danger'}
       />
       <EuiSpacer size="xs" />
       {noResultsMessage}

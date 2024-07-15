@@ -9,19 +9,21 @@
 import React from 'react';
 
 import {
-  EuiIconTip,
-  EuiFlexItem,
-  EuiProgress,
-  EuiFlexGroup,
   EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPopoverFooter,
-  useEuiPaddingSize,
+  EuiProgress,
   useEuiBackgroundColor,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { ControlStateManager } from '../../../types';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 const aggregationToggleButtons = [
   {
@@ -36,12 +38,17 @@ const aggregationToggleButtons = [
   },
 ];
 
-export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) => {
-  const optionsList = useOptionsList();
-
-  const exclude = optionsList.select((state) => state.explicitInput.exclude);
-  const allowExpensiveQueries = optionsList.select(
-    (state) => state.componentState.allowExpensiveQueries
+export const OptionsListPopoverFooter = ({
+  api,
+  stateManager,
+}: {
+  api: OptionsListComponentApi;
+  stateManager: ControlStateManager<OptionsListComponentState>;
+}) => {
+  const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
+    stateManager.exclude,
+    api.dataLoading,
+    api.allowExpensiveQueries$
   );
 
   return (
@@ -52,7 +59,7 @@ export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) 
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
       >
-        {isLoading && (
+        {loading && (
           <div style={{ position: 'absolute', width: '100%' }}>
             <EuiProgress
               data-test-subj="optionsList-control-popover-loading"
@@ -77,7 +84,7 @@ export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) 
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
               onChange={(optionId) =>
-                optionsList.dispatch.setExclude(optionId === 'optionsList__excludeResults')
+                stateManager.exclude.next(optionId === 'optionsList__excludeResults')
               }
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"

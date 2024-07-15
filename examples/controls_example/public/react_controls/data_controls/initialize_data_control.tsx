@@ -13,6 +13,7 @@ import {
   DataView,
   DataViewField,
   DATA_VIEW_SAVED_OBJECT_TYPE,
+  FieldSpec,
 } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
@@ -50,7 +51,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-  const fieldSpec = new BehaviorSubject<DataViewField | undefined>(undefined);
+  const fieldSpec = new BehaviorSubject<FieldSpec | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(
     (toFormat: string) => toFormat
   );
@@ -113,10 +114,11 @@ export const initializeDataControl = <EditorState extends object = {}>(
         clearBlockingError();
       }
 
-      fieldSpec.next(field);
+      const spec = field?.toSpec();
+      fieldSpec.next(spec);
       defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
-      if (field) {
-        fieldFormatter.next(dataView.getFormatterForField(field.toSpec()).getConverterFor('text'));
+      if (spec) {
+        fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
       }
     }
   );

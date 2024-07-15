@@ -12,7 +12,16 @@ import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { DataControlApi, DefaultDataControlState } from '../types';
 
-export interface OptionsListControlState extends DefaultDataControlState {
+export interface OptionsListDisplaySettings {
+  placeholder?: string;
+  hideActionBar?: boolean;
+  hideExclude?: boolean;
+  hideExists?: boolean;
+  hideSort?: boolean;
+}
+export interface OptionsListControlState
+  extends DefaultDataControlState,
+    OptionsListDisplaySettings {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: string[];
@@ -20,27 +29,21 @@ export interface OptionsListControlState extends DefaultDataControlState {
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   exclude?: boolean;
-
-  // display settings
-  // placeholder?: string;
-  // hideActionBar?: boolean;
-  // hideExclude?: boolean;
-  // hideExists?: boolean;
-  // hideSort?: boolean;
 }
+
 export interface PublishesOptions {
   availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
-  // validSelections$: PublishingSubject<Set<string>>;
   invalidSelections$: PublishingSubject<Set<string>>;
-
   totalCardinality$: PublishingSubject<number>;
   allowExpensiveQueries$: PublishingSubject<boolean>;
 }
 
 export type OptionsListControlApi = DataControlApi;
 
-export interface OptionsListComponentState extends OptionsListControlState {
+export interface OptionsListComponentState
+  extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
   searchString: string;
+  searchStringValid: boolean;
   requestSize: number;
 }
 

@@ -6,32 +6,36 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
-  EuiButtonGroupOptionProps,
-  EuiSelectableOption,
-  EuiPopoverTitle,
+  Direction,
   EuiButtonGroup,
-  EuiSelectable,
+  EuiButtonGroupOptionProps,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  Direction,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSelectableOption,
   EuiToolTip,
-  EuiButtonIcon,
 } from '@elastic/eui';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import {
   getCompatibleSortingTypes,
-  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
-} from '../../../common/options_list/suggestions_sorting';
+  OPTIONS_LIST_DEFAULT_SORT,
+} from '../../../../../common/options_list/suggestions_sorting';
+import { ControlStateManager } from '../../../types';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;
+  api: OptionsListComponentApi;
+  stateManager: ControlStateManager<OptionsListComponentState>;
 }
 
 type SortByItem = EuiSelectableOption & {
@@ -54,23 +58,30 @@ const sortOrderOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export const OptionsListPopoverSortingButton = ({
+  api,
+  stateManager,
   showOnlySelected,
 }: OptionsListSortingPopoverProps) => {
-  const optionsList = useOptionsList();
-
-  const field = optionsList.select((state) => state.componentState.field);
-  const sort = optionsList.select((state) => state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT);
+  const fieldSpec = useStateFromPublishingSubject(api.fieldSpec);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
+  const [selectedSort, setSelectedSort] = useState(
+    stateManager.sort.getValue() ?? OPTIONS_LIST_DEFAULT_SORT
+  );
+
+  /** When selected sort changes, push to state manager */
+  useEffect(() => {
+    stateManager.sort.next(selectedSort);
+  }, [selectedSort, stateManager.sort]);
 
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
-    return getCompatibleSortingTypes(field?.type).map((key) => {
+    return getCompatibleSortingTypes(fieldSpec?.type).map((key) => {
       return {
         onFocusBadge: false,
         data: { sortBy: key },
-        checked: key === sort.by ? 'on' : undefined,
+        checked: key === selectedSort.by ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
-        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(field?.type),
+        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(fieldSpec?.type),
       } as SortByItem;
     });
   });
@@ -80,10 +91,13 @@ export const OptionsListPopoverSortingButton = ({
       setSortByOptions(updatedOptions);
       const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
       if (selectedOption) {
-        optionsList.dispatch.setSort({ by: selectedOption.data.sortBy });
+        setSelectedSort({
+          ...selectedSort,
+          by: selectedOption.data.sortBy,
+        });
       }
     },
-    [optionsList.dispatch]
+    [selectedSort, setSelectedSort]
   );
 
   const SortButton = () => (
@@ -91,7 +105,7 @@ export const OptionsListPopoverSortingButton = ({
       size="xs"
       display="empty"
       color="text"
-      iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
+      iconType={selectedSort.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
       isDisabled={showOnlySelected}
       className="optionsList__sortButton"
       data-test-subj="optionsListControl__sortingOptionsButton"
@@ -129,11 +143,14 @@ export const OptionsListPopoverSortingButton = ({
                 isIconOnly
                 buttonSize="compressed"
                 options={sortOrderOptions}
-                idSelected={sort.direction}
+                idSelected={selectedSort.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction}
                 legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
-                onChange={(value) =>
-                  optionsList.dispatch.setSort({ direction: value as Direction })
-                }
+                onChange={(value) => {
+                  setSelectedSort({
+                    ...selectedSort,
+                    direction: value as Direction,
+                  });
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

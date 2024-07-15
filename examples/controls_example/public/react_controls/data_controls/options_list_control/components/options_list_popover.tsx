@@ -10,19 +10,29 @@ import React, { useState } from 'react';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlStateManager } from '../../../types';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import {
+  OptionsListComponentApi,
+  OptionsListComponentState,
+  OptionsListDisplaySettings,
+} from '../types';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 // import { OptionsListPopoverFooter } from './options_list_popover_footer';
-import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
+import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
+import { OptionsListPopoverFooter } from './options_list_popover_footer';
 
 export interface OptionsListPopoverProps {
   api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
+  displaySettings: OptionsListDisplaySettings;
 }
 
-export const OptionsListPopover = ({ api, stateManager }: OptionsListPopoverProps) => {
-  const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
+export const OptionsListPopover = ({
+  api,
+  stateManager,
+  displaySettings,
+}: OptionsListPopoverProps) => {
+  const [fieldSpec, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
     api.fieldSpec,
     api.availableOptions$,
     api.invalidSelections$,
@@ -36,10 +46,11 @@ export const OptionsListPopover = ({ api, stateManager }: OptionsListPopoverProp
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
-      {field?.type !== 'boolean' && ( // !hideActionBar &&
+      {fieldSpec?.type !== 'boolean' && !displaySettings.hideActionBar && (
         <OptionsListPopoverActionBar
           api={api}
           stateManager={stateManager}
+          displaySettings={displaySettings}
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
         />
@@ -58,8 +69,9 @@ export const OptionsListPopover = ({ api, stateManager }: OptionsListPopoverProp
           <OptionsListPopoverInvalidSelections api={api} />
         )}
       </div>
-      {/* <OptionsListPopoverFooter isLoading={isLoading} /> */}
-      {/* {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />} */}
+      {!displaySettings.hideExclude && (
+        <OptionsListPopoverFooter api={api} stateManager={stateManager} />
+      )}
     </div>
   );
 };
