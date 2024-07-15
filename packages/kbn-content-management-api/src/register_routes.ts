@@ -11,7 +11,6 @@ import { type ContentManagementServerSetup } from '@kbn/content-management-plugi
 import { VersionedRouteResponseValidation } from '@kbn/core-http-server';
 import { HttpServiceSetup } from '@kbn/core/server';
 import { type UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { prettyPrintAndSortKeys } from '@kbn/utils';
 import { baseGetSchema, contentManagementApiVersions } from './constants';
 import { ContentManagementApiVersionsType } from './types';
 
@@ -63,7 +62,7 @@ export function registerAPIRoutes<P extends Props>({
   const createRoute = versionedRouter.post({
     path: `/api/${appName}/${contentId}/`,
     access: 'public',
-    description: 'Create an item of type {type}.',
+    description: `Create an item of type ${contentId}.`,
   });
 
   for (const version of Object.values(contentManagementApiVersions)) {
@@ -77,16 +76,9 @@ export function registerAPIRoutes<P extends Props>({
           response: {
             200: {
               body: () =>
-                getSchemas()[version].schema.extends(
-                  {
-                    id: schema.maybe(
-                      schema.string({ meta: { description: 'The ID of the item' } })
-                    ),
-                  },
-                  {
-                    meta: { id: contentId },
-                  }
-                ),
+                baseGetSchema.extends({
+                  attributes: getSchemas()[version].schema,
+                }),
             },
           },
         },
@@ -100,14 +92,62 @@ export function registerAPIRoutes<P extends Props>({
           ({
             result: { item: result },
           } = await client.create(req.body));
-
-          const outTransform = getTransforms()[version].outTransform ?? ((data) => data);
-          const body = prettyPrintAndSortKeys(outTransform(result), Boolean(req.query.pretty));
-          return res.ok({ body });
         } catch (e) {
           // TODO do some error handling
           throw e;
         }
+
+        const body = recursiveSortObjectByKeys(result);
+        return res.ok({ body });
+      }
+    );
+  }
+
+  // Update API route
+
+  const updateRoute = versionedRouter.put({
+    path: `/api/${appName}/${contentId}/{id}`,
+    access: 'public',
+    description: `Update an item of type ${contentId}.`,
+  });
+
+  for (const version of Object.values(contentManagementApiVersions)) {
+    updateRoute.addVersion(
+      {
+        version,
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+            body: getSchemas()[version].schema,
+          },
+          response: {
+            200: {
+              body: () =>
+                baseGetSchema.extends({
+                  attributes: getSchemas()[version].schema,
+                }),
+            },
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for(contentId);
+        let result;
+        try {
+          ({
+            result: { item: result },
+          } = await client.update(req.params.id, req.body));
+        } catch (e) {
+          // TODO do some error handling
+          throw e;
+        }
+
+        const body = recursiveSortObjectByKeys(result);
+        return res.ok({ body });
       }
     );
   }
@@ -153,10 +193,43 @@ export function registerAPIRoutes<P extends Props>({
           throw e;
         }
 
-        const outTransform = getTransforms()[version].outTransform ?? ((data) => data);
-        const transformedResult = outTransform(result);
-        const body = recursiveSortObjectByKeys(transformedResult);
+        const body = recursiveSortObjectByKeys(result);
         return res.ok({ body });
+      }
+    );
+  }
+
+  // Delete API route
+  const deleteRoute = versionedRouter.delete({
+    path: `/api/${appName}/${contentId}/{id}`,
+    access: 'public',
+    description: `Delete an item of type ${contentId}.`,
+  });
+
+  for (const version of Object.values(contentManagementApiVersions)) {
+    deleteRoute.addVersion(
+      {
+        version,
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for(contentId);
+        try {
+          await client.delete(req.params.id);
+        } catch (e) {
+          // TODO do some error handling
+          throw e;
+        }
+
+        return res.ok();
       }
     );
   }

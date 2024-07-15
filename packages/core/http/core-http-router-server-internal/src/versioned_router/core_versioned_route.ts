@@ -28,7 +28,6 @@ import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
 import {
-  isAllowedPublicVersion,
   isValidRouteVersion,
   hasQueryVersion,
   readVersion,

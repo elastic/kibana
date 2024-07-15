@@ -26,12 +26,10 @@ import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
-import { CONTENT_ID, DashboardItem, LATEST_VERSION } from '../common/content_management';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { v2023_10_31, v2024_06_24 } from '../common/api';
-import { Dashboard as Dashboard_v2023_10_31 } from '../common/api/2023_10_31';
-import { Dashboard as Dashboard_v2024_06_24 } from '../common/api/2024_06_24';
+import { v2023_10_31 } from '../common/api';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -72,73 +70,18 @@ export class DashboardPlugin
       getSchemas: () => {
         return {
           '2023-10-31': {
-            schema: v2023_10_31.baseDashboard,
-          },
-          '2024-06-24': {
-            schema: v2024_06_24.baseDashboard,
+            schema: v2023_10_31.dashboardAttributesSchema,
           },
         };
       },
-      getTransforms: () => {
-        return {
-          '2023-10-31': {
-            inTransform: (data: Dashboard_v2023_10_31) => data,
-            // outTransform: ({ id, attributes }: DashboardItem) => ({
-            //   id,
-            //   description: attributes.description,
-            //   title: attributes.title,
-            //   kibanaSavedObjectMeta: attributes.kibanaSavedObjectMeta,
-            //   timeRestore: attributes.timeRestore,
-            //   timeFrom: attributes.timeFrom,
-            //   optionsJSON: attributes.optionsJSON,
-            //   panelsJSON: attributes.panelsJSON,
-            //   controlGroupInput: attributes.controlGroupInput,
-            //   refreshInterval: attributes.refreshInterval,
-            //   timeTo: attributes.timeTo,
-            // }),
-          },
-          '2024-06-24': {
-            inTransform: (data: Dashboard_v2024_06_24) => {
-              const { panels, options, kibanaSavedObjectMeta, ...restAttributes } = data;
-              const { searchSource, ...restKibanaSavedObjectMeta } = kibanaSavedObjectMeta;
-              return {
-                ...restAttributes,
-                kibanaSavedObjectMeta: {
-                  ...restKibanaSavedObjectMeta,
-                  searchSourceJSON: JSON.stringify(searchSource),
-                },
-                panelsJSON: JSON.stringify(data.panels),
-                optionsJSON: JSON.stringify(data.options),
-              };
-            },
-            outTransform: ({ attributes, ...restItem }: DashboardItem) => {
-              const { panelsJSON, optionsJSON, version, ...restAttributes } = attributes;
-              const { searchSourceJSON, ...restKibanaSavedObjectMeta } =
-                attributes.kibanaSavedObjectMeta;
-              return {
-                ...restItem,
-                attributes: {
-                  ...restAttributes,
-                  kibanaSavedObjectMeta: {
-                    ...restKibanaSavedObjectMeta,
-                    searchSource: JSON.parse(searchSourceJSON),
-                  },
-                  panels: JSON.parse(panelsJSON),
-                  options: JSON.parse(optionsJSON ?? ''),
-                },
-              };
-            },
-          },
-        };
-      },
+      getTransforms: () => ({
+        '2023-10-31': {},
+      }),
     });
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
+      storage: new DashboardStorage(),
       version: {
         latest: LATEST_VERSION,
       },

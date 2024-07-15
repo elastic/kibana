@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 
 export const contentManagementApiVersions = {
   '2023-10-31': '2023-10-31',
-  '2024-06-24': '2024-06-24',
 } as const;
 
 export const baseGetSchema = schema.object({

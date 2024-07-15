@@ -15,11 +15,7 @@ import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 
-import {
-  injectReferences,
-  type DashboardOptions,
-  convertSavedPanelsToPanelMap,
-} from '../../../../common';
+import { injectReferences, convertSavedPanelsToPanelMap } from '../../../../common';
 import { migrateDashboardInput } from './migrate_dashboard_input';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { DashboardCrudTypes } from '../../../../common/content_management';
@@ -123,14 +119,13 @@ export const loadDashboardState = async ({
   /**
    * Create search source and pull filters and query from it.
    */
-  const searchSourceJSON = attributes.kibanaSavedObjectMeta.searchSourceJSON;
+  const rawSearchSource = attributes.kibanaSavedObjectMeta.searchSource;
   const searchSource = await (async () => {
-    if (!searchSourceJSON) {
+    if (!rawSearchSource) {
       return await dataSearchService.searchSource.create();
     }
     try {
-      let searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
-      searchSourceValues = injectSearchSourceReferences(searchSourceValues as any, references);
+      const searchSourceValues = injectSearchSourceReferences(rawSearchSource, references);
       return await dataSearchService.searchSource.create(searchSourceValues);
     } catch (error: any) {
       return await dataSearchService.searchSource.create();
@@ -147,8 +142,8 @@ export const loadDashboardState = async ({
     refreshInterval,
     description,
     timeRestore,
-    optionsJSON,
-    panelsJSON,
+    options,
+    panels,
     timeFrom,
     version,
     timeTo,
@@ -163,11 +158,7 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  /**
-   * Parse panels and options from JSON
-   */
-  const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
-  const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
+  const panelMap = convertSavedPanelsToPanelMap(panels ?? []);
 
   const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
     {
@@ -180,16 +171,14 @@ export const loadDashboardState = async ({
       description,
       timeRange,
       filters,
-      panels,
+      panels: panelMap,
       query,
       title,
 
       viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],
 
-      controlGroupInput:
-        attributes.controlGroupInput &&
-        rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+      controlGroupInput: attributes.controlGroupInput,
 
       version: convertNumberToDashboardVersion(version),
     },

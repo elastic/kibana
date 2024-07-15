@@ -10,12 +10,15 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import {
-  controlGroupInputToRawControlGroupAttributes,
   generateNewControlIds,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
-import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
+import {
+  extractSearchSourceReferences,
+  RefreshInterval,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
@@ -44,7 +47,7 @@ export const serializeControlGroupInput = (
   ) {
     return undefined;
   }
-  return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
+  return controlGroupInput;
 };
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
@@ -114,33 +117,33 @@ export const saveDashboardState = async ({
     controlGroupInput = generateNewControlIds(controlGroupInput);
   }
 
-  /**
-   * Stringify filters and query into search source JSON
-   */
-  const { searchSourceJSON, searchSourceReferences } = await (async () => {
-    const searchSource = await dataSearchService.searchSource.create();
-    searchSource.setField(
+  const { searchSource, searchSourceReferences } = await (async () => {
+    const searchSourceFields = await dataSearchService.searchSource.create();
+    searchSourceFields.setField(
       'filter', // save only unpinned filters
       filters.filter((filter) => !isFilterPinned(filter))
     );
-    searchSource.setField('query', query);
+    searchSourceFields.setField('query', query);
 
-    const rawSearchSourceFields = searchSource.getSerializedFields();
+    const rawSearchSourceFields = searchSourceFields.getSerializedFields();
     const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields);
-    return { searchSourceReferences: references, searchSourceJSON: JSON.stringify(fields) };
+    return {
+      searchSourceReferences: references,
+      searchSource: fields as SerializedSearchSourceFields & { indexRefName: string },
+    };
   })();
 
   /**
    * Stringify options and panels
    */
-  const optionsJSON = JSON.stringify({
+  const options = {
     useMargins,
     syncColors,
     syncCursor,
     syncTooltips,
     hidePanelTitles,
-  });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, true));
+  };
+  const savedPanels = convertPanelMapToSavedPanels(panels, true);
 
   /**
    * Parse global time filter settings
@@ -157,15 +160,15 @@ export const saveDashboardState = async ({
       ]) as RefreshInterval)
     : undefined;
 
-  const rawDashboardAttributes: DashboardAttributes = {
+  const dashboardAttributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: serializeControlGroupInput(controlGroupInput),
-    kibanaSavedObjectMeta: { searchSourceJSON },
+    kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
     refreshInterval,
     timeRestore,
-    optionsJSON,
-    panelsJSON,
+    options,
+    panels: savedPanels,
     timeFrom,
     title,
     timeTo,
@@ -176,7 +179,7 @@ export const saveDashboardState = async ({
    */
   const { attributes, references: dashboardReferences } = extractReferences(
     {
-      attributes: rawDashboardAttributes,
+      attributes: dashboardAttributes,
       references: searchSourceReferences,
     },
     { embeddablePersistableStateService: embeddable }

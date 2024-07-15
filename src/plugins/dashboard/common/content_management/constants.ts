@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const LATEST_VERSION = 2;
+export const LATEST_VERSION = 3;
 
 export const CONTENT_ID = 'dashboard';
