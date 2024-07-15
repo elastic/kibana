@@ -10,22 +10,8 @@ import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useCallback } from 'react';
 import { useIndicesFields } from './use_indices_fields';
 import { ChatFormFields } from '../types';
-import { IndexFields } from '../utils/create_query';
 import { useUsageTracker } from './use_usage_tracker';
 import { AnalyticsEvents } from '../analytics/constants';
-
-export const getIndicesWithNoSourceFields = (
-  defaultSourceFields: IndexFields
-): string | undefined => {
-  const indices: string[] = [];
-  Object.keys(defaultSourceFields).forEach((index: string) => {
-    if (defaultSourceFields[index].length === 0) {
-      indices.push(index);
-    }
-  });
-
-  return indices.length === 0 ? undefined : indices.join();
-};
 
 export const useSourceIndicesFields = () => {
   const usageTracker = useUsageTracker();
@@ -38,6 +24,12 @@ export const useSourceIndicesFields = () => {
 
   const addIndex = useCallback(
     (newIndex: IndexName) => {
+      if (selectedIndices.includes(newIndex)) {
+        // needed to fire change event to skip the setup page
+        // TODO remove this once we have a better way to handle this
+        onIndicesChange(selectedIndices);
+        return;
+      }
       const newIndices = [...selectedIndices, newIndex];
       onIndicesChange(newIndices);
       usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
