@@ -21,13 +21,13 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { OptionsListStrings } from './options_list_strings';
-import { OptionsListComponentState, OptionsListControlApi } from '../types';
+import { OptionsListComponentState, OptionsListComponentApi } from '../types';
 import { ControlStateManager } from '../../../types';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
-  api: OptionsListControlApi;
+  api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
 }
 

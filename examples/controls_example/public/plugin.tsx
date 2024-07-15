@@ -60,7 +60,7 @@ export class ControlsExamplePlugin
       ]);
       return getOptionsListControlFactory({
         core: coreStart,
-        dataViewsService: depsStart.data.dataViews,
+        dataService: depsStart.data,
       });
     });
 

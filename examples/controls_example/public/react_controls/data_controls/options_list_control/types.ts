@@ -29,15 +29,23 @@ export interface OptionsListControlState extends DefaultDataControlState {
   // hideSort?: boolean;
 }
 export interface PublishesOptions {
-  totalCardinality$: PublishingSubject<number>;
-  invalidSelections$: PublishingSubject<string[]>;
-  allowExpensiveQueries$: PublishingSubject<boolean>;
   availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
+  // validSelections$: PublishingSubject<Set<string>>;
+  invalidSelections$: PublishingSubject<Set<string>>;
+
+  totalCardinality$: PublishingSubject<number>;
+  allowExpensiveQueries$: PublishingSubject<boolean>;
 }
+
+export type OptionsListControlApi = DataControlApi;
 
 export interface OptionsListComponentState extends OptionsListControlState {
   searchString: string;
   requestSize: number;
 }
 
-export type OptionsListControlApi = DataControlApi & PublishesOptions; // make PublishesOptions private
+export type OptionsListComponentApi = OptionsListControlApi &
+  PublishesOptions & {
+    deselectOption: (key: string) => void;
+    makeSelection: (key: string, showOnlySelected: boolean) => void;
+  };

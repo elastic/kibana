@@ -18,26 +18,22 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useFieldFormatter } from '../../hooks/use_field_formatter';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { OptionsListComponentApi } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 
-export const OptionsListPopoverInvalidSelections = () => {
-  const optionsList = useOptionsList();
-
-  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
-
-  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-  const fieldSpec = optionsList.select((state) => state.componentState.field);
-
-  const dataViewId = optionsList.select((state) => state.output.dataViewId);
-  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
+export const OptionsListPopoverInvalidSelections = ({ api }: { api: OptionsListComponentApi }) => {
+  const [fieldSpec, invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
+    api.fieldSpec,
+    api.invalidSelections$,
+    api.fieldFormatter
+  );
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to unchecking options */
-    const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
+    const options: EuiSelectableOption[] = Array.from(invalidSelections).map((key) => {
       return {
         key,
         label: fieldFormatter(key),
@@ -76,23 +72,21 @@ export const OptionsListPopoverInvalidSelections = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <label>
-              {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-                invalidSelections?.length ?? 0
-              )}
+              {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>
       <EuiSelectable
         aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
-          fieldName,
-          invalidSelections?.length ?? 0
+          fieldSpec?.displayName ?? '',
+          invalidSelections.size
         )}
         options={selectableOptions}
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          optionsList.dispatch.deselectOption(changedOption.key ?? changedOption.label);
+          api.deselectOption(changedOption.key ?? changedOption.label);
         }}
       >
         {(list) => list}

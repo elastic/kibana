@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
+import React, { useEffect } from 'react';
+import deepEqual from 'react-fast-compare';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
+import { RangeSliderControl } from './components/range_slider_control';
+import { hasNoResults$ } from './has_no_results';
+import { minMax$ } from './min_max';
+import { RangeSliderStrings } from './range_slider_strings';
 import {
   RangesliderControlApi,
   RangesliderControlState,
@@ -24,10 +28,6 @@ import {
   RANGE_SLIDER_CONTROL_TYPE,
   Services,
 } from './types';
-import { RangeSliderStrings } from './range_slider_strings';
-import { RangeSliderControl } from './components/range_slider_control';
-import { minMax$ } from './min_max';
-import { hasNoResults$ } from './has_no_results';
 
 export const getRangesliderControlFactory = (
   services: Services
@@ -210,11 +210,10 @@ export const getRangesliderControlFactory = (
       return {
         api,
         Component: (controlPanelClassNames) => {
-          const [dataLoading, dataViews, fieldSpec, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
-              dataControl.api.dataViews,
-              dataControl.api.fieldSpec,
+              dataControl.api.fieldFormatter,
               max$,
               min$,
               selectionHasNoResults$,
@@ -231,16 +230,6 @@ export const getRangesliderControlFactory = (
               outputFilterSubscription.unsubscribe();
             };
           }, []);
-
-          const fieldFormatter = useMemo(() => {
-            const dataView = dataViews?.[0];
-            if (!dataView) {
-              return undefined;
-            }
-            return fieldSpec
-              ? dataView.getFormatterForField(fieldSpec).getConverterFor('text')
-              : undefined;
-          }, [fieldSpec, dataViews]);
 
           return (
             <RangeSliderControl

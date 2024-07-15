@@ -24,7 +24,7 @@ import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DefaultDataControlState } from './types';
+import { DataControlApi, DataControlFieldFormatter, DefaultDataControlState } from './types';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
@@ -51,6 +51,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
   const fieldSpec = new BehaviorSubject<DataViewField | undefined>(undefined);
+  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(
+    (toFormat: string) => toFormat
+  );
   const filters = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   const stateManager: ControlStateManager<DefaultDataControlState> = {
@@ -112,6 +115,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
 
       fieldSpec.next(field);
       defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
+      if (field) {
+        fieldFormatter.next(dataView.getFormatterForField(field.toSpec()).getConverterFor('text'));
+      }
     }
   );
 
@@ -133,6 +139,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     defaultPanelTitle,
     dataViews,
     fieldSpec,
+    fieldFormatter,
     onEdit,
     filters$: filters,
     setOutputFilter: (newFilter: Filter | undefined) => {

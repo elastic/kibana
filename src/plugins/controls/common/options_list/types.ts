@@ -7,7 +7,7 @@
  */
 
 import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 import type { DataControlInput } from '../types';
 import { OptionsListSearchTechnique } from './suggestions_searching';
@@ -54,6 +54,12 @@ export interface OptionsListFailureResponse {
   error: 'aborted' | Error;
 }
 
+export const optionsListResponseWasFailure = (
+  response: OptionsListResponse
+): response is OptionsListFailureResponse => {
+  return (response as OptionsListFailureResponse).error !== undefined;
+};
+
 export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailureResponse;
 
 /**
@@ -70,7 +76,7 @@ export type OptionsListRequest = Omit<
   dataView: DataView;
   filters?: Filter[];
   field: FieldSpec;
-  query?: Query;
+  query?: Query | AggregateQuery;
 };
 
 /**

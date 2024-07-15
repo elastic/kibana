@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Subject } from 'rxjs';
+import { isEmpty } from 'lodash';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiFilterButton,
@@ -24,20 +23,20 @@ import {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import classNames from 'classnames';
 import { ControlStateManager } from '../../../types';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_POPOVER_WIDTH } from '../constants';
-import { OptionsListComponentState, OptionsListControlApi } from '../types';
+import { MIN_POPOVER_WIDTH } from '../constants';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import './options_list.scss';
 import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from './options_list_strings';
-import classNames from 'classnames';
 
 export const OptionsListControl = ({
   api,
   stateManager,
   ...rest
 }: {
-  api: OptionsListControlApi;
+  api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
@@ -53,6 +52,7 @@ export const OptionsListControl = ({
     fieldSpec,
     loading,
     panelTitle,
+    fieldFormatter,
   ] = useBatchedPublishingSubjects(
     stateManager.exclude,
     stateManager.existsSelected,
@@ -62,20 +62,13 @@ export const OptionsListControl = ({
     api.dataViews,
     api.fieldSpec,
     api.dataLoading,
-    api.panelTitle
+    api.panelTitle,
+    api.fieldFormatter
   );
   const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
 
   // const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
   // const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
-
-  // TODO: Better field formatter
-  const fieldFormatter = useMemo(() => {
-    const dataView = dataViews?.[0];
-    return dataView && fieldSpec
-      ? dataView.getFormatterForField(fieldSpec).getConverterFor('text')
-      : (toFormat: string) => toFormat;
-  }, [fieldSpec, dataViews]);
 
   // // remove all other selections if this control is single select
   // useEffect(() => {
@@ -117,9 +110,10 @@ export const OptionsListControl = ({
                         const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;
-                        const isInvalid = invalidSelections?.includes(value);
+                        const isInvalid = invalidSelections?.has(value);
                         return (
                           <span
+                            key={value}
                             className={`optionsList__filter ${
                               isInvalid ? 'optionsList__filterInvalid' : ''
                             }`}
@@ -133,12 +127,12 @@ export const OptionsListControl = ({
               )}
             </div>
           </EuiFlexItem>
-          {invalidSelections && invalidSelections.length > 0 && (
+          {invalidSelections && invalidSelections.size > 0 && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
                 content={OptionsListStrings.control.getInvalidSelectionWarningLabel(
-                  invalidSelections.length
+                  invalidSelections.size
                 )}
                 delay="long"
               >
@@ -150,7 +144,7 @@ export const OptionsListControl = ({
                   shape="square"
                   fill="dark"
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
-                    invalidSelections.length
+                    invalidSelections.size
                   )}
                   css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge
                 />

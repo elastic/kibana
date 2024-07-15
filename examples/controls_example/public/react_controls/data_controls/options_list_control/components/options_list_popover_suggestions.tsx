@@ -15,13 +15,12 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ControlStateManager } from '../../../types';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
-import { OptionsListComponentState, OptionsListControlApi } from '../types';
-import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverSuggestionsProps {
-  api: OptionsListControlApi;
+  api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
   showOnlySelected: boolean;
 }
@@ -36,64 +35,34 @@ export const OptionsListPopoverSuggestions = ({
     searchString,
     existsSelected,
     singleSelect,
-    selectedOptions,
     searchTechnique,
+    selectedOptions,
     invalidSelections,
     availableOptions,
     totalCardinality,
-    dataViews,
     fieldSpec,
     loading,
     allowExpensiveQueries,
+    fieldFormatter,
   ] = useBatchedPublishingSubjects(
     stateManager.sort,
     stateManager.searchString,
     stateManager.existsSelected,
     stateManager.singleSelect,
-    stateManager.selectedOptions,
     stateManager.searchTechnique,
+    stateManager.selectedOptions,
     api.invalidSelections$,
     api.availableOptions$,
     api.totalCardinality$,
-    api.dataViews,
     api.fieldSpec,
     api.dataLoading,
-    api.allowExpensiveQueries$
+    api.allowExpensiveQueries$,
+    api.fieldFormatter
   );
-
-  // const optionsList = useOptionsList();
-
-  // const fieldSpec = optionsList.select((state) => state.componentState.field);
-  // const searchString = optionsList.select((state) => state.componentState.searchString);
-  // const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
-  // const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
-  // const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-  // const allowExpensiveQueries = optionsList.select(
-  //   (state) => state.componentState.allowExpensiveQueries
-  // );
-
-  // const sort = optionsList.select((state) => state.explicitInput.sort);
-  // const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
-  // const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
-  // const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
-  // const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
-  // const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
-  // const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
-
-  // const dataViewId = optionsList.select((state) => state.output.dataViewId);
-  // const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
   const listRef = useRef<HTMLDivElement>(null);
 
-  // TODO: Better field formatter
-  const fieldFormatter = useMemo(() => {
-    const dataView = dataViews?.[0];
-    return dataView && fieldSpec
-      ? dataView.getFormatterForField(fieldSpec).getConverterFor('text')
-      : (toFormat: string) => toFormat;
-  }, [fieldSpec, dataViews]);
-
-  const canLoadMoreSuggestions = useMemo(
+  const canLoadMoreSuggestions = useMemo<boolean>(
     () =>
       allowExpensiveQueries && totalCardinality && !showOnlySelected // && searchString.valid
         ? (availableOptions ?? []).length <
@@ -102,13 +71,7 @@ export const OptionsListPopoverSuggestions = ({
     [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
   );
 
-  // track selectedOptions and invalidSelections in sets for more efficient lookup
-  const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
-  const invalidSelectionsSet = useMemo(
-    () => new Set<string>(invalidSelections),
-    [invalidSelections]
-  );
-  const suggestions = useMemo(() => {
+  const suggestions = useMemo<OptionsListSuggestions>(() => {
     return showOnlySelected ? selectedOptions : availableOptions ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
@@ -137,17 +100,17 @@ export const OptionsListPopoverSuggestions = ({
       return {
         key: suggestion.value,
         label: fieldFormatter(suggestion.value) ?? suggestion.value,
-        checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
+        checked: (selectedOptions ?? []).includes(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelectionsSet.has(suggestion.value)
+          showOnlySelected && invalidSelections.has(suggestion.value)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
           !showOnlySelected && suggestion?.docCount ? (
             <OptionsListPopoverSuggestionBadge documentCount={suggestion.docCount} />
           ) : undefined,
-      };
+      } as EuiSelectableOption;
     });
 
     if (canLoadMoreSuggestions) {
@@ -170,8 +133,8 @@ export const OptionsListPopoverSuggestions = ({
     suggestions,
     availableOptions,
     showOnlySelected,
-    selectedOptionsSet,
-    invalidSelectionsSet,
+    selectedOptions,
+    invalidSelections,
     existsSelectableOption,
     canLoadMoreSuggestions,
     fieldFormatter,
@@ -233,16 +196,7 @@ export const OptionsListPopoverSuggestions = ({
           onChange={(newSuggestions, _, changedOption) => {
             const key = changedOption.key ?? changedOption.label;
             setSelectableOptions(newSuggestions);
-            // the order of these checks matters, so be careful if rearranging them
-            // if (key === 'exists-option') {
-            //   optionsList.dispatch.selectExists(!Boolean(existsSelected));
-            // } else if (showOnlySelected || selectedOptionsSet.has(key)) {
-            //   optionsList.dispatch.deselectOption(key);
-            // } else if (singleSelect) {
-            //   optionsList.dispatch.replaceSelection(key);
-            // } else {
-            //   optionsList.dispatch.selectOption(key);
-            // }
+            api.makeSelection(key, showOnlySelected);
           }}
         >
           {(list) => list}

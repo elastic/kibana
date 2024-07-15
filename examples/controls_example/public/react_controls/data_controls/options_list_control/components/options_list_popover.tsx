@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlStateManager } from '../../../types';
-import { OptionsListControlApi, OptionsListComponentState } from '../types';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 // import { OptionsListPopoverFooter } from './options_list_popover_footer';
-import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
+import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 
 export interface OptionsListPopoverProps {
-  api: OptionsListControlApi;
+  api: OptionsListComponentApi;
   stateManager: ControlStateManager<OptionsListComponentState>;
 }
 
@@ -55,9 +54,9 @@ export const OptionsListPopover = ({ api, stateManager }: OptionsListPopoverProp
           stateManager={stateManager}
           showOnlySelected={showOnlySelected}
         />
-        {/* {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
-          <OptionsListPopoverInvalidSelections />
-        )} */}
+        {!showOnlySelected && invalidSelections && invalidSelections.size !== 0 && (
+          <OptionsListPopoverInvalidSelections api={api} />
+        )}
       </div>
       {/* <OptionsListPopoverFooter isLoading={isLoading} /> */}
       {/* {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />} */}
