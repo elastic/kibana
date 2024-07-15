@@ -13,6 +13,13 @@ import { useIndicesFields } from './use_indices_fields';
 import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
 import { AnalyticsEvents } from '../analytics/constants';
 
+const mergeDefaultAndCurrentValues = (defaultFields, currentFields) =>
+  Object.keys(defaultFields).reduce((result, key) => {
+    result[key] = currentFields[key] ?? defaultFields[key];
+
+    return result;
+  }, {});
+
 export const useLoadFieldsByIndices = ({
   watch,
   setValue,
@@ -29,15 +36,14 @@ export const useLoadFieldsByIndices = ({
     ]);
     const defaultFields = getDefaultQueryFields(fields);
     const defaultSourceFields = getDefaultSourceFields(fields);
-    const mergedQueryFields = Object.assign({}, defaultFields, queryFields);
-    const mergedSourceFields = Object.assign({}, defaultSourceFields, sourceFields);
+    const mergedQueryFields = mergeDefaultAndCurrentValues(defaultFields, queryFields);
+    const mergedSourceFields = mergeDefaultAndCurrentValues(defaultSourceFields, sourceFields);
 
     setValue(
       ChatFormFields.elasticsearchQuery,
       createQuery(mergedQueryFields, mergedSourceFields, fields)
     );
     setValue(ChatFormFields.queryFields, mergedQueryFields);
-
     setValue(ChatFormFields.sourceFields, mergedSourceFields);
 
     usageTracker?.count(AnalyticsEvents.sourceFieldsLoaded, Object.values(fields)?.flat()?.length);
