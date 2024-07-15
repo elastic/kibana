@@ -18,7 +18,7 @@ export const FormProvider: React.FC = ({ children }) => {
       doc_size: 3,
       source_fields: {},
       indices: [],
-      summarization_model: {},
+      summarization_model: undefined,
     },
   });
   useLoadFieldsByIndices({ watch: form.watch, setValue: form.setValue, getValues: form.getValues });
@@ -26,7 +26,7 @@ export const FormProvider: React.FC = ({ children }) => {
   useEffect(() => {
     const defaultModel = models.find((model) => !model.disabled);
 
-    if (defaultModel) {
+    if (defaultModel && !form.getValues(ChatFormFields.summarizationModel)) {
       form.setValue(ChatFormFields.summarizationModel, defaultModel);
     }
   }, [form, models]);
