@@ -66,17 +66,17 @@ const CUSTOM_OLD_ISO = CUSTOM_OLD.toISOString();
 const CUSTOM_RECENT_ISO = CUSTOM_RECENT.toISOString();
 
 const ALL_COUNTERS = [
-  `customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}:a:count:server:${CUSTOM_OLD_YMD}:default`,
-  `customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}:a:count:server:${CUSTOM_RECENT_YMD}:default`,
-  `domain1:a:count:server:${OLD_YMD}:default`,
-  `domain1:a:count:server:${RECENT_YMD}:default`,
-  `domain1:b:count:server:${OLD_YMD}:one`,
-  `domain1:b:count:server:${OLD_YMD}:two`,
-  `domain1:b:count:server:${RECENT_YMD}:one`,
-  `domain1:b:count:server:${RECENT_YMD}:two`,
-  `domain2:a:count:server:${OLD_YMD}:default`,
-  `domain2:a:count:server:${RECENT_YMD}:default`,
-  `domain2:c:count:server:${RECENT_YMD}:default`,
+  `testCounter|customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}:a:count:server:${CUSTOM_OLD_YMD}:default`,
+  `testCounter|customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}:a:count:server:${CUSTOM_RECENT_YMD}:default`,
+  `testCounter|domain1:a:count:server:${OLD_YMD}:default`,
+  `testCounter|domain1:a:count:server:${RECENT_YMD}:default`,
+  `testCounter|domain1:b:count:server:${OLD_YMD}:one`,
+  `testCounter|domain1:b:count:server:${OLD_YMD}:two`,
+  `testCounter|domain1:b:count:server:${RECENT_YMD}:one`,
+  `testCounter|domain1:b:count:server:${RECENT_YMD}:two`,
+  `testCounter|domain2:a:count:server:${OLD_YMD}:default`,
+  `testCounter|domain2:a:count:server:${RECENT_YMD}:default`,
+  `testCounter|domain2:c:count:server:${RECENT_YMD}:default`,
 ];
 
 const RECENT_COUNTERS = ALL_COUNTERS.filter(
@@ -101,7 +101,7 @@ describe('usage-counters', () => {
     usageCollection = {
       getUsageCounterByDomainId: jest.fn().mockImplementation((domainId: string) => {
         let retentionPeriodDays = USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS;
-        if (domainId.startsWith('customRetention_')) {
+        if (domainId.startsWith('testCounter|customRetention_')) {
           const daysString = domainId.split('_').pop();
           retentionPeriodDays = Number(daysString!);
         }
@@ -137,6 +137,7 @@ describe('usage-counters', () => {
         .map(({ attributes, updated_at: updatedAt, namespaces }) =>
           serializeCounterKey({ ...attributes, date: updatedAt, namespace: namespaces?.[0] })
         )
+        .filter((counterKey) => counterKey.startsWith('testCounter|'))
         .sort()
     ).toEqual(ALL_COUNTERS);
 
@@ -161,6 +162,7 @@ describe('usage-counters', () => {
         .map(({ attributes, updated_at: updatedAt, namespaces }) =>
           serializeCounterKey({ ...attributes, date: updatedAt, namespace: namespaces?.[0] })
         )
+        .filter((counterKey) => counterKey.startsWith('testCounter|'))
         .sort()
     ).toEqual(RECENT_COUNTERS);
   });
@@ -174,29 +176,29 @@ describe('usage-counters', () => {
 async function createTestCounters(internalRepository: ISavedObjectsRepository) {
   await createCounters(internalRepository, CUSTOM_OLD_ISO, [
     // domainId, counterName, counterType, source, count, namespace?
-    [`customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}`, 'a', 'count', 'server', 198],
+    [`testCounter|customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}`, 'a', 'count', 'server', 198],
   ]);
 
   await createCounters(internalRepository, CUSTOM_RECENT_ISO, [
     // domainId, counterName, counterType, source, count, namespace?
-    [`customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}`, 'a', 'count', 'server', 199],
+    [`testCounter|customRetention_${CUSTOM_RETENTION_PERIOD_DAYS}`, 'a', 'count', 'server', 199],
   ]);
 
   await createCounters(internalRepository, OLD_ISO, [
     // domainId, counterName, counterType, source, count, namespace?
-    ['domain1', 'a', 'count', 'server', 28],
-    ['domain1', 'b', 'count', 'server', 29, 'one'],
-    ['domain1', 'b', 'count', 'server', 30, 'two'],
-    ['domain2', 'a', 'count', 'server', 31],
+    ['testCounter|domain1', 'a', 'count', 'server', 28],
+    ['testCounter|domain1', 'b', 'count', 'server', 29, 'one'],
+    ['testCounter|domain1', 'b', 'count', 'server', 30, 'two'],
+    ['testCounter|domain2', 'a', 'count', 'server', 31],
   ]);
 
   await createCounters(internalRepository, RECENT_ISO, [
     // domainId, counterName, counterType, source, count, namespace?
-    ['domain1', 'a', 'count', 'server', 32],
-    ['domain1', 'b', 'count', 'server', 33, 'one'],
-    ['domain1', 'b', 'count', 'server', 34, 'two'],
-    ['domain2', 'a', 'count', 'server', 35],
-    ['domain2', 'c', 'count', 'server', 36],
+    ['testCounter|domain1', 'a', 'count', 'server', 32],
+    ['testCounter|domain1', 'b', 'count', 'server', 33, 'one'],
+    ['testCounter|domain1', 'b', 'count', 'server', 34, 'two'],
+    ['testCounter|domain2', 'a', 'count', 'server', 35],
+    ['testCounter|domain2', 'c', 'count', 'server', 36],
   ]);
 }
 
