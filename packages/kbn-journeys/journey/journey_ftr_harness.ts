@@ -308,9 +308,6 @@ export class JourneyFtrHarness {
   private async takeScreenshots(step: AnyStep) {
     let screenshot;
     let fs;
-    if (!this.page) {
-      return { screenshot, fs };
-    }
     // screenshots taking might crash the browser
     try {
       screenshot = await this.page.screenshot({ animations: 'disabled' });
