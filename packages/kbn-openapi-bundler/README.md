@@ -195,7 +195,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
 })();
 ```
 
-Finally you should be able to run OpenAPI bundler via
+Finally you should be able to run OpenAPI merger via
 
 ```bash
 node ./path/to/the/script.js
