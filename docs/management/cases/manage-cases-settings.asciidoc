@@ -61,8 +61,6 @@ You can add optional and required fields for customized case collaboration.
 
 To create a custom field:
 
-. Go to *{stack-manage-app} > Cases* and click *Settings*.
-
 . In the *Custom fields* section, click *Add field*.
 +
 --
