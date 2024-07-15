@@ -7,7 +7,6 @@
  */
 
 import { AxiosError } from 'axios';
-
 export class KbnClientRequesterError extends Error {
   axiosError?: AxiosError;
   constructor(message: string, error: unknown) {
@@ -15,7 +14,14 @@ export class KbnClientRequesterError extends Error {
     this.name = 'KbnClientRequesterError';
 
     if (error instanceof AxiosError) {
-      this.axiosError = error;
+      this.axiosError = clean(error);
     }
   }
+}
+function clean(error: Error): AxiosError {
+  const _ = AxiosError.from(error);
+  delete _.config;
+  delete _.request;
+  delete _.response;
+  return _;
 }
