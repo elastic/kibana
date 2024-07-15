@@ -37,6 +37,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
             field: 'field1',
             model_id: 'model1',
             indices: ['newIndex'],
+            sparse_vector: true,
           },
         ],
         dense_vector_query_fields: [],
