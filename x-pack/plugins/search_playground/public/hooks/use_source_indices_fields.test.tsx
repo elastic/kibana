@@ -85,7 +85,7 @@ describe('useSourceIndicesFields Hook', () => {
           "prompt": "You are an assistant for question-answering tasks.",
           "query_fields": Object {},
           "source_fields": Object {},
-          "summarization_model": Object {},
+          "summarization_model": undefined,
         }
       `);
       result.current.addIndex('newIndex');
@@ -129,7 +129,7 @@ describe('useSourceIndicesFields Hook', () => {
               "field1",
             ],
           },
-          "summarization_model": Object {},
+          "summarization_model": undefined,
         }
       `);
     });
