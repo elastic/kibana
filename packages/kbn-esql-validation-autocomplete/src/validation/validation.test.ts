@@ -9165,9 +9165,7 @@ describe('validation logic', () => {
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats max(booleanField)', [
-          'Argument of [max] must be [number], found value [booleanField] type [boolean]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
@@ -9309,9 +9307,7 @@ describe('validation logic', () => {
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats min(booleanField)', [
-          'Argument of [min] must be [number], found value [booleanField] type [boolean]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
