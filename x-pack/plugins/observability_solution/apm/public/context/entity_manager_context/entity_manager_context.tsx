@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
+import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ENTITY_FETCH_STATUS, useEntityManager } from '../../hooks/use_entity_manager';
 import { useLocalStorage } from '../../hooks/use_local_storage';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
 export interface EntityManagerEnablementContextValue {
   isEntityManagerEnabled: boolean;
@@ -15,6 +17,7 @@ export interface EntityManagerEnablementContextValue {
   refetch: () => void;
   userServiceInventoryView: ServiceInventoryView;
   setUserServiceInventoryView: (view: ServiceInventoryView) => void;
+  isEntityCentricExperienceViewEnabled: boolean;
 }
 
 export enum ServiceInventoryView {
@@ -33,22 +36,34 @@ export function EntityManagerEnablementContextProvider({
 }: {
   children: React.ReactChild;
 }) {
-  const { isEnabled, status, refetch } = useEntityManager();
+  const { core } = useApmPluginContext();
+  const { isEnabled: isEntityManagerEnabled, status, refetch } = useEntityManager();
 
   const [userServiceInventoryView, setUserServiceInventoryView] = useLocalStorage(
     serviceInventoryStorageKey,
     ServiceInventoryView.classic
   );
 
+  const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
+    entityCentricExperience,
+    false
+  );
+
+  const isEntityCentricExperienceViewEnabled =
+    isEntityManagerEnabled &&
+    userServiceInventoryView === ServiceInventoryView.entity &&
+    isEntityCentricExperienceSettingEnabled;
+
   return (
     <EntityManagerEnablementContext.Provider
       value={{
-        isEntityManagerEnabled: isEnabled,
+        isEntityManagerEnabled,
         entityManagerEnablementStatus: status,
         isEnablementPending: status === ENTITY_FETCH_STATUS.LOADING,
         refetch,
         userServiceInventoryView,
         setUserServiceInventoryView,
+        isEntityCentricExperienceViewEnabled,
       }}
     >
       {children}

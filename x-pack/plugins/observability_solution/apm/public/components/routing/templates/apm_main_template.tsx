@@ -72,11 +72,11 @@ export function ApmMainTemplate({
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
   const { config, core } = useApmPluginContext();
-  const isEntityCentricExperienceEnabled = core.uiSettings.get<boolean>(
+  const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
     false
   );
-  const { isEntityManagerEnabled } = useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -144,7 +144,7 @@ export function ApmMainTemplate({
             <FeatureFeedbackButton
               data-test-subj="infraApmFeedbackLink"
               formUrl={
-                isEntityManagerEnabled && sanitizedPath.includes('service')
+                isEntityCentricExperienceViewEnabled && sanitizedPath.includes('service')
                   ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
                   : APM_FEEDBACK_LINK
               }
@@ -170,7 +170,7 @@ export function ApmMainTemplate({
         pageTitle: pageHeaderTitle,
         children: (
           <EuiFlexGroup direction="column">
-            {isEntityCentricExperienceEnabled &&
+            {isEntityCentricExperienceSettingEnabled &&
               showEnablementCallout &&
               selectedNavButton === 'allServices' && <EntityEnablement />}
             {showServiceGroupsNav && selectedNavButton && (

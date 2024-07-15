@@ -37,11 +37,10 @@ export function EntityEnablement() {
   } = useKibana<ApmPluginStartDeps>();
 
   const {
-    isEntityManagerEnabled,
     isEnablementPending,
     refetch,
-    userServiceInventoryView,
     setUserServiceInventoryView,
+    isEntityCentricExperienceViewEnabled,
   } = useEntityManagerEnablementContext();
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
@@ -51,9 +50,6 @@ export function EntityEnablement() {
     setUserServiceInventoryView(ServiceInventoryView.classic);
     setsIsFeedbackModalVisible(true);
   };
-
-  const isEntityManagerEnabledAndEntityViewSelected =
-    isEntityManagerEnabled && userServiceInventoryView === ServiceInventoryView.entity;
 
   const handleEnablement = async () => {
     setIsLoading(true);
@@ -90,11 +86,11 @@ export function EntityEnablement() {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
-          disabled={isEntityManagerEnabledAndEntityViewSelected}
+          disabled={isEntityCentricExperienceViewEnabled}
           data-test-subj="tryOutEEMLink"
           onClick={handleEnablement}
         >
-          {isEntityManagerEnabledAndEntityViewSelected
+          {isEntityCentricExperienceViewEnabled
             ? i18n.translate('xpack.apm.eemEnablement.enabled.', {
                 defaultMessage: 'Viewing our new experience',
               })
@@ -146,7 +142,7 @@ export function EntityEnablement() {
           </EuiPopoverFooter>
         </EuiPopover>
       </EuiFlexItem>
-      {isEntityManagerEnabledAndEntityViewSelected && (
+      {isEntityCentricExperienceViewEnabled && (
         <EuiFlexItem grow={false}>
           <EuiLink data-test-subj="restoreClassicView" onClick={handleRestoreView}>
             {i18n.translate('xpack.apm.eemEnablement.restoreClassicView.', {
