@@ -15,7 +15,7 @@ import { AnalyticsEvents } from '../analytics/constants';
 
 const mergeDefaultAndCurrentValues = (defaultFields, currentFields) =>
   Object.keys(defaultFields).reduce((result, key) => {
-    result[key] = currentFields[key] ?? defaultFields[key];
+    result[key] = currentFields?.[key] ?? defaultFields[key];
 
     return result;
   }, {});
