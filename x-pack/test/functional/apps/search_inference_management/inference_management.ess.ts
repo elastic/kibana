@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags('skipMKI');
 
     before(async () => {
-      await pageObjects.common.navigateToApp('enterpriseSearchApplications/inference_endpoints');
+      await pageObjects.common.navigateToApp('inferenceManagement');
+      await browser.refresh();
     });
 
     describe('endpoint empty view', () => {
