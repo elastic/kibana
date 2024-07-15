@@ -9,17 +9,36 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
 
+export const addApmAgent = {
+  name: i18n.translate('xpack.apm.add.apm.agent.button.', {
+    defaultMessage: 'Add APM agent',
+  }),
+  link: '/app/observabilityOnboarding/?category=apm',
+};
+
+export const associateServiceLogs = {
+  name: i18n.translate('xpack.apm.associate.service.logs.button', {
+    defaultMessage: 'Associate existing service logs',
+  }),
+  link: 'https://ela.st/new-experience-associate-service-logs',
+};
+
+export const collectServiceLogs = {
+  name: i18n.translate('xpack.apm.collect.service.logs.button', {
+    defaultMessage: 'Collect new service logs',
+  }),
+  link: '/app/observabilityOnboarding/?category=logs',
+};
+
 export function AddApmAgent({ basePath }: { basePath: IBasePath }) {
   return (
     <EuiButton
       data-test-subj="addApmAgentButton"
       size="s"
       target="_blank"
-      href={basePath.prepend('/app/observabilityOnboarding/?category=apm')}
+      href={basePath.prepend(addApmAgent.link)}
     >
-      {i18n.translate('xpack.apm.add.apm.agent.button.', {
-        defaultMessage: 'Add APM agent',
-      })}
+      {addApmAgent.name}
     </EuiButton>
   );
 }
@@ -30,11 +49,9 @@ export function AssociateServiceLogs() {
       data-test-subj="associateServiceLogsButton"
       size="s"
       target="_blank"
-      href="https://ela.st/new-experience-associate-service-logs"
+      href={associateServiceLogs.link}
     >
-      {i18n.translate('xpack.apm.associate.service.logs.button', {
-        defaultMessage: 'Associate existing service logs',
-      })}
+      {associateServiceLogs.name}
     </EuiButton>
   );
 }
@@ -45,11 +62,9 @@ export function CollectServiceLogs({ basePath }: { basePath: IBasePath }) {
       data-test-subj="collectServiceLogsButton"
       size="s"
       target="_blank"
-      href={basePath.prepend('/app/observabilityOnboarding/?category=logs')}
+      href={basePath.prepend(collectServiceLogs.link)}
     >
-      {i18n.translate('xpack.apm.collect.service.logs.button', {
-        defaultMessage: 'Collect new service logs',
-      })}
+      {collectServiceLogs.name}
     </EuiButton>
   );
 }
