@@ -209,7 +209,7 @@ export const getRangesliderControlFactory = (
 
       return {
         api,
-        Component: (controlPanelClassNames) => {
+        Component: ({ className: controlPanelClassName }) => {
           const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
@@ -233,7 +233,7 @@ export const getRangesliderControlFactory = (
 
           return (
             <RangeSliderControl
-              {...controlPanelClassNames}
+              controlPanelClassName={controlPanelClassName}
               fieldFormatter={fieldFormatter}
               isInvalid={selectionHasNotResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

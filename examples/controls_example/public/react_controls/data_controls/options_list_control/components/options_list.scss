@@ -1,9 +1,9 @@
 .optionsList__inputButtonOverride {
    max-inline-size: 100% !important;
-
+   
   .euiButtonEmpty {
     border-end-start-radius: 0 !important;
-     border-start-start-radius: 0 !important;
+    border-start-start-radius: 0 !important;
   }
 }
 
@@ -30,27 +30,21 @@
     color: $euiColorWarningText;
   }
 
-  // .optionsList__negateLabel {
-  //   font-weight: $euiFontWeightSemiBold;
-  //   font-size: $euiSizeM;
-  //   color: $euiColorDanger;
-  // }
+  .optionsList__negateLabel {
+    font-weight: $euiFontWeightSemiBold;
+    font-size: $euiSizeM;
+    color: $euiColorDanger;
+  }
 }
 
-
-// .optionsList--sortPopover {
-//   width: $euiSizeXL * 7;
-// }
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
+}
 
 .optionsList__existsFilter {
   font-style: italic;
   font-weight: $euiFontWeightMedium;
 }
-
-// .optionsList__popoverOverride {
-//   @include euiBottomShadowMedium;
-//   filter: none; // overwrite the default popover shadow
-// }
 
 .optionsList__popover {
   .optionsList__actions {
