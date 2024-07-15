@@ -11,12 +11,13 @@ disabled:
   - x-pack/test/fleet_api_integration/config.base.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.trial.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
-  - x-pack/test/security_solution_endpoint/config.base.ts
-  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
+  - x-pack/test/security_solution_endpoint/configs/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -408,6 +409,10 @@ enabled:
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
+  - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
+  - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
+  - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
+  - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
@@ -578,9 +583,17 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.trial.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/endpoint.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy_response/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy_response/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
