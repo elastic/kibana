@@ -29,6 +29,8 @@ import { entitiesLatestBaseComponentTemplateConfig } from './templates/component
 import { entitiesHistoryBaseComponentTemplateConfig } from './templates/components/base_history';
 import { entitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 import { entitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
+import { updateBuiltInEntityDefinitions } from './lib/entities/update_entity_definition';
+import { builtInDefinitions } from './lib/entities/built_in';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -128,7 +130,15 @@ export class EntityManagerServerPlugin
           template: entitiesLatestIndexTemplateConfig,
         })
       )
-      .catch(() => {});
+      .catch((err) => {
+        this.logger.error(err);
+      })
+      .then(() => {
+        updateBuiltInEntityDefinitions({
+          definitions: builtInDefinitions,
+          server: this.server!,
+        }).catch((err) => this.logger.error(err));
+      });
 
     return {};
   }
