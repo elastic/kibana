@@ -133,9 +133,6 @@ export const postActionsConnectorExecuteRoute = (
           }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
-            // TODO: @stephmilovic, what's the right way to go about deprecating these telemetry values?
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
