@@ -144,8 +144,8 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
   const updateTimeline = useUpdateTimeline();
 
@@ -160,10 +160,10 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           indexNames: timeline.indexNames ?? [],
           show: true,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
             ? timeline.excludedRowRendererIds
             : [],
         },
@@ -175,7 +175,7 @@ export const useInvestigateInTimeline = ({
       updateTimeline,
       updateTimelineIsLoading,
       clearActiveTimeline,
-      unifiedComponentsInTimelineEnabled,
+      unifiedComponentsInTimelineDisabled,
     ]
   );
 
