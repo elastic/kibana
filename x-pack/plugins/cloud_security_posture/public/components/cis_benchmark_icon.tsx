@@ -30,8 +30,9 @@ const getBenchmarkIdIconType = (props: Props): string => {
     case 'cis_gcp':
       return googleCloudLogo;
     case 'cis_k8s':
-    default:
       return 'logoKubernetes';
+    default:
+      return undefined;
   }
 };
 

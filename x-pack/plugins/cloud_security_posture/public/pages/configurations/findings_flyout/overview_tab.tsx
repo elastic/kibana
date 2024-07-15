@@ -42,18 +42,19 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: data.rule?.name ? (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
-          defaultMessage: 'Manage Rule',
-        })}
-      >
-        <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
-      </EuiToolTip>
-    ) : (
-      '-'
-    ),
+    description:
+      ruleFlyoutLink && data.rule?.name ? (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTooltip', {
+            defaultMessage: 'Manage Rule',
+          })}
+        >
+          <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
+        </EuiToolTip>
+      ) : (
+        data.rule?.name || '-'
+      ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
@@ -175,7 +176,16 @@ export const OverviewTab = ({
   const discoverIndexLink = useMemo(
     () =>
       discover.locator?.getRedirectUrl({
-        indexPatternId: latestFindingsDataView.data?.id,
+        dataViewId: latestFindingsDataView.data?.id,
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'data_stream.dataset': data.data_stream?.dataset,
+              },
+            },
+          },
+        ],
       }),
     [discover.locator, latestFindingsDataView.data?.id]
   );

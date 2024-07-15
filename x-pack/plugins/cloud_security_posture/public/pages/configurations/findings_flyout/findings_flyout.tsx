@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import {
+  useEuiTheme,
   EuiFlexItem,
   EuiSpacer,
   EuiTextColor,
@@ -24,13 +25,16 @@ import {
   EuiFlyoutFooter,
   EuiToolTip,
   EuiDescriptionListProps,
+  EuiCallOut,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -102,8 +106,8 @@ export const CisKubernetesIcons = ({
   benchmarkId,
   benchmarkName,
 }: {
-  benchmarkId: BenchmarkId;
-  benchmarkName: BenchmarkName;
+  benchmarkId?: BenchmarkId;
+  benchmarkName?: BenchmarkName;
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
@@ -137,15 +141,17 @@ const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps[
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   const { application } = useKibana().services;
 
-  const ruleFlyoutLink = application.getUrlForApp('security', {
-    path: generatePath(benchmarksNavigation.rules.path, {
-      benchmarkVersion: findings.rule?.benchmark?.version.split('v')[1] || '1', // removing the v from the version
-      benchmarkId: findings.rule?.benchmark?.id || '1',
-      ruleId: findings.rule?.id,
-    }),
-  });
-
-  console.log(findings);
+  const ruleFlyoutLink =
+    findings.rule?.benchmark?.version &&
+    findings.rule?.benchmark?.id &&
+    findings.rule?.id &&
+    application.getUrlForApp('security', {
+      path: generatePath(benchmarksNavigation.rules.path, {
+        benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
+        benchmarkId: findings.rule.benchmark.id,
+        ruleId: findings.rule.id,
+      }),
+    });
 
   switch (tab.id) {
     case 'overview':
@@ -159,6 +165,29 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
     default:
       assertNever(tab);
   }
+};
+
+const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
+  const { euiTheme } = useEuiTheme();
+  const dataSetPrettyName = getDatasetDisplayName(finding.event.dataset);
+
+  return (
+    <EuiCallOut
+      size="s"
+      iconType="iInCircle"
+      title={
+        <span style={{ color: euiTheme.colors.text }}>
+          <FormattedMessage
+            id="xpack.csp.findings.findingsFlyout.calloutTitle"
+            defaultMessage="Some fields not provided by {datasource}"
+            values={{
+              datasource: dataSetPrettyName || 'the data source',
+            }}
+          />
+        </span>
+      }
+    />
+  );
 };
 
 export const FindingsRuleFlyout = ({
@@ -214,6 +243,11 @@ export const FindingsRuleFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
+        {['overview', 'rule'].includes(tab.id) && (
+          <div style={{ marginBottom: 16, borderRadius: 4, overflow: 'hidden' }}>
+            <MissingFieldsCallout finding={findings} />
+          </div>
+        )}
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

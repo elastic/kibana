@@ -27,10 +27,12 @@ export const useFetchDetectionRulesAlertsStatus = (tags: string[]) => {
     throw new Error('Kibana http service is not available');
   }
 
-  return useQuery<AlertStatus, Error>([DETECTION_ENGINE_ALERTS_KEY, tags], () =>
-    http.get<AlertStatus>(GET_DETECTION_RULE_ALERTS_STATUS_PATH, {
-      version: DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
-      query: { tags },
-    })
-  );
+  return useQuery<AlertStatus, Error>({
+    queryKey: [DETECTION_ENGINE_ALERTS_KEY, tags],
+    queryFn: () =>
+      http.get<AlertStatus>(GET_DETECTION_RULE_ALERTS_STATUS_PATH, {
+        version: DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
+        query: { tags },
+      }),
+  });
 };
