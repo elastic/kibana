@@ -36,6 +36,7 @@ export function generateHistoryTransform(
     transform_id: generateHistoryTransformId(definition),
     _meta: {
       definitionVersion: definition.version,
+      managed: definition.managed,
     },
     defer_validation: true,
     source: {
@@ -68,7 +69,7 @@ export function generateHistoryTransform(
         ...definition.identityFields.reduce(
           (acc, id) => ({
             ...acc,
-            [`entity.identityFields.${id.field}`]: {
+            [`entity.identity.${id.field}`]: {
               terms: { field: id.field, missing_bucket: id.optional },
             },
           }),
