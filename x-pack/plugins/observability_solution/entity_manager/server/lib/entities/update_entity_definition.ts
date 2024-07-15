@@ -45,20 +45,20 @@ export async function updateBuiltInEntityDefinitions({
     });
     if (!installedDefinition) {
       logger.info(
-        `Installing built-in entity definition [${latestDefinition.id}] version ${latestDefinition.version}`
+        `Installing built-in entity definition [${latestDefinition.id}] v${latestDefinition.version}`
       );
       return installEntityDefinition({ esClient, soClient, logger, definition: latestDefinition });
     }
 
     if (semver.eq(latestDefinition.version, installedDefinition.version)) {
       logger.debug(
-        `Built-in entity definition [${latestDefinition.version}] latest version ${latestDefinition.version} already installed`
+        `Built-in entity definition [${latestDefinition.version}] latest version v${latestDefinition.version} already installed`
       );
       return latestDefinition;
     }
 
     logger.info(
-      `Updating built-in entity definition [${latestDefinition.id}] from version ${installedDefinition.version} to ${latestDefinition.version}`
+      `Updating built-in entity definition [${latestDefinition.id}] from v${installedDefinition.version} to v${latestDefinition.version}`
     );
     await uninstallEntityDefinition({
       esClient,

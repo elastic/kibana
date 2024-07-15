@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition } from '@kbn/entities-schema';
@@ -132,8 +133,10 @@ export async function installBuiltInEntityDefinitions({
 
     const definition = installedDefinitions[0];
     // verify current installation
-    if (!definition.state.installed) {
-      logger.debug(`Detected partial installation of definition [${definition.id}], reinstalling`);
+    if (!definition.state.installed || semver.lt(definition.version, builtInDefinition.version)) {
+      logger.debug(
+        `Detected partial or outdated installation of definition [${definition.id}] v${definition.version}, reinstalling v${builtInDefinition.version}`
+      );
       await uninstallEntityDefinition({ esClient, soClient, logger, definition });
       return await installAndStartDefinition({
         definition: builtInDefinition,
