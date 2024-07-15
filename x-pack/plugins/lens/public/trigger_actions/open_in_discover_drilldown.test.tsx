@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
+import React from 'react';
 import type { ApplicationStart } from '@kbn/core/public';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
-import { mount } from 'enzyme';
 import { Filter } from '@kbn/es-query';
 import {
   ActionFactoryContext,
@@ -49,14 +50,14 @@ describe('open in discover drilldown', () => {
     const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
       .ReactCollectConfig;
     const setConfig = jest.fn();
-    const instance = mount(
+    render(
       <Component
         config={{ openInNewTab: false }}
         onConfig={setConfig}
         context={{} as ActionFactoryContext}
       />
     );
-    instance.find('EuiSwitch').prop('onChange')!({} as unknown as FormEvent<{}>);
+    userEvent.click(screen.getByRole('switch'));
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
 
