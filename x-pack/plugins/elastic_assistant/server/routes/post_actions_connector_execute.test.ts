@@ -160,23 +160,23 @@ describe('postActionsConnectorExecuteRoute', () => {
           throw new Error('simulated error');
         }
       }
-    ),
-      actionsClient.getBulk.mockResolvedValue([
-        {
-          id: '1',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-          name: 'my name',
-          actionTypeId: '.gen-ai',
-          isMissingSecrets: false,
-          config: {
-            a: true,
-            b: true,
-            c: true,
-          },
+    );
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        name: 'my name',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: {
+          a: true,
+          b: true,
+          c: true,
         },
-      ]);
+      },
+    ]);
   });
 
   it('returns the expected response', async () => {
