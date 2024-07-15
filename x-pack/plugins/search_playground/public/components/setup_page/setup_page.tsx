@@ -30,13 +30,13 @@ export const SetupPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { indices, isLoading: isIndicesLoading } = useQueryIndices();
   const index = useMemo(() => searchParams.get('default-index'), [searchParams]);
-  const { addIndex } = useSourceIndicesFields();
+  const { setIndices } = useSourceIndicesFields();
 
   useEffect(() => {
     if (index) {
-      addIndex(index);
+      setIndices([index]);
     }
-  }, [index, addIndex]);
+  }, [index, setIndices]);
 
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.setupChatPageLoaded);
