@@ -16,6 +16,9 @@ import { ChatFormFields } from '../types';
 
 jest.mock('../hooks/use_load_fields_by_indices');
 jest.mock('../hooks/use_llms_models');
+jest.mock('react-router-dom-v5-compat', () => ({
+  useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
+}));
 
 let formHookSpy: jest.SpyInstance;
 

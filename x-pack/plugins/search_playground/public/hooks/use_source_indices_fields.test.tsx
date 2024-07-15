@@ -14,6 +14,9 @@ import * as ReactHookForm from 'react-hook-form';
 jest.mock('./use_kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('react-router-dom-v5-compat', () => ({
+  useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
+}));
 
 let formHookSpy: jest.SpyInstance;
 
