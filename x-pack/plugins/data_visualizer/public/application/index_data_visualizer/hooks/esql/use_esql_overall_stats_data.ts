@@ -159,7 +159,6 @@ const getESQLDocumentCountStats = async (
       handleError({
         request,
         error,
-        onError,
         title: i18n.translate('xpack.dataVisualizer.esql.docCountNoneTimeseriesError', {
           defaultMessage: `Error getting total count for ES|QL data:`,
         }),
@@ -215,6 +214,8 @@ export const useESQLOverallStatsData = (
   } = useDataVisualizerKibana();
 
   const previousDocCountRequest = useRef('');
+  const previousError = useRef<Error | undefined>();
+
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
@@ -224,10 +225,16 @@ export const useESQLOverallStatsData = (
     getInitialProgress()
   );
   const onError = useCallback(
-    (error, title?: string) =>
+    (error: Error, title?: string) => {
+      // If a previous error already occured, no need to show the toast again
+      if (previousError.current) {
+        return;
+      }
+      previousError.current = error;
       toasts.addError(error, {
         title: title ?? fieldStatsErrorTitle,
-      }),
+      });
+    },
     [toasts]
   );
 
@@ -244,7 +251,7 @@ export const useESQLOverallStatsData = (
           isRunning: true,
           error: undefined,
         });
-
+        previousError.current = undefined;
         const {
           searchQuery,
           intervalMs,
@@ -453,6 +460,11 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        setOverallStatsProgress({
+          loaded: 100,
+          isRunning: false,
+          error,
+        });
         setQueryHistoryStatus(false);
         // If error already handled in sub functions, no need to propogate
         if (error.name !== 'AbortError' && error.handled !== true) {
