@@ -69,12 +69,14 @@ export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedFie
 
   return (
     <EuiFormRow
+      fullWidth
       data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
       label={i18n.translate('xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel', {
         defaultMessage: 'Selected field',
       })}
     >
       <EuiSuperSelect
+        fullWidth
         aria-label="Select a field"
         options={fieldOptions}
         valueOfSelected={selectedField ?? undefined}

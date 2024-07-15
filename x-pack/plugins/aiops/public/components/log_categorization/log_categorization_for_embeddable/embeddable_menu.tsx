@@ -119,6 +119,7 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
   return (
     <>
       <EuiFormRow
+        fullWidth
         data-test-subj="aiopsRandomSamplerOptionsFormRow"
         label={
           <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -160,6 +161,7 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
         }
       >
         <EuiSuperSelect
+          fullWidth
           aria-label="Select a minimum time range"
           options={minimumTimeRangeOptions}
           valueOfSelected={minimumTimeRangeOption}

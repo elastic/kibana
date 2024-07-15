@@ -59,7 +59,8 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
         {
           ownFocus: true,
           size: 's',
-          type: 'push',
+          type: 'overlay',
+          paddingSize: 'm',
           'data-test-subj': 'aiopsPatternAnalysisEmbeddableInitializer',
           'aria-labelledby': 'patternAnalysisConfig',
           onClose: () => {

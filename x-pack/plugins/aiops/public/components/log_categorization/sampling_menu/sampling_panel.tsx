@@ -66,6 +66,7 @@ export const SamplingPanel: FC<Props> = ({
       ) : null}
 
       <EuiFormRow
+        fullWidth
         data-test-subj="aiopsRandomSamplerOptionsFormRow"
         label={i18n.translate(
           'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
@@ -80,6 +81,7 @@ export const SamplingPanel: FC<Props> = ({
         }
       >
         <EuiSuperSelect
+          fullWidth
           data-test-subj="aiopsRandomSamplerOptionsSelect"
           options={RANDOM_SAMPLER_SELECT_OPTIONS}
           valueOfSelected={randomSamplerPreference}

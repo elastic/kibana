@@ -98,7 +98,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
           backgroundColor: euiThemeVars.euiColorEmptyShade,
         }}
       >
-        <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
+        <EuiTitle size="s" data-test-subj="inlineEditingFlyoutLabel">
           <h2>
             {isNewPanel
               ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.config.title.new', {
@@ -122,7 +122,6 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             <IndexPatternSelect
               autoFocus={!dataViewId}
               fullWidth
-              compressed
               indexPatternId={dataViewId}
               placeholder={i18n.translate(
                 'xpack.aiops.embeddablePatternAnalysis.config.dataViewSelectorPlaceholder',
@@ -151,10 +150,15 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} data-test-subj="aiopsPatternAnalysisCancelButton">
+            <EuiButtonEmpty
+              color="primary"
+              size="m"
+              onClick={onCancel}
+              data-test-subj="aiopsPatternAnalysisCancelButton"
+            >
               <FormattedMessage
                 id="xpack.aiops.embeddablePatternAnalysis.config.cancelButtonLabel"
-                defaultMessage="Cancel"
+                defaultMessage="Close"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -174,7 +178,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             >
               <FormattedMessage
                 id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
-                defaultMessage="Apply and close"
+                defaultMessage="Save"
               />
             </EuiButton>
           </EuiFlexItem>

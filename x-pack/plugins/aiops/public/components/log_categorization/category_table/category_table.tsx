@@ -153,7 +153,7 @@ export const CategoryTable: FC<Props> = ({
           onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
         },
         {
-          name: openInDiscoverLabels.singleSelect.out + '1',
+          name: openInDiscoverLabels.singleSelect.out + '1', // !!!!!!!!!!!!!!!!!!!!!!
           description: openInDiscoverLabels.singleSelect.out,
           icon: 'minusInCircle',
           type: 'icon',
