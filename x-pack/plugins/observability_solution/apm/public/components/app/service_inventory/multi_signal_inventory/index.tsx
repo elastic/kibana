@@ -26,6 +26,7 @@ import {
 import { ServiceListItem } from '../../../../../common/service_inventory';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
+import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
@@ -158,6 +159,13 @@ export function MultiSignalInventory() {
     services: mainStatisticsData.services,
   });
 
+  const { data, status } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/has_entities');
+  }, []);
+
+  if (!data?.hasData && status === FETCH_STATUS.SUCCESS) {
+    return <NoEntitiesEmptyState />;
+  }
   return (
     <>
       <EuiFlexGroup gutterSize="m">

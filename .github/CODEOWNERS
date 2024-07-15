@@ -752,6 +752,7 @@ x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-in
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
+packages/kbn-securitysolution-exceptions-common @elastic/security-detection-engine
 packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
@@ -1236,6 +1237,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
+/.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -1617,8 +1619,8 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
