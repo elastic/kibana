@@ -10,15 +10,16 @@ import {
   SimpleChatModel,
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
-import { type BaseMessage } from '@langchain/core/messages';
+import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { parseGeminiStream } from '../utils/gemini';
-import { parseBedrockStream } from '../utils/bedrock';
+import { parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
+import { parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
@@ -36,6 +37,18 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   temperature?: number;
   streaming: boolean;
   maxTokens?: number;
+}
+
+function _formatMessages(messages: BaseMessage[]) {
+  if (!messages.length) {
+    throw new Error('No messages provided.');
+  }
+  return messages.map((message, i) => {
+    if (typeof message.content !== 'string') {
+      throw new Error('Multimodal messages are not supported.');
+    }
+    return getMessageContentAndRole(message.content, message._getType());
+  });
 }
 
 export class ActionsClientSimpleChatModel extends SimpleChatModel {
@@ -91,16 +104,14 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
-    if (!messages.length) {
-      throw new Error('No messages provided.');
-    }
-    const formattedMessages: Array<{ content: string; role: string }> = [];
-    messages.forEach((message, i) => {
-      if (typeof message.content !== 'string') {
-        throw new Error('Multimodal messages are not supported.');
+    if (this.streaming) {
+      const chunks = [];
+      for await (const chunk of this._streamResponseChunks(messages, options, runManager)) {
+        chunks.push(chunk.message.content);
       }
-      formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
-    });
+      return chunks.join("");
+    }
+    const formattedMessages = _formatMessages(messages);
     this.#logger.debug(
       () =>
         `ActionsClientSimpleChatModel#_call\ntraceId: ${
@@ -128,16 +139,47 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       );
     }
 
-    if (!this.streaming) {
-      const content = get('data.message', actionResult);
+    const content = get('data.message', actionResult);
 
-      if (typeof content !== 'string') {
-        throw new Error(
-          `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
-        );
-      }
+    if (typeof content !== 'string') {
+      throw new Error(
+        `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
+      );
+    }
 
-      return content; // per the contact of _call, return a string
+    return content; // per the contact of _call, return a string
+  }
+
+  async *_streamResponseChunks(
+    messages: BaseMessage[],
+    options: this['ParsedCallOptions'],
+    runManager?: CallbackManagerForLLMRun | undefined
+  ): AsyncGenerator<ChatGenerationChunk, any, unknown> {
+    const formattedMessages = _formatMessages(messages);;
+    this.#logger.debug(
+      () =>
+        `ActionsClientSimpleChatModel#stream\ntraceId: ${
+          this.#traceId
+        }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
+    );
+    // create a new connector request body with the assistant message:
+    const requestBody = {
+      actionId: this.#connectorId,
+      params: {
+        subAction: 'invokeStream',
+        subActionParams: {
+          model: this.model,
+          messages: formattedMessages,
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
+        },
+      },
+    };
+    const actionResult = await this.#actionsClient.execute(requestBody);
+
+    if (actionResult.status === 'error') {
+      throw new Error(
+        `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+      );
     }
 
     const readable = get('data', actionResult) as Readable;
@@ -151,7 +193,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
     let streamingFinished = false;
     const finalOutputStopRegex = /(?<!\\)\"/;
-    const handleLLMNewToken = async (token: string) => {
+
+    const streamParser = this.llmType === 'bedrock' ? parseBedrockStreamAsAsyncIterator : parseGeminiStreamAsAsyncIterator;
+    for await (const token of streamParser(readable, this.#logger, this.#signal)) {
+      // TODO: Move modifications of raw generated content out of chat model parsing
       if (finalOutputIndex === -1) {
         // Remove whitespace to simplify parsing
         currentOutput += token.replace(/\s/g, '');
@@ -163,14 +208,13 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
         } else {
+          yield new ChatGenerationChunk({
+            message: new AIMessageChunk({ content: token }),
+            text: token,
+          })
           await runManager?.handleLLMNewToken(token);
         }
       }
-    };
-    const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
-
-    const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
-
-    return parsed; // per the contact of _call, return a string
+    }
   }
 }
