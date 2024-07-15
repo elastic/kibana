@@ -27,6 +27,8 @@ export async function createAndInstallHistoryIngestPipeline(
       () =>
         esClient.ingest.putPipeline({
           id: historyId,
+          // TODO The ingest pipelines include a pipeline processor that calls out the pipelines named <definition_id>@custom and <definition_id>-history@custom or <definition_id>-latest@custom if they exists
+          // ignore_missing_pipeline is set to true to avoid errors when the pipeline does not exist
           processors: historyProcessors,
         }),
       { logger }
@@ -50,6 +52,8 @@ export async function createAndInstallLatestIngestPipeline(
       () =>
         esClient.ingest.putPipeline({
           id: latestId,
+          // TODO The ingest pipelines include a pipeline processor that calls out the pipelines named <definition_id>@custom and <definition_id>-history@custom or <definition_id>-latest@custom if they exists
+          // ignore_missing_pipeline is set to true to avoid errors when the pipeline does not exist
           processors: latestProcessors,
         }),
       { logger }

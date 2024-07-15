@@ -6,25 +6,30 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getEntityHistoryIndexTemplateV1 } from '../../common/helpers';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
   ENTITY_HISTORY_INDEX_PREFIX_V1,
-  ENTITY_HISTORY_INDEX_TEMPLATE_V1,
 } from '../../common/constants_entities';
+import { getCustomHistoryTemplateComponents } from './components/helpers';
 
-export const entitiesHistoryIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
-  name: ENTITY_HISTORY_INDEX_TEMPLATE_V1,
+export const getEntitiesHistoryIndexTemplateConfig = (
+  definitionId: string
+): IndicesPutIndexTemplateRequest => ({
+  name: getEntityHistoryIndexTemplateV1(definitionId),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",
     ecs_version: '8.0.0',
   },
+  ignore_missing_component_templates: getCustomHistoryTemplateComponents(definitionId),
   composed_of: [
     ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+    ...getCustomHistoryTemplateComponents(definitionId),
   ],
   index_patterns: [`${ENTITY_HISTORY_INDEX_PREFIX_V1}.*`],
   priority: 1,
@@ -71,4 +76,4 @@ export const entitiesHistoryIndexTemplateConfig: IndicesPutIndexTemplateRequest 
       },
     },
   },
-};
+});

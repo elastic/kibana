@@ -28,6 +28,9 @@ import {
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
+import { upsertTemplate } from '../manage_index_templates';
+import { getEntitiesLatestIndexTemplateConfig } from '../../templates/entities_latest_template';
+import { getEntitiesHistoryIndexTemplateConfig } from '../../templates/entities_history_template';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -61,6 +64,19 @@ export async function installEntityDefinition({
 
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
+
+    // create scoped index template
+    await upsertTemplate({
+      esClient,
+      logger,
+      template: getEntitiesHistoryIndexTemplateConfig(definition.id),
+    });
+
+    await upsertTemplate({
+      esClient,
+      logger,
+      template: getEntitiesLatestIndexTemplateConfig(definition.id),
+    });
 
     // install ingest pipelines
     logger.debug(`Installing ingest pipelines for definition ${definition.id}`);

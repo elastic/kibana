@@ -139,5 +139,17 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
+      },
+    },
   ];
 }
