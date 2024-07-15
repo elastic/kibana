@@ -1157,7 +1157,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should run rule in the past and generate alert, without duplicates', async () => {
+      it('alerts when run on a time range that the rule has not previously seen, and deduplicates if run there more than once', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h');
         const firstDocument = {
@@ -1208,7 +1208,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
       });
 
-      it("should run rule in the past and don't generate duplicate alert", async () => {
+      it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
         const id = uuidv4();
         const firstTimestamp = moment();
 
