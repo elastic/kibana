@@ -54,25 +54,26 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai';
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
+  const getLlmInstance = () =>
+    new llmClass({
+      actionsClient,
+      connectorId,
+      llmType,
+      logger,
+      // possible client model override,
+      // let this be undefined otherwise so the connector handles the model
+      model: request.body.model,
+      // ensure this is defined because we default to it in the language_models
+      // This is where the LangSmith logs (Metadata > Invocation Params) are set
+      temperature: getDefaultArguments(llmType).temperature,
+      signal: abortSignal,
+      streaming: isStream,
+      // prevents the agent from retrying on failure
+      // failure could be due to bad connector, we should deliver that result to the client asap
+      maxRetries: 0,
+    });
 
-  const llm = new llmClass({
-    actionsClient,
-    connectorId,
-    llmType,
-    logger,
-    // possible client model override,
-    // let this be undefined otherwise so the connector handles the model
-    model: request.body.model,
-    // ensure this is defined because we default to it in the language_models
-    // This is where the LangSmith logs (Metadata > Invocation Params) are set
-    temperature: getDefaultArguments(llmType).temperature,
-    signal: abortSignal,
-    streaming: isStream,
-    // prevents the agent from retrying on failure
-    // failure could be due to bad connector, we should deliver that result to the client asap
-    maxRetries: 0,
-    graph: true,
-  });
+  const llm = getLlmInstance();
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -145,6 +146,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     conversationId,
     dataClients,
     llm,
+    getLlmInstance,
     logger,
     tools,
     responseLanguage,
@@ -153,7 +155,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const inputs = { input: latestMessage[0]?.content as string };
 
   if (isStream) {
-    return streamGraph({ apmTracer, assistantGraph, inputs, logger, onLlmResponse, request });
+    return streamGraph({
+      apmTracer,
+      assistantGraph,
+      llmType,
+      bedrockChatEnabled,
+      inputs,
+      logger,
+      onLlmResponse,
+      request,
+      traceOptions,
+    });
   }
 
   const graphResponse = await invokeGraph({
