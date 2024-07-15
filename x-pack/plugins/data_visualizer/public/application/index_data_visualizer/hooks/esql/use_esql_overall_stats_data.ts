@@ -285,8 +285,6 @@ export const useESQLOverallStatsData = (
 
         setQueryHistoryStatus(true);
 
-        // @TODO: remove
-        console.log(`--@@runRequest called`);
         // Note: dropNullColumns will return empty [] for all_columns if limit size is 0
         // So we are making a query with default limit
         // And use this one query to
