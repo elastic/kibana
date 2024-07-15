@@ -93,7 +93,7 @@ export function DataIngestStatus({ onboardingId }: Props) {
                 troubleshootingLink: (
                   <EuiLink
                     data-test-subj="observabilityOnboardingDataIngestStatusTroubleshootingLink"
-                    href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html#agent-oom-k8s"
+                    href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
                     external
                     target="_blank"
                   >
