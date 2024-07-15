@@ -28,6 +28,7 @@ import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -41,6 +42,7 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
+const taskPartitioner = new TaskPartitioner('test');
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -131,6 +133,7 @@ describe('TaskClaiming', () => {
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        taskPartitioner,
         ...taskClaimingOpts,
       });
 
@@ -1251,6 +1254,7 @@ if (doc['task.runAt'].size()!=0) {
         taskStore,
         maxAttempts: 2,
         getCapacity,
+        taskPartitioner,
       });
 
       return { taskManagerId, runAt, taskClaiming };

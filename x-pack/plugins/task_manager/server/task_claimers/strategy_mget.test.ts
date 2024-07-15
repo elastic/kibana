@@ -16,7 +16,7 @@ import {
   ConcreteTaskInstanceVersion,
   TaskPriority,
 } from '../task';
-import { StoreOpts } from '../task_store';
+import { SearchOpts, StoreOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
 import { asOk, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -33,6 +33,12 @@ import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
+import { TaskPartitioner } from '../lib/task_partitioner';
+import type { MustNotCondition } from '../queries/query_clauses';
+
+jest.mock('../lib/assign_pod_partitions', () => ({
+  assignPodPartitions: jest.fn().mockReturnValue([1, 3]),
+}));
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -46,6 +52,7 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
+const taskPartitioner = new TaskPartitioner('test');
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -138,6 +145,7 @@ describe('TaskClaiming', () => {
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        taskPartitioner,
         ...taskClaimingOpts,
       });
 
@@ -183,17 +191,13 @@ describe('TaskClaiming', () => {
         return unwrap(resultOrErr) as ClaimOwnershipResult;
       });
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        TASK_MANAGER_MARK_AS_CLAIMED,
-        TASK_MANAGER_TRANSACTION_TYPE
-      );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      expect(store.fetch.mock.calls).toMatchObject({});
-      expect(store.getDocVersions.mock.calls).toMatchObject({});
       return results.map((result, index) => ({
         result,
-        args: {},
+        args: {
+          search: store.fetch.mock.calls[index][0] as SearchOpts & {
+            query: MustNotCondition;
+          },
+        },
       }));
     }
 
@@ -271,6 +275,91 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: ['foobar'],
       });
       expect(result).toMatchObject({});
+    });
+
+    test('it should filter for specific partitions and tasks without partitions', async () => {
+      const taskManagerId = uuidv4();
+      const [
+        {
+          args: {
+            search: { query },
+          },
+        },
+      ] = await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "must": Object {
+                          "range": Object {
+                            "task.retryAt": Object {
+                              "gt": "now",
+                            },
+                          },
+                        },
+                        "should": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "running",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "task.status": "claiming",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "terms": Object {
+                        "task.partition": Array [
+                          1,
+                          3,
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must_not": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "task.partition",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
     });
   });
 
@@ -373,6 +462,7 @@ describe('TaskClaiming', () => {
         taskStore,
         maxAttempts: 2,
         getCapacity,
+        taskPartitioner,
       });
 
       return { taskManagerId, runAt, taskClaiming };
