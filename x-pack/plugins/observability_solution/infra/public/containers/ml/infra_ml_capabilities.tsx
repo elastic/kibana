@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
-import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,

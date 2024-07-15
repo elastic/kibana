@@ -18,7 +18,7 @@ import {
   MetricsK8sAnomaly,
   Metric,
 } from '../../../../../common/http_api/infra_ml';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../../hooks/use_tracked_promise';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;

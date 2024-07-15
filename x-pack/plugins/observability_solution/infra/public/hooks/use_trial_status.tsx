@@ -13,7 +13,7 @@ import { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_BASE_PATH as LICENSE_MANAGEMENT_API_BASE_PATH } from '@kbn/license-management-plugin/common/constants';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { useTrackedPromise } from '../utils/use_tracked_promise';
+import { useTrackedPromise } from './use_tracked_promise';
 
 interface UseTrialStatusState {
   loadState: 'uninitialized' | 'pending' | 'resolved' | 'rejected';

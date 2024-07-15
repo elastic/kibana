@@ -19,7 +19,7 @@ import {
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
 } from '../../../../../../common/http_api';
 import { ExecutionTimeRange } from '../../../../../types';
-import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../../../hooks/use_tracked_promise';
 
 interface Options {
   logViewReference: PersistedLogViewReference;
