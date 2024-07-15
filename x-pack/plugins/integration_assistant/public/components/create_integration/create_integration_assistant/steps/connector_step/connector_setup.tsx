@@ -50,7 +50,6 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
       notifications: { toasts },
     } = useKibana().services;
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
-
     const onModalClose = useCallback(() => {
       setSelectedActionType(null);
       onClose?.();
@@ -74,6 +73,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
         {compressed ? (
           <EuiListGroup
             flush
+            data-test-subj="connectorSetupCompressed"
             listItems={actionTypes.map((actionType) => ({
               id: actionType.id,
               label: actionType.name,
@@ -90,10 +90,13 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
             }))}
           />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="connectorSetupPage">
             {actionTypes?.map((actionType: ActionType) => (
-              <EuiFlexItem data-test-subj="action-option" key={actionType.id}>
-                <EuiLink onClick={() => setSelectedActionType(actionType)}>
+              <EuiFlexItem key={actionType.id}>
+                <EuiLink
+                  onClick={() => setSelectedActionType(actionType)}
+                  data-test-subj={`actionType-${actionType.id}`}
+                >
                   <EuiPanel hasShadow={false} hasBorder paddingSize="l" css={panelCss}>
                     <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>

@@ -40,6 +40,3 @@ export const CreateLiveQueryRequestBody = z.object({
   event_ids: z.array(z.string()).optional(),
   metadata: z.object({}).nullable().optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

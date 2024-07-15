@@ -2419,6 +2419,10 @@
                 "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.mocks.ts"
               },

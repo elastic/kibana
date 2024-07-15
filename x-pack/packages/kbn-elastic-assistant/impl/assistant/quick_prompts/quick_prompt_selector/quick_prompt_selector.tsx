@@ -140,9 +140,8 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     const renderOption: (
       option: QuickPromptSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      searchValue: string
+    ) => React.ReactNode = (option, searchValue) => {
       const { color, label, value } = option;
       return (
         <EuiFlexGroup
