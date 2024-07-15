@@ -158,7 +158,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+                <RiskScoreDocTooltip anchorPosition="upCenter" />
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
