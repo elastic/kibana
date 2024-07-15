@@ -53,7 +53,7 @@ export function extractIntegrations(
     //   Unauthorized Method" refers "apm" package name while apm package has
     //   "apmserver" integration
     //
-    // - (2) Some packages don't have policy templates at al,
+    // - (2) Some packages don't have policy templates at all,
     //   e.g. "Lateral Movement Detection"
     if (packagePolicyTemplates.length <= 1) {
       result.push({
