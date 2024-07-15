@@ -66,12 +66,12 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(
     cli
     collect
     --project kibana
-    --branch "$KIBANA_BASE_BRANCH"
-    --commit "$GIT_COMMIT"
+    --branch $KIBANA_BASE_BRANCH
+    --commit $GIT_COMMIT
     --workflow $WORKFLOW
-    --version "$BASE_VERSION"
-    --qualifier "$VERSION_QUALIFIER"
-    --dependency "beats:$BEATS_MANIFEST_URL"
+    --version $BASE_VERSION
+    --qualifier $VERSION_QUALIFIER
+    --dependency beats:$BEATS_MANIFEST_URL
     --artifact-set main
 EOF
 )
