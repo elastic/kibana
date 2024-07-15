@@ -252,7 +252,7 @@ describe('formatJS Runner', () => {
             "defaultMessage": "Unexpected status check state {statusCheckState}",
             "end": 663,
             "file": "intl_prop.tsx",
-            "hasValuesObject": 1,
+            "hasValuesObject": true,
             "id": "home.tutorial.unexpectedStatusCheckStateErrorDescription",
             "start": 499,
             "valuesKeys": Array [
@@ -285,7 +285,7 @@ describe('formatJS Runner', () => {
             "defaultMessage": "Unexpected status check state {statusCheckState}",
             "end": 663,
             "file": "intl_prop.tsx",
-            "hasValuesObject": 1,
+            "hasValuesObject": true,
             "id": "home.tutorial.unexpectedStatusCheckStateErrorDescription",
             "start": 499,
             "valuesKeys": Array [

@@ -10,12 +10,17 @@ import { OnErrorFn, IntlErrorCode } from '@formatjs/intl';
 
 export const handleIntlError: OnErrorFn = (error) => {
   /**
-   * throw on any intl error except missing translations
-   * we do not throw on missing translations because our process
+   * log any intl error except missing translations
+   * we do not log on missing translations because our process
    * of translations happens after developers have commited their
    * strings in english.
+   *
+   * Previously we used to throw an error on malformed strings but
+   * restricting to logging is less risky in cases of errors
+   * for better UX (ie seeing `InvalidDate` is better than an empty screen)
    */
   if (error.code !== IntlErrorCode.MISSING_TRANSLATION) {
-    throw error;
+    // eslint-disable-next-line no-console
+    console.error(error);
   }
 };
