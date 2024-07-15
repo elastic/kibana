@@ -12,7 +12,7 @@ import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
-import { RowActions } from '../../../common/components/assistant_settings_management/row_actions';
+import { useInlineActions } from '../../../common/components/assistant_settings_management/inline_actions';
 import { getConversationApiConfig } from '../../../use_conversation/helpers';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../system_prompt_modal/translations';
 import * as i18n from './translations';
@@ -21,6 +21,7 @@ import { getSelectedConversations } from './utils';
 type SystemPromptTableItem = PromptResponse & { defaultConversations: string[] };
 
 export const useSystemPromptTable = () => {
+  const getActions = useInlineActions<SystemPromptTableItem>();
   const getColumns = useCallback(
     ({
       isActionsDisabled,
@@ -76,23 +77,14 @@ export const useSystemPromptTable = () => {
       },
       {
         align: 'center',
-        name: 'Actions',
         width: '120px',
-        render: (prompt: SystemPromptTableItem) => {
-          const isDeletable = !prompt.isDefault;
-          return (
-            <RowActions<SystemPromptTableItem>
-              disabled={isActionsDisabled}
-              rowItem={prompt}
-              onEdit={onEditActionClicked}
-              onDelete={isDeletable ? onDeleteActionClicked : undefined}
-              isDeletable={isDeletable}
-            />
-          );
-        },
+        ...getActions({
+          onDelete: onDeleteActionClicked,
+          onEdit: onEditActionClicked,
+        }),
       },
     ],
-    []
+    [getActions]
   );
 
   const getSystemPromptsList = ({

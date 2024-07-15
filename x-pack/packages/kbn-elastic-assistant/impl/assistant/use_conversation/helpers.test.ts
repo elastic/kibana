@@ -279,6 +279,9 @@ describe('getConversationApiConfig', () => {
       id: '123',
       actionTypeId: '.gen-ai',
       apiProvider: OpenAiProviderType.OpenAi,
+      config: {
+        provider: OpenAiProviderType.OpenAi,
+      },
     },
     {
       id: '456',
@@ -342,7 +345,9 @@ describe('getConversationApiConfig', () => {
       conversation,
     });
 
-    expect(result).toEqual({});
+    expect(result).toEqual({
+      defaultSystemPromptId: '2',
+    });
   });
 
   test('should return the default system prompt if conversation system prompt is not found', () => {

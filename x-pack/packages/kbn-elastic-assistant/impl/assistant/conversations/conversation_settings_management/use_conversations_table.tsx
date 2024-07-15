@@ -20,7 +20,7 @@ import {
   getInitialDefaultSystemPrompt,
 } from '../../use_conversation/helpers';
 import * as i18n from './translations';
-import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
+import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 
 const emptyConversations = {};
 
@@ -38,6 +38,7 @@ export type ConversationTableItem = Conversation & {
 };
 
 export const useConversationsTable = () => {
+  const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
       onDeleteActionClicked,
@@ -87,24 +88,16 @@ export const useConversationsTable = () => {
           sortable: true,
         },
         {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_ACTIONS,
           width: '120px',
           align: 'center',
-          render: (conversation: ConversationTableItem) => {
-            const isDeletable = !conversation.isDefault;
-            return (
-              <RowActions<ConversationTableItem>
-                rowItem={conversation}
-                onDelete={isDeletable ? onDeleteActionClicked : undefined}
-                onEdit={onEditActionClicked}
-                isDeletable={isDeletable}
-              />
-            );
-          },
+          ...getActions({
+            onDelete: onDeleteActionClicked,
+            onEdit: onEditActionClicked,
+          }),
         },
       ];
     },
-    []
+    [getActions]
   );
   const getConversationsList = useCallback(
     ({

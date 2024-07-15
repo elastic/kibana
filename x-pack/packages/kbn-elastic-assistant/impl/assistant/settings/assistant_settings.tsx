@@ -81,7 +81,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     conversationsLoaded,
   }) => {
     const {
-      actionTypeRegistry,
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       toasts,
@@ -97,7 +96,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
-    const { data: allPrompts } = useFetchPrompts();
+    const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
     const { data: connectors } = useLoadConnectors({
       http,
@@ -123,7 +122,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setUpdatedAnonymizationData,
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,
-    } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, anonymizationFields);
+    } = useSettingsUpdater(
+      conversations,
+      allPrompts,
+      conversationsLoaded,
+      promptsLoaded,
+      anonymizationFields
+    );
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -322,7 +327,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 {!selectedSettingsTab ||
                   (selectedSettingsTab === CONVERSATIONS_TAB && (
                     <ConversationSettings
-                      actionTypeRegistry={actionTypeRegistry}
                       connectors={connectors}
                       defaultConnector={defaultConnector}
                       conversationSettings={conversationSettings}

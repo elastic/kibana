@@ -65,6 +65,7 @@ describe('useSystemPromptTable', () => {
       const onEditActionClicked = jest.fn();
       const onDeleteActionClicked = jest.fn();
       const columns = result.current.getColumns({
+        isActionsDisabled: false,
         onEditActionClicked,
         onDeleteActionClicked,
       });
@@ -72,7 +73,7 @@ describe('useSystemPromptTable', () => {
       expect(columns).toHaveLength(4);
       expect(columns[0].name).toBe('Name');
       expect(columns[1].name).toBe('Default conversations');
-      expect(columns[2].name).toBe('Created on');
+      expect(columns[2].name).toBe('Date updated');
       expect(columns[3].name).toBe('Actions');
     });
   });

@@ -10,11 +10,12 @@ import React, { useCallback } from 'react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { FormattedDate } from '@kbn/i18n-react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
-import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { PromptContextTemplate } from '../../prompt_context/types';
 import * as i18n from './translations';
+import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 
 export const useQuickPromptTable = () => {
+  const getActions = useInlineActions<PromptResponse>();
   const getColumns = useCallback(
     ({
       isActionsDisabled,
@@ -71,26 +72,14 @@ export const useQuickPromptTable = () => {
       },
       {
         align: 'center',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
         width: '120px',
-        render: (prompt: PromptResponse) => {
-          if (!prompt) {
-            return null;
-          }
-          const isDeletable = !prompt.isDefault;
-          return (
-            <RowActions<PromptResponse>
-              disabled={isActionsDisabled}
-              rowItem={prompt}
-              onDelete={isDeletable ? onDeleteActionClicked : undefined}
-              onEdit={onEditActionClicked}
-              isDeletable={isDeletable}
-            />
-          );
-        },
+        ...getActions({
+          onDelete: onDeleteActionClicked,
+          onEdit: onEditActionClicked,
+        }),
       },
     ],
-    []
+    [getActions]
   );
 
   return { getColumns };
