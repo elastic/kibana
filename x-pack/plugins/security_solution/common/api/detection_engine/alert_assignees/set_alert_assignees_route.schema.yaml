@@ -12,7 +12,7 @@ paths:
       description: |
         Assign users to detection alerts, and unassign them from alerts.
         > info
-        > You cannot add and remove the same assignee.
+        > You cannot add and remove the same assignee in the same request.
       requestBody:
         required: true
         content:

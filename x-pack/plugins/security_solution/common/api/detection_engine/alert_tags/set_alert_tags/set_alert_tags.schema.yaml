@@ -12,7 +12,7 @@ paths:
       description: |
         And tags to detection alerts, and remove them from alerts.
         > info
-        > You cannot add and remove the same alert tag.
+        > You cannot add and remove the same alert tag in the same request.
       tags:
         - Alerts API
       requestBody:
