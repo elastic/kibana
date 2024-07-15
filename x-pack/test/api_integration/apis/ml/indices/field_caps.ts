@@ -60,17 +60,56 @@ export default ({ getService }: FtrProviderContext) => {
         1,
         `Expected number of indices to be 1, but got ${indices.length}`
       );
-      const fieldsLength = Object.keys(fields).length;
+      const fieldsArr = Object.keys(fields).sort();
 
       // The number of fields returned by the field caps API is different across
       // ES versions in forward compatibility tests. In ES 8.15.0, the `_ignored_source`
       // field was added (https://github.com/elastic/elasticsearch/pull/107567).
       const esVersion = getService('esVersion');
-      const expectedFieldsLength = esVersion.matchRange('>=8.15') ? 22 : 21;
 
-      expect(fieldsLength).to.eql(
-        expectedFieldsLength,
-        `Expected number of fields to be ${expectedFieldsLength}, but got ${fieldsLength}`
+      const expectedFieldsArr = [
+        '@timestamp',
+        '@version',
+        '@version.keyword',
+        '_data_stream_timestamp',
+        '_doc_count',
+        '_feature',
+        '_field_names',
+        '_id',
+        '_ignored',
+        '_index',
+        '_routing',
+        '_seq_no',
+        '_source',
+        '_tier',
+        '_type',
+        '_version',
+        'airline',
+        'responsetime',
+        'sourcetype',
+        'type',
+        'type.keyword',
+      ];
+
+      if (esVersion.matchRange('>=8.15')) {
+        // Remove `_type` field from expected fields array.
+        expectedFieldsArr.splice(expectedFieldsArr.indexOf('_type'), 1);
+        // Add `_ignored_source` and `_nested_path` fields to expected fields arra.
+        // https://github.com/elastic/elasticsearch/pull/107567
+        expectedFieldsArr.push('_ignored_source', '_nested_path');
+        expectedFieldsArr.sort();
+      }
+
+      if (esVersion.matchRange('>=8.16')) {
+        // Add `_index_mode` field to expected fields array.
+        // https://github.com/elastic/elasticsearch/pull/110676
+        expectedFieldsArr.push('_index_mode');
+        expectedFieldsArr.sort();
+      }
+
+      expect(fieldsArr).to.eql(
+        expectedFieldsArr,
+        `Expected fields to be [${expectedFieldsArr}], but got [${fieldsArr}]`
       );
     });
   });
