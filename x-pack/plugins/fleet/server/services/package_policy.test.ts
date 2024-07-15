@@ -68,13 +68,12 @@ import {
 import { appContextService } from './app_context';
 
 import { getPackageInfo } from './epm/packages';
-import { sendTelemetryEvents } from './upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from './upgrade_sender';
 import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
 
-const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
-  typeof sendTelemetryEvents
->;
+const mockedSendPackageUpdateTelemetryEvents =
+  sendPackageUpdateTelemetryEvents as jest.MockedFunction<typeof sendPackageUpdateTelemetryEvents>;
 
 const ASSETS_MAP_FIXTURES = new Map([
   [
@@ -191,7 +190,7 @@ jest.mock('./epm/packages/cleanup', () => {
 
 jest.mock('./upgrade_sender', () => {
   return {
-    sendTelemetryEvents: jest.fn(),
+    sendPackageUpdateTelemetryEvents: jest.fn(),
   };
 });
 
@@ -1713,7 +1712,7 @@ describe('Package policy service', () => {
 
   describe('bulkUpdate', () => {
     beforeEach(() => {
-      mockedSendTelemetryEvents.mockReset();
+      mockedSendPackageUpdateTelemetryEvents.mockReset();
     });
 
     it('should throw if the user try to update input vars that are frozen', async () => {
@@ -2364,7 +2363,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).toBeCalled();
+      expect(mockedSendPackageUpdateTelemetryEvents).toBeCalled();
     });
 
     it('should not send telemetry event when updating a package policy without upgrade', async () => {
@@ -2464,7 +2463,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).not.toBeCalled();
+      expect(mockedSendPackageUpdateTelemetryEvents).not.toBeCalled();
     });
 
     it('should call audit logger', async () => {

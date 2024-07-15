@@ -11,10 +11,10 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
-import { sendTelemetryEvents, capErrorSize, UpdateEventType } from './upgrade_sender';
+import { sendPackageUpdateTelemetryEvents, capErrorSize, UpdateEventType } from './upgrade_sender';
 import type { PackageUpdateEvent } from './upgrade_sender';
 
-describe('sendTelemetryEvents', () => {
+describe('sendPackageUpdateTelemetryEvents', () => {
   let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;
   let loggerMock: jest.Mocked<Logger>;
 
@@ -37,7 +37,7 @@ describe('sendTelemetryEvents', () => {
       eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
     };
 
-    sendTelemetryEvents(loggerMock, eventsTelemetryMock, upgradeMessage);
+    sendPackageUpdateTelemetryEvents(loggerMock, eventsTelemetryMock, upgradeMessage);
 
     expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith('fleet-upgrades', [
       {

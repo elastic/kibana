@@ -12,7 +12,7 @@ import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 import type { InstallablePackage, Installation } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
-import { sendTelemetryEvents } from '../../upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from '../../upgrade_sender';
 import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
 import { appContextService } from '../../app_context';
@@ -196,16 +196,20 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.1.0',
-          packageName: 'apache',
-          status: 'failure',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.1.0',
+            packageName: 'apache',
+            status: 'failure',
+          }
+        );
       });
 
       it('should send telemetry on install failure, license error', async () => {
@@ -218,16 +222,20 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          errorMessage: 'Installation requires basic license',
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'failure',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            errorMessage: 'Installation requires basic license',
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'failure',
+          }
+        );
       });
 
       it('should send telemetry on install success', async () => {
@@ -240,15 +248,19 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'success',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'success',
+          }
+        );
       });
 
       it('should send telemetry on update success', async () => {
@@ -265,15 +277,19 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: '1.2.0',
-          dryRun: false,
-          eventType: 'package-install',
-          installType: 'update',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'success',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: '1.2.0',
+            dryRun: false,
+            eventType: 'package-install',
+            installType: 'update',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'success',
+          }
+        );
       });
 
       it('should send telemetry on install failure, async error', async () => {
@@ -288,16 +304,20 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          errorMessage: 'error',
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'failure',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            errorMessage: 'error',
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'failure',
+          }
+        );
       });
 
       it('should install from bundled package if one exists', async () => {
@@ -335,7 +355,7 @@ describe('install', () => {
 
         expect(response.status).toEqual('installed');
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
           expect.anything(),
           undefined,
           expect.objectContaining({
@@ -409,16 +429,20 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.1.0',
-          packageName: 'apache',
-          status: 'failure',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.1.0',
+            packageName: 'apache',
+            status: 'failure',
+          }
+        );
       });
 
       it('should send telemetry on install failure, license error', async () => {
@@ -431,16 +455,20 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          errorMessage: 'Installation requires basic license',
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'failure',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            errorMessage: 'Installation requires basic license',
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'failure',
+          }
+        );
       });
 
       it('should send telemetry on install success', async () => {
@@ -453,15 +481,19 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'success',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'success',
+          }
+        );
       });
 
       it('should send telemetry on update success', async () => {
@@ -478,15 +510,19 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: '1.2.0',
-          dryRun: false,
-          eventType: 'package-install',
-          installType: 'update',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'success',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: '1.2.0',
+            dryRun: false,
+            eventType: 'package-install',
+            installType: 'update',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'success',
+          }
+        );
       });
 
       it('should send telemetry on install failure, async error', async () => {
@@ -503,16 +539,20 @@ describe('install', () => {
           esClient: {} as ElasticsearchClient,
         });
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-          currentVersion: 'not_installed',
-          dryRun: false,
-          errorMessage: 'error',
-          eventType: 'package-install',
-          installType: 'install',
-          newVersion: '1.3.0',
-          packageName: 'apache',
-          status: 'failure',
-        });
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          {
+            currentVersion: 'not_installed',
+            dryRun: false,
+            errorMessage: 'error',
+            eventType: 'package-install',
+            installType: 'install',
+            newVersion: '1.3.0',
+            packageName: 'apache',
+            status: 'failure',
+          }
+        );
       });
 
       it('should install from bundled package if one exists', async () => {
@@ -551,7 +591,7 @@ describe('install', () => {
 
         expect(response.status).toEqual('installed');
 
-        expect(sendTelemetryEvents).toHaveBeenCalledWith(
+        expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(
           expect.anything(),
           undefined,
           expect.objectContaining({
@@ -617,7 +657,7 @@ describe('install', () => {
         esClient: {} as ElasticsearchClient,
       });
 
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+      expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: '1.2.0',
         dryRun: false,
         eventType: 'package-install',
@@ -638,7 +678,7 @@ describe('install', () => {
         esClient: {} as ElasticsearchClient,
       });
 
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+      expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: 'not_installed',
         dryRun: false,
         eventType: 'package-install',
@@ -661,7 +701,7 @@ describe('install', () => {
         esClient: {} as ElasticsearchClient,
       });
 
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+      expect(sendPackageUpdateTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: 'not_installed',
         dryRun: false,
         errorMessage: 'error',

@@ -73,8 +73,9 @@ import {
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
-import type { PackageUpdateEvent } from '../../upgrade_sender';
-import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
+import { UpdateEventType } from '../../../telemetry/types';
+import type { PackageUpdateEvent } from '../../../telemetry/types';
+import { sendPackageUpdateTelemetryEvents } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
 
@@ -386,7 +387,7 @@ function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEv
 }
 
 function sendEvent(telemetryEvent: PackageUpdateEvent) {
-  sendTelemetryEvents(
+  sendPackageUpdateTelemetryEvents(
     appContextService.getLogger(),
     appContextService.getTelemetryEventsSender(),
     telemetryEvent

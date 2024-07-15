@@ -8,34 +8,18 @@
 import type { Logger } from '@kbn/core/server';
 
 import type { TelemetryEventsSender } from '../telemetry/sender';
-import type { InstallType } from '../types';
+import {
+  FLEET_UPGRADES_CHANNEL_NAME,
+  FLEET_INTEGRATIONS_POLICIES_EVENT_TYPE,
+  MAX_ERROR_SIZE,
+} from '../telemetry/constants';
+import type { PackageUpdateEvent, IntegrationPoliciesEvent, EventError } from '../telemetry/types';
 
-export interface PackageUpdateEvent {
-  packageName: string;
-  currentVersion: string;
-  newVersion: string;
-  status: 'success' | 'failure';
-  dryRun?: boolean;
-  errorMessage?: string[] | string;
-  error?: UpgradeError[];
-  eventType: UpdateEventType;
-  installType?: InstallType;
-}
+/*
+ * Defines the telemetry event senders
+ */
 
-export enum UpdateEventType {
-  PACKAGE_POLICY_UPGRADE = 'package-policy-upgrade',
-  PACKAGE_INSTALL = 'package-install',
-}
-
-export interface UpgradeError {
-  key?: string;
-  message: string | string[];
-}
-
-export const MAX_ERROR_SIZE = 100;
-export const FLEET_UPGRADES_CHANNEL_NAME = 'fleet-upgrades';
-
-export function sendTelemetryEvents(
+export function sendPackageUpdateTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
   upgradeEvent: PackageUpdateEvent
@@ -54,15 +38,38 @@ export function sendTelemetryEvents(
       },
     ]);
   } catch (exc) {
-    logger.error(`queuing telemetry events failed ${exc}`);
+    logger.error(`Queuing telemetry events failed ${exc}`);
   }
 }
 
-export function capErrorSize(errors: UpgradeError[], maxSize: number): UpgradeError[] {
+export function sendIntegrationPoliciesTelemetryEvents(
+  logger: Logger,
+  eventsTelemetry: TelemetryEventsSender | undefined,
+  integrationPoliciesEvent: IntegrationPoliciesEvent
+) {
+  if (eventsTelemetry === undefined) {
+    return;
+  }
+
+  try {
+    const cappedErrors = capErrorSize(integrationPoliciesEvent?.error || [], MAX_ERROR_SIZE);
+    eventsTelemetry.queueTelemetryEvents(FLEET_INTEGRATIONS_POLICIES_EVENT_TYPE, [
+      {
+        ...integrationPoliciesEvent,
+        error: integrationPoliciesEvent.error ? cappedErrors : undefined,
+        errorMessage: integrationPoliciesEvent.errorMessage || makeErrorGeneric(cappedErrors),
+      },
+    ]);
+  } catch (exc) {
+    logger.error(`Queuing telemetry events failed ${exc}`);
+  }
+}
+
+export function capErrorSize(errors: EventError[], maxSize: number): EventError[] {
   return errors.length > maxSize ? errors?.slice(0, maxSize) : errors;
 }
 
-function makeErrorGeneric(errors: UpgradeError[]): string[] {
+function makeErrorGeneric(errors: EventError[]): string[] {
   return errors.map((error) => {
     if (Array.isArray(error.message)) {
       const firstMessage = error.message[0];

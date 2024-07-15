@@ -95,6 +95,8 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import type { PackageUpdateEvent, UpdateEventType } from '../telemetry/types';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -109,8 +111,7 @@ import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
-import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
-import { sendTelemetryEvents } from './upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from './upgrade_sender';
 import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
@@ -1668,7 +1669,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         dryRun: true,
         eventType: 'package-policy-upgrade' as UpdateEventType,
       };
-      sendTelemetryEvents(
+      sendPackageUpdateTelemetryEvents(
         appContextService.getLogger(),
         appContextService.getTelemetryEventsSender(),
         upgradeTelemetry
@@ -2776,7 +2777,7 @@ export function sendUpdatePackagePolicyTelemetryEvent(
           status: 'success',
           eventType: 'package-policy-upgrade' as UpdateEventType,
         };
-        sendTelemetryEvents(
+        sendPackageUpdateTelemetryEvents(
           appContextService.getLogger(),
           appContextService.getTelemetryEventsSender(),
           upgradeTelemetry
