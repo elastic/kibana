@@ -46,7 +46,7 @@ type Candidate = FieldCandidate | TextFieldCandidate;
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -110,15 +110,17 @@ export const significantItemsHandlerFactory =
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
-          pValues = await fetchSignificantTermPValues(
-            client,
-            requestBody,
-            [fieldCandidate],
+          pValues = await fetchSignificantTermPValues({
+            esClient,
+            abortSignal,
             logger,
-            stateHandler.sampleProbability(),
-            responseStream.pushError,
-            abortSignal
-          );
+            emitError: responseStream.pushError,
+            arguments: {
+              ...requestBody,
+              fieldNames: [fieldCandidate],
+              sampleProbability: stateHandler.sampleProbability(),
+            },
+          });
         } catch (e) {
           if (!isRequestAbortedError(e)) {
             logger.error(
@@ -144,15 +146,17 @@ export const significantItemsHandlerFactory =
       } else if (isTextFieldCandidate(payload)) {
         const { textFieldCandidate } = payload;
 
-        const significantCategoriesForField = await fetchSignificantCategories(
-          client,
-          requestBody,
-          [textFieldCandidate],
+        const significantCategoriesForField = await fetchSignificantCategories({
+          esClient,
           logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        );
+          emitError: responseStream.pushError,
+          abortSignal,
+          arguments: {
+            ...requestBody,
+            fieldNames: [textFieldCandidate],
+            sampleProbability: stateHandler.sampleProbability(),
+          },
+        });
 
         if (significantCategoriesForField.length > 0) {
           significantCategories.push(...significantCategoriesForField);

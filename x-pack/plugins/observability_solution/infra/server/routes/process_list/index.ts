@@ -41,7 +41,14 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
       );
 
       const client = createSearchClient(requestContext, framework);
-      const processListResponse = await getProcessList(client, options);
+      const soClient = (await requestContext.core).savedObjects.client;
+
+      const { configuration } = await libs.sources.getSourceConfiguration(
+        soClient,
+        options.sourceId
+      );
+
+      const processListResponse = await getProcessList(client, configuration, options);
 
       return response.ok({
         body: ProcessListAPIResponseRT.encode(processListResponse),

@@ -68,7 +68,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
-import { withAlertingSpan, processRunResults } from './lib';
+import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -630,11 +630,13 @@ export class TaskRunner<
           if (outcome === 'failure') {
             this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
           }
-          this.logger.debug(
-            `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
-              executionStatus
-            )} - ${JSON.stringify(lastRun)}`
-          );
+          if (this.logger.isLevelEnabled('debug')) {
+            this.logger.debug(
+              `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
+                executionStatus
+              )} - ${JSON.stringify(lastRun)}`
+            );
+          }
           await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,
@@ -666,6 +668,8 @@ export class TaskRunner<
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+
+    this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;

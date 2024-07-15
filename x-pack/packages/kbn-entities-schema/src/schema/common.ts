@@ -8,16 +8,7 @@
 import { z } from 'zod';
 import moment from 'moment';
 
-export enum EntityType {
-  service = 'service',
-  host = 'host',
-  pod = 'pod',
-  node = 'node',
-}
-
 export const arrayOfStringsSchema = z.array(z.string());
-
-export const entityTypeSchema = z.nativeEnum(EntityType);
 
 export enum BasicAggregations {
   avg = 'avg',
@@ -105,3 +96,9 @@ export const identityFieldsSchema = z
     optional: z.boolean(),
   })
   .or(z.string().transform((value) => ({ field: value, optional: false })));
+
+const semVerRegex = new RegExp(/^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$/);
+export const semVerSchema = z.string().refine((maybeSemVer) => semVerRegex.test(maybeSemVer), {
+  message:
+    'The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.',
+});

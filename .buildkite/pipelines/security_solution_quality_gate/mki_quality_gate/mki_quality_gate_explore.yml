@@ -17,3 +17,66 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
+
+  - group: "API MKI - Explore"
+    key: api_test_explore
+    steps:
+      - label: Running explore:hosts:runner:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless:release
+        key: explore:hosts:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running explore:network:runner:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless:release
+        key: explore:network:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running explore:overview:runner:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless:release
+        key: explore:overview:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running explore:users:runner:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless:release
+        key: explore:users:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2

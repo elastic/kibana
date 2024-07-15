@@ -57,7 +57,6 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
         isLoading={isLoading}
         data-test-subj="create-case-template-select"
         fullWidth
-        hasNoInitialSelection
         value={selectedTemplate}
       />
     </EuiFormRow>

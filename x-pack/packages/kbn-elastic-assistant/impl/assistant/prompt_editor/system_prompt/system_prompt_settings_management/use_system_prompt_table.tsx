@@ -6,11 +6,11 @@
  */
 import { EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../../common/components/assistant_settings_management/row_actions';
-import { Prompt } from '../../../types';
 import {
   getConversationApiConfig,
   getInitialDefaultSystemPrompt,
@@ -21,10 +21,10 @@ import { getSelectedConversations } from './utils';
 
 type ConversationsWithSystemPrompt = Record<
   string,
-  Conversation & { systemPrompt: Prompt | undefined }
+  Conversation & { systemPrompt: PromptResponse | undefined }
 >;
 
-type SystemPromptTableItem = Prompt & { defaultConversations: string[] };
+type SystemPromptTableItem = PromptResponse & { defaultConversations: string[] };
 
 export const useSystemPromptTable = () => {
   const getColumns = useCallback(
@@ -97,7 +97,7 @@ export const useSystemPromptTable = () => {
     connectors: AIConnector[] | undefined;
     conversationSettings: Record<string, Conversation>;
     defaultConnector: AIConnector | undefined;
-    systemPromptSettings: Prompt[];
+    systemPromptSettings: PromptResponse[];
   }): SystemPromptTableItem[] => {
     const conversationsWithApiConfig = Object.entries(
       conversationSettings

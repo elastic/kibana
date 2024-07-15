@@ -7,10 +7,10 @@
 
 import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { PromptContextTemplate } from '../../prompt_context/types';
-import { QuickPrompt } from '../types';
 import * as i18n from './translations';
 
 export const useQuickPromptTable = () => {
@@ -21,29 +21,29 @@ export const useQuickPromptTable = () => {
       onDeleteActionClicked,
     }: {
       basePromptContexts: PromptContextTemplate[];
-      onEditActionClicked: (prompt: QuickPrompt) => void;
-      onDeleteActionClicked: (prompt: QuickPrompt) => void;
-    }): Array<EuiBasicTableColumn<QuickPrompt>> => [
+      onEditActionClicked: (prompt: PromptResponse) => void;
+      onDeleteActionClicked: (prompt: PromptResponse) => void;
+    }): Array<EuiBasicTableColumn<PromptResponse>> => [
       {
         align: 'left',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_NAME,
-        render: (prompt: QuickPrompt) =>
-          prompt?.title ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.title}</EuiLink>
+        render: (prompt: PromptResponse) =>
+          prompt?.name ? (
+            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.name}</EuiLink>
           ) : null,
-        sortable: ({ title }: QuickPrompt) => title,
+        sortable: ({ name }: PromptResponse) => name,
       },
       {
         align: 'left',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
-        render: (prompt: QuickPrompt) => {
+        render: (prompt: PromptResponse) => {
           const selectedPromptContexts = (
             basePromptContexts.filter((bpc) =>
               prompt?.categories?.some((cat) => bpc?.category === cat)
             ) ?? []
           ).map((bpc) => bpc?.description);
           return selectedPromptContexts ? (
-            <BadgesColumn items={selectedPromptContexts} prefix={prompt.title} />
+            <BadgesColumn items={selectedPromptContexts} prefix={prompt.name} />
           ) : null;
         },
       },
@@ -58,13 +58,13 @@ export const useQuickPromptTable = () => {
         align: 'center',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
         width: '120px',
-        render: (prompt: QuickPrompt) => {
+        render: (prompt: PromptResponse) => {
           if (!prompt) {
             return null;
           }
           const isDeletable = !prompt.isDefault;
           return (
-            <RowActions<QuickPrompt>
+            <RowActions<PromptResponse>
               rowItem={prompt}
               onDelete={isDeletable ? onDeleteActionClicked : undefined}
               onEdit={onEditActionClicked}

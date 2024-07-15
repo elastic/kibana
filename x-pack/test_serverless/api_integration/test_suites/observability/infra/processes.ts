@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
             hostTerm: {
               'host.name': 'serverless-host',
             },
-            indexPattern: 'metrics-*,metricbeat-*',
+            sourceId: 'default',
             to: DATES.serverlessTestingHost.max,
             sortBy: {
               name: 'cpu',

@@ -77,7 +77,9 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
   /**
    * @deprecated Use `authc` methods from the `SecurityServiceStart` contract instead.
    */
-  authc: { getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null };
+  authc: {
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  };
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
@@ -110,6 +112,7 @@ export class SecurityPlugin
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;
+
   private configSubscription?: Subscription;
 
   private config?: ConfigType;
@@ -189,6 +192,7 @@ export class SecurityPlugin
       this.initializerContext.logger.get('authentication')
     );
     this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+
     this.elasticsearchService = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
     );
@@ -340,7 +344,9 @@ export class SecurityPlugin
 
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
-      authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
+      authc: {
+        getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      },
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
@@ -421,8 +427,8 @@ export class SecurityPlugin
 
     return Object.freeze<SecurityPluginStart>({
       authc: {
-        apiKeys: this.authenticationStart.apiKeys,
         getCurrentUser: this.authenticationStart.getCurrentUser,
+        apiKeys: this.authenticationStart.apiKeys,
       },
       authz: {
         actions: this.authorizationSetup!.actions,

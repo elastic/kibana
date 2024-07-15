@@ -35,7 +35,7 @@ export const generateChatTitle = async ({
   model,
   state,
 }: GenerateChatTitleParams) => {
-  logger.debug(`Node state:\n ${JSON.stringify(state, null, 2)}`);
+  logger.debug(() => `Node state:\n ${JSON.stringify(state, null, 2)}`);
 
   if (state.messages.length !== 0) {
     logger.debug('No need to generate chat title, messages already exist');

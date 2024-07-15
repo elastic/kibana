@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const EVENT_RENDERERS_SWITCH = i18n.translate(
   'xpack.securitySolution.timeline.eventRenderersSwitch.title',
   {
-    defaultMessage: 'Row Renderers',
+    defaultMessage: 'Event renderers',
   }
 );
 
 export const EVENT_RENDERERS_SWITCH_WARNING = i18n.translate(
   'xpack.securitySolution.timeline.eventRenderersSwitch.warning',
   {
-    defaultMessage: 'Enabling Row Renderers may impact table performance.',
+    defaultMessage: 'Enabling event renderers might impact table performance.',
   }
 );

@@ -5,20 +5,10 @@
   "description": "Entity manager plugin for entity assets (inventory, topology, etc)",
   "plugin": {
     "id": "entityManager",
-    "configPath": [
-      "xpack",
-      "entityManager"
-    ],
-    "optionalPlugins": [
-      "spaces"
-    ],
-    "requiredPlugins": [
-      "security",
-      "encryptedSavedObjects",
-    ],
+    "configPath": ["xpack", "entityManager"],
+    "requiredPlugins": ["security", "encryptedSavedObjects"],
     "browser": true,
     "server": true,
-    "requiredBundles": [
-    ]
+    "requiredBundles": []
   }
 }

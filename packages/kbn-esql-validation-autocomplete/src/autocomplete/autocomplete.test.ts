@@ -10,7 +10,7 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
+import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
@@ -53,15 +53,27 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
 ];
 
 const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: string }>).concat(
-  ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
+  [
+    'a',
+    'index',
+    'otherIndex',
+    '.secretIndex',
+    'my-index',
+    'my-index$',
+    'my_index{}',
+    'my-index+1',
+    'synthetics-*',
+  ].map((name) => ({
     name,
     hidden: name.startsWith('.'),
   })),
-  ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
-    name,
-    hidden: false,
-    suggestedAs: `\`${name}\``,
-  }))
+  ['my-index[quoted]', 'my:index', 'my,index', 'logstash-{now/d{yyyy.MM.dd|+12:00}}'].map(
+    (name) => ({
+      name,
+      hidden: false,
+      suggestedAs: `"${name}"`,
+    })
+  )
 );
 
 const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
@@ -206,9 +218,6 @@ function getLiteralsByType(_type: string | string[]) {
   if (type.includes('time_literal')) {
     // return only singular
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
-  }
-  if (type.includes('chrono_literal')) {
-    return chronoLiterals.map(({ name }) => name);
   }
   return [];
 }
@@ -368,8 +377,9 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
-
+    const suggestedIndexes = indexes
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     // Monaco will filter further down here
     testSuggestions(
       'f',
@@ -397,8 +407,7 @@ describe('autocomplete', () => {
     const dataSources = indexes.concat(integrations);
     const suggestedDataSources = dataSources
       .filter(({ hidden }) => !hidden)
-      .map(({ name }) => name);
-
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     testSuggestions('from ', suggestedDataSources, '', [undefined, dataSources, undefined]);
     testSuggestions('from a,', suggestedDataSources, '', [undefined, dataSources, undefined]);
     testSuggestions('from *,', suggestedDataSources, '', [undefined, dataSources, undefined]);
