@@ -158,9 +158,11 @@ describe('Security Plugin', () => {
       const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
 
       expect(infoLogs.length).toBeGreaterThan(0);
-      expect(infoLogs[0]).toEqual([
-        `Hashed 'xpack.security.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
-      ]);
+      infoLogs.forEach((log) => {
+        expect(log).toEqual([
+          `Hashed 'xpack.security.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+        ]);
+      });
     });
   });
 
