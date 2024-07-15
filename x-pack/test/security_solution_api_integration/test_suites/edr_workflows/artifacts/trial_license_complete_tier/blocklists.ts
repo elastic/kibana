@@ -203,7 +203,11 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(anErrorMessageWith(/Invalid value \"\[\]\"/));
+              .expect(
+                anErrorMessageWith(
+                  '[request body]: entries.0.value: Array must contain at least 1 element(s)'
+                )
+              );
           });
 
           it(`should error on [${blocklistApiCall.method}] if signer is set for a non windows os entry item`, async () => {
