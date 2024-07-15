@@ -21,12 +21,12 @@ const RETRIES = 120;
 const RETRY_DELAY = 500;
 
 export async function waitForRuleStatus({
-                                          id,
-                                          expectedStatus,
-                                          supertest,
-                                          retryService,
-                                          logger,
-                                        }: {
+  id,
+  expectedStatus,
+  supertest,
+  retryService,
+  logger,
+}: {
   id: string;
   expectedStatus: string;
   supertest: SuperTest.Agent;
@@ -55,12 +55,12 @@ export async function waitForRuleStatus({
 }
 
 export async function waitForDocumentInIndex<T>({
-                                                  esClient,
-                                                  indexName,
-                                                  docCountTarget = 1,
-                                                  retryService,
-                                                  logger,
-                                                }: {
+  esClient,
+  indexName,
+  docCountTarget = 1,
+  retryService,
+  logger,
+}: {
   esClient: Client;
   indexName: string;
   docCountTarget?: number;
@@ -92,12 +92,12 @@ export async function waitForDocumentInIndex<T>({
 }
 
 export async function waitForAlertInIndex<T>({
-                                               esClient,
-                                               indexName,
-                                               ruleId,
-                                               retryService,
-                                               logger,
-                                             }: {
+  esClient,
+  indexName,
+  ruleId,
+  retryService,
+  logger,
+}: {
   esClient: Client;
   indexName: string;
   ruleId: string;
