@@ -8,33 +8,31 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const indexManagementService = getService('indexManagement');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const svlSettingsApi = getService('svlSettingsApi');
+  const svlIndicesHelpers = getService('svlIndicesHelpers');
+  let roleAuthc: RoleCredentials;
 
-  describe('settings', () => {
-    let getIndexSettings: typeof indexManagementService['settings']['api']['getIndexSettings'];
-    let updateIndexSettings: typeof indexManagementService['settings']['api']['updateIndexSettings'];
-    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
-    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
-
+  // see details: https://github.com/elastic/kibana/issues/187369
+  describe.skip('settings', function () {
     before(async () => {
-      ({
-        settings: {
-          api: { getIndexSettings, updateIndexSettings },
-        },
-        indices: {
-          helpers: { createIndex, deleteAllIndices },
-        },
-      } = indexManagementService);
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
-    after(async () => await deleteAllIndices());
+    after(async () => {
+      await svlIndicesHelpers.deleteAllIndices();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('should fetch an index settings', async () => {
-      const index = await createIndex();
+      const index = await svlIndicesHelpers.createIndex();
 
-      const { body } = await getIndexSettings(index).expect(200);
+      const { status, body } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       // Verify we fetch the corret index settings
       expect(body.settings.index.provided_name).to.be(index);
@@ -96,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
         try {
-          expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
+          expect(body.defaults.index.hasOwnProperty(setting)).to.eql(true);
         } catch {
           throw new Error(`Expected setting "${setting}" not found.`);
         }
@@ -104,9 +102,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update an index settings', async () => {
-      const index = await createIndex();
+      const index = await svlIndicesHelpers.createIndex();
 
-      const { body: body1 } = await getIndexSettings(index);
+      const { body: body1 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
       expect(body1.settings.index.number_of_replicas).to.be('1');
 
       const settings = {
@@ -114,9 +112,9 @@ export default function ({ getService }: FtrProviderContext) {
           number_of_replicas: 2,
         },
       };
-      await updateIndexSettings(index, settings);
+      await svlSettingsApi.updateIndexSettings(index, settings, roleAuthc);
 
-      const { body: body2 } = await getIndexSettings(index);
+      const { body: body2 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
       expect(body2.settings.index.number_of_replicas).to.be('2');
     });
   });

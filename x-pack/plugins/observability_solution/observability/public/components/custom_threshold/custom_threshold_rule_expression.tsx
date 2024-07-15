@@ -16,10 +16,8 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
@@ -72,7 +70,6 @@ export default function Expressions(props: Props) {
     data,
     dataViews,
     dataViewEditor,
-    docLinks,
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -331,30 +328,6 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  // Test to see if any of the group fields in groupBy are already filtered down to a single
-  // group by the filterQuery. If this is the case, then a groupBy is unnecessary, as it would only
-  // ever produce one group instance
-  const groupByFilterTestPatterns = useMemo(() => {
-    if (!ruleParams.groupBy) return null;
-    const groups = !Array.isArray(ruleParams.groupBy) ? [ruleParams.groupBy] : ruleParams.groupBy;
-    return groups.map((group: string) => ({
-      groupName: group,
-      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
-    }));
-  }, [ruleParams.groupBy]);
-
-  const redundantFilterGroupBy = useMemo(() => {
-    const { filterQuery } = ruleParams;
-    if (typeof filterQuery !== 'string' || !groupByFilterTestPatterns) return [];
-    return groupByFilterTestPatterns
-      .map(({ groupName, pattern }) => {
-        if (pattern.test(filterQuery)) {
-          return groupName;
-        }
-      })
-      .filter((g) => typeof g === 'string') as string[];
-  }, [ruleParams, groupByFilterTestPatterns]);
-
   if (paramsError) {
     return (
       <>
@@ -562,35 +535,8 @@ export default function Expressions(props: Props) {
           options={{
             groupBy: ruleParams.groupBy || null,
           }}
-          errorOptions={redundantFilterGroupBy}
         />
       </EuiFormRow>
-      {redundantFilterGroupBy.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="danger">
-            <FormattedMessage
-              id="xpack.observability.customThreshold.rule.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
-              values={{
-                matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
-                groupCount: redundantFilterGroupBy.length,
-                filteringAndGroupingLink: (
-                  <EuiLink
-                    data-test-subj="thresholdRuleExpressionsTheDocsLink"
-                    href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
-                  >
-                    {i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink',
-                      { defaultMessage: 'the docs' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </>
-      )}
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"

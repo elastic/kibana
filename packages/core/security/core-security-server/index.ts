@@ -26,4 +26,26 @@ export type {
   AuditRequest,
 } from './src/audit_logging/audit_events';
 export type { AuditLogger } from './src/audit_logging/audit_logger';
+
+export type {
+  APIKeysServiceWithContext,
+  APIKeysService,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyResult,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
+} from './src/authentication/api_keys';
+
+export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';
+export { isCreateRestAPIKeyParams } from './src/authentication/api_keys';
 export type { CoreFipsService } from './src/fips';
