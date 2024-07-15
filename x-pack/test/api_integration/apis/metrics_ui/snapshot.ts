@@ -20,13 +20,14 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchSnapshot = async (
-    body: SnapshotRequest
+    body: SnapshotRequest,
+    expectStatusCode = 200
   ): Promise<SnapshotNodeResponse | undefined> => {
     const response = await supertest
       .post('/api/metrics/snapshot')
       .set('kbn-xsrf', 'xxx')
       .send(body)
-      .expect(200);
+      .expect(expectStatusCode);
     return response.body;
   };
 
