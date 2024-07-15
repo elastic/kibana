@@ -22,7 +22,7 @@ export interface ExtractorOpts extends Opts {
   onMsgWithValuesExtracted: (filePath: string, msgs: MessageDescriptor[]) => void;
 }
 
-export { MessageDescriptor };
+export type { MessageDescriptor };
 
 /**
  * Check if node is `i18n.translate` node
