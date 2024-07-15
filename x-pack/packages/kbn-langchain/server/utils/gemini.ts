@@ -48,15 +48,10 @@ export const parseGeminiStream: StreamParser = async (
     const decoded = chunk.toString();
     const parsed = parseGeminiResponse(decoded);
     if (tokenHandler) {
-      const splitByQuotes = parsed.split(`"`);
-      splitByQuotes.forEach((chunkk, index) => {
-        // add quote back on except for last chunk
-        const splitBySpace = `${chunkk}${index === splitByQuotes.length - 1 ? '' : '"'}`.split(` `);
-
-        for (const char of splitBySpace) {
-          tokenHandler(`${char} `);
-        }
-      });
+      // Split the parsed string into chunks of 5 characters
+      for (let i = 0; i < parsed.length; i += 5) {
+        tokenHandler(parsed.substring(i, i + 5));
+      }
     }
     responseBody += parsed;
   });

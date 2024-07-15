@@ -155,7 +155,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
     let streamingFinished = false;
     const finalOutputStopRegex = /(?<!\\)"/;
-    let extraOutput = '';
     const handleLLMNewToken = async (token: string) => {
       if (finalOutputIndex === -1) {
         currentOutput += token;
@@ -165,7 +164,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
           const nonStrippedToken = '"action_input": "';
           finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
           const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
-          extraOutput = currentOutput.substring(contentStartIndex);
+          const extraOutput = currentOutput.substring(contentStartIndex);
           if (extraOutput.length > 0) {
             await runManager?.handleLLMNewToken(extraOutput);
           }
@@ -174,7 +173,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         const finalOutputEndIndex = token.search(finalOutputStopRegex);
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
-          extraOutput = token.substring(0, finalOutputEndIndex);
+          const extraOutput = token.substring(0, finalOutputEndIndex);
           streamingFinished = true;
           if (extraOutput.length > 0) {
             await runManager?.handleLLMNewToken(extraOutput);
