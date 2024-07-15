@@ -14,6 +14,7 @@ import {
   createAndInstallLatestIngestPipeline,
 } from './create_and_install_ingest_pipeline';
 import {
+  createAndInstallHistoryBackfillTransform,
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from './create_and_install_transform';
@@ -49,6 +50,7 @@ export async function installEntityDefinition({
     },
     transforms: {
       history: false,
+      backfill: false,
       latest: false,
     },
     definition: false,
@@ -73,6 +75,10 @@ export async function installEntityDefinition({
     logger.debug(`Installing transforms for definition ${definition.id}`);
     await createAndInstallHistoryTransform(esClient, entityDefinition, logger);
     installState.transforms.history = true;
+    if (entityDefinition.history.settings?.backfillSyncDelay) {
+      await createAndInstallHistoryBackfillTransform(esClient, entityDefinition, logger);
+      installState.transforms.backfill = true;
+    }
     await createAndInstallLatestTransform(esClient, entityDefinition, logger);
     installState.transforms.latest = true;
 
