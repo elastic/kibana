@@ -68,7 +68,7 @@
     "@kbn/security-plugin",
     "@kbn/share-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/text-based-languages",
+    "@kbn/esql",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-theme",
     "@kbn/unified-search-plugin",

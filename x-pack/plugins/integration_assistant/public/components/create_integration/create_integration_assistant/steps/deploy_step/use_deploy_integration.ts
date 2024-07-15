@@ -88,7 +88,18 @@ export const useDeployIntegration = ({
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body?.message ?? e.message}`);
+        const errorMessage = `${e.message}${
+          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
+        }`;
+
+        telemetry.reportAssistantComplete({
+          integrationName: integrationSettings.name ?? '',
+          integrationSettings,
+          connector,
+          error: errorMessage,
+        });
+
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }

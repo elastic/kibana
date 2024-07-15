@@ -15,11 +15,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -93,6 +89,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-exception-list-components",
+    "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/saved-objects-tagging-plugin",

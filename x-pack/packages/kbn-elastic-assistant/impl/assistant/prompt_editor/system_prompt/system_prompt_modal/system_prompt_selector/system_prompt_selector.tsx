@@ -147,9 +147,8 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     const renderOption: (
       option: SystemPromptSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      searchValue: string
+    ) => React.ReactNode = (option, searchValue) => {
       const { label, value } = option;
       return (
         <EuiFlexGroup
