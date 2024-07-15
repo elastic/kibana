@@ -192,6 +192,7 @@ const fieldStatsErrorTitle = i18n.translate(
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
+        id?: string;
         earliest: number | undefined;
         latest: number | undefined;
         aggInterval: TimeBucketsInterval;
@@ -213,6 +214,7 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const previousExecutionTs = useRef<number | undefined>(undefined);
   const previousDocCountRequest = useRef('');
   const previousError = useRef<Error | undefined>();
 
@@ -241,11 +243,23 @@ export const useESQLOverallStatsData = (
   const startFetch = useCallback(
     async function fetchOverallStats() {
       try {
-        cancelRequest();
-
         if (!fieldStatsRequest) {
           return;
         }
+        if (
+          fieldStatsRequest.lastRefresh === 0 ||
+          // Prevent running requests again when other plugins force refresh when query changes
+          // or when users repeat refresh button too quickly
+          (fieldStatsRequest.id !== 'esql_data_visualizer' &&
+            previousExecutionTs.current !== undefined &&
+            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 250)
+        ) {
+          return;
+        }
+        previousExecutionTs.current = fieldStatsRequest.lastRefresh;
+
+        cancelRequest();
+
         setOverallStatsProgress({
           ...getInitialProgress(),
           isRunning: true,
@@ -271,6 +285,8 @@ export const useESQLOverallStatsData = (
 
         setQueryHistoryStatus(true);
 
+        // @TODO: remove
+        console.log(`--@@runRequest called`);
         // Note: dropNullColumns will return empty [] for all_columns if limit size is 0
         // So we are making a query with default limit
         // And use this one query to

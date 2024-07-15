@@ -221,6 +221,7 @@ export const useESQLDataVisualizerData = (
         }
       }
       return {
+        id: input.id,
         earliest,
         latest,
         aggInterval,
@@ -239,7 +240,6 @@ export const useESQLDataVisualizerData = (
     [
       _timeBuckets,
       timefilter,
-      currentDataView?.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({ query, parentQuery, parentFilters }),
       indexPattern,
