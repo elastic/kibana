@@ -17,7 +17,7 @@ import { RiskScoreLevel } from './severity/common';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../common/search_strategy';
 import { getEmptyValue } from '../../common/components/empty_value';
-import { RiskScoreDocLink } from './risk_score_onboarding/risk_score_doc_link';
+import { EntityAnalyticsLearnMoreLink } from './risk_score_onboarding/entity_analytics_doc_link';
 import { RiskScoreHeaderTitle } from './risk_score_onboarding/risk_score_header_title';
 import type { HostRisk, UserRisk } from '../api/types';
 
@@ -35,7 +35,7 @@ interface UserRiskEntity {
 
 export type RiskEntity = HostRiskEntity | UserRiskEntity;
 
-const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, originalRisk }) => {
+const RiskSummaryPanelComponent: React.FC<RiskEntity> = ({ risk, riskEntity, originalRisk }) => {
   const currentRiskScore =
     riskEntity === RiskScoreEntity.host
       ? risk?.result?.[0]?.host?.risk?.calculated_level
@@ -64,10 +64,7 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
               values={{
                 riskEntity,
                 riskScoreDocumentationLink: (
-                  <RiskScoreDocLink
-                    riskScoreEntity={riskEntity}
-                    title={i18n.RISK_SCORE_TITLE(riskEntity)}
-                  />
+                  <EntityAnalyticsLearnMoreLink title={i18n.RISK_SCORING_TITLE} />
                 ),
               }}
             />
@@ -103,4 +100,4 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
     </>
   );
 };
-export const RiskSummary = React.memo(RiskSummaryComponent);
+export const RiskSummaryPanel = React.memo(RiskSummaryPanelComponent);

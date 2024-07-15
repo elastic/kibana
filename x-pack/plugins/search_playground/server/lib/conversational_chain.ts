@@ -7,16 +7,18 @@
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Document } from '@langchain/core/documents';
-import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
+import {
+  ChatPromptTemplate,
+  PromptTemplate,
+  SystemMessagePromptTemplate,
+} from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
-import {
-  createStreamDataTransformer,
-  experimental_StreamData,
-  Message as VercelChatMessage,
-} from 'ai';
+import { createStreamDataTransformer, experimental_StreamData } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import { ChatMessage, MessageRole } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
@@ -47,17 +49,25 @@ interface ContextInputs {
   question: string;
 }
 
-const formatVercelMessages = (chatHistory: VercelChatMessage[]) => {
+const getSerialisedMessages = (chatHistory: ChatMessage[]) => {
   const formattedDialogueTurns = chatHistory.map((message) => {
-    if (message.role === 'user') {
+    if (message.role === MessageRole.user) {
       return `Human: ${message.content}`;
-    } else if (message.role === 'assistant') {
+    } else if (message.role === MessageRole.assistant) {
       return `Assistant: ${message.content}`;
-    } else {
-      return `${message.role}: ${message.content}`;
     }
   });
   return formattedDialogueTurns.join('\n');
+};
+
+const getMessages = (chatHistory: ChatMessage[]) => {
+  return chatHistory.map((message) => {
+    if (message.role === 'human') {
+      return new HumanMessage(message.content);
+    } else {
+      return new AIMessage(message.content);
+    }
+  });
 };
 
 const buildContext = (docs: Document[]) => {
@@ -127,7 +137,7 @@ class ConversationalChainFn {
     this.options = options;
   }
 
-  async stream(client: AssistClient, msgs: VercelChatMessage[]) {
+  async stream(client: AssistClient, msgs: ChatMessage[]) {
     const data = new experimental_StreamData();
 
     const messages = msgs ?? [];
@@ -136,7 +146,7 @@ class ConversationalChainFn {
     const retrievedDocs: Document[] = [];
 
     let retrievalChain: Runnable = RunnableLambda.from(() => '');
-    const chatHistory = formatVercelMessages(previousMessages);
+    const chatHistory = getSerialisedMessages(previousMessages);
 
     if (this.options.rag) {
       const retriever = new ElasticsearchRetriever({
@@ -161,8 +171,7 @@ class ConversationalChainFn {
       );
       standaloneQuestionChain = RunnableSequence.from([
         {
-          context: () => '',
-          chat_history: (input) => input.chat_history,
+          context: (input) => input.chat_history,
           question: (input) => input.question,
         },
         questionRewritePromptTemplate,
@@ -175,12 +184,15 @@ class ConversationalChainFn {
       });
     }
 
-    const prompt = ChatPromptTemplate.fromTemplate(this.options.prompt);
+    const lcMessages = getMessages(messages);
+    const prompt = ChatPromptTemplate.fromMessages([
+      SystemMessagePromptTemplate.fromTemplate(this.options.prompt),
+      ...lcMessages,
+    ]);
 
     const answerChain = RunnableSequence.from([
       {
         context: RunnableSequence.from([(input) => input.question, retrievalChain]),
-        chat_history: (input) => input.chat_history,
         question: (input) => input.question,
       },
       RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
