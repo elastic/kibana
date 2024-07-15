@@ -28,7 +28,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTimelineChartTheme } from '../../../../../utils/use_timeline_chart_theme';
+import { useTimelineChartTheme } from '../../../../../hooks/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
