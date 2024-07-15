@@ -31,8 +31,7 @@ import type {
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
-import { useTagFilterPanel } from './use_tag_filter_panel';
-import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
+import { Props as UseTagFilterPanelParams } from './tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
 import {
   UserFilterPanel,
@@ -151,14 +150,6 @@ export function Table<T extends UserContentCommonSchema>({
     }
   }, [deleteItems, dispatch, tableItemsRowActions]);
 
-  const { isInUse, onSelectChange, options, totalActiveFilters } = useTagFilterPanel({
-    query: searchQuery.query,
-    getTagList,
-    tagsToTableItemMap,
-    addOrRemoveExcludeTagFilter,
-    addOrRemoveIncludeTagFilter,
-  });
-
   const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
     return {
       type: 'custom_component',
@@ -183,16 +174,25 @@ export function Table<T extends UserContentCommonSchema>({
       component: () => {
         return (
           <TagFilterPanel
-            isInUse={isInUse}
-            options={options}
-            totalActiveFilters={totalActiveFilters}
-            onSelectChange={onSelectChange}
+            query={searchQuery.query}
+            getTagList={getTagList}
+            tagsToTableItemMap={tagsToTableItemMap}
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
             clearTagSelection={clearTagSelection}
           />
         );
       },
     };
-  }, [isInUse, isTaggingEnabled, options, totalActiveFilters, onSelectChange, clearTagSelection]);
+  }, [
+    isTaggingEnabled,
+    searchQuery.query,
+    getTagList,
+    tagsToTableItemMap,
+    addOrRemoveExcludeTagFilter,
+    addOrRemoveIncludeTagFilter,
+    clearTagSelection,
+  ]);
 
   const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     return createdByEnabled

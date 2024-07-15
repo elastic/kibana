@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { FC } from 'react';
 import {
   EuiPopover,
@@ -23,6 +23,10 @@ import {
   useEuiTheme,
   EuiPopoverFooter,
   EuiButton,
+  FieldValueOptionType,
+  Query,
+  EuiHealth,
+  EuiBadge,
 } from '@elastic/eui';
 import type { EuiSelectableProps, ExclusiveUnion } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useServices } from '../services';
-import type { TagOptionItem } from './use_tag_filter_panel';
+import { Tag } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const modifierKeyPrefix = isMac ? '⌘' : '^';
@@ -43,27 +47,163 @@ const saveBtnWrapperCSS = css`
   width: 100%;
 `;
 
-interface Props {
+const toArray = (item: unknown) => (Array.isArray(item) ? item : [item]);
+
+const testSubjFriendly = (name: string) => {
+  return name.replace(' ', '_');
+};
+
+export interface TagSelection {
+  [tagId: string]: 'include' | 'exclude' | undefined;
+}
+
+export interface TagOptionItem extends FieldValueOptionType {
+  label: string;
+  checked?: 'on' | 'off';
+  tag: Tag;
+}
+
+export interface Props {
   clearTagSelection: () => void;
-  isInUse: boolean;
-  options: TagOptionItem[];
-  totalActiveFilters: number;
-  onSelectChange: (updatedOptions: TagOptionItem[]) => void;
+  query: Query | null;
+  tagsToTableItemMap: { [tagId: string]: string[] };
+  getTagList: () => Tag[];
+  addOrRemoveIncludeTagFilter: (tag: Tag) => void;
+  addOrRemoveExcludeTagFilter: (tag: Tag) => void;
 }
 
 export const TagFilterPanel: FC<Props> = ({
-  isInUse,
-  options,
-  totalActiveFilters,
-  onSelectChange,
   clearTagSelection,
+  query,
+  tagsToTableItemMap,
+  getTagList,
+  addOrRemoveExcludeTagFilter,
+  addOrRemoveIncludeTagFilter,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [isInUse, setIsInUse] = useState(false);
+  const [options, setOptions] = useState<TagOptionItem[]>([]);
+  const [tagSelection, setTagSelection] = useState<TagSelection>({});
+  const totalActiveFilters = Object.keys(tagSelection).length;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const togglePopover = () => {
+  const onSelectChange = useCallback(
+    (updatedOptions: TagOptionItem[]) => {
+      // Note: see data flow comment in useEffect() below
+      const diff = updatedOptions.find((item, index) => item.checked !== options[index].checked);
+      if (diff) {
+        addOrRemoveIncludeTagFilter(diff.tag);
+      }
+    },
+    [options, addOrRemoveIncludeTagFilter]
+  );
+
+  const onOptionClick = useCallback(
+    (tag: Tag) => (e: MouseEvent) => {
+      const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
+
+      if (withModifierKey) {
+        addOrRemoveExcludeTagFilter(tag);
+      } else {
+        addOrRemoveIncludeTagFilter(tag);
+      }
+    },
+    [addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter]
+  );
+
+  const updateTagList = useCallback(() => {
+    const tags = getTagList();
+
+    const tagsToSelectOptions = tags.map((tag) => {
+      const { name, id, color } = tag;
+      let checked: 'on' | 'off' | undefined;
+
+      if (tagSelection[name]) {
+        checked = tagSelection[name] === 'include' ? 'on' : 'off';
+      }
+
+      return {
+        name,
+        label: name,
+        value: id ?? '',
+        tag,
+        checked,
+        view: (
+          <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiHealth
+                color={color}
+                data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
+                onClick={() => onOptionClick(tag)}
+              >
+                <EuiText>{name}</EuiText>
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
+                {tagsToTableItemMap[id ?? '']?.length ?? 0}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      };
+    });
+
+    setOptions(tagsToSelectOptions);
+  }, [getTagList, tagsToTableItemMap, tagSelection, onOptionClick]);
+
+  const togglePopover = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);
-  };
+  }, []);
+
+  useEffect(() => {
+    /**
+     * Data flow for tag filter panel state:
+     * When we click (or Ctrl + click) on a tag in the filter panel:
+     * 1. The "onSelectChange()" handler is called
+     * 2. It updates the Query in the parent component
+     * 3. Which in turns update the search bar
+     * 4. We receive the updated query back here
+     * 5. The useEffect() executes and we check which tag is "included" or "excluded"
+     * 6. We update the "tagSelection" state
+     * 7. Which updates the "options" state (which is then passed to the stateless <TagFilterPanel />)
+     */
+    if (query) {
+      const clauseInclude = query.ast.getOrFieldClause('tag', undefined, true, 'eq');
+      const clauseExclude = query.ast.getOrFieldClause('tag', undefined, false, 'eq');
+
+      const updatedTagSelection: TagSelection = {};
+
+      if (clauseInclude) {
+        toArray(clauseInclude.value).forEach((tagName) => {
+          updatedTagSelection[tagName] = 'include';
+        });
+      }
+
+      if (clauseExclude) {
+        toArray(clauseExclude.value).forEach((tagName) => {
+          updatedTagSelection[tagName] = 'exclude';
+        });
+      }
+
+      setTagSelection(updatedTagSelection);
+    }
+  }, [query]);
+
+  useEffect(() => {
+    if (isPopoverOpen) {
+      // Refresh the tag list whenever we open the pop over
+      updateTagList();
+
+      // To avoid "cutting" the inflight css transition when opening the popover
+      // we add a slight delay to switch the "isInUse" flag.
+      setTimeout(() => {
+        setIsInUse(true);
+      }, 250);
+    } else {
+      setIsInUse(false);
+    }
+  }, [isPopoverOpen, updateTagList]);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
