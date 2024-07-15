@@ -494,10 +494,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Embeddable.openConfingPanel",
+            "id": "def-public.Embeddable.openConfigPanel",
             "type": "Function",
             "tags": [],
-            "label": "openConfingPanel",
+            "label": "openConfigPanel",
             "description": [],
             "signature": [
               "(startDependencies: ",
@@ -510,7 +510,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Embeddable.openConfingPanel.$1",
+                "id": "def-public.Embeddable.openConfigPanel.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "startDependencies",
@@ -525,7 +525,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Embeddable.openConfingPanel.$2",
+                "id": "def-public.Embeddable.openConfigPanel.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "isNewPanel",
@@ -540,7 +540,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Embeddable.openConfingPanel.$3",
+                "id": "def-public.Embeddable.openConfigPanel.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "deletePanel",
