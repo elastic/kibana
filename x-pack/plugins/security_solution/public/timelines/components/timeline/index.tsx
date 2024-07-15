@@ -75,8 +75,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -129,11 +129,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
             ? timelineDefaults.excludedRowRendererIds
             : [],
         })
