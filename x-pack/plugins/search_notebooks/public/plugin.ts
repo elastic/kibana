@@ -14,14 +14,17 @@ import {
   SearchNotebooksPluginStart,
   SearchNotebooksPluginStartDependencies,
   NotebookListValue,
+  AppMetricsTracker,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
+import { createUsageTracker } from './utils/usage_tracker';
 
 export class SearchNotebooksPlugin
   implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>
 {
   private notebooksList: NotebookListValue = null;
   private queryClient: QueryClient | undefined;
+  private usageTracker: AppMetricsTracker | undefined;
 
   public setup(core: CoreSetup): SearchNotebooksPluginSetup {
     this.queryClient = new QueryClient({
@@ -56,11 +59,13 @@ export class SearchNotebooksPlugin
     core: CoreStart,
     deps: SearchNotebooksPluginStartDependencies
   ): SearchNotebooksPluginStart {
+    this.usageTracker = createUsageTracker(deps.usageCollection);
     if (deps.console?.registerEmbeddedConsoleAlternateView) {
       deps.console.registerEmbeddedConsoleAlternateView(
         notebooksConsoleView(
           core,
           this.queryClient!,
+          this.usageTracker,
           this.clearNotebookList.bind(this),
           this.getNotebookList.bind(this)
         )

@@ -144,6 +144,13 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
+  // make form dirty if new agent policy is selected
+  useEffect(() => {
+    if (newAgentPolicyName) {
+      setIsEdited(true);
+    }
+  }, [newAgentPolicyName, setIsEdited]);
+
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
   // Retrieve agent count
@@ -184,24 +191,23 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   const cancelUrl = useMemo((): string => {
-    if (packageInfo && policyId) {
-      return from === 'package-edit'
-        ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
-        : getHref('policy_details', { policyId });
-    }
-    return '/';
+    return from === 'package-edit' && packageInfo
+      ? getHref('integration_details_policies', {
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
+      : policyId
+      ? getHref('policy_details', { policyId })
+      : '/';
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
-    if (packageInfo && policyId) {
-      return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
-        ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
-        : getHref('policy_details', { policyId });
-    }
-    return '/';
+    return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
+      packageInfo
+      ? getHref('integration_details_policies', {
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
+      : policyId
+      ? getHref('policy_details', { policyId })
+      : '/';
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);

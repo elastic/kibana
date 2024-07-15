@@ -65,17 +65,13 @@ export interface UsageMetrics {
   quantity: number;
   period_seconds?: number;
   cause?: string;
-  metadata?: unknown;
+  metadata?: ResourceSubtypeCounter;
 }
 
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  metadata?: UsageSourceMetadata;
-}
-
-export interface UsageSourceMetadata {
-  tier?: Tier;
+  metadata?: { tier?: Tier };
 }
 
 export type Tier = ProductTier | 'none';
@@ -124,4 +120,7 @@ export interface MetringTaskProperties {
   interval: string;
   periodSeconds: number;
   version: string;
+}
+export interface ResourceSubtypeCounter {
+  [key: string]: string;
 }

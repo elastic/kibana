@@ -22,6 +22,3 @@ export type ReadSavedQueryRequestQuery = z.infer<typeof ReadSavedQueryRequestQue
 export const ReadSavedQueryRequestQuery = z.object({
   id: SavedQueryId.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

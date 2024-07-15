@@ -435,6 +435,7 @@ export enum RegistryVarsEntryKeys {
   os = 'os',
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
+  full_width = 'full_width',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -457,6 +458,7 @@ export interface RegistryVarsEntry {
     };
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
+  [RegistryVarsEntryKeys.full_width]?: boolean;
 }
 
 // Deprecated as part of the removing public references to saved object schemas

@@ -56,7 +56,9 @@ describe(
       login();
       deleteAlertsAndRules();
     });
-    describe('without suppression', () => {
+
+    // https://github.com/elastic/kibana/issues/187621
+    describe('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });

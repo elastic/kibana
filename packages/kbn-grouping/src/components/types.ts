@@ -62,16 +62,16 @@ export interface BadgeMetric {
   width?: number;
 }
 
-export interface StatRenderer {
+export interface GroupStatsItem {
   title: string;
-  renderer?: JSX.Element;
+  component?: JSX.Element;
   badge?: BadgeMetric;
 }
 
-export type GroupStatsRenderer<T> = (
+export type GetGroupStats<T> = (
   selectedGroup: string,
   fieldBucket: RawBucket<T>
-) => StatRenderer[];
+) => GroupStatsItem[];
 
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
