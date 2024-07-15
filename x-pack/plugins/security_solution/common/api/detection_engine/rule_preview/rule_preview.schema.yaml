@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: Rule preview API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/preview:
+    post:
+      x-labels: [serverless, ess]
+      operationId: RulePreview
+      x-codegen-enabled: true
+      summary: Preview rule alerts generated on specified time range
+      tags:
+        - Rule preview API
+      requestBody:
+        description: An object containing tags to add or remove and alert ids the changes will be applied
+        required: true
+        content:
+          application/json:
+            schema:
+              discriminator:
+                propertyName: type
+              anyOf:
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/EqlRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/QueryRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/SavedQueryRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/ThresholdRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/ThreatMatchRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/MachineLearningRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/NewTermsRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+                - allOf:
+                    - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/EsqlRuleCreateProps'
+                    - $ref: '#/components/schemas/RulePreviewParams'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RulePreviewLogs'
+                  previewId:
+                    $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                  isAborted:
+                    type: boolean
+                required: [logs]
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    RulePreviewParams:
+      type: object
+      properties:
+        invocationCount:
+          type: integer
+        timeframeEnd:
+          type: string
+          format: date-time
+      required: [invocationCount, timeframeEnd]
+
+    RulePreviewLogs:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        warnings:
+          type: array
+          items:
+            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        duration:
+          type: integer
+          description: Execution duration in milliseconds
+        startedAt:
+          $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - errors
+        - warnings
+        - duration

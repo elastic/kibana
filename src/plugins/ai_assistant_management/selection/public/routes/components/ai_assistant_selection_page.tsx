@@ -25,8 +25,7 @@ import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
   const { capabilities, setBreadcrumbs, navigateToApp } = useAppContext();
-
-  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant.show;
+  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
   const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
 
   useEffect(() => {
@@ -79,8 +78,7 @@ export function AiAssistantSelectionPage() {
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
                         {
-                          defaultMessage:
-                            'This feature is disabled. It can be enabled from Spaces > Features.',
+                          defaultMessage: 'This feature is disabled.',
                         }
                       )}
                       size="s"

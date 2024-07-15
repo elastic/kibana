@@ -112,7 +112,7 @@ const buildBulkResponse = (
 export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
@@ -123,7 +123,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),

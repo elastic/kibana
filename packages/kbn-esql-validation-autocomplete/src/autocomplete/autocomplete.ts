@@ -70,6 +70,7 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
   buildValueDefinitions,
+  buildFieldsDefinitionsWithMetadata,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -86,6 +87,7 @@ import {
   getQueryForFields,
   getSourcesFromCommands,
   isAggFunctionUsedAlready,
+  removeQuoteForSuggestedSources,
 } from './helper';
 import { FunctionParameter } from '../definitions/types';
 
@@ -291,7 +293,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildFieldsDefinitionsWithMetadata(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -857,19 +859,28 @@ async function getExpressionSuggestionsByType(
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
         const index = getSourcesFromCommands(commands, 'index');
+        const canRemoveQuote = isNewExpression && innerText.includes('"');
+
         // This is going to be empty for simple indices, and not empty for integrations
         if (index && index.text && index.text !== EDITOR_MARKER) {
           const source = index.text.replace(EDITOR_MARKER, '');
           const dataSource = await getDatastreamsForIntegration(source);
+
           const newDefinitions = buildSourcesDefinitions(
             dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
           );
-          suggestions.push(...newDefinitions);
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
+          );
         } else {
           // FROM <suggest>
           // @TODO: filter down the suggestions here based on other existing sources defined
           const sourcesDefinitions = await getSources();
-          suggestions.push(...sourcesDefinitions);
+          suggestions.push(
+            ...(canRemoveQuote
+              ? removeQuoteForSuggestedSources(sourcesDefinitions)
+              : sourcesDefinitions)
+          );
         }
       }
     }

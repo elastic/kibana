@@ -103,10 +103,6 @@ describe('migration v2', () => {
     await removeLogFile();
   });
 
-  afterAll(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  });
-
   afterEach(async () => {
     if (root) {
       await root.shutdown();
