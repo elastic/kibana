@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { URL } from 'node:url';
 import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
@@ -14,6 +13,7 @@ import Qs from 'querystring';
 import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
   return (
@@ -93,7 +93,7 @@ export class KbnClientRequester {
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
     this.httpsAgent =
-      new URL(options.url).protocol === 'https:'
+      Url.parse(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
             rejectUnauthorized: false,
@@ -116,74 +116,64 @@ export class KbnClientRequester {
 
   async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
     const url = this.resolveUrl(options.path);
-    const redacted = redactUrl(url);
+    const description = options.description || `${options.method} - ${redactUrl(url)}`;
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
+
     while (true) {
       attempt += 1;
+
       try {
-        this.log.info(`Requesting url [${redacted}]`);
-        return await Axios.request(buildRequest(url, this.httpsAgent, options));
-      } catch (ex) {
-        if (isIgnorableError(ex, options.ignoreErrors)) return ex.response;
-        if (hasMoreAttempts(attempt, maxAttempts)) {
+        const response = await Axios.request({
+          method: options.method,
+          url,
+          data: options.body,
+          params: options.query,
+          headers: {
+            ...options.headers,
+            'kbn-xsrf': 'kbn-client',
+            'x-elastic-internal-origin': 'kbn-client',
+          },
+          httpsAgent: this.httpsAgent,
+          responseType: options.responseType,
+          // work around https://github.com/axios/axios/issues/2791
+          transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
+          maxContentLength: 30000000,
+          maxBodyLength: 30000000,
+          paramsSerializer: (params) => Qs.stringify(params),
+        });
+
+        return response;
+      } catch (error) {
+        const conflictOnGet = isConcliftOnGetError(error);
+        const requestedRetries = options.retries !== undefined;
+        const failedToGetResponse = isAxiosRequestError(error);
+
+        if (isIgnorableError(error, options.ignoreErrors)) {
+          return error.response;
+        }
+
+        let errorMessage;
+        if (conflictOnGet) {
+          errorMessage = `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`;
+          this.log.error(errorMessage);
+        } else if (requestedRetries || failedToGetResponse) {
+          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts}): ${error.message}`;
+          this.log.error(errorMessage);
+        } else {
+          throw error;
+        }
+
+        if (attempt < maxAttempts) {
           await delay(1000 * attempt);
           continue;
         }
-        throw new Error(
-          buildErrMsg(attempt, maxAttempts, redacted, options.path, options.retries, ex)
-        );
+
+        throw new KbnClientRequesterError(`${errorMessage} -- and ran out of retries`, error);
       }
     }
   }
 }
-
-function buildErrMsg(
-  current: number,
-  ceiling: number,
-  redactedUrl: string,
-  path: any,
-  retries: any,
-  err: any
-) {
-  const conflictOnGet: boolean = isConcliftOnGetError(err);
-  const requestedRetries: boolean = retries !== undefined;
-  const failedToGetResponse: boolean = isAxiosRequestError(err);
-
-  if (conflictOnGet) return `Conflict on GET (path=${path}, attempt=${current}/${ceiling})`;
-  else if (requestedRetries || failedToGetResponse)
-    return `${err.code} ${err.name} [${redactedUrl}] request failed (attempt=${current}/${ceiling})`;
-}
-
-function hasMoreAttempts(current: number, ceiling: number) {
-  return current < ceiling;
-}
-
-function buildRequest(
-  url: any,
-  httpsAgent: Https.Agent | null,
-  { method, body, query, headers, responseType }: any
-) {
-  return {
-    method,
-    url,
-    data: body,
-    params: query,
-    headers: {
-      ...headers,
-      'kbn-xsrf': 'kbn-client',
-      'x-elastic-internal-origin': 'kbn-client',
-    },
-    httpsAgent,
-    responseType,
-    // work around https://github.com/axios/axios/issues/2791
-    transformResponse: responseType === 'text' ? [(x: any) => x] : undefined,
-    maxContentLength: 30000000,
-    maxBodyLength: 30000000,
-    paramsSerializer: (params: any) => Qs.stringify(params),
-  };
-}
-
 function redactUrl(_: string): string {
   const url = new URL(_);
   return url.password ? `${url.protocol}//${url.host}${url.pathname}` : _;
