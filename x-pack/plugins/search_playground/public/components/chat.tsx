@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiHideFor,
   EuiHorizontalRule,
   EuiSpacer,
   useEuiTheme,
@@ -50,14 +51,12 @@ export const Chat = () => {
   const { euiTheme } = useEuiTheme();
   const {
     control,
-    watch,
     formState: { isValid, isSubmitting },
     resetField,
     handleSubmit,
     getValues,
   } = useFormContext<ChatForm>();
   const { messages, append, stop: stopRequest, setMessages, reload, error } = useChat();
-  const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll();
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
@@ -123,7 +122,6 @@ export const Chat = () => {
         <EuiFlexItem
           grow={2}
           css={{
-            borderRight: euiTheme.border.thin,
             paddingTop: euiTheme.size.l,
             paddingBottom: euiTheme.size.l,
             // don't allow the chat to shrink below 66.6% of the screen
@@ -149,14 +147,15 @@ export const Chat = () => {
             >
               <EuiHorizontalRule margin="none" />
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
 
-              <EuiFlexGroup>
+              <EuiFlexGroup responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="sparkles"
                     disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
+                    size="xs"
                     data-test-subj="regenerateActionButton"
                   >
                     <FormattedMessage
@@ -170,6 +169,7 @@ export const Chat = () => {
                     iconType="refresh"
                     disabled={isToolBarActionsDisabled}
                     onClick={handleClearChat}
+                    size="xs"
                     data-test-subj="clearChatActionButton"
                   >
                     <FormattedMessage
@@ -180,7 +180,7 @@ export const Chat = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
 
               <Controller
                 name={ChatFormFields.question}
@@ -234,9 +234,11 @@ export const Chat = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
-          <ChatSidebar selectedIndicesCount={selectedIndicesCount} />
-        </EuiFlexItem>
+        <EuiHideFor sizes={['xs', 's']}>
+          <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
+            <ChatSidebar />
+          </EuiFlexItem>
+        </EuiHideFor>
       </EuiFlexGroup>
     </EuiForm>
   );

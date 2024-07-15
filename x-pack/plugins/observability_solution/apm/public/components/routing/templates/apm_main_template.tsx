@@ -12,6 +12,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
@@ -23,10 +24,12 @@ import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_group
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { EntityEnablement } from '../../shared/entity_enablement';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 const APM_FEEDBACK_LINK = 'https://ela.st/services-feedback';
+const APM_NEW_EXPERIENCE_FEEDBACK_LINK = 'https://ela.st/entity-services-feedback';
 
 /*
  * This template contains:
@@ -45,6 +48,7 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
+  showEnablementCallout = false,
   environmentFilterInTemplate = true,
   selectedNavButton,
   ...pageTemplateProps
@@ -55,6 +59,7 @@ export function ApmMainTemplate({
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
+  showEnablementCallout?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
@@ -66,6 +71,7 @@ export function ApmMainTemplate({
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
+  const { isEntityManagerEnabled } = useEntityManagerEnablementContext();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -126,12 +132,17 @@ export function ApmMainTemplate({
   const pageHeaderTitle = (
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
+      <EuiFlexItem grow={false} />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <FeatureFeedbackButton
               data-test-subj="infraApmFeedbackLink"
-              formUrl={APM_FEEDBACK_LINK}
+              formUrl={
+                isEntityManagerEnabled && sanitizedPath.includes('service')
+                  ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
+                  : APM_FEEDBACK_LINK
+              }
               kibanaVersion={kibanaVersion}
               isCloudEnv={isCloudEnv}
               isServerlessEnv={isServerlessEnv}
@@ -152,10 +163,14 @@ export function ApmMainTemplate({
         rightSideItems,
         ...pageHeader,
         pageTitle: pageHeaderTitle,
-        children:
-          showServiceGroupsNav && selectedNavButton ? (
-            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-          ) : null,
+        children: (
+          <EuiFlexGroup direction="column">
+            {showEnablementCallout && selectedNavButton === 'allServices' && <EntityEnablement />}
+            {showServiceGroupsNav && selectedNavButton && (
+              <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+            )}
+          </EuiFlexGroup>
+        ),
       }}
       {...pageTemplateProps}
     >
@@ -164,6 +179,4 @@ export function ApmMainTemplate({
   );
 
   return <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>;
-
-  return pageTemplate;
 }

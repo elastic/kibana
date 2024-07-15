@@ -33,8 +33,8 @@ export const GcpCredentialsFormAgentless = ({
   input,
   newPolicy,
   updatePolicy,
-  packageInfo,
   disabled,
+  packageInfo,
 }: GcpFormProps) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
@@ -102,6 +102,7 @@ export const GcpCredentialsFormAgentless = ({
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
         }
         isOrganization={isOrganization}
+        packageInfo={packageInfo}
       />
       <EuiSpacer size="s" />
       <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
