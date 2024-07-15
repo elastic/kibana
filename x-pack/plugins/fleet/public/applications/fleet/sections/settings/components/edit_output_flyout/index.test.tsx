@@ -83,7 +83,7 @@ const kafkaSectionsLabels = [
   'Broker settings',
 ];
 
-const remoteEsOutputLabels = ['Hosts', 'Service Token'];
+const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
 describe('EditOutputFlyout', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
