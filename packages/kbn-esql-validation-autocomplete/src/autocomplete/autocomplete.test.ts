@@ -394,14 +394,15 @@ describe('autocomplete', () => {
     testSuggestions('from a, b metadata ', METADATA_FIELDS, ' ');
     testSuggestions(
       'from a, b [metadata _index, ]',
-      METADATA_FIELDS.filter((field) => field !== '_index'),
+      [',', '|', ...METADATA_FIELDS.filter((field) => field !== '_index')],
       ' ]'
     );
     testSuggestions(
       'from a, b metadata _index, ',
-      METADATA_FIELDS.filter((field) => field !== '_index'),
+      [',', '|', ...METADATA_FIELDS.filter((field) => field !== '_index')],
       ' '
     );
+    testSuggestions(`from a, b metadata ${METADATA_FIELDS.join(', ')} `, ['|'], ' ');
 
     // with integrations support
     const dataSources = indexes.concat(integrations);
