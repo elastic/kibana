@@ -26,6 +26,7 @@ import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { FeedbackModal } from './feedback_modal';
 import { UnauthorisedModal } from './unauthorized_modal';
+import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 
 export function EntityEnablement() {
   const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
@@ -35,26 +36,24 @@ export function EntityEnablement() {
     services: { entityManager },
   } = useKibana<ApmPluginStartDeps>();
 
-  const { isEntityManagerEnabled, isEnablementPending, refetch } =
-    useEntityManagerEnablementContext();
+  const {
+    isEntityManagerEnabled,
+    isEnablementPending,
+    refetch,
+    userServiceInventoryView,
+    setUserServiceInventoryView,
+  } = useEntityManagerEnablementContext();
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
   const [isLoading, setIsLoading] = useToggle(false);
 
   const handleRestoreView = async () => {
-    setIsLoading(true);
-    try {
-      const response = await entityManager.entityClient.disableManagedEntityDiscovery();
-      if (response.success) {
-        setIsLoading(false);
-        setsIsFeedbackModalVisible(true);
-      }
-    } catch (error) {
-      setIsLoading(false);
-      setsIsFeedbackModalVisible(true);
-      console.error(error);
-    }
+    setUserServiceInventoryView(ServiceInventoryView.classic);
+    setsIsFeedbackModalVisible(true);
   };
+
+  const isEntityManagerEnabledAndEntityViewSelected =
+    isEntityManagerEnabled && userServiceInventoryView === ServiceInventoryView.entity;
 
   const handleEnableblement = async () => {
     setIsLoading(true);
@@ -62,6 +61,7 @@ export function EntityEnablement() {
       const response = await entityManager.entityClient.enableManagedEntityDiscovery();
       if (response.success) {
         setIsLoading(false);
+        setUserServiceInventoryView(ServiceInventoryView.entity);
         refetch();
       }
 
@@ -77,7 +77,6 @@ export function EntityEnablement() {
 
   const handdleOnCloseFeedback = () => {
     setsIsFeedbackModalVisible(false);
-    refetch();
   };
 
   return isEnablementPending ? (
@@ -91,11 +90,11 @@ export function EntityEnablement() {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
-          disabled={isEntityManagerEnabled}
+          disabled={isEntityManagerEnabledAndEntityViewSelected}
           data-test-subj="tryOutEEMLink"
           onClick={handleEnableblement}
         >
-          {isEntityManagerEnabled
+          {isEntityManagerEnabledAndEntityViewSelected
             ? i18n.translate('xpack.apm.eemEnablement.enabled.', {
                 defaultMessage: 'Viewing our new experience',
               })
@@ -147,7 +146,7 @@ export function EntityEnablement() {
           </EuiPopoverFooter>
         </EuiPopover>
       </EuiFlexItem>
-      {isEntityManagerEnabled && (
+      {isEntityManagerEnabledAndEntityViewSelected && (
         <EuiFlexItem grow={false}>
           <EuiLink data-test-subj="restoreClassiView" onClick={handleRestoreView}>
             {i18n.translate('xpack.apm.eemEnablement.restoveClassicView.', {

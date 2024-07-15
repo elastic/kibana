@@ -6,13 +6,23 @@
  */
 import React, { createContext } from 'react';
 import { ENTITY_FETCH_STATUS, useEntityManager } from '../../hooks/use_entity_manager';
+import { useLocalStorage } from '../../hooks/use_local_storage';
 
 export interface EntityManagerEnablementContextValue {
   isEntityManagerEnabled: boolean;
   entityManagerEnablementStatus: ENTITY_FETCH_STATUS;
   isEnablementPending: boolean;
   refetch: () => void;
+  userServiceInventoryView: ServiceInventoryView;
+  setUserServiceInventoryView: (view: ServiceInventoryView) => void;
 }
+
+export enum ServiceInventoryView {
+  classic = 'classic',
+  entity = 'entity',
+}
+
+export const serviceInventoryStorageKey = 'apm.service.inventory.view';
 
 export const EntityManagerEnablementContext = createContext(
   {} as EntityManagerEnablementContextValue
@@ -25,6 +35,11 @@ export function EntityManagerEnablementContextProvider({
 }) {
   const { isEnabled, status, refetch } = useEntityManager();
 
+  const [userServiceInventoryView, setUserServiceInventoryView] = useLocalStorage(
+    serviceInventoryStorageKey,
+    ServiceInventoryView.classic
+  );
+
   return (
     <EntityManagerEnablementContext.Provider
       value={{
@@ -32,6 +47,8 @@ export function EntityManagerEnablementContextProvider({
         entityManagerEnablementStatus: status,
         isEnablementPending: status === ENTITY_FETCH_STATUS.LOADING,
         refetch,
+        userServiceInventoryView,
+        setUserServiceInventoryView,
       }}
     >
       {children}
