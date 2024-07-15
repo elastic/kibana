@@ -175,6 +175,7 @@ export function SearchEmbeddableGridComponent({
     <DiscoverGridEmbeddableMemoized
       {...sharedProps}
       {...onStateEditedProps}
+      settings={savedSearch.grid}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID}
       columnsMeta={columnsMeta}

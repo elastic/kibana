@@ -33,7 +33,14 @@ import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
   SerializableSavedSearch,
-  'rowHeight' | 'rowsPerPage' | 'headerRowHeight' | 'columns' | 'sort' | 'sampleSize' | 'viewMode'
+  | 'rowHeight'
+  | 'rowsPerPage'
+  | 'headerRowHeight'
+  | 'columns'
+  | 'sort'
+  | 'sampleSize'
+  | 'viewMode'
+  | 'grid'
 > & {
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;

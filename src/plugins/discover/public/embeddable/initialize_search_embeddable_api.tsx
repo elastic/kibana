@@ -19,7 +19,7 @@ import type {
   PublishesUnifiedSearch,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 
@@ -86,6 +86,7 @@ export const initializeSearchEmbeddableApi = async (
 
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
+  const grid$ = new BehaviorSubject<DiscoverGridSettings | undefined>(initialState.grid);
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
@@ -121,6 +122,7 @@ export const initializeSearchEmbeddableApi = async (
   const stateManager: SearchEmbeddableStateManager = {
     columns: columns$,
     columnsMeta: columnsMeta$,
+    grid: grid$,
     headerRowHeight: headerRowHeight$,
     rows: rows$,
     rowHeight: rowHeight$,
@@ -167,18 +169,6 @@ export const initializeSearchEmbeddableApi = async (
     },
     stateManager,
     comparators: {
-      serializedSearchSource: [
-        serializedSearchSource$,
-        (value) => {
-          return; // the search source can't currently be changed from dashboard, so the setter is not necessary
-        },
-      ],
-      viewMode: [
-        savedSearchViewMode$,
-        (value) => {
-          return; // the view mode can't currently be changed from dashboard, so the setter is not necessary
-        },
-      ],
       sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
       columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
       sampleSize: [
@@ -201,6 +191,11 @@ export const initializeSearchEmbeddableApi = async (
         (value) => headerRowHeight$.next(value),
         (a, b) => (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
       ],
+
+      /** The following can't currently be changed froom the dashboard */
+      serializedSearchSource: [serializedSearchSource$, (value) => {}, () => true],
+      viewMode: [savedSearchViewMode$, (value) => {}, () => true],
+      grid: [grid$, (value) => {}, () => true],
     },
   };
 };
