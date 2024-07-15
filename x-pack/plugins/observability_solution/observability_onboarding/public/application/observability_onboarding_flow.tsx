@@ -11,16 +11,15 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { EuiPageTemplate, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
-import backgroundImageUrl from './header/background.svg';
 import { Footer } from './footer/footer';
 import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
-import { Header } from './header/header';
 import { SystemLogsPanel } from './quickstart_flows/system_logs';
 import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 import { OtelLogsPanel } from './quickstart_flows/otel_logs';
 import { AutoDetectPanel } from './quickstart_flows/auto_detect';
 import { KubernetesPanel } from './quickstart_flows/kubernetes';
 import { BackButton } from './shared/back_button';
+import { HeaderSection } from './header/header_section';
 
 const queryClient = new QueryClient();
 
@@ -38,21 +37,7 @@ export function ObservabilityOnboardingFlow() {
           padding-top: 0px !important;
         `}
       >
-        <EuiPageTemplate.Section
-          paddingSize="xl"
-          css={css`
-            & > div {
-              background-image: url(${backgroundImageUrl});
-              background-position: right center;
-              background-repeat: no-repeat;
-            }
-          `}
-          grow={false}
-          restrictWidth
-        >
-          <EuiSpacer size="xl" />
-          <Header />
-        </EuiPageTemplate.Section>
+        <HeaderSection />
         <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
           <Routes>
             <Route path="/auto-detect">

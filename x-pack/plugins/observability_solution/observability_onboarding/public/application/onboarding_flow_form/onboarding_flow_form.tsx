@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
@@ -31,6 +30,8 @@ import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
+import type { SupportedLogo } from '../../hooks/types';
+import { useIconForLogo } from '../../hooks/use_icon_for_logo';
 
 interface UseCaseOption {
   id: Category;
@@ -39,19 +40,6 @@ interface UseCaseOption {
   logos?: SupportedLogo[];
   showIntegrationsBadge?: boolean;
 }
-
-type SupportedLogo =
-  | 'aws'
-  | 'azure'
-  | 'docker'
-  | 'dotnet'
-  | 'prometheus'
-  | 'gcp'
-  | 'java'
-  | 'javascript'
-  | 'kubernetes'
-  | 'nginx'
-  | 'opentelemetry';
 
 export const OnboardingFlowForm: FunctionComponent = () => {
   const options: UseCaseOption[] = [
@@ -305,30 +293,6 @@ function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
     behavior: 'smooth',
     top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
   });
-}
-
-function useIconForLogo(logo?: SupportedLogo): string | undefined {
-  const {
-    services: { http },
-  } = useKibana();
-  switch (logo) {
-    case 'aws':
-      return 'logoAWS';
-    case 'azure':
-      return 'logoAzure';
-    case 'gcp':
-      return 'logoGCP';
-    case 'kubernetes':
-      return 'logoKubernetes';
-    case 'nginx':
-      return 'logoNginx';
-    case 'prometheus':
-      return 'logoPrometheus';
-    case 'docker':
-      return 'logoDocker';
-    default:
-      return http?.staticAssets.getPluginAssetHref(`${logo}.svg`);
-  }
 }
 
 function LogoIcon({ logo }: { logo: SupportedLogo }) {
