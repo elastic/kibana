@@ -31,7 +31,7 @@ export function mergePaths(resolvedDocuments: ResolvedDocument[]): OpenAPIV3.Pat
       const sourcePathItem = pathsObject[path];
       const mergedPathItem = mergedPaths[path];
 
-      if (isRefNode(mergedPathItem)) {
+      if (isRefNode(sourcePathItem)) {
         throw new Error('Path item top level $ref is not supported');
       }
 

@@ -10,7 +10,7 @@ import { createOASDocument } from '../create_oas_document';
 import { mergeSpecs } from './merge_specs';
 
 describe('OpenAPI Merger - different OpenAPI versions', () => {
-  it('merges OpenAPI 3.0.x versions', async () => {
+  it('merges specs having OpenAPI 3.0.x versions', async () => {
     const spec1 = createOASDocument({
       openapi: '3.0.3',
       paths: {},
@@ -48,7 +48,7 @@ describe('OpenAPI Merger - different OpenAPI versions', () => {
     ).rejects.toThrowError(/OpenAPI specs must use the same OpenAPI version/);
   });
 
-  it('throws an error when different OAS 3.1 patch versions encountered', async () => {
+  it('throws an error when different OAS 3.1.x patch versions encountered', async () => {
     const spec1 = createOASDocument({
       openapi: '3.1.0',
       paths: {},
