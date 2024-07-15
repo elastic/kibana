@@ -24,8 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/186440
-  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
+  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -126,7 +125,7 @@ export default function (providerContext: FtrProviderContext) {
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
               'confirmGoogleCloudShellModalConfirmButton',
-              3
+              1
             )
           ).includes('shell.cloud.google.com%2Fcloudshell')
         ).to.be(true);
