@@ -11,6 +11,14 @@ import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
+import {
+  E5_LINUX_OPTIMIZED_MODEL_ID,
+  E5_MODEL_ID,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  ELSER_MODEL_ID,
+  LANG_IDENT_MODEL_ID,
+} from '@kbn/ml-trained-models-utils';
+
 import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
@@ -18,15 +26,10 @@ import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 import {
   BASE_MODEL,
   ELSER_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
-  ELSER_MODEL_ID,
   ELSER_MODEL_PLACEHOLDER,
   E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
-  E5_MODEL_ID,
   E5_MODEL_PLACEHOLDER,
-  LANG_IDENT_MODEL_ID,
   MODEL_TITLES_BY_TYPE,
-  E5_LINUX_OPTIMIZED_MODEL_ID,
-  ELSER_LINUX_OPTIMIZED_MODEL_ID,
 } from './utils';
 
 let compatibleElserModelId = ELSER_MODEL_ID;

@@ -156,7 +156,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+                <RiskScoreDocTooltip anchorPosition="upCenter" />
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
