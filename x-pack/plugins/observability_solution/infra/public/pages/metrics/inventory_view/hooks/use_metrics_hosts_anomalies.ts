@@ -17,7 +17,7 @@ import {
   MetricsHostsAnomaly,
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
 } from '../../../../../common/http_api/infra_ml';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../../hooks/use_tracked_promise';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
