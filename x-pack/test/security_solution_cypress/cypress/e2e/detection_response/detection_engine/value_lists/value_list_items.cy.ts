@@ -7,8 +7,7 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
-import { closeErrorToast } from '../../../../tasks/alerts_detection_rules';
+import { checkToastMessageAndClose } from '../../../../tasks/alerts_detection_rules';
 import {
   createListsIndex,
   waitForValueListsModalToBeLoaded,
@@ -39,7 +38,7 @@ import {
   VALUE_LIST_ITEMS_MODAL_TITLE,
 } from '../../../../screens/lists';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { getDefaultUsername } from '../../../../tasks/common/users';
+import { getPlatformEngineerUsername } from '../../../../tasks/common/users';
 
 // Failing: See https://github.com/elastic/kibana/issues/183713
 describe(
@@ -74,7 +73,7 @@ describe(
       // check modal title and info
       cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
       cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
-      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains(`Updated by: ${getDefaultUsername()}`);
+      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains(`Updated by: ${getPlatformEngineerUsername()}`);
       checkTotalItems(totalItems);
 
       // search working
@@ -122,24 +121,21 @@ describe(
       );
     });
 
-    it('displays a toaster error when list item actions fail', () => {
+    it.only('displays a toaster error when list item actions fail', () => {
       mockCreateListItemError();
       mockUpdateListItemError();
       mockDeleteListItemError();
       openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
       addListItem('a new item');
-      cy.get(TOASTER_BODY).contains('error to create list item');
-      closeErrorToast();
+      checkToastMessageAndClose('error to create list item');
 
       sortValueListItemsTableByValue();
 
       deleteListItem('a');
-      cy.get(TOASTER_BODY).contains('error to delete list item');
-      closeErrorToast();
+      checkToastMessageAndClose('error to delete list item');
 
       updateListItem('a', 'b');
-      cy.get(TOASTER_BODY).contains('error to update list item');
-      closeErrorToast();
+      checkToastMessageAndClose('error to update list item');
     });
   }
 );

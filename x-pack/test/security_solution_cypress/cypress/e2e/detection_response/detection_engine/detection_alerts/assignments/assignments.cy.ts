@@ -18,7 +18,7 @@ import {
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
-import { getDefaultUsername } from '../../../../../tasks/common/users';
+import { getPlatformEngineerUsername } from '../../../../../tasks/common/users';
 import { ALERTS_URL } from '../../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
@@ -67,7 +67,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     });
 
     it('alert with some assignees in alerts table & details flyout', () => {
-      const users = [getDefaultUsername()];
+      const users = [getPlatformEngineerUsername()];
       updateAssigneesForFirstAlert(users);
 
       alertsTableShowsAssigneesForAlert(users);
@@ -80,7 +80,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
   context('Updating assignees (single alert)', () => {
     it('adding new assignees via `More actions` in alerts table', () => {
       // Assign users
-      const users = [getDefaultUsername()];
+      const users = [getPlatformEngineerUsername()];
       updateAssigneesForFirstAlert(users);
 
       // Assignees should appear in the alerts table
@@ -95,7 +95,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       expandFirstAlert();
 
       // Assign users
-      const users = [getDefaultUsername()];
+      const users = [getPlatformEngineerUsername()];
       updateAssigneesViaAddButtonInFlyout(users);
 
       // Assignees should appear in the alert's details flyout
@@ -110,7 +110,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       expandFirstAlert();
 
       // Assign users
-      const users = [getDefaultUsername()];
+      const users = [getPlatformEngineerUsername()];
       updateAssigneesViaTakeActionButtonInFlyout(users);
 
       // Assignees should appear in the alert's details flyout
@@ -123,7 +123,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
 
     it('removing all assignees via `More actions` in alerts table', () => {
       // Initially assigned users
-      const initialAssignees = [getDefaultUsername()];
+      const initialAssignees = [getPlatformEngineerUsername()];
       updateAssigneesForFirstAlert(initialAssignees);
       alertsTableShowsAssigneesForAlert(initialAssignees);
 
@@ -139,7 +139,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       expandFirstAlert();
 
       // Initially assigned users
-      const initialAssignees = [getDefaultUsername()];
+      const initialAssignees = [getPlatformEngineerUsername()];
       updateAssigneesViaTakeActionButtonInFlyout(initialAssignees);
       alertDetailsFlyoutShowsAssignees(initialAssignees);
 
@@ -157,7 +157,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       selectFirstPageAlerts();
 
       // Assign users
-      const users = [getDefaultUsername()];
+      const users = [getPlatformEngineerUsername()];
       bulkUpdateAssignees(users);
 
       // Assignees should appear in the alerts table
@@ -168,7 +168,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       selectFirstPageAlerts();
 
       // Initially assigned users
-      const initialAssignees = [getDefaultUsername()];
+      const initialAssignees = [getPlatformEngineerUsername()];
       bulkUpdateAssignees(initialAssignees);
       alertsTableShowsAssigneesForAllAlerts(initialAssignees);
 
@@ -186,7 +186,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       const totalNumberOfAlerts = 5;
       const numberOfSelectedAlerts = 2;
       selectNumberOfAlerts(numberOfSelectedAlerts);
-      bulkUpdateAssignees([getDefaultUsername()]);
+      bulkUpdateAssignees([getPlatformEngineerUsername()]);
 
       filterByAssignees([NO_ASSIGNEES]);
 
@@ -197,9 +197,9 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     it('by one assignee', () => {
       const numberOfSelectedAlerts = 2;
       selectNumberOfAlerts(numberOfSelectedAlerts);
-      bulkUpdateAssignees([getDefaultUsername()]);
+      bulkUpdateAssignees([getPlatformEngineerUsername()]);
 
-      filterByAssignees([getDefaultUsername()]);
+      filterByAssignees([getPlatformEngineerUsername()]);
 
       cy.get(ALERTS_COUNT).contains(numberOfSelectedAlerts);
     });
@@ -208,9 +208,9 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       const totalNumberOfAlerts = 5;
       const numberOfAssignedAlerts = 3;
       selectNumberOfAlerts(numberOfAssignedAlerts);
-      bulkUpdateAssignees([getDefaultUsername()]);
+      bulkUpdateAssignees([getPlatformEngineerUsername()]);
 
-      filterByAssignees([getDefaultUsername()]);
+      filterByAssignees([getPlatformEngineerUsername()]);
 
       const numberOfClosedAlerts = 1;
       selectNumberOfAlerts(numberOfClosedAlerts);
@@ -224,7 +224,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
       const expectedNumberOfAllerts2 = totalNumberOfAlerts - numberOfClosedAlerts;
       cy.get(ALERTS_COUNT).contains(expectedNumberOfAllerts2);
 
-      filterByAssignees([getDefaultUsername()]);
+      filterByAssignees([getPlatformEngineerUsername()]);
       selectPageFilterValue(0, 'closed');
       cy.get(ALERTS_COUNT).contains(numberOfClosedAlerts);
     });
