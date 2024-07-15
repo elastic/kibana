@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IBasePath } from '@kbn/core/public';
 
 export const addApmAgent = {
   name: i18n.translate('xpack.apm.add.apm.agent.button.', {
@@ -26,3 +29,42 @@ export const collectServiceLogs = {
   }),
   link: '/app/observabilityOnboarding/?category=logs',
 };
+
+export function AddApmAgent({ basePath }: { basePath: IBasePath }) {
+  return (
+    <EuiButton
+      data-test-subj="addApmAgentButton"
+      size="s"
+      target="_blank"
+      href={basePath.prepend(addApmAgent.link)}
+    >
+      {addApmAgent.name}
+    </EuiButton>
+  );
+}
+
+export function AssociateServiceLogs() {
+  return (
+    <EuiButton
+      data-test-subj="associateServiceLogsButton"
+      size="s"
+      target="_blank"
+      href={associateServiceLogs.link}
+    >
+      {associateServiceLogs.name}
+    </EuiButton>
+  );
+}
+
+export function CollectServiceLogs({ basePath }: { basePath: IBasePath }) {
+  return (
+    <EuiButton
+      data-test-subj="collectServiceLogsButton"
+      size="s"
+      target="_blank"
+      href={basePath.prepend(collectServiceLogs.link)}
+    >
+      {collectServiceLogs.name}
+    </EuiButton>
+  );
+}
