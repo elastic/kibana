@@ -160,15 +160,11 @@ let useTimelineEventsMock = jest.fn();
 describe('query tab with unified timeline', () => {
   beforeAll(() => {
     // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
-    if ('__@hello-pangea/dnd-disable-dev-warnings' in window) {
-      window['__@hello-pangea/dnd-disable-dev-warnings'] = true;
-    } else {
-      Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
-        get() {
-          return true;
-        },
-      });
-    }
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
   });
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
@@ -183,10 +179,6 @@ describe('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
-    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
-      value: true,
-      writable: false,
-    });
     useTimelineEventsMock = jest.fn(() => [
       false,
       {
