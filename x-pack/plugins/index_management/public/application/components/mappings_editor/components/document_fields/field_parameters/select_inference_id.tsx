@@ -343,6 +343,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
               isInferenceFlyoutVisible={isInferenceFlyoutVisible}
               supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
               nlpImportModel={docLinks.links.ml.nlpImportModel}
+              inferenceEndpointUrl={docLinks.links.ml.createInferenceEndpoint}
               setInferenceEndpointError={setInferenceEndpointError}
               isCreateInferenceApiLoading={isSaveInferenceLoading}
             />

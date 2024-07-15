@@ -16,6 +16,7 @@ export const DEFAULT_VALUES: InferenceFlyoutProps = {
   supportedNlpModels: '',
   elserv2documentationUrl: '',
   e5documentationUrl: '',
+  inferenceEndpointUrl: '',
   isInferenceFlyoutVisible: false,
   onFlyoutClose: jest.fn(),
   onSaveInferenceEndpoint: jest.fn(),

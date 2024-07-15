@@ -11,12 +11,12 @@ import { connectToApiOptions, isEmpty, setModalConfigResponse } from '../lib/sha
 import type { ModelConfig } from '../types';
 import { Service } from '../types';
 import { InferenceFlyout } from './flyout_layout';
-import type { SaveMappingOnClick } from './inference_flyout_wrapper';
+import type { SaveMappingOnClick, DocumentationProps } from './inference_flyout_wrapper';
 import { CohereForm } from './service_forms/cohere_form';
 import { HuggingFaceForm } from './service_forms/huggingface_form';
 import { OpenaiForm } from './service_forms/openai_form';
 
-interface Props extends SaveMappingOnClick {
+interface Props extends SaveMappingOnClick, Pick<DocumentationProps, 'inferenceEndpointUrl'> {
   description: string;
   onInferenceEndpointChange: (inferenceId: string) => void;
   inferenceEndpointError?: string;
@@ -27,6 +27,7 @@ export const ConnectToApi: React.FC<Props> = ({
   isCreateInferenceApiLoading,
   onInferenceEndpointChange,
   inferenceEndpointError,
+  inferenceEndpointUrl,
 }) => {
   const defaultOpenaiUrl = 'https://api.openai.com/v1/embeddings';
   const defaultCohereModelId = 'embed-english-v2.0';
@@ -176,6 +177,7 @@ export const ConnectToApi: React.FC<Props> = ({
         isCreateInferenceApiLoading={isCreateInferenceApiLoading}
         onInferenceEndpointChange={onInferenceEndpointChange}
         inferenceEndpointError={inferenceEndpointError}
+        inferenceEndpointUrl={inferenceEndpointUrl}
       />
     </>
   );

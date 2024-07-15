@@ -18,10 +18,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEmpty, serviceTypeMap } from '../lib/shared_values';
 import type { Service, ModelConfig } from '../types';
-import type { SaveMappingOnClick } from './inference_flyout_wrapper';
+import type { SaveMappingOnClick, DocumentationProps } from './inference_flyout_wrapper';
 import { SaveInferenceEndpoint } from './save_inference_mappings_button';
 
-interface GenericInferenceFlyoutProps extends SaveMappingOnClick {
+interface GenericInferenceFlyoutProps
+  extends SaveMappingOnClick,
+    Pick<DocumentationProps, 'inferenceEndpointUrl'> {
   inferenceComponent: React.ReactNode;
   description: string;
   service: Service;
@@ -41,6 +43,7 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
   isCreateInferenceApiLoading,
   onInferenceEndpointChange,
   inferenceEndpointError,
+  inferenceEndpointUrl,
 }) => {
   const [inferenceEndpointId, setInferenceEndpointId] = useState<string>('');
   const hasError: boolean = useMemo(() => {
@@ -85,7 +88,7 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
             )}
             hasChildLabel={false}
             labelAppend={
-              <EuiLink href="TODO" external target={'_blank'}>
+              <EuiLink href={inferenceEndpointUrl} external target={'_blank'}>
                 <FormattedMessage
                   id="xpack.ml.inferenceFlyoutWrapper.elasticsearchModels.inferenceEndpointIdForm.inferenceEnpointDocumentation"
                   defaultMessage="What's this?"

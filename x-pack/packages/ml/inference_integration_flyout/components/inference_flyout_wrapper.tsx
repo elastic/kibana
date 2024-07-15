@@ -85,6 +85,7 @@ export interface DocumentationProps {
   e5documentationUrl?: string;
   supportedNlpModels?: string;
   nlpImportModel?: string;
+  inferenceEndpointUrl?: string;
 }
 export interface InferenceFlyoutProps extends SaveMappingOnClick, DocumentationProps {
   onFlyoutClose: (value: boolean) => void;
@@ -103,6 +104,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   elserv2documentationUrl = '',
   supportedNlpModels = '',
   nlpImportModel = '',
+  inferenceEndpointUrl = '',
   errorCallout,
   trainedModels = [],
   isCreateInferenceApiLoading,
@@ -122,6 +124,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
         trainedModels={trainedModels}
         onInferenceEndpointChange={onInferenceEndpointChange}
         inferenceEndpointError={inferenceEndpointError}
+        inferenceEndpointUrl={inferenceEndpointUrl}
       />
     ),
     connect_to_api: (
@@ -131,6 +134,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
         isCreateInferenceApiLoading={isCreateInferenceApiLoading}
         onInferenceEndpointChange={onInferenceEndpointChange}
         inferenceEndpointError={inferenceEndpointError}
+        inferenceEndpointUrl={inferenceEndpointUrl}
       />
     ),
     eland_python_client: (

@@ -36,6 +36,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
   description,
   elserv2documentationUrl = '',
   e5documentationUrl = '',
+  inferenceEndpointUrl = '',
   onSaveInferenceEndpoint,
   trainedModels,
   isCreateInferenceApiLoading,
@@ -201,6 +202,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
         isCreateInferenceApiLoading={isCreateInferenceApiLoading}
         onInferenceEndpointChange={onInferenceEndpointChange}
         inferenceEndpointError={inferenceEndpointError}
+        inferenceEndpointUrl={inferenceEndpointUrl}
       />
     </>
   );
