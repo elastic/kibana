@@ -7,9 +7,9 @@
 
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 
-type DefaultUsername = 'elastic_platform_engineer' | 'system_indices_superuser';
+type DefaultUsername = 'elastic_platform_engineer' | 'platform_engineer';
 
 export const getDefaultUsername = (): DefaultUsername => {
   const isServerless: boolean = Cypress.env(IS_SERVERLESS);
-  return isServerless ? 'elastic_platform_engineer' : 'system_indices_superuser';
+  return isServerless ? 'elastic_platform_engineer' : 'platform_engineer';
 };
