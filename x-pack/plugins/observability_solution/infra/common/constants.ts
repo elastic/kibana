@@ -42,3 +42,5 @@ export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {
   name: 'Metrics View',
   timeFieldName: TIMESTAMP_FIELD,
 };
+
+export const SNAPSHOT_API_MAX_METRICS = 20;

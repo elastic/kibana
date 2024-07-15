@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
