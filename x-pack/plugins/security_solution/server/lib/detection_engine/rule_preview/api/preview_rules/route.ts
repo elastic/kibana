@@ -28,10 +28,10 @@ import {
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
-  PreviewResponse,
+  RulePreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
+import { RulePreviewRequestBody } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -92,9 +92,9 @@ export const previewRulesRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidationWithZod(PreviewRulesSchema) } },
+        validate: { request: { body: buildRouteValidationWithZod(RulePreviewRequestBody) } },
       },
-      async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<RulePreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const validationErrors = validateCreateRuleProps(request.body);
         const coreContext = await context.core;
