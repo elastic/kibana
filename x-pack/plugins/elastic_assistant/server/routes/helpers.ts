@@ -308,9 +308,6 @@ export const nonLangChainExecute = async ({
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    // TODO: @stephmilovic, what's the right way to go about deprecating these telemetry values?
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: true,
     model: request.body.model,
     assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
   });
@@ -446,9 +443,6 @@ export const langChainExecute = async ({
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    // TODO: @stephmilovic, what's the right way to go about deprecating these telemetry values?
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: true,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
