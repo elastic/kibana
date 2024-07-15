@@ -6208,6 +6208,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-exceptions-common@link:packages/kbn-securitysolution-exceptions-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-hook-utils@link:packages/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
