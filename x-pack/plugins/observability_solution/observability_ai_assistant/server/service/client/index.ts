@@ -67,6 +67,7 @@ import { replaceSystemMessage } from '../util/replace_system_message';
 import { withAssistantSpan } from '../util/with_assistant_span';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
+import { createGeminiAdapter } from './adapters/gemini/gemini_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
@@ -514,13 +515,24 @@ export class ObservabilityAIAssistantClient {
             });
             break;
 
+          case ObservabilityAIAssistantConnectorType.Gemini:
+            adapter = createGeminiAdapter({
+              messages,
+              functions,
+              functionCall,
+              logger: this.dependencies.logger,
+            });
+            break;
+
           default:
             throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
         }
 
         const subAction = adapter.getSubAction();
 
-        this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+        if (this.dependencies.logger.isLevelEnabled('trace')) {
+          this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+        }
 
         return from(
           withAssistantSpan('get_execute_result', () =>

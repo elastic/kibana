@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { cloneDeep } from 'lodash';
 import {
   ChildFieldName,
   ComboBoxOption,
@@ -23,6 +24,7 @@ import {
   ParameterName,
   RuntimeFields,
   SubType,
+  SemanticTextField,
 } from '../types';
 
 import {
@@ -684,4 +686,89 @@ const getallFieldsIncludingNestedFields = (fields: Fields, fieldsArray: DataType
 export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
   const fields: DataType[] = [];
   return getallFieldsIncludingNestedFields(allFields, fields).filter(filterUnique);
+};
+
+export function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
+  return Boolean(field.inference_id && field.type === 'semantic_text');
+}
+
+/**
+ * Returns deep copy of state with `copy_to` added to text fields that are referenced by new semantic text fields
+ * @param state
+ * @returns state
+ */
+
+export function getStateWithCopyToFields(state: State): State {
+  // Make sure we don't accidentally modify existing state
+  let updatedState = cloneDeep(state);
+  for (const field of Object.values(updatedState.fields.byId)) {
+    if (field.source.type === 'semantic_text' && field.source.reference_field) {
+      // Check fields already added to the list of to-update fields first
+      // API will not accept reference_field so removing it now
+      const { reference_field: referenceField, ...source } = field.source;
+      if (typeof referenceField !== 'string') {
+        // should never happen
+        throw new Error('Reference field is not a string');
+      }
+      field.source = source;
+      const existingTextField =
+        getFieldByPathName(updatedState.fields, referenceField) ||
+        getFieldByPathName(updatedState.mappingViewFields || { byId: {} }, referenceField);
+      if (existingTextField) {
+        // Add copy_to to existing text field's copy_to array
+        const updatedTextField: NormalizedField = {
+          ...existingTextField,
+          source: {
+            ...existingTextField.source,
+            copy_to: existingTextField.source.copy_to
+              ? [
+                  ...(Array.isArray(existingTextField.source.copy_to)
+                    ? existingTextField.source.copy_to
+                    : [existingTextField.source.copy_to]),
+                  field.path.join('.'),
+                ]
+              : [field.path.join('.')],
+          },
+        };
+        updatedState = {
+          ...updatedState,
+          fields: {
+            ...updatedState.fields,
+            byId: {
+              ...updatedState.fields.byId,
+              [existingTextField.id]: updatedTextField,
+            },
+          },
+        };
+        if (existingTextField.parentId) {
+          let currentField = existingTextField;
+          let hasParent = true;
+          while (hasParent) {
+            if (!currentField.parentId) {
+              // reached the top of the tree, push current field to root level fields
+              updatedState.fields.rootLevelFields.push(currentField.id);
+              hasParent = false;
+            } else if (updatedState.fields.byId[currentField.parentId]) {
+              // parent is already in state, don't need to do anything
+              hasParent = false;
+            } else {
+              // parent is not in state yet
+              updatedState.fields.byId[currentField.parentId] =
+                updatedState.mappingViewFields.byId[currentField.parentId];
+              currentField = updatedState.fields.byId[currentField.parentId];
+            }
+          }
+        } else {
+          updatedState.fields.rootLevelFields.push(existingTextField.id);
+        }
+      } else {
+        throw new Error(`Semantic text field ${field.path.join('.')} has invalid reference field`);
+      }
+    }
+  }
+  return updatedState;
+}
+
+export const getFieldByPathName = (fields: NormalizedFields, name: string) => {
+  return Object.values(fields.byId).find((field) => field.path.join('.') === name);
 };
