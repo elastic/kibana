@@ -24,12 +24,6 @@ export const useSourceIndicesFields = () => {
 
   const addIndex = useCallback(
     (newIndex: IndexName) => {
-      if (selectedIndices.includes(newIndex)) {
-        // needed to fire change event to skip the setup page
-        // TODO remove this once we have a better way to handle this
-        onIndicesChange(selectedIndices);
-        return;
-      }
       const newIndices = [...selectedIndices, newIndex];
       onIndicesChange(newIndices);
       usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
