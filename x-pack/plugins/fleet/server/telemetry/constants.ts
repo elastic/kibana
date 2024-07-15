@@ -6,5 +6,5 @@
  */
 
 export const FLEET_UPGRADES_CHANNEL_NAME = 'fleet-upgrades';
-export const FLEET_INTEGRATIONS_POLICIES_EVENT_TYPE = 'fleet-integration-policies';
+export const FLEET_INTEGRATIONS_POLICIES_EVENT_TYPE = 'fleet-integrations';
 export const MAX_ERROR_SIZE = 100;

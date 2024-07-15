@@ -16,12 +16,12 @@ export interface EventError {
   key?: string;
   message: string | string[];
 }
-export interface TelemetryEvent {
+export interface BaseTelemetryEvent {
   errorMessage?: string[] | string;
   error?: EventError[];
 }
 
-export interface PackageUpdateEvent extends TelemetryEvent {
+export interface PackageUpdateEvent extends BaseTelemetryEvent {
   packageName: string;
   currentVersion: string;
   newVersion: string;
@@ -31,22 +31,23 @@ export interface PackageUpdateEvent extends TelemetryEvent {
   installType?: InstallType;
 }
 
-export interface IntegrationPoliciesEvent extends TelemetryEvent {
+interface SharedIntegrations {
+  name: string;
+  pkgName: string;
+  version?: string;
+  sharedByPoliciesCount: number;
+}
+export interface IntegrationPoliciesEvent extends BaseTelemetryEvent {
   shared: {
-    count: number;
-    integrations: {
-      name: string;
-      pkgName: string;
-      version?: string;
-      shared_by_policies_count: number;
-    };
+    totalCount: number;
+    integrations: SharedIntegrations[];
   };
 }
 
 export interface FleetTelemetryChannelEvents {
   // channel name => event type
   'fleet-upgrades': PackageUpdateEvent;
-  'fleet-integration-policies': IntegrationPoliciesEvent;
+  'fleet-integrations': IntegrationPoliciesEvent;
 }
 
 export type FleetTelemetryChannel = keyof FleetTelemetryChannelEvents;
