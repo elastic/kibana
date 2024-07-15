@@ -88,51 +88,6 @@ advanced data analysis and visualize your data in a variety of charts, tables,
 and maps.
 
 [discrete]
-=== Compatibility with cold tier nodes
-
-Cold tier is a {ref}/data-tiers.html[data tier] that holds time-series data that is accessed only occasionally. In {stack} version >=7.11.0, {elastic-sec} supports cold tier data for the following {es} indices:
-
-* Index patterns specified in `securitySolution:defaultIndex`
-* Index patterns specified in the definitions of detection rules, except for indicator match rules
-* Index patterns specified in the data sources selector on various {security-app} pages
-
-{elastic-sec} does NOT support cold tier data for the following {es} indices:
-
-* Index patterns controlled by {elastic-sec}, including signals and list indices
-* Index patterns specified in indicator match rules
-
-Using cold tier data for unsupported indices may result in detection rule timeouts and overall performance degradation.
-
-[discrete]
-[[self-protection]]
-==== Elastic Endpoint self-protection
-
-Self-protection means that {elastic-endpoint} has guards against users and attackers that may try to interfere with its functionality. This protection feature is consistently enhanced to prevent attackers who may attempt to use newer, more sophisticated tactics to interfere with the {elastic-endpoint}. Self-protection is enabled by default when {elastic-endpoint} installs on supported platforms, listed below.
-
-Self-protection is enabled on the following 64-bit Windows versions:
-
-* Windows 8.1
-* Windows 10
-* Windows Server 2012 R2
-* Windows Server 2016
-* Windows Server 2019
-
-And on the following macOS versions:
-
-* macOS 10.15 (Catalina)
-* macOS 11 (Big Sur)
-
-NOTE: Other Windows and macOS variants (and all Linux distributions) do not have self-protection.
-
-For {stack} version >= 7.11.0, self-protection defines the following permissions:
-
-* Users -- even Administrator/root -- *cannot* delete {elastic-endpoint} files (located at `c:\Program Files\Elastic\Endpoint` on Windows, and `/Library/Elastic/Endpoint` on macOS).
-* Users *cannot* terminate the {elastic-endpoint} program or service.
-* Administrator/root users *can* read the endpoint's files. On Windows, the easiest way to read Endpoint files is to start an Administrator `cmd.exe` prompt. On macOS, an Administrator can use the `sudo` command.
-* Administrator/root users *can* stop the {elastic-agent}'s service. On Windows, run the `sc stop "Elastic Agent"` command. On macOS, run the `sudo launchctl stop elastic-agent` command.
-
-
-[discrete]
 [[siem-integration]]
 === Integration with other Elastic products
 
