@@ -23,10 +23,10 @@ import {
   useEuiTheme,
   EuiPopoverFooter,
   EuiButton,
-  FieldValueOptionType,
-  Query,
   EuiHealth,
   EuiBadge,
+  Query,
+  FieldValueOptionType,
 } from '@elastic/eui';
 import type { EuiSelectableProps, ExclusiveUnion } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,15 +37,6 @@ import { useServices } from '../services';
 import { Tag } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-const modifierKeyPrefix = isMac ? '⌘' : '^';
-
-const clearSelectionBtnCSS = css`
-  height: auto;
-`;
-
-const saveBtnWrapperCSS = css`
-  width: 100%;
-`;
 
 const toArray = (item: unknown) => (Array.isArray(item) ? item : [item]);
 
@@ -62,6 +53,15 @@ export interface TagOptionItem extends FieldValueOptionType {
   checked?: 'on' | 'off';
   tag: Tag;
 }
+const modifierKeyPrefix = isMac ? '⌘' : '^';
+
+const clearSelectionBtnCSS = css`
+  height: auto;
+`;
+
+const saveBtnWrapperCSS = css`
+  width: 100%;
+`;
 
 export interface Props {
   clearTagSelection: () => void;
@@ -77,15 +77,50 @@ export const TagFilterPanel: FC<Props> = ({
   query,
   tagsToTableItemMap,
   getTagList,
-  addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
-}) => {
+  addOrRemoveExcludeTagFilter,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
+  const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  // When the panel is "in use" it means that it is opened and the user is interacting with it.
+  // When the user clicks on a tag to select it, the component is unmounted and mounted immediately, which
+  // creates a new EUI transition "IN" which makes the UI "flicker". To avoid that we pass this
+  // "isInUse" state which disable the transition.
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const totalActiveFilters = Object.keys(tagSelection).length;
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const isSearchVisible = options.length > 10;
+
+  const searchBoxCSS = css`
+    padding: ${euiTheme.size.s};
+    border-bottom: ${euiTheme.border.thin};
+  `;
+
+  const popoverTitleCSS = css`
+    height: ${euiTheme.size.xxxl};
+  `;
+
+  let searchProps: ExclusiveUnion<
+    { searchable: false },
+    {
+      searchable: true;
+      searchProps: EuiSelectableProps['searchProps'];
+    }
+  > = {
+    searchable: false,
+  };
+
+  if (isSearchVisible) {
+    searchProps = {
+      searchable: true,
+      searchProps: {
+        compressed: true,
+      },
+    };
+  }
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
@@ -134,7 +169,7 @@ export const TagFilterPanel: FC<Props> = ({
               <EuiHealth
                 color={color}
                 data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
-                onClick={() => onOptionClick(tag)}
+                onClick={(e) => onOptionClick(tag)}
               >
                 <EuiText>{name}</EuiText>
               </EuiHealth>
@@ -152,8 +187,12 @@ export const TagFilterPanel: FC<Props> = ({
     setOptions(tagsToSelectOptions);
   }, [getTagList, tagsToTableItemMap, tagSelection, onOptionClick]);
 
-  const togglePopover = useCallback(() => {
+  const onFilterButtonClick = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
   }, []);
 
   useEffect(() => {
@@ -205,65 +244,29 @@ export const TagFilterPanel: FC<Props> = ({
     }
   }, [isPopoverOpen, updateTagList]);
 
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
-
-  const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
-  const isSearchVisible = options.length > 10;
-  const searchBoxCSS = css`
-    padding: ${euiTheme.size.s};
-    border-bottom: ${euiTheme.border.thin};
-  `;
-
-  const popoverTitleCSS = css`
-    height: ${euiTheme.size.xxxl};
-  `;
-
-  let searchProps: ExclusiveUnion<
-    { searchable: false },
-    {
-      searchable: true;
-      searchProps: EuiSelectableProps['searchProps'];
-    }
-  > = {
-    searchable: false,
-  };
-
-  if (isSearchVisible) {
-    searchProps = {
-      searchable: true,
-      searchProps: {
-        compressed: true,
-      },
-    };
-  }
-
-  const button = (
-    <EuiFilterButton
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={togglePopover}
-      data-test-subj="tagFilterPopoverButton"
-      hasActiveFilters={totalActiveFilters > 0}
-      numActiveFilters={totalActiveFilters}
-      grow
-    >
-      Tags
-    </EuiFilterButton>
-  );
-
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downCenter"
-      panelProps={{ css: { width: euiTheme.base * 18 } }}
-      panelStyle={isInUse ? { transition: 'none' } : undefined}
-    >
-      <>
+    <>
+      <EuiPopover
+        button={
+          <EuiFilterButton
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={onFilterButtonClick}
+            data-test-subj="tagFilterPopoverButton"
+            hasActiveFilters={totalActiveFilters > 0}
+            numActiveFilters={totalActiveFilters}
+            grow
+          >
+            Tags
+          </EuiFilterButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downCenter"
+        panelProps={{ css: { width: euiTheme.base * 18 } }}
+        panelStyle={isInUse ? { transition: 'none' } : undefined}
+      >
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
             <EuiFlexItem>Tags</EuiFlexItem>
@@ -348,7 +351,7 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverFooter>
-      </>
-    </EuiPopover>
+      </EuiPopover>
+    </>
   );
 };

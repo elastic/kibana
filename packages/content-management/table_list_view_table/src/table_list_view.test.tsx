@@ -1131,11 +1131,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "July 14, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "July 14, 2023",
           ],
         ]
       `);
@@ -1165,7 +1165,7 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item from search",
-            "July 1, 2023",
+            "June 30, 2023",
           ],
         ]
       `);
@@ -1207,11 +1207,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "July 14, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "July 14, 2023",
           ],
         ]
       `);
