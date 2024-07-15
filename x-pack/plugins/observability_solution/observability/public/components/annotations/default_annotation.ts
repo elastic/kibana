@@ -9,8 +9,8 @@ import moment, { Moment } from 'moment';
 import {
   defaultAnnotationColor,
   defaultAnnotationLabel,
-  defaultRangeAnnotationLabel,
   defaultAnnotationRangeColor,
+  defaultRangeAnnotationLabel,
 } from '@kbn/event-annotation-common';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { CreateAnnotationForm } from './components/create_annotation';
@@ -23,10 +23,9 @@ export function getDefaultAnnotation({
   timestamp?: Moment;
   eventEnd?: Moment;
   slo?: SLOWithSummaryResponse;
-}): Partial<CreateAnnotationForm> {
+}): CreateAnnotationForm {
   const sloId = slo?.id;
   const sloInstanceId = slo?.instanceId;
-
   return {
     message: eventEnd ? defaultRangeAnnotationLabel : defaultAnnotationLabel,
     '@timestamp': timestamp ?? moment(),
@@ -49,14 +48,13 @@ export function getDefaultAnnotation({
         },
       },
     },
-    ...(sloId &&
-      sloInstanceId && {
-        slos: [
-          {
+    ...(sloId
+      ? {
+          slo: {
             id: sloId,
             instanceId: sloInstanceId,
           },
-        ],
-      }),
+        }
+      : {}),
   };
 }
