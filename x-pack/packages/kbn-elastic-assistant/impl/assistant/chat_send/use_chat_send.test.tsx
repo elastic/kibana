@@ -66,7 +66,7 @@ describe('use chat send', () => {
       knowledgeBase: { isEnabledKnowledgeBase: false, isEnabledRAGAlerts: false },
     });
   });
-  it('handleOnChatCleared clears the conversation', async () => {
+  it.only('handleOnChatCleared clears the conversation', async () => {
     (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,

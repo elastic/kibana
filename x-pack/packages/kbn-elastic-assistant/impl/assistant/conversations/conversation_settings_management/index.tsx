@@ -149,10 +149,12 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (selectedConversation != null) {
+      const newConversation =
+        conversationSettings[selectedConversation.id] ||
+        conversationSettings[selectedConversation.title];
       setSelectedConversation(
         // conversationSettings has title as key, sometime has id as key
-        conversationSettings[selectedConversation.id] ||
-          conversationSettings[selectedConversation.title]
+        newConversation
       );
     }
   }, [conversationSettings, selectedConversation]);
@@ -322,6 +324,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+            onSelectedConversationChange={onSelectedConversationChange}
           />
         </Flyout>
       )}

@@ -114,7 +114,6 @@ jest.mock('../../../connectorland/connector_selector', () => ({
     />
   ),
 }));
-
 describe('ConversationSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();

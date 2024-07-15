@@ -93,7 +93,6 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
                 (conversation) =>
                   conversation.title === conversationSelectorSettingsOption[0]?.label
               ) ?? conversationSelectorSettingsOption[0]?.label;
-        console.log('newConversation---', newConversation);
         onConversationSelectionChange(newConversation);
       },
       [onConversationSelectionChange, conversations]

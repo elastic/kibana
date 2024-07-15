@@ -17,7 +17,7 @@ import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import {
   getConversationApiConfig,
-  getInitialDefaultSystemPrompt,
+  getFallbackDefaultSystemPrompt,
 } from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
@@ -119,19 +119,11 @@ export const useConversationsTable = () => {
         );
         const connectorTypeTitle = getConnectorTypeTitle(connector, actionTypeRegistry);
 
-        const systemPrompt: PromptResponse | undefined = allSystemPrompts.find(
-          ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
-        );
-        const defaultSystemPrompt = getInitialDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation,
-        });
+        const systemPrompt: PromptResponse | undefined =
+          allSystemPrompts.find(({ id }) => id === conversation.apiConfig?.defaultSystemPromptId) ??
+          getFallbackDefaultSystemPrompt({ allSystemPrompts });
 
-        const systemPromptTitle =
-          systemPrompt?.name ||
-          systemPrompt?.id ||
-          defaultSystemPrompt?.name ||
-          defaultSystemPrompt?.id;
+        const systemPromptTitle = systemPrompt?.name || systemPrompt?.id;
 
         return {
           ...conversation,

@@ -10,6 +10,7 @@ import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../assistant_context/types';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
+import { DEFAULT_SYSTEM_PROMPT_NAME } from '../../content/prompts/system/translations';
 
 export interface CodeBlockDetails {
   type: QueryType;
@@ -75,11 +76,15 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
  *
  * @param allSystemPrompts All available System Prompts
  */
-export const getDefaultNewSystemPrompt = (allSystemPrompts: PromptResponse[]) =>
-  allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts?.[0];
+export const getDefaultNewSystemPrompt = (allSystemPrompts: PromptResponse[]) => {
+  const fallbackSystemPrompt = allSystemPrompts.find(
+    (prompt) => prompt.name === DEFAULT_SYSTEM_PROMPT_NAME
+  );
+  return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? fallbackSystemPrompt;
+};
 
 /**
- * Returns the default system prompt for a given (New Custom) conversation
+ * Returns the default system prompt for a given conversation
  *
  * @param allSystemPrompts All available System Prompts
  * @param conversation Conversation to get the default system prompt for
@@ -96,27 +101,25 @@ export const getDefaultSystemPrompt = ({
   );
   const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
-  return conversationSystemPrompt?.id ? conversationSystemPrompt : defaultNewSystemPrompt;
+  return conversation && conversation.id !== '' ? conversationSystemPrompt : defaultNewSystemPrompt;
 };
 
 /**
- * Returns the default system prompt for an existing conversation that has never been given a system prompt
+ * Returns the default system prompt
  *
  * @param allSystemPrompts All available System Prompts
  * @param conversation Conversation to get the default system prompt for
  */
-export const getInitialDefaultSystemPrompt = ({
+export const getFallbackDefaultSystemPrompt = ({
   allSystemPrompts,
-  conversation,
 }: {
   allSystemPrompts: PromptResponse[];
-  conversation: Conversation | undefined;
 }): PromptResponse | undefined => {
-  const conversationSystemPrompt = allSystemPrompts.find(
-    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
+  const fallbackSystemPrompt = allSystemPrompts.find(
+    (prompt) => prompt.name === DEFAULT_SYSTEM_PROMPT_NAME
   );
 
-  return conversationSystemPrompt;
+  return fallbackSystemPrompt;
 };
 
 /**
@@ -144,16 +147,10 @@ export const getConversationApiConfig = ({
   const { apiProvider: connectorApiProvider, defaultModel: connectorModel } =
     getGenAiConfig(connector) ?? {};
 
-  const defaultSystemPrompt =
-    conversation.apiConfig?.defaultSystemPromptId == null
-      ? getInitialDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation,
-        })
-      : getDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation,
-        });
+  const defaultSystemPrompt = getDefaultSystemPrompt({
+    allSystemPrompts,
+    conversation,
+  });
 
   return connector
     ? {

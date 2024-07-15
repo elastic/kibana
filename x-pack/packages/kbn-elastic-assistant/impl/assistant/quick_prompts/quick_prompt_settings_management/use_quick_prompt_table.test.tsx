@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useQuickPromptTable } from './use_quick_prompt_table';
-import { EuiTableComputedColumnType } from '@elastic/eui';
+import { EuiTableActionsColumnType, EuiTableComputedColumnType } from '@elastic/eui';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
@@ -57,17 +57,11 @@ describe('useQuickPromptTable', () => {
     it('should not render delete action for non-deletable prompt', () => {
       const columns = result.current.getColumns(props);
 
-      const mockRowActions = (columns[3] as EuiTableComputedColumnType<PromptResponse>).render(
-        MOCK_QUICK_PROMPTS[0]
-      );
-
-      expect(mockRowActions).toHaveProperty('props', {
-        disabled: false,
-        rowItem: MOCK_QUICK_PROMPTS[0],
-        onDelete: undefined,
-        onEdit: mockOnEditActionClicked,
-        isDeletable: false,
-      });
+      const defaultPrompt = MOCK_QUICK_PROMPTS.find((qp) => qp.isDefault);
+      if (defaultPrompt) {
+        const mockRowActions = (columns[3] as EuiTableActionsColumnType<PromptResponse>).actions[1];
+        expect(mockRowActions?.enabled?.(defaultPrompt)).toEqual(false);
+      }
     });
 
     it('should render delete actions correctly for deletable prompt', () => {
@@ -75,16 +69,8 @@ describe('useQuickPromptTable', () => {
 
       const nonDefaultPrompt = MOCK_QUICK_PROMPTS.find((qp) => !qp.isDefault);
       if (nonDefaultPrompt) {
-        const mockRowActions = (columns[3] as EuiTableComputedColumnType<PromptResponse>).render(
-          nonDefaultPrompt
-        );
-        expect(mockRowActions).toHaveProperty('props', {
-          disabled: false,
-          rowItem: nonDefaultPrompt,
-          onDelete: mockOnDeleteActionClicked,
-          onEdit: mockOnEditActionClicked,
-          isDeletable: true,
-        });
+        const mockRowActions = (columns[3] as EuiTableActionsColumnType<PromptResponse>).actions[1];
+        expect(mockRowActions?.enabled?.(nonDefaultPrompt)).toEqual(true);
       }
     });
   });
