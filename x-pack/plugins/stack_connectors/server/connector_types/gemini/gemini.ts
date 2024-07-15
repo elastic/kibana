@@ -11,9 +11,8 @@ import { PassThrough } from 'stream';
 import { IncomingMessage } from 'http';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
-import { Logger } from '@kbn/core/server';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+
 import {
   RunActionParamsSchema,
   RunApiResponseSchema,
@@ -39,16 +38,6 @@ import {
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/gemini/constants';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
-
-export interface GetAxiosInstanceOpts {
-  connectorId: string;
-  logger: Logger;
-  credentials: string;
-  snServiceUrl: string;
-  connectorTokenClient: ConnectorTokenClientContract;
-  configurationUtilities: ActionsConfigurationUtilities;
-}
-
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {

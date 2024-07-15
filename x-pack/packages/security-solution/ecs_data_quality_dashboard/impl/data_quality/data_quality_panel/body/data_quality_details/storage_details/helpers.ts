@@ -134,37 +134,34 @@ export const getFlattenedBuckets = ({
     if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
       return [
         ...acc,
-        ...Object.entries(stats).reduce<FlattenedBucket[]>(
-          (validStats, [indexName, indexStats]) => {
-            const ilmPhase = getIlmPhase(ilmExplain?.[indexName], isILMAvailable);
-            const isSelectedPhase =
-              (isILMAvailable && ilmPhase != null && ilmPhasesMap[ilmPhase] != null) ||
-              !isILMAvailable;
+        ...Object.entries(stats).reduce<FlattenedBucket[]>((validStats, [indexName]) => {
+          const ilmPhase = getIlmPhase(ilmExplain?.[indexName], isILMAvailable);
+          const isSelectedPhase =
+            (isILMAvailable && ilmPhase != null && ilmPhasesMap[ilmPhase] != null) ||
+            !isILMAvailable;
 
-            if (isSelectedPhase) {
-              const incompatible =
-                results != null && results[indexName] != null
-                  ? results[indexName].incompatible
-                  : undefined;
-              const sizeInBytes = getSizeInBytes({ indexName, stats });
-              const docsCount = getDocsCount({ stats, indexName });
-              return [
-                ...validStats,
-                {
-                  ilmPhase,
-                  incompatible,
-                  indexName,
-                  pattern,
-                  sizeInBytes,
-                  docsCount,
-                },
-              ];
-            } else {
-              return validStats;
-            }
-          },
-          []
-        ),
+          if (isSelectedPhase) {
+            const incompatible =
+              results != null && results[indexName] != null
+                ? results[indexName].incompatible
+                : undefined;
+            const sizeInBytes = getSizeInBytes({ indexName, stats });
+            const docsCount = getDocsCount({ stats, indexName });
+            return [
+              ...validStats,
+              {
+                ilmPhase,
+                incompatible,
+                indexName,
+                pattern,
+                sizeInBytes,
+                docsCount,
+              },
+            ];
+          } else {
+            return validStats;
+          }
+        }, []),
       ];
     }
 
@@ -232,7 +229,7 @@ export const getLayersMultiDimensional = ({
       groupByRollup: (d: Datum) => d.indexName,
       nodeLabel: (indexName: Datum) => indexName,
       shape: {
-        fillColor: (indexName: Key, sortIndex: number, node: Pick<ArrayNode, 'path'>) => {
+        fillColor: (indexName: Key, _sortIndex: number, node: Pick<ArrayNode, 'path'>) => {
           const pattern = getGroupFromPath(node.path) ?? '';
           const flattenedBucket = pathToFlattenedBucketMap[`${pattern}${indexName}`];
 

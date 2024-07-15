@@ -198,6 +198,7 @@ describe('Task Runner Cancel', () => {
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
+    logger.isLevelEnabled.mockReturnValue(true);
 
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });

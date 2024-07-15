@@ -9,7 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { CanClearSelections, ControlWidth } from '@kbn/controls-plugin/public/types';
-import { HasSerializableState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
@@ -43,8 +43,11 @@ export type DefaultControlApi = PublishesDataLoading &
   CanClearSelections &
   HasType &
   HasUniqueId &
-  HasSerializableState &
   HasParentApi<ControlGroupApi> & {
+    // Can not use HasSerializableState interface
+    // HasSerializableState types serializeState as function returning 'MaybePromise'
+    // Controls serializeState is sync
+    serializeState: () => SerializedPanelState<DefaultControlState>;
     /** TODO: Make these non-public as part of https://github.com/elastic/kibana/issues/174961 */
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;

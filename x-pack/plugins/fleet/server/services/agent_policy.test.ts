@@ -119,6 +119,7 @@ describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
   });
 
   afterEach(() => {
@@ -230,7 +231,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
+    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful without agentless feature', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: false } as any);
@@ -249,7 +250,7 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
     });
@@ -273,7 +274,7 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
     });
@@ -1029,13 +1030,13 @@ describe('Agent policy', () => {
       ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
     });
 
-    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
+    it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+        .mockReturnValue({ agentless: true } as any);
       jest
         .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: false } as any);
+        .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1052,11 +1053,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
-        new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
-        )
-      );
+      ).resolves.not.toThrow();
     });
 
     it('should throw AgentPolicyInvalidError if agentless flag is disabled in serverless', async () => {
@@ -1084,7 +1081,7 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
     });

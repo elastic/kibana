@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinitionIdTooLong } from '../errors/entity_definition_id_too_long_error';
+import { EntityDefinitionIdInvalid } from '../errors/entity_definition_id_invalid';
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
 import { validateDefinitionCanCreateValidTransformIds } from './validate_transform_ids';
 
@@ -20,7 +20,25 @@ describe('validateDefinitionCanCreateValidTransformIds(definition)', () => {
       'a-really-really-really-really-really-really-really-really-really-really-long-id';
 
     expect(() => {
-      validateDefinitionCanCreateValidTransformIds(entityDefinition);
-    }).toThrow(EntityDefinitionIdTooLong);
+      validateDefinitionCanCreateValidTransformIds(entityDefinitionWithLongID);
+    }).toThrow(EntityDefinitionIdInvalid);
+  });
+
+  it('should throw an error for a definition ID which contains invalid characters', () => {
+    const entityDefinitionWithDots = entityDefinition;
+    entityDefinitionWithDots.id = 'dots.are.not.allowed';
+
+    expect(() => {
+      validateDefinitionCanCreateValidTransformIds(entityDefinitionWithDots);
+    }).toThrow(EntityDefinitionIdInvalid);
+  });
+
+  it('should throw an error for a definition ID which ends with dash or underscore', () => {
+    const entityDefinitionEndingInUnderscore = entityDefinition;
+    entityDefinitionEndingInUnderscore.id = 'looking-good-but_';
+
+    expect(() => {
+      validateDefinitionCanCreateValidTransformIds(entityDefinitionEndingInUnderscore);
+    }).toThrow(EntityDefinitionIdInvalid);
   });
 });
