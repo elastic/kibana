@@ -12,7 +12,7 @@ import { SearchHomepageHeader } from './search_homepage_header';
 export const App: React.FC = () => {
   return (
     <>
-      <SearchHomepageHeader />
+      <SearchHomepageHeader showEndpointsAPIKeys={false} />
       <SearchHomepageBody />
     </>
   );

@@ -143,3 +143,17 @@ components:
         logo:
           type: string
           description: The logo of the integration.
+
+    LangSmithOptions:
+      type: object
+      description: The LangSmith options object.
+      required:
+        - projectName
+        - apiKey
+      properties:
+        projectName:
+          type: string
+          description: The project name.
+        apiKey:
+          type: string
+          description: The apiKey to use for tracing.

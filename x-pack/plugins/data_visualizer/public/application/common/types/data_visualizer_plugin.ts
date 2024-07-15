@@ -20,6 +20,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -42,4 +43,5 @@ export interface DataVisualizerStartDependencies {
   uiActions?: UiActionsStart;
   cloud?: CloudStart;
   savedSearch: SavedSearchPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }

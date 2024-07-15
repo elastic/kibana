@@ -38,7 +38,51 @@ export const determineDiffOutcome = <TValue>(
   const baseEqlTarget = isEqual(baseVersion, targetVersion);
   const currentEqlTarget = isEqual(currentVersion, targetVersion);
 
-  if (baseVersion === MissingVersion) {
+  return getThreeWayDiffOutcome({
+    baseEqlCurrent,
+    baseEqlTarget,
+    currentEqlTarget,
+    hasBaseVersion: baseVersion !== MissingVersion,
+  });
+};
+
+/**
+ * Determines diff outcomes of array fields that do not care about order (e.g. `[1, 2 , 3] === [3, 2, 1]`)
+ */
+export const determineOrderAgnosticDiffOutcome = <TValue>(
+  baseVersion: TValue[] | MissingVersion,
+  currentVersion: TValue[],
+  targetVersion: TValue[]
+): ThreeWayDiffOutcome => {
+  const baseSet = baseVersion === MissingVersion ? MissingVersion : new Set<TValue>(baseVersion);
+  const currentSet = new Set<TValue>(currentVersion);
+  const targetSet = new Set<TValue>(targetVersion);
+  const baseEqlCurrent = isEqual(baseSet, currentSet);
+  const baseEqlTarget = isEqual(baseSet, targetSet);
+  const currentEqlTarget = isEqual(currentSet, targetSet);
+
+  return getThreeWayDiffOutcome({
+    baseEqlCurrent,
+    baseEqlTarget,
+    currentEqlTarget,
+    hasBaseVersion: baseVersion !== MissingVersion,
+  });
+};
+
+interface DetermineDiffOutcomeProps {
+  baseEqlCurrent: boolean;
+  baseEqlTarget: boolean;
+  currentEqlTarget: boolean;
+  hasBaseVersion: boolean;
+}
+
+const getThreeWayDiffOutcome = ({
+  baseEqlCurrent,
+  baseEqlTarget,
+  currentEqlTarget,
+  hasBaseVersion,
+}: DetermineDiffOutcomeProps): ThreeWayDiffOutcome => {
+  if (!hasBaseVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
      * version comparison is not possible. We assume that the rule is not

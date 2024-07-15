@@ -23,6 +23,7 @@ export const useDatasetQualityFlyout = () => {
     insightsTimeRange,
     breakdownField,
     isNonAggregatable,
+    integration,
   } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
@@ -30,12 +31,20 @@ export const useDatasetQualityFlyout = () => {
   const loadingState = useSelector(service, (state) => ({
     dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
     dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
-    datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
+    datasetIntegrationDashboardLoading: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+    ),
+    datasetIntegrationDone: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+    ),
   }));
 
   const canUserAccessDashboards = useSelector(
     service,
-    (state) => !state.matches('flyout.initializing.integrationDashboards.unauthorized')
+    (state) =>
+      !state.matches(
+        'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized'
+      )
   );
 
   const canUserViewIntegrations = useSelector(
@@ -48,6 +57,7 @@ export const useDatasetQualityFlyout = () => {
     dataStreamSettings,
     dataStreamDetails,
     isNonAggregatable,
+    integration,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,

@@ -69,8 +69,6 @@ export const JourneyScreenshotDialog = ({
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
   const imgSrc = stepNumber === initialStepNumber ? initialImgSrc ?? url : url;
 
-  const stepCountLabel = formatScreenshotStepsCount(stepNumber, maxSteps ?? stepNumber);
-
   useEffect(() => {
     if (isOpen) {
       setStepNumber(initialStepNumber);
@@ -122,16 +120,19 @@ export const JourneyScreenshotDialog = ({
       >
         <ModalBodyStyled css={{ display: 'flex' }}>
           <ScreenshotImage
-            label={stepCountLabel}
+            label={i18n.translate('xpack.synthetics.monitor.screenshotImageLabel', {
+              defaultMessage: '"{stepName}", {stepNumber} of {totalSteps}',
+              values: {
+                stepName,
+                stepNumber,
+                totalSteps: maxSteps ?? stepNumber,
+              },
+            })}
             imgSrc={imgSrc}
             isLoading={!!loading}
             animateLoading={false}
             hasBorder={false}
             size={'full'}
-            onClick={(evt) => {
-              // for table row click to work
-              evt.stopPropagation();
-            }}
           />
         </ModalBodyStyled>
 
@@ -172,7 +173,15 @@ export const JourneyScreenshotDialog = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
-              <EuiText color={euiTheme.colors.text}>{stepCountLabel}</EuiText>
+              <EuiText color={euiTheme.colors.text}>
+                {i18n.translate('xpack.synthetics.monitor.stepOfSteps', {
+                  defaultMessage: 'Step: {stepNumber} of {totalSteps}',
+                  values: {
+                    stepNumber,
+                    totalSteps: maxSteps ?? stepNumber,
+                  },
+                })}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
@@ -240,15 +249,6 @@ export const getScreenshotUrl = ({
     checkGroup
   ).replace('{stepIndex}', stepNumber.toString())}`;
 };
-
-export const formatScreenshotStepsCount = (stepNumber: number, totalSteps: number) =>
-  i18n.translate('xpack.synthetics.monitor.stepOfSteps', {
-    defaultMessage: 'Step: {stepNumber} of {totalSteps}',
-    values: {
-      stepNumber,
-      totalSteps,
-    },
-  });
 
 const prevAriaLabel = i18n.translate('xpack.synthetics.monitor.step.previousStep', {
   defaultMessage: 'Previous step',

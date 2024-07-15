@@ -91,6 +91,11 @@ export const createConfigService = ({
         ...csp,
       });
     }
+    if (path === 'permissionsPolicy') {
+      return new BehaviorSubject({
+        report_to: [],
+      });
+    }
     throw new Error(`Unexpected config path: ${path}`);
   });
   return configService;

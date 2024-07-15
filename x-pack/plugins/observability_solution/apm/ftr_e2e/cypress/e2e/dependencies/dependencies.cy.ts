@@ -112,8 +112,7 @@ describe('Dependencies', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/179083
-describe.skip('Dependencies with high volume of data', () => {
+describe('Dependencies with high volume of data', () => {
   before(() => {
     synthtrace.index(
       generateManyDependencies({

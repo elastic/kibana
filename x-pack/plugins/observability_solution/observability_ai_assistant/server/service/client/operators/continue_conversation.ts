@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
-import { pick, take } from 'lodash';
+import { last, pick, take } from 'lodash';
 import {
   catchError,
   concat,
@@ -212,10 +212,8 @@ export function continueConversation({
     initialMessages
   );
 
-  const lastMessage =
-    messagesWithUpdatedSystemMessage[messagesWithUpdatedSystemMessage.length - 1].message;
-
-  const isUserMessage = lastMessage.role === MessageRole.User;
+  const lastMessage = last(messagesWithUpdatedSystemMessage)?.message;
+  const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
 
@@ -233,7 +231,7 @@ export function continueConversation({
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
-    const functionCallName = lastMessage.function_call?.name;
+    const functionCallName = lastMessage?.function_call?.name;
 
     if (!functionCallName) {
       // reply from the LLM without a function request,

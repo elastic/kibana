@@ -239,6 +239,9 @@ export const useBulkActions = ({
         }
 
         const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+        startServices.telemetry.reportManualRuleRunOpenModal({
+          type: 'bulk',
+        });
         if (modalManualRuleRunConfirmationResult === null) {
           return;
         }
@@ -252,6 +255,14 @@ export const useBulkActions = ({
             start_date: modalManualRuleRunConfirmationResult.startDate.toISOString(),
             end_date: modalManualRuleRunConfirmationResult.endDate.toISOString(),
           },
+        });
+
+        startServices.telemetry.reportManualRuleRunExecute({
+          rangeInMs: modalManualRuleRunConfirmationResult.endDate.diff(
+            modalManualRuleRunConfirmationResult.startDate
+          ),
+          status: 'success',
+          rulesCount: enabledIds.length,
         });
       };
 

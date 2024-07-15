@@ -134,7 +134,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
     this.loggingSubscription = license$.subscribe((license) =>
       this.logger.debug(
-        'Imported license information from Elasticsearch:' +
+        () =>
+          'Imported license information from Elasticsearch:' +
           [
             `type: ${license.type}`,
             `status: ${license.status}`,

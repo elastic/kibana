@@ -747,6 +747,9 @@ describe('Textbased Data Source', () => {
                 "idMap": Array [
                   "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\"}]}",
                 ],
+                "isTextBased": Array [
+                  true,
+                ],
               },
               "function": "lens_map_to_columns",
               "type": "function",

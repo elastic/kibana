@@ -32,15 +32,20 @@ export const attackDiscoveryFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  last_viewed_at: {
+    type: 'date',
+    array: false,
+    required: true,
+  },
   updated_at: {
     type: 'date',
     array: false,
-    required: false,
+    required: true,
   },
   created_at: {
     type: 'date',
     array: false,
-    required: false,
+    required: true,
   },
   attack_discoveries: {
     type: 'nested',

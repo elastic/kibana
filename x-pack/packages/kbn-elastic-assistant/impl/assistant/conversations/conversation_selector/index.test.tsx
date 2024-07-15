@@ -50,6 +50,7 @@ const defaultProps = {
   defaultProvider: OpenAiProviderType.OpenAi,
   conversations: mockConversations,
   onConversationDeleted,
+  allPrompts: [],
 };
 describe('Conversation selector', () => {
   beforeAll(() => {

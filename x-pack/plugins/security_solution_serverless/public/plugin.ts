@@ -64,10 +64,9 @@ export class SecuritySolutionServerlessPlugin
   ): SecuritySolutionServerlessPluginStart {
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
-
     const services = createServices(core, startDeps, this.experimentalFeatures);
 
-    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
+    registerUpsellings(productTypes, services);
 
     securitySolution.setComponents({
       DashboardsLandingCallout: getDashboardsLandingCallout(services),

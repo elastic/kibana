@@ -180,7 +180,10 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('change-new-convo'));
 
-    expect(onSelectedConversationChange).toHaveBeenCalledWith({ ...mockConvo, id: '' });
+    expect(onSelectedConversationChange).toHaveBeenCalledWith({
+      ...mockConvo,
+      id: mockConvo.title,
+    });
     expect(setConversationsSettingsBulkActions).toHaveBeenCalledWith({
       create: {
         [mockConvo.title]: { ...mockConvo, id: '' },
@@ -205,7 +208,7 @@ describe('ConversationSettings', () => {
       ...mockConvos,
       [newConvo.title]: newConvo,
     });
-    expect(onSelectedConversationChange).toHaveBeenCalledWith(newConvo);
+    expect(onSelectedConversationChange).toHaveBeenCalledWith({ ...newConvo, id: newConvo.title });
   });
   it('Deleting a conversation removes it from the convo settings', () => {
     const { getByTestId } = render(

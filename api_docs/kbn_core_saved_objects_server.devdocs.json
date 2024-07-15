@@ -13819,6 +13819,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.USAGE_COUNTERS_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "USAGE_COUNTERS_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

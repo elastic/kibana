@@ -67,6 +67,8 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { NotesFlyout } from '../../properties/notes_flyout';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -114,7 +116,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings, timelineDataService } = useKibana().services;
+  const { uiSettings, telemetry, timelineDataService } = useKibana().services;
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
@@ -209,15 +211,30 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+    activeTab,
+  });
+
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+      if (eventId && securitySolutionNotesEnabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -239,14 +256,28 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+          location: timelineId,
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'left',
+        });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
       }
     },
     [
-      expandableFlyoutDisabled,
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
+      telemetry,
       timelineId,
+      showNotesFlyout,
+      setNotesEventId,
     ]
   );
 
@@ -256,6 +287,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.query,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
     onToggleShowNotes,
   });
 
@@ -311,6 +345,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
   // </Synchronisation of the timeline data service>
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   if (unifiedComponentsInTimelineEnabled) {
     return (
       <>
@@ -322,6 +370,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           refetch={refetch}
           skip={!canQueryTimeline}
         />
+        {NotesFlyoutMemo}
 
         <UnifiedTimelineBody
           header={
@@ -350,8 +399,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           expandedDetail={expandedDetail}
           showExpandedDetails={showExpandedDetails}
           leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-          eventIdToNoteIds={eventIdToNoteIds}
-          pinnedEventIds={pinnedEventIds}
           onChangePage={loadPage}
           activeTab={activeTab}
           updatedAt={refreshedAt}
@@ -372,6 +419,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
+      {NotesFlyoutMemo}
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
           <QueryTabHeader
@@ -405,6 +453,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 })}
                 leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={timelineEmptyTrailingControlColumns}
+                onToggleShowNotes={onToggleShowNotes}
               />
             </StyledEuiFlyoutBody>
 

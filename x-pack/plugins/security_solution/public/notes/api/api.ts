@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as uuid from 'uuid';
 import type { BareNote, Note } from '../../../common/api/timeline';
 import { KibanaServices } from '../../common/lib/kibana';
 import { NOTE_URL } from '../../../common/constants';
@@ -30,38 +29,58 @@ export const createNote = async ({ note }: { note: BareNote }) => {
   }
 };
 
-// TODO point to the correct API when it is available
+export const fetchNotes = async ({
+  page,
+  perPage,
+  sortField,
+  sortOrder,
+  filter,
+  search,
+}: {
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortOrder: string;
+  filter: string;
+  search: string;
+}) => {
+  const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
+    NOTE_URL,
+    {
+      query: {
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        filter,
+        search,
+      },
+      version: '2023-10-31',
+    }
+  );
+  return response;
+};
+
 /**
  * Fetches all the notes for an array of document ids
  */
 export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
-  const response = {
-    totalCount: 1,
-    notes: generateNoteMock(documentIds),
-  };
-  return response.notes;
+  const response = await KibanaServices.get().http.get<{ notes: Note[]; totalCount: number }>(
+    NOTE_URL,
+    {
+      query: { documentIds },
+      version: '2023-10-31',
+    }
+  );
+  return response;
 };
 
-// TODO remove when the API is available
-export const generateNoteMock = (documentIds: string[]) =>
-  documentIds.map((documentId: string) => ({
-    noteId: uuid.v4(),
-    version: 'WzU1MDEsMV0=',
-    timelineId: '',
-    eventId: documentId,
-    note: 'This is a mocked note',
-    created: new Date().getTime(),
-    createdBy: 'elastic',
-    updated: new Date().getTime(),
-    updatedBy: 'elastic',
-  }));
-
 /**
- * Deletes a note
+ * Deletes multiple notes
  */
-export const deleteNote = async (noteId: string) => {
+export const deleteNotes = async (noteIds: string[]) => {
   const response = await KibanaServices.get().http.delete<{ data: unknown }>(NOTE_URL, {
-    body: JSON.stringify({ noteId }),
+    body: JSON.stringify({ noteIds }),
     version: '2023-10-31',
   });
   return response;
