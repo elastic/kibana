@@ -6,6 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from '.';
+
+export interface CreateUsageCounterParams {
+  /**
+   * Number of days a usage counter must be kept in the persistence layer.
+   * See USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS for default value.
+   */
+  retentionPeriodDays?: number;
+}
+
+/**
+ * Provides the necessary tools to create and incremement Usage Counters
+ */
+export interface UsageCountersServiceSetup {
+  /**
+   * Creates and registers a usage counter to collect daily aggregated plugin counter events
+   */
+  createUsageCounter: (domainId: string, params?: CreateUsageCounterParams) => UsageCounter;
+  /**
+   * Returns a usage counter by domainId
+   */
+  getUsageCounterByDomainId: (domainId: string) => UsageCounter | undefined;
+}
+
 export interface UsageCountersSearchParams {
   /** The domainId used to create the Counter API */
   domainId: string;
@@ -21,6 +45,9 @@ export interface UsageCountersSearchParams {
   source?: 'server' | 'ui';
 }
 
+/**
+ * Miscellaneous options to configure the search operation
+ */
 export interface UsageCountersSearchOptions {
   /** Number of results to return for the given search request. Defaults to 100 */
   perPage?: number;
@@ -28,7 +55,13 @@ export interface UsageCountersSearchOptions {
   page?: number;
 }
 
+/**
+ * The result of a Usage Counters search operation
+ */
 export interface UsageCountersSearchResult {
+  /**
+   * The counters that matched the search criteria
+   */
   counters: UsageCounterSnapshot[];
 }
 
@@ -50,6 +83,9 @@ export interface UsageCounterSnapshot {
   records: UsageCounterRecord[];
 }
 
+/**
+ * Number of events counted on a given day
+ */
 export interface UsageCounterRecord {
   /** Number of events captured */
   count: number;
@@ -60,7 +96,7 @@ export interface UsageCounterRecord {
 /**
  * Interface to allow searching for persisted usage-counters
  */
-export interface UsageCountersSearch {
+export interface UsageCountersServiceStart {
   search: (
     params: UsageCountersSearchParams,
     options?: UsageCountersSearchOptions

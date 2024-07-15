@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ICollectorSet } from '@kbn/usage-collection-plugin/server';
 
 export interface CloudUsageCollectorConfig {
   isCloudEnabled: boolean;
@@ -32,7 +32,7 @@ interface CloudUsage {
 }
 
 export function createCloudUsageCollector(
-  usageCollection: UsageCollectionSetup,
+  usageCollection: ICollectorSet,
   config: CloudUsageCollectorConfig
 ) {
   const {
@@ -103,7 +103,7 @@ export function createCloudUsageCollector(
 }
 
 export function registerCloudUsageCollector(
-  usageCollection: UsageCollectionSetup | undefined,
+  usageCollection: ICollectorSet | undefined,
   config: CloudUsageCollectorConfig
 ) {
   if (!usageCollection) {

@@ -28,12 +28,13 @@ import {
 import { usageCountersSearchParamsToKueryFilter } from './usage_counters_service_utils';
 import type {
   UsageCounterSnapshot,
-  UsageCountersSearch,
+  UsageCountersServiceSetup,
+  UsageCountersServiceStart,
   UsageCountersSearchOptions,
   UsageCountersSearchParams,
   UsageCountersSearchResult,
+  CreateUsageCounterParams,
 } from './types';
-import type { CreateUsageCounterParams } from '../plugin';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -45,17 +46,12 @@ export interface UsageCountersServiceDeps {
   bufferDurationMs: number;
 }
 
-export interface UsageCountersServiceSetup {
-  createUsageCounter: (domainId: string) => IUsageCounter;
-  getUsageCounterByDomainId: (domainId: string) => IUsageCounter | undefined;
-}
-
 /* internal */
 export interface UsageCountersServiceStartDeps {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export class UsageCountersService implements UsageCountersSearch {
+export class UsageCountersService {
   private readonly stop$ = new Rx.Subject<void>();
   private readonly retryCount: number;
   private readonly bufferDurationMs: number;
@@ -108,7 +104,7 @@ export class UsageCountersService implements UsageCountersSearch {
     };
   };
 
-  public start = ({ savedObjects }: UsageCountersServiceStartDeps): void => {
+  public start = ({ savedObjects }: UsageCountersServiceStartDeps): UsageCountersServiceStart => {
     this.stopCaching$.next();
     this.repository = savedObjects.createInternalRepository();
     this.counter$
@@ -134,6 +130,10 @@ export class UsageCountersService implements UsageCountersSearch {
       });
 
     this.flushCache$.next();
+
+    return {
+      search: this.search,
+    };
   };
 
   public stop = () => {
@@ -220,9 +220,6 @@ export class UsageCountersService implements UsageCountersSearch {
     const filter = usageCountersSearchParamsToKueryFilter(params);
 
     const findParams: SavedObjectsFindOptions = {
-      aggs: {
-        totalCount: { sum: { field: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.count` } },
-      },
       ...(filterNamespace && { namespaces: [filterNamespace] }),
       type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       sortField: 'updated_at',
@@ -235,7 +232,6 @@ export class UsageCountersService implements UsageCountersSearch {
     const res = await this.repository.find<UsageCountersSavedObjectAttributes>(findParams);
 
     const countersMap = new Map<string, UsageCounterSnapshot>();
-
     res.saved_objects.forEach(({ attributes, updated_at: updatedAt, namespaces }) => {
       const namespace = namespaces?.[0];
       const key = serializeCounterKey({ ...attributes, namespace });
