@@ -24,23 +24,9 @@ import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
   const { capabilities, setBreadcrumbs, navigateToApp } = useAppContext();
-  const observabilityAIAssistantPluginEnabled = capabilities.observabilityAIAssistant !== undefined;
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
   const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
 
-  const observabilityAIAssistantPluginDisabledMsg = i18n.translate(
-    'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
-    {
-      defaultMessage: 'This feature is disabled.',
-    }
-  );
-
-  const observabilityFeatureDisabledInSpaceMsg = i18n.translate(
-    'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledInSpaceCallOutLabel',
-    {
-      defaultMessage: 'This feature is disabled. It can be enabled from Spaces > Features',
-    }
-  );
   useEffect(() => {
     setBreadcrumbs([
       {
@@ -88,11 +74,12 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                     <EuiCallOut
                       iconType="warning"
-                      title={
-                        !observabilityAIAssistantPluginEnabled
-                          ? observabilityAIAssistantPluginDisabledMsg
-                          : observabilityFeatureDisabledInSpaceMsg
-                      }
+                      title={i18n.translate(
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
+                        {
+                          defaultMessage: 'This feature is disabled.',
+                        }
+                      )}
                       size="s"
                     />
                     <EuiSpacer size="s" />
