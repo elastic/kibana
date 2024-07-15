@@ -360,7 +360,7 @@ describe('TaskClaiming', () => {
         'task:id-5',
         'task:id-6',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -442,7 +442,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         1,
@@ -539,7 +539,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         1,
@@ -628,7 +628,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         1,
@@ -765,7 +765,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -841,7 +841,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -917,7 +917,7 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['task:id-2', 'task:id-3']);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1006,12 +1006,7 @@ describe('TaskClaiming', () => {
         'task:id-5',
         'task:id-6',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith([
-        'task:id-1',
-        'task:id-2',
-        'task:id-3',
-        'task:id-5',
-      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-5']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1120,12 +1115,7 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith([
-        'task:id-1',
-        'task:id-2',
-        'task:id-3',
-        'task:id-4',
-      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1216,12 +1206,7 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith([
-        'task:id-1',
-        'task:id-2',
-        'task:id-3',
-        'task:id-4',
-      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
 
@@ -1300,12 +1285,7 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith([
-        'task:id-1',
-        'task:id-2',
-        'task:id-3',
-        'task:id-4',
-      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1402,12 +1382,7 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith([
-        'task:id-1',
-        'task:id-2',
-        'task:id-3',
-        'task:id-4',
-      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
 

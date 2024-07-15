@@ -54,7 +54,8 @@ describe('Configuration Statistics Aggregator', () => {
     };
 
     const managedConfig = {
-      maxWorkersConfiguration$: new Subject<number>(),
+      startingCapacity: 10,
+      capacityConfiguration$: new Subject<number>(),
       pollIntervalConfiguration$: new Subject<number>(),
     };
 
@@ -64,6 +65,12 @@ describe('Configuration Statistics Aggregator', () => {
           .pipe(take(3), bufferCount(3))
           .subscribe(([initial, updatedWorkers, updatedInterval]) => {
             expect(initial.value).toEqual({
+              capacity: {
+                config: 10,
+                as_workers: 10,
+                as_cost: 20,
+              },
+              claim_strategy: 'default',
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -77,6 +84,12 @@ describe('Configuration Statistics Aggregator', () => {
               },
             });
             expect(updatedWorkers.value).toEqual({
+              capacity: {
+                config: 8,
+                as_workers: 8,
+                as_cost: 16,
+              },
+              claim_strategy: 'default',
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -90,6 +103,12 @@ describe('Configuration Statistics Aggregator', () => {
               },
             });
             expect(updatedInterval.value).toEqual({
+              capacity: {
+                config: 8,
+                as_workers: 8,
+                as_cost: 16,
+              },
+              claim_strategy: 'default',
               poll_interval: 3000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -104,7 +123,7 @@ describe('Configuration Statistics Aggregator', () => {
             });
             resolve();
           }, reject);
-        managedConfig.maxWorkersConfiguration$.next(8);
+        managedConfig.capacityConfiguration$.next(8);
         managedConfig.pollIntervalConfiguration$.next(3000);
       } catch (error) {
         reject(error);

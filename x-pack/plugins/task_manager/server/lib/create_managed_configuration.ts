@@ -39,6 +39,7 @@ interface ManagedConfigurationOpts {
 }
 
 export interface ManagedConfiguration {
+  startingCapacity: number;
   capacityConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
@@ -52,6 +53,7 @@ export function createManagedConfiguration({
   const startingCapacity = calculateStartingCapacity(config, logger);
   const startingPollInterval = config.poll_interval;
   return {
+    startingCapacity,
     capacityConfiguration$: errorCheck$.pipe(
       createCapacityScan(logger, startingCapacity),
       startWith(startingCapacity),

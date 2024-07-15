@@ -19,7 +19,7 @@ import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
 import { ClaimAndFillPoolResult } from '../lib/fill_pool';
-import { createRunningAveragedStat } from '../monitoring/task_run_calcultors';
+import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 import { TaskCost } from '../task';
 
 /**

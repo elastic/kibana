@@ -9,6 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { TaskRunner } from '../task_running';
 import { CapacityOpts, ICapacity } from './types';
 import { TaskDefinition } from '../task';
+import { getCapacityInWorkers } from './utils';
 
 export class WorkerCapacity implements ICapacity {
   private workers: number = 0;
@@ -19,7 +20,7 @@ export class WorkerCapacity implements ICapacity {
     opts.capacity$.subscribe((capacity) => {
       // Capacity config describes the number of normal-cost tasks that can be
       // run simulatenously. This directly corresponds to the number of workers to use.
-      this.workers = capacity;
+      this.workers = getCapacityInWorkers(capacity);
       this.logger.debug(
         `Task pool now using ${this.workers} as the max worker value which is based on a capacity of ${capacity}`
       );

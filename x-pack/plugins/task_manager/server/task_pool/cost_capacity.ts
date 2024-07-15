@@ -6,9 +6,10 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { TaskCost, TaskDefinition } from '../task';
+import { TaskDefinition } from '../task';
 import { TaskRunner } from '../task_running';
 import { CapacityOpts, ICapacity } from './types';
+import { getCapacityInCost } from './utils';
 
 export class CostCapacity implements ICapacity {
   private maxAllowedCost: number = 0;
@@ -20,7 +21,7 @@ export class CostCapacity implements ICapacity {
       // Capacity config describes the number of normal-cost tasks that can be
       // run simulatenously. Multiple by the cost of a normal cost to determine
       // the maximum allowed cost
-      this.maxAllowedCost = capacity * TaskCost.Normal;
+      this.maxAllowedCost = getCapacityInCost(capacity);
       this.logger.debug(
         `Task pool now using ${this.maxAllowedCost} as the max allowed cost which is based on a capacity of ${capacity}`
       );

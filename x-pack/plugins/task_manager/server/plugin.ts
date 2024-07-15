@@ -284,16 +284,17 @@ export class TaskManagerPlugin
       });
     }
 
-    createMonitoringStats(
+    createMonitoringStats({
       taskStore,
-      this.elasticsearchAndSOAvailability$!,
-      this.config!,
-      managedConfiguration,
-      this.logger,
-      this.adHocTaskCounter,
-      this.taskPollingLifecycle,
-      this.ephemeralTaskLifecycle
-    ).subscribe((stat) => this.monitoringStats$.next(stat));
+      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      config: this.config!,
+      managedConfig: managedConfiguration,
+      logger: this.logger,
+      adHocTaskCounter: this.adHocTaskCounter,
+      taskDefinitions: this.definitions,
+      taskPollingLifecycle: this.taskPollingLifecycle,
+      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
+    }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
       config: this.config!,

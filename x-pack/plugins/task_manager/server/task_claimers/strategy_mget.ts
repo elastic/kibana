@@ -181,7 +181,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // perform an mget to get the full task instance for claiming
   let fullTasksToRun: ConcreteTaskInstance[] = [];
   try {
-    fullTasksToRun = (await taskStore.bulkGet(tasksToRun.map((task) => `task:${task.id}`))).reduce<
+    fullTasksToRun = (await taskStore.bulkGet(tasksToRun.map((task) => task.id))).reduce<
       ConcreteTaskInstance[]
     >((acc, task) => {
       if (isOk(task)) {
