@@ -43,6 +43,7 @@ import {
   getDefaultConnector,
   getBlockBotConversation,
   mergeBaseWithPersistedConversations,
+  sleep,
 } from './helpers';
 
 import { useAssistantContext, UserAvatar } from '../assistant_context';
@@ -222,6 +223,7 @@ const AssistantComponent: React.FC<Props> = ({
           retries < maxRetries
         ) {
           retries++;
+          await sleep(5000);
           updatedConversation = await getConversation(conversationId);
         }
 
