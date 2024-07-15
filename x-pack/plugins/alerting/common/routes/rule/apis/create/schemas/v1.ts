@@ -186,7 +186,7 @@ export const createParamsSchema = schema.object({
   id: schema.maybe(
     schema.string({
       meta: {
-        description: 'The ID of the rule',
+        description: 'The identifier for the rule.',
       },
     })
   ),

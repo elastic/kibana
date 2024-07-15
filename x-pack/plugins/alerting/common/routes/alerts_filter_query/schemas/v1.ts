@@ -16,10 +16,18 @@ export const alertsFilterQuerySchema = schema.object({
       meta: schema.recordOf(schema.string(), schema.any()),
       $state: schema.maybe(
         schema.object({
-          store: schema.oneOf([
-            schema.literal(FilterStateStore.APP_STATE),
-            schema.literal(FilterStateStore.GLOBAL_STATE),
-          ]),
+          store: schema.oneOf(
+            [
+              schema.literal(FilterStateStore.APP_STATE),
+              schema.literal(FilterStateStore.GLOBAL_STATE),
+            ],
+            {
+              meta: {
+                description:
+                  'A filter is specific to an application context or whether it should be applied globally.',
+              },
+            }
+          ),
         })
       ),
     }),
@@ -30,5 +38,11 @@ export const alertsFilterQuerySchema = schema.object({
       },
     }
   ),
-  dsl: schema.maybe(schema.string()),
+  dsl: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'A filter written in Elasticsearch Query Domain Specific Language (DSL).',
+      },
+    })
+  ),
 });

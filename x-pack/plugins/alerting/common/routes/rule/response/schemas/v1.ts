@@ -143,29 +143,57 @@ const actionSchema = schema.object({
 });
 
 export const ruleExecutionStatusSchema = schema.object({
-  status: schema.oneOf([
-    schema.literal(ruleExecutionStatusValuesV1.OK),
-    schema.literal(ruleExecutionStatusValuesV1.ACTIVE),
-    schema.literal(ruleExecutionStatusValuesV1.ERROR),
-    schema.literal(ruleExecutionStatusValuesV1.WARNING),
-    schema.literal(ruleExecutionStatusValuesV1.PENDING),
-    schema.literal(ruleExecutionStatusValuesV1.UNKNOWN),
-  ]),
-  last_execution_date: schema.string(),
-  last_duration: schema.maybe(schema.number()),
+  status: schema.oneOf(
+    [
+      schema.literal(ruleExecutionStatusValuesV1.OK),
+      schema.literal(ruleExecutionStatusValuesV1.ACTIVE),
+      schema.literal(ruleExecutionStatusValuesV1.ERROR),
+      schema.literal(ruleExecutionStatusValuesV1.WARNING),
+      schema.literal(ruleExecutionStatusValuesV1.PENDING),
+      schema.literal(ruleExecutionStatusValuesV1.UNKNOWN),
+    ],
+    {
+      meta: {
+        description: 'Status of rule execution.',
+      },
+    }
+  ),
+  last_execution_date: schema.string({
+    meta: {
+      description: 'The date and time when rule was executed last.',
+    },
+  }),
+  last_duration: schema.maybe(
+    schema.number({
+      meta: {
+        description: 'Duration of last execution of the rule.',
+      },
+    })
+  ),
   error: schema.maybe(
     schema.object({
-      reason: schema.oneOf([
-        schema.literal(ruleExecutionStatusErrorReasonV1.READ),
-        schema.literal(ruleExecutionStatusErrorReasonV1.DECRYPT),
-        schema.literal(ruleExecutionStatusErrorReasonV1.EXECUTE),
-        schema.literal(ruleExecutionStatusErrorReasonV1.UNKNOWN),
-        schema.literal(ruleExecutionStatusErrorReasonV1.LICENSE),
-        schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
-        schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
-        schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
-      ]),
-      message: schema.string(),
+      reason: schema.oneOf(
+        [
+          schema.literal(ruleExecutionStatusErrorReasonV1.READ),
+          schema.literal(ruleExecutionStatusErrorReasonV1.DECRYPT),
+          schema.literal(ruleExecutionStatusErrorReasonV1.EXECUTE),
+          schema.literal(ruleExecutionStatusErrorReasonV1.UNKNOWN),
+          schema.literal(ruleExecutionStatusErrorReasonV1.LICENSE),
+          schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
+          schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
+          schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
+        ],
+        {
+          meta: {
+            description: 'Reason for error.',
+          },
+        }
+      ),
+      message: schema.string({
+        meta: {
+          description: 'error message.',
+        },
+      }),
     })
   ),
   warning: schema.maybe(
@@ -348,7 +376,16 @@ export const ruleResponseSchema = schema.object({
       })
     )
   ),
-  throttle: schema.maybe(schema.nullable(schema.string())),
+  throttle: schema.maybe(
+    schema.nullable(
+      schema.string({
+        meta: {
+          description:
+            'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+        },
+      })
+    )
+  ),
   mute_all: schema.boolean(),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
   muted_alert_ids: schema.arrayOf(schema.string()),
