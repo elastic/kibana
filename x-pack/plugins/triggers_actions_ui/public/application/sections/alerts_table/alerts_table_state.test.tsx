@@ -28,7 +28,6 @@ import {
 import { PLUGIN_ID } from '../../../common/constants';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
-import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -38,9 +37,11 @@ import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alert_fields';
 
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alert_fields');
 jest.mock('./hooks/use_fetch_alerts');
-jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('./hooks/use_bulk_get_cases');
 jest.mock('./hooks/use_bulk_get_maintenance_windows');
 
@@ -308,19 +309,47 @@ const fetchAlertsResponse = {
 
 hookUseFetchAlerts.mockReturnValue([false, fetchAlertsResponse]);
 
-const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
-hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
-
 const casesMap = getCasesMockMap();
 const useBulkGetCasesMock = useBulkGetCases as jest.Mock;
 
 const maintenanceWindowsMap = getMaintenanceWindowMockMap();
 const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
 
-const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
-  <IntlProvider locale="en">
-    <AlertsTableState {...props} />
-  </IntlProvider>
+const browserFields: BrowserFields = {
+  kibana: {
+    fields: {
+      [AlertsField.uuid]: {
+        category: 'kibana',
+        name: AlertsField.uuid,
+      },
+      [AlertsField.name]: {
+        category: 'kibana',
+        name: AlertsField.name,
+      },
+      [AlertsField.reason]: {
+        category: 'kibana',
+        name: AlertsField.reason,
+      },
+    },
+  },
+};
+
+jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields, fields: [] });
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const TestComponent: React.FunctionComponent<AlertsTableStateProps> = (props) => (
+  <QueryClientProvider client={queryClient}>
+    <IntlProvider locale="en">
+      <AlertsTableState {...props} />
+    </IntlProvider>
+  </QueryClientProvider>
 );
 
 describe('AlertsTableState', () => {
@@ -383,12 +412,12 @@ describe('AlertsTableState', () => {
     });
 
     it('should show the cases column', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(await screen.findByText('Cases')).toBeInTheDocument();
     });
 
     it('should show the cases titles correctly', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(await screen.findByText('Test case')).toBeInTheDocument();
       expect(await screen.findByText('Test case 2')).toBeInTheDocument();
     });
@@ -396,12 +425,12 @@ describe('AlertsTableState', () => {
     it('should show the loading skeleton when fetching cases', async () => {
       useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: true });
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(3);
     });
 
     it('should pass the correct case ids to useBulkGetCases', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
 
       await waitFor(() => {
         expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
@@ -417,7 +446,7 @@ describe('AlertsTableState', () => {
         },
       ]);
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
 
       await waitFor(() => {
         expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
@@ -436,7 +465,7 @@ describe('AlertsTableState', () => {
         },
       ]);
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
 
       await waitFor(() => {
         expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], true);
@@ -448,7 +477,7 @@ describe('AlertsTableState', () => {
         .fn()
         .mockReturnValue({ create: false, read: false });
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
 
       await waitFor(() => {
         expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
@@ -463,7 +492,7 @@ describe('AlertsTableState', () => {
       });
 
       render(
-        <AlertsTableWithLocale
+        <TestComponent
           {...props}
           columns={[
             {
@@ -479,7 +508,7 @@ describe('AlertsTableState', () => {
     });
 
     it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);
     });
 
@@ -488,7 +517,7 @@ describe('AlertsTableState', () => {
         cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
       });
 
-      render(<AlertsTableWithLocale {...props} />);
+      render(<TestComponent {...props} />);
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['test-owner']);
     });
 
@@ -500,7 +529,7 @@ describe('AlertsTableState', () => {
       const CasesContextMock = jest.fn().mockReturnValue(null);
       mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
 
-      render(<AlertsTableWithLocale {...props} />);
+      render(<TestComponent {...props} />);
 
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
@@ -517,7 +546,7 @@ describe('AlertsTableState', () => {
       const CasesContextMock = jest.fn().mockReturnValue(null);
       mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -536,7 +565,7 @@ describe('AlertsTableState', () => {
         .fn()
         .mockReturnValue({ create: false, read: false });
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -556,7 +585,7 @@ describe('AlertsTableState', () => {
       const CasesContextMock = jest.fn().mockReturnValue(null);
       mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
 
-      render(<AlertsTableWithLocale {...props} />);
+      render(<TestComponent {...props} />);
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -575,18 +604,18 @@ describe('AlertsTableState', () => {
     });
 
     it('should show maintenance windows column', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(await screen.findByText('Maintenance Windows')).toBeInTheDocument();
     });
 
     it('should show maintenance windows titles correctly', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(await screen.findByText('test-title')).toBeInTheDocument();
       expect(await screen.findByText('test-title-2')).toBeInTheDocument();
     });
 
     it('should pass the correct maintenance window ids to useBulkGetMaintenanceWindows', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       await waitFor(() => {
         expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -606,7 +635,7 @@ describe('AlertsTableState', () => {
         },
       ]);
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       await waitFor(() => {
         expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -629,7 +658,7 @@ describe('AlertsTableState', () => {
         },
       ]);
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       await waitFor(() => {
         expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -646,7 +675,7 @@ describe('AlertsTableState', () => {
         isFetching: true,
       });
 
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect((await screen.findAllByTestId('maintenance-window-cell-loading')).length).toBe(1);
     });
 
@@ -654,7 +683,7 @@ describe('AlertsTableState', () => {
 
     it('should not fetch maintenance windows if the column is not visible', async () => {
       render(
-        <AlertsTableWithLocale
+        <TestComponent
           {...tableProps}
           columns={[
             {
@@ -677,7 +706,7 @@ describe('AlertsTableState', () => {
 
   describe('Alerts table configuration registry', () => {
     it('should read the configuration from the registry', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(hasMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(getMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(updateMock).toBeCalledTimes(2);
@@ -685,14 +714,14 @@ describe('AlertsTableState', () => {
 
     it('should render an empty error state when the plugin id owner is not registered', async () => {
       const props = { ...tableProps, configurationId: 'none' };
-      const result = render(<AlertsTableWithLocale {...props} />);
+      const result = render(<TestComponent {...props} />);
       expect(result.getByTestId('alertsTableNoConfiguration')).toBeTruthy();
     });
   });
 
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
+      const wrapper = render(<TestComponent {...tableProps} />);
       userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
@@ -713,7 +742,7 @@ describe('AlertsTableState', () => {
 
     it('should refetch data if flyout pagination exceeds the current page', async () => {
       const wrapper = render(
-        <AlertsTableWithLocale
+        <TestComponent
           {...{
             ...tableProps,
             pageSize: 1,
@@ -751,7 +780,7 @@ describe('AlertsTableState', () => {
 
     it('Should be able to go back from last page to n - 1', async () => {
       const wrapper = render(
-        <AlertsTableWithLocale
+        <TestComponent
           {...{
             ...tableProps,
             pageSize: 2,
@@ -789,29 +818,8 @@ describe('AlertsTableState', () => {
   });
 
   describe('field browser', () => {
-    const browserFields: BrowserFields = {
-      kibana: {
-        fields: {
-          [AlertsField.uuid]: {
-            category: 'kibana',
-            name: AlertsField.uuid,
-          },
-          [AlertsField.name]: {
-            category: 'kibana',
-            name: AlertsField.name,
-          },
-          [AlertsField.reason]: {
-            category: 'kibana',
-            name: AlertsField.reason,
-          },
-        },
-      },
-    };
-
     beforeEach(() => {
       jest.clearAllMocks();
-      hookUseFetchBrowserFieldCapabilities.mockClear();
-      hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
       useBulkGetCasesMock.mockReturnValue({ data: new Map(), isFetching: false });
       useBulkGetMaintenanceWindowsMock.mockReturnValue({
         data: new Map(),
@@ -819,13 +827,13 @@ describe('AlertsTableState', () => {
       });
     });
 
-    it('should show field browser', () => {
-      const { queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
-      expect(queryByTestId('show-field-browser')).not.toBe(null);
+    it('should show field browser', async () => {
+      const { findByTestId } = render(<TestComponent {...tableProps} />);
+      expect(await findByTestId('show-field-browser')).toBeInTheDocument();
     });
 
     it('should remove an already existing element when selected', async () => {
-      const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
       fireEvent.click(getByTestId('show-field-browser'));
@@ -857,7 +865,7 @@ describe('AlertsTableState', () => {
         set: jest.fn(),
       }));
 
-      const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
       fireEvent.click(getByTestId('show-field-browser'));
@@ -876,7 +884,7 @@ describe('AlertsTableState', () => {
     });
 
     it('should insert a new field as column when its not a default one', async () => {
-      const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
       fireEvent.click(getByTestId('show-field-browser'));
@@ -900,20 +908,20 @@ describe('AlertsTableState', () => {
       const props = mockCustomProps({
         usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
       });
-      const result = render(<AlertsTableWithLocale {...props} />);
+      const result = render(<TestComponent {...props} />);
       expect(result.getByText('This is a persistent control')).toBeInTheDocument();
     });
   });
 
   describe('inspect button', () => {
     it('should hide the inspect button by default', () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
       expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
     });
 
     it('should show the inspect button if the right prop is set', async () => {
       const props = mockCustomProps({ showInspectButton: true });
-      render(<AlertsTableWithLocale {...props} />);
+      render(<TestComponent {...props} />);
       expect(await screen.findByTestId('inspect-icon-button')).toBeInTheDocument();
     });
   });
@@ -934,19 +942,19 @@ describe('AlertsTableState', () => {
     });
 
     it('should render an empty screen if there are no alerts', async () => {
-      const result = render(<AlertsTableWithLocale {...tableProps} />);
+      const result = render(<TestComponent {...tableProps} />);
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
 
     describe('inspect button', () => {
       it('should hide the inspect button by default', () => {
-        render(<AlertsTableWithLocale {...tableProps} />);
+        render(<TestComponent {...tableProps} />);
         expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
       });
 
       it('should show the inspect button if the right prop is set', async () => {
         const props = mockCustomProps({ showInspectButton: true });
-        render(<AlertsTableWithLocale {...props} />);
+        render(<TestComponent {...props} />);
         expect(await screen.findByTestId('inspect-icon-button')).toBeInTheDocument();
       });
     });
@@ -957,7 +965,7 @@ describe('AlertsTableState', () => {
       });
 
       it('should show persistent controls if set', () => {
-        const result = render(<AlertsTableWithLocale {...props} />);
+        const result = render(<TestComponent {...props} />);
         expect(result.getByText('This is a persistent control')).toBeInTheDocument();
       });
     });
@@ -970,7 +978,7 @@ describe('AlertsTableState', () => {
         toolbarVisibility: { showColumnSelector: false },
       };
 
-      render(<AlertsTableWithLocale {...customTableProps} />);
+      render(<TestComponent {...customTableProps} />);
 
       expect(screen.queryByTestId('dataGridColumnSelectorButton')).not.toBeInTheDocument();
     });
@@ -980,7 +988,7 @@ describe('AlertsTableState', () => {
         toolbarVisibility: { showSortSelector: false },
       };
 
-      render(<AlertsTableWithLocale {...customTableProps} />);
+      render(<TestComponent {...customTableProps} />);
 
       expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
     });

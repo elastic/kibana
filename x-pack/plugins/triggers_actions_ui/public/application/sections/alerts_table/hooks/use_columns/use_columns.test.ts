@@ -11,7 +11,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
-import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
+import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
@@ -23,7 +23,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
-jest.mock('../use_fetch_browser_fields_capabilities');
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query');
 
 const setItemStorageMock = jest.fn();
 const mockStorage = {
@@ -73,7 +73,7 @@ describe('useColumn', () => {
       schema: 'string',
     },
   ];
-  const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
+  const hookUseFetchBrowserFieldCapabilities = useFetchAlertsFieldsQuery as jest.Mock;
   const browserFields: BrowserFields = {
     kibana: {
       fields: {

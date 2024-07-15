@@ -11,9 +11,10 @@ import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
+import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
-import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
+import { useKibana } from '../../../../../common';
 
 export interface UseColumnsArgs {
   featureIds: AlertConsumers[];
@@ -156,7 +157,13 @@ export const useColumns = ({
   defaultColumns,
   initialBrowserFields,
 }: UseColumnsArgs): UseColumnsResp => {
-  const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
+  const { http } = useKibana().services;
+
+  const {
+    isLoading: isBrowserFieldDataLoading,
+    data: { browserFields },
+  } = useFetchAlertsFieldsQuery({
+    http,
     featureIds,
     initialBrowserFields,
   });

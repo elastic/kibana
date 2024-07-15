@@ -6,23 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { HttpSetup } from '@kbn/core/public';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
+import { UseFetchAlertsFieldsQueryParams } from '../hooks/use_fetch_alerts_fields_query';
 
-export async function fetchAlertFields({
-  http,
-  featureIds,
-}: {
-  http: HttpSetup;
-  featureIds: ValidFeatureId[];
-}): Promise<FieldSpec[]> {
-  const { fields: alertFields = [] } = await http.get<{ fields: FieldSpec[] }>(
+export const fetchAlertsFields = ({ http, featureIds }: UseFetchAlertsFieldsQueryParams) =>
+  http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
     `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
     {
       query: { featureIds },
     }
   );
-  return alertFields;
-}
