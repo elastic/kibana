@@ -19,6 +19,10 @@ interface ModelField {
   indices: string[];
 }
 
+interface ELSERQueryFields extends ModelField {
+  sparse_vector: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   role: MessageRole;
@@ -33,7 +37,7 @@ interface SemanticField {
 }
 
 export interface QuerySourceFields {
-  elser_query_fields: ModelField[];
+  elser_query_fields: ELSERQueryFields[];
   dense_vector_query_fields: ModelField[];
   bm25_query_fields: string[];
   source_fields: string[];
