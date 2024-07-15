@@ -47,7 +47,6 @@ export MERGE_QUEUE_TARGET_BRANCH
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
 
-
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -133,14 +132,18 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 export GH_REPO=github.com/elastic/kibana
 
 FTR_ENABLE_FIPS_AGENT=false
-# used by FIPS agents to link FIPS OpenSSL modules
 if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
   FTR_ENABLE_FIPS_AGENT=true
+  # used by FIPS agents to link FIPS OpenSSL modules
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
 
   if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
     echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
     echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
+  fi
+
+  if [[ -f "$KIBANA_DIR/config/kibana.yml" ]]; then
+    echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
   fi
 fi
 

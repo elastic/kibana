@@ -21,12 +21,12 @@ const RETRIES = 120;
 const RETRY_DELAY = 500;
 
 export async function waitForRuleStatus({
-  id,
-  expectedStatus,
-  supertest,
-  retryService,
-  logger,
-}: {
+                                          id,
+                                          expectedStatus,
+                                          supertest,
+                                          retryService,
+                                          logger,
+                                        }: {
   id: string;
   expectedStatus: string;
   supertest: SuperTest.Agent;
@@ -55,12 +55,12 @@ export async function waitForRuleStatus({
 }
 
 export async function waitForDocumentInIndex<T>({
-  esClient,
-  indexName,
-  docCountTarget = 1,
-  retryService,
-  logger,
-}: {
+                                                  esClient,
+                                                  indexName,
+                                                  docCountTarget = 1,
+                                                  retryService,
+                                                  logger,
+                                                }: {
   esClient: Client;
   indexName: string;
   docCountTarget?: number;
@@ -69,12 +69,12 @@ export async function waitForDocumentInIndex<T>({
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
     test: async () => {
-      const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
-      if (
-        !response.hits.total ||
-        typeof response.hits.total !== 'number' ||
-        response.hits.total < docCountTarget
-      ) {
+      const response = await esClient.search<T>({
+        index: indexName,
+        rest_total_hits_as_int: true,
+        ignore_unavailable: true,
+      });
+      if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
         throw new Error(
           `Number of hits does not match expectation (total: ${response.hits.total}, target: ${docCountTarget})`
         );
@@ -92,12 +92,12 @@ export async function waitForDocumentInIndex<T>({
 }
 
 export async function waitForAlertInIndex<T>({
-  esClient,
-  indexName,
-  ruleId,
-  retryService,
-  logger,
-}: {
+                                               esClient,
+                                               indexName,
+                                               ruleId,
+                                               retryService,
+                                               logger,
+                                             }: {
   esClient: Client;
   indexName: string;
   ruleId: string;
