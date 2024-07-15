@@ -38,7 +38,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { UptimeConfig } from '../common/config';
-import { UptimeEsClient } from './lib';
+import { SyntheticsEsClient } from './lib';
 
 export interface SyntheticsServerSetup {
   router: UptimeRouter;
@@ -54,7 +54,7 @@ export interface SyntheticsServerSetup {
   stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;

@@ -25,8 +25,8 @@ import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { FeedbackModal } from './feedback_modal';
-import { UnauthorisedModal } from './unauthorized_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
+import { Unauthorized } from './unauthorized_modal';
 
 export function EntityEnablement() {
   const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
@@ -55,7 +55,7 @@ export function EntityEnablement() {
   const isEntityManagerEnabledAndEntityViewSelected =
     isEntityManagerEnabled && userServiceInventoryView === ServiceInventoryView.entity;
 
-  const handleEnableblement = async () => {
+  const handleEnablement = async () => {
     setIsLoading(true);
     try {
       const response = await entityManager.entityClient.enableManagedEntityDiscovery();
@@ -75,7 +75,7 @@ export function EntityEnablement() {
     }
   };
 
-  const handdleOnCloseFeedback = () => {
+  const handleOnCloseFeedback = () => {
     setsIsFeedbackModalVisible(false);
   };
 
@@ -92,7 +92,7 @@ export function EntityEnablement() {
         <EuiLink
           disabled={isEntityManagerEnabledAndEntityViewSelected}
           data-test-subj="tryOutEEMLink"
-          onClick={handleEnableblement}
+          onClick={handleEnablement}
         >
           {isEntityManagerEnabledAndEntityViewSelected
             ? i18n.translate('xpack.apm.eemEnablement.enabled.', {
@@ -148,8 +148,8 @@ export function EntityEnablement() {
       </EuiFlexItem>
       {isEntityManagerEnabledAndEntityViewSelected && (
         <EuiFlexItem grow={false}>
-          <EuiLink data-test-subj="restoreClassiView" onClick={handleRestoreView}>
-            {i18n.translate('xpack.apm.eemEnablement.restoveClassicView.', {
+          <EuiLink data-test-subj="restoreClassicView" onClick={handleRestoreView}>
+            {i18n.translate('xpack.apm.eemEnablement.restoreClassicView.', {
               defaultMessage: 'Restore classic view',
             })}
           </EuiLink>
@@ -157,9 +157,9 @@ export function EntityEnablement() {
       )}
       <FeedbackModal
         isFeedbackModalVisible={isFeedbackModalVisible}
-        onClose={handdleOnCloseFeedback}
+        onClose={handleOnCloseFeedback}
       />
-      <UnauthorisedModal
+      <Unauthorized
         isUnauthorizedModalVisible={isUnauthorizedModalVisible}
         onClose={() => setsIsUnauthorizedModalVisible(false)}
       />
