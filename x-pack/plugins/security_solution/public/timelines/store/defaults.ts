@@ -101,7 +101,7 @@ export const timelineDefaults: SubsetTimelineModel &
   savedSearch: null,
   isDataProviderVisible: false,
   sampleSize: 500,
-  rowHeight: 1,
+  rowHeight: 3,
 };
 
 export const getTimelineManageDefaults = (id: string) => ({
