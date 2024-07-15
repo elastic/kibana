@@ -926,6 +926,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           itemId="id"
           columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
+          rowHeader="name"
           rowProps={rowProps}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',

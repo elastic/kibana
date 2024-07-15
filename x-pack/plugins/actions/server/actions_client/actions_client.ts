@@ -557,15 +557,17 @@ export class ActionsClient {
         });
 
         this.context.logger.debug(
-          `Successfully retrieved access token using JWT OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          } and config ${JSON.stringify(tokenOpts.config)}`
+          () =>
+            `Successfully retrieved access token using JWT OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            } and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
         this.context.logger.debug(
-          `Failed to retrieve access token using JWT OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
+          () =>
+            `Failed to retrieve access token using JWT OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
@@ -584,17 +586,19 @@ export class ActionsClient {
         });
 
         this.context.logger.debug(
-          `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
+          () =>
+            `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
         this.context.logger.debug(
-          `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
-            err.message
-          }`
+          () =>
+            `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
+              err.message
+            }`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }

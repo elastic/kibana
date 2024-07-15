@@ -1,9 +1,9 @@
 steps:
-  - group: "Serverless MKI QA Detection Engine - Cypress Tests"
+  - group: "Cypress MKI - Detection Engine"
     key: cypress_test_detections_engine
     steps:
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine
-        label: "Serverless MKI QA Detection Engine - Security Solution Cypress Tests"
+        label: "Cypress MKI - Detection Engine"
         key: test_detection_engine
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
@@ -22,7 +22,7 @@ steps:
               limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:exceptions
-        label: "Serverless MKI QA Detection Engine - Exceptions - Security Solution Cypress Tests"
+        label: "Cypress MKI - Detection Engine - Exceptions"
         key: test_detection_engine_exceptions
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
@@ -40,7 +40,7 @@ steps:
             - exit_status: "-1"
               limit: 1
 
-  - group: "Serverless MKI QA Detection Engine - API Integration"
+  - group: "API MKI - Detection Engine - "
     key: api_test_detections_engine
     steps:
       - label: Running exception_lists_items:qa:serverless

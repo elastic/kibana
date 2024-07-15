@@ -6,11 +6,12 @@
  */
 
 import { TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineType, TimelineStatus, RowRendererId } from '../../../common/api/timeline';
 
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
@@ -19,9 +20,9 @@ export const timelineDefaults: SubsetTimelineModel &
   Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig' | 'sampleSize' | 'rowHeight'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
-  columns: defaultHeaders,
+  columns: defaultUdtHeaders,
   documentType: '',
-  defaultColumns: defaultHeaders,
+  defaultColumns: defaultUdtHeaders,
   dataProviders: [],
   dataViewId: null,
   dateRange: { start, end },
@@ -35,7 +36,26 @@ export const timelineDefaults: SubsetTimelineModel &
   },
   eventType: 'all',
   eventIdToNoteIds: {},
-  excludedRowRendererIds: [],
+  excludedRowRendererIds: [
+    RowRendererId.alert,
+    RowRendererId.alerts,
+    RowRendererId.auditd,
+    RowRendererId.auditd_file,
+    RowRendererId.library,
+    RowRendererId.netflow,
+    RowRendererId.plain,
+    RowRendererId.registry,
+    RowRendererId.suricata,
+    RowRendererId.system,
+    RowRendererId.system_dns,
+    RowRendererId.system_endgame_process,
+    RowRendererId.system_file,
+    RowRendererId.system_fim,
+    RowRendererId.system_security_event,
+    RowRendererId.system_socket,
+    RowRendererId.threat_match,
+    RowRendererId.zeek,
+  ],
   expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],

@@ -74,6 +74,48 @@ components:
           description: The duration of the attack discovery generation
           type: integer
 
+    AttackDiscoveryStat:
+      type: object
+      description: Attack discovery stats
+      required:
+        - 'hasViewed'
+        - 'status'
+        - 'count'
+        - 'connectorId'
+      properties:
+        hasViewed:
+          description: Whether the user has viewed the results of the attack discovery run
+          type: boolean
+        count:
+          description: The number of attack discoveries for the connector
+          type: integer
+        connectorId:
+          description: The connector ID for the attack discovery
+          type: string
+        status:
+          $ref: '#/components/schemas/AttackDiscoveryStatus'
+          description: The status of the attack discovery.
+
+    AttackDiscoveryStats:
+      type: object
+      description: Stats on existing attack discovery documents
+      required:
+        - 'newDiscoveriesCount'
+        - 'newConnectorResultsCount'
+        - 'statsPerConnector'
+      properties:
+        newDiscoveriesCount:
+          description: The number of attack discoveries that have not yet been viewed
+          type: integer
+        newConnectorResultsCount:
+          description: The number of connectors with new results that have not yet been viewed
+          type: integer
+        statsPerConnector:
+          type: array
+          description: Attack discovery stats per connector
+          items:
+            $ref: '#/components/schemas/AttackDiscoveryStat'
+
 
     AttackDiscoveryResponse:
       type: object
@@ -81,6 +123,8 @@ components:
         - apiConfig
         - id
         - createdAt
+        - updatedAt
+        - lastViewedAt
         - users
         - namespace
         - attackDiscoveries
@@ -95,6 +139,9 @@ components:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         updatedAt:
           description: The last time attack discovery was updated.
+          type: string
+        lastViewedAt:
+          description: The last time attack discovery was viewed in the browser.
           type: string
         alertsContextCount:
             type: integer
@@ -139,7 +186,6 @@ components:
       type: object
       required:
         - id
-        - status
         - backingIndex
       properties:
         id:
@@ -169,6 +215,9 @@ components:
         failureReason:
           type: string
           description: The reason for a status of failed.
+        lastViewedAt:
+          description: The last time attack discovery was viewed in the browser.
+          type: string
 
     AttackDiscoveryCreateProps:
       type: object

@@ -34,6 +34,7 @@ import {
   useFleetStatus,
 } from '../../../../../hooks';
 import { sendGetBulkAssets } from '../../../../../hooks';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { DeferredAssetsSection } from './deferred_assets_accordion';
 import { AssetsAccordion } from './assets_accordion';
@@ -299,7 +300,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   return (
     <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1} />
+      <SideBarColumn grow={1} />
       <EuiFlexItem grow={7}>
         {fetchError && (
           <>

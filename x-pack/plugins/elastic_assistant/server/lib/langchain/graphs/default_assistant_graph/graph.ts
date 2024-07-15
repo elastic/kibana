@@ -14,11 +14,25 @@ import type { Logger } from '@kbn/logging';
 
 import { BaseMessage } from '@langchain/core/messages';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
-import { shouldContinue } from './nodes/should_continue';
+import {
+  shouldContinue,
+  shouldContinueGenerateTitle,
+  shouldContinueGetConversation,
+} from './nodes/should_continue';
 import { AGENT_NODE, runAgent } from './nodes/run_agent';
 import { executeTools, TOOLS_NODE } from './nodes/execute_tools';
+import { GENERATE_CHAT_TITLE_NODE, generateChatTitle } from './nodes/generate_chat_title';
+import {
+  GET_PERSISTED_CONVERSATION_NODE,
+  getPersistedConversation,
+} from './nodes/get_persisted_conversation';
+import {
+  PERSIST_CONVERSATION_CHANGES_NODE,
+  persistConversationChanges,
+} from './nodes/persist_conversation_changes';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -28,8 +42,9 @@ interface GetDefaultAssistantGraphParams {
   conversationId?: string;
   llm: BaseChatModel;
   logger: Logger;
-  messages: BaseMessage[];
   tools: StructuredTool[];
+  responseLanguage: string;
+  replacements: Replacements;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -43,8 +58,9 @@ export const getDefaultAssistantGraph = ({
   dataClients,
   llm,
   logger,
-  messages,
+  responseLanguage,
   tools,
+  replacements,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -66,7 +82,16 @@ export const getDefaultAssistantGraph = ({
       },
       messages: {
         value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
-        default: () => messages,
+        default: () => [],
+      },
+      chatTitle: {
+        value: (x: string, y?: string) => y ?? x,
+        default: () => '',
+      },
+      conversation: {
+        value: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
+          y ?? x,
+        default: () => undefined,
       },
     };
 
@@ -94,19 +119,68 @@ export const getDefaultAssistantGraph = ({
         state,
         tools,
       });
+    const generateChatTitleNode = (state: AgentState) =>
+      generateChatTitle({
+        ...nodeParams,
+        state,
+        responseLanguage,
+      });
+
+    const getPersistedConversationNode = (state: AgentState) =>
+      getPersistedConversation({
+        ...nodeParams,
+        state,
+        conversationsDataClient: dataClients?.conversationsDataClient,
+        conversationId,
+      });
+
+    const persistConversationChangesNode = (state: AgentState) =>
+      persistConversationChanges({
+        ...nodeParams,
+        state,
+        conversationsDataClient: dataClients?.conversationsDataClient,
+        conversationId,
+        replacements,
+      });
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
+    const shouldContinueGenerateTitleEdge = (state: AgentState) =>
+      shouldContinueGenerateTitle({ ...nodeParams, state });
+    const shouldContinueGetConversationEdge = (state: AgentState) =>
+      shouldContinueGetConversation({ ...nodeParams, state, conversationId });
 
     // Put together a new graph using the nodes and default state from above
-    const graph = new StateGraph<AgentState, Partial<AgentState>, '__start__' | 'agent' | 'tools'>({
+    const graph = new StateGraph<
+      AgentState,
+      Partial<AgentState>,
+      | '__start__'
+      | 'agent'
+      | 'tools'
+      | 'generateChatTitle'
+      | 'getPersistedConversation'
+      | 'persistConversationChanges'
+    >({
       channels: graphState,
     });
     // Define the nodes to cycle between
+    graph.addNode(GET_PERSISTED_CONVERSATION_NODE, getPersistedConversationNode);
+    graph.addNode(GENERATE_CHAT_TITLE_NODE, generateChatTitleNode);
+    graph.addNode(PERSIST_CONVERSATION_CHANGES_NODE, persistConversationChangesNode);
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);
+
+    // Add edges, alternating between agent and action until finished
+    graph.addConditionalEdges(START, shouldContinueGetConversationEdge, {
+      continue: GET_PERSISTED_CONVERSATION_NODE,
+      end: AGENT_NODE,
+    });
+    graph.addConditionalEdges(GET_PERSISTED_CONVERSATION_NODE, shouldContinueGenerateTitleEdge, {
+      continue: GENERATE_CHAT_TITLE_NODE,
+      end: PERSIST_CONVERSATION_CHANGES_NODE,
+    });
+    graph.addEdge(GENERATE_CHAT_TITLE_NODE, PERSIST_CONVERSATION_CHANGES_NODE);
+    graph.addEdge(PERSIST_CONVERSATION_CHANGES_NODE, AGENT_NODE);
     // Add conditional edge for basic routing
     graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, { continue: TOOLS_NODE, end: END });
-    // Add edges, alternating between agent and action until finished
-    graph.addEdge(START, AGENT_NODE);
     graph.addEdge(TOOLS_NODE, AGENT_NODE);
     // Compile the graph
     return graph.compile();

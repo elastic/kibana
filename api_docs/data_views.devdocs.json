@@ -6882,23 +6882,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.UserIdGetter",
-        "type": "Type",
-        "tags": [],
-        "label": "UserIdGetter",
-        "description": [],
-        "signature": [
-          "() => Promise<string | undefined>"
-        ],
-        "path": "src/plugins/data_views/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -12943,6 +12926,10 @@
             "references": [
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -12950,16 +12937,12 @@
                 "path": "src/plugins/data/common/search/tabify/response_writer.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
                 "plugin": "@kbn/search-errors",
                 "path": "packages/kbn-search-errors/src/painless_error.tsx"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -13008,6 +12991,10 @@
               {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -13132,10 +13119,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "@kbn/ml-data-view-utils",

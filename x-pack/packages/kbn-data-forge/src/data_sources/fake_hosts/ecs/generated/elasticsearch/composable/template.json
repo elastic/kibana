@@ -41,6 +41,7 @@
     "settings": {
       "index": {
         "codec": "best_compression",
+        "final_pipeline": "kbn-data-forge-add-event-ingested",
         "mapping": {
           "total_fields": {
             "limit": 2000

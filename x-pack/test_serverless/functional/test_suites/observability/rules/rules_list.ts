@@ -103,7 +103,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout();
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 

@@ -22,6 +22,3 @@ export type ReadPacksRequestQuery = z.infer<typeof ReadPacksRequestQuery>;
 export const ReadPacksRequestQuery = z.object({
   id: PackId.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

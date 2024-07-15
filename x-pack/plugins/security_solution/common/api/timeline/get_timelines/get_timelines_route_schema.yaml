@@ -16,7 +16,7 @@ paths:
   /api/timelines:
     get:
       operationId: getTimelines
-      description: This API is used to retrieve a list of existing saved timelines or timeline templates.
+      summary: This API is used to retrieve a list of existing saved timelines or timeline templates.
       tags:
         - access:securitySolution
       parameters:
@@ -68,8 +68,8 @@ paths:
              - $ref: '../model/components.yaml#/components/schemas/TimelineStatus'
              - nullable: true
       responses:
-        200:
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+        '200':
+          description: Indicates that the (template) timelines were found and returned.
           content:
             application/json:
               schema:
@@ -96,7 +96,7 @@ paths:
                         type: number
                 required:
                   - data
-        400:
+        '400':
           description: Bad request. The user supplied invalid data.
           content:
             application:json:

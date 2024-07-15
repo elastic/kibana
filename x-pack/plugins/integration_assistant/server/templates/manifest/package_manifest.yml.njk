@@ -12,11 +12,11 @@ categories:
 conditions:
   kibana:
     version: {{ min_version }}
-icons:
+{% if package_logo %}icons:
   - src: /img/logo.svg
     title: "{{ package_name }} Logo"
     size: 32x32
-    type: image/svg+xml
+    type: image/svg+xml{% endif %}
 policy_templates:
   - name: {{ package_name }}
     title: |

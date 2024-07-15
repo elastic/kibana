@@ -6,52 +6,25 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import type { Logger } from '@kbn/logging';
+import { UsageCounters } from '@kbn/usage-collection-plugin/common';
 import {
-  CollectorFetchContext,
-  UsageCollectionSetup,
+  type UsageCollectionSetup,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-  UsageCountersSavedObject,
-  UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';
-
-interface UsageCounterEvent {
-  domainId: string;
-  counterName: string;
-  counterType: string;
-  lastUpdatedAt?: string;
-  fromTimestamp?: string;
-  total: number;
-}
+import { type CounterEvent, createCounterFetcher } from '../common/counters';
 
 export interface UsageCounters {
-  dailyEvents: UsageCounterEvent[];
+  dailyEvents: CounterEvent[];
 }
 
-export function transformRawCounter(
-  rawUsageCounter: UsageCountersSavedObject
-): UsageCounterEvent | undefined {
-  const {
-    attributes: { count, counterName, counterType, domainId },
-    updated_at: lastUpdatedAt,
-  } = rawUsageCounter;
-  const fromTimestamp = moment(lastUpdatedAt).utc().startOf('day').format();
+const SERVER: UsageCounters.v1.CounterEventSource = 'server';
+const SERVER_COUNTERS_FILTER = `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.source: ${SERVER}`;
 
-  if (domainId === 'uiCounter' || typeof count !== 'number' || count < 1) {
-    return;
-  }
-
-  return {
-    domainId,
-    counterName,
-    counterType,
-    lastUpdatedAt,
-    fromTimestamp,
-    total: count,
-  };
-}
-
-export function registerUsageCountersUsageCollector(usageCollection: UsageCollectionSetup) {
+export function registerUsageCountersUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  logger: Logger
+) {
   const collector = usageCollection.makeUsageCollector<UsageCounters>({
     type: 'usage_counters',
     schema: {
@@ -85,33 +58,15 @@ export function registerUsageCountersUsageCollector(usageCollection: UsageCollec
         },
       },
     },
-    fetch: async ({ soClient }: CollectorFetchContext) => {
-      const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
-        type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-        fields: ['count', 'counterName', 'counterType', 'domainId'],
-        filter: `NOT ${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
-        perPage: 1000,
-      });
-
-      const dailyEvents: UsageCounterEvent[] = [];
-
-      for await (const { saved_objects: rawUsageCounters } of finder.find()) {
-        rawUsageCounters.forEach((rawUsageCounter) => {
-          try {
-            const event = transformRawCounter(rawUsageCounter);
-            if (event) {
-              dailyEvents.push(event);
-            }
-          } catch (_) {
-            // swallow error; allows sending successfully transformed objects.
-          }
-        });
-      }
-
-      return { dailyEvents };
-    },
+    fetch: createCounterFetcher(logger, SERVER_COUNTERS_FILTER, toDailyEvents),
     isReady: () => true,
   });
 
   usageCollection.registerCollector(collector);
+}
+
+export function toDailyEvents(counters: CounterEvent[]) {
+  return {
+    dailyEvents: counters,
+  };
 }

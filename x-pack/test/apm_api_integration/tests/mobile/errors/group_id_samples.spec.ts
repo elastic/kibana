@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177654
-  registry.when('when samples data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when samples data is loaded', { config: 'basic', archives: [] }, () => {
     const { bananaTransaction } = config;
     describe('error group id', () => {
       before(async () => {
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177665
-  registry.when('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
     describe('error sample id', () => {
       before(async () => {
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });

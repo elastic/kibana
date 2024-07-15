@@ -66,7 +66,7 @@ export const esqlValidator = async (
     if (isMissingMetadataOperator) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-        message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
+        message: i18n.ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
       };
     }
 
@@ -84,7 +84,7 @@ export const esqlValidator = async (
     if (!isEsqlQueryAggregating && !isIdFieldPresent) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-        message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
+        message: i18n.ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR,
       };
     }
   } catch (error) {

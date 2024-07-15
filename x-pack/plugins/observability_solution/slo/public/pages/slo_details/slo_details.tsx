@@ -8,6 +8,7 @@
 import { EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -34,6 +35,7 @@ import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
 
 export function SloDetailsPage() {
+  const { onPageReady } = usePerformanceContext();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -78,6 +80,7 @@ export function SloDetailsPage() {
         Instance Id: ${slo.instanceId}
         Description: ${slo.description}
         Observed value: ${slo.summary.sliValue}
+        Error budget remaining: ${slo.summary.errorBudget.remaining}
         Status: ${slo.summary.status}
       `),
       data: [
@@ -95,6 +98,12 @@ export function SloDetailsPage() {
       navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
   }, [hasRightLicense, permissions, navigateToUrl, basePath]);
+
+  useEffect(() => {
+    if (!isLoading && slo !== undefined) {
+      onPageReady();
+    }
+  }, [onPageReady, slo, isLoading]);
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
