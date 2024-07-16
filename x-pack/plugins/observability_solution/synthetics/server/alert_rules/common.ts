@@ -186,6 +186,10 @@ export const setRecoveredAlertsContext = ({
     const alertUuid = recoveredAlert.alert.getUuid();
 
     const state = recoveredAlert.alert.getState();
+    const alertHit = recoveredAlert.hit;
+    const alertId = alertHit?.['kibana.alert.instance.id'];
+    const locationId = alertHit?.['location.id'];
+    const configId = alertHit?.configId;
 
     let recoveryReason = '';
     let recoveryStatus = i18n.translate(
@@ -199,15 +203,14 @@ export const setRecoveredAlertsContext = ({
     let monitorSummary: MonitorSummaryStatusRule | null = null;
     let lastErrorMessage;
 
-    if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
-      const { idWithLocation, locationId } = state;
-      const downConfig = staleDownConfigs[idWithLocation];
-      const { ping, configId } = downConfig;
+    if (alertId && locationId && staleDownConfigs[alertId]) {
+      const downConfig = staleDownConfigs[alertId];
+      const { ping } = downConfig;
       monitorSummary = getMonitorSummary(
         ping,
         RECOVERED_LABEL,
         locationId,
-        configId,
+        downConfig.configId,
         dateFormat,
         tz
       );
@@ -242,12 +245,11 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
-    if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      const { idWithLocation, configId, locationId } = state;
+    if (configId && alertId && locationId && upConfigs[alertId]) {
       // pull the last error from state, since it is not available on the up ping
-      lastErrorMessage = state.lastErrorMessage;
+      lastErrorMessage = alertHit?.['error.message'];
 
-      const upConfig = upConfigs[idWithLocation];
+      const upConfig = upConfigs[alertId];
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
 
