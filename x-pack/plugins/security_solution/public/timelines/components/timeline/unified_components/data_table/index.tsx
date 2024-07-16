@@ -13,7 +13,6 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
-import { GRID_STYLE } from '@kbn/unified-data-table/src/constants';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
@@ -46,7 +45,6 @@ import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
-import { getEventTypeRowClassName } from './use_get_event_type_row_classname';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -154,7 +152,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       selectTimelineById(state, timelineId)
     );
 
-    const tableRows = useMemo(
+    const { tableRows, tableStylesOverride } = useMemo(
       () => transformTimelineItemToUnifiedRows({ events, dataView }),
       [events, dataView]
     );
@@ -364,18 +362,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
     }, [enabledRowRenderers.length, trailingControlColumns]);
 
-    const gridStyles = useMemo(() => {
-      const rowClasses = tableRows.reduce((acc: Record<number, string>, item, index) => {
-        acc[index] = getEventTypeRowClassName(item.ecs);
-        return acc;
-      }, {});
-
-      return { ...GRID_STYLE, rowClasses };
-    }, [tableRows]);
-
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
-        <StyledTimelineUnifiedDataTable className="unifiedDataTable">
+        <StyledTimelineUnifiedDataTable>
           {(dataLoadingState === DataLoadingState.loading ||
             dataLoadingState === DataLoadingState.loadingMore) && (
             <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
@@ -386,7 +375,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             className="udtTimeline"
             columns={columnIds}
             expandedDoc={expandedDoc}
-            gridStyleOverride={gridStyles}
+            gridStyleOverride={tableStylesOverride}
             dataView={dataView}
             showColumnTokens={true}
             loadingState={dataLoadingState}
