@@ -187,7 +187,6 @@ export const setRecoveredAlertsContext = ({
 
     const state = recoveredAlert.alert.getState();
     const alertHit = recoveredAlert.hit;
-    const alertId = alertHit?.['kibana.alert.instance.id'];
     const locationId = alertHit?.['location.id'];
     const configId = alertHit?.configId;
 
@@ -203,8 +202,8 @@ export const setRecoveredAlertsContext = ({
     let monitorSummary: MonitorSummaryStatusRule | null = null;
     let lastErrorMessage;
 
-    if (alertId && locationId && staleDownConfigs[alertId]) {
-      const downConfig = staleDownConfigs[alertId];
+    if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
+      const downConfig = staleDownConfigs[recoveredAlertId];
       const { ping } = downConfig;
       monitorSummary = getMonitorSummary(
         ping,
@@ -245,11 +244,11 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
-    if (configId && alertId && locationId && upConfigs[alertId]) {
+    if (configId && recoveredAlertId && locationId && upConfigs[recoveredAlertId]) {
       // pull the last error from state, since it is not available on the up ping
       lastErrorMessage = alertHit?.['error.message'];
 
-      const upConfig = upConfigs[alertId];
+      const upConfig = upConfigs[recoveredAlertId];
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
 
@@ -293,7 +292,7 @@ export const setRecoveredAlertsContext = ({
       ...state,
       ...(monitorSummary ? monitorSummary : {}),
       locationId,
-      idWithLocation: alertId,
+      idWithLocation: recoveredAlertId,
       lastErrorMessage,
       recoveryStatus,
       linkMessage,
