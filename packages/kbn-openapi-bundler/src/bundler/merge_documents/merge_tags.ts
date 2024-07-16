@@ -13,15 +13,11 @@ import { mergeArrays } from './merge_arrays';
 export function mergeTags(
   resolvedDocuments: ResolvedDocument[]
 ): OpenAPIV3.TagObject[] | undefined {
-  const merged: OpenAPIV3.TagObject[] = [];
+  const tagsArrayOfArrays = resolvedDocuments
+    .filter(({ document }) => Array.isArray(document.tags))
+    .map(({ document }) => document.tags as OpenAPIV3.TagObject[]);
 
-  for (const { document } of resolvedDocuments) {
-    if (!Array.isArray(document.tags)) {
-      continue;
-    }
-
-    mergeArrays(document.tags, merged);
-  }
+  const merged = mergeArrays(tagsArrayOfArrays);
 
   return merged.length > 0 ? merged : undefined;
 }

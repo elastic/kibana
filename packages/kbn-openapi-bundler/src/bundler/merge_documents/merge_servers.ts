@@ -13,15 +13,11 @@ import { mergeArrays } from './merge_arrays';
 export function mergeServers(
   resolvedDocuments: ResolvedDocument[]
 ): OpenAPIV3.ServerObject[] | undefined {
-  const merged: OpenAPIV3.ServerObject[] = [];
+  const serverObjArrayOfArrays = resolvedDocuments
+    .filter(({ document }) => Array.isArray(document.servers))
+    .map(({ document }) => document.servers as OpenAPIV3.ServerObject[]);
 
-  for (const { document } of resolvedDocuments) {
-    if (!Array.isArray(document.servers)) {
-      continue;
-    }
-
-    mergeArrays(document.servers, merged);
-  }
+  const merged = mergeArrays(serverObjArrayOfArrays);
 
   return merged.length > 0 ? merged : undefined;
 }

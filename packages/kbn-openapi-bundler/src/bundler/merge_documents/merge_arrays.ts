@@ -6,16 +6,34 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'fast-deep-equal';
+/**
+ * Merges source arrays by merging array items and omitting duplicates.
+ * Duplicates checked by exacts match.
+ */
+export function mergeArrays<T>(sources: Array<readonly T[]>): T[] {
+  const merged: T[] = [];
+  const seen = new Set<string>();
 
-export function mergeArrays(source: unknown[], merged: unknown[]): void {
-  for (const item of source) {
-    const existing = merged.find((x) => deepEqual(x, item));
+  for (const itemsSource of sources) {
+    for (const item of itemsSource) {
+      const searchableItem = toString(item);
 
-    if (existing) {
-      continue;
+      if (seen.has(searchableItem)) {
+        continue;
+      }
+
+      merged.push(item);
+      seen.add(searchableItem);
     }
+  }
 
-    merged.push(item);
+  return merged;
+}
+
+function toString(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    throw new Error('Unable to merge arrays - encountered value is not serializable');
   }
 }

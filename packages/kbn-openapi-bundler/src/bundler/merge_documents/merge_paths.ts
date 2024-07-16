@@ -116,7 +116,7 @@ function mergePathItemServers(
     mergedPathItem.servers = [];
   }
 
-  mergeArrays(sourcePathItem.servers, mergedPathItem.servers);
+  mergedPathItem.servers = mergeArrays([sourcePathItem.servers, mergedPathItem.servers]);
 }
 
 function mergeParameters(

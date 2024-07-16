@@ -13,15 +13,11 @@ import { mergeArrays } from './merge_arrays';
 export function mergeSecurityRequirements(
   resolvedDocuments: ResolvedDocument[]
 ): OpenAPIV3.SecurityRequirementObject[] | undefined {
-  const merged: OpenAPIV3.SecurityRequirementObject[] = [];
+  const securityArrayOfArrays = resolvedDocuments
+    .filter(({ document }) => Array.isArray(document.security))
+    .map(({ document }) => document.security as OpenAPIV3.SecurityRequirementObject[]);
 
-  for (const { document } of resolvedDocuments) {
-    if (!Array.isArray(document.security)) {
-      continue;
-    }
-
-    mergeArrays(document.security, merged);
-  }
+  const merged = mergeArrays(securityArrayOfArrays);
 
   return merged.length > 0 ? merged : undefined;
 }
