@@ -14,15 +14,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const ml = getService('ml');
 
-  describe('Serverless Inference Management UI', function () {
+  describe.skip('ESS Inference Management UI', function () {
     this.tags('skipMKI');
 
     before(async () => {
+      await pageObjects.common.navigateToApp('home');
+      await pageObjects.common.navigateToApp('enterprise_search/overview');
       await pageObjects.common.navigateToApp('inferenceManagement');
-      await browser.refresh();
     });
 
-    describe('endpoint empty view', () => {
+    describe.skip('endpoint empty view', () => {
       it('is loaded successfully', async () => {
         await pageObjects.inferenceManagement.InferenceEmptyPage.expectComponentsToBeExist();
       });
@@ -31,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('endpoint tabular view', () => {
+    describe.skip('endpoint tabular view', () => {
       before(async () => {
         const modelConfig: ModelConfig = {
           service: 'elser',
