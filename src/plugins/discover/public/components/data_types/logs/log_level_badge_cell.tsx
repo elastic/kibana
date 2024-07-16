@@ -30,12 +30,12 @@ export const getLogLevelBadgeCell =
     const coalescedValue = getLogLevelCoalescedValue(value);
     const color = coalescedValue ? getLogLevelColor(coalescedValue, euiTheme) : undefined;
 
+    if (!color || !coalescedValue) {
+      return <span data-test-subj="logLevelBadgeCell-unknown">{value}</span>;
+    }
+
     return (
-      <EuiBadge
-        color={color}
-        data-test-subj={`logLevelBadgeCell-${coalescedValue ?? 'unknown'}`}
-        css={badgeCss}
-      >
+      <EuiBadge color={color} data-test-subj={`logLevelBadgeCell-${coalescedValue}`} css={badgeCss}>
         {value}
       </EuiBadge>
     );
