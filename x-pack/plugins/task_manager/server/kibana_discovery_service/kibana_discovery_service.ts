@@ -21,15 +21,12 @@ interface DiscoveryServiceUpsertParams {
   lastSeen: string;
 }
 
-export const discoveryInterval = 1000 * 10;
-export const cleanupInterval = 1000 * 60;
-export const cleanupLookBack = '5m';
-export const getActiveNodesLookBack = '30s';
+export const DISCOVERY_INTERVAL = 1000 * 10;
+export const ACTIVE_NODES_LOOK_BACK = '30s';
 
 export class KibanaDiscoveryService {
   private currentNode: string;
-  private discoveryStarted = false;
-  private cleanupStarted = false;
+  private started = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
 
@@ -51,60 +48,17 @@ export class KibanaDiscoveryService {
     );
   }
 
-  private async deleteInactiveNodes() {
-    const { saved_objects: inactiveNodes } =
-      await this.savedObjectsRepository.find<BackgroundTaskNode>({
-        type: BACKGROUND_TASK_NODE_SO_NAME,
-        perPage: 10000,
-        page: 1,
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen < now-${cleanupLookBack}`,
-      });
-
-    if (inactiveNodes.length > 0) {
-      const nodesToDelete = inactiveNodes.map((node) => ({
-        type: BACKGROUND_TASK_NODE_SO_NAME,
-        id: node.attributes.id,
-      }));
-      await this.savedObjectsRepository.bulkDelete(nodesToDelete, { force: true, refresh: false });
-      this.logger.info(
-        `Inactive Kibana nodes: ${nodesToDelete.map(
-          (node) => node.id
-        )}, have been successfully deleted`
-      );
-    }
-  }
-
-  private async scheduleDeleteInactiveNodes() {
-    try {
-      await this.deleteInactiveNodes();
-      if (!this.cleanupStarted) {
-        this.logger.info('Kibana Discovery Service - Cleanup - has been started');
-        this.cleanupStarted = true;
-      }
-    } catch (e) {
-      if (!this.cleanupStarted) {
-        this.logger.error(
-          `Kibana Discovery Service - Cleanup - couldn't be started and will be retried in ${cleanupInterval}ms. Error: ${e.message}`
-        );
-      } else {
-        this.logger.error(`Deleting inactive nodes failed. Error: ${e.message} `);
-      }
-    } finally {
-      setTimeout(async () => await this.scheduleDeleteInactiveNodes(), cleanupInterval);
-    }
-  }
-
   private async scheduleUpsertCurrentNode() {
     const lastSeenDate = new Date();
     const lastSeen = lastSeenDate.toISOString();
     try {
       await this.upsertCurrentNode({ id: this.currentNode, lastSeen });
-      if (!this.discoveryStarted) {
+      if (!this.started) {
         this.logger.info('Kibana Discovery Service has been started');
-        this.discoveryStarted = true;
+        this.started = true;
       }
     } catch (e) {
-      if (!this.discoveryStarted) {
+      if (!this.started) {
         this.logger.error(
           `Kibana Discovery Service couldn't be started and will be retried in 10s, error:${e.message}`
         );
@@ -116,28 +70,20 @@ export class KibanaDiscoveryService {
     } finally {
       setTimeout(
         async () => await this.scheduleUpsertCurrentNode(),
-        discoveryInterval - (Date.now() - lastSeenDate.getTime())
+        DISCOVERY_INTERVAL - (Date.now() - lastSeenDate.getTime())
       );
     }
   }
 
-  public isDiscoveryStarted() {
-    return this.discoveryStarted;
+  public isStarted() {
+    return this.started;
   }
 
-  public async startDiscovery() {
-    if (!this.discoveryStarted) {
+  public async start() {
+    if (!this.started) {
       await this.scheduleUpsertCurrentNode();
     } else {
       this.logger.warn('Kibana Discovery Service has already been started');
-    }
-  }
-
-  public async startCleanup() {
-    if (!this.cleanupStarted) {
-      await this.scheduleDeleteInactiveNodes();
-    } else {
-      this.logger.warn('Kibana Discovery Service - Cleanup - has already been started');
     }
   }
 
@@ -147,7 +93,7 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         perPage: 10000,
         page: 1,
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${getActiveNodesLookBack}`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${ACTIVE_NODES_LOOK_BACK}`,
       });
 
     return activeNodes;

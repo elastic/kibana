@@ -18,6 +18,10 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import {
+  registerRemoveInactiveNodesTaskDefinition,
+  scheduleRemoveInactiveNodesTaskDefinition,
+} from './kibana_discovery_service/remove_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
@@ -112,7 +116,7 @@ export class TaskManagerPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<TaskManagerStartContract, unknown>,
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
@@ -199,6 +203,8 @@ export class TaskManagerPlugin
       );
     }
 
+    registerRemoveInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
@@ -241,8 +247,10 @@ export class TaskManagerPlugin
       logger: this.logger,
       currentNode: this.taskManagerId!,
     });
-    this.kibanaDiscoveryService.startDiscovery().catch(() => {});
-    this.kibanaDiscoveryService.startCleanup().catch(() => {});
+
+    if (this.shouldRunBackgroundTasks) {
+      this.kibanaDiscoveryService.start().catch(() => {});
+    }
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
@@ -325,6 +333,8 @@ export class TaskManagerPlugin
       taskManagerId: taskStore.taskManagerId,
     });
 
+    scheduleRemoveInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
@@ -349,7 +359,7 @@ export class TaskManagerPlugin
   }
 
   public stop() {
-    if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isDiscoveryStarted()) {
+    if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isStarted()) {
       this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
     }
   }

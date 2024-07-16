@@ -7,8 +7,8 @@
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   KibanaDiscoveryService,
-  cleanupInterval,
-  discoveryInterval,
+  DISCOVERY_INTERVAL,
+  ACTIVE_NODES_LOOK_BACK,
 } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import {
@@ -77,7 +77,7 @@ describe('KibanaDiscoveryService', () => {
         logger,
         currentNode,
       });
-      await kibanaDiscoveryService.startDiscovery();
+      await kibanaDiscoveryService.start();
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
       expect(savedObjectsRepository.update).toHaveBeenCalledWith(
@@ -93,7 +93,7 @@ describe('KibanaDiscoveryService', () => {
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('Kibana Discovery Service has been started');
-      expect(kibanaDiscoveryService.isDiscoveryStarted()).toBe(true);
+      expect(kibanaDiscoveryService.isStarted()).toBe(true);
     });
 
     it('does not start multiple times', async () => {
@@ -102,8 +102,8 @@ describe('KibanaDiscoveryService', () => {
         logger,
         currentNode,
       });
-      await kibanaDiscoveryService.startDiscovery();
-      await kibanaDiscoveryService.startDiscovery();
+      await kibanaDiscoveryService.start();
+      await kibanaDiscoveryService.start();
 
       expect(logger.info).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -118,12 +118,12 @@ describe('KibanaDiscoveryService', () => {
         logger,
         currentNode,
       });
-      await kibanaDiscoveryService.startDiscovery();
+      await kibanaDiscoveryService.start();
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
 
       expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), discoveryInterval);
+      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DISCOVERY_INTERVAL);
 
       jest.runOnlyPendingTimers();
 
@@ -138,7 +138,7 @@ describe('KibanaDiscoveryService', () => {
         logger,
         currentNode,
       });
-      await kibanaDiscoveryService.startDiscovery();
+      await kibanaDiscoveryService.start();
 
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
@@ -146,7 +146,7 @@ describe('KibanaDiscoveryService', () => {
       );
       expect(logger.info).not.toHaveBeenCalled();
       expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), discoveryInterval);
+      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DISCOVERY_INTERVAL);
     });
 
     it('reschedules when upsert fails after start', async () => {
@@ -159,14 +159,14 @@ describe('KibanaDiscoveryService', () => {
         logger,
         currentNode,
       });
-      await kibanaDiscoveryService.startDiscovery();
+      await kibanaDiscoveryService.start();
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('Kibana Discovery Service has been started');
-      expect(kibanaDiscoveryService.isDiscoveryStarted()).toBe(true);
+      expect(kibanaDiscoveryService.isStarted()).toBe(true);
       expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), discoveryInterval);
+      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DISCOVERY_INTERVAL);
 
       savedObjectsRepository.update.mockRejectedValueOnce(new Error('foo'));
 
@@ -174,7 +174,7 @@ describe('KibanaDiscoveryService', () => {
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
       expect(setTimeout).toHaveBeenCalledTimes(2);
-      expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), discoveryInterval);
+      expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), DISCOVERY_INTERVAL);
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
         "Background Task Node couldn't be updated. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
@@ -182,130 +182,11 @@ describe('KibanaDiscoveryService', () => {
     });
   });
 
-  describe('Cleanup', () => {
-    it('starts successfully', async () => {
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-      await kibanaDiscoveryService.startCleanup();
-
-      expect(savedObjectsRepository.find).toHaveBeenCalledTimes(1);
-      expect(savedObjectsRepository.find).toHaveBeenCalledWith({
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen < now-5m`,
-        page: 1,
-        perPage: 10000,
-        type: BACKGROUND_TASK_NODE_SO_NAME,
-      });
-      expect(savedObjectsRepository.bulkDelete).not.toHaveBeenCalled();
-
-      expect(logger.info).toHaveBeenCalledTimes(1);
-      expect(logger.warn).not.toHaveBeenCalled();
-      expect(logger.error).not.toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith(
-        'Kibana Discovery Service - Cleanup - has been started'
-      );
-    });
-
-    it('does not start multiple times', async () => {
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-      await kibanaDiscoveryService.startCleanup();
-      await kibanaDiscoveryService.startCleanup();
-
-      expect(logger.info).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.info).toHaveBeenCalledWith(
-        'Kibana Discovery Service - Cleanup - has been started'
-      );
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Kibana Discovery Service - Cleanup - has already been started'
-      );
-    });
-
-    it('schedules discovery job', async () => {
-      savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse([createFindSO('123')]));
-
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-      await kibanaDiscoveryService.startCleanup();
-      expect(savedObjectsRepository.find).toHaveBeenCalledTimes(1);
-      expect(savedObjectsRepository.bulkDelete).toHaveBeenCalledTimes(1);
-
-      expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), cleanupInterval);
-
-      jest.runOnlyPendingTimers();
-
-      expect(savedObjectsRepository.find).toHaveBeenCalledTimes(2);
-      expect(savedObjectsRepository.bulkDelete).toHaveBeenCalledTimes(1);
-    });
-
-    it('reschedules when bulkDelete fails on start', async () => {
-      savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse([createFindSO('123')]));
-      savedObjectsRepository.bulkDelete.mockRejectedValueOnce(new Error('foo'));
-
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-      await kibanaDiscoveryService.startCleanup();
-
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(
-        "Kibana Discovery Service - Cleanup - couldn't be started and will be retried in 60000ms. Error: foo"
-      );
-      expect(logger.info).not.toHaveBeenCalled();
-      expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), cleanupInterval);
-    });
-
-    it('reschedules when bulkDelete fails after start', async () => {
-      savedObjectsRepository.find.mockResolvedValue(createFindResponse([createFindSO('123')]));
-      savedObjectsRepository.bulkDelete.mockResolvedValue({} as SavedObjectsBulkDeleteResponse);
-
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-      await kibanaDiscoveryService.startCleanup();
-
-      expect(savedObjectsRepository.bulkDelete).toHaveBeenCalledTimes(1);
-      expect(logger.error).not.toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith(
-        'Kibana Discovery Service - Cleanup - has been started'
-      );
-
-      expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), cleanupInterval);
-
-      savedObjectsRepository.bulkDelete.mockRejectedValueOnce(new Error('foo'));
-
-      await jest.advanceTimersByTimeAsync(100000);
-
-      expect(savedObjectsRepository.bulkDelete).toHaveBeenCalledTimes(2);
-      expect(setTimeout).toHaveBeenCalledTimes(2);
-      expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), cleanupInterval);
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith('Deleting inactive nodes failed. Error: foo ');
-    });
-  });
-
   describe('getActiveKibanaNodes', () => {
+    const mockActiveNodes = [createFindSO('456', '10.10.2024')];
+    savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse(mockActiveNodes));
+
     it('returns the active kibana nodes', async () => {
-      const mockActiveNodes = [createFindSO('456', '10.10.2024')];
-
-      savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse(mockActiveNodes));
-
       const kibanaDiscoveryService = new KibanaDiscoveryService({
         savedObjectsRepository,
         logger,
@@ -315,7 +196,7 @@ describe('KibanaDiscoveryService', () => {
       const activeNodes = await kibanaDiscoveryService.getActiveKibanaNodes();
 
       expect(savedObjectsRepository.find).toHaveBeenCalledWith({
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-30s`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${ACTIVE_NODES_LOOK_BACK}`,
         page: 1,
         perPage: 10000,
         type: BACKGROUND_TASK_NODE_SO_NAME,
