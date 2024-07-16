@@ -55,6 +55,8 @@ export function isPropertyWithKey(property, identifierName) {
  * Service call example: `i18n('message-id', { defaultMessage: 'Message text'})`
  *
  * `@kbn/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
+ *
+ * To cover `import { i18n as anythingElse }` scenarios: `<anything>.translate('message-id', { defaultMessage: 'Message text'})` (checking the parameters as well)
  */
 export function isI18nTranslateFunction(node) {
   return (
@@ -62,7 +64,15 @@ export function isI18nTranslateFunction(node) {
     (isIdentifier(node.callee, { name: 'i18n' }) ||
       (isMemberExpression(node.callee) &&
         isIdentifier(node.callee.object, { name: 'i18n' }) &&
-        isIdentifier(node.callee.property, { name: 'translate' })))
+        isIdentifier(node.callee.property, { name: 'translate' })) ||
+      // Naively trying to identify `<anything>.translate('message-id', { defaultMessage: 'Message text' })`
+      (isMemberExpression(node.callee) &&
+        isIdentifier(node.callee.property, { name: 'translate' }) &&
+        isStringLiteral(node.arguments[0]) &&
+        isObjectExpression(node.arguments[1]) &&
+        node.arguments[1].properties.some((property) =>
+          isPropertyWithKey(property, 'defaultMessage')
+        )))
   );
 }
 

@@ -7,7 +7,7 @@
  */
 
 import { createFailError } from '@kbn/dev-cli-errors';
-import { matchEntriesWithExctractors } from '../extract_default_translations';
+import { matchEntriesWithExtractors } from '../extract_default_translations';
 import { I18nConfig } from '../config';
 import { normalizePath, readFileAsync, ErrorReporter } from '../utils';
 import { I18nCheckTaskContext } from '../types';
@@ -42,7 +42,7 @@ export async function extractUntrackedMessagesTask({
     '**/dist/**',
   ]);
   for (const inputPath of inputPaths) {
-    const { entries, extractFunction } = await matchEntriesWithExctractors(inputPath, {
+    const { entries, extractFunction } = await matchEntriesWithExtractors(inputPath, {
       additionalIgnore: ignore,
       mark: true,
       absolute: true,
