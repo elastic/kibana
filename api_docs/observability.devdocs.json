@@ -10665,10 +10665,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmEnableMultiSignal",
+            "id": "def-server.uiSettings.entityCentricExperience",
             "type": "Object",
             "tags": [],
-            "label": "[apmEnableMultiSignal]",
+            "label": "[entityCentricExperience]",
             "description": [],
             "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
             "deprecated": false,
@@ -10676,7 +10676,7 @@
             "children": [
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.category",
+                "id": "def-server.uiSettings.entityCentricExperience.category",
                 "type": "Array",
                 "tags": [],
                 "label": "category",
@@ -10690,7 +10690,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.name",
+                "id": "def-server.uiSettings.entityCentricExperience.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -10701,7 +10701,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.description",
+                "id": "def-server.uiSettings.entityCentricExperience.description",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -10712,7 +10712,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.schema",
+                "id": "def-server.uiSettings.entityCentricExperience.schema",
                 "type": "Object",
                 "tags": [],
                 "label": "schema",
@@ -10733,7 +10733,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.value",
+                "id": "def-server.uiSettings.entityCentricExperience.value",
                 "type": "boolean",
                 "tags": [],
                 "label": "value",
@@ -10747,7 +10747,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.requiresPageReload",
+                "id": "def-server.uiSettings.entityCentricExperience.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",
@@ -10761,7 +10761,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableMultiSignal.type",
+                "id": "def-server.uiSettings.entityCentricExperience.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -13773,21 +13773,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.apmEnableMultiSignal",
-        "type": "string",
-        "tags": [],
-        "label": "apmEnableMultiSignal",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableMultiSignal\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-common.apmEnableProfilingIntegration",
         "type": "string",
         "tags": [],
@@ -14202,6 +14187,21 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.entityCentricExperience",
+        "type": "string",
+        "tags": [],
+        "label": "entityCentricExperience",
+        "description": [],
+        "signature": [
+          "\"observability:entityCentricExperience\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
