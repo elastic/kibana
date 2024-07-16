@@ -477,11 +477,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
     groupByFields.length === 0;
 
-  const isSuppressionGroupByDisabled =
+  /**
+   * If we don't have ML field information, users can't meaningfully interact with these fields */
+  const areSuppressionFieldsDisabledByMlFields =
+    isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length);
+
+  const areSuppressionFieldsDisabled =
     !isAlertSuppressionLicenseValid ||
     areSuppressionFieldsDisabledBySequence ||
-    isEsqlSuppressionLoading ||
-    (isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length));
+    areSuppressionFieldsDisabledByMlFields;
+
+  const isSuppressionGroupByDisabled = areSuppressionFieldsDisabled || isEsqlSuppressionLoading;
 
   const suppressionGroupByDisabledText = useMemo(() => {
     if (areSuppressionFieldsDisabledBySequence) {
@@ -513,31 +519,29 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *  - if suppression license is not valid(i.e. less than platinum)
    *  - or for not threshold rule - when groupBy fields not selected
    * - Eql sequence is used
+   * - ML Field information is not available
    */
   const isGroupByChildrenDisabled =
-    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule
-      ? false
-      : !groupByFields?.length;
+    areSuppressionFieldsDisabled || (isThresholdRule ? false : !groupByFields?.length);
 
   /**
    * Per rule execution radio option is disabled
    *  - if suppression license is not valid(i.e. less than platinum)
    *  - always disabled for threshold rule
    *  - Eql sequence is used and suppression fields are in the default state
+   * - ML Field information is not available
    */
-  const isPerRuleExecutionDisabled =
-    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule;
+  const isPerRuleExecutionDisabled = areSuppressionFieldsDisabled || isThresholdRule;
 
   /**
    * Per time period execution radio option is disabled
    *  - if suppression license is not valid(i.e. less than platinum)
    *  - disabled for threshold rule when enabled suppression is not checked
    * - Eql sequence is used and suppression fields are in the default state
+   * - ML Field information is not available
    */
   const isPerTimePeriodDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    (isThresholdRule && !enableThresholdSuppression);
+    areSuppressionFieldsDisabled || (isThresholdRule && !enableThresholdSuppression);
 
   /**
    * Suppression duration is disabled when
@@ -545,11 +549,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *  - when suppression by rule execution is selected in radio button
    *  - when threshold suppression is not enabled and no group by fields selected
    * -  Eql sequence is used and suppression fields are in the default state
+   * - ML Field information is not available
    * */
   const isDurationDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    (!enableThresholdSuppression && groupByFields?.length === 0);
+    areSuppressionFieldsDisabled || (!enableThresholdSuppression && groupByFields?.length === 0);
 
   /**
    * Suppression missing fields is disabled when
@@ -557,10 +560,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *  - when no group by fields selected
    * -  Eql sequence is used and suppression fields are in the default state
    * */
-  const isMissingFieldsDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    !groupByFields.length;
+  const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !groupByFields.length;
 
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
