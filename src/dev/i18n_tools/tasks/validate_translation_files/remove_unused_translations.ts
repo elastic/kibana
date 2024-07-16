@@ -47,7 +47,7 @@ export const removeUnusedTranslations = ({
       );
 
       unusedMessages.forEach((unusedMessage) => {
-        const message = `Found No longer used message with id ${unusedMessage[0]}.`;
+        const message = `Found no longer used message with id ${unusedMessage[0]}.`;
         taskReporter.log(message);
         errorReporter.report(message);
       });
