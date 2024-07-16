@@ -16,15 +16,15 @@ describe('useAlertSuppression', () => {
       .mockReturnValue(false);
   });
 
-  (['new_terms', 'threat_match', 'saved_query', 'query', 'threshold', 'eql'] as Type[]).forEach(
-    (ruleType) => {
-      it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
-        const { result } = renderHook(() => useAlertSuppression(ruleType));
+  (
+    ['new_terms', 'threat_match', 'saved_query', 'query', 'threshold', 'eql', 'esql'] as Type[]
+  ).forEach((ruleType) => {
+    it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
+      const { result } = renderHook(() => useAlertSuppression(ruleType));
 
-        expect(result.current.isSuppressionEnabled).toBe(true);
-      });
-    }
-  );
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
+  });
 
   it('should return false if rule type is undefined', () => {
     const { result } = renderHook(() => useAlertSuppression(undefined));
@@ -52,23 +52,6 @@ describe('useAlertSuppression', () => {
       const { result } = renderHook(() => useAlertSuppression('machine_learning'));
 
       expect(result.current.isSuppressionEnabled).toBe(false);
-    });
-  });
-
-  describe('ES|QL rules', () => {
-    it('should return isSuppressionEnabled false if ES|QL Feature Flag is disabled', () => {
-      const { result } = renderHook(() => useAlertSuppression('esql'));
-
-      expect(result.current.isSuppressionEnabled).toBe(false);
-    });
-
-    it('should return isSuppressionEnabled true if ES|QL Feature Flag is enabled', () => {
-      jest
-        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-        .mockImplementation((flag) => flag === 'alertSuppressionForEsqlRuleEnabled');
-      const { result } = renderHook(() => useAlertSuppression('esql'));
-
-      expect(result.current.isSuppressionEnabled).toBe(true);
     });
   });
 });
