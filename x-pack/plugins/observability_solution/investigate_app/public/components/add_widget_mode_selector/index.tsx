@@ -13,26 +13,10 @@ import { InvestigateTextButton } from '../investigate_text_button';
 interface AddWidgetModeProps {
   mode: AddWidgetMode;
   onModeSelect: (mode: AddWidgetMode) => void;
-  assistantAvailable: boolean;
 }
 
-export function AddWidgetModeSelector({
-  mode,
-  onModeSelect,
-  assistantAvailable,
-}: AddWidgetModeProps) {
+export function AddWidgetModeSelector({ mode, onModeSelect }: AddWidgetModeProps) {
   const items: Array<{ mode: AddWidgetMode; label: string; icon: string }> = [
-    ...(assistantAvailable
-      ? [
-          {
-            mode: AddWidgetMode.Assistant,
-            label: i18n.translate('xpack.investigateApp.addWidgetMode.assistant', {
-              defaultMessage: 'Assistant',
-            }),
-            icon: 'sparkles',
-          },
-        ]
-      : []),
     {
       mode: AddWidgetMode.Esql,
       label: i18n.translate('xpack.investigateApp.addWidgetMode.esql', { defaultMessage: 'ES|QL' }),

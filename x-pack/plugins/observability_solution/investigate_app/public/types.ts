@@ -21,18 +21,12 @@ import type {
 } from '@kbn/investigate-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
-  ObservabilityAIAssistantPublicSetup,
-  ObservabilityAIAssistantPublicStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { SloPublicStart } from '@kbn/slo-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { ApmPluginStart, ApmPluginSetup } from '@kbn/apm-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -40,7 +34,6 @@ export interface ConfigSchema {}
 
 export interface InvestigateAppSetupDependencies {
   investigate: InvestigatePublicSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
@@ -48,16 +41,13 @@ export interface InvestigateAppSetupDependencies {
   embeddable: EmbeddableSetup;
   contentManagement: {};
   datasetQuality: DatasetQualityPluginSetup;
-  slo: {};
   unifiedSearch: {};
   uiActions: UiActionsSetup;
   security: SecurityPluginSetup;
-  apm: ApmPluginSetup;
 }
 
 export interface InvestigateAppStartDependencies {
   investigate: InvestigatePublicStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
@@ -65,11 +55,9 @@ export interface InvestigateAppStartDependencies {
   embeddable: EmbeddableStart;
   contentManagement: ContentManagementPublicStart;
   datasetQuality: DatasetQualityPluginStart;
-  slo: SloPublicStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
-  apm: ApmPluginStart;
 }
 
 export interface InvestigateAppPublicSetup {}

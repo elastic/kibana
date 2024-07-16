@@ -13,7 +13,6 @@ import type {
   OnWidgetAdd,
   WorkflowBlock,
 } from '@kbn/investigate-plugin/public';
-
 import { assertNever } from '@kbn/std';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
@@ -21,13 +20,11 @@ import { AddWidgetMode } from '../../constants/add_widget_mode';
 import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 import { AddFromLibraryButton } from '../add_from_library_button';
 import { AddWidgetModeSelector } from '../add_widget_mode_selector';
-import { AssistantWidgetControl } from '../assistant_widget_control';
 import { EsqlWidgetControl } from '../esql_widget_control';
 import { NoteWidgetControl } from '../note_widget_control';
 
 type AddWidgetUIProps = {
   user: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  assistantAvailable: boolean;
   onWidgetAdd: OnWidgetAdd;
   revision: InvestigationRevision;
   start: Moment;
@@ -64,16 +61,6 @@ function getControlsForMode({
         />
       );
 
-    case AddWidgetMode.Assistant:
-      return (
-        <AssistantWidgetControl
-          onWidgetAdd={onWidgetAdd}
-          revision={revision}
-          start={start}
-          end={end}
-        />
-      );
-
     case AddWidgetMode.Note:
       return <NoteWidgetControl user={user} onWidgetAdd={onWidgetAdd} />;
 
@@ -84,7 +71,6 @@ function getControlsForMode({
 
 export function AddWidgetUI({
   user,
-  assistantAvailable,
   onWidgetAdd,
   revision,
   start,
@@ -94,7 +80,7 @@ export function AddWidgetUI({
   timeRange,
   workflowBlocks,
 }: AddWidgetUIProps) {
-  const [mode, setMode] = useState(AddWidgetMode.Assistant);
+  const [mode, setMode] = useState(AddWidgetMode.Note);
 
   const workflowBlocksControl = useWorkflowBlocks({
     start: start.toISOString(),
@@ -130,7 +116,6 @@ export function AddWidgetUI({
               onModeSelect={(nextMode) => {
                 setMode(() => nextMode);
               }}
-              assistantAvailable={assistantAvailable}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

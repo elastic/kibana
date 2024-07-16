@@ -11,7 +11,6 @@ import type { InvestigateAppSetupDependencies, InvestigateAppStartDependencies }
 import { registerEmbeddableWidget } from './embeddable_widget/register_embeddable_widget';
 import { registerEsqlWidget } from './esql_widget/register_esql_widget';
 import { registerNoteWidget } from './note_widget';
-import { registerAssistantWidgets } from './register_assistant_widgets';
 
 export interface RegisterWidgetOptions {
   dependencies: {
@@ -23,7 +22,6 @@ export interface RegisterWidgetOptions {
 }
 
 export function registerWidgets(options: RegisterWidgetOptions) {
-  registerAssistantWidgets(options);
   registerEsqlWidget(options);
   registerEmbeddableWidget(options);
   registerNoteWidget(options);

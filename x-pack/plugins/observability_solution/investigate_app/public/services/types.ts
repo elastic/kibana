@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { AssistantService } from './assistant/types';
 import type { EsqlService } from './esql';
 
 export interface InvestigateAppServices {
   esql: EsqlService;
-  assistant: AssistantService;
 }

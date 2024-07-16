@@ -293,7 +293,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 workflowBlocks={blocks}
                 user={user}
                 revision={revision}
-                assistantAvailable={true}
                 start={range.start}
                 end={range.end}
                 filters={revision.parameters.filters}

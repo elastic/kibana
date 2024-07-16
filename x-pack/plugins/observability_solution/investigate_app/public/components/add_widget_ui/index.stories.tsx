@@ -30,7 +30,6 @@ export default meta;
 const defaultStory: Story = {
   args: {
     props: {
-      assistantAvailable: true,
       start: moment().subtract(15, 'minutes'),
       end: moment(),
       onWidgetAdd: async () => {},

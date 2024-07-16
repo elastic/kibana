@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { css } from '@emotion/css';
 import {
   AppMountParameters,
   APP_WRAPPER_CLASS,
@@ -19,8 +20,6 @@ import type { Logger } from '@kbn/logging';
 import { once } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { css } from '@emotion/css';
-import { createCallInvestigateAppAPI } from './api';
 import type { InvestigateAppServices } from './services/types';
 import type {
   ConfigSchema,
@@ -29,10 +28,6 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
-
-const getCreateAssistantService = once(() =>
-  import('./services/assistant').then((m) => m.createAssistantService)
-);
 
 const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 
@@ -54,8 +49,6 @@ export class InvestigateAppPlugin
     coreSetup: CoreSetup<InvestigateAppStartDependencies, InvestigateAppPublicStart>,
     pluginsSetup: InvestigateAppSetupDependencies
   ): InvestigateAppPublicSetup {
-    const apiClient = createCallInvestigateAppAPI(coreSetup);
-
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
       title: i18n.translate('xpack.investigateApp.appTitle', {
@@ -76,16 +69,10 @@ export class InvestigateAppPlugin
       ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
-        const [
-          { Application },
-          [coreStart, pluginsStart],
-          createEsqlService,
-          createAssistantService,
-        ] = await Promise.all([
+        const [{ Application }, [coreStart, pluginsStart], createEsqlService] = await Promise.all([
           import('./application'),
           coreSetup.getStartServices(),
           getCreateEsqlService(),
-          getCreateAssistantService(),
         ]);
 
         const services: InvestigateAppServices = {
@@ -93,16 +80,6 @@ export class InvestigateAppPlugin
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             lens: pluginsStart.lens,
-          }),
-          assistant: createAssistantService({
-            contentManagement: pluginsStart.contentManagement,
-            embeddable: pluginsStart.embeddable,
-            observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-            datasetQuality: pluginsStart.datasetQuality,
-            dataViews: pluginsStart.dataViews,
-            security: pluginsStart.security,
-            apiClient,
-            logger: this.logger,
           }),
         };
 
@@ -141,8 +118,7 @@ export class InvestigateAppPlugin
         pluginsStartPromise,
         import('./widgets/register_widgets').then((m) => m.registerWidgets),
         getCreateEsqlService(),
-        getCreateAssistantService(),
-      ]).then(([pluginsStart, registerWidgets, createEsqlService, createAssistantService]) => {
+      ]).then(([pluginsStart, registerWidgets, createEsqlService]) => {
         registerWidgets({
           dependencies: {
             setup: pluginsSetup,
@@ -153,16 +129,6 @@ export class InvestigateAppPlugin
               data: pluginsStart.data,
               dataViews: pluginsStart.dataViews,
               lens: pluginsStart.lens,
-            }),
-            assistant: createAssistantService({
-              contentManagement: pluginsStart.contentManagement,
-              embeddable: pluginsStart.embeddable,
-              observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-              datasetQuality: pluginsStart.datasetQuality,
-              dataViews: pluginsStart.dataViews,
-              security: pluginsStart.security,
-              apiClient,
-              logger: this.logger,
             }),
           },
           registerWidget,

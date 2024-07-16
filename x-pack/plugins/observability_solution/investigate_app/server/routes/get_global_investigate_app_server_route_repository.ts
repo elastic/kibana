@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { assistantRoutes } from './assistant/route';
-
 export function getGlobalInvestigateAppServerRouteRepository() {
-  return {
-    ...assistantRoutes,
-  };
+  return {};
 }
 
 export type InvestigateAppServerRouteRepository = ReturnType<

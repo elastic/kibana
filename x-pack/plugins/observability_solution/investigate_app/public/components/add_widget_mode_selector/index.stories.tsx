@@ -21,8 +21,7 @@ export default meta;
 
 const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {
-    mode: AddWidgetMode.Assistant,
-    assistantAvailable: true,
+    mode: AddWidgetMode.Note,
   },
   render: (props) => {
     return (
