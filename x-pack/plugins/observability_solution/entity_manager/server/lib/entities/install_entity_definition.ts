@@ -133,7 +133,7 @@ export async function installBuiltInEntityDefinitions({
 
     const definition = installedDefinitions[0];
     // verify current installation
-    if (!definition.state.installed || semver.lt(definition.version, builtInDefinition.version)) {
+    if (!definition.state.installed || semver.neq(definition.version, builtInDefinition.version)) {
       logger.debug(
         `Detected partial or outdated installation of definition [${definition.id}] v${definition.version}, reinstalling v${builtInDefinition.version}`
       );
