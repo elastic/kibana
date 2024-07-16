@@ -15,8 +15,8 @@ export interface EntityManagerEnablementContextValue {
   entityManagerEnablementStatus: ENTITY_FETCH_STATUS;
   isEnablementPending: boolean;
   refetch: () => void;
-  userServiceInventoryView: ServiceInventoryView;
-  setUserServiceInventoryView: (view: ServiceInventoryView) => void;
+  serviceInventoryViewLocalStorageSetting: ServiceInventoryView;
+  setServiceInventoryViewLocalStorageSetting: (view: ServiceInventoryView) => void;
   isEntityCentricExperienceViewEnabled: boolean;
 }
 
@@ -39,10 +39,8 @@ export function EntityManagerEnablementContextProvider({
   const { core } = useApmPluginContext();
   const { isEnabled: isEntityManagerEnabled, status, refetch } = useEntityManager();
 
-  const [userServiceInventoryView, setUserServiceInventoryView] = useLocalStorage(
-    serviceInventoryStorageKey,
-    ServiceInventoryView.classic
-  );
+  const [serviceInventoryViewLocalStorageSetting, setServiceInventoryViewLocalStorageSetting] =
+    useLocalStorage(serviceInventoryStorageKey, ServiceInventoryView.classic);
 
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
@@ -51,7 +49,7 @@ export function EntityManagerEnablementContextProvider({
 
   const isEntityCentricExperienceViewEnabled =
     isEntityManagerEnabled &&
-    userServiceInventoryView === ServiceInventoryView.entity &&
+    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity &&
     isEntityCentricExperienceSettingEnabled;
 
   return (
@@ -61,8 +59,8 @@ export function EntityManagerEnablementContextProvider({
         entityManagerEnablementStatus: status,
         isEnablementPending: status === ENTITY_FETCH_STATUS.LOADING,
         refetch,
-        userServiceInventoryView,
-        setUserServiceInventoryView,
+        serviceInventoryViewLocalStorageSetting,
+        setServiceInventoryViewLocalStorageSetting,
         isEntityCentricExperienceViewEnabled,
       }}
     >

@@ -39,7 +39,7 @@ export function EntityEnablement() {
   const {
     isEnablementPending,
     refetch,
-    setUserServiceInventoryView,
+    setServiceInventoryViewLocalStorageSetting,
     isEntityCentricExperienceViewEnabled,
   } = useEntityManagerEnablementContext();
 
@@ -47,7 +47,7 @@ export function EntityEnablement() {
   const [isLoading, setIsLoading] = useToggle(false);
 
   const handleRestoreView = async () => {
-    setUserServiceInventoryView(ServiceInventoryView.classic);
+    setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.classic);
     setsIsFeedbackModalVisible(true);
   };
 
@@ -57,7 +57,7 @@ export function EntityEnablement() {
       const response = await entityManager.entityClient.enableManagedEntityDiscovery();
       if (response.success) {
         setIsLoading(false);
-        setUserServiceInventoryView(ServiceInventoryView.entity);
+        setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
         refetch();
       }
 
