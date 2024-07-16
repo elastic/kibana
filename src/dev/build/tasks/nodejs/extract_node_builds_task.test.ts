@@ -35,6 +35,15 @@ expect.addSnapshotSerializer(
   )
 );
 
+// The node variant may be overriden by an environment variable,
+// to provide test coverage against pointer-compression
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (s) => typeof s === 'string' && Boolean(s.match(/(glibc-217|pointer-compression)/)),
+    (s) => s.replace('glibc-217', '<node variant>').replace('pointer-compression', '<node variant>')
+  )
+);
+
 async function setup() {
   const config = await Config.create({
     isRelease: true,
@@ -91,15 +100,15 @@ it('runs expected fs operations', async () => {
       ],
       "untar": Array [
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64,
           Object {
             "strip": 1,
           },
@@ -119,29 +128,15 @@ it('runs expected fs operations', async () => {
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/pointer-compression/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/pointer-compression/linux-x64,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-arm64,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/pointer-compression/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/pointer-compression/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64,
           Object {
             "strip": 1,
           },
