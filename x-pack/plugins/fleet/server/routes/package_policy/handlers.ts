@@ -66,7 +66,10 @@ import {
   canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
+  sendEvent,
+  getTelemetryEvent,
 } from './utils';
+import { IntegrationPoliciesEvent } from '../../telemetry/types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -239,18 +242,18 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
-
+  let telemetryEvent: IntegrationPoliciesEvent;
   if ('output_id' in newPolicy) {
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
     delete newPolicy.output_id;
   }
   const spaceId = fleetContext.spaceId;
+  const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
   try {
     if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
       throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
     }
 
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
     if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
       throw new PackagePolicyRequestError(errorMessage);
     }
@@ -298,6 +301,17 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       request
     );
 
+    if (canUseReusablePolicies && (newPolicy.policy_ids ?? []).length > 1) {
+      telemetryEvent = getTelemetryEvent({
+        id: packagePolicy.id,
+        policyIds: packagePolicy.policy_ids,
+        name: packagePolicy.name,
+        pkgName: pkg?.name ? pkg.name : '',
+        version: pkg?.version,
+      });
+      sendEvent(telemetryEvent);
+    }
+
     return response.ok({
       body: {
         item:
@@ -326,6 +340,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           esClient,
         });
       }
+    }
+
+    if (canUseReusablePolicies && (newPolicy.policy_ids ?? []).length > 1) {
+      sendEvent({
+        ...telemetryEvent!,
+        errorMessage: error.message,
+      });
     }
 
     if (error.statusCode) {
@@ -363,6 +384,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       });
     }
   }
+  const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+  let telemetryEvent: IntegrationPoliciesEvent;
 
   try {
     const { force, package: pkg, ...body } = request.body;
@@ -370,7 +393,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     if ('output_id' in body) {
       delete body.output_id;
     }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -416,7 +438,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+
     if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
       throw new PackagePolicyRequestError(errorMessage);
     }
@@ -433,6 +455,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       { user, force },
       packagePolicy.package?.version
     );
+
+    if (canUseReusablePolicies && (newData.policy_ids ?? []).length > 1) {
+      telemetryEvent = getTelemetryEvent({
+        id: `${newData?.id}` || packagePolicy.id,
+        policyIds: newData.policy_ids,
+        name: newData.name,
+        pkgName: pkg?.name ? pkg.name : '',
+        version: pkg?.version,
+      });
+      sendEvent(telemetryEvent);
+    }
+
     return response.ok({
       body: {
         item:
@@ -443,6 +477,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     });
   } catch (error) {
     if (error.statusCode) {
+      if (canUseReusablePolicies && (request.body.policy_ids ?? []).length > 1) {
+        sendEvent({
+          ...telemetryEvent!,
+          errorMessage: error.message,
+        });
+      }
       return response.customError({
         statusCode: error.statusCode,
         body: { message: error.message },

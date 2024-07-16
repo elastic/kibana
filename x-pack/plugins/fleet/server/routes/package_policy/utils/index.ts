@@ -10,6 +10,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { CreatePackagePolicyRequestSchema, PackagePolicyInput } from '../../../types';
 import { appContextService, licenseService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
+import type { IntegrationPoliciesEvent } from '../../../telemetry/types';
+import { sendIntegrationPoliciesTelemetryEvents } from '../../../services/event_sender';
 
 export function isSimplifiedCreatePackagePolicyRequest(
   body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
@@ -52,4 +54,41 @@ export function canUseMultipleAgentPolicies() {
       ? 'Reusable integration policies are only available with an Enterprise license'
       : 'Reusable integration policies are not supported',
   };
+}
+
+export function getTelemetryEvent({
+  id,
+  policyIds,
+  name,
+  pkgName,
+  version,
+}: {
+  id: string;
+  policyIds: string[];
+  name?: string;
+  pkgName: string;
+  version?: string;
+}): IntegrationPoliciesEvent {
+  const sharedByPoliciesCount = policyIds.length > 0 ? policyIds.length : 0;
+  return {
+    shared: {
+      integrations: [
+        {
+          id,
+          pkgName,
+          sharedByPoliciesCount,
+          version,
+          name,
+        },
+      ],
+    },
+  };
+}
+
+export function sendEvent(telemetryEvent: IntegrationPoliciesEvent) {
+  sendIntegrationPoliciesTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    telemetryEvent
+  );
 }

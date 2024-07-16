@@ -32,14 +32,14 @@ export interface PackageUpdateEvent extends BaseTelemetryEvent {
 }
 
 interface SharedIntegrations {
-  name: string;
+  id: string;
+  name?: string;
   pkgName: string;
   version?: string;
   sharedByPoliciesCount: number;
 }
 export interface IntegrationPoliciesEvent extends BaseTelemetryEvent {
-  shared: {
-    totalCount: number;
+  shared?: {
     integrations: SharedIntegrations[];
   };
 }
