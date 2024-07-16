@@ -898,13 +898,19 @@ export const createDatasetQualityControllerStateMachine = ({
       },
       assertBreakdownFieldIsEcs: async (context) => {
         if (context.flyout.breakdownField) {
-          const client = await plugins.fieldsMetadata.getClient();
-          const { fields } = await client.find({
-            attributes: ['source'],
-            fieldNames: [context.flyout.breakdownField],
-          });
+          // This timeout is to avoid a runtime error that randomly happens on breakdown field change
+          // TypeError: Cannot read properties of undefined (reading 'timeFieldName')
+          return new Promise((res) =>
+            setTimeout(async () => {
+              const client = await plugins.fieldsMetadata.getClient();
+              const { fields } = await client.find({
+                attributes: ['source'],
+                fieldNames: [context.flyout.breakdownField!],
+              });
 
-          return fields[context.flyout.breakdownField]?.source === 'ecs';
+              res(fields[context.flyout.breakdownField!]?.source === 'ecs');
+            }, 200)
+          );
         }
 
         return true;
