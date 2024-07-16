@@ -205,7 +205,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
             return [
               // APM navigation
               {
-                label: 'APM',
+                label: 'Applications',
                 sortKey: 400,
                 entries: [
                   {
