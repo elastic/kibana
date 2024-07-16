@@ -24,7 +24,7 @@ interface Props {
   index: number;
   actionTypeId: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  refetchCurrentConversation: () => void;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: () => void;
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;

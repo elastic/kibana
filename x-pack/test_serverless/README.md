@@ -144,20 +144,20 @@ describe("my test suite", async function() {
 #### API integration test example
 
 Recommendations:
-- in each test file top level `describe` suite should start with `createApiKeyForRole` call in `before` hook
-- don't forget to invalidate api key using `invalidateApiKeyForRole` in `after` hook
+- in each test file top level `describe` suite should start with `createM2mApiKeyWithRoleScope` call in `before` hook
+- don't forget to invalidate api key using `invalidateApiKeyWithRoleScope` in `after` hook
 - make api calls using `supertestWithoutAuth` with generated api key header
 
 ```
 describe("my test suite", async function() {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
       commonRequestHeader = svlCommonApi.getCommonRequestHeader();
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyWithRoleScope(roleAuthc);
     });
 
     it(''test step', async () => {
