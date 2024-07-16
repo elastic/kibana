@@ -184,7 +184,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         await findByTestId('range-slider-control-invalid-append-myControl1');
       });
@@ -202,7 +202,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         const minInput = await findByTestId('rangeSlider__lowerBoundFieldNumber');
         expect(minInput).toHaveAttribute('placeholder', String(DEFAULT_MIN));
