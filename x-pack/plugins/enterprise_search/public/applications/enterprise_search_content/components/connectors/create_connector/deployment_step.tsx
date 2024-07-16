@@ -33,7 +33,6 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({ title }) => {
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
-        {/* Configuration */}
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="m">

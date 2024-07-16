@@ -35,6 +35,8 @@ import {
 import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
 
+import connectorLogo from './assets/connector-logo.svg';
+
 interface FinishUpStepProps {
   title: string;
 }
@@ -70,7 +72,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
-        {/* Configuration */}
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="m">
@@ -159,7 +160,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="machineLearningApp" />}
+                    icon={<EuiIcon size="xxl" type={connectorLogo} />}
                     titleSize="s"
                     title="Manage your connector"
                     description="Now you can manage your connector, schedule a sync and much more"
