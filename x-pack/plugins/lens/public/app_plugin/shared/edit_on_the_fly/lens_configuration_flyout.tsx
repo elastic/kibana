@@ -516,6 +516,13 @@ export function LensEditConfigurationFlyout({
             >
               <EuiAccordion
                 id="esql-results"
+                css={css`
+                  .euiAccordion__children {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                  }
+                `}
                 buttonContent={
                   <EuiTitle
                     size="xxs"
