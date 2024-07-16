@@ -23,6 +23,7 @@ import { findIntervalForMetrics } from './lib/find_interval_for_metrics';
 import { query } from '../../lib/metrics';
 import { queryTotalGroupings } from './lib/query_total_groupings';
 import { transformSeries } from './lib/transform_series';
+import { METRICS_EXPLORER_API_MAX_METRICS } from '../../../common/constants';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -41,6 +42,12 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
         metricsExplorerRequestBodyRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
+
+      if (options.metrics.length > METRICS_EXPLORER_API_MAX_METRICS) {
+        throw Boom.badRequest(
+          `'metrics' size is greater than maximum of ${METRICS_EXPLORER_API_MAX_METRICS} allowed.`
+        );
+      }
 
       const client = createSearchClient(requestContext, framework);
       const interval = await findIntervalForMetrics(client, options);
