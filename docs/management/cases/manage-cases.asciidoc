@@ -33,7 +33,7 @@ text.
 You can add users only if they meet the necessary <<setup-cases,prerequisites>>.
 
 . If you defined any custom fields, they appear in the *Additional fields* section.
-Check out <<case-custom-fields>>. preview:[]
+Check out <<case-custom-fields>>. added:[8.16.0]
 
 . For the *External incident management system*, select a connector. For more
 information, refer to <<case-connectors>>.
