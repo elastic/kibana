@@ -171,8 +171,10 @@ export function ApmMainTemplate({
         children: (
           <EuiFlexGroup direction="column">
             {isEntityCentricExperienceSettingEnabled &&
-              showEnablementCallout &&
-              selectedNavButton === 'allServices' && <EntityEnablement />}
+            showEnablementCallout &&
+            selectedNavButton === 'allServices' ? (
+              <EntityEnablement />
+            ) : null}
             {showServiceGroupsNav && selectedNavButton && (
               <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
             )}
