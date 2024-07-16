@@ -8,6 +8,7 @@
 
 import { difference } from 'lodash';
 import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
+import { ErrorReporter } from '../../utils';
 import { TaskReporter } from '../../utils/task_reporter';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
 
@@ -16,11 +17,13 @@ export const removeUnusedTranslations = ({
   namespacedTranslatedMessages,
   filterNamespaces,
   taskReporter,
+  errorReporter,
 }: {
   context: I18nCheckTaskContext;
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
   filterNamespaces?: string[];
   taskReporter: TaskReporter;
+  errorReporter: ErrorReporter;
 }) => {
   for (const [namespace, translatedMessages] of namespacedTranslatedMessages) {
     if (filterNamespaces) {
@@ -38,11 +41,17 @@ export const removeUnusedTranslations = ({
       taskReporter.log(`The whole namespace ${namespace} has been removed from the codebase.`);
       namespacedTranslatedMessages.delete(namespace);
     } else {
-      const updatedMessages = removeUnusedMessages(
+      const { updatedMessages, unusedMessages } = removeUnusedMessages(
         extractedMessages,
-        translatedMessages,
-        taskReporter
+        translatedMessages
       );
+
+      unusedMessages.forEach((unusedMessage) => {
+        const message = `Found No longer used message with id ${unusedMessage[0]}.`;
+        taskReporter.log(message);
+        errorReporter.report(message);
+      });
+
       namespacedTranslatedMessages.set(namespace, updatedMessages);
     }
   }
@@ -50,24 +59,27 @@ export const removeUnusedTranslations = ({
   return namespacedTranslatedMessages;
 };
 
-export const removeUnusedMessages = (
+const removeUnusedMessages = (
   extractedMessages: MessageDescriptor[],
-  translationMessages: Array<[string, string | { message: string }]>,
-  taskReporter: TaskReporter
-): Array<[string, string | { message: string }]> => {
+  translationMessages: Array<[string, string | { message: string }]>
+): Record<'unusedMessages' | 'updatedMessages', Array<[string, string | { message: string }]>> => {
   const extractedMessagesIds = [...extractedMessages].map(({ id }) => id);
   const translationMessagesIds = [...translationMessages.map(([id]) => id)];
   const unusedTranslations = difference(translationMessagesIds, extractedMessagesIds);
+  const unusedMessages: Array<[string, string | { message: string }]> = [];
+  let updatedMessages = translationMessages;
 
   if (unusedTranslations.length > 0) {
-    return translationMessages.filter(([id]) => {
-      const isUnused = unusedTranslations.find((unusedTranslationId) => unusedTranslationId === id);
-      if (isUnused) {
-        taskReporter.log(`Message with Id ${id} is no longer used.`);
+    updatedMessages = translationMessages.filter(([id]) => {
+      const unusedMessage = unusedTranslations.find(
+        (unusedTranslationId) => unusedTranslationId === id
+      );
+      if (unusedMessage) {
+        unusedMessages.push([id, unusedMessage]);
       }
-      return !isUnused;
+      return !unusedMessage;
     });
   }
 
-  return translationMessages;
+  return { updatedMessages, unusedMessages };
 };

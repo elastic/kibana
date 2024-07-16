@@ -10,16 +10,19 @@ import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
 import { verifyMessageDescriptor } from '../../extractors/formatjs';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
 import { TaskReporter } from '../../utils/task_reporter';
+import { ErrorReporter } from '../../utils';
 export const removeOutdatedTranslations = ({
   context,
   namespacedTranslatedMessages,
   filterNamespaces,
   taskReporter,
+  errorReporter,
 }: {
   context: I18nCheckTaskContext;
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
   filterNamespaces?: string[];
   taskReporter: TaskReporter;
+  errorReporter: ErrorReporter;
 }) => {
   for (const [namespace, translatedMessages] of namespacedTranslatedMessages) {
     if (filterNamespaces) {
@@ -38,11 +41,17 @@ export const removeOutdatedTranslations = ({
       namespacedTranslatedMessages.delete(namespace);
       taskReporter.log(`The whole namespace ${namespace} has been removed from the codebase.`);
     } else {
-      const updatedMessages = removeOutdatedMessages(
+      const { updatedMessages, outdatedMessages } = removeOutdatedMessages(
         extractedMessages,
-        translatedMessages,
-        taskReporter
+        translatedMessages
       );
+
+      outdatedMessages.forEach((outdatedMessage) => {
+        const message = `Found incompatible message with id ${outdatedMessage[0]}.`;
+        taskReporter.log(message);
+        errorReporter.report(message);
+      });
+
       namespacedTranslatedMessages.set(namespace, updatedMessages);
     }
   }
@@ -50,12 +59,17 @@ export const removeOutdatedTranslations = ({
   return namespacedTranslatedMessages;
 };
 
-export const removeOutdatedMessages = (
+const removeOutdatedMessages = (
   extractedMessages: MessageDescriptor[],
-  translationMessages: Array<[string, string | { message: string }]>,
-  taskReporter: TaskReporter
-): Array<[string, string | { message: string }]> => {
-  return translationMessages.filter(([translatedId, translatedMessage]) => {
+  translationMessages: Array<[string, string | { message: string }]>
+): Record<
+  'outdatedMessages' | 'updatedMessages',
+  Array<[string, string | { message: string }]>
+> => {
+  const outdatedMessages: Array<[string, string | { message: string }]> = [];
+  let updatedMessages = translationMessages;
+
+  updatedMessages = translationMessages.filter(([translatedId, translatedMessage]) => {
     const messageDescriptor = extractedMessages.find(({ id }) => id === translatedId);
     if (!messageDescriptor?.hasValuesObject) {
       return true;
@@ -67,9 +81,11 @@ export const removeOutdatedMessages = (
       );
       return true;
     } catch (err) {
-      taskReporter.log(`Found an incompatible message with id ${translatedId}`);
+      outdatedMessages.push([translatedId, translatedMessage]);
       // failed to verify message against latest descriptor. remove from file.
       return false;
     }
   });
+
+  return { updatedMessages, outdatedMessages };
 };

@@ -60,6 +60,23 @@ function isMemberMethodFormatMessageCall(typescript: TypeScript, node: ts.CallEx
   return typescript.isIdentifier(method) && fnNames.has(method.text);
 }
 
+function updateDefaultMessageobject(
+  typescript: TypeScript,
+  factory: ts.NodeFactory,
+  defaultMessageProp: ts.PropertyAssignment
+) {
+  if (typescript.isBinaryExpression(defaultMessageProp.initializer)) {
+    const [result, isStatic] = evaluateStringConcat(typescript, defaultMessageProp.initializer);
+    if (!isStatic) {
+      throw new Error('Unexpected defaultMessage with runtime evaluated variables found.');
+    }
+    const stringLiteral = factory.createStringLiteral(result);
+    return factory.createPropertyAssignment('defaultMessage', stringLiteral);
+  }
+
+  return defaultMessageProp;
+}
+
 function setAttributesInObject(
   typescript: TypeScript,
   factory: ts.NodeFactory,
@@ -78,7 +95,11 @@ function setAttributesInObject(
       typescript.isIdentifier(prop.name) &&
       MESSAGE_DESC_KEYS.includes(prop.name.text as keyof MessageDescriptor)
     ) {
-      newProps.push(prop);
+      if (prop.name.escapedText === 'defaultMessage') {
+        newProps.push(updateDefaultMessageobject(typescript, factory, prop));
+      } else {
+        newProps.push(prop);
+      }
       continue;
     }
     if (typescript.isPropertyAssignment(prop)) {
@@ -121,6 +142,7 @@ export function extractMessagesFromCallExpression(
     }
   } else if (isMemberMethodI18nTranslateCall(typescript, node)) {
     const [idArgumentNode, descriptorsObj, ...restArgs] = node.arguments;
+
     if (
       typescript.isStringLiteral(idArgumentNode) &&
       typescript.isObjectLiteralExpression(descriptorsObj)
@@ -246,6 +268,23 @@ export function extractMessageDescriptor(
           case 'description':
             msg.description = initializer.text;
             break;
+        }
+      }
+      // message binary 'a' + `b` + ...
+      else if (typescript.isBinaryExpression(initializer)) {
+        const [result, isStatic] = evaluateStringConcat(typescript, initializer);
+        if (isStatic) {
+          switch (name.text) {
+            case 'id':
+              msg.id = result;
+              break;
+            case 'defaultMessage':
+              msg.defaultMessage = result;
+              break;
+            case 'description':
+              msg.description = result;
+              break;
+          }
         }
       }
       // {id: `id`}
@@ -409,10 +448,10 @@ function evaluateStringConcat(
   node: ts.BinaryExpression
 ): [result: string, isStaticallyEvaluatable: boolean] {
   const { right, left } = node;
-  if (!typescript.isStringLiteral(right)) {
+  if (!typescript.isStringLiteral(right) && !typescript.isNoSubstitutionTemplateLiteral(right)) {
     return ['', false];
   }
-  if (typescript.isStringLiteral(left)) {
+  if (typescript.isStringLiteral(left) || typescript.isNoSubstitutionTemplateLiteral(left)) {
     return [left.text + right.text, true];
   }
   if (typescript.isBinaryExpression(left)) {

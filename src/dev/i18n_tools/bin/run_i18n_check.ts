@@ -10,7 +10,7 @@ import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { ErrorReporter } from '../utils';
+import { isFailError } from '@kbn/dev-cli-errors';
 import { I18nCheckTaskContext, MessageDescriptor } from '../types';
 
 import {
@@ -144,8 +144,8 @@ run(
       });
     } catch (error) {
       process.exitCode = 1;
-      if (error instanceof ErrorReporter) {
-        error.errors.forEach((e: string | Error) => log.error(e));
+
+      if (isFailError(error)) {
         reportTime(runStartTime, 'error', {
           success: false,
         });

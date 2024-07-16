@@ -175,6 +175,32 @@ describe('formatJS Runner', () => {
       `);
     });
 
+    it('parses complex cases for i18n translated as expected', async () => {
+      const { extractedMessages } = await formatJsFixtureRunner('complex_i18n_cases.ts');
+      expect(extractedMessages).toMatchInlineSnapshot(`
+        Map {
+          "Multiple_Binary_strings_with_No_Substitution_Template_Literal" => Object {
+            "defaultMessage": "{objectCount, plural, one {# object} other {# objects}} with unknown types {objectCount, plural, one {was} other {were}} found in Kibana system indices. Upgrading with unknown savedObject types is no longer supported. To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the Kibana indices",
+            "end": -1,
+            "file": "complex_i18n_cases.ts",
+            "hasValuesObject": true,
+            "id": "Multiple_Binary_strings_with_No_Substitution_Template_Literal",
+            "start": -1,
+            "valuesKeys": Array [
+              "objectCount",
+            ],
+          },
+          "more_than_3_No_Substitution_Template_Literals" => Object {
+            "defaultMessage": "The UI theme that the Kibana UI should use. Set to 'enabled' or 'disabled' to enable or disable the dark theme. Set to 'system' to have the Kibana UI theme follow the system theme. A page refresh is required for the setting to be applied.",
+            "end": -1,
+            "file": "complex_i18n_cases.ts",
+            "id": "more_than_3_No_Substitution_Template_Literals",
+            "start": -1,
+          },
+        }
+      `);
+    });
+
     it('parses renamed i18n imports as expected', async () => {
       const { extractedMessages } = await formatJsFixtureRunner('renamed_i18n.ts');
       expect(extractedMessages).toMatchInlineSnapshot(`

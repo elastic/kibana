@@ -75,6 +75,7 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
                 filterNamespaces,
                 context,
                 taskReporter,
+                errorReporter,
               });
             }
             if (!ignoreIncompatible) {
@@ -84,17 +85,20 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
                 filterNamespaces,
                 context,
                 taskReporter,
+                errorReporter,
               });
             }
-            parent.title = fix
-              ? `Updating translation file`
-              : `Dry-run detected. No fixes will be commited to file.`;
+
+            parent.title = fix ? `Updating translation file` : `No fixes will be commited to file.`;
             if (fix) {
               await updateTranslationFile({
                 formats: translationInput.formats,
                 namespacedTranslatedMessages,
                 targetFilePath: filePath,
               });
+            } else if (errorReporter.hasErrors()) {
+              // only throw if --fix is not set (or dry-run)
+              throw errorReporter.throwErrors();
             }
           }
         },
