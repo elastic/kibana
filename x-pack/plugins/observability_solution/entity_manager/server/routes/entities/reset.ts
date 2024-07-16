@@ -12,6 +12,7 @@ import { EntitySecurityException } from '../../lib/entities/errors/entity_securi
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
 import {
+  stopAndDeleteHistoryBackfillTransform,
   stopAndDeleteHistoryTransform,
   stopAndDeleteLatestTransform,
 } from '../../lib/entities/stop_and_delete_transform';
@@ -25,12 +26,14 @@ import {
   createAndInstallLatestIngestPipeline,
 } from '../../lib/entities/create_and_install_ingest_pipeline';
 import {
+  createAndInstallHistoryBackfillTransform,
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from '../../lib/entities/create_and_install_transform';
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
+import { isBackfillEnabled } from '../../lib/entities/helpers/is_backfill_enabled';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -54,6 +57,9 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         // Delete the transform and ingest pipeline
         await stopAndDeleteHistoryTransform(esClient, definition, logger);
+        if (isBackfillEnabled(definition)) {
+          await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
+        }
         await stopAndDeleteLatestTransform(esClient, definition, logger);
         await deleteHistoryIngestPipeline(esClient, definition, logger);
         await deleteLatestIngestPipeline(esClient, definition, logger);
@@ -63,6 +69,9 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
         await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
         await createAndInstallLatestIngestPipeline(esClient, definition, logger);
         await createAndInstallHistoryTransform(esClient, definition, logger);
+        if (isBackfillEnabled(definition)) {
+          await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
+        }
         await createAndInstallLatestTransform(esClient, definition, logger);
         await startTransform(esClient, definition, logger);
 
