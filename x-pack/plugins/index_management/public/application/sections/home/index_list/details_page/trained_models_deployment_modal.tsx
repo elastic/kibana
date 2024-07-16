@@ -210,6 +210,7 @@ export function TrainedModelsDeploymentModal({
 
           <EuiSpacer size="s" />
           <EuiCheckbox
+            data-test-subj="allowForceSaveMappingsCheckbox"
             id="allowForceSaveMappings"
             checked={allowForceSaveMappings}
             onChange={() => setAllowForceSaveMappings(!allowForceSaveMappings)}
@@ -249,7 +250,12 @@ export function TrainedModelsDeploymentModal({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={forceSaveMappings} disabled={!allowForceSaveMappings}>
+            <EuiButton
+              fill
+              onClick={forceSaveMappings}
+              disabled={!allowForceSaveMappings}
+              data-test-subj="forceSaveMappingsButton"
+            >
               {i18n.translate(
                 'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsLabel',
                 {
