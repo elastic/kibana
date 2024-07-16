@@ -101,6 +101,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         updateAgentPolicies([]);
       }
     };
+    if (isLoading || selectedPolicyIds.length === 0) {
+      return;
+    }
     const agentPoliciesHaveAllSelectedIds = selectedPolicyIds.every((id) =>
       agentPolicies.map((policy) => policy.id).includes(id)
     );
@@ -110,7 +113,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       setSelectedAgentPolicyError(undefined);
       updateAgentPolicies(agentPolicies.filter((policy) => selectedPolicyIds.includes(policy.id)));
     }
-  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies]);
+  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies, isLoading]);
 
   // Try to select default agent policy
   useEffect(() => {
@@ -192,7 +195,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 <h3>
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupTitle"
-                    defaultMessage="Agent policy"
+                    defaultMessage="Agent policies"
                   />
                 </h3>
               </EuiTitle>
@@ -215,7 +218,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   <EuiFlexItem>
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
-                      defaultMessage="Agent policy"
+                      defaultMessage="Agent policies"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -241,7 +244,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 selectedPolicyIds.length === 0 ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
-                    defaultMessage="An agent policy is required."
+                    defaultMessage="At least one agent policy is required."
                   />
                 ) : someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage

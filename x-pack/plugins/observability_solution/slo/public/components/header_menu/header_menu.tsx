@@ -45,6 +45,15 @@ export function HeaderMenu(): React.ReactElement | null {
                 })}
               </EuiHeaderLink>
             )}
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/observability/annotations')}
+              iconType="brush"
+            >
+              {i18n.translate('xpack.slo.home.annotations', {
+                defaultMessage: 'Annotations',
+              })}
+            </EuiHeaderLink>
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>

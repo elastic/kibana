@@ -25,8 +25,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/features-plugin",
     "@kbn/share-plugin",
-    "@kbn/utility-types",
     "@kbn/deeplinks-management",
+    "@kbn/deeplinks-observability",
     "@kbn/ebt-tools",
   ],
   "exclude": ["target/**/*"]

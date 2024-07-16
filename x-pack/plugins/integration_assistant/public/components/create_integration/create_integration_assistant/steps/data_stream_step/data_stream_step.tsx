@@ -136,7 +136,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
     }, [packageNames, name]);
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
         <EuiFlexItem>
           <StepContentWrapper
             title={i18n.INTEGRATION_NAME_TITLE}
@@ -154,6 +154,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 >
                   <EuiFieldText
                     name="name"
+                    data-test-subj="nameInput"
                     value={name}
                     onChange={onChange.name}
                     isInvalid={invalidFields.name}
@@ -176,6 +177,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 <EuiFormRow label={i18n.DATA_STREAM_TITLE_LABEL}>
                   <EuiFieldText
                     name="dataStreamTitle"
+                    data-test-subj="dataStreamTitleInput"
                     value={integrationSettings?.dataStreamTitle ?? ''}
                     onChange={onChange.dataStreamTitle}
                   />
@@ -183,6 +185,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 <EuiFormRow label={i18n.DATA_STREAM_DESCRIPTION_LABEL}>
                   <EuiFieldText
                     name="dataStreamDescription"
+                    data-test-subj="dataStreamDescriptionInput"
                     value={integrationSettings?.dataStreamDescription ?? ''}
                     onChange={onChange.dataStreamDescription}
                   />
@@ -195,6 +198,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 >
                   <EuiFieldText
                     name="dataStreamName"
+                    data-test-subj="dataStreamNameInput"
                     value={dataStreamName}
                     onChange={onChange.dataStreamName}
                     isInvalid={invalidFields.dataStreamName}
@@ -203,15 +207,13 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 <EuiFormRow label={i18n.DATA_COLLECTION_METHOD_LABEL}>
                   <EuiSelect
                     name="dataCollectionMethod"
+                    data-test-subj="dataCollectionMethodInput"
                     options={InputTypeOptions}
                     value={integrationSettings?.inputType ?? ''}
                     onChange={onChange.inputType}
                   />
                 </EuiFormRow>
-                <SampleLogsInput
-                  integrationSettings={integrationSettings}
-                  setIntegrationSettings={setIntegrationSettings}
-                />
+                <SampleLogsInput integrationSettings={integrationSettings} />
               </EuiForm>
             </EuiPanel>
           </StepContentWrapper>

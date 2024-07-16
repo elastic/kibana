@@ -7,6 +7,7 @@
 
 export enum APIRoutes {
   GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
+  DELETE_INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
 }
 
 export interface SearchInferenceEndpointsConfigType {
