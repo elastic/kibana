@@ -11,19 +11,16 @@ import React, { useMemo } from 'react';
 import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { ControlStateManager } from '../../../types';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListStrings } from './options_list_strings';
 
 export const OptionsListPopoverEmptyMessage = ({
-  api,
-  stateManager,
   showOnlySelected,
 }: {
   showOnlySelected: boolean;
-  api: OptionsListComponentApi;
-  stateManager: ControlStateManager<OptionsListComponentState>;
 }) => {
+  const { api, stateManager } = useOptionsListContext();
+
   const [searchTechnique, searchStringValid, fieldSpec] = useBatchedPublishingSubjects(
     stateManager.searchTechnique,
     stateManager.searchStringValid,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import deepEqual from 'react-fast-compare';
 import {
   BehaviorSubject,
@@ -39,7 +39,33 @@ import {
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
-import { OptionsListControlApi, OptionsListControlState } from './types';
+import {
+  OptionsListComponentApi,
+  OptionsListComponentState,
+  OptionsListControlApi,
+  OptionsListControlState,
+  OptionsListDisplaySettings,
+} from './types';
+import { ControlStateManager } from '../../types';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
+export const OptionsListControlContext = React.createContext<
+  | {
+      api: OptionsListComponentApi;
+      stateManager: ControlStateManager<OptionsListComponentState>;
+      displaySettings: OptionsListDisplaySettings;
+    }
+  | undefined
+>(undefined);
+
+export const useOptionsListContext = () => {
+  const optionsListContext = useContext(OptionsListControlContext);
+  if (!optionsListContext)
+    throw new Error(
+      'No OptionsListControlContext.Provider found when calling useOptionsListContext.'
+    );
+  return optionsListContext;
+};
 
 export const getOptionsListControlFactory = ({
   core,
@@ -87,11 +113,11 @@ export const getOptionsListControlFactory = ({
       const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
 
       /** Creation options state - cannot currently be changed after creation, but need subjects for comparators */
-      const placeholder = new BehaviorSubject<string | undefined>(initialState.placeholder);
-      const hideActionBar = new BehaviorSubject<boolean | undefined>(initialState.hideActionBar);
-      const hideExclude = new BehaviorSubject<boolean | undefined>(initialState.hideExclude);
-      const hideExists = new BehaviorSubject<boolean | undefined>(initialState.hideExists);
-      const hideSort = new BehaviorSubject<boolean | undefined>(initialState.hideSort);
+      const placeholder$ = new BehaviorSubject<string | undefined>(initialState.placeholder);
+      const hideActionBar$ = new BehaviorSubject<boolean | undefined>(initialState.hideActionBar);
+      const hideExclude$ = new BehaviorSubject<boolean | undefined>(initialState.hideExclude);
+      const hideExists$ = new BehaviorSubject<boolean | undefined>(initialState.hideExists);
+      const hideSort$ = new BehaviorSubject<boolean | undefined>(initialState.hideSort);
 
       /** State that is reliant on fetching */
       const availableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(undefined);
@@ -279,11 +305,11 @@ export const getOptionsListControlFactory = ({
           sort: [sort$, (sort) => sort$.next(sort)],
 
           /** This state cannot be changed once the control is created */
-          placeholder: [placeholder, () => {}, () => true],
-          hideActionBar: [hideActionBar, () => {}, () => true],
-          hideExclude: [hideExclude, () => {}, () => true],
-          hideExists: [hideExists, () => {}, () => true],
-          hideSort: [hideSort, () => {}, () => true],
+          placeholder: [placeholder$, () => {}, () => true],
+          hideActionBar: [hideActionBar$, () => {}, () => true],
+          hideExclude: [hideExclude$, () => {}, () => true],
+          hideExists: [hideExists$, () => {}, () => true],
+          hideSort: [hideSort$, () => {}, () => true],
         }
       );
 
@@ -337,19 +363,12 @@ export const getOptionsListControlFactory = ({
         allowExpensiveQueries$,
       };
 
-      const displaySettings = {
-        placeholder: placeholder.getValue(),
-        hideActionBar: hideActionBar.getValue(),
-        hideExclude: hideExclude.getValue(),
-        hideExists: hideExists.getValue(),
-        hideSort: hideSort.getValue(),
-      };
-
       return {
         api,
-        Component: (controlPanelClassNames) => {
+        Component: ({ className: controlPanelClassName }) => {
           useEffect(() => {
             return () => {
+              /** On unmount, clean up all subscriptions */
               dataLoadingSubscription.unsubscribe();
               fetchSubscription.unsubscribe();
               fieldChangedSubscription.unsubscribe();
@@ -359,13 +378,26 @@ export const getOptionsListControlFactory = ({
             };
           }, []);
 
+          /** Get display settings */
+          const [placeholder, hideActionBar, hideExclude, hideExists, hideSort] =
+            useBatchedPublishingSubjects(
+              placeholder$,
+              hideActionBar$,
+              hideExclude$,
+              hideExists$,
+              hideSort$
+            );
+
           return (
-            <OptionsListControl
-              {...controlPanelClassNames}
-              stateManager={stateManager}
-              api={componentApi}
-              displaySettings={displaySettings}
-            />
+            <OptionsListControlContext.Provider
+              value={{
+                stateManager,
+                api: componentApi,
+                displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
+              }}
+            >
+              <OptionsListControl controlPanelClassName={controlPanelClassName} />
+            </OptionsListControlContext.Provider>
           );
         },
       };

@@ -14,24 +14,21 @@ import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { ControlStateManager } from '../../../types';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverSuggestionsProps {
-  api: OptionsListComponentApi;
-  stateManager: ControlStateManager<OptionsListComponentState>;
   showOnlySelected: boolean;
 }
 
 export const OptionsListPopoverSuggestions = ({
-  api,
-  stateManager,
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
+  const { api, stateManager } = useOptionsListContext();
+
   const [
     sort,
     searchString,
@@ -192,13 +189,7 @@ export const OptionsListPopoverSuggestions = ({
             fieldName,
             selectableOptions.length
           )}
-          emptyMessage={
-            <OptionsListPopoverEmptyMessage
-              api={api}
-              stateManager={stateManager}
-              showOnlySelected={showOnlySelected}
-            />
-          }
+          emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
             const key = changedOption.key ?? changedOption.label;
             setSelectableOptions(newSuggestions);

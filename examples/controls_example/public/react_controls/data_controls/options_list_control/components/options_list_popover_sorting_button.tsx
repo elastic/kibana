@@ -28,15 +28,8 @@ import {
   OptionsListSortBy,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '../../../../../common/options_list/suggestions_sorting';
-import { ControlStateManager } from '../../../types';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListStrings } from './options_list_strings';
-
-interface OptionsListSortingPopoverProps {
-  showOnlySelected: boolean;
-  api: OptionsListComponentApi;
-  stateManager: ControlStateManager<OptionsListComponentState>;
-}
 
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
@@ -58,10 +51,12 @@ const sortOrderOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export const OptionsListPopoverSortingButton = ({
-  api,
-  stateManager,
   showOnlySelected,
-}: OptionsListSortingPopoverProps) => {
+}: {
+  showOnlySelected: boolean;
+}) => {
+  const { api, stateManager } = useOptionsListContext();
+
   const fieldSpec = useStateFromPublishingSubject(api.fieldSpec);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);

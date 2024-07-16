@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 
@@ -23,29 +24,21 @@ import {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import classNames from 'classnames';
-import { ControlStateManager } from '../../../types';
+
 import { MIN_POPOVER_WIDTH } from '../constants';
-import {
-  OptionsListComponentApi,
-  OptionsListComponentState,
-  OptionsListDisplaySettings,
-} from '../types';
-import './options_list.scss';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from './options_list_strings';
 
+import './options_list.scss';
+
 export const OptionsListControl = ({
-  api,
-  stateManager,
-  displaySettings,
-  ...rest
+  controlPanelClassName,
 }: {
-  api: OptionsListComponentApi;
-  stateManager: ControlStateManager<OptionsListComponentState>;
-  displaySettings: OptionsListDisplaySettings;
+  controlPanelClassName: string;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
+  const { api, stateManager, displaySettings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
   const [
@@ -160,9 +153,7 @@ export const OptionsListControl = ({
       <EuiFilterButton
         badgeColor="success"
         iconType={loading ? 'empty' : 'arrowDown'}
-        className={classNames('optionsList--filterBtn', {
-          'optionsList--filterBtnPlaceholder': !hasSelections,
-        })}
+        className={'optionsList--filterBtn'}
         data-test-subj={`optionsList-control-${api.uuid}`}
         onClick={() => setPopoverOpen(!isPopoverOpen)}
         isSelected={isPopoverOpen}
@@ -182,7 +173,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth {...rest}>
+    <EuiFilterGroup fullWidth className={controlPanelClassName}>
       <EuiInputPopover
         id={popoverId}
         ownFocus
@@ -200,11 +191,7 @@ export const OptionsListControl = ({
           'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
         }}
       >
-        <OptionsListPopover
-          api={api}
-          stateManager={stateManager}
-          displaySettings={displaySettings}
-        />
+        <OptionsListPopover />
       </EuiInputPopover>
     </EuiFilterGroup>
   );

@@ -18,17 +18,22 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 
-import { OptionsListComponentApi } from '../types';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListStrings } from './options_list_strings';
 
-export const OptionsListPopoverInvalidSelections = ({ api }: { api: OptionsListComponentApi }) => {
-  const [fieldSpec, invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
-    api.fieldSpec,
+export const OptionsListPopoverInvalidSelections = () => {
+  const { api } = useOptionsListContext();
+
+  const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
     api.invalidSelections$,
     api.fieldFormatter
   );
+  const defaultPanelTitle = useStateFromPublishingSubject(api.defaultPanelTitle);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -79,7 +84,7 @@ export const OptionsListPopoverInvalidSelections = ({ api }: { api: OptionsListC
       </EuiTitle>
       <EuiSelectable
         aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
-          fieldSpec?.displayName ?? '',
+          defaultPanelTitle ?? '',
           invalidSelections.size
         )}
         options={selectableOptions}

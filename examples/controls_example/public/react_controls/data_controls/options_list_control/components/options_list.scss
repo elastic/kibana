@@ -1,6 +1,6 @@
 .optionsList__inputButtonOverride {
-   max-inline-size: 100% !important;
-   
+  max-inline-size: 100% !important;
+
   .euiButtonEmpty {
     border-end-start-radius: 0 !important;
     border-start-start-radius: 0 !important;
@@ -8,10 +8,8 @@
 }
 
 .optionsList--filterBtn {
-  &.optionsList--filterBtnPlaceholder {
-    color: $euiTextSubduedColor;
-    font-weight: $euiFontWeightRegular;
-  }
+  font-weight: $euiFontWeightRegular !important;
+  color: $euiTextSubduedColor !important;
 
   .optionsList--selectionText {
     flex-grow: 1;
@@ -23,6 +21,7 @@
   }
 
   .optionsList__filter {
+    color: $euiTextColor;
     font-weight: $euiFontWeightMedium;
   }
 

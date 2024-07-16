@@ -20,30 +20,21 @@ import {
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
-import { ControlStateManager } from '../../../types';
-import {
-  OptionsListComponentApi,
-  OptionsListComponentState,
-  OptionsListDisplaySettings,
-} from '../types';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
-  api: OptionsListComponentApi;
-  stateManager: ControlStateManager<OptionsListComponentState>;
-  displaySettings: OptionsListDisplaySettings;
 }
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
-  api,
-  stateManager,
-  displaySettings,
 }: OptionsListPopoverProps) => {
+  const { api, stateManager, displaySettings } = useOptionsListContext();
+
   const [
     searchString,
     searchTechnique,
@@ -154,11 +145,7 @@ export const OptionsListPopoverActionBar = ({
               </EuiFlexItem>
               {!displaySettings.hideSort && (
                 <EuiFlexItem grow={false}>
-                  <OptionsListPopoverSortingButton
-                    api={api}
-                    stateManager={stateManager}
-                    showOnlySelected={showOnlySelected}
-                  />
+                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

@@ -21,8 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { ControlStateManager } from '../../../types';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import { useOptionsListContext } from '../get_options_list_control_factory';
 import { OptionsListStrings } from './options_list_strings';
 
 const aggregationToggleButtons = [
@@ -38,13 +37,9 @@ const aggregationToggleButtons = [
   },
 ];
 
-export const OptionsListPopoverFooter = ({
-  api,
-  stateManager,
-}: {
-  api: OptionsListComponentApi;
-  stateManager: ControlStateManager<OptionsListComponentState>;
-}) => {
+export const OptionsListPopoverFooter = () => {
+  const { api, stateManager } = useOptionsListContext();
+
   const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
     stateManager.exclude,
     api.dataLoading,
