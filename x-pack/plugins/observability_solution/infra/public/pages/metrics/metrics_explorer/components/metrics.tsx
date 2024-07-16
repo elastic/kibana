@@ -46,10 +46,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, autoFocus = false }:
   const colors = Object.keys(Color) as Array<keyof typeof Color>;
   const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
-  const maxMetricsReached = useMemo(
-    () => options.metrics.length >= METRICS_EXPLORER_API_MAX_METRICS,
-    [options.metrics.length]
-  );
+  const maxMetricsReached = options.metrics.length >= METRICS_EXPLORER_API_MAX_METRICS;
 
   // the EuiCombobox forwards the ref to an input element
   const autoFocusInputElement = useCallback(
