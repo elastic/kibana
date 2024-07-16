@@ -68,7 +68,7 @@ export interface AssistantProviderProps {
     currentConversation?: Conversation;
     isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
-    refetchCurrentConversation: () => void;
+    refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
     setIsStreaming: (isStreaming: boolean) => void;
@@ -109,7 +109,7 @@ export interface UseAssistantContext {
     currentConversation?: Conversation;
     isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
-    refetchCurrentConversation: () => void;
+    refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
     currentUserAvatar?: UserAvatar;
