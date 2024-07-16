@@ -38,7 +38,14 @@
     "@kbn/home-sample-data-tab",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/ebt"
+    "@kbn/discover-plugin",
+    "@kbn/utility-types",
+    "@kbn/spaces-plugin",
+    "@kbn/ebt",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

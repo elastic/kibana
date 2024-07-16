@@ -69,7 +69,11 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
 
   it('should be able to disable it', () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode(expectedUpdatedPolicy, true, true, false);
+    setMalwareMode({
+      policy: expectedUpdatedPolicy,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
     render();
     userEvent.click(renderResult.getByTestId('test'));
 
@@ -80,9 +84,17 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
   });
 
   it('should be able to enable it', () => {
-    setMalwareMode(formProps.policy, true, true, false);
+    setMalwareMode({
+      policy: formProps.policy,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode(expectedUpdatedPolicy, false, true, false);
+    setMalwareMode({
+      policy: expectedUpdatedPolicy,
+      turnOff: false,
+      includeSubfeatures: false,
+    });
     render();
     userEvent.click(renderResult.getByTestId('test'));
 
@@ -100,7 +112,11 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
 
     const expectedPolicyDataBeforeAdditionalCallback = cloneDeep(formProps.policy);
-    setMalwareMode(expectedPolicyDataBeforeAdditionalCallback, true, true, false);
+    setMalwareMode({
+      policy: expectedPolicyDataBeforeAdditionalCallback,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
 
     const expectedUpdatedPolicy = cloneDeep(expectedPolicyDataBeforeAdditionalCallback);
     expectedUpdatedPolicy.windows.popup.malware.message = 'foo';
@@ -134,7 +150,12 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
 
     it('should NOT update notification settings when disabling', () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-      setMalwareMode(expectedUpdatedPolicy, true, false, false);
+      setMalwareMode({
+        policy: expectedUpdatedPolicy,
+        turnOff: true,
+        includePopup: false,
+        includeSubfeatures: false,
+      });
       render();
       userEvent.click(renderResult.getByTestId('test'));
 
@@ -146,7 +167,12 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
 
     it('should NOT update notification settings when enabling', () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-      setMalwareMode(formProps.policy, true, false, false);
+      setMalwareMode({
+        policy: formProps.policy,
+        turnOff: true,
+        includePopup: false,
+        includeSubfeatures: false,
+      });
       render();
       userEvent.click(renderResult.getByTestId('test'));
 
@@ -176,7 +202,11 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
 
     it('should show option when unchecked', () => {
-      setMalwareMode(formProps.policy, true, true, false);
+      setMalwareMode({
+        policy: formProps.policy,
+        turnOff: true,
+        includeSubfeatures: false,
+      });
       render();
 
       expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));

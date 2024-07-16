@@ -1,24 +1,38 @@
 # {{ package_name }} Integration
 
-This integration is for ingesting data from [{{ package_name }}](https://example.com/).
-{% for data_stream in data_streams %}
-- `{{ data_stream.name }}`: {{ data_stream.description }}
-{% endfor %}
-See [Link to docs](https://example.com/docs) for more information.
+## Overview
 
-## Compatibility
+Explain what the integration is, define the third-party product that is providing data, establish its relationship to the larger ecosystem of Elastic products, and help the reader understand how it can be used to solve a tangible problem.
+Check the [overview guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-overview) for more information.
 
-Insert compatibility information here. This could for example be which versions of the product it was tested with.
+## Datastreams
+
+Provide a high-level overview of the kind of data that is collected by the integration. 
+Check the [datastreams guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-datastreams) for more information.
+
+## Requirements
+
+The requirements section helps readers to confirm that the integration will work with their systems.
+Check the [requirements guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-requirements) for more information.
 
 ## Setup
 
-Insert how to configure the vendor side of the integration here, for example how to configure the API, create a syslog remote destination etc.
+Point the reader to the [Observability Getting started guide](https://www.elastic.co/guide/en/observability/master/observability-get-started.html) for generic, step-by-step instructions. Include any additional setup instructions beyond what’s included in the guide, which may include instructions to update the configuration of a third-party service.
+Check the [setup guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-setup) for more information.
+
+## Troubleshooting (optional)
+
+Provide information about special cases and exceptions that aren’t necessary for getting started or won’t be applicable to all users. Check the [troubleshooting guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-troubleshooting) for more information.
+
+## Reference
+
+Provide detailed information about the log or metric types we support within the integration. Check the [reference guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-reference) for more information.
 
 ## Logs
 {% for data_stream in data_streams %}
 ### {{ data_stream.name }}
 
-Insert a description of the data stream here.
+Insert a description of the datastream here.
 
 {% raw %}{{fields {% endraw %}"{{ data_stream.name }}"{% raw %}}}{% endraw %}
 {% endfor %}

@@ -25,12 +25,12 @@ export type FindListItemsCursor = z.infer<typeof FindListItemsCursor>;
 export const FindListItemsCursor = NonEmptyString;
 
 export type FindListItemsFilter = z.infer<typeof FindListItemsFilter>;
-export const FindListItemsFilter = NonEmptyString;
+export const FindListItemsFilter = z.string();
 
 export type FindListItemsRequestQuery = z.infer<typeof FindListItemsRequestQuery>;
 export const FindListItemsRequestQuery = z.object({
   /**
-   * List's ide
+   * List's id
    */
   list_id: ListId,
   /**

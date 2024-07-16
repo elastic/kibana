@@ -11,8 +11,6 @@ const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
 });
 
-export type DataStreamUserPrivileges = rt.TypeOf<typeof userPrivilegesRt>;
-
 const datasetUserPrivilegesRt = rt.intersection([
   userPrivilegesRt,
   rt.type({
@@ -44,14 +42,13 @@ export const dashboardRT = rt.type({
   title: rt.string,
 });
 
+export type Dashboard = rt.TypeOf<typeof dashboardRT>;
+
 export const integrationDashboardsRT = rt.type({
   dashboards: rt.array(dashboardRT),
 });
 
-export type IntegrationDashboards = rt.TypeOf<typeof integrationDashboardsRT>;
-export type Dashboard = rt.TypeOf<typeof dashboardRT>;
-
-export const getIntegrationDashboardsResponseRt = rt.exact(integrationDashboardsRT);
+export type IntegrationDashboardsResponse = rt.TypeOf<typeof integrationDashboardsRT>;
 
 export const integrationIconRt = rt.intersection([
   rt.type({
@@ -74,17 +71,18 @@ export const integrationRt = rt.intersection([
     version: rt.string,
     icons: rt.array(integrationIconRt),
     datasets: rt.record(rt.string, rt.string),
-    dashboards: rt.array(dashboardRT),
   }),
 ]);
 
-export type Integration = rt.TypeOf<typeof integrationRt>;
+export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
 export const getIntegrationsResponseRt = rt.exact(
   rt.type({
     integrations: rt.array(integrationRt),
   })
 );
+
+export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
@@ -117,6 +115,7 @@ export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFields
 
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+  integration: rt.string,
 });
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;

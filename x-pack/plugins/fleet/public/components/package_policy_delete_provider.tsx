@@ -10,11 +10,10 @@ import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ExperimentalFeaturesService } from '../services';
 import { useStartServices, sendDeletePackagePolicy, useConfig } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
-import { sendGetAgents } from '../hooks';
+import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -42,10 +41,20 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const [agentsCount, setAgentsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+
+  const isShared = useMemo(() => {
+    if (agentPolicies?.length !== 1) {
+      return false;
+    }
+    const packagePolicy = agentPolicies[0].package_policies?.find(
+      (policy) => policy.id === packagePolicies[0]
+    );
+    return (packagePolicy?.policy_ids?.length ?? 0) > 1;
+  }, [agentPolicies, packagePolicies]);
 
   const hasMultipleAgentPolicies =
-    enableReusableIntegrationPolicies && agentPolicies && agentPolicies.length > 1;
+    canUseMultipleAgentPolicies && agentPolicies && agentPolicies.length > 1;
 
   const fetchAgentsCount = useMemo(
     () => async () => {
@@ -60,7 +69,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
       const request = await sendGetAgents({
         kuery,
-        showInactive: false,
+        showInactive: true,
       });
       setAgentsCount(request.data?.total || 0);
       setIsLoadingAgentsCount(false);
@@ -197,7 +206,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            {hasMultipleAgentPolicies && (
+            {(hasMultipleAgentPolicies || isShared) && (
               <>
                 <EuiCallOut
                   color="warning"

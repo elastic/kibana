@@ -12,7 +12,6 @@ import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ConfigSchema } from '../config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
@@ -51,7 +50,6 @@ export interface DataPluginSetupDependencies {
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
-  security?: SecurityPluginSetup;
 }
 
 export interface DataPluginStartDependencies {
@@ -86,7 +84,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, fieldFormats, security }: DataPluginSetupDependencies
+    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
@@ -98,7 +96,6 @@ export class DataServerPlugin
       bfetch,
       expressions,
       usageCollection,
-      security,
     });
 
     return {

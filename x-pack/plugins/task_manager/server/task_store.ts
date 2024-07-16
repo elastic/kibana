@@ -504,9 +504,9 @@ export class TaskStore {
       for (const task of tasks) {
         if (task._seq_no == null || task._primary_term == null) continue;
 
-        const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
+        const esId = task._id!.startsWith('task:') ? task._id!.slice(5) : task._id!;
         versionMap.set(esId, {
-          esId: task._id,
+          esId: task._id!,
           seqNo: task._seq_no,
           primaryTerm: task._primary_term,
         });

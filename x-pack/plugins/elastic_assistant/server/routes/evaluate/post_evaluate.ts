@@ -18,6 +18,7 @@ import {
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
@@ -29,7 +30,7 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
+import { fetchLangSmithDataset, getConnectorName } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
@@ -192,7 +193,7 @@ export const postEvaluateRoute = (
               agents.push({
                 agentEvaluator: async (langChainMessages, exampleId) => {
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
-                    actions,
+                    actionsClient,
                     isEnabledKnowledgeBase: true,
                     assistantTools,
                     connectorId,
@@ -237,9 +238,8 @@ export const postEvaluateRoute = (
             evalModel == null || evalModel === ''
               ? undefined
               : new ActionsClientLlm({
-                  actions,
+                  actionsClient,
                   connectorId: evalModel,
-                  request: skeletonRequest,
                   logger,
                   model: skeletonRequest.body.model,
                 });

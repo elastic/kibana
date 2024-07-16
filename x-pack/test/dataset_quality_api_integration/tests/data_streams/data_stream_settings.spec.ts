@@ -21,13 +21,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtrace = getService('logSynthtraceEsClient');
   const esClient = getService('es');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
+  const pkgService = getService('packageService');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
-  const dataset = 'nginx.access';
+  const dataset = 'synth.1';
+  const integrationDataset = 'apache.access';
   const namespace = 'default';
   const serviceName = 'my-service';
   const hostName = 'synth-host';
+  const pkg = {
+    name: 'apache',
+    version: '1.14.0',
+  };
 
   async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
     return await datasetQualityApiClient[user]({
@@ -43,6 +49,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('DataStream Settings', { config: 'basic' }, () => {
     describe('gets the data stream settings', () => {
       before(async () => {
+        // Install Integration and ingest logs for it
+        await pkgService.installPackage(pkg);
+        await synthtrace.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) =>
+              log
+                .create()
+                .message('This is a log message')
+                .timestamp(timestamp)
+                .dataset(integrationDataset)
+                .namespace(namespace)
+                .defaults({
+                  'log.file.path': '/my-service.log',
+                  'service.name': serviceName,
+                  'host.name': hostName,
+                })
+            ),
+        ]);
+        // Ingest basic logs
         await synthtrace.index([
           timerange(start, end)
             .interval('1m')
@@ -98,8 +125,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       });
 
+      it('returns "createdOn" and "integration" correctly when available', async () => {
+        const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
+          esClient,
+          `${type}-${integrationDataset}-${namespace}`
+        );
+        const resp = await callApiAs(
+          'datasetQualityLogsUser',
+          `${type}-${integrationDataset}-${namespace}`
+        );
+        expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+        expect(resp.body.integration).to.be('apache');
+      });
+
       after(async () => {
         await synthtrace.clean();
+        await pkgService.uninstallPackage(pkg);
       });
     });
   });

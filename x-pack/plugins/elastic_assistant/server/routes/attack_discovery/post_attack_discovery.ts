@@ -14,15 +14,19 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ActionsClientLlm } from '@kbn/langchain/server';
 
+import moment from 'moment/moment';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { getAssistantToolParams } from './helpers';
+import {
+  getAssistantTool,
+  getAssistantToolParams,
+  handleToolError,
+  updateAttackDiscoveries,
+  updateAttackDiscoveryStatusToRunning,
+} from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { getLlmType } from '../utils';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
@@ -57,13 +61,30 @@ export const postAttackDiscoveryRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryPostResponse>> => {
+        const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
+        const telemetry = assistantContext.telemetry;
 
         try {
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
+          const actionsClient = await actions.getActionsClientWithRequest(request);
+          const dataClient = await assistantContext.getAttackDiscoveryDataClient();
+          const authenticatedUser = assistantContext.getCurrentUser();
+          if (authenticatedUser == null) {
+            return resp.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
+          if (!dataClient) {
+            return resp.error({
+              body: `Attack discovery data client not initialized`,
+              statusCode: 500,
+            });
+          }
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -72,9 +93,8 @@ export const postAttackDiscoveryRoute = (
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
-          const connectorId = decodeURIComponent(request.body.connectorId);
           const {
-            actionTypeId,
+            apiConfig,
             anonymizationFields,
             langSmithApiKey,
             langSmithProject,
@@ -91,42 +111,26 @@ export const postAttackDiscoveryRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          // get the attack discovery tool:
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
-          const assistantTool = assistantTools.find((tool) => tool.id === 'attack-discovery');
+          const assistantTool = getAssistantTool(
+            (await context.elasticAssistant).getRegisteredTools,
+            pluginName
+          );
+
           if (!assistantTool) {
             return response.notFound(); // attack discovery tool not found
           }
 
-          const traceOptions = {
-            projectName: langSmithProject,
-            tracers: [
-              ...getLangSmithTracer({
-                apiKey: langSmithApiKey,
-                projectName: langSmithProject,
-                logger,
-              }),
-            ],
-          };
-
-          const llm = new ActionsClientLlm({
-            actions,
-            connectorId,
-            llmType: getLlmType(actionTypeId),
-            logger,
-            request,
-            temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
-            timeout: CONNECTOR_TIMEOUT,
-            traceOptions,
-          });
-
           const assistantToolParams = getAssistantToolParams({
+            actionsClient,
             alertsIndexPattern,
             anonymizationFields,
+            apiConfig,
             esClient,
             latestReplacements,
+            connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
-            llm,
+            langSmithProject,
+            langSmithApiKey,
             logger,
             onNewReplacements,
             request,
@@ -135,23 +139,44 @@ export const postAttackDiscoveryRoute = (
 
           // invoke the attack discovery tool:
           const toolInstance = assistantTool.getTool(assistantToolParams);
-          const rawAttackDiscoveries = await toolInstance?.invoke('');
-          if (rawAttackDiscoveries == null) {
-            return response.customError({
-              body: { message: 'tool returned no attack discoveries' },
-              statusCode: 500,
-            });
-          }
 
-          const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
+          const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
+            dataClient,
+            authenticatedUser,
+            apiConfig
+          );
+
+          toolInstance
+            ?.invoke('')
+            .then((rawAttackDiscoveries: string) =>
+              updateAttackDiscoveries({
+                apiConfig,
+                attackDiscoveryId,
+                authenticatedUser,
+                dataClient,
+                latestReplacements,
+                logger,
+                rawAttackDiscoveries,
+                size,
+                startTime,
+                telemetry,
+              })
+            )
+            .catch((err) =>
+              handleToolError({
+                apiConfig,
+                attackDiscoveryId,
+                authenticatedUser,
+                dataClient,
+                err,
+                latestReplacements,
+                logger,
+                telemetry,
+              })
+            );
 
           return response.ok({
-            body: {
-              alertsContextCount,
-              attackDiscoveries,
-              connector_id: connectorId,
-              replacements: latestReplacements,
-            },
+            body: currentAd,
           });
         } catch (err) {
           logger.error(err);

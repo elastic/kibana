@@ -240,6 +240,7 @@ export interface Tree {
   allEvents: Event[];
   startTime: Date;
   endTime: Date;
+  agentId: string;
 }
 
 export interface TreeOptions {
@@ -381,6 +382,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   protected get commonInfo() {
     return clone(this._commonInfo);
   }
+
   protected set commonInfo(newInfo) {
     this._commonInfo = newInfo;
   }
@@ -1184,6 +1186,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       childrenLevels: levels,
       startTime,
       endTime,
+      agentId: this.commonInfo.agent.id,
     };
   }
 

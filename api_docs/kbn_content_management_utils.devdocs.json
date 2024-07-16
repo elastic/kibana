@@ -4065,7 +4065,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ [x: string]: any; } & {}>; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; }> | undefined>"
+              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ [x: string]: any; } & {}>; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; }> | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,

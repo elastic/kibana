@@ -12,6 +12,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   IBasePath,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -57,6 +58,7 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
   securityPluginStart: SecurityPluginStart;
+  securityServiceStart: SecurityServiceStart;
   spacesPluginStart?: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
@@ -257,6 +259,7 @@ export class CasesClientFactory {
 
     try {
       const userProfile = await this.options.securityPluginStart.userProfiles.getCurrent({
+        // todo: Access userProfiles from core's UserProfileService contract
         request,
       });
 
@@ -273,7 +276,7 @@ export class CasesClientFactory {
     }
 
     try {
-      const user = this.options.securityPluginStart.authc.getCurrentUser(request);
+      const user = this.options.securityServiceStart.authc.getCurrentUser(request);
 
       if (user != null) {
         return {

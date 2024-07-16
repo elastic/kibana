@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { FlyoutTour } from '../../shared/components/flyout_tour';
 import {
   getRightSectionTourSteps,
@@ -35,7 +35,7 @@ export const RightPanelTour = memo(() => {
   const { isTourShown: isGuidedOnboardingTourShown } = useTourContext();
 
   const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, isPreview, getFieldsData } = useRightPanelContext();
+  const { eventId, indexName, scopeId, isPreview, getFieldsData } = useDocumentDetailsContext();
 
   const eventKind = getField(getFieldsData('event.kind'));
   const isAlert = eventKind === EventKind.signal;

@@ -149,6 +149,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnGroup',
       field: 'group',
+      width: skippedColumns.length < 3 ? '34%' : '50%',
       name: (
         <>
           <FormattedMessage

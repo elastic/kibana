@@ -9,8 +9,8 @@ import { useMutation } from '@tanstack/react-query';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
-  KillOrSuspendProcessRequestBody,
   ResponseActionApiResponse,
+  SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import { suspendProcess } from '../../../common/lib/process_actions';
 
@@ -22,15 +22,11 @@ export const useSendSuspendProcessRequest = (
   customOptions?: UseMutationOptions<
     ResponseActionApiResponse,
     IHttpFetchError,
-    KillOrSuspendProcessRequestBody
+    SuspendProcessRequestBody
   >
-): UseMutationResult<
-  ResponseActionApiResponse,
-  IHttpFetchError,
-  KillOrSuspendProcessRequestBody
-> => {
-  return useMutation<ResponseActionApiResponse, IHttpFetchError, KillOrSuspendProcessRequestBody>(
-    (processData: KillOrSuspendProcessRequestBody) => {
+): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, SuspendProcessRequestBody> => {
+  return useMutation<ResponseActionApiResponse, IHttpFetchError, SuspendProcessRequestBody>(
+    (processData: SuspendProcessRequestBody) => {
       return suspendProcess(processData);
     },
     customOptions

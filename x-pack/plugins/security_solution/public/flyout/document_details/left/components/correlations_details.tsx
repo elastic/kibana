@@ -15,7 +15,7 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
@@ -29,7 +29,8 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview } = useLeftPanelContext();
+  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview } =
+    useDocumentDetailsContext();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
@@ -65,6 +66,7 @@ export const CorrelationsDetails: React.FC = () => {
               <SuppressedAlerts
                 alertSuppressionCount={alertSuppressionCount}
                 dataAsNestedObject={dataAsNestedObject}
+                isPreview={isPreview}
               />
             </EuiFlexItem>
           )}

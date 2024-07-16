@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 
-export function getFallbackKibanaUrl({ http }: CoreStart) {
+export function getKibanaUrl(coreSetup: CoreSetup, cloudSetup?: CloudSetup) {
+  return (
+    coreSetup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
+    cloudSetup?.kibanaUrl ?? // then cloud id
+    getFallbackKibanaUrl(coreSetup) // falls back to local network binding
+  );
+}
+
+export function getFallbackKibanaUrl({ http }: CoreSetup) {
   const basePath = http.basePath;
   const { protocol, hostname, port } = http.getServerInfo();
   return `${protocol}://${hostname}:${port}${basePath
