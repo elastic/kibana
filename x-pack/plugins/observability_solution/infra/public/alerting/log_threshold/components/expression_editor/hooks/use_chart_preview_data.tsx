@@ -19,7 +19,7 @@ import {
 } from '../../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { ExecutionTimeRange } from '../../../../../types';
-import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../../../hooks/use_tracked_promise';
 
 interface Options {
   logViewReference: PersistedLogViewReference;
