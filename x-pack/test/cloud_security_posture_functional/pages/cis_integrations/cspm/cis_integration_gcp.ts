@@ -124,8 +124,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmGoogleCloudShellModalConfirmButton',
-              3
+              'confirmGoogleCloudShellModalConfirmButton'
             )
           ).includes('shell.cloud.google.com%2Fcloudshell')
         ).to.be(true);
