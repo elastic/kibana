@@ -6986,12 +6986,12 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.18":
-  version "0.2.18"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.18.tgz#127a7ac53a30dd6dedede887811fdd992061e2d2"
-  integrity sha512-UsCB97dMG87giQLniKx4bjv7OnMw2vQeavSt9gqOnGCnfb5IQBAgdjX4SjwFPbVGMz1HQoQKVlNqQ64ozCdgNg==
+"@langchain/community@^0.2.19":
+  version "0.2.19"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.19.tgz#ca1fb64e57f94216d6d05aa9362950d4c5473bc3"
+  integrity sha512-NKUOFW7ykY+WcnxEV6MZJj1hKncogdloBGDsk5zfW/FkZtQQpSHTgA8bgAT7X4Bnr5+Cv1fLkiDtVs/yKI4/Ow==
   dependencies:
-    "@langchain/core" "~0.2.11"
+    "@langchain/core" ">=0.2.16 <0.3.0"
     "@langchain/openai" "~0.1.0"
     binary-extensions "^2.2.0"
     expr-eval "^2.0.2"
@@ -7003,10 +7003,10 @@
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.11 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@^0.2.15", "@langchain/core@~0.2.11":
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.15.tgz#1bb99ac4fffe935c7ba37edcaa91abfba3c82219"
-  integrity sha512-L096itIBQ5XNsy5BCCPqIQEk/x4rzI+U4BhYT+fDBYtljESshIi/WzXdmiGfY/6MpVjB76jNuaRgMDmo1m9NeQ==
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>=0.2.11 <0.3.0", "@langchain/core@>=0.2.16 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@^0.2.16":
+  version "0.2.16"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.16.tgz#0700a7def44c613ef775d351a2e6428e09cfbfda"
+  integrity sha512-mPmQi0ecJ81QwhvUQX4cwGVAqsM30ly3ygIlWoeUwDOXv9UW/IB2LAq8KKoVYIHTyEsIWJiyMP9Sv3e0xwjV8g==
   dependencies:
     ansi-styles "^5.0.0"
     camelcase "6"
@@ -7021,13 +7021,23 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/langgraph@^0.0.26":
-  version "0.0.26"
-  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.26.tgz#4971577366f7ec4ff1c634f0ab1aa9f0ec73fb0b"
-  integrity sha512-edfy9C9e5E1/HvWY9Jk4P3kF3RToA7OIVj9aXjCCb/8dvoMcmMsQSB990Uc29H+3lSpxHWrzSaZVQCAxD6XAAg==
+"@langchain/google-common@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@langchain/google-common/-/google-common-0.0.20.tgz#00d8e9b8f346c986366e199d4aaf19be1f97f1fd"
+  integrity sha512-kH1Bwh1tKxzIU+IFhOLLxuY7GjYjO+iebd3Gaih3smtQNldMidrYO2CRYtesnvD9AKJxvforU7neeux39fysoA==
   dependencies:
-    "@langchain/core" ">0.1.61 <0.3.0"
+    "@langchain/core" ">=0.2.16 <0.3.0"
     uuid "^10.0.0"
+    zod-to-json-schema "^3.22.4"
+
+"@langchain/langgraph@^0.0.27":
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.27.tgz#ae7df3f838e6cecd5be5c23071eafce102aa8942"
+  integrity sha512-+E5VOfIDUS9Rbv2Ut1osQ9Dy5IXPiIT8KasLyEToFbBN7KlzajIC2sm29he5aiR3I3KrKc6AburjPUUw+hw35A==
+  dependencies:
+    "@langchain/core" ">=0.2.16 <0.3.0"
+    uuid "^10.0.0"
+    zod "^3.23.8"
 
 "@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.1.3", "@langchain/openai@~0.1.0":
   version "0.1.3"
@@ -21861,10 +21871,10 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@0.2.3, langchain@^0.2.9:
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.9.tgz#1341bdd7166f4f6da0b9337f363e409a79523dbb"
-  integrity sha512-iZ0l7BDVfoifqZlDl1gy3JP5mIdhYjWiToPlDnlmfHD748cw3okvF0gZo0ruT4nbftnQcaM7JzPUiNC43UPfgg==
+langchain@0.2.3, langchain@^0.2.10:
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.10.tgz#35b74038e54650efbd9fe7d9d59765fe2790bb47"
+  integrity sha512-i0fC+RlX/6w6HKPWL3N5zrhrkijvpe2Xu4t/qbWzq4uFf8WBfPwmNFom3RtO2RatuPnHLm8mViU6nw8YBDiVwA==
   dependencies:
     "@langchain/core" ">=0.2.11 <0.3.0"
     "@langchain/openai" ">=0.1.0 <0.3.0"
@@ -21888,7 +21898,18 @@ langchainhub@~0.0.8:
   resolved "https://registry.yarnpkg.com/langchainhub/-/langchainhub-0.0.8.tgz#fd4b96dc795e22e36c1a20bad31b61b0c33d3110"
   integrity sha512-Woyb8YDHgqqTOZvWIbm2CaFDGfZ4NTSyXV687AG4vXEfoNo7cGQp7nhl7wL3ehenKWmNEmcxCLgOZzW8jE6lOQ==
 
-langsmith@^0.1.36, langsmith@~0.1.30:
+langsmith@^0.1.37:
+  version "0.1.37"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.37.tgz#7e7bf6fce3eab2a9e95221d5879820ec29d0aa60"
+  integrity sha512-8JgWykdJywdKWs+WeefOEf4Gkz3YdNkvG5u5JPbgXuodTUwuHPwjmblsldt1OGKkPp7iCWfdtCdnc9z9MYC/Dw==
+  dependencies:
+    "@types/uuid" "^9.0.1"
+    commander "^10.0.1"
+    p-queue "^6.6.2"
+    p-retry "4"
+    uuid "^9.0.0"
+
+langsmith@~0.1.30:
   version "0.1.36"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.36.tgz#5f21b9c6bcd4ea9c0e943f83e304a53e5232297d"
   integrity sha512-D5hhkFl31uxFdffx0lA6pin0lt8Pv2dpHFZYpSgEzvQ26PQ/Y/tnniQ+aCNokIXuLhMa7uqLtb6tfwjfiZXgdg==
@@ -32828,7 +32849,7 @@ zip-stream@^4.1.0:
     compress-commons "^4.1.0"
     readable-stream "^3.6.0"
 
-zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.5:
+zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5:
   version "3.22.5"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.22.5.tgz#3646e81cfc318dbad2a22519e5ce661615418673"
   integrity sha512-+akaPo6a0zpVCCseDed504KBJUQpEW5QZw7RMneNmKw+fGaML1Z9tUNLnHHAC8x6dzVRO1eB2oEMyZRnuBZg7Q==
@@ -32837,6 +32858,11 @@ zod@3.22.4, zod@^3.22.3, zod@^3.22.4:
   version "3.22.4"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
   integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
+
+zod@^3.23.8:
+  version "3.23.8"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
+  integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
 
 zwitch@^1.0.0:
   version "1.0.5"

@@ -120,7 +120,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         prompt: openAIFunctionAgentPrompt,
         streamRunnable: isStream,
       })
-    : llmType === 'bedrock' && bedrockChatEnabled
+    : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
     ? await createToolCallingAgent({
         llm,
         tools,

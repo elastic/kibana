@@ -16,7 +16,7 @@ export const respond = async ({ llm, state }: { llm: BaseChatModel; state: Agent
   const userMessage = [
     'user',
     `Respond exactly with
-    ${state.agentOutcome?.returnValues?.output}.
+    ${state.agentOutcome?.returnValues?.output}
 
     Do not verify, confirm or anything else. Just reply with the same content as provided above.`,
   ];

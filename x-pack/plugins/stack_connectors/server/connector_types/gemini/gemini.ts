@@ -17,6 +17,7 @@ import {
   RunActionParamsSchema,
   RunApiResponseSchema,
   InvokeAIActionParamsSchema,
+  InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
 } from '../../../common/gemini/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
@@ -31,6 +32,8 @@ import {
   StreamingResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  InvokeAIRawActionParams,
+  InvokeAIRawActionResponse,
 } from '../../../common/gemini/types';
 import {
   SUB_ACTION,
@@ -101,6 +104,12 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI_RAW,
+      method: 'invokeAIRaw',
+      schema: InvokeAIRawActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -193,7 +202,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     model: reqModel,
     signal,
     timeout,
-  }: RunActionParams): Promise<RunActionResponse> {
+    raw,
+  }: RunActionParams): Promise<RunActionResponse | RunActionRawResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
@@ -216,6 +226,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const candidate = response.data.candidates[0];
     const usageMetadata = response.data.usageMetadata;
     const completionText = candidate.content.parts[0].text;
+
+    if (raw) {
+      return response.data;
+    }
 
     return { completion: completionText, usageMetadata };
   }
@@ -264,6 +278,24 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return { message: res.completion, usageMetadata: res.usageMetadata };
   }
 
+  public async invokeAIRaw({
+    messages,
+    model,
+    temperature = 0,
+    signal,
+    timeout,
+  }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
+    const res = await this.runApi({
+      body: JSON.stringify(messages),
+      model,
+      signal,
+      timeout,
+      raw: true,
+    });
+
+    return res;
+  }
+
   /**
    *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
    *  request to the Gemini API with the formatted messages and model. It then returns a Transform stream
@@ -280,13 +312,22 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamAPI({
-      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
-      model,
-      stopSequences,
-      signal,
-      timeout,
-    })) as unknown as IncomingMessage;
+    console.error('invokeStream', JSON.stringify(messages, null, 2));
+    let res;
+
+    try {
+      res = (await this.streamAPI({
+        // body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+        body: JSON.stringify(messages),
+        model,
+        stopSequences,
+        signal,
+        timeout,
+      })) as unknown as IncomingMessage;
+    } catch (e) {
+      console.error('eee', e);
+    }
+
     return res;
   }
 }

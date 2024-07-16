@@ -39,6 +39,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
+  ActionsClientVertexChatModel,
 } from '@kbn/langchain/server';
 
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
@@ -217,7 +218,8 @@ export interface AssistantTool {
 export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
-  | ActionsClientSimpleChatModel;
+  | ActionsClientSimpleChatModel
+  | ActionsClientVertexChatModel;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;

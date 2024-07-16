@@ -82,14 +82,13 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  if (llmType === 'bedrock' && bedrockChatEnabled) {
+  if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
-        // callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-        // runName: DEFAULT_ASSISTANT_GRAPH_ID,
-        // // streamMode: 'updates',
-        // tags: traceOptions?.tags ?? [],
+        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+        runName: DEFAULT_ASSISTANT_GRAPH_ID,
+        tags: traceOptions?.tags ?? [],
         version: 'v2',
       },
       { includeNames: ['Summarizer'] }
