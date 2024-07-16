@@ -1431,7 +1431,12 @@ async function getOptionArgsSuggestions(
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
   const optionDef = getCommandOption(option.name);
-  const { nodeArg, argIndex, lastArg } = extractArgMeta(option, node);
+  const {
+    nodeArg,
+    argIndex,
+    lastArg,
+    isIncompleteItem: isIncomplete,
+  } = extractArgMeta(option, node);
   const suggestions = [];
   const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
 
@@ -1541,14 +1546,14 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    if (existingFields.size > 0) {
+    if (isNewExpression) {
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else if (existingFields.size > 0) {
       if (filteredMetaFields.length > 0) {
         suggestions.push(commaCompleteItem);
       }
       suggestions.push(pipeCompleteItem);
     }
-
-    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
   }
 
   if (command.name === 'stats') {

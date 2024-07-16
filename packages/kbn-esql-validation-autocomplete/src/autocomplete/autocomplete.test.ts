@@ -392,14 +392,16 @@ describe('autocomplete', () => {
     testSuggestions('from index', suggestedIndexes, 5 /* space before index */);
     testSuggestions('from a, b [metadata ]', METADATA_FIELDS, ' ]');
     testSuggestions('from a, b metadata ', METADATA_FIELDS, ' ');
+    testSuggestions('from a, b [metadata _index  ]', [',', '|'], ' ]');
     testSuggestions(
       'from a, b [metadata _index, ]',
-      [',', '|', ...METADATA_FIELDS.filter((field) => field !== '_index')],
+      [...METADATA_FIELDS.filter((field) => field !== '_index')],
       ' ]'
     );
+    testSuggestions('from a, b metadata _index ', [',', '|'], ' ');
     testSuggestions(
       'from a, b metadata _index, ',
-      [',', '|', ...METADATA_FIELDS.filter((field) => field !== '_index')],
+      [...METADATA_FIELDS.filter((field) => field !== '_index')],
       ' '
     );
     testSuggestions(`from a, b metadata ${METADATA_FIELDS.join(', ')} `, ['|'], ' ');
