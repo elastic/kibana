@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useEffect, useReducer } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { FETCH_STATUS, isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   Sort,
@@ -18,7 +19,6 @@ import {
   MetricsK8sAnomaly,
   Metric,
 } from '../../../../../common/http_api/infra_ml';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;

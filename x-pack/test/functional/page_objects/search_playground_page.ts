@@ -146,6 +146,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(code.replace(/ /g, '')).to.be(
           '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
         );
+
+        await testSubjects.click('chatMode');
       },
 
       async expectEditContextOpens() {
@@ -156,6 +158,16 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const fields = await testSubjects.findAll('contextField');
 
         expect(fields.length).to.be(1);
+      },
+
+      async expectSaveFieldsBetweenModes() {
+        await testSubjects.click('queryMode');
+        await testSubjects.existOrFail('field-baz-true');
+        await testSubjects.click('field-baz-true');
+        await testSubjects.existOrFail('field-baz-false');
+        await testSubjects.click('chatMode');
+        await testSubjects.click('queryMode');
+        await testSubjects.existOrFail('field-baz-false');
       },
     },
   };
