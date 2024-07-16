@@ -52,6 +52,7 @@ class VisEditorVisualizationUI extends Component {
 
   getSavedVis = () => ({
     ...omit(this.props.vis, 'uiState'),
+    // ALWAYS serialize search source fields
     data: {
       ...this.props.vis.data,
       ...(this.props.vis.data.searchSource
