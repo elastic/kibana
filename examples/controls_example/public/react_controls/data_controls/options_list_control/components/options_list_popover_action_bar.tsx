@@ -20,7 +20,7 @@ import {
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
-import { useOptionsListContext } from '../get_options_list_control_factory';
+import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 import { OptionsListStrings } from './options_list_strings';
 

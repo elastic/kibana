@@ -28,7 +28,7 @@ import {
   OptionsListSortBy,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '../../../../../common/options_list/suggestions_sorting';
-import { useOptionsListContext } from '../get_options_list_control_factory';
+import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 
 type SortByItem = EuiSelectableOption & {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 
@@ -26,7 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { MIN_POPOVER_WIDTH } from '../constants';
-import { useOptionsListContext } from '../get_options_list_control_factory';
+import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from './options_list_strings';
 

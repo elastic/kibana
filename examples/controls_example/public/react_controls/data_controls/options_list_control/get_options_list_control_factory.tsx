@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import deepEqual from 'react-fast-compare';
 import {
   BehaviorSubject,
@@ -26,6 +26,7 @@ import {
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
@@ -39,33 +40,8 @@ import {
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
-import {
-  OptionsListComponentApi,
-  OptionsListComponentState,
-  OptionsListControlApi,
-  OptionsListControlState,
-  OptionsListDisplaySettings,
-} from './types';
-import { ControlStateManager } from '../../types';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
-export const OptionsListControlContext = React.createContext<
-  | {
-      api: OptionsListComponentApi;
-      stateManager: ControlStateManager<OptionsListComponentState>;
-      displaySettings: OptionsListDisplaySettings;
-    }
-  | undefined
->(undefined);
-
-export const useOptionsListContext = () => {
-  const optionsListContext = useContext(OptionsListControlContext);
-  if (!optionsListContext)
-    throw new Error(
-      'No OptionsListControlContext.Provider found when calling useOptionsListContext.'
-    );
-  return optionsListContext;
-};
+import { OptionsListControlContext } from './options_list_context_provider';
+import { OptionsListControlApi, OptionsListControlState } from './types';
 
 export const getOptionsListControlFactory = ({
   core,

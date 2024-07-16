@@ -21,7 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useOptionsListContext } from '../get_options_list_control_factory';
+import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 
 const aggregationToggleButtons = [

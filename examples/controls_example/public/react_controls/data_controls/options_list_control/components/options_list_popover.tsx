@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
-import { useOptionsListContext } from '../get_options_list_control_factory';
+import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
