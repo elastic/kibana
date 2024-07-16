@@ -97,7 +97,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const loggerTag = claimAvailableTasksMget.name;
   const logMeta = { tags: [loggerTag] };
   const initialCapacity = getCapacity();
-  console.log(`mget strategy initialCapacity: ${initialCapacity}`);
   const stopTaskTimer = startTaskTimer();
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES

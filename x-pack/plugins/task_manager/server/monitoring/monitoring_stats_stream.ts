@@ -34,7 +34,7 @@ import {
 } from './background_task_utilization_statistics';
 
 import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
-import { DEFAULT_CAPACITY, TaskManagerConfig } from '../config';
+import { TaskManagerConfig } from '../config';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { CreateMonitoringStatsOpts } from '.';
