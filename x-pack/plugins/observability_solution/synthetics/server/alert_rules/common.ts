@@ -292,6 +292,8 @@ export const setRecoveredAlertsContext = ({
     const context = {
       ...state,
       ...(monitorSummary ? monitorSummary : {}),
+      locationId,
+      idWithLocation: alertId,
       lastErrorMessage,
       recoveryStatus,
       linkMessage,
