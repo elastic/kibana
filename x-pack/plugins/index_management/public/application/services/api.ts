@@ -255,7 +255,7 @@ export async function loadIndexStats(indexName: string) {
 }
 
 export async function loadIndexMapping(indexName: string) {
-  const response = await httpService.httpClient.get(
+  const response = await httpService.httpClient.get<MappingTypeMapping>(
     `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
   );
   return response;
