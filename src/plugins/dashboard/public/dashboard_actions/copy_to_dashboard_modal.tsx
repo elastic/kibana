@@ -19,7 +19,6 @@ import {
 import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-
 import { omit } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';

@@ -412,21 +412,18 @@ export const initializeDashboard = async ({
 
       untilDashboardReady().then(async (container) => {
         const createdEmbeddable = await (async () => {
-          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-
           // if there is no width or height we can add the panel using the default behaviour.
           if (!incomingEmbeddable.size) {
             return await container.addNewPanel<{ uuid: string }>({
               panelType: incomingEmbeddable.type,
-              initialState: {
-                ...incomingEmbeddable.input,
-              },
+              initialState: incomingEmbeddable.input,
             });
           }
 
           // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
           const { width, height } = incomingEmbeddable.size;
           const currentPanels = container.getInput().panels;
+          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
           const { newPanelPlacement } = runPanelPlacementStrategy(
             PanelPlacementStrategy.findTopLeftMostOpenSpace,
             {

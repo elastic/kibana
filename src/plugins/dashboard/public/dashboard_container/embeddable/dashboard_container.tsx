@@ -35,7 +35,6 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  HasPanelSaveCheck,
   HasRuntimeChildState,
   HasSaveNotification,
   HasSerializedChildState,
@@ -134,8 +133,7 @@ export class DashboardContainer
     HasRuntimeChildState,
     HasSerializedChildState,
     PublishesSettings,
-    Partial<PublishesViewMode>,
-    HasPanelSaveCheck
+    Partial<PublishesViewMode>
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -839,9 +837,6 @@ export class DashboardContainer
   };
 
   public saveNotification$: Subject<void> = new Subject<void>();
-  public isPanelSaved = (panelId: string) => {
-    return Boolean(this.getState().componentState.lastSavedInput.panels[panelId]);
-  };
 
   public getSerializedStateForChild = (childId: string) => {
     const rawState = this.getInput().panels[childId].explicitInput;
