@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/logs-optimization-plugin",
+  "owner": "@elastic/obs-ux-logs-team",
+  "description": "Exposes services for logs optimization and structuring",
+  "plugin": {
+    "id": "logsOptimization",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "logs_optimization"],
+    "requiredPlugins": [],
+    "requiredBundles": [],
+  }
+}
