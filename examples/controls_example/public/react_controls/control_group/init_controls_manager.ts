@@ -7,7 +7,7 @@
  */
 
 import { v4 as generateId } from 'uuid';
-import { HasSerializedChildState, PresentationContainer } from "@kbn/presentation-containers";
+import { HasSerializedChildState, PanelPackage, PresentationContainer } from "@kbn/presentation-containers";
 import { Reference } from '@kbn/content-management-utils';
 import { BehaviorSubject, merge } from "rxjs";
 import { ControlPanelsState, ControlPanelState } from "./types";
@@ -51,6 +51,26 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
 
   function getControlApi(controlUuid: string) {
     return children$.value[controlUuid];
+  }
+
+  async function addNewPanel({ panelType, initialState }: PanelPackage<object>) {
+    const id = generateId();
+    const controlsInOrder = controlsInOrder$.getValue();
+    controlsInOrder$.next([
+      ...controlsInOrder,
+      {
+        id,
+        type: panelType,
+        order: controlsInOrder.length,
+        ...(initialState ?? {}),
+      }
+    ]);
+    return await untilControlLoaded(id);
+  }
+
+  function removePanel(panelId: string) {
+    controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !==panelId));
+    children$.next(omit(children$.value, panelId));
   }
 
   return {
@@ -109,27 +129,12 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
       getPanelCount: () => {
         return controlsInOrder$.value.length
       },
-      addNewPanel: async (panel) => {
-        const id = generateId();
-        const controlsInOrder = controlsInOrder$.getValue();
-        controlsInOrder$.next([
-          ...controlsInOrder,
-          {
-            id,
-            type: panel.panelType,
-            order: controlsInOrder.length,
-            ...(panel.initialState ?? {}),
-          }
-        ]);
-        return await untilControlLoaded(id);
-      },
-      removePanel: (panelId) => {
-        controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !==panelId));
-        children$.next(omit(children$.value, panelId));
-      },
+      addNewPanel,
+      removePanel,
       replacePanel: async (panelId, newPanel) => {
-        // TODO: Replace a child control
-        return Promise.resolve(panelId);
+        removePanel(panelId);
+        const controlApi = await addNewPanel(newPanel);
+        return controlApi ? controlApi.uuid : '';
       },
     } as PresentationContainer & HasSerializedChildState<ControlPanelState>,
   }
