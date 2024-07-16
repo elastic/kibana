@@ -53,7 +53,6 @@ export function ObservabilityOnboardingFlow() {
               <CustomLogsPanel />
             </Route>
             <Route path="/kubernetes">
-              <BackButton />
               <KubernetesPanel />
             </Route>
             <Route path="/otel-logs">

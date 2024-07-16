@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -16,10 +15,12 @@ import {
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useIconForLogo } from '../../hooks/use_icon_for_logo';
+import { BackButton } from '../shared/back_button';
 
 export function KubernetesHeaderSection() {
   const kubernetesLogo = useIconForLogo('kubernetes');
@@ -27,17 +28,14 @@ export function KubernetesHeaderSection() {
   const shadow = useEuiShadow('s');
   return (
     <EuiPageTemplate.Section paddingSize="xl">
-      <EuiButtonEmpty
-        iconType="arrowLeft"
-        flush="left"
-        href="/observability"
-        data-test-subj="observabilityOnboardingFlowBackToSelectionButton"
-      >
-        <FormattedMessage
-          id="xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel"
-          defaultMessage="Return"
-        />
-      </EuiButtonEmpty>
+      <BackButton
+        customLabel={i18n.translate(
+          'xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel',
+          {
+            defaultMessage: 'Return',
+          }
+        )}
+      />
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>

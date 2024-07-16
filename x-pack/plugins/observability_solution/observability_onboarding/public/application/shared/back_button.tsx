@@ -10,11 +10,13 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-export const BackButton = () => {
+export interface BackButtonProps {
+  customLabel?: string;
+}
+
+export const BackButton: React.FC<BackButtonProps> = ({ customLabel }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  if (location.pathname === '/kubernetes') return null;
 
   return (
     <>
@@ -24,10 +26,12 @@ export const BackButton = () => {
         flush="left"
         onClick={() => navigate(`../${location.search}`)}
       >
-        {i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.button.backToSelectionLabel',
-          { defaultMessage: 'Back to selection' }
-        )}
+        {customLabel
+          ? customLabel
+          : i18n.translate(
+              'xpack.observability_onboarding.experimentalOnboardingFlow.button.backToSelectionLabel',
+              { defaultMessage: 'Back to selection' }
+            )}
       </EuiButtonEmpty>
       <EuiSpacer size="m" />
     </>
