@@ -2117,7 +2117,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedSearch: null,
     isDataProviderVisible: false,
     sampleSize: 500,
-    rowHeight: 1,
+    rowHeight: 3,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,
