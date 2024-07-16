@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import {
   Plugin,
   CoreSetup,
@@ -88,12 +89,15 @@ export class EntityManagerServerPlugin
     const esClient = core.elasticsearch.client.asInternalUser;
 
     installEntityManagerTemplates({ esClient, logger: this.logger })
-      .then(() =>
-        updateBuiltInEntityDefinitions({
+      .then(async () => {
+        // the api key validation requires a check against the cluster license
+        // which is lazily loaded. we ensure it gets loaded before the update
+        await firstValueFrom(plugins.licensing.license$);
+        return updateBuiltInEntityDefinitions({
           definitions: builtInDefinitions,
           server: this.server!,
-        })
-      )
+        });
+      })
       .catch((err) => this.logger.error(err));
 
     return {};

@@ -11,6 +11,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { EntityManagerConfig } from '../common/config';
 
 export interface EntityManagerServerSetup {
@@ -33,4 +34,5 @@ export interface EntityManagerPluginSetupDependencies {
 export interface EntityManagerPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  licensing: LicensingPluginStart;
 }
