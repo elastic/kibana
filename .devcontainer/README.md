@@ -1,0 +1,1 @@
+Make a copy of .env.template and edit as you see fit
