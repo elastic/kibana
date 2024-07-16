@@ -67,7 +67,7 @@ export const getComments = ({
   currentConversation?: Conversation;
   isEnabledLangChain: boolean;
   isFetchingResponse: boolean;
-  refetchCurrentConversation: () => void;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
   currentUserAvatar?: UserAvatar;
