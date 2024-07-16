@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem, ControlPanelState } from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
 import { chaining$ } from './chaining';
+import { ControlPanelState } from "../types";
 
 const FILTER_ALPHA = {
   meta: {

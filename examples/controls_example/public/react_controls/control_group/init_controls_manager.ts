@@ -13,6 +13,7 @@ import { BehaviorSubject, merge } from "rxjs";
 import { ControlPanelsState, ControlPanelState } from "./types";
 import { DefaultControlApi } from '../types';
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { omit } from 'lodash';
 
 export function initControlsManager(controlPanelsState: ControlPanelsState) {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -123,7 +124,8 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         return await untilControlLoaded(id);
       },
       removePanel: (panelId) => {
-        // TODO: Remove a child control
+        controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !==panelId));
+        children$.next(omit(children$.value, panelId));
       },
       replacePanel: async (panelId, newPanel) => {
         // TODO: Replace a child control

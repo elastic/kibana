@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem, ControlPanelState } from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
 import { Filter, TimeRange } from '@kbn/es-query';
 import {
   apiPublishesFilters,
@@ -14,6 +14,7 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from 'rxjs';
+import { ControlPanelState } from "../types";
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;
