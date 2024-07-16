@@ -63,10 +63,9 @@ To use {x}, you'll need the following:
 
 | *Amazon Bedrock*
 a|
-* Anthropic: Claude 3 Sonnet
+* Anthropic: Claude 3.5 Sonnet
 * Anthropic: Claude 3 Haiku
 a|
-Does not currently support streaming.
 
 | *OpenAI*
 a|
@@ -80,6 +79,7 @@ a|
 * GPT-3 turbo
 * GPT-4 turbo
 a|
+Buffers responses in large chunks
 
 | *Google*
 a|
@@ -207,4 +207,3 @@ Once you've got {x} up and running, and you've tested out the chat interface, yo
 include::playground-context.asciidoc[]
 include::playground-query.asciidoc[]
 include::playground-troubleshooting.asciidoc[]
-
