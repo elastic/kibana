@@ -14,6 +14,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const ml = getService('ml');
 
+  /* Due to a race condition between registrating an app and license subscription, 
+    the FTR tests can not access the desired application.
+  */
   describe.skip('ESS Inference Management UI', function () {
     this.tags('skipMKI');
 
