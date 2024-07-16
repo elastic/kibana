@@ -49,10 +49,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
   >
     <EuiCheckbox
       checked={false}
-      compressed={false}
-      disabled={false}
       id="ml-include-past-events"
-      indeterminate={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Include past events"

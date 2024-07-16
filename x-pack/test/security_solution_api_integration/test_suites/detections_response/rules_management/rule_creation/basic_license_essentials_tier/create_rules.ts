@@ -32,9 +32,9 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
+  const utils = getService('securitySolutionUtils');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).toEqual(expectedRule);
       });
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
             version: 1,
             revision: 0,
           },
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).toEqual(expectedRule);
@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).toEqual(expectedRule);

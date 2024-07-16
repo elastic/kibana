@@ -2928,6 +2928,46 @@
           },
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogsSharedClientStartDeps.uiActions",
             "type": "Object",
             "tags": [],
@@ -5902,7 +5942,7 @@
         "label": "LogEntryAfterCursor",
         "description": [],
         "signature": [
-          "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
+          "{ after: \"first\" | { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,

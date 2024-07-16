@@ -1,0 +1,20 @@
+- name: data_stream.type
+  type: constant_keyword
+  description: Data stream type.
+- name: data_stream.dataset
+  type: constant_keyword
+  description: Data stream dataset name.
+- name: data_stream.namespace
+  type: constant_keyword
+  description: Data stream namespace.
+- name: event.module
+  type: constant_keyword
+  description: Event module
+  value: {{ module }}
+- name: event.dataset
+  type: constant_keyword
+  description: Event dataset
+  value: {{ dataset }}
+- name: "@timestamp"
+  type: date
+  description: Event timestamp.

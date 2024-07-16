@@ -25,7 +25,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
   });
 
   homePlugin.featureCatalogue.register({
-    id: 'logs',
+    id: 'observability-logs-explorer',
     title: i18n.translate('xpack.infra.registerFeatures.logsTitle', {
       defaultMessage: 'Logs',
     }),
@@ -34,7 +34,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
         'Stream logs in real time or scroll through historical views in a console-like experience.',
     }),
     icon: 'logsApp',
-    path: `/app/logs`,
+    path: `/app/observability-logs-explorer`,
     showOnHomePage: false,
     category: 'data',
   });

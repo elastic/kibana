@@ -1,0 +1,5485 @@
+openapi: 3.0.3
+info:
+  description: >-
+    You can create rules that automatically turn events and external alerts sent
+    to Elastic Security into detection alerts. These alerts are displayed on the
+    Detections page.
+  title: Security Solution Detections API (Elastic Cloud Serverless)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/detection_engine/rules:
+    delete:
+      description: Deletes a single rule using the `rule_id` or `id` field.
+      operationId: DeleteRule
+      parameters:
+        - description: The rule's `id` value.
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/RuleObjectId'
+        - description: The rule's `rule_id` value.
+          in: query
+          name: rule_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/RuleSignatureId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+          description: Indicates a successful call.
+      tags:
+        - Rules API
+    get:
+      description: Read a single rule
+      operationId: ReadRule
+      parameters:
+        - description: The rule's `id` value.
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/RuleObjectId'
+        - description: The rule's `rule_id` value.
+          in: query
+          name: rule_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/RuleSignatureId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+          description: Indicates a successful call.
+      tags:
+        - Rules API
+    patch:
+      description: Patch a single rule
+      operationId: PatchRule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RulePatchProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+          description: Indicates a successful call.
+      tags:
+        - Rules API
+    post:
+      description: Create a single detection rule
+      operationId: CreateRule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleCreateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+          description: Indicates a successful call.
+      tags:
+        - Rules API
+    put:
+      description: Update a single rule
+      operationId: UpdateRule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleUpdateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+          description: Indicates a successful call.
+      tags:
+        - Rules API
+  /api/detection_engine/rules/_bulk_action:
+    post:
+      description: >-
+        The bulk action is applied to all rules that match the filter or to the
+        list of rules by their IDs.
+      operationId: PerformBulkAction
+      parameters:
+        - description: Enables dry run mode for the request call.
+          in: query
+          name: dry_run
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/BulkDeleteRules'
+                - $ref: '#/components/schemas/BulkDisableRules'
+                - $ref: '#/components/schemas/BulkEnableRules'
+                - $ref: '#/components/schemas/BulkExportRules'
+                - $ref: '#/components/schemas/BulkDuplicateRules'
+                - $ref: '#/components/schemas/BulkEditRules'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BulkEditActionResponse'
+                  - $ref: '#/components/schemas/BulkExportActionResponse'
+          description: OK
+      summary: Applies a bulk action to multiple rules
+      tags:
+        - Bulk API
+  /api/detection_engine/rules/_export:
+    post:
+      description: >-
+        Exports rules to an `.ndjson` file. The following configuration items
+        are also included in the `.ndjson` file - Actions, Exception lists.
+        Prebuilt rules cannot be exported.
+      operationId: ExportRules
+      parameters:
+        - description: Determines whether a summary of the exported rules is returned.
+          in: query
+          name: exclude_export_details
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: File name for saving the exported rules.
+          in: query
+          name: file_name
+          required: false
+          schema:
+            default: export.ndjson
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              nullable: true
+              type: object
+              properties:
+                objects:
+                  description: >-
+                    Array of `rule_id` fields. Exports all rules when
+                    unspecified.
+                  items:
+                    type: object
+                    properties:
+                      rule_id:
+                        $ref: '#/components/schemas/RuleSignatureId'
+                    required:
+                      - rule_id
+                  type: array
+              required:
+                - objects
+        required: false
+      responses:
+        '200':
+          content:
+            application/ndjson:
+              schema:
+                description: An `.ndjson` file containing the returned rules.
+                format: binary
+                type: string
+          description: Indicates a successful call.
+      summary: Export rules
+      tags:
+        - Import/Export API
+    summary: Exports rules to an `.ndjson` file
+  /api/detection_engine/rules/_find:
+    get:
+      description: Finds rules that match the given query.
+      operationId: FindRules
+      parameters:
+        - in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Search query
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: Field to sort by
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindRulesSortField'
+        - description: Sort order
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Rules per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/RuleResponse'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+          description: Successful response
+      tags:
+        - Rules API
+  /api/detection_engine/rules/_import:
+    post:
+      description: >-
+        Imports rules from an `.ndjson` file, including actions and exception
+        lists.
+      operationId: ImportRules
+      parameters:
+        - description: >-
+            Determines whether existing rules with the same `rule_id` are
+            overwritten.
+          in: query
+          name: overwrite
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: >-
+            Determines whether existing exception lists with the same `list_id`
+            are overwritten.
+          in: query
+          name: overwrite_exceptions
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: >-
+            Determines whether existing actions with the same
+            `kibana.alert.rule.actions.id` are overwritten.
+          in: query
+          name: overwrite_action_connectors
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: Generates a new list ID for each imported exception list.
+          in: query
+          name: as_new_list
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The `.ndjson` file containing the rules.
+                  format: binary
+                  type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  action_connectors_errors:
+                    items:
+                      $ref: '#/components/schemas/ErrorSchema'
+                    type: array
+                  action_connectors_success:
+                    type: boolean
+                  action_connectors_success_count:
+                    minimum: 0
+                    type: integer
+                  action_connectors_warnings:
+                    items:
+                      $ref: '#/components/schemas/WarningSchema'
+                    type: array
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/ErrorSchema'
+                    type: array
+                  exceptions_errors:
+                    items:
+                      $ref: '#/components/schemas/ErrorSchema'
+                    type: array
+                  exceptions_success:
+                    type: boolean
+                  exceptions_success_count:
+                    minimum: 0
+                    type: integer
+                  rules_count:
+                    minimum: 0
+                    type: integer
+                  success:
+                    type: boolean
+                  success_count:
+                    minimum: 0
+                    type: integer
+                required:
+                  - exceptions_success
+                  - exceptions_success_count
+                  - exceptions_errors
+                  - rules_count
+                  - success
+                  - success_count
+                  - errors
+                  - action_connectors_errors
+                  - action_connectors_warnings
+                  - action_connectors_success
+                  - action_connectors_success_count
+          description: Indicates a successful call.
+      summary: Import rules
+      tags:
+        - Import/Export API
+    summary: Imports rules from an `.ndjson` file
+  /api/detection_engine/signals/assignees:
+    post:
+      description: Assigns users to alerts.
+      operationId: SetAlertAssignees
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignees:
+                  $ref: '#/components/schemas/AlertAssignees'
+                  description: Details about the assignees to assign and unassign.
+                ids:
+                  $ref: '#/components/schemas/AlertIds'
+                  description: List of alerts ids to assign and unassign passed assignees.
+              required:
+                - assignees
+                - ids
+        required: true
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Invalid request.
+    summary: Assigns users to alerts
+  /api/detection_engine/tags:
+    get:
+      operationId: ReadTags
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleTagArray'
+          description: Indicates a successful call
+      summary: Aggregates and returns all unique tags from all rules
+      tags:
+        - Tags API
+    summary: Aggregates and returns rule tags
+components:
+  schemas:
+    AlertAssignees:
+      type: object
+      properties:
+        add:
+          description: A list of users ids to assign.
+          items:
+            $ref: '#/components/schemas/NonEmptyString'
+          type: array
+        remove:
+          description: A list of users ids to unassign.
+          items:
+            $ref: '#/components/schemas/NonEmptyString'
+          type: array
+      required:
+        - add
+        - remove
+    AlertIds:
+      description: A list of alerts ids.
+      items:
+        $ref: '#/components/schemas/NonEmptyString'
+      minItems: 1
+      type: array
+    AlertsIndex:
+      deprecated: true
+      description: (deprecated) Has no effect.
+      type: string
+    AlertsIndexNamespace:
+      description: Has no effect.
+      type: string
+    AlertSuppression:
+      type: object
+      properties:
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        group_by:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        missing_fields_strategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - group_by
+    AlertSuppressionDuration:
+      type: object
+      properties:
+        unit:
+          enum:
+            - s
+            - m
+            - h
+          type: string
+        value:
+          minimum: 1
+          type: integer
+      required:
+        - value
+        - unit
+    AlertSuppressionGroupBy:
+      items:
+        type: string
+      maxItems: 3
+      minItems: 1
+      type: array
+    AlertSuppressionMissingFieldsStrategy:
+      description: >-
+        Describes how alerts will be generated for documents with missing
+        suppress by fields:
+
+        doNotSuppress - per each document a separate alert will be created
+
+        suppress - only alert will be created per suppress by bucket
+      enum:
+        - doNotSuppress
+        - suppress
+      type: string
+    AnomalyThreshold:
+      description: Anomaly threshold
+      minimum: 0
+      type: integer
+    BuildingBlockType:
+      description: >-
+        Determines if the rule acts as a building block. By default,
+        building-block alerts are not displayed in the UI. These rules are used
+        as a foundation for other rules that do generate alerts. Its value must
+        be default.
+      type: string
+    BulkActionEditPayload:
+      anyOf:
+        - $ref: '#/components/schemas/BulkActionEditPayloadTags'
+        - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
+        - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
+        - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
+        - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+    BulkActionEditPayloadIndexPatterns:
+      type: object
+      properties:
+        overwrite_data_views:
+          type: boolean
+        type:
+          enum:
+            - add_index_patterns
+            - delete_index_patterns
+            - set_index_patterns
+          type: string
+        value:
+          $ref: '#/components/schemas/IndexPatternArray'
+      required:
+        - type
+        - value
+    BulkActionEditPayloadInvestigationFields:
+      type: object
+      properties:
+        type:
+          enum:
+            - add_investigation_fields
+            - delete_investigation_fields
+            - set_investigation_fields
+          type: string
+        value:
+          $ref: '#/components/schemas/InvestigationFields'
+      required:
+        - type
+        - value
+    BulkActionEditPayloadRuleActions:
+      type: object
+      properties:
+        type:
+          enum:
+            - add_rule_actions
+            - set_rule_actions
+          type: string
+        value:
+          type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/NormalizedRuleAction'
+              type: array
+            throttle:
+              $ref: '#/components/schemas/ThrottleForBulkActions'
+          required:
+            - actions
+      required:
+        - type
+        - value
+    BulkActionEditPayloadSchedule:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_schedule
+          type: string
+        value:
+          type: object
+          properties:
+            interval:
+              description: Interval in which the rule is executed
+              example: 1h
+              pattern: '^[1-9]\d*[smh]$'
+              type: string
+            lookback:
+              description: Lookback time for the rule
+              example: 1h
+              pattern: '^[1-9]\d*[smh]$'
+              type: string
+          required:
+            - interval
+            - lookback
+      required:
+        - type
+        - value
+    BulkActionEditPayloadTags:
+      type: object
+      properties:
+        type:
+          enum:
+            - add_tags
+            - delete_tags
+            - set_tags
+          type: string
+        value:
+          $ref: '#/components/schemas/RuleTagArray'
+      required:
+        - type
+        - value
+    BulkActionEditPayloadTimeline:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_timeline
+          type: string
+        value:
+          type: object
+          properties:
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+          required:
+            - timeline_id
+            - timeline_title
+      required:
+        - type
+        - value
+    BulkActionsDryRunErrCode:
+      enum:
+        - IMMUTABLE
+        - MACHINE_LEARNING_AUTH
+        - MACHINE_LEARNING_INDEX_PATTERN
+        - ESQL_INDEX_PATTERN
+        - INVESTIGATION_FIELDS_FEATURE
+      type: string
+    BulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/BulkEditSkipReason'
+      required:
+        - id
+        - skip_reason
+    BulkDeleteRules:
+      type: object
+      properties:
+        action:
+          enum:
+            - delete
+          type: string
+        ids:
+          description: Array of rule IDs
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules
+          type: string
+      required:
+        - action
+    BulkDisableRules:
+      type: object
+      properties:
+        action:
+          enum:
+            - disable
+          type: string
+        ids:
+          description: Array of rule IDs
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules
+          type: string
+      required:
+        - action
+    BulkDuplicateRules:
+      type: object
+      properties:
+        action:
+          enum:
+            - duplicate
+          type: string
+        duplicate:
+          type: object
+          properties:
+            include_exceptions:
+              description: Whether to copy exceptions from the original rule
+              type: boolean
+            include_expired_exceptions:
+              description: Whether to copy expired exceptions from the original rule
+              type: boolean
+          required:
+            - include_exceptions
+            - include_expired_exceptions
+        ids:
+          description: Array of rule IDs
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules
+          type: string
+      required:
+        - action
+    BulkEditActionResponse:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            errors:
+              items:
+                $ref: '#/components/schemas/NormalizedRuleError'
+              type: array
+            results:
+              $ref: '#/components/schemas/BulkEditActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkEditActionSummary'
+          required:
+            - results
+            - summary
+        message:
+          type: string
+        rules_count:
+          type: integer
+        status_code:
+          type: integer
+        success:
+          type: boolean
+      required:
+        - attributes
+    BulkEditActionResults:
+      type: object
+      properties:
+        created:
+          items:
+            $ref: '#/components/schemas/RuleResponse'
+          type: array
+        deleted:
+          items:
+            $ref: '#/components/schemas/RuleResponse'
+          type: array
+        skipped:
+          items:
+            $ref: '#/components/schemas/BulkActionSkipResult'
+          type: array
+        updated:
+          items:
+            $ref: '#/components/schemas/RuleResponse'
+          type: array
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+    BulkEditActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+    BulkEditRules:
+      type: object
+      properties:
+        action:
+          enum:
+            - edit
+          type: string
+        edit:
+          description: Array of objects containing the edit operations
+          items:
+            $ref: '#/components/schemas/BulkActionEditPayload'
+          minItems: 1
+          type: array
+        ids:
+          description: Array of rule IDs
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules
+          type: string
+      required:
+        - action
+        - edit
+    BulkEditSkipReason:
+      enum:
+        - RULE_NOT_MODIFIED
+      type: string
+    BulkEnableRules:
+      type: object
+      properties:
+        action:
+          enum:
+            - enable
+          type: string
+        ids:
+          description: Array of rule IDs
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules
+          type: string
+      required:
+        - action
+    BulkExportActionResponse:
+      type: string
+    BulkExportRules:
+      type: object
+      properties:
+        action:
+          enum:
+            - export
+          type: string
+        ids:
+          description: Array of rule IDs
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules
+          type: string
+      required:
+        - action
+    ConcurrentSearches:
+      minimum: 1
+      type: integer
+    DataViewId:
+      type: string
+    DefaultParams:
+      type: object
+      properties:
+        command:
+          enum:
+            - isolate
+          type: string
+        comment:
+          type: string
+      required:
+        - command
+    EcsMapping:
+      additionalProperties:
+        type: object
+        properties:
+          field:
+            type: string
+          value:
+            oneOf:
+              - type: string
+              - items:
+                  type: string
+                type: array
+      type: object
+    EndpointResponseAction:
+      type: object
+      properties:
+        action_type_id:
+          enum:
+            - .endpoint
+          type: string
+        params:
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
+      required:
+        - action_type_id
+        - params
+    EqlOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/AlertSuppression'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+        event_category_override:
+          $ref: '#/components/schemas/EventCategoryOverride'
+        filters:
+          $ref: '#/components/schemas/RuleFilterArray'
+        index:
+          $ref: '#/components/schemas/IndexPatternArray'
+        tiebreaker_field:
+          $ref: '#/components/schemas/TiebreakerField'
+        timestamp_field:
+          $ref: '#/components/schemas/TimestampField'
+    EqlQueryLanguage:
+      enum:
+        - eql
+      type: string
+    EqlRequiredFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/EqlQueryLanguage'
+          description: Query language to use
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+          description: EQL query to execute
+        type:
+          description: Rule type
+          enum:
+            - eql
+          type: string
+      required:
+        - type
+        - query
+        - language
+    EqlRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/EqlRuleResponseFields'
+    EqlRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/EqlRequiredFields'
+        - $ref: '#/components/schemas/EqlOptionalFields'
+    EqlRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/EqlRuleCreateFields'
+    EqlRulePatchFields:
+      allOf:
+        - type: object
+          properties:
+            language:
+              $ref: '#/components/schemas/EqlQueryLanguage'
+              description: Query language to use
+            query:
+              $ref: '#/components/schemas/RuleQuery'
+              description: EQL query to execute
+            type:
+              description: Rule type
+              enum:
+                - eql
+              type: string
+        - $ref: '#/components/schemas/EqlOptionalFields'
+    EqlRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/EqlRulePatchFields'
+    EqlRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/EqlRequiredFields'
+        - $ref: '#/components/schemas/EqlOptionalFields'
+    EqlRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/EqlRuleCreateFields'
+    ErrorSchema:
+      additionalProperties: false
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              minimum: 400
+              type: integer
+          required:
+            - status_code
+            - message
+        id:
+          type: string
+        item_id:
+          minLength: 1
+          type: string
+        list_id:
+          minLength: 1
+          type: string
+        rule_id:
+          $ref: '#/components/schemas/RuleSignatureId'
+      required:
+        - error
+    EsqlQueryLanguage:
+      enum:
+        - esql
+      type: string
+    EsqlRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/EsqlRuleResponseFields'
+    EsqlRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
+        - $ref: '#/components/schemas/EsqlRuleRequiredFields'
+    EsqlRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/EsqlRuleCreateFields'
+    EsqlRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/AlertSuppression'
+    EsqlRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            language:
+              $ref: '#/components/schemas/EsqlQueryLanguage'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            query:
+              $ref: '#/components/schemas/RuleQuery'
+              description: ESQL query to execute
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            type:
+              description: Rule type
+              enum:
+                - esql
+              type: string
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
+    EsqlRuleRequiredFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/EsqlQueryLanguage'
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+          description: ESQL query to execute
+        type:
+          description: Rule type
+          enum:
+            - esql
+          type: string
+      required:
+        - type
+        - language
+        - query
+    EsqlRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
+        - $ref: '#/components/schemas/EsqlRuleRequiredFields'
+    EsqlRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/EsqlRuleCreateFields'
+    EventCategoryOverride:
+      type: string
+    ExceptionListType:
+      description: The exception type
+      enum:
+        - detection
+        - rule_default
+        - endpoint
+        - endpoint_trusted_apps
+        - endpoint_events
+        - endpoint_host_isolation_exceptions
+        - endpoint_blocklists
+      type: string
+    ExternalRuleSource:
+      description: >-
+        Type of rule source for externally sourced rules, i.e. rules that have
+        an external source, such as the Elastic Prebuilt rules repo.
+      type: object
+      properties:
+        is_customized:
+          $ref: '#/components/schemas/IsExternalRuleCustomized'
+        type:
+          enum:
+            - external
+          type: string
+      required:
+        - type
+        - is_customized
+    FindRulesSortField:
+      enum:
+        - created_at
+        - createdAt
+        - enabled
+        - execution_summary.last_execution.date
+        - execution_summary.last_execution.metrics.execution_gap_duration_s
+        - execution_summary.last_execution.metrics.total_indexing_duration_ms
+        - execution_summary.last_execution.metrics.total_search_duration_ms
+        - execution_summary.last_execution.status
+        - name
+        - risk_score
+        - riskScore
+        - severity
+        - updated_at
+        - updatedAt
+      type: string
+    HistoryWindowStart:
+      $ref: '#/components/schemas/NonEmptyString'
+    IndexPatternArray:
+      items:
+        type: string
+      type: array
+    InternalRuleSource:
+      description: >-
+        Type of rule source for internally sourced rules, i.e. created within
+        the Kibana apps.
+      type: object
+      properties:
+        type:
+          enum:
+            - internal
+          type: string
+      required:
+        - type
+    InvestigationFields:
+      type: object
+      properties:
+        field_names:
+          items:
+            $ref: '#/components/schemas/NonEmptyString'
+          minItems: 1
+          type: array
+      required:
+        - field_names
+    InvestigationGuide:
+      description: Notes to help investigate alerts produced by the rule.
+      type: string
+    IsExternalRuleCustomized:
+      description: >-
+        Determines whether an external/prebuilt rule has been customized by the
+        user (i.e. any of its fields have been modified and diverged from the
+        base value).
+      type: boolean
+    IsRuleEnabled:
+      description: Determines whether the rule is enabled.
+      type: boolean
+    IsRuleImmutable:
+      deprecated: true
+      description: >-
+        This field determines whether the rule is a prebuilt Elastic rule. It
+        will be replaced with the `rule_source` field.
+      type: boolean
+    ItemsPerSearch:
+      minimum: 1
+      type: integer
+    KqlQueryLanguage:
+      enum:
+        - kuery
+        - lucene
+      type: string
+    MachineLearningJobId:
+      description: Machine learning job ID
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          minItems: 1
+          type: array
+    MachineLearningRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/MachineLearningRuleResponseFields'
+    MachineLearningRuleCreateFields:
+      $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+    MachineLearningRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
+    MachineLearningRulePatchFields:
+      type: object
+      properties:
+        anomaly_threshold:
+          $ref: '#/components/schemas/AnomalyThreshold'
+        machine_learning_job_id:
+          $ref: '#/components/schemas/MachineLearningJobId'
+        type:
+          description: Rule type
+          enum:
+            - machine_learning
+          type: string
+    MachineLearningRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/MachineLearningRulePatchFields'
+    MachineLearningRuleRequiredFields:
+      type: object
+      properties:
+        anomaly_threshold:
+          $ref: '#/components/schemas/AnomalyThreshold'
+        machine_learning_job_id:
+          $ref: '#/components/schemas/MachineLearningJobId'
+        type:
+          description: Rule type
+          enum:
+            - machine_learning
+          type: string
+      required:
+        - type
+        - machine_learning_job_id
+        - anomaly_threshold
+    MachineLearningRuleResponseFields:
+      $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+    MachineLearningRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
+    MaxSignals:
+      minimum: 1
+      type: integer
+    NewTermsFields:
+      items:
+        type: string
+      maxItems: 3
+      minItems: 1
+      type: array
+    NewTermsRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/NewTermsRuleResponseFields'
+    NewTermsRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/NewTermsRuleRequiredFields'
+        - $ref: '#/components/schemas/NewTermsRuleOptionalFields'
+        - $ref: '#/components/schemas/NewTermsRuleDefaultableFields'
+    NewTermsRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/NewTermsRuleCreateFields'
+    NewTermsRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/KqlQueryLanguage'
+    NewTermsRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/AlertSuppression'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+        filters:
+          $ref: '#/components/schemas/RuleFilterArray'
+        index:
+          $ref: '#/components/schemas/IndexPatternArray'
+    NewTermsRulePatchFields:
+      allOf:
+        - type: object
+          properties:
+            history_window_start:
+              $ref: '#/components/schemas/HistoryWindowStart'
+            new_terms_fields:
+              $ref: '#/components/schemas/NewTermsFields'
+            query:
+              $ref: '#/components/schemas/RuleQuery'
+            type:
+              description: Rule type
+              enum:
+                - new_terms
+              type: string
+        - $ref: '#/components/schemas/NewTermsRuleOptionalFields'
+        - $ref: '#/components/schemas/NewTermsRuleDefaultableFields'
+    NewTermsRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/NewTermsRulePatchFields'
+    NewTermsRuleRequiredFields:
+      type: object
+      properties:
+        history_window_start:
+          $ref: '#/components/schemas/HistoryWindowStart'
+        new_terms_fields:
+          $ref: '#/components/schemas/NewTermsFields'
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+        type:
+          description: Rule type
+          enum:
+            - new_terms
+          type: string
+      required:
+        - type
+        - query
+        - new_terms_fields
+        - history_window_start
+    NewTermsRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/NewTermsRuleRequiredFields'
+        - $ref: '#/components/schemas/NewTermsRuleOptionalFields'
+        - type: object
+          properties:
+            language:
+              $ref: '#/components/schemas/KqlQueryLanguage'
+          required:
+            - language
+    NewTermsRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/NewTermsRuleCreateFields'
+    NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    NormalizedRuleAction:
+      additionalProperties: false
+      type: object
+      properties:
+        alerts_filter:
+          $ref: '#/components/schemas/RuleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/RuleActionFrequency'
+        group:
+          $ref: '#/components/schemas/RuleActionGroup'
+        id:
+          $ref: '#/components/schemas/RuleActionId'
+        params:
+          $ref: '#/components/schemas/RuleActionParams'
+      required:
+        - group
+        - id
+        - params
+    NormalizedRuleError:
+      type: object
+      properties:
+        err_code:
+          $ref: '#/components/schemas/BulkActionsDryRunErrCode'
+        message:
+          type: string
+        rules:
+          items:
+            $ref: '#/components/schemas/RuleDetailsInError'
+          type: array
+        status_code:
+          type: integer
+      required:
+        - message
+        - status_code
+        - rules
+    OsqueryParams:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/EcsMapping'
+        pack_id:
+          type: string
+        queries:
+          items:
+            $ref: '#/components/schemas/OsqueryQuery'
+          type: array
+        query:
+          type: string
+        saved_query_id:
+          type: string
+        timeout:
+          type: number
+    OsqueryQuery:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/EcsMapping'
+        id:
+          description: Query ID
+          type: string
+        platform:
+          type: string
+        query:
+          description: Query to execute
+          type: string
+        removed:
+          type: boolean
+        snapshot:
+          type: boolean
+        version:
+          description: Query version
+          type: string
+      required:
+        - id
+        - query
+    OsqueryResponseAction:
+      type: object
+      properties:
+        action_type_id:
+          enum:
+            - .osquery
+          type: string
+        params:
+          $ref: '#/components/schemas/OsqueryParams'
+      required:
+        - action_type_id
+        - params
+    ProcessesParams:
+      type: object
+      properties:
+        command:
+          enum:
+            - kill-process
+            - suspend-process
+          type: string
+        comment:
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of process.pid
+              type: string
+            overwrite:
+              default: true
+              description: Whether to overwrite field with process.pid
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
+    QueryRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/QueryRuleResponseFields'
+    QueryRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/QueryRuleRequiredFields'
+        - $ref: '#/components/schemas/QueryRuleOptionalFields'
+        - $ref: '#/components/schemas/QueryRuleDefaultableFields'
+    QueryRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/QueryRuleCreateFields'
+    QueryRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/KqlQueryLanguage'
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+    QueryRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/AlertSuppression'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+        filters:
+          $ref: '#/components/schemas/RuleFilterArray'
+        index:
+          $ref: '#/components/schemas/IndexPatternArray'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
+        saved_id:
+          $ref: '#/components/schemas/SavedQueryId'
+    QueryRulePatchFields:
+      allOf:
+        - type: object
+          properties:
+            type:
+              description: Rule type
+              enum:
+                - query
+              type: string
+        - $ref: '#/components/schemas/QueryRuleOptionalFields'
+        - $ref: '#/components/schemas/QueryRuleDefaultableFields'
+    QueryRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/QueryRulePatchFields'
+    QueryRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          description: Rule type
+          enum:
+            - query
+          type: string
+      required:
+        - type
+    QueryRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/QueryRuleRequiredFields'
+        - $ref: '#/components/schemas/QueryRuleOptionalFields'
+        - type: object
+          properties:
+            language:
+              $ref: '#/components/schemas/KqlQueryLanguage'
+            query:
+              $ref: '#/components/schemas/RuleQuery'
+          required:
+            - query
+            - language
+    QueryRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/QueryRuleCreateFields'
+    RelatedIntegration:
+      type: object
+      properties:
+        integration:
+          $ref: '#/components/schemas/NonEmptyString'
+        package:
+          $ref: '#/components/schemas/NonEmptyString'
+        version:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - package
+        - version
+    RelatedIntegrationArray:
+      items:
+        $ref: '#/components/schemas/RelatedIntegration'
+      type: array
+    RequiredField:
+      description: Describes an Elasticsearch field that is needed for the rule to function
+      type: object
+      properties:
+        ecs:
+          description: Whether the field is an ECS field
+          type: boolean
+        name:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Name of an Elasticsearch field
+        type:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Type of the Elasticsearch field
+      required:
+        - name
+        - type
+        - ecs
+    RequiredFieldArray:
+      items:
+        $ref: '#/components/schemas/RequiredField'
+      type: array
+    RequiredFieldInput:
+      description: >-
+        Input parameters to create a RequiredField. Does not include the `ecs`
+        field, because `ecs` is calculated on the backend based on the field
+        name and type.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Name of an Elasticsearch field
+        type:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Type of an Elasticsearch field
+      required:
+        - name
+        - type
+    ResponseAction:
+      oneOf:
+        - $ref: '#/components/schemas/OsqueryResponseAction'
+        - $ref: '#/components/schemas/EndpointResponseAction'
+    ResponseFields:
+      type: object
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        execution_summary:
+          $ref: '#/components/schemas/RuleExecutionSummary'
+        id:
+          $ref: '#/components/schemas/RuleObjectId'
+        immutable:
+          $ref: '#/components/schemas/IsRuleImmutable'
+        required_fields:
+          $ref: '#/components/schemas/RequiredFieldArray'
+        revision:
+          minimum: 0
+          type: integer
+        rule_id:
+          $ref: '#/components/schemas/RuleSignatureId'
+        rule_source:
+          $ref: '#/components/schemas/RuleSource'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+      required:
+        - id
+        - rule_id
+        - immutable
+        - updated_at
+        - updated_by
+        - created_at
+        - created_by
+        - revision
+        - related_integrations
+        - required_fields
+    RiskScore:
+      description: Risk score (0 to 100)
+      maximum: 100
+      minimum: 0
+      type: integer
+    RiskScoreMapping:
+      description: >-
+        Overrides generated alerts' risk_score with a value from the source
+        event
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          operator:
+            enum:
+              - equals
+            type: string
+          risk_score:
+            $ref: '#/components/schemas/RiskScore'
+          value:
+            type: string
+        required:
+          - field
+          - operator
+          - value
+      type: array
+    RuleAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/RuleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/RuleActionFrequency'
+        group:
+          $ref: '#/components/schemas/RuleActionGroup'
+        id:
+          $ref: '#/components/schemas/RuleActionId'
+        params:
+          $ref: '#/components/schemas/RuleActionParams'
+        uuid:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
+    RuleActionAlertsFilter:
+      additionalProperties: true
+      type: object
+    RuleActionFrequency:
+      description: >-
+        The action frequency defines when the action runs (for example, only on
+        rule execution or at specific time intervals).
+      type: object
+      properties:
+        notifyWhen:
+          $ref: '#/components/schemas/RuleActionNotifyWhen'
+        summary:
+          description: >-
+            Action summary indicates whether we will send a summary notification
+            about all the generate alerts or notification per individual alert
+          type: boolean
+        throttle:
+          $ref: '#/components/schemas/RuleActionThrottle'
+          nullable: true
+      required:
+        - summary
+        - notifyWhen
+        - throttle
+    RuleActionGroup:
+      description: >-
+        Optionally groups actions by use cases. Use `default` for alert
+        notifications.
+      type: string
+    RuleActionId:
+      description: The connector ID.
+      type: string
+    RuleActionNotifyWhen:
+      description: >-
+        The condition for throttling the notification: `onActionGroupChange`,
+        `onActiveAlert`,  or `onThrottleInterval`
+      enum:
+        - onActiveAlert
+        - onThrottleInterval
+        - onActionGroupChange
+      type: string
+    RuleActionParams:
+      additionalProperties: true
+      description: >-
+        Object containing the allowed connector fields, which varies according
+        to the connector type.
+      type: object
+    RuleActionThrottle:
+      description: Defines the interval on which a rule's actions are executed.
+      oneOf:
+        - enum:
+            - no_actions
+            - rule
+          type: string
+        - description: 'Time interval in seconds, minutes, hours, or days.'
+          example: 1h
+          pattern: '^[1-9]\d*[smhd]$'
+          type: string
+    RuleAuthorArray:
+      items:
+        type: string
+      type: array
+    RuleCreateProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRuleCreateProps'
+        - $ref: '#/components/schemas/QueryRuleCreateProps'
+        - $ref: '#/components/schemas/SavedQueryRuleCreateProps'
+        - $ref: '#/components/schemas/ThresholdRuleCreateProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateProps'
+        - $ref: '#/components/schemas/MachineLearningRuleCreateProps'
+        - $ref: '#/components/schemas/NewTermsRuleCreateProps'
+        - $ref: '#/components/schemas/EsqlRuleCreateProps'
+      discriminator:
+        propertyName: type
+    RuleDescription:
+      minLength: 1
+      type: string
+    RuleDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+    RuleExceptionList:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: ID of the exception container
+        list_id:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: List ID of the exception container
+        namespace_type:
+          description: Determines the exceptions validity in rule's Kibana space
+          enum:
+            - agnostic
+            - single
+          type: string
+        type:
+          $ref: '#/components/schemas/ExceptionListType'
+      required:
+        - id
+        - list_id
+        - type
+        - namespace_type
+    RuleExecutionMetrics:
+      type: object
+      properties:
+        execution_gap_duration_s:
+          description: Duration in seconds of execution gap
+          minimum: 0
+          type: integer
+        total_enrichment_duration_ms:
+          description: >-
+            Total time spent enriching documents during current rule execution
+            cycle
+          minimum: 0
+          type: integer
+        total_indexing_duration_ms:
+          description: >-
+            Total time spent indexing documents during current rule execution
+            cycle
+          minimum: 0
+          type: integer
+        total_search_duration_ms:
+          description: >-
+            Total time spent performing ES searches as measured by Kibana;
+            includes network latency and time spent serializing/deserializing
+            request/response
+          minimum: 0
+          type: integer
+    RuleExecutionStatus:
+      description: >-
+        Custom execution status of Security rules that is different from the
+        status used in the Alerting Framework. We merge our custom status with
+        the Framework's status to determine the resulting status of a rule.
+
+        - going to run - @deprecated Replaced by the 'running' status but left
+        for backwards compatibility with rule execution events already written
+        to Event Log in the prior versions of Kibana. Don't use when writing
+        rule status changes.
+
+        - running - Rule execution started but not reached any intermediate or
+        final status.
+
+        - partial failure - Rule can partially fail for various reasons either
+        in the middle of an execution (in this case we update its status right
+        away) or in the end of it. So currently this status can be both
+        intermediate and final at the same time. A typical reason for a partial
+        failure: not all the indices that the rule searches over actually exist.
+
+        - failed - Rule failed to execute due to unhandled exception or a reason
+        defined in the business logic of its executor function.
+
+        - succeeded - Rule executed successfully without any issues. Note: this
+        status is just an indication of a rule's "health". The rule might or
+        might not generate any alerts despite of it.
+      enum:
+        - going to run
+        - running
+        - partial failure
+        - failed
+        - succeeded
+      type: string
+    RuleExecutionStatusOrder:
+      type: integer
+    RuleExecutionSummary:
+      type: object
+      properties:
+        last_execution:
+          type: object
+          properties:
+            date:
+              description: Date of the last execution
+              format: date-time
+              type: string
+            message:
+              type: string
+            metrics:
+              $ref: '#/components/schemas/RuleExecutionMetrics'
+            status:
+              $ref: '#/components/schemas/RuleExecutionStatus'
+              description: Status of the last execution
+            status_order:
+              $ref: '#/components/schemas/RuleExecutionStatusOrder'
+          required:
+            - date
+            - status
+            - status_order
+            - message
+            - metrics
+      required:
+        - last_execution
+    RuleFalsePositiveArray:
+      items:
+        type: string
+      type: array
+    RuleFilterArray:
+      items: {}
+      type: array
+    RuleInterval:
+      description: >-
+        Frequency of rule execution, using a date math range. For example, "1h"
+        means the rule runs every hour. Defaults to 5m (5 minutes).
+      type: string
+    RuleIntervalFrom:
+      description: >-
+        Time from which data is analyzed each time the rule executes, using a
+        date math range. For example, now-4200s means the rule analyzes data
+        from 70 minutes before its start time. Defaults to now-6m (analyzes data
+        from 6 minutes before the start time).
+      format: date-math
+      type: string
+    RuleIntervalTo:
+      type: string
+    RuleLicense:
+      description: The rule's license.
+      type: string
+    RuleMetadata:
+      additionalProperties: true
+      type: object
+    RuleName:
+      minLength: 1
+      type: string
+    RuleNameOverride:
+      description: Sets the source field for the alert's signal.rule.name value
+      type: string
+    RuleObjectId:
+      $ref: '#/components/schemas/UUID'
+    RulePatchProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRulePatchProps'
+        - $ref: '#/components/schemas/QueryRulePatchProps'
+        - $ref: '#/components/schemas/SavedQueryRulePatchProps'
+        - $ref: '#/components/schemas/ThresholdRulePatchProps'
+        - $ref: '#/components/schemas/ThreatMatchRulePatchProps'
+        - $ref: '#/components/schemas/MachineLearningRulePatchProps'
+        - $ref: '#/components/schemas/NewTermsRulePatchProps'
+        - $ref: '#/components/schemas/EsqlRulePatchProps'
+    RuleQuery:
+      type: string
+    RuleReferenceArray:
+      items:
+        type: string
+      type: array
+    RuleResponse:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRule'
+        - $ref: '#/components/schemas/QueryRule'
+        - $ref: '#/components/schemas/SavedQueryRule'
+        - $ref: '#/components/schemas/ThresholdRule'
+        - $ref: '#/components/schemas/ThreatMatchRule'
+        - $ref: '#/components/schemas/MachineLearningRule'
+        - $ref: '#/components/schemas/NewTermsRule'
+        - $ref: '#/components/schemas/EsqlRule'
+      discriminator:
+        propertyName: type
+    RuleSignatureId:
+      description: 'Could be any string, not necessarily a UUID'
+      type: string
+    RuleSource:
+      description: >-
+        Discriminated union that determines whether the rule is internally
+        sourced (created within the Kibana app) or has an external source, such
+        as the Elastic Prebuilt rules repo.
+      discriminator:
+        propertyName: type
+      oneOf:
+        - $ref: '#/components/schemas/ExternalRuleSource'
+        - $ref: '#/components/schemas/InternalRuleSource'
+    RuleTagArray:
+      description: >-
+        String array containing words and phrases to help categorize, filter,
+        and search rules. Defaults to an empty array.
+      items:
+        type: string
+      type: array
+    RuleUpdateProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRuleUpdateProps'
+        - $ref: '#/components/schemas/QueryRuleUpdateProps'
+        - $ref: '#/components/schemas/SavedQueryRuleUpdateProps'
+        - $ref: '#/components/schemas/ThresholdRuleUpdateProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleUpdateProps'
+        - $ref: '#/components/schemas/MachineLearningRuleUpdateProps'
+        - $ref: '#/components/schemas/NewTermsRuleUpdateProps'
+        - $ref: '#/components/schemas/EsqlRuleUpdateProps'
+      discriminator:
+        propertyName: type
+    RuleVersion:
+      description: The rule's version number.
+      minimum: 1
+      type: integer
+    SavedObjectResolveAliasPurpose:
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+      type: string
+    SavedObjectResolveAliasTargetId:
+      type: string
+    SavedObjectResolveOutcome:
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+      type: string
+    SavedQueryId:
+      type: string
+    SavedQueryRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/SavedQueryRuleResponseFields'
+    SavedQueryRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/SavedQueryRuleRequiredFields'
+        - $ref: '#/components/schemas/SavedQueryRuleOptionalFields'
+        - $ref: '#/components/schemas/SavedQueryRuleDefaultableFields'
+    SavedQueryRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+    SavedQueryRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/KqlQueryLanguage'
+    SavedQueryRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/AlertSuppression'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+        filters:
+          $ref: '#/components/schemas/RuleFilterArray'
+        index:
+          $ref: '#/components/schemas/IndexPatternArray'
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
+    SavedQueryRulePatchFields:
+      allOf:
+        - type: object
+          properties:
+            saved_id:
+              $ref: '#/components/schemas/SavedQueryId'
+            type:
+              description: Rule type
+              enum:
+                - saved_query
+              type: string
+        - $ref: '#/components/schemas/SavedQueryRuleOptionalFields'
+        - $ref: '#/components/schemas/SavedQueryRuleDefaultableFields'
+    SavedQueryRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/SavedQueryRulePatchFields'
+    SavedQueryRuleRequiredFields:
+      type: object
+      properties:
+        saved_id:
+          $ref: '#/components/schemas/SavedQueryId'
+        type:
+          description: Rule type
+          enum:
+            - saved_query
+          type: string
+      required:
+        - type
+        - saved_id
+    SavedQueryRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/SavedQueryRuleRequiredFields'
+        - $ref: '#/components/schemas/SavedQueryRuleOptionalFields'
+        - type: object
+          properties:
+            language:
+              $ref: '#/components/schemas/KqlQueryLanguage'
+          required:
+            - language
+    SavedQueryRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+    SetupGuide:
+      type: string
+    Severity:
+      description: Severity of the rule
+      enum:
+        - low
+        - medium
+        - high
+        - critical
+      type: string
+    SeverityMapping:
+      description: Overrides generated alerts' severity with values from the source event
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          operator:
+            enum:
+              - equals
+            type: string
+          severity:
+            $ref: '#/components/schemas/Severity'
+          value:
+            type: string
+        required:
+          - field
+          - operator
+          - severity
+          - value
+      type: array
+    SortOrder:
+      enum:
+        - asc
+        - desc
+      type: string
+    Threat:
+      type: object
+      properties:
+        framework:
+          description: Relevant attack framework
+          type: string
+        tactic:
+          $ref: '#/components/schemas/ThreatTactic'
+        technique:
+          description: Array containing information on the attack techniques (optional)
+          items:
+            $ref: '#/components/schemas/ThreatTechnique'
+          type: array
+      required:
+        - framework
+        - tactic
+    ThreatArray:
+      items:
+        $ref: '#/components/schemas/Threat'
+      type: array
+    ThreatFilters:
+      items:
+        description: >-
+          Query and filter context array used to filter documents from the
+          Elasticsearch index containing the threat values
+      type: array
+    ThreatIndex:
+      items:
+        type: string
+      type: array
+    ThreatIndicatorPath:
+      description: >-
+        Defines the path to the threat indicator in the indicator documents
+        (optional)
+      type: string
+    ThreatMapping:
+      items:
+        type: object
+        properties:
+          entries:
+            items:
+              type: object
+              properties:
+                field:
+                  $ref: '#/components/schemas/NonEmptyString'
+                type:
+                  enum:
+                    - mapping
+                  type: string
+                value:
+                  $ref: '#/components/schemas/NonEmptyString'
+              required:
+                - field
+                - type
+                - value
+            type: array
+        required:
+          - entries
+      minItems: 1
+      type: array
+    ThreatMatchRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleResponseFields'
+    ThreatMatchRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/ThreatMatchRuleRequiredFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleOptionalFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleDefaultableFields'
+    ThreatMatchRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateFields'
+    ThreatMatchRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/KqlQueryLanguage'
+    ThreatMatchRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/AlertSuppression'
+        concurrent_searches:
+          $ref: '#/components/schemas/ConcurrentSearches'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+        filters:
+          $ref: '#/components/schemas/RuleFilterArray'
+        index:
+          $ref: '#/components/schemas/IndexPatternArray'
+        items_per_search:
+          $ref: '#/components/schemas/ItemsPerSearch'
+        saved_id:
+          $ref: '#/components/schemas/SavedQueryId'
+        threat_filters:
+          $ref: '#/components/schemas/ThreatFilters'
+        threat_indicator_path:
+          $ref: '#/components/schemas/ThreatIndicatorPath'
+        threat_language:
+          $ref: '#/components/schemas/KqlQueryLanguage'
+    ThreatMatchRulePatchFields:
+      allOf:
+        - type: object
+          properties:
+            query:
+              $ref: '#/components/schemas/RuleQuery'
+            threat_index:
+              $ref: '#/components/schemas/ThreatIndex'
+            threat_mapping:
+              $ref: '#/components/schemas/ThreatMapping'
+            threat_query:
+              $ref: '#/components/schemas/ThreatQuery'
+            type:
+              description: Rule type
+              enum:
+                - threat_match
+              type: string
+        - $ref: '#/components/schemas/ThreatMatchRuleOptionalFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleDefaultableFields'
+    ThreatMatchRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/ThreatMatchRulePatchFields'
+    ThreatMatchRuleRequiredFields:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+        threat_index:
+          $ref: '#/components/schemas/ThreatIndex'
+        threat_mapping:
+          $ref: '#/components/schemas/ThreatMapping'
+        threat_query:
+          $ref: '#/components/schemas/ThreatQuery'
+        type:
+          description: Rule type
+          enum:
+            - threat_match
+          type: string
+      required:
+        - type
+        - query
+        - threat_query
+        - threat_mapping
+        - threat_index
+    ThreatMatchRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/ThreatMatchRuleRequiredFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleOptionalFields'
+        - type: object
+          properties:
+            language:
+              $ref: '#/components/schemas/KqlQueryLanguage'
+          required:
+            - language
+    ThreatMatchRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateFields'
+    ThreatQuery:
+      description: Query to execute
+      type: string
+    ThreatSubtechnique:
+      type: object
+      properties:
+        id:
+          description: Subtechnique ID
+          type: string
+        name:
+          description: Subtechnique name
+          type: string
+        reference:
+          description: Subtechnique reference
+          type: string
+      required:
+        - id
+        - name
+        - reference
+    ThreatTactic:
+      type: object
+      properties:
+        id:
+          description: Tactic ID
+          type: string
+        name:
+          description: Tactic name
+          type: string
+        reference:
+          description: Tactic reference
+          type: string
+      required:
+        - id
+        - name
+        - reference
+    ThreatTechnique:
+      type: object
+      properties:
+        id:
+          description: Technique ID
+          type: string
+        name:
+          description: Technique name
+          type: string
+        reference:
+          description: Technique reference
+          type: string
+        subtechnique:
+          description: Array containing more specific information on the attack technique
+          items:
+            $ref: '#/components/schemas/ThreatSubtechnique'
+          type: array
+      required:
+        - id
+        - name
+        - reference
+    Threshold:
+      type: object
+      properties:
+        cardinality:
+          $ref: '#/components/schemas/ThresholdCardinality'
+        field:
+          $ref: '#/components/schemas/ThresholdField'
+        value:
+          $ref: '#/components/schemas/ThresholdValue'
+      required:
+        - field
+        - value
+    ThresholdAlertSuppression:
+      type: object
+      properties:
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+      required:
+        - duration
+    ThresholdCardinality:
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          value:
+            minimum: 0
+            type: integer
+        required:
+          - field
+          - value
+      type: array
+    ThresholdField:
+      description: Field to aggregate on
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+    ThresholdRule:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+            - version
+            - tags
+            - enabled
+            - risk_score_mapping
+            - severity_mapping
+            - interval
+            - from
+            - to
+            - actions
+            - exceptions_list
+            - author
+            - false_positives
+            - references
+            - max_signals
+            - threat
+            - setup
+            - related_integrations
+            - required_fields
+        - $ref: '#/components/schemas/ResponseFields'
+        - $ref: '#/components/schemas/ThresholdRuleResponseFields'
+    ThresholdRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/ThresholdRuleRequiredFields'
+        - $ref: '#/components/schemas/ThresholdRuleOptionalFields'
+        - $ref: '#/components/schemas/ThresholdRuleDefaultableFields'
+    ThresholdRuleCreateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/ThresholdRuleCreateFields'
+    ThresholdRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/KqlQueryLanguage'
+    ThresholdRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: '#/components/schemas/ThresholdAlertSuppression'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+        filters:
+          $ref: '#/components/schemas/RuleFilterArray'
+        index:
+          $ref: '#/components/schemas/IndexPatternArray'
+        saved_id:
+          $ref: '#/components/schemas/SavedQueryId'
+    ThresholdRulePatchFields:
+      allOf:
+        - type: object
+          properties:
+            query:
+              $ref: '#/components/schemas/RuleQuery'
+            threshold:
+              $ref: '#/components/schemas/Threshold'
+            type:
+              description: Rule type
+              enum:
+                - threshold
+              type: string
+        - $ref: '#/components/schemas/ThresholdRuleOptionalFields'
+        - $ref: '#/components/schemas/ThresholdRuleDefaultableFields'
+    ThresholdRulePatchProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+        - $ref: '#/components/schemas/ThresholdRulePatchFields'
+    ThresholdRuleRequiredFields:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/RuleQuery'
+        threshold:
+          $ref: '#/components/schemas/Threshold'
+        type:
+          description: Rule type
+          enum:
+            - threshold
+          type: string
+      required:
+        - type
+        - query
+        - threshold
+    ThresholdRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/ThresholdRuleRequiredFields'
+        - $ref: '#/components/schemas/ThresholdRuleOptionalFields'
+        - type: object
+          properties:
+            language:
+              $ref: '#/components/schemas/KqlQueryLanguage'
+          required:
+            - language
+    ThresholdRuleUpdateProps:
+      allOf:
+        - type: object
+          properties:
+            actions:
+              items:
+                $ref: '#/components/schemas/RuleAction'
+              type: array
+            alias_purpose:
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+            alias_target_id:
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+            author:
+              $ref: '#/components/schemas/RuleAuthorArray'
+            building_block_type:
+              $ref: '#/components/schemas/BuildingBlockType'
+            description:
+              $ref: '#/components/schemas/RuleDescription'
+            enabled:
+              $ref: '#/components/schemas/IsRuleEnabled'
+            exceptions_list:
+              items:
+                $ref: '#/components/schemas/RuleExceptionList'
+              type: array
+            false_positives:
+              $ref: '#/components/schemas/RuleFalsePositiveArray'
+            from:
+              $ref: '#/components/schemas/RuleIntervalFrom'
+            id:
+              $ref: '#/components/schemas/RuleObjectId'
+            interval:
+              $ref: '#/components/schemas/RuleInterval'
+            investigation_fields:
+              $ref: '#/components/schemas/InvestigationFields'
+            license:
+              $ref: '#/components/schemas/RuleLicense'
+            max_signals:
+              $ref: '#/components/schemas/MaxSignals'
+            meta:
+              $ref: '#/components/schemas/RuleMetadata'
+            name:
+              $ref: '#/components/schemas/RuleName'
+            namespace:
+              $ref: '#/components/schemas/AlertsIndexNamespace'
+            note:
+              $ref: '#/components/schemas/InvestigationGuide'
+            outcome:
+              $ref: '#/components/schemas/SavedObjectResolveOutcome'
+            output_index:
+              $ref: '#/components/schemas/AlertsIndex'
+            references:
+              $ref: '#/components/schemas/RuleReferenceArray'
+            related_integrations:
+              $ref: '#/components/schemas/RelatedIntegrationArray'
+            required_fields:
+              items:
+                $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            risk_score:
+              $ref: '#/components/schemas/RiskScore'
+            risk_score_mapping:
+              $ref: '#/components/schemas/RiskScoreMapping'
+            rule_id:
+              $ref: '#/components/schemas/RuleSignatureId'
+            rule_name_override:
+              $ref: '#/components/schemas/RuleNameOverride'
+            setup:
+              $ref: '#/components/schemas/SetupGuide'
+            severity:
+              $ref: '#/components/schemas/Severity'
+            severity_mapping:
+              $ref: '#/components/schemas/SeverityMapping'
+            tags:
+              $ref: '#/components/schemas/RuleTagArray'
+            threat:
+              $ref: '#/components/schemas/ThreatArray'
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            timeline_id:
+              $ref: '#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '#/components/schemas/TimelineTemplateTitle'
+            timestamp_override:
+              $ref: '#/components/schemas/TimestampOverride'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            to:
+              $ref: '#/components/schemas/RuleIntervalTo'
+            version:
+              $ref: '#/components/schemas/RuleVersion'
+          required:
+            - name
+            - description
+            - risk_score
+            - severity
+        - $ref: '#/components/schemas/ThresholdRuleCreateFields'
+    ThresholdValue:
+      description: Threshold value
+      minimum: 1
+      type: integer
+    ThrottleForBulkActions:
+      description: >-
+        The condition for throttling the notification: 'rule', 'no_actions', or
+        time duration
+      enum:
+        - rule
+        - 1h
+        - 1d
+        - 7d
+      type: string
+    TiebreakerField:
+      description: Sets a secondary field for sorting events
+      type: string
+    TimelineTemplateId:
+      description: Timeline template ID
+      type: string
+    TimelineTemplateTitle:
+      description: Timeline template title
+      type: string
+    TimestampField:
+      description: Contains the event timestamp used for sorting a sequence of events
+      type: string
+    TimestampOverride:
+      description: Sets the time field used to query indices
+      type: string
+    TimestampOverrideFallbackDisabled:
+      description: Disables the fallback to the event's @timestamp field
+      type: boolean
+    UUID:
+      description: A universally unique identifier
+      format: uuid
+      type: string
+    WarningSchema:
+      type: object
+      properties:
+        actionPath:
+          type: string
+        buttonLabel:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+      required:
+        - type
+        - message
+        - actionPath
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []

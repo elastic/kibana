@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@elastic/ecs';
+import { EcsVersion } from '@elastic/ecs';
 
 import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { EMPTY_STAT } from '../../../../helpers';
 import { mockMappingsResponse } from '../../../../mock/mappings_response/mock_mappings_response';
 import { mockUnallowedValuesResponse } from '../../../../mock/unallowed_values/mock_unallowed_values';
-import { EcsMetadata, UnallowedValueRequestItem } from '../../../../types';
-
-const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;
+import { UnallowedValueRequestItem } from '../../../../types';
+import { EcsFlatTyped } from '../../../../constants';
 
 let mockFetchMappings = jest.fn(
   ({
@@ -99,7 +98,7 @@ describe('checkIndex', () => {
         abortController: new AbortController(),
         batchId: 'batch-id',
         checkAllStartTime: Date.now(),
-        ecsMetadata,
+        ecsMetadata: EcsFlatTyped,
         formatBytes,
         formatNumber,
         httpFetch,
@@ -149,7 +148,7 @@ describe('checkIndex', () => {
         abortController,
         batchId: 'batch-id',
         checkAllStartTime: Date.now(),
-        ecsMetadata,
+        ecsMetadata: EcsFlatTyped,
         formatBytes,
         formatNumber,
         httpFetch,
@@ -161,51 +160,6 @@ describe('checkIndex', () => {
       });
 
       expect(onCheckCompleted).not.toBeCalled();
-    });
-  });
-
-  describe('when `ecsMetadata` is null', () => {
-    const onCheckCompleted = jest.fn();
-
-    beforeEach(async () => {
-      jest.clearAllMocks();
-
-      await checkIndex({
-        abortController: new AbortController(),
-        batchId: 'batch-id',
-        checkAllStartTime: Date.now(),
-        ecsMetadata: null, // <--
-        formatBytes,
-        formatNumber,
-        httpFetch,
-        indexName,
-        isLastCheck: false,
-        onCheckCompleted,
-        pattern,
-        version: EcsVersion,
-      });
-    });
-
-    test('it invokes onCheckCompleted with a null `error`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].error).toBeNull();
-    });
-
-    test('it invokes onCheckCompleted with the expected `indexName`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].indexName).toEqual(indexName);
-    });
-
-    test('it invokes onCheckCompleted with the default `partitionedFieldMetadata`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].partitionedFieldMetadata).toEqual(
-        EMPTY_PARTITIONED_FIELD_METADATA
-      );
-    });
-
-    test('it invokes onCheckCompleted with the expected `pattern`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].pattern).toEqual(pattern);
-    });
-
-    test('it invokes onCheckCompleted with the expected `version`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].version).toEqual(EcsVersion);
     });
   });
 
@@ -230,7 +184,7 @@ describe('checkIndex', () => {
         abortController: new AbortController(),
         batchId: 'batch-id',
         checkAllStartTime: Date.now(),
-        ecsMetadata,
+        ecsMetadata: EcsFlatTyped,
         formatBytes,
         formatNumber,
         httpFetch,
@@ -284,7 +238,7 @@ describe('checkIndex', () => {
         abortController: new AbortController(),
         batchId: 'batch-id',
         checkAllStartTime: Date.now(),
-        ecsMetadata,
+        ecsMetadata: EcsFlatTyped,
         formatBytes,
         formatNumber,
         httpFetch,
@@ -346,7 +300,7 @@ describe('checkIndex', () => {
         abortController,
         batchId: 'batch-id',
         checkAllStartTime: Date.now(),
-        ecsMetadata,
+        ecsMetadata: EcsFlatTyped,
         formatBytes,
         formatNumber,
         httpFetch,

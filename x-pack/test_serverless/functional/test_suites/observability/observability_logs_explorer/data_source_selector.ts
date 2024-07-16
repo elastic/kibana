@@ -44,10 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('as consistent behavior', () => {
       before(async () => {
         await PageObjects.observabilityLogsExplorer.navigateTo();

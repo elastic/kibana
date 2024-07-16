@@ -102,6 +102,7 @@ describe('Add Integration - Mock API', () => {
         ],
       };
       cy.intercept('/api/fleet/agent_policies?*', { items: [agentPolicy] });
+      cy.intercept('/api/fleet/agent_policies/_bulk_get', { items: [agentPolicy] });
       cy.intercept('/api/fleet/agent_policies/policy-1', {
         item: agentPolicy,
       });

@@ -7,6 +7,7 @@
  */
 
 import type { Duration } from 'moment';
+import type { ByteSizeValue } from '@kbn/config-schema';
 
 /**
  * Definition of an API that should redact the requested body in the logs
@@ -35,6 +36,7 @@ export interface ElasticsearchClientConfig {
   requestHeadersWhitelist: string[];
   maxSockets: number;
   maxIdleSockets: number;
+  maxResponseSize?: ByteSizeValue;
   idleSocketTimeout: Duration;
   compression: boolean;
   sniffOnStart: boolean;

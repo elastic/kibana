@@ -99,7 +99,7 @@ describe('maybe + object', () => {
 
 test('meta', () => {
   const maybeString = schema.maybe(schema.string());
-  const result = maybeString.getSchema().describe().metas[0];
+  const result = maybeString.getSchema().describe().metas?.[0];
   expect(result).toEqual({ [META_FIELD_X_OAS_OPTIONAL]: true });
 });
 

@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { firstValueFrom, from, of, ReplaySubject, shareReplay, take, combineLatest } from 'rxjs';
+import {
+  firstValueFrom,
+  from,
+  of,
+  ReplaySubject,
+  shareReplay,
+  take,
+  combineLatest,
+  map,
+} from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
@@ -119,7 +128,14 @@ export class NavigationPublicPlugin
           this.addSolutionNavigation(solutionNavigation);
         });
       },
-      isSolutionNavEnabled$: this.isSolutionNavExperiementEnabled$,
+      isSolutionNavEnabled$: combineLatest([
+        this.isSolutionNavExperiementEnabled$,
+        activeSpace$,
+      ]).pipe(
+        map(([isFeatureEnabled, activeSpace]) => {
+          return getIsProjectNav(isFeatureEnabled, activeSpace?.solution) && !isServerless;
+        })
+      ),
     };
   }
 
@@ -168,8 +184,8 @@ export class NavigationPublicPlugin
       activeSpace,
     }: { isFeatureEnabled: boolean; isServerless: boolean; activeSpace?: Space }
   ) {
-    const solutionView = serializeSpaceSolution(activeSpace);
-    const isProjectNav = isFeatureEnabled && Boolean(solutionView) && solutionView !== 'classic';
+    const solutionView = activeSpace?.solution;
+    const isProjectNav = getIsProjectNav(isFeatureEnabled, solutionView) && !isServerless;
 
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
@@ -182,10 +198,10 @@ export class NavigationPublicPlugin
   }
 }
 
-function serializeSpaceSolution(space?: Space): 'classic' | 'es' | 'oblt' | 'security' | undefined {
-  if (!space) return undefined;
-  if (space.solution === 'search') return 'es';
-  if (space.solution === 'observability') return 'oblt';
-  if (space.solution === 'security') return 'security';
-  return undefined;
+function getIsProjectNav(isFeatureEnabled: boolean, solutionView?: string) {
+  return isFeatureEnabled && Boolean(solutionView) && isKnownSolutionView(solutionView);
+}
+
+function isKnownSolutionView(solution?: string) {
+  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
 }

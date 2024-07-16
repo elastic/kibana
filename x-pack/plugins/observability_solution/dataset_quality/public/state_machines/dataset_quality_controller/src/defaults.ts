@@ -26,6 +26,12 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       direction: DEFAULT_SORT_DIRECTION,
     },
   },
+  datasetUserPrivileges: {
+    canRead: true,
+    canMonitor: true,
+    canViewIntegrations: true,
+  },
+  dataStreamStats: [],
   filters: {
     inactive: true,
     fullNames: false,

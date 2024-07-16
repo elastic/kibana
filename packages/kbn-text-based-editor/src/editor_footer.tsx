@@ -145,7 +145,6 @@ export const EditorFooter = memo(function EditorFooter({
   queryHasChanged,
   measuredContainerWidth,
 }: EditorFooterProps) {
-  const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
   const onUpdateAndSubmit = useCallback(
@@ -162,10 +161,6 @@ export const EditorFooter = memo(function EditorFooter({
     [runQuery, updateQuery]
   );
 
-  const shadowStyle = isInCompactMode
-    ? `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`
-    : 'none';
-
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -173,7 +168,6 @@ export const EditorFooter = memo(function EditorFooter({
       direction="column"
       css={css`
         width: 100%;
-        box-shadow: ${shadowStyle};
       `}
     >
       <EuiFlexItem grow={false}>

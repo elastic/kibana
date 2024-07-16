@@ -30,4 +30,5 @@ export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlertType> = {
     },
   },
   shouldWrite: true,
+  useEcs: true,
 };

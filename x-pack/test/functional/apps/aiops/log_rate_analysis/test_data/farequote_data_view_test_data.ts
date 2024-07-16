@@ -25,7 +25,16 @@ export const farequoteDataViewTestData: TestData = {
   expected: {
     totalDocCountFormatted: '86,374',
     sampleProbabilityFormatted: '0.5',
-    columnSelectorPopover: ['Log rate', 'Doc count', 'p-value', 'Impact', 'Actions'],
+    columnSelectorPopover: [
+      'Log rate',
+      'Doc count',
+      'p-value',
+      'Impact',
+      'Baseline rate',
+      'Deviation rate',
+      'Log rate change',
+      'Actions',
+    ],
     fieldSelectorPopover: ['airline', 'custom_field.keyword'],
     globalState: {
       refreshInterval: { pause: true, value: 60000 },

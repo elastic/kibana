@@ -26,13 +26,13 @@ describe('Synthetics Availability Transform Generator', () => {
       _meta: {
         managed: true,
         managed_by: 'observability',
-        version: 3.2,
+        version: 3.3,
       },
       defer_validation: true,
       description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
       dest: {
-        index: '.slo-observability.sli-v3.2',
-        pipeline: '.slo-observability.sli.pipeline-v3.2',
+        index: '.slo-observability.sli-v3.3',
+        pipeline: '.slo-observability.sli.pipeline-v3.3',
       },
       frequency: '1m',
       pivot: {

@@ -25,7 +25,6 @@ export * from './nodejs';
 export * from './notice_file_task';
 export * from './os_packages';
 export * from './package_json';
-export * from './patch_native_modules_task';
 export * from './assert_file_time';
 export * from './assert_no_uuid';
 export * from './assert_path_length';

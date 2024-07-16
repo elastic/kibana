@@ -17,9 +17,8 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
-const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
-  SourceLogic: { values: { contentSource } },
+  SourceLogic: { values: { contentSource: { id: 'source123' } } },
 }));
 
 jest.mock('../../../../app_logic', () => ({

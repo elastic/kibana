@@ -26,10 +26,9 @@ export function useProcessList(
   to: number,
   sortBy: SortBy,
   searchFilter: object,
+  sourceId: string,
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>
 ) {
-  const { metricsView } = useMetricsDataViewContext();
-
   const decodeResponse = (response: any) => {
     return pipe(
       ProcessListAPIResponseRT.decode(response),
@@ -50,7 +49,7 @@ export function useProcessList(
     'POST',
     JSON.stringify({
       hostTerm,
-      indexPattern: metricsView?.indices,
+      sourceId,
       to,
       sortBy: parsedSortBy,
       searchFilter,

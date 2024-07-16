@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -65,9 +67,9 @@ async function createPackagePolicy(
         force: true,
         user: options.user,
       });
+
       throw error;
     });
-
   if (!newPackagePolicy) return;
 
   newPackagePolicy.policy_id = agentPolicy.id;
@@ -80,7 +82,7 @@ async function createPackagePolicy(
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
-    force: options.force,
+    force: options.force || agentPolicy.supports_agentless === true,
   });
 }
 
@@ -168,6 +170,5 @@ export async function createAgentPolicyWithPackages({
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
-
   return agentPolicy;
 }

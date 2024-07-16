@@ -32,8 +32,8 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
 
 export interface HasSnapshottableState<RuntimeState extends object = object> {
   /**
-   * Serializes all runtime state exactly as it appears. This could be used
-   * to rehydrate a component's state without needing to deserialize it.
+   * Serializes all runtime state exactly as it appears. This can be used
+   * to rehydrate a component's state without needing to serialize then deserialize it.
    */
   snapshotRuntimeState: () => RuntimeState;
 }

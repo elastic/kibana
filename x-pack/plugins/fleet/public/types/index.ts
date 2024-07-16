@@ -80,6 +80,8 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  PostStandaloneAgentAPIKeyRequest,
+  PostStandaloneAgentAPIKeyResponse,
   PostLogstashApiKeyResponse,
   GetOutputsResponse,
   GetCurrentUpgradesResponse,

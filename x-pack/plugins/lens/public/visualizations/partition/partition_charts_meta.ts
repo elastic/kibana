@@ -16,7 +16,8 @@ import {
   IconChartMosaic,
   IconChartWaffle,
 } from '@kbn/chart-icons';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import type { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { LegendValue } from '@elastic/charts';
 import { SharedPieLayerState, EmptySizeRatios } from '../../../common/types';
 import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
 import type { PieChartType } from '../../../common/types';
@@ -212,7 +213,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
     legend: {
       flat: true,
-      defaultLegendStats: [PartitionLegendValue.Value],
+      defaultLegendStats: [LegendValue.Value],
       hideNestedLegendSwitch: true,
       getShowLegendDefault: () => true,
     },

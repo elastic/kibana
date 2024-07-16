@@ -10,7 +10,7 @@ import { Reference } from '@kbn/content-management-utils';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { DefaultControlApi, DefaultControlState } from '../types';
+import { DefaultControlApi } from '../types';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
 export const deserializeControlGroup = (
@@ -43,6 +43,10 @@ export const deserializeControlGroup = (
     ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
     initialChildControlState: flattenedPanels,
     ignoreParentSettings,
+    autoApplySelections:
+      typeof state.rawState.showApplySelections === 'boolean'
+        ? !state.rawState.showApplySelections
+        : false,
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
@@ -71,7 +75,7 @@ export const serializeControlGroup = (
     const {
       rawState: { grow, width, ...rest },
       references: childReferences,
-    } = (child.serializeState as () => SerializedPanelState<DefaultControlState>)();
+    } = child.serializeState();
 
     if (childReferences && childReferences.length > 0) {
       references = [...references, ...childReferences];
@@ -91,6 +95,7 @@ export const serializeControlGroup = (
     rawState: {
       ...omit(state, ['ignoreParentSettings', 'labelPosition']),
       controlStyle: state.labelPosition, // Rename "labelPosition" to "controlStyle"
+      showApplySelections: !state.autoApplySelections,
       ignoreParentSettingsJSON: JSON.stringify(state.ignoreParentSettings),
       panelsJSON: JSON.stringify(explicitInputPanels),
     },

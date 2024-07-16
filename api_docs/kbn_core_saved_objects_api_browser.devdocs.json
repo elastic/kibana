@@ -139,19 +139,19 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "canvas",
@@ -1139,10 +1139,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
               },
@@ -1656,10 +1652,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               },
@@ -1746,10 +1738,6 @@
               {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",

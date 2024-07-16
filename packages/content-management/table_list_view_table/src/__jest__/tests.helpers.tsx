@@ -9,12 +9,13 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
 import { ContentEditorProvider } from '@kbn/content-management-content-editor';
+import { UserProfilesProvider, UserProfilesServices } from '@kbn/content-management-user-profiles';
 
 import { TagList } from '../mocks';
 import { TableListViewProvider, Services } from '../services';
 
-export const getMockServices = (overrides?: Partial<Services>) => {
-  const services: Services = {
+export const getMockServices = (overrides?: Partial<Services & UserProfilesServices>) => {
+  const services: Services & UserProfilesServices = {
     canEditAdvancedSettings: true,
     getListingLimitSettingsUrl: () => 'http://elastic.co',
     notifyError: () => undefined,
@@ -25,24 +26,29 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     itemHasTags: () => true,
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
-    bulkGetUserProfiles: jest.fn(() => Promise.resolve([])),
-    getUserProfile: jest.fn(),
     isTaggingEnabled: () => true,
+    bulkGetUserProfiles: async () => [],
+    getUserProfile: async () => ({ uid: '', enabled: true, data: {}, user: { username: '' } }),
     ...overrides,
   };
 
   return services;
 };
 
-export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Services> = {}) {
+export function WithServices<P>(
+  Comp: ComponentType<P>,
+  overrides: Partial<Services & UserProfilesServices> = {}
+) {
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
-        <TableListViewProvider {...services}>
-          <Comp {...(props as any)} />
-        </TableListViewProvider>
-      </ContentEditorProvider>
+      <UserProfilesProvider {...services}>
+        <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
+          <TableListViewProvider {...services}>
+            <Comp {...(props as any)} />
+          </TableListViewProvider>
+        </ContentEditorProvider>
+      </UserProfilesProvider>
     );
   };
 }

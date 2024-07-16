@@ -6,10 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { first } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { TileMapVisConfig } from './types';
-import { MapComponent } from '../../embeddable/map_component';
+import { MapRenderer } from '../../react_embeddable/map_renderer';
 import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
 
 interface Props {
@@ -21,6 +23,7 @@ interface Props {
 }
 
 export function TileMapVisualization(props: Props) {
+  const isMounted = useMountedState();
   const initialMapCenter = useMemo(() => {
     return {
       lat: props.visConfig.mapCenter[0],
@@ -37,7 +40,7 @@ export function TileMapVisualization(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <MapComponent
+    <MapRenderer
       title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
@@ -45,7 +48,13 @@ export function TileMapVisualization(props: Props) {
       mapCenter={initialMapCenter}
       isLayerTOCOpen={true}
       layerList={initialLayerList}
-      onInitialRenderComplete={props.onInitialRenderComplete}
+      onApiAvailable={(api) => {
+        api.onRenderComplete$.pipe(first()).subscribe(() => {
+          if (isMounted()) {
+            props.onInitialRenderComplete();
+          }
+        });
+      }}
       isSharable={false}
     />
   );

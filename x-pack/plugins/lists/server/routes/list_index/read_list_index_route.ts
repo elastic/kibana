@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { GetListIndexResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import { readListIndexResponse } from '../../../common/api';
 import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
@@ -37,15 +36,12 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
           const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
           if (listDataStreamExists && listItemDataStreamExists) {
-            const [validated, errors] = validate(
-              { list_index: listDataStreamExists, list_item_index: listItemDataStreamExists },
-              readListIndexResponse
-            );
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({
+              body: GetListIndexResponse.parse({
+                list_index: listDataStreamExists,
+                list_item_index: listItemDataStreamExists,
+              }),
+            });
           } else if (!listDataStreamExists && listItemDataStreamExists) {
             return siemResponse.error({
               body: `data stream ${lists.getListName()} does not exist`,

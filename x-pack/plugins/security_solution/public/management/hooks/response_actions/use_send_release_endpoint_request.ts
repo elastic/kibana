@@ -12,7 +12,7 @@ import type {
   HostIsolationRequestBody,
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
-import { unIsolateHost } from '../../../common/lib/endpoint_isolation';
+import { unIsolateHost } from '../../../common/lib/endpoint/endpoint_isolation';
 
 /**
  * Create host release requests

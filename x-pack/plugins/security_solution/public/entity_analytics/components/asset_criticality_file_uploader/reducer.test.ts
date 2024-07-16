@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetCriticalityCsvUploadResponse } from '../../../../common/api/entity_analytics';
+import type { AssetCriticalityBulkUploadResponse } from '../../../../common/api/entity_analytics';
 import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
 import { reducer } from './reducer';
 import { FileUploaderSteps } from './types';
@@ -43,7 +43,7 @@ describe('reducer', () => {
   });
 
   it('should handle "fileUploaded" action with response', () => {
-    const response: AssetCriticalityCsvUploadResponse = {
+    const response: AssetCriticalityBulkUploadResponse = {
       errors: [],
       stats: {
         total: 10,

@@ -1,0 +1,60 @@
+name: Check & deploy API documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'oas_docs/kibana.serverless.yaml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'oas_docs/kibana.serverless.yaml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-doc:
+    if: ${{ github.event_name == 'push' }}
+    name: Deploy API documentation on Bump.sh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy API documentation
+        uses: bump-sh/github-action@v1
+        with:
+          doc: serverless
+          token: ${{secrets.BUMP_TOKEN}}
+          file: oas_docs/kibana.serverless.yaml
+
+  api-diff:
+    if: ${{ github.event_name == 'pull_request' }}
+    name: Check API diff on Bump.sh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create Preview
+        uses: bump-sh/github-action@v1
+        with:
+          doc: serverless
+          token: ${{secrets.BUMP_TOKEN}}
+          file: oas_docs/kibana.serverless.yaml
+          command: preview
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Comment pull request with API diff
+        uses: bump-sh/github-action@v1
+        with:
+          doc: serverless
+          token: ${{secrets.BUMP_TOKEN}}
+          file: oas_docs/kibana.serverless.yaml
+          command: diff
+          fail_on_breaking: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'This is your space-3!',
         color: '#00bfb3',
         disabledFeatures: [],
-        solution: 'search',
+        solution: 'es',
       });
     });
 
@@ -103,8 +103,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(stats.stack_stats.kibana.plugins.spaces.solutions).to.eql({
         security: 1,
-        search: 1,
-        observability: 0,
+        es: 1,
+        oblt: 0,
         classic: 0,
         unset: 2,
       });

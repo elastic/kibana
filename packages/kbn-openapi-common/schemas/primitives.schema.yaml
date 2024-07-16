@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info:
+  title: Shared Primitives Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    NonEmptyString:
+      type: string
+      pattern: ^(?! *$).+$
+      minLength: 1
+      description: A string that is not empty and does not contain only whitespace
+
+    UUID:
+      type: string
+      format: uuid
+      description: A universally unique identifier

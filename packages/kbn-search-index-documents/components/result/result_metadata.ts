@@ -33,6 +33,6 @@ export const resultTitle = (result: SearchHit): string | undefined => {
 };
 
 export const resultMetaData = (result: SearchHit): MetaDataProps => ({
-  id: result._id,
+  id: result._id!,
   title: resultTitle(result),
 });

@@ -33,11 +33,11 @@ export const KnowledgeBaseEntryErrorSchema = z
 export type Metadata = z.infer<typeof Metadata>;
 export const Metadata = z.object({
   /**
-   * Knowledge Base resource name
+   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
    */
   kbResource: z.string(),
   /**
-   * Original text content source
+   * Source document name or filepath
    */
   source: z.string(),
   /**

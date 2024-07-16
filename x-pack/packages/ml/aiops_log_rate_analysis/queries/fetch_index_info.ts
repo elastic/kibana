@@ -17,6 +17,12 @@ import { getTotalDocCountRequest } from './get_total_doc_count_request';
 // TODO Consolidate with duplicate `fetchPValues` in
 // `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
+// Supported field names for text fields for log rate analysis.
+// If we analyse all detected text fields, we might run into performance
+// issues with the `categorize_text` aggregation. Until this is resolved, we
+// rely on a predefined white list of supported text fields.
+const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
+
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
   ES_FIELD_TYPES.IP,
@@ -33,12 +39,18 @@ interface IndexInfo {
   zeroDocsFallback: boolean;
 }
 
-export const fetchIndexInfo = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  textFieldCandidatesOverrides: string[] = [],
-  abortSignal?: AbortSignal
-): Promise<IndexInfo> => {
+export const fetchIndexInfo = async ({
+  esClient,
+  abortSignal,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  arguments: AiopsLogRateAnalysisSchema & {
+    textFieldCandidatesOverrides?: string[];
+  };
+}): Promise<IndexInfo> => {
+  const { textFieldCandidatesOverrides = [], ...params } = args;
   const { index } = params;
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(
@@ -76,7 +88,7 @@ export const fetchIndexInfo = async (
       acceptableFields.add(key);
     }
 
-    if (isTextField) {
+    if (isTextField && TEXT_FIELD_WHITE_LIST.includes(key)) {
       acceptableTextFields.add(key);
     }
 

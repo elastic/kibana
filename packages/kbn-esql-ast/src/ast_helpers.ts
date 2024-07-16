@@ -14,6 +14,7 @@ import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
 import type {
   ArithmeticUnaryContext,
   DecimalValueContext,
+  InlineCastContext,
   IntegerValueContext,
   QualifiedIntegerLiteralContext,
 } from './antlr/esql_parser';
@@ -32,6 +33,8 @@ import type {
   ESQLCommandOption,
   ESQLAstItem,
   ESQLCommandMode,
+  ESQLInlineCast,
+  ESQLUnknownItem,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -56,6 +59,17 @@ export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand
     name,
     text: ctx.getText(),
     args: [],
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
+}
+
+export function createInlineCast(ctx: InlineCastContext): Omit<ESQLInlineCast, 'value'> {
+  return {
+    type: 'inlineCast',
+    name: 'inlineCast',
+    text: ctx.getText(),
+    castType: ctx.dataType().getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
@@ -120,11 +134,20 @@ export function textExistsAndIsValid(text: string | undefined): text is string {
 
 export function createLiteral(
   type: ESQLLiteral['literalType'],
-  node: TerminalNode | undefined
-): ESQLLiteral | undefined {
+  node: TerminalNode | null
+): ESQLLiteral {
   if (!node) {
-    return;
+    return {
+      type: 'literal',
+      name: 'unknown',
+      text: 'unknown',
+      value: 'unknown',
+      literalType: type,
+      location: { min: 0, max: 0 },
+      incomplete: false,
+    } as ESQLLiteral;
   }
+
   const text = node.getText();
 
   const partialLiteral: Omit<ESQLLiteral, 'literalType' | 'value'> = {
@@ -140,6 +163,8 @@ export function createLiteral(
       literalType: type,
       value: Number(text),
     };
+  } else if (type === 'param') {
+    throw new Error('Should never happen');
   }
   return {
     ...partialLiteral,
@@ -250,12 +275,24 @@ function safeBackticksRemoval(text: string | undefined) {
   return text?.replace(TICKS_REGEX, '').replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK) || '';
 }
 
+function sanitizeSourceString(ctx: ParserRuleContext) {
+  const contextText = ctx.getText();
+  // If wrapped by triple quote, remove
+  if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
+    return contextText.replace(/\"\"\"/g, '');
+  }
+  // If wrapped by single quote, remove
+  if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
+    return contextText.slice(1, -1);
+  }
+  return contextText;
+}
+
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
     safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
-
   // TODO - understand why <missing null> is now returned as the match text for the FROM command
   return result === '<missing null>' ? '' : result;
 }
@@ -296,7 +333,7 @@ export function createSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
-  const text = sanitizeIdentifierString(ctx);
+  const text = sanitizeSourceString(ctx);
   return {
     type: 'source',
     name: text,
@@ -345,5 +382,15 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
           return Boolean(c.isErrorNode);
         })
     ),
+  };
+}
+
+export function createUnknownItem(ctx: ParserRuleContext): ESQLUnknownItem {
+  return {
+    type: 'unknown',
+    name: 'unknown',
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
   };
 }
