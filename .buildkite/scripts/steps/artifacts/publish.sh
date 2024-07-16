@@ -12,7 +12,7 @@ function download {
   download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   download_artifact "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   sha512sum -c "$1.sha512.txt"
-  rm -f "$1.sha512.txt"
+  rm "$1.sha512.txt"
 }
 
 mkdir -p target
