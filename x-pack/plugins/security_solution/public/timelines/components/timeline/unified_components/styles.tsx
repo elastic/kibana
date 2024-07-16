@@ -100,7 +100,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     border-radius: 8px;
   }
 
-  .udtTimeline .euiDataGridRow:has(.buildingBlockType) {
+  .udtTimeline .euiDataGridRow:has(.buildingBlockType),
+  .udtTimeline .euiDataGridRow.buildingBlockType {
     background: repeating-linear-gradient(
       127deg,
       rgba(245, 167, 0, 0.2),
@@ -109,7 +110,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(245, 167, 0, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.eqlSequence) {
+  .udtTimeline .euiDataGridRow:has(.eqlSequence),
+  .udtTimeline .euiDataGridRow.eqlSequence {
     .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--lastColumn,
     .udt--customRow {
@@ -123,7 +125,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(0, 107, 180, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.eqlNonSequence) {
+  .udtTimeline .euiDataGridRow:has(.eqlNonSequence),
+  .udtTimeline .euiDataGridRow.eqlNonSequence {
     .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--lastColumn,
     .udt--customRow {
@@ -137,14 +140,16 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(221, 10, 115, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.nonRawEvent) {
+  .udtTimeline .euiDataGridRow:has(.nonRawEvent),
+  .udtTimeline .euiDataGridRow.nonRawEvent {
     .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
     }
   }
-  .udtTimeline .euiDataGridRow:has(.rawEvent) {
+  .udtTimeline .euiDataGridRow:has(.rawEvent),
+  .udtTimeline .euiDataGridRow.rawEvent {
     .euiDataGridRowCell--firstColumn,
     .euiDataGridRowCell--lastColumn,
     .udt--customRow {
