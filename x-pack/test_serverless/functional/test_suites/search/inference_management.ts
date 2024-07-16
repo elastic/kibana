@@ -21,8 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('Serverless Inference Management UI', function () {
-    this.tags('skipMKI');
-
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('admin');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
