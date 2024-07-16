@@ -20,6 +20,7 @@ import { API_VERSIONS } from '../../../common/constants';
 
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
+import { GetSpaceSettingsResponse } from '@kbn/fleet-plugin/common/types';
 
 export function useGetSettingsQuery(options?: { enabled?: boolean }) {
   return useQuery<GetSettingsResponse, RequestError>({
@@ -39,6 +40,19 @@ export function useGetSettings() {
     method: 'get',
     path: settingsRoutesService.getInfoPath(),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function useGetSpaceSettings({ enabled }: { enabled?: boolean }) {
+  return useQuery<GetSpaceSettingsResponse, RequestError>({
+    queryKey: ['space_settings'],
+    enabled,
+    queryFn: () =>
+      sendRequestForRq<GetSpaceSettingsResponse>({
+        method: 'get',
+        path: settingsRoutesService.getSpaceInfoPath(),
+        version: API_VERSIONS.public.v1,
+      }),
   });
 }
 
