@@ -10,7 +10,7 @@ import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
@@ -24,7 +24,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { Observable } from 'rxjs';
-import { DefaultControlApi, DefaultControlState, PublishesControlDisplaySettings } from '../types';
+import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
+import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
@@ -43,13 +44,7 @@ export type ControlGroupUnsavedChanges = Omit<
 
 export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
-export interface DataControlFetchContext {
-  unifiedSearchFilters?: Filter[] | undefined;
-  query?: Query | AggregateQuery | undefined;
-  timeRange?: TimeRange | undefined;
-}
-
-export type ControlGroupApi = PresentationContainer<DefaultControlApi> &
+export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
   PublishesDataViews &
@@ -61,7 +56,7 @@ export type ControlGroupApi = PresentationContainer<DefaultControlApi> &
   PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch>> & {
     autoApplySelections$: PublishingSubject<boolean>;
-    dataControlFetch$: Observable<DataControlFetchContext>;
+    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
   };
 

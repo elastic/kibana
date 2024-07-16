@@ -15,7 +15,7 @@ export interface PanelPackage<SerializedState extends object = object> {
   initialState?: SerializedState;
 }
 
-export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
+export interface PresentationContainer extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
@@ -44,7 +44,7 @@ export interface PresentationContainer<ApiType extends unknown = unknown> extend
    * children are created asynchronously. This means that the children$ observable might
    * contain fewer children than the actual number of panels in the container.
    */
-  children$: PublishingSubject<{ [key: string]: ApiType }>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {

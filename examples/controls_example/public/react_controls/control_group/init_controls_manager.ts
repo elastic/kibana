@@ -49,6 +49,9 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
 
   return {
     controlsInOrder$: controlsInOrder$ as PublishingSubject<Array<ControlPanelState & { id: string }>>,
+    getControlApi: (controlUuid: string) => {
+      return children$.value[controlUuid];
+    },
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
         ...children$.getValue(),
@@ -83,6 +86,6 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         // TODO: Replace a child control
         return Promise.resolve(panelId);
       },
-    } as PresentationContainer<DefaultControlApi>,
+    } as PresentationContainer,
   }
 }

@@ -44,8 +44,8 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { dataControlFetch$ } from './data_control_fetch';
 import { initControlsManager } from './init_controls_manager';
+import { controlGroupFetch$, chaining$, controlFetch$ } from './control_fetch';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -105,7 +105,11 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
-        dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
+        controlFetch$: (controlUuid: string) =>
+          controlFetch$(
+            chaining$(controlUuid, chainingSystem$, controlsManager.controlsInOrder$, controlsManager.getControlApi),
+            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
+          ),
         ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
