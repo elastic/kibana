@@ -130,7 +130,7 @@ export async function removeInstallation(options: {
  * installed in 8.x or later.
  */
 async function deleteKibanaAssets({
-  installedObjects,
+  installedObjects: allAssets,
   packageInfo,
   spaceId = DEFAULT_SPACE_ID,
 }: {
@@ -138,6 +138,9 @@ async function deleteKibanaAssets({
   spaceId?: string;
   packageInfo: RegistryPackage | ArchivePackage;
 }) {
+  const installedObjects = allAssets.filter(({ type }) => type !== 'slo');
+  const sloAssets = allAssets.filter(({ type }) => type === 'slo');
+
   const savedObjectsClient = new SavedObjectsClient(
     appContextService.getSavedObjects().createInternalRepository()
   );
@@ -154,6 +157,7 @@ async function deleteKibanaAssets({
   // which might create high memory pressure if a package has a lot of assets.
   if (minKibana && minKibana.major >= 8) {
     await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient);
+    await deleteSloAssets(sloAssets, namespace, savedObjectsClient);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
       installedObjects,
@@ -177,8 +181,26 @@ async function deleteKibanaAssets({
     const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
 
     await bulkDeleteSavedObjects(assetsToDelete, namespace, savedObjectsClient);
+    await deleteSloAssets(sloAssets, namespace, savedObjectsClient);
   }
 }
+
+const deleteSloAssets = async (
+  sloAssets: KibanaAssetReference[],
+  namespace: string | undefined,
+  soClient: SavedObjectsClientContract
+) => {
+  const sloClient = appContextService.getSloStart()?.sloClient;
+  if (!sloClient) {
+    return;
+  }
+
+  const esClient = appContextService.getInternalUserESClient();
+
+  for (const { id } of sloAssets) {
+    await sloClient.deleteSLO({ sloId: id, soClient, esClient, spaceId: namespace ?? 'default' });
+  }
+};
 
 async function bulkDeleteSavedObjects(
   assetsToDelete: Array<{ id: string; type: string }>,

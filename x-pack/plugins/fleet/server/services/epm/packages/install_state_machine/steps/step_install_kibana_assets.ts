@@ -12,7 +12,15 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
+  const {
+    savedObjectsClient,
+    logger,
+    installedPkg,
+    packageInstallContext,
+    spaceId,
+    sloClient,
+    esClient,
+  } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
@@ -25,6 +33,8 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       installedPkg,
       logger,
       spaceId,
+      sloClient,
+      esClient,
       assetTags: packageInfo?.asset_tags,
     })
   );

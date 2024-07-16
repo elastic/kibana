@@ -11,9 +11,9 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SLOClient } from '@kbn/slo-plugin/server';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
-
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 import { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
@@ -51,6 +51,7 @@ import { handleState } from './state_machine';
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  sloClient?: SLOClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
   packageInstallContext: PackageInstallContext;

@@ -64,6 +64,7 @@ export enum KibanaAssetType {
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
+  slo = 'slo',
 }
 
 /*
@@ -82,6 +83,7 @@ export enum KibanaSavedObjectType {
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
+  slo = 'slo',
 }
 
 export enum ElasticsearchAssetType {

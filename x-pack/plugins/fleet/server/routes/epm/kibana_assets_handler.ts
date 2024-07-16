@@ -57,6 +57,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
     const { packageInfo } = installedPkgWithAssets;
 
     await installKibanaAssetsAndReferences({
+      esClient: appContextService.getInternalUserESClient(),
       savedObjectsClient,
       logger,
       pkgName,

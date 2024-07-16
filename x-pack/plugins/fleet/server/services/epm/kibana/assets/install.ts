@@ -19,6 +19,12 @@ import type {
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
+import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+import type { CreateSLOParams } from '@kbn/slo-schema';
+
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
@@ -73,6 +79,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
+  [KibanaAssetType.slo]: KibanaSavedObjectType.slo,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -102,13 +109,17 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 }
 
 export async function installKibanaAssets(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
+  sloClient?: SLOClient;
+  spaceId: string;
+  esClient: ElasticsearchClient;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, soClient, esClient, savedObjectsImporter, logger, sloClient, spaceId } =
+    options;
 
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
@@ -142,15 +153,25 @@ export async function installKibanaAssets(options: {
     managed: true,
   });
 
-  await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  await makeManagedIndexPatternsGlobal(soClient);
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: assetsToInstall,
+    kibanaAssets: assetsToInstall.filter((asset) => asset.type !== KibanaSavedObjectType.slo),
   });
 
-  return installedAssets;
+  const sloAssets = assetsToInstall.filter((asset) => asset.type === KibanaSavedObjectType.slo);
+
+  const installedSlos = await installSLOAssets({
+    sloAssets,
+    sloClient,
+    soClient,
+    esClient,
+    spaceId,
+  });
+
+  return installedAssets.concat(installedSlos);
 }
 
 export async function installKibanaAssetsAndReferencesMultispace({
@@ -162,6 +183,8 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg,
   spaceId,
   assetTags,
+  esClient,
+  sloClient,
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -173,6 +196,8 @@ export async function installKibanaAssetsAndReferencesMultispace({
   spaceId: string;
   assetTags?: PackageSpecTags[];
   installAsAdditionalSpace?: boolean;
+  esClient: ElasticsearchClient;
+  sloClient?: SLOClient;
 }) {
   if (installedPkg && !installAsAdditionalSpace) {
     // Install in every space => upgrades
@@ -185,10 +210,12 @@ export async function installKibanaAssetsAndReferencesMultispace({
       installedPkg,
       spaceId,
       assetTags,
+      esClient,
+      sloClient,
       installAsAdditionalSpace,
     });
 
-    for (const additionnalSpaceId of Object.keys(
+    for (const additionalSpaceId of Object.keys(
       installedPkg.attributes.additional_spaces_installed_kibana ?? {}
     )) {
       await installKibanaAssetsAndReferences({
@@ -198,8 +225,10 @@ export async function installKibanaAssetsAndReferencesMultispace({
         pkgTitle,
         packageInstallContext,
         installedPkg,
-        spaceId: additionnalSpaceId,
         assetTags,
+        esClient,
+        sloClient,
+        spaceId: additionalSpaceId,
         installAsAdditionalSpace: true,
       });
     }
@@ -215,11 +244,47 @@ export async function installKibanaAssetsAndReferencesMultispace({
     installedPkg,
     spaceId,
     assetTags,
+    esClient,
+    sloClient,
     installAsAdditionalSpace,
   });
 }
 
+export async function installSLOAssets({
+  sloClient,
+  soClient,
+  esClient,
+  spaceId,
+  sloAssets,
+}: {
+  sloAssets: ArchiveAsset[];
+  sloClient?: SLOClient;
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+}) {
+  if (!sloClient || !sloAssets.length) {
+    return [];
+  }
+
+  const installedSLOs = [];
+
+  for (const asset of sloAssets) {
+    const attr = asset.attributes as CreateSLOParams;
+    const slo = await sloClient.createSLO({
+      soClient,
+      esClient,
+      params: { ...attr, id: asset.id },
+      spaceId,
+    });
+    installedSLOs.push({ id: slo.id, type: 'slo', meta: {} });
+  }
+
+  return installedSLOs;
+}
+
 export async function installKibanaAssetsAndReferences({
+  esClient,
   savedObjectsClient,
   logger,
   pkgName,
@@ -229,6 +294,7 @@ export async function installKibanaAssetsAndReferences({
   spaceId,
   assetTags,
   installAsAdditionalSpace,
+  sloClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -239,6 +305,8 @@ export async function installKibanaAssetsAndReferences({
   spaceId: string;
   assetTags?: PackageSpecTags[];
   installAsAdditionalSpace?: boolean;
+  esClient: ElasticsearchClient;
+  sloClient?: SLOClient;
 }) {
   const { savedObjectsImporter, savedObjectTagAssignmentService, savedObjectTagClient } =
     getSpaceAwareSaveobjectsClients(spaceId);
@@ -258,11 +326,14 @@ export async function installKibanaAssetsAndReferences({
   }
 
   const importedAssets = await installKibanaAssets({
-    savedObjectsClient,
+    soClient: savedObjectsClient,
     logger,
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
+    sloClient,
+    esClient,
+    spaceId,
   });
   if (installAsAdditionalSpace) {
     const assets = importedAssets.map(

@@ -37,6 +37,7 @@
     "@kbn/cloud-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/home-plugin",
+    "@kbn/slo-plugin",
 
     // requiredBundles from ./kibana.json
     "@kbn/kibana-react-plugin",

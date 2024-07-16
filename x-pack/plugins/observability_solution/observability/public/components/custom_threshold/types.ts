@@ -15,7 +15,6 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -71,7 +70,6 @@ export interface InfraClientStartDeps {
   lens: LensPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: OsqueryPluginStart;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;

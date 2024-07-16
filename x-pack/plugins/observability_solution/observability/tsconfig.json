@@ -78,7 +78,6 @@
     "@kbn/actions-plugin",
     "@kbn/core-capabilities-common",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/osquery-plugin",
     "@kbn/content-management-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/aiops-plugin",

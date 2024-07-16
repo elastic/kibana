@@ -18,6 +18,8 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { PluginSetup, PluginStart } from './plugin';
 
+export { SLOClient } from './services/slo_client';
+
 export const config = {
   schema: configSchema,
   exposeToBrowser: {

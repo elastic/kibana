@@ -56,6 +56,8 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import type { SLOPluginSetup, SLOPluginStart } from '@kbn/slo-plugin/server/plugin';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import {
@@ -140,6 +142,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
+  slo?: SLOPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -150,6 +153,7 @@ export interface FleetStartDeps {
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
+  slo?: SLOPluginStart;
 }
 
 export interface FleetAppContext {
@@ -177,6 +181,7 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
+  sloStart?: SLOPluginStart;
 }
 
 export type FleetSetupContract = void;
@@ -638,6 +643,7 @@ export class FleetPlugin
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
       uninstallTokenService,
+      sloStart: plugins.slo,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

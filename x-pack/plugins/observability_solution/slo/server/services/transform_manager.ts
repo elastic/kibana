@@ -12,9 +12,28 @@ import { DataViewsService } from '@kbn/data-views-plugin/server';
 import { SLODefinition, IndicatorTypes } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import { TransformGenerator } from './transform_generators';
+import {
+  ApmTransactionDurationTransformGenerator,
+  ApmTransactionErrorRateTransformGenerator,
+  HistogramTransformGenerator,
+  KQLCustomTransformGenerator,
+  MetricCustomTransformGenerator,
+  SyntheticsAvailabilityTransformGenerator,
+  TimesliceMetricTransformGenerator,
+  TransformGenerator,
+} from './transform_generators';
 
 type TransformId = string;
+
+const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
+  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(),
+  'sli.kql.custom': new KQLCustomTransformGenerator(),
+  'sli.metric.custom': new MetricCustomTransformGenerator(),
+  'sli.histogram.custom': new HistogramTransformGenerator(),
+  'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
+};
 
 export interface TransformManager {
   install(slo: SLODefinition): Promise<TransformId>;
@@ -27,7 +46,6 @@ export interface TransformManager {
 
 export class DefaultTransformManager implements TransformManager {
   constructor(
-    private generators: Record<IndicatorTypes, TransformGenerator>,
     private esClient: ElasticsearchClient,
     private logger: Logger,
     private spaceId: string,
@@ -35,7 +53,7 @@ export class DefaultTransformManager implements TransformManager {
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
-    const generator = this.generators[slo.indicator.type];
+    const generator = transformGenerators[slo.indicator.type];
     if (!generator) {
       this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
@@ -63,7 +81,7 @@ export class DefaultTransformManager implements TransformManager {
   }
 
   async inspect(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    const generator = this.generators[slo.indicator.type];
+    const generator = transformGenerators[slo.indicator.type];
     if (!generator) {
       this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
