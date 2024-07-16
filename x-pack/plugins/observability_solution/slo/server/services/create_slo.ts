@@ -11,12 +11,14 @@ import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
   SLO_MODEL_VERSION,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
@@ -50,6 +52,17 @@ export class CreateSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
+      await retryTransientEsErrors(
+        () => this.esClient.ingest.putPipeline(getSLOPipelineTemplate(slo)),
+        { logger: this.logger }
+      );
+      rollbackOperations.push(() =>
+        this.esClient.ingest.deletePipeline(
+          { id: getSLOPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      );
+
       await this.transformManager.install(slo);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
 

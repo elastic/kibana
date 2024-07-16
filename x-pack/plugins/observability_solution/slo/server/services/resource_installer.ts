@@ -23,8 +23,6 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_INDEX_TEMPLATE_PATTERN,
-  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-  SLO_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
@@ -34,7 +32,7 @@ import {
 } from '../../common/constants';
 import { getSLOIndexTemplate } from '../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../assets/index_templates/slo_summary_index_templates';
-import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
+
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
@@ -85,10 +83,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createIndex(SLO_DESTINATION_INDEX_NAME);
       await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
-
-      await this.createOrUpdateIngestPipelineTemplate(
-        getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
-      );
     } catch (err) {
       this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
