@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.closeButton',
-  {
-    defaultMessage: 'close',
-  }
-);
+export { useUsageTracker } from '../contexts/usage_tracker_context';
