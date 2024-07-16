@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
       await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
       await transform.api.cleanTransformIndices();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
