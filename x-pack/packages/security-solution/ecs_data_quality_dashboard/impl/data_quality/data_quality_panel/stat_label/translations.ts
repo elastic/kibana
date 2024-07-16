@@ -44,17 +44,10 @@ export const DOCS = i18n.translate(
   }
 );
 
-export const FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.statLabels.fieldsLabel',
+export const INCOMPATIBLE_FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.statLabels.incompatibleFieldsLabel',
   {
-    defaultMessage: 'fields',
-  }
-);
-
-export const INCOMPATIBLE = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.statLabels.incompatibleLabel',
-  {
-    defaultMessage: 'Incompatible',
+    defaultMessage: 'Incompatible fields',
   }
 );
 
@@ -99,6 +92,13 @@ export const INDICES = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.statLabels.indicesLabel',
   {
     defaultMessage: 'Indices',
+  }
+);
+
+export const INDICES_CHECKED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.statLabels.indicesCheckedLabel',
+  {
+    defaultMessage: 'Indices checked',
   }
 );
 

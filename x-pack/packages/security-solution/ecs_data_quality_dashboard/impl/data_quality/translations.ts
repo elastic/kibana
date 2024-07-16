@@ -302,3 +302,42 @@ export const GET_RESULTS_ERROR_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.getResultErrorTitle',
   { defaultMessage: 'Error reading saved data quality check results' }
 );
+
+export const COLD = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseCold',
+  {
+    defaultMessage: 'cold',
+  }
+);
+
+export const FROZEN = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseFrozen',
+  {
+    defaultMessage: 'frozen',
+  }
+);
+
+export const HOT = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseHot', {
+  defaultMessage: 'hot',
+});
+
+export const WARM = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseWarm',
+  {
+    defaultMessage: 'warm',
+  }
+);
+
+export const UNMANAGED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseUnmanaged',
+  {
+    defaultMessage: 'unmanaged',
+  }
+);
+
+export const DATA_QUALITY_DASHBOARD_CONVERSATION_ID = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.dataQualityDashboardConversationId',
+  {
+    defaultMessage: 'Data Quality dashboard',
+  }
+);
