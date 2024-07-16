@@ -134,24 +134,43 @@ export const StartStep: React.FC<StartStepProps> = ({
           </EuiPanel>
         </EuiFlexItem>
         {/* Configure index */}
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-            <EuiTitle size="s">
-              <h4>Configure index and API key</h4>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <p>
-                This process will create a new index, API key, and a Connector ID. Optionally you
-                can bring your own configuration as well.
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton iconType="sparkles" fill>
-              Generate configuration
-            </EuiButton>
-          </EuiPanel>
-        </EuiFlexItem>
+        {selfManaged ? (
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+              <EuiTitle size="s">
+                <h4>Deployment</h4>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiText size="s">
+                <p>
+                  You will start the process of creating a new index, API key, and a Web Crawler
+                  Connector ID manually. Optionally you can bring your own configuration as well.
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiButton fill>Next</EuiButton>
+            </EuiPanel>
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+              <EuiTitle size="s">
+                <h4>Configure index and API key</h4>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiText size="s">
+                <p>
+                  This process will create a new index, API key, and a Connector ID. Optionally you
+                  can bring your own configuration as well.
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiButton iconType="sparkles" fill>
+                Generate configuration
+              </EuiButton>
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
