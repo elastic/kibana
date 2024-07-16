@@ -21,7 +21,7 @@ import { partition } from 'lodash';
 
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type { AssetReference, AssetParts, Installation, PackageSpecTags } from '../../../../types';
+import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
 import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
 import {
   indexPatternTypes,
@@ -242,7 +242,8 @@ export async function installKibanaAssetsAndReferences({
 }) {
   const { savedObjectsImporter, savedObjectTagAssignmentService, savedObjectTagClient } =
     getSpaceAwareSaveobjectsClients(spaceId);
-  const kibanaAssets = await getKibanaAssets(packageInstallContext);
+  // This is where the memory consumption is rising up in the first place
+  const kibanaAssets = getKibanaAssets(packageInstallContext);
   if (installedPkg) {
     await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   }
@@ -323,9 +324,9 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], true);
 }
 
-export async function getKibanaAssets(
+export function getKibanaAssets(
   packageInstallContext: PackageInstallContext
-): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {
+): Record<KibanaAssetType, ArchiveAsset[]> {
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const isKibanaAssetType = (path: string) => {
     const parts = getPathParts(path);
@@ -333,36 +334,20 @@ export async function getKibanaAssets(
     return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
   };
 
-  const filteredPaths = packageInstallContext.paths
-    .filter(isKibanaAssetType)
-    .map<[string, AssetParts]>((path) => [path, getPathParts(path)]);
+  const result = Object.fromEntries<ArchiveAsset[]>(
+    kibanaAssetTypes.map((type) => [type, []])
+  ) as Record<KibanaAssetType, ArchiveAsset[]>;
 
-  const assetArrays: Array<Promise<ArchiveAsset[]>> = [];
-  for (const assetType of kibanaAssetTypes) {
-    const matching = filteredPaths.filter(([path, parts]) => parts.type === assetType);
+  packageInstallContext.paths.filter(isKibanaAssetType).forEach((path) => {
+    const buffer = getAssetFromAssetsMap(packageInstallContext.assetsMap, path);
+    const asset = JSON.parse(buffer.toString('utf8'));
 
-    assetArrays.push(
-      Promise.all(
-        matching.map(([path]) => {
-          const buffer = getAssetFromAssetsMap(packageInstallContext.assetsMap, path);
-
-          // cache values are buffers. convert to string / JSON
-          return JSON.parse(buffer.toString('utf8'));
-        })
-      )
-    );
-  }
-
-  const resolvedAssets = await Promise.all(assetArrays);
-
-  const result = {} as Record<KibanaAssetType, ArchiveAsset[]>;
-
-  for (const [index, assetType] of kibanaAssetTypes.entries()) {
-    const expectedType = KibanaSavedObjectTypeMapping[assetType];
-    const properlyTypedAssets = resolvedAssets[index].filter(({ type }) => type === expectedType);
-
-    result[assetType] = properlyTypedAssets;
-  }
+    const assetType = getPathParts(path).type as KibanaAssetType;
+    const soType = KibanaSavedObjectTypeMapping[assetType];
+    if (asset.type === soType) {
+      result[assetType].push(asset);
+    }
+  });
 
   return result;
 }
