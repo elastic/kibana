@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/186091
-  describe.skip('forecasts', function () {
+  describe('forecasts', function () {
     this.tags(['mlqa']);
 
     describe('with single metric job', function () {

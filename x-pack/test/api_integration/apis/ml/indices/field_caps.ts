@@ -30,7 +30,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('field_caps', function () {
+  // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/188382
+  describe.skip('field_caps', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
     });
