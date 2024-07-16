@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { Observable, of } from 'rxjs';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,21 +15,14 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { SearchBar, IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { merge } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TimelineAskWidgetUpdate } from '../public/services/assistant/types';
 import type { EsqlQueryMeta } from '../public/services/esql';
 import type { InvestigateAppServices } from '../public/services/types';
 import { InvestigateAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppKibanaContext> {
   const services: DeeplyMockedKeys<InvestigateAppServices> = {
-    assistant: {
-      ask: jest.fn().mockImplementation((): Observable<TimelineAskWidgetUpdate> => {
-        return of();
-      }),
-    },
     esql: {
       meta: jest.fn().mockImplementation((): Promise<EsqlQueryMeta> => {
         return Promise.resolve({
@@ -110,15 +102,6 @@ export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppK
         }),
         investigate: {},
         lens: {},
-        observabilityAIAssistant: {
-          useGenAIConnectors: jest.fn().mockImplementation(
-            (): UseGenAIConnectorsResult => ({
-              loading: false,
-              reloadConnectors: () => {},
-              selectConnector: () => {},
-            })
-          ),
-        },
         observabilityShared: {},
         dataViews: dataViewPluginMocks.createStartContract(),
       },
