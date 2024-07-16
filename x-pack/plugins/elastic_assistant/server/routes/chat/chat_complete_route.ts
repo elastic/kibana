@@ -150,8 +150,7 @@ export const chatCompleteRoute = (
 
           let updatedConversation: ConversationResponse | undefined | null;
 
-          // TODO: remove non-graph persistance when KB will be enabled by default
-          // TODO: @yuliia, is this still needed for the `!conversationId` case that was for when enableKnowledgeBaseByDefault:true?
+          // TODO: Remove non-graph persistence now that KB is enabled by default
           if (!conversationId && request.body.persist && conversationsDataClient) {
             updatedConversation = await createOrUpdateConversationWithUserInput({
               actionsClient,

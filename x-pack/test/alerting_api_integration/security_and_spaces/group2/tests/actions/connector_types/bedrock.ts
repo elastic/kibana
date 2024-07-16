@@ -608,16 +608,3 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
     });
   });
 }
-
-function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const newBuffer = new Uint8Array(a.length + b.length);
-  newBuffer.set(a);
-  newBuffer.set(b, a.length);
-  return newBuffer;
-}
-
-function getMessageLength(buffer: Uint8Array): number {
-  if (buffer.byteLength === 0) return 0;
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  return view.getUint32(0, false);
-}
