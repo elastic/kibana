@@ -100,6 +100,9 @@ function extractObjectToMerge(
   try {
     return extractByJsonPointer(resolvedDocument.document, sourcePointer);
   } catch (e) {
-    throw new Error(`Unable to merge shared components. ${e}`);
+    logger.debug(
+      `JSON pointer "${sourcePointer}" is not resolvable in ${resolvedDocument.absolutePath}`
+    );
+    return;
   }
 }

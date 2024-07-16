@@ -36,7 +36,9 @@ export function extractByJsonPointer(document: unknown, pointer: string): Record
     const nextTarget = target[segment];
 
     if (!isPlainObjectType(nextTarget)) {
-      throw new Error(`JSON Pointer "${pointer}" is not found in "${JSON.stringify(document)}"`);
+      throw new Error(
+        `JSON Pointer "${pointer}" is not resolvable in "${JSON.stringify(document)}"`
+      );
     }
 
     target = nextTarget;
