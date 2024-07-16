@@ -80,8 +80,8 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
@@ -111,9 +111,9 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
         onOpenTimeline: undefined,
         timelineId,
         timelineType: undefined,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       }),
-    [queryTimelineById, unifiedComponentsInTimelineEnabled]
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
   );
 
   // show a toast if the fetch notes call fails
