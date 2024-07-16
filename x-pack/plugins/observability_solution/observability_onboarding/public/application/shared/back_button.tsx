@@ -14,6 +14,8 @@ export const BackButton = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  if (location.pathname === '/kubernetes') return null;
+
   return (
     <>
       <EuiButtonEmpty
