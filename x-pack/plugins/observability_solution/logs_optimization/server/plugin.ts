@@ -17,6 +17,7 @@ import {
 
 import { LogsOptimizationBackendLibs } from './lib/shared_types';
 import { initLogsOptimizationServer } from './logs_optimization_server';
+import { DetectionsService } from './services/detections';
 
 export class LogsOptimizationPlugin
   implements
@@ -29,15 +30,19 @@ export class LogsOptimizationPlugin
 {
   private readonly logger: Logger;
   private libs!: LogsOptimizationBackendLibs;
+  private detectionsService: DetectionsService;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
+    this.detectionsService = new DetectionsService(this.logger);
   }
 
   public setup(
     core: LogsOptimizationPluginCoreSetup,
     plugins: LogsOptimizationServerPluginSetupDeps
   ) {
+    const detectionsService = this.detectionsService.setup();
+
     this.libs = {
       getStartServices: () => core.getStartServices(),
       logger: this.logger,
@@ -45,13 +50,27 @@ export class LogsOptimizationPlugin
       router: core.http.createRouter(),
     };
 
+    this.logger.info('LOAAAAAAAAADDDDDD');
+
+    core
+      .getStartServices()[0]
+      .elasticsearch.client.asInternalUser.search({
+        index: 'logs-*-*',
+        size: 100,
+      })
+      .then(console.log);
+
     // Register server side APIs
     initLogsOptimizationServer(this.libs);
 
-    return {};
+    return {
+      detectionsService,
+    };
   }
 
-  public start(_core: CoreStart, _plugins: LogsOptimizationServerPluginStartDeps) {
-    return {};
+  public start(core: CoreStart, _plugins: LogsOptimizationServerPluginStartDeps) {
+    const detectionsService = this.detectionsService.start();
+
+    return { detectionsService };
   }
 }

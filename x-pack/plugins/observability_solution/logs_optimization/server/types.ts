@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { DetectionsServiceSetup, DetectionsServiceStart } from './services/detections';
 
 export type LogsOptimizationPluginCoreSetup = CoreSetup<
   LogsOptimizationServerPluginStartDeps,
@@ -14,11 +15,13 @@ export type LogsOptimizationPluginCoreSetup = CoreSetup<
 export type LogsOptimizationPluginStartServicesAccessor =
   LogsOptimizationPluginCoreSetup['getStartServices'];
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsOptimizationServerSetup {}
+export interface LogsOptimizationServerSetup {
+  detectionsService: DetectionsServiceSetup;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsOptimizationServerStart {}
+export interface LogsOptimizationServerStart {
+  detectionsService: DetectionsServiceStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsOptimizationServerPluginSetupDeps {}
