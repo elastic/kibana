@@ -16,6 +16,7 @@ import {
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
@@ -54,6 +55,7 @@ export interface PluginSetup {
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
 }
 
