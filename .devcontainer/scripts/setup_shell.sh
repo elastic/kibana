@@ -12,5 +12,5 @@ if [ -f "$ENV_PATH" ]; then
     echo "Shell is not set or not executable, using bash."
   fi
 else
-  echo ".env file not found."
+  echo ".env file not found, using bash."
 fi
