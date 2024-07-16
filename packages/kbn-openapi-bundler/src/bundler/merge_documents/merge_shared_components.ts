@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { extractByJsonPointer } from '../../utils/extract_by_json_pointer';
+import { logger } from '../../logger';
 
 const MERGEABLE_COMPONENT_TYPES = [
   'schemas',
@@ -62,16 +63,26 @@ function mergeObjects(
       const componentToAdd = object[name];
       const existingComponent = merged[name];
 
-      if (existingComponent && !deepEqual(componentToAdd, existingComponent)) {
+      if (existingComponent) {
         const existingSchemaLocation = componentNameSourceLocationMap.get(name);
 
-        throw new Error(
-          `❌  Unable to merge documents due to conflicts in referenced ${mergedEntityName}. Component ${chalk.yellow(
-            `${sourcePointer}/${name}`
-          )} is defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
-            existingSchemaLocation
-          )} but has not matching definitions.`
-        );
+        if (deepEqual(componentToAdd, existingComponent)) {
+          logger.warning(
+            `Found a duplicate component ${chalk.yellow(
+              `${sourcePointer}/${name}`
+            )} defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
+              existingSchemaLocation
+            )}.`
+          );
+        } else {
+          throw new Error(
+            `❌  Unable to merge documents due to conflicts in referenced ${mergedEntityName}. Component ${chalk.yellow(
+              `${sourcePointer}/${name}`
+            )} is defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
+              existingSchemaLocation
+            )} but has not matching definitions.`
+          );
+        }
       }
 
       merged[name] = componentToAdd;
@@ -88,7 +99,7 @@ function extractObjectToMerge(
 ): Record<string, unknown> | undefined {
   try {
     return extractByJsonPointer(resolvedDocument.document, sourcePointer);
-  } catch {
-    return;
+  } catch (e) {
+    throw new Error(`Unable to merge shared components. ${e}`);
   }
 }
