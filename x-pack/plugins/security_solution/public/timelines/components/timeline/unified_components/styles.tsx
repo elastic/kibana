@@ -113,7 +113,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow:has(.eqlSequence),
   .udtTimeline .euiDataGridRow.eqlSequence {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
     }
@@ -128,7 +128,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow:has(.eqlNonSequence),
   .udtTimeline .euiDataGridRow.eqlNonSequence {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
@@ -143,7 +143,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow:has(.nonRawEvent),
   .udtTimeline .euiDataGridRow.nonRawEvent {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
     }
@@ -151,7 +151,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow:has(.rawEvent),
   .udtTimeline .euiDataGridRow.rawEvent {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
     }
