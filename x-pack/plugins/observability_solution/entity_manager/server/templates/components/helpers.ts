@@ -6,15 +6,15 @@
  */
 
 export const getCustomLatestTemplateComponents = (definitionId: string) => [
-  `${definitionId}@custom`,
   `${definitionId}@platform`,
-  `${definitionId}-history@custom`,
   `${definitionId}-history@platform`,
+  `${definitionId}@custom`,
+  `${definitionId}-history@custom`,
 ];
 
 export const getCustomHistoryTemplateComponents = (definitionId: string) => [
-  `${definitionId}@custom`,
   `${definitionId}@platform`,
-  `${definitionId}-latest@custom`,
   `${definitionId}-latest@platform`,
+  `${definitionId}@custom`,
+  `${definitionId}-latest@custom`,
 ];

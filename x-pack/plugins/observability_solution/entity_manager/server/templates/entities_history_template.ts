@@ -24,6 +24,7 @@ export const getEntitiesHistoryIndexTemplateConfig = (
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",
     ecs_version: '8.0.0',
     managed: true,
+    managed_by: 'elastic_entity_model',
   },
   ignore_missing_component_templates: getCustomHistoryTemplateComponents(definitionId),
   composed_of: [
@@ -33,7 +34,7 @@ export const getEntitiesHistoryIndexTemplateConfig = (
     ...getCustomHistoryTemplateComponents(definitionId),
   ],
   index_patterns: [`${ENTITY_HISTORY_INDEX_PREFIX_V1}.*`],
-  priority: 1,
+  priority: 200,
   template: {
     mappings: {
       _meta: {
