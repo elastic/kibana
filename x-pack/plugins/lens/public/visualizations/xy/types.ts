@@ -324,6 +324,15 @@ export const chartSwitchOptions = [
     description: i18n.translate('xpack.lens.bar.visualizationDescription', {
       defaultMessage: 'Compare categories or groups of data via bars.',
     }),
+    getCompatibleSubtype: (subtype: string) => {
+      if (subtype === 'area') {
+        return 'bar';
+      } else if (subtype === 'area_stacked') {
+        return 'bar_stacked';
+      } else if (subtype === 'area_percentage_stacked') {
+        return 'bar_percentage_stacked';
+      }
+    },
   },
   {
     id: 'area',
@@ -336,6 +345,15 @@ export const chartSwitchOptions = [
       defaultMessage: 'Compare distributions of cumulative data trends.',
     }),
     subtypes: ['area', 'area_stacked', 'area_percentage_stacked'],
+    getCompatibleSubtype: (subtype: string) => {
+      if (subtype === 'bar') {
+        return 'area';
+      } else if (subtype === 'bar_stacked') {
+        return 'area_stacked';
+      } else if (subtype === 'bar_percentage_stacked') {
+        return 'area_percentage_stacked';
+      }
+    },
   },
   {
     id: 'line',

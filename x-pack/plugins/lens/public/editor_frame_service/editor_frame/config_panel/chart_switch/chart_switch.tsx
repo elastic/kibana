@@ -113,10 +113,11 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
 
 function getCurrentVisualizationId(
   activeVisualization: Visualization,
-  visualizationState: unknown
+  visualizationState: unknown,
+  layerId?: string
 ) {
   return safeFnCall(
-    () => activeVisualization.getVisualizationTypeId(visualizationState),
+    () => activeVisualization.getVisualizationTypeId(visualizationState, layerId),
     undefined
   );
 }
@@ -303,8 +304,15 @@ export const ChartSwitch = memo(function ChartSwitch({
             let typeId = visualizationType.id;
 
             if (visualizationType.subtypes) {
+              console.log(
+                '   visualizationType.getCompatibleSubtype(subVisualizationId)',
+                visualizationType,
+                subVisualizationId,
+                visualizationType.getCompatibleSubtype?.(subVisualizationId)
+              );
               typeId =
                 visualizationType.subtypes.find((subtype) => subtype === subVisualizationId) ||
+                visualizationType.getCompatibleSubtype?.(subVisualizationId) ||
                 visualizationType.subtypes[0];
             }
             const visualizationEntry = {

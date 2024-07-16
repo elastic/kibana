@@ -1090,7 +1090,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * Return the ID of the current visualization. Used to highlight
    * the active subtype of the visualization.
    */
-  getVisualizationTypeId: (state: T) => string;
+  getVisualizationTypeId: (state: T, layerId?: string) => string;
 
   hideFromChartSwitch?: (frame: FramePublicAPI) => boolean;
   /**

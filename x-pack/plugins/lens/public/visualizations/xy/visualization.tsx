@@ -173,8 +173,9 @@ export const getXyVisualization = ({
 }): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   visualizationTypes,
-  getVisualizationTypeId(state) {
-    const type = getVisualizationType(state);
+  getVisualizationTypeId(state, layerId) {
+    const type = getVisualizationType(state, layerId);
+    console.log('getVisualizationTypeId', type);
     return type === 'mixed' ? type : type.id;
   },
 

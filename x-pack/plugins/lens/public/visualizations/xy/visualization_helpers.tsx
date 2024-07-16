@@ -201,6 +201,7 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
   }
   const dataLayers = getDataLayers(state?.layers);
   if (layerId) {
+    console.log('layerId', layerId);
     const dataLayerSeries = layerId
       ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
       : dataLayers[0].seriesType;
