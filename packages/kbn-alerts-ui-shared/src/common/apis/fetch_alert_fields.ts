@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import type { BrowserFields } from '../types/alerts_fields_types';
+import type { UseFetchAlertsFieldsQueryParams } from '../hooks/use_fetch_alerts_fields_query';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
-import { UseFetchAlertsFieldsQueryParams } from '../hooks/use_fetch_alerts_fields_query';
 
 export const fetchAlertsFields = ({ http, featureIds }: UseFetchAlertsFieldsQueryParams) =>
   http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(

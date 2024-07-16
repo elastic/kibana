@@ -7,29 +7,28 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { AlertsField } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { BrowserFields } from '../types/alerts_fields_types';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
-import { HttpSetup } from '@kbn/core-http-browser';
+import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 
 const browserFields: BrowserFields = {
   kibana: {
     fields: {
-      [AlertsField.uuid]: {
+      'kibana.alert.rule.uuid': {
         category: 'kibana',
-        name: AlertsField.uuid,
+        name: 'kibana.alert.rule.uuid',
       },
-      [AlertsField.name]: {
+      'kibana.alert.rule.name': {
         category: 'kibana',
-        name: AlertsField.name,
+        name: 'kibana.alert.rule.name',
       },
-      [AlertsField.reason]: {
+      'kibana.alert.reason': {
         category: 'kibana',
-        name: AlertsField.reason,
+        name: 'kibana.alert.reason',
       },
     },
   },

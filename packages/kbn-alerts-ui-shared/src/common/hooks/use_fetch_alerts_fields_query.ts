@@ -7,9 +7,9 @@
  */
 
 import { AlertConsumers, isValidFeatureId, ValidFeatureId } from '@kbn/rule-data-utils';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { HttpSetup } from '@kbn/core-http-browser';
+import type { BrowserFields } from '../types/alerts_fields_types';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 import { fetchAlertsFields } from '../apis/fetch_alert_fields';
 
