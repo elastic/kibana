@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
 
-      it('should render the histogram for indices with no @timestamp field when the ?earliest, ?latest params are in the queru', async function () {
+      it('should render the histogram for indices with no @timestamp field when the ?earliest, ?latest params are in the query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
