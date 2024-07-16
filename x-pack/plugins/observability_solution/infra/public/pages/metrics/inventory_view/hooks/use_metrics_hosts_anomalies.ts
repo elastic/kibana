@@ -8,7 +8,7 @@
 import { useState, useCallback, useEffect, useReducer } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FETCH_STATUS, isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { isPending, isFailure, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
   Sort,
@@ -321,7 +321,7 @@ export const useMetricsHostsAnomaliesResults = (
     }
   }, [dispatch, reducerState]);
 
-  const isPendingMetricsHostsAnomalies = status === FETCH_STATUS.LOADING;
+  const isPendingMetricsHostsAnomalies = isPending(status);
   const hasFailedLoadingMetricsHostsAnomalies = isFailure(status);
 
   return {

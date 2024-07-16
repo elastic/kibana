@@ -46,8 +46,8 @@ export function useSnapshot(
   return {
     error: (error && error.message) || null,
     loading: isPending(status),
-    nodes: data ? data.nodes : [],
-    interval: data ? data.interval : '60s',
+    nodes: data?.nodes || [],
+    interval: data?.interval || '60s',
     reload: refetch,
   };
 }

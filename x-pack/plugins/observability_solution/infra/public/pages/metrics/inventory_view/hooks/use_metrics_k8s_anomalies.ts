@@ -8,7 +8,7 @@
 import { useState, useCallback, useEffect, useReducer } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FETCH_STATUS, isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   Sort,
   Pagination,
@@ -296,7 +296,7 @@ export const useMetricsK8sAnomaliesResults = (
     }
   }, [dispatch, reducerState]);
 
-  const isPendingMetricsK8sAnomalies = status === FETCH_STATUS.LOADING;
+  const isPendingMetricsK8sAnomalies = isPending(status);
   const hasFailedLoadingMetricsK8sAnomalies = isFailure(status);
 
   return {

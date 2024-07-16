@@ -29,7 +29,7 @@ export function useDatePicker({
     []
   );
 
-  const autoRefreshEnabled = useMemo(() => autoRefresh && !autoRefresh.isPaused, [autoRefresh]);
+  const autoRefreshEnabled = autoRefresh && !autoRefresh.isPaused;
 
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const [parsedDateRange, setParsedDateRange] = useState(

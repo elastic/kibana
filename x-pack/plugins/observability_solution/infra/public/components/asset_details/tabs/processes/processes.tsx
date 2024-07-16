@@ -138,7 +138,7 @@ export const Processes = () => {
         <EuiFlexItem grow={false}>
           <SummaryTable
             isLoading={isLoading}
-            processSummary={(!error ? data?.summary : null) ?? { total: 0 }}
+            processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
           />
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="xs">
