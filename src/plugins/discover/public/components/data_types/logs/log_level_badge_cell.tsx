@@ -18,20 +18,25 @@ const badgeCss: CSSObject = {
   maxWidth: mathWithUnits(euiThemeVars.euiSize, (size) => size * 7.5),
 };
 
-export const LogLevelBadgeCell = (props: DataGridCellValueElementProps) => {
-  const { euiTheme } = useEuiTheme();
-  const value = props.row.flattened['log.level'];
+export const getLogLevelBadgeCell =
+  (logLevelField: string) => (props: DataGridCellValueElementProps) => {
+    const { euiTheme } = useEuiTheme();
+    const value = props.row.flattened[logLevelField];
 
-  if (!value) {
-    return <>-</>;
-  }
+    if (!value) {
+      return <span data-test-subj="logLevelBadgeCell-empty">-</span>;
+    }
 
-  const coalescedValue = getLogLevelCoalescedValue(value);
-  const color = coalescedValue ? getLogLevelColor(coalescedValue, euiTheme) : undefined;
+    const coalescedValue = getLogLevelCoalescedValue(value);
+    const color = coalescedValue ? getLogLevelColor(coalescedValue, euiTheme) : undefined;
 
-  return (
-    <EuiBadge color={color} css={badgeCss}>
-      {value}
-    </EuiBadge>
-  );
-};
+    return (
+      <EuiBadge
+        color={color}
+        data-test-subj={`logLevelBadgeCell-${coalescedValue ?? 'unknown'}`}
+        css={badgeCss}
+      >
+        {value}
+      </EuiBadge>
+    );
+  };

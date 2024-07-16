@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { LogLevelBadgeCell } from '../../../../components/data_types/logs/log_level_badge_cell';
+import { getLogLevelBadgeCell } from '../../../../components/data_types/logs/log_level_badge_cell';
 import type { DataSourceProfileProvider } from '../../../profiles';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
   (prev) => () => ({
     ...prev(),
-    'log.level': LogLevelBadgeCell,
-    log_level: LogLevelBadgeCell,
+    'log.level': getLogLevelBadgeCell('log.level'),
+    log_level: getLogLevelBadgeCell('log_level'),
   });
