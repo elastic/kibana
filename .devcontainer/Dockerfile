@@ -1,17 +1,17 @@
 FROM mcr.microsoft.com/devcontainers/base:focal
 
-ARG NODE_VERSION=20.13.1
-
 RUN apt-get update && apt-get install -y curl git zsh locales docker.io
 
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 
 # Install NVM and Node.js
+COPY .node-version /tmp/
 ENV NVM_DIR=/usr/local/nvm
 RUN mkdir -p $NVM_DIR && \ 
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
   . "$NVM_DIR/nvm.sh" && \
+  NODE_VERSION=$(cat /tmp/.node-version) && \
   nvm install ${NODE_VERSION} && \
   nvm use ${NODE_VERSION} && \
   nvm alias default ${NODE_VERSION}

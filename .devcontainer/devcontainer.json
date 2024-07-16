@@ -2,10 +2,7 @@
 	"name": "Kibana Dev Container",
 	"build": {
 		"dockerfile": "Dockerfile",
-		"context": "..",
-		"args": {
-			"NODE_VERSION": "20.13.1"
-		}
+		"context": ".."
 	},
 	"customizations": {
 		"vscode": {
