@@ -45,18 +45,19 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
 
 export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
+    const comment = command.args.args?.comment?.[0];
     const actionCreator = useSendGetEndpointProcessesRequest();
 
     const actionRequestBody = useMemo(() => {
       return endpointId
         ? {
             endpoint_ids: [endpointId],
-            comment: command.args.args?.comment?.[0],
-            agent_type: command.commandDefinition?.meta?.agentType,
+            comment,
+            agent_type: agentType,
           }
         : undefined;
-    }, [endpointId, command.args.args?.comment, command.commandDefinition?.meta?.agentType]);
+    }, [endpointId, comment, agentType]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,
