@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -98,6 +98,10 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   overflowIndexStart = 5,
   maxOverflowItems = 5,
 }) => {
+  const maxVisibleValues = useMemo(
+    () => values.slice(0, maxOverflowItems + 1),
+    [values, maxOverflowItems]
+  );
   return (
     <>
       {values.length > overflowIndexStart && (
@@ -106,7 +110,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
             <MoreContainer
               fieldName={fieldName}
               idPrefix={idPrefix}
-              values={values.slice(0, maxOverflowItems + 1)}
+              values={maxVisibleValues}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"
             />
