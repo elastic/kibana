@@ -8,7 +8,7 @@
 import { TimeRange } from '@kbn/es-query';
 import { Search } from 'history';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import type { InfraWaffleMapOptions } from '../../lib/lib';
+import type { InfraWaffleMapOptions } from '../../common/inventory/types';
 
 export type { AssetDetailsUrlState } from './hooks/use_asset_details_url_state';
 

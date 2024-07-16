@@ -15,7 +15,10 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_STAGING } from '@kbn/telemetry-plugin/common/constants';
-import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../lib/telemetry/constants';
+import {
+  TELEMETRY_CHANNEL_DETECTION_ALERTS,
+  TELEMETRY_CHANNEL_ENDPOINT_META,
+} from '../lib/telemetry/constants';
 
 import { eventually, setupTestServers, removeFile } from './lib/helpers';
 import {
@@ -33,6 +36,7 @@ import {
   dropEndpointIndices,
   mockEndpointData,
   getTelemetryReceiver,
+  mockPrebuiltRulesData,
 } from './lib/telemetry_helpers';
 
 import {
@@ -45,9 +49,10 @@ import {
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
 import type { SecurityTelemetryTask } from '../lib/telemetry/task';
-import { TelemetryChannel } from '../lib/telemetry/types';
+import { TelemetryChannel, type TelemetryEvent } from '../lib/telemetry/types';
 import type { AsyncTelemetryEventsSender } from '../lib/telemetry/async_sender';
 import endpointMetaTelemetryRequest from './__mocks__/endpoint-meta-telemetry-request.json';
+import alertsDetectionsRequest from './__mocks__/alerts-detections-request.json';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../lib/telemetry/receiver';
 import type { TaskMetric } from '../lib/telemetry/task_metrics.types';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
@@ -659,11 +664,82 @@ describe('telemetry tasks', () => {
     });
   });
 
+  describe('telemetry-prebuilt-rule-alerts', () => {
+    it('should execute when scheduled', async () => {
+      await mockAndSchedulePrebuiltRulesTask();
+
+      const alertsDetectionsRequests = await getAlertsDetectionsRequests();
+
+      expect(alertsDetectionsRequests.length).toBe(2);
+
+      const body = alertsDetectionsRequests[0];
+
+      expect(body.dll).toStrictEqual(alertsDetectionsRequest.dll);
+      expect(body.process).toStrictEqual(alertsDetectionsRequest.process);
+      expect(body.file).toStrictEqual(alertsDetectionsRequest.file);
+    });
+
+    // Flaky: https://github.com/elastic/kibana/issues/188234
+    it.skip('should manage runtime errors searching endpoint metrics', async () => {
+      const errorMessage = 'Something went wront';
+
+      async function* mockedGenerator(
+        _index: string,
+        _executeFrom: string,
+        _executeTo: string
+      ): AsyncGenerator<TelemetryEvent[], void, unknown> {
+        throw Error(errorMessage);
+      }
+
+      const fetchEndpointMetricsAbstract = telemetryReceiver.fetchPrebuiltRuleAlertsBatch;
+      deferred.push(() => {
+        telemetryReceiver.fetchPrebuiltRuleAlertsBatch = fetchEndpointMetricsAbstract;
+      });
+
+      telemetryReceiver.fetchPrebuiltRuleAlertsBatch = mockedGenerator;
+
+      const task = await mockAndSchedulePrebuiltRulesTask();
+      const started = performance.now();
+
+      const requests = await getTaskMetricsRequests(task, started);
+
+      expect(requests.length).toBe(1);
+
+      const metric = requests[0];
+
+      expect(metric).not.toBeFalsy();
+      expect(metric.taskMetric.passed).toBe(false);
+      expect(metric.taskMetric.error_message).toBe(errorMessage);
+    });
+  });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getEndpointMetaRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
       const found = mockedAxiosPost.mock.calls.filter(([url]) => {
         return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
+      });
+
+      expect(found).not.toBeFalsy();
+      expect(found.length).toBeGreaterThanOrEqual(atLeast);
+
+      return (found ?? []).flatMap((req) => {
+        const ndjson = req[1] as string;
+        return ndjson
+          .split('\n')
+          .filter((l) => l.trim().length > 0)
+          .map((l) => {
+            return JSON.parse(l);
+          });
+      });
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function getAlertsDetectionsRequests(atLeast: number = 1): Promise<any[]> {
+    return eventually(async () => {
+      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+        return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_DETECTION_ALERTS);
       });
 
       expect(found).not.toBeFalsy();
@@ -708,6 +784,19 @@ describe('telemetry tasks', () => {
     const task = getTelemetryTask(tasks, 'security:endpoint-meta-telemetry');
 
     await mockEndpointData(esClient, kibanaServer.coreStart.savedObjects);
+
+    // schedule task to run ASAP
+    await eventually(async () => {
+      await taskManagerPlugin.runSoon(task.getTaskId());
+    });
+
+    return task;
+  }
+
+  async function mockAndSchedulePrebuiltRulesTask(): Promise<SecurityTelemetryTask> {
+    const task = getTelemetryTask(tasks, 'security:telemetry-prebuilt-rule-alerts');
+
+    await mockPrebuiltRulesData(esClient);
 
     // schedule task to run ASAP
     await eventually(async () => {
