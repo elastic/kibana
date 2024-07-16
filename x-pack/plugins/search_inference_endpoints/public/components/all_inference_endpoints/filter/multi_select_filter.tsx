@@ -32,7 +32,7 @@ interface UseFilterParams {
   options: MultiSelectFilterOption[];
   renderOption?: (option: MultiSelectFilterOption) => React.ReactNode;
   selectedOptionKeys?: string[];
-  dataTestSubj: string;
+  dataTestSubj?: string;
 }
 
 export const MultiSelectFilter: React.FC<UseFilterParams> = ({
