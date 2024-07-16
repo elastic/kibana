@@ -42,20 +42,7 @@ export type ExpandedNetworkType =
     }
   | EmptyObject;
 
-export type ExpandedUserType =
-  | {
-      panelView?: 'userDetail';
-      params?: {
-        userName: string;
-      };
-    }
-  | EmptyObject;
-
-export type ExpandedDetailType =
-  | ExpandedEventType
-  | ExpandedHostType
-  | ExpandedNetworkType
-  | ExpandedUserType;
+export type ExpandedDetailType = ExpandedEventType | ExpandedHostType | ExpandedNetworkType;
 
 export enum TimelineTabs {
   query = 'query',

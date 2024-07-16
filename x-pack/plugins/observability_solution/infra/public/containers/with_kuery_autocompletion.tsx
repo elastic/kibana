@@ -13,12 +13,11 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { RendererFunction } from '../utils/typed_react';
 import { InfraClientStartDeps } from '../types';
 
 interface WithKueryAutocompletionLifecycleProps {
   kibana: KibanaReactContextValue<InfraClientStartDeps & KibanaServices>;
-  children: RendererFunction<{
+  children: React.FunctionComponent<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
