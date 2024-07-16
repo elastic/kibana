@@ -143,6 +143,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
 export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
   const startServices = createStartServices(basePath);
   const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
