@@ -246,13 +246,15 @@ export const useESQLOverallStatsData = (
         if (!fieldStatsRequest) {
           return;
         }
+
+        if (fieldStatsRequest.lastRefresh === 0) {
+          return;
+        }
         if (
-          fieldStatsRequest.lastRefresh === 0 ||
-          // Prevent running requests again when other plugins force refresh when query changes
-          // or when users repeat refresh button too quickly
-          (fieldStatsRequest.id !== 'esql_data_visualizer' &&
-            previousExecutionTs.current !== undefined &&
-            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 250)
+          fieldStatsRequest.id === undefined &&
+          previousExecutionTs.current !== undefined &&
+          (fieldStatsRequest.lastRefresh === previousExecutionTs.current ||
+            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 1000)
         ) {
           return;
         }
