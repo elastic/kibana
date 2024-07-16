@@ -237,18 +237,8 @@ export const getTopNavConfig = (
             path = originatingPath;
           }
 
-          console.log(
-            'NAVIGATE',
-            app,
-            path,
-            originatingPath,
-            stateTransfer,
-            saveOptions.dashboardId
-          );
-
           if (stateTransfer) {
             const snapshot = snapshotState();
-            console.log('SNAPSHOT', snapshot, id);
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
