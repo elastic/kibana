@@ -148,7 +148,9 @@ describe('logsDataSourceProfileProvider', () => {
 
       expect(cellRenderers).toBeDefined();
       expect(cellRenderers?.['log.level']).toBeDefined();
+      expect(cellRenderers?.['log.level.keyword']).toBeDefined();
       expect(cellRenderers?.log_level).toBeDefined();
+      expect(cellRenderers?.['log_level.keyword']).toBeDefined();
     });
   });
 });
