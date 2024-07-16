@@ -5,7 +5,9 @@
  * 2.0.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { SearchHomepageConfig } from './config';
 
+import { defineRoutes } from './routes';
 import { SearchHomepagePluginSetup, SearchHomepagePluginStart } from './types';
 
 export class SearchHomepagePlugin
@@ -21,10 +23,21 @@ export class SearchHomepagePlugin
 
   public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
     this.logger.debug('searchHomepage: Setup');
+    const router = core.http.createRouter();
+
+    defineRoutes({
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      router,
+      options: { hasIndexStats: this.config.enableIndexStats },
+    });
+
     return {};
   }
 
   public start(core: CoreStart) {
     return {};
   }
+
+  public stop() {}
 }
