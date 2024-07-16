@@ -85,7 +85,19 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     {
       pipeline: {
         ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
         name: `${definition.id}-latest@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@platform`,
       },
     },
   ];
