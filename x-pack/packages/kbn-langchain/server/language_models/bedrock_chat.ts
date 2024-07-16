@@ -37,7 +37,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
       fetchFn: async (url, options) => {
         const inputBody = JSON.parse(options?.body as string);
 
-        if (this.streaming && !inputBody.tools?.length) {
+        if (this.streaming) {
           const data = (await actionsClient.execute({
             actionId: connectorId,
             params: {
