@@ -25,7 +25,7 @@ describe('getEsqlDataView', () => {
   } as DataView;
   const services = discoverServiceMock;
 
-  it('returns the current dataview if is adhoc with no named params and query pattern is the same with the dataview', async () => {
+  it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
     const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
     expect(dataView).toStrictEqual(dataViewAdHocNoAtTimestamp);
