@@ -293,11 +293,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      if (event.shiftKey) {
+      if (event.shiftKey && isLoading === false) {
         window.open(url);
-      } else if (event.ctrlKey || event.metaKey) {
+      } else if ((event.ctrlKey || event.metaKey) && isLoading === false) {
         window.open(url, '_blank');
-      } else {
+      } else if (isLoading === false) {
         navigateToUrl(url);
       }
 
@@ -307,7 +307,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue, isLoading]
   );
 
   const clearField = () => setSearchValue('');
