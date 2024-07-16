@@ -10,6 +10,12 @@ import {
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { entitiesHistoryBaseComponentTemplateConfig } from '../templates/components/base_history';
+import { entitiesLatestBaseComponentTemplateConfig } from '../templates/components/base_latest';
+import { entitiesEntityComponentTemplateConfig } from '../templates/components/entity';
+import { entitiesEventComponentTemplateConfig } from '../templates/components/event';
+import { entitiesHistoryIndexTemplateConfig } from '../templates/entities_history_template';
+import { entitiesLatestIndexTemplateConfig } from '../templates/entities_latest_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -22,6 +28,50 @@ interface ComponentManagementOptions {
   component: ClusterPutComponentTemplateRequest;
   logger: Logger;
 }
+
+export const installEntityManagerTemplates = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}) => {
+  await Promise.all([
+    upsertComponent({
+      esClient,
+      logger,
+      component: entitiesHistoryBaseComponentTemplateConfig,
+    }),
+    upsertComponent({
+      esClient,
+      logger,
+      component: entitiesLatestBaseComponentTemplateConfig,
+    }),
+    upsertComponent({
+      esClient,
+      logger,
+      component: entitiesEventComponentTemplateConfig,
+    }),
+    upsertComponent({
+      esClient,
+      logger,
+      component: entitiesEntityComponentTemplateConfig,
+    }),
+  ]);
+
+  await Promise.all([
+    upsertTemplate({
+      esClient,
+      logger,
+      template: entitiesHistoryIndexTemplateConfig,
+    }),
+    upsertTemplate({
+      esClient,
+      logger,
+      template: entitiesLatestIndexTemplateConfig,
+    }),
+  ]);
+};
 
 export async function upsertTemplate({ esClient, template, logger }: TemplateManagementOptions) {
   try {

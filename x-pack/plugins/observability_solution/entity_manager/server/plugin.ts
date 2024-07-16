@@ -14,7 +14,7 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
-import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
+import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import {
   EntityManagerPluginSetupDependencies,
@@ -22,13 +22,7 @@ import {
   EntityManagerServerSetup,
 } from './types';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { entitiesEventComponentTemplateConfig } from './templates/components/event';
 import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
-import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
-import { entitiesLatestBaseComponentTemplateConfig } from './templates/components/base_latest';
-import { entitiesHistoryBaseComponentTemplateConfig } from './templates/components/base_history';
-import { entitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
-import { entitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
 import { updateBuiltInEntityDefinitions } from './lib/entities/update_entity_definition';
 import { builtInDefinitions } from './lib/entities/built_in';
 
@@ -93,52 +87,13 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Install entities component templates and index template
-    Promise.all([
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesHistoryBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesLatestBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEventComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEntityComponentTemplateConfig,
-      }),
-    ])
+    installEntityManagerTemplates({ esClient, logger: this.logger })
       .then(() =>
-        upsertTemplate({
-          esClient,
-          logger: this.logger,
-          template: entitiesHistoryIndexTemplateConfig,
-        })
-      )
-      .then(() =>
-        upsertTemplate({
-          esClient,
-          logger: this.logger,
-          template: entitiesLatestIndexTemplateConfig,
-        })
-      )
-      .catch((err) => {
-        this.logger.error(err);
-      })
-      .then(() => {
-        return updateBuiltInEntityDefinitions({
+        updateBuiltInEntityDefinitions({
           definitions: builtInDefinitions,
           server: this.server!,
-        });
-      })
+        })
+      )
       .catch((err) => this.logger.error(err));
 
     return {};
