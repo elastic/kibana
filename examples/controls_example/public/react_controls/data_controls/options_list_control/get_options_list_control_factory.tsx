@@ -7,7 +7,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, filter } from 'rxjs';
+import deepEqual from 'react-fast-compare';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  skip,
+} from 'rxjs';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
@@ -19,6 +27,7 @@ import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
@@ -160,6 +169,23 @@ export const getOptionsListControlFactory = ({
         );
       });
 
+      /** Clear state when the field changes */
+      const fieldChangedSubscription = combineLatest([
+        dataControl.stateManager.fieldName,
+        dataControl.stateManager.dataViewId,
+      ])
+        .pipe(
+          distinctUntilChanged(deepEqual),
+          skip(1) // skip first filter output because it will have been applied in initialize
+        )
+        .subscribe(() => {
+          searchString$.next('');
+          selections$.next(undefined);
+          existsSelected$.next(false);
+          excludeSelected$.next(false);
+          sort$.next(OPTIONS_LIST_DEFAULT_SORT);
+        });
+
       /** Fetch the suggestions and perform validation */
       const fetchSubscription = fetchAndValidate$({
         services: { http: core.http, uiSettings: core.uiSettings, data: dataService },
@@ -190,6 +216,34 @@ export const getOptionsListControlFactory = ({
           const currentSelections = selections$.getValue() ?? [];
           if (currentSelections.length > 1) selections$.next([currentSelections[0]]);
         });
+
+      /** Output filters when selections change */
+      const outputFilterSubscription = combineLatest([
+        dataControl.api.dataViews,
+        dataControl.stateManager.fieldName,
+        selections$,
+        existsSelected$,
+        excludeSelected$,
+      ]).subscribe(([dataViews, fieldName, selections, existsSelected, exclude]) => {
+        const dataView = dataViews?.[0];
+        const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        if (!dataView || !field) return;
+
+        let newFilter: Filter | undefined;
+        if (existsSelected) {
+          newFilter = buildExistsFilter(field, dataView);
+        } else if (selections) {
+          newFilter =
+            selections.length === 1
+              ? buildPhraseFilter(field, selections[0], dataView)
+              : buildPhrasesFilter(field, selections, dataView);
+        }
+        if (newFilter) {
+          newFilter.meta.key = field?.name;
+          if (exclude) newFilter.meta.negate = true;
+          api.setOutputFilter(newFilter);
+        }
+      });
 
       const api = buildApi(
         {
@@ -291,6 +345,8 @@ export const getOptionsListControlFactory = ({
             return () => {
               dataLoadingSubscription.unsubscribe();
               fetchSubscription.unsubscribe();
+              fieldChangedSubscription.unsubscribe();
+              outputFilterSubscription.unsubscribe();
               singleSelectSubscription.unsubscribe();
               validSearchStringSubscription.unsubscribe();
             };
