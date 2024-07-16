@@ -37,7 +37,7 @@ describe('getEsqlDataView', () => {
     expect(dataView.timeFieldName).toBe('time');
   });
 
-  it('creates an adhoc dataview if the current dataview is persistent and query pattern is the same with the dataviewd', async () => {
+  it('creates an adhoc dataview if the current dataview is persistent and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from the-data-view-title' };
     const dataView = await getEsqlDataView(query, dataViewMock, services);
     expect(dataView.isPersisted()).toEqual(false);
