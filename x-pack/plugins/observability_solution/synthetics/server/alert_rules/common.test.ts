@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
 import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
@@ -185,6 +186,8 @@ describe('updateState', () => {
 });
 
 describe('setRecoveredAlertsContext', () => {
+  const { alertFactory } = alertsMock.createRuleExecutorServices();
+  const { getRecoveredAlerts } = alertFactory.done();
   const alertUuid = 'alert-id';
   const location = 'US Central';
   const configId = '12345';
@@ -192,6 +195,7 @@ describe('setRecoveredAlertsContext', () => {
   const basePath = {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
+  const getAlertUuid = () => alertUuid;
 
   const upConfigs = {
     [idWithLocation]: {
@@ -215,26 +219,17 @@ describe('setRecoveredAlertsContext', () => {
   };
 
   it('sets context correctly when monitor is deleted', () => {
-    const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
-        {
-          alert: {
-            getId: () => alertUuid,
-            getState: () => ({
-              idWithLocation,
-              monitorName: 'test-monitor',
-            }),
-            setContext: jest.fn(),
-            getUuid: () => alertUuid,
-          },
-        },
-      ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
-    };
+    const setContext = jest.fn();
+    getRecoveredAlerts.mockReturnValue([
+      {
+        getId: () => alertUuid,
+        getState: () => ({
+          idWithLocation,
+          monitorName: 'test-monitor',
+        }),
+        setContext,
+      },
+    ]);
     const staleDownConfigs = {
       [idWithLocation]: {
         configId,
@@ -255,56 +250,45 @@ describe('setRecoveredAlertsContext', () => {
       },
     };
     setRecoveredAlertsContext({
-      alertsClient: alertsClientMock,
+      alertFactory,
       basePath,
+      getAlertUuid,
       spaceId: 'default',
       staleDownConfigs,
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
-      context: {
-        checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
-        configId: '12345',
-        idWithLocation,
-        linkMessage: '',
-        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        monitorName: 'test-monitor',
-        recoveryReason: 'the monitor has been deleted',
-        recoveryStatus: 'has been deleted',
-        monitorUrl: '(unavailable)',
-        monitorUrlLabel: 'URL',
-        reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
-        stateId: '123456',
-        status: 'recovered',
-      },
+    expect(setContext).toBeCalledWith({
+      checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+      configId: '12345',
+      idWithLocation,
+      linkMessage: '',
+      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+      monitorName: 'test-monitor',
+      recoveryReason: 'the monitor has been deleted',
+      recoveryStatus: 'has been deleted',
+      monitorUrl: '(unavailable)',
+      monitorUrlLabel: 'URL',
+      reason:
+        'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+      stateId: '123456',
+      status: 'recovered',
     });
   });
 
   it('sets context correctly when location is removed', () => {
-    const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
-        {
-          alert: {
-            getId: () => alertUuid,
-            getState: () => ({
-              idWithLocation,
-              monitorName: 'test-monitor',
-            }),
-            setContext: jest.fn(),
-            getUuid: () => alertUuid,
-          },
-        },
-      ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
-    };
+    const setContext = jest.fn();
+    getRecoveredAlerts.mockReturnValue([
+      {
+        getId: () => alertUuid,
+        getState: () => ({
+          idWithLocation,
+          monitorName: 'test-monitor',
+        }),
+        setContext,
+      },
+    ]);
     const staleDownConfigs = {
       [idWithLocation]: {
         configId,
@@ -325,58 +309,47 @@ describe('setRecoveredAlertsContext', () => {
       },
     };
     setRecoveredAlertsContext({
-      alertsClient: alertsClientMock,
+      alertFactory,
       basePath,
+      getAlertUuid,
       spaceId: 'default',
       staleDownConfigs,
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
-      context: {
-        configId: '12345',
-        checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
-        monitorUrl: '(unavailable)',
-        reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
-        idWithLocation,
-        linkMessage: '',
-        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        monitorName: 'test-monitor',
-        recoveryReason: 'this location has been removed from the monitor',
-        recoveryStatus: 'has recovered',
-        stateId: '123456',
-        status: 'recovered',
-        monitorUrlLabel: 'URL',
-      },
+    expect(setContext).toBeCalledWith({
+      configId: '12345',
+      checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+      monitorUrl: '(unavailable)',
+      reason:
+        'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+      idWithLocation,
+      linkMessage: '',
+      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+      monitorName: 'test-monitor',
+      recoveryReason: 'this location has been removed from the monitor',
+      recoveryStatus: 'has recovered',
+      stateId: '123456',
+      status: 'recovered',
+      monitorUrlLabel: 'URL',
     });
   });
 
   it('sets context correctly when monitor is up', () => {
-    const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
-        {
-          alert: {
-            getId: () => alertUuid,
-            getState: () => ({
-              idWithLocation,
-              monitorName: 'test-monitor',
-              locationId: 'us_west',
-              configId: '12345-67891',
-            }),
-            setContext: jest.fn(),
-            getUuid: () => alertUuid,
-          },
-        },
-      ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
-    };
+    const setContext = jest.fn();
+    getRecoveredAlerts.mockReturnValue([
+      {
+        getId: () => alertUuid,
+        getState: () => ({
+          idWithLocation,
+          monitorName: 'test-monitor',
+          locationId: 'us_west',
+          configId: '12345-67891',
+        }),
+        setContext,
+      },
+    ]);
     const staleDownConfigs = {
       [idWithLocation]: {
         configId,
@@ -397,35 +370,33 @@ describe('setRecoveredAlertsContext', () => {
       },
     };
     setRecoveredAlertsContext({
-      alertsClient: alertsClientMock,
+      alertFactory,
       basePath,
+      getAlertUuid,
       spaceId: 'default',
       staleDownConfigs,
       upConfigs,
       dateFormat,
       tz: 'UTC',
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
-      context: {
-        configId: '12345-67891',
-        idWithLocation,
-        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        monitorName: 'test-monitor',
-        status: 'up',
-        recoveryReason:
-          'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
-        recoveryStatus: 'is now up',
-        locationId: 'us_west',
-        checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
-        linkMessage:
-          '- Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
-        monitorUrl: '(unavailable)',
-        monitorUrlLabel: 'URL',
-        reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
-        stateId: null,
-      },
+    expect(setContext).toBeCalledWith({
+      configId: '12345-67891',
+      idWithLocation,
+      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+      monitorName: 'test-monitor',
+      status: 'up',
+      recoveryReason:
+        'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
+      recoveryStatus: 'is now up',
+      locationId: 'us_west',
+      checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+      linkMessage:
+        '- Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
+      monitorUrl: '(unavailable)',
+      monitorUrlLabel: 'URL',
+      reason:
+        'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+      stateId: null,
     });
   });
 });
