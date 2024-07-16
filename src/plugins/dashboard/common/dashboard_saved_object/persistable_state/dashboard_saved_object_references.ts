@@ -45,15 +45,15 @@ export function injectReferences(
 
   const newAttributes = {
     ...attributes,
-    panelsJSON: JSON.stringify(injectedPanels),
-  } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && injectedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panels: injectedState.controlGroupInput.panels,
-    };
-  }
+    panels: injectedPanels,
+    ...(attributes.controlGroupInput &&
+      injectedState.controlGroupInput && {
+        controlGroupInput: {
+          ...attributes.controlGroupInput,
+          panels: injectedState.controlGroupInput.panels,
+        },
+      }),
+  };
 
   return newAttributes;
 }
@@ -82,15 +82,15 @@ export function extractReferences(
 
   const newAttributes = {
     ...attributes,
-    panelsJSON: JSON.stringify(extractedPanels),
-  } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && extractedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panels: extractedState.controlGroupInput.panels,
-    };
-  }
+    panels: extractedPanels,
+    ...(attributes.controlGroupInput &&
+      extractedState.controlGroupInput && {
+        controlGroupInput: {
+          ...attributes.controlGroupInput,
+          panels: extractedState.controlGroupInput.panels,
+        },
+      }),
+  };
 
   return {
     references: [...references, ...extractedReferences],

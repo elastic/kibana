@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import {
   CMCrudTypes,
   ContentManagementCrudTypes,
@@ -13,29 +14,15 @@ import {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { DashboardOptions } from '../../types';
 import { DashboardContentType } from '../types';
-import {
-  DashboardAttributes as DashboardAttributesV2,
-  SavedDashboardPanel as SavedDashboardPanelV2,
-} from '../v2';
+import { DashboardAttributes as DashboardAttributesV2 } from '../v2';
+import { dashboardAttributesSchema } from './cm_services';
 
 export type { PersistableControlGroupInput as ControlGroupAttributes };
 
 export type { DashboardAttributesV2 as RawDashboardAttributes };
 
-export type DashboardAttributes = Omit<
-  DashboardAttributesV2,
-  'panelsJSON' | 'optionsJSON' | 'kibanaSavedObjectMeta' | 'controlGroupInput'
-> & {
-  controlGroupInput?: PersistableControlGroupInput;
-  panels: SavedDashboardPanelV2[];
-  options: DashboardOptions;
-  kibanaSavedObjectMeta: {
-    searchSource: SerializedSearchSourceFields & { indexRefName: string };
-  };
-};
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 
 export type DashboardCrudTypes = CMCrudTypes &
   ContentManagementCrudTypes<

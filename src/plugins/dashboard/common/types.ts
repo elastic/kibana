@@ -10,7 +10,11 @@ import { Reference } from '@kbn/content-management-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { DashboardAttributes, SavedDashboardPanel } from './content_management';
+import {
+  DashboardAttributes,
+  RawDashboardAttributes,
+  SavedDashboardPanel,
+} from './content_management';
 import { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
 
 export interface DashboardOptions {
@@ -47,5 +51,10 @@ export type DashboardAttributesWithType = EmbeddableStateWithType & {
 
 export interface DashboardAttributesAndReferences {
   attributes: DashboardAttributes;
+  references: Reference[];
+}
+
+export interface RawDashboardAttributesAndReferences {
+  attributes: RawDashboardAttributes;
   references: Reference[];
 }

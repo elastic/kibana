@@ -22,22 +22,31 @@ import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
-  PersistableControlGroupInput,
   RawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
 import { ControlWidth } from '@kbn/controls-plugin/common';
 import { CONTROL_CHAINING_OPTIONS, CONTROL_STYLE_OPTIONS } from '@kbn/controls-plugin/common';
-import { DashboardCrudTypes } from './types';
+import { ControlGroupAttributes, DashboardCrudTypes } from './types';
 import {
   DashboardCrudTypes as DashboardCrudTypesV2,
   serviceDefinition as serviceDefinitionV2,
 } from '../v2';
 
-const controlGroupInputSchema = schema.object({
+export const controlGroupInputSchema = schema.object({
   panels: schema.recordOf(
     schema.string(),
     schema.object(
       {
+        type: schema.string({ meta: { description: 'The type of the control panel.' } }),
+        explicitInput: schema.object(
+          {
+            id: schema.string({ meta: { description: 'The id of the control panel.' } }),
+          },
+          {
+            unknowns: 'allow',
+            meta: { description: 'Embeddable input for the control.' },
+          }
+        ),
         order: schema.number({
           meta: {
             description: 'The order of the control panel in the control group.',
@@ -85,28 +94,35 @@ const controlGroupInputSchema = schema.object({
       },
     }
   ),
-  ignoreParentSettings: schema.object({
-    ignoreFilters: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Ignore global filters in controls.' },
-    }),
-    ignoreQuery: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Ignore the global query bar in controls.' },
-    }),
-    ignoreTimerange: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Ignore the global time range in controls.' },
-    }),
-    ignoreValidations: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Ignore validations in controls.' },
-    }),
-  }),
-  showApplySelections: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Show apply selections button in controls.' },
-  }),
+  ignoreParentSettings: schema.maybe(
+    schema.object({
+      ignoreFilters: schema.maybe(
+        schema.boolean({
+          meta: { description: 'Ignore global filters in controls.' },
+        })
+      ),
+      ignoreQuery: schema.maybe(
+        schema.boolean({
+          meta: { description: 'Ignore the global query bar in controls.' },
+        })
+      ),
+      ignoreTimerange: schema.maybe(
+        schema.boolean({
+          meta: { description: 'Ignore the global time range in controls.' },
+        })
+      ),
+      ignoreValidations: schema.maybe(
+        schema.boolean({
+          meta: { description: 'Ignore validations in controls.' },
+        })
+      ),
+    })
+  ),
+  showApplySelections: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Show apply selections button in controls.' },
+    })
+  ),
 });
 
 const searchSourceSchema = schema.object(
@@ -221,16 +237,13 @@ const optionsSchema = schema.object({
 
 export const dashboardAttributesSchema = schema.object({
   // General
-  title: schema.maybe(
-    schema.string({ meta: { description: 'A human-readable title for the dashboard' } })
-  ),
-  description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
+  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
 
   // Search
   kibanaSavedObjectMeta: schema.object(
     {
       searchSource: searchSourceSchema,
-      searchSourceJSON: schema.string({ defaultValue: '', meta: { deprecated: true } }),
     },
     {
       meta: {
@@ -240,9 +253,10 @@ export const dashboardAttributesSchema = schema.object({
   ),
 
   // Time
-  timeRestore: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to restore time upon viewing this dashboard' } })
-  ),
+  timeRestore: schema.boolean({
+    defaultValue: false,
+    meta: { description: 'Whether to restore time upon viewing this dashboard' },
+  }),
   timeFrom: schema.maybe(
     schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
   ),
@@ -292,19 +306,14 @@ export const dashboardAttributesSchema = schema.object({
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
   panels: panelsSchema,
-  panelsJSON: schema.string({ defaultValue: '', meta: { deprecated: true } }),
   options: optionsSchema,
-  optionsJSON: schema.string({ defaultValue: '', meta: { deprecated: true } }),
-
-  // Legacy
-  hits: schema.maybe(schema.number({ meta: { deprecated: true } })),
-  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
+  version: schema.number({ meta: { deprecated: true } }),
 });
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
 const controlGroupInputDown = (
-  controlGroupInput?: PersistableControlGroupInput
+  controlGroupInput?: ControlGroupAttributes
 ): RawControlGroupAttributes | undefined => {
   if (!controlGroupInput) {
     return;

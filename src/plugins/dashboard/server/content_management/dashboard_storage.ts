@@ -439,35 +439,3 @@ export class DashboardStorage
     return value;
   }
 }
-
-// export class DashboardStorage extends SOContentStorage<DashboardCrudTypes> {
-//   constructor({
-//     logger,
-//     throwOnResultValidationError,
-//   }: {
-//     logger: Logger;
-//     throwOnResultValidationError: boolean;
-//   }) {
-//     super({
-//       savedObjectType: CONTENT_ID,
-//       cmServicesDefinition,
-//       searchArgsToSOFindOptions,
-//       enableMSearch: true,
-//       allowedSavedObjectAttributes: [
-//         'kibanaSavedObjectMeta',
-//         'controlGroupInput',
-//         'refreshInterval',
-//         'description',
-//         'timeRestore',
-//         'optionsJSON',
-//         'panelsJSON',
-//         'timeFrom',
-//         'version',
-//         'timeTo',
-//         'title',
-//       ],
-//       logger,
-//       throwOnResultValidationError,
-//     });
-//   }
-// }
