@@ -195,3 +195,23 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     defaultValue: [],
   }
 );
+
+export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
+  schema.object({
+    space_id: schema.string(),
+    allowed_namespace_prefixes: schema.nullable(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        })
+      )
+    ),
+  }),
+  {
+    defaultValue: [],
+  }
+);
