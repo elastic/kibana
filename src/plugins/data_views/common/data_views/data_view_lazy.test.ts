@@ -464,6 +464,21 @@ describe('DataViewLazy', () => {
       dataViewLazy.removeRuntimeField(newField);
     });
 
+    test('add and remove a custom description from a runtime field', async () => {
+      const newField = 'new_field_test';
+      fieldCapsResponse = [];
+      dataViewLazy.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        customDescription: 'test1',
+      });
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test1');
+      dataViewLazy.setFieldCustomDescription(newField, 'test2');
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test2');
+      dataViewLazy.setFieldCustomDescription(newField, undefined);
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toBeUndefined();
+      dataViewLazy.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', async () => {
       const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap();
       const fieldCount = Object.values(fieldMap).length;
