@@ -26,11 +26,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Reporting Management', function () {
     before(async () => {
-      adminUser = await svlUserManager.createApiKeyForRole('admin');
+      adminUser = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(adminUser);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminUser);
     });
 
     describe('Deletion', () => {
