@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
 import { createFormatter } from '../../../../../common/formatters';

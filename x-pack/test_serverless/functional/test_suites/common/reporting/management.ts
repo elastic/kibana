@@ -83,23 +83,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
     });
-
-    // Skipping test for now because functionality is not yet possible to test
-    // See details: https://github.com/elastic/kibana/issues/186558
-    xit(`user doesn't see a job another user has created`, async () => {
-      log.debug(`creating a csv report job using api keys for role: [${roleName}]`);
-
-      const {
-        job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
-        CSV_REPORT_TYPE_V2,
-        job,
-        roleAuthc,
-        internalReqHeader
-      );
-
-      await navigateToReportingManagement();
-      await testSubjects.missingOrFail(`viewReportingLink-${jobId}`);
-    });
   });
 };
