@@ -122,10 +122,4 @@ export const getOptionalRequestParams = ({
   };
 };
 
-export const hasParsableResponse = ({
-  isEnabledRAGAlerts,
-  isEnabledKnowledgeBase,
-}: {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
-}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

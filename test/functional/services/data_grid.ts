@@ -302,7 +302,10 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+      isAnchorRow: false,
+      rowIndex: 0,
+    }
   ): Promise<void> {
     const testSubj = options.isAnchorRow
       ? 'docTableExpandToggleColumnAnchor'
@@ -321,11 +324,24 @@ export class DataGridService extends FtrService {
     });
 
     if (toggle) {
-      await toggle.scrollIntoViewIfNecessary();
-      await toggle.click();
+      await this.retry.waitFor('doc viewer to open', async () => {
+        await toggle!.scrollIntoViewIfNecessary();
+        await toggle!.click();
+        return this.isShowingDocViewer();
+      });
     } else {
       throw new Error('Unable to find row toggle element');
     }
+
+    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+  }
+
+  public async isShowingDocViewer() {
+    return await this.testSubjects.exists('kbnDocViewer');
+  }
+
+  public async clickDocViewerTab(id: string) {
+    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
