@@ -31,7 +31,7 @@ describe('getEsqlDataView', () => {
     expect(dataView).toStrictEqual(dataViewAdHocNoAtTimestamp);
   });
 
-  it('returns an adhoc dataview if is adhoc with named params and uery pattern is the same with the dataview', async () => {
+  it('returns an adhoc dataview if it is adhoc with named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title | where time >= ?earliest' };
     const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
     expect(dataView.timeFieldName).toBe('time');
