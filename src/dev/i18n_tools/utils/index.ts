@@ -9,4 +9,10 @@
 export { ErrorReporter } from './error_reporter';
 export { globNamespacePaths, globTranslationFiles } from './glob_namespace';
 
-export { normalizePath, arrayify, makeAbsolutePath, descriptorDetailsStack } from './helpers';
+export {
+  normalizePath,
+  arrayify,
+  makeAbsolutePath,
+  descriptorDetailsStack,
+  writeToFile,
+} from './helpers';

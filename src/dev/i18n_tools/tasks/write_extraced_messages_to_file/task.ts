@@ -7,18 +7,15 @@
  */
 
 import { PRESET_TIMER } from 'listr2';
+import type { TaskSignature } from '../../types';
 
-import { writeFile as writeFileAsync } from 'fs/promises';
-import path from 'path';
-import { TaskSignature } from '../../types';
+import { ErrorReporter } from '../../utils/error_reporter';
+import { writeToFile } from '../../utils';
+import { serializeToJson } from '../../serializers';
 
 export interface TaskOptions {
   outputDir: string;
 }
-
-import { ErrorReporter } from '../../utils/error_reporter';
-import { makeAbsolutePath } from '../../utils';
-import { serializeToJson } from '../../serializers';
 
 export const writeExtractedMessagesToFile: TaskSignature<TaskOptions> = (
   context,
@@ -41,15 +38,14 @@ export const writeExtractedMessagesToFile: TaskSignature<TaskOptions> = (
         title: `Writing Translation Files`,
         task: async () => {
           try {
-            const outputFileParth = makeAbsolutePath(path.resolve(outputDir, 'en.json'));
-
             const sortedMessages = [...context.messages.values()]
               .flat()
               .sort(({ id: key1 }, { id: key2 }) => key1.localeCompare(key2));
 
             const fileJsonContent = serializeToJson(sortedMessages);
-            await writeFileAsync(outputFileParth, fileJsonContent);
-            parent.title = `Successfully wrote file ${outputFileParth}`;
+            const { outputFilePath } = await writeToFile(outputDir, 'en.json', fileJsonContent);
+
+            parent.title = `Successfully wrote file ${outputFilePath}`;
           } catch (err) {
             throw err;
           }

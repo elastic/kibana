@@ -8,6 +8,9 @@
 
 import path from 'path';
 import normalize from 'normalize-path';
+import type { MakeDirectoryOptions, PathLike } from 'fs';
+import { mkdir, writeFile as writeFileAsync } from 'fs/promises';
+import { constants } from 'os';
 import { MessageDescriptor } from '../types';
 
 export function normalizePath(inputPath: string) {
@@ -37,4 +40,23 @@ message: ${messageDescriptor.defaultMessage}
 file: ${messageDescriptor.file}
 namespace: ${namespaceRoot}
 `;
+};
+
+async function mkdirIfNotExists(dirPath: PathLike, options?: MakeDirectoryOptions) {
+  return mkdir(dirPath, options).catch((err) => {
+    if (err.code !== constants.errno.EEXIST) throw err;
+  });
+}
+
+export const writeToFile = async (outputDir: string, filename: string, content: string) => {
+  const outputDirPath = makeAbsolutePath(outputDir);
+  await mkdirIfNotExists(outputDirPath, { recursive: true });
+
+  const outputFilePath = path.join(outputDirPath, filename);
+  const result = await writeFileAsync(outputFilePath, content);
+
+  return {
+    outputFilePath,
+    result,
+  };
 };
