@@ -15,7 +15,6 @@ import {
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 
 const tilde = '`';
 const codeDelimiter = '```';
@@ -168,44 +167,6 @@ describe('useConversation helpers', () => {
       expect(result).toBeUndefined();
     });
 
-    test('should return the default (starred) isNewConversationDefault system prompt if conversation id is empty', () => {
-      const testConversation: Conversation = {
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-        replacements: {},
-        category: 'assistant',
-        id: '',
-        messages: [],
-        title: '4',
-      };
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: testConversation,
-      });
-
-      expect(result).toEqual(allSystemPrompts[1]);
-    });
-
-    test('should return the default system prompt if conversation id is empty and no "isNewConversationDefault" prompt found', () => {
-      const testConversation: Conversation = {
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-        replacements: {},
-        category: 'assistant',
-        id: '',
-        messages: [],
-        title: '4',
-      };
-      const mockAllSystemPrompts = [
-        { ...defaultSystemPrompt, isNewConversationDefault: false },
-        mockSystemPrompt,
-      ];
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts: mockAllSystemPrompts,
-        conversation: testConversation,
-      });
-
-      expect(result).toEqual(mockAllSystemPrompts[0]);
-    });
-
     test('should return undefined if conversation system prompt does not exist and there are no system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         ...conversation,
@@ -231,15 +192,6 @@ describe('useConversation helpers', () => {
       });
 
       expect(result).toBeUndefined();
-    });
-
-    test('should return (starred) isNewConversationDefault system prompt if conversation is undefined', () => {
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: undefined,
-      });
-
-      expect(result).toEqual(allSystemPrompts[1]);
     });
 
     test('should return undefined if conversation is undefined and no system prompts are provided', () => {

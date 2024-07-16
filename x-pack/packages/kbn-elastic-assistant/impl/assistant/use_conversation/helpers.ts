@@ -99,9 +99,8 @@ export const getDefaultSystemPrompt = ({
   const conversationSystemPrompt = allSystemPrompts.find(
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );
-  const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
-  return conversation && conversation.id !== '' ? conversationSystemPrompt : defaultNewSystemPrompt;
+  return conversationSystemPrompt;
 };
 
 /**

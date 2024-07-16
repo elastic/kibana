@@ -128,7 +128,6 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                   ],
                 }),
           };
-
           setPromptsBulkActions(newBulkActions);
         }
       }
@@ -173,7 +172,6 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       const currentPromptConversationTitles = currentPromptConversations.map(
         (convo) => convo.title
       );
-
       const getDefaultSystemPromptId = (convo: Conversation) =>
         currentPromptConversationTitles.includes(convo.title)
           ? selectedSystemPrompt?.id
@@ -195,23 +193,26 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
              * through each conversation adds/removed the selected prompt on each conversation.
              *
              * */
-            Object.values(prev).map((convo) => ({
-              ...convo,
-              ...(convo.apiConfig
-                ? {
-                    apiConfig: {
-                      ...convo.apiConfig,
-                      defaultSystemPromptId: getDefaultSystemPromptId(convo),
-                    },
-                  }
-                : {
-                    apiConfig: {
-                      defaultSystemPromptId: getDefaultSystemPromptId(convo),
-                      connectorId: defaultConnector?.id ?? '',
-                      actionTypeId: defaultConnector?.actionTypeId ?? '',
-                    },
-                  }),
-            }))
+            Object.values(prev).map((convo) => {
+              const newConversationSetting = {
+                ...convo,
+                ...(convo.apiConfig
+                  ? {
+                      apiConfig: {
+                        ...convo.apiConfig,
+                        defaultSystemPromptId: getDefaultSystemPromptId(convo),
+                      },
+                    }
+                  : {
+                      apiConfig: {
+                        defaultSystemPromptId: getDefaultSystemPromptId(convo),
+                        connectorId: defaultConnector?.id ?? '',
+                        actionTypeId: defaultConnector?.actionTypeId ?? '',
+                      },
+                    }),
+              };
+              return newConversationSetting;
+            })
           )
         );
 

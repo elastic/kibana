@@ -114,12 +114,14 @@ export const useSystemPromptTable = () => {
       return acc;
     }, {});
     return systemPromptSettings.map((systemPrompt) => {
+      const defaultConversations = getSelectedConversations(
+        conversationsWithApiConfig,
+        systemPrompt?.id
+      ).map(({ title }) => title);
+
       return {
         ...systemPrompt,
-        defaultConversations: getSelectedConversations(
-          conversationsWithApiConfig,
-          systemPrompt?.id
-        ).map(({ title }) => title),
+        defaultConversations,
       };
     });
   };

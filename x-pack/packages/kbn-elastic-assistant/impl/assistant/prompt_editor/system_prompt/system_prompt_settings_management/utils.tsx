@@ -11,7 +11,7 @@ export const getSelectedConversations = (
   conversationSettings: Record<string, Conversation>,
   systemPromptId: string
 ) => {
-  return Object.values(conversationSettings).filter((conversation) => {
-    return conversation?.apiConfig?.defaultSystemPromptId === systemPromptId;
-  });
+  return Object.values(conversationSettings).filter(
+    (conversation) => conversation?.apiConfig?.defaultSystemPromptId === systemPromptId
+  );
 };
