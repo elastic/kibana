@@ -28,15 +28,24 @@ import { useInstalledSecurityJobNameById } from '../../../common/components/ml/h
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 
 export interface NetworkDetailsProps {
-  expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
+  /**
+   * IP value
+   */
+  ip: string;
+  /**
+   * Destination or source information
+   */
+  flowTarget: FlowTargetSourceDest;
 }
 
+/**
+ * Component rendering all the network details for the expandable flyout
+ */
 export const NetworkDetails = ({
-  contextID,
-  expandedNetwork,
+  ip,
+  flowTarget,
   isDraggable,
-}: NetworkDetailsProps & { contextID: string; isDraggable?: boolean }) => {
-  const { ip, flowTarget } = expandedNetwork;
+}: NetworkDetailsProps & { isDraggable?: boolean }) => {
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -95,7 +104,7 @@ export const NetworkDetails = ({
 
   return indicesExist ? (
     <IpOverview
-      contextID={contextID}
+      contextID={undefined}
       id={id}
       ip={ip}
       data={networkDetails}

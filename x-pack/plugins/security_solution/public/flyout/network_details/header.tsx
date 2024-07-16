@@ -7,44 +7,50 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { css } from '@emotion/react';
-import { EuiTitle } from '@elastic/eui';
 import type { EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { getNetworkDetailsUrl } from '../../common/components/link_to';
+import {
+  SecuritySolutionLinkAnchor,
+  useGetSecuritySolutionLinkProps,
+} from '../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { FlyoutHeader } from '../shared/components/flyout_header';
-
-const NETWORK_DETAILS = i18n.translate(
-  'xpack.securitySolution.timeline.sidePanel.networkDetails.title',
-  {
-    defaultMessage: 'Network details',
-  }
-);
+import { FlyoutTitle } from '../shared/components/flyout_title';
+import { encodeIpv6 } from '../../common/lib/helpers';
 
 export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
-  expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
+  /**
+   * IP value
+   */
+  ip: string;
+  /**
+   * Destination or source information
+   */
+  flowTarget: FlowTargetSourceDest;
 }
 
 /**
  *
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
-  ({ expandedNetwork, ...flyoutHeaderProps }: PanelHeaderProps) => {
-    const { ip } = expandedNetwork;
+  ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { href } = getSecuritySolutionLinkProps({
+      deepLinkId: SecurityPageName.network,
+      path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget),
+    });
 
     return (
       <FlyoutHeader {...flyoutHeaderProps}>
-        <EuiTitle size="s">
-          <h4
-            css={css`
-              word-break: break-all;
-              word-wrap: break-word;
-              white-space: pre-wrap;
-            `}
-          >
-            {`${NETWORK_DETAILS}: ${ip}`}
-          </h4>
-        </EuiTitle>
+        <SecuritySolutionLinkAnchor
+          deepLinkId={SecurityPageName.network}
+          path={href}
+          target={'_blank'}
+          external={false}
+        >
+          <FlyoutTitle title={ip} iconType={'globe'} isLink />
+        </SecuritySolutionLinkAnchor>
       </FlyoutHeader>
     );
   }

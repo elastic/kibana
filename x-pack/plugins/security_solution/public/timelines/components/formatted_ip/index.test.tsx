@@ -128,11 +128,8 @@ describe('FormattedIp', () => {
       right: {
         id: NetworkPanelKey,
         params: {
-          contextId: 'timeline-1',
-          expandedNetwork: {
-            ip: props.value,
-            flowTarget: 'source',
-          },
+          ip: props.value,
+          flowTarget: 'source',
         },
       },
     });

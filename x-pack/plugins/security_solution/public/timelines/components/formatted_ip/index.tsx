@@ -189,18 +189,14 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
       }
 
       if (eventContext && isInTimelineContext) {
-        const { timelineID } = eventContext;
         openFlyout({
           right: {
             id: NetworkPanelKey,
             params: {
-              contextId: timelineID,
-              expandedNetwork: {
-                ip: address,
-                flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-                  ? FlowTargetSourceDest.destination
-                  : FlowTargetSourceDest.source,
-              },
+              ip: address,
+              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+                ? FlowTargetSourceDest.destination
+                : FlowTargetSourceDest.source,
             },
           },
         });

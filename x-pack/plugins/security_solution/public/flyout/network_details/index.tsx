@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { PanelFooter } from './footer';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
@@ -20,19 +19,24 @@ export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
 export const NetworkPanelKey: NetworkExpandableFlyoutProps['key'] = 'network-details';
 
 export interface NetworkPanelProps extends Record<string, unknown> {
-  contextID: string;
-  expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
+  /**
+   * IP value
+   */
+  ip: string;
+  /**
+   * Destination or source information
+   */
+  flowTarget: FlowTargetSourceDest;
 }
 
 /**
- *
+ * Panel to be displayed in the network details expandable flyout right section
  */
-export const NetworkPanel = memo(({ contextID, expandedNetwork }: NetworkPanelProps) => {
+export const NetworkPanel = memo(({ ip, flowTarget }: NetworkPanelProps) => {
   return (
     <>
-      <PanelHeader expandedNetwork={expandedNetwork} />
-      <PanelContent contextID={contextID} expandedNetwork={expandedNetwork} />
-      <PanelFooter expandedNetwork={expandedNetwork} />
+      <PanelHeader ip={ip} flowTarget={flowTarget} />
+      <PanelContent ip={ip} flowTarget={flowTarget} />
     </>
   );
 });
