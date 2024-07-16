@@ -9,7 +9,7 @@ import semver from 'semver';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { findEntityDefinitions } from './find_entity_definition';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
-import { installEntityDefinition } from './install_entity_definition';
+import { installAndStartDefinition } from './install_entity_definition';
 import { EntityManagerServerSetup } from '../../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
@@ -47,7 +47,7 @@ export async function updateBuiltInEntityDefinitions({
       logger.info(
         `Installing built-in entity definition [${latestDefinition.id}] v${latestDefinition.version}`
       );
-      return installEntityDefinition({ esClient, soClient, logger, definition: latestDefinition });
+      return installAndStartDefinition({ esClient, soClient, logger, definition: latestDefinition });
     }
 
     if (semver.eq(latestDefinition.version, installedDefinition.version)) {
@@ -66,7 +66,7 @@ export async function updateBuiltInEntityDefinitions({
       logger,
       definition: installedDefinition,
     });
-    return installEntityDefinition({ esClient, soClient, logger, definition: latestDefinition });
+    return installAndStartDefinition({ esClient, soClient, logger, definition: latestDefinition });
   });
 
   return Promise.all(updatePromises);

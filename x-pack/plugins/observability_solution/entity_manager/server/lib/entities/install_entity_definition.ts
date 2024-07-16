@@ -156,7 +156,7 @@ export async function installBuiltInEntityDefinitions({
   return await Promise.all(installPromises);
 }
 
-async function installAndStartDefinition(params: InstallDefinitionParams) {
+export async function installAndStartDefinition(params: InstallDefinitionParams) {
   const definition = await installEntityDefinition(params);
   await startTransform(params.esClient, definition, params.logger);
   return definition;
