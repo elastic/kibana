@@ -98,65 +98,121 @@ export const CreateConnector: React.FC = () => {
   }
   const selfManagedSteps: CustomEuiStepInterface[] = [
     {
-      title: 'Start',
       children: <EuiSpacer size="xs" />,
-      status: startStepStatus,
       content: (
         <StartStep
-          title="Start"
+          title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+            defaultMessage: 'Start',
+          })}
           setSelfManaged={setSelfManaged}
           selfManaged={selfManaged}
           setConnectorSelected={setConnectorSelected}
           connectorSelected={connectorSelected}
         />
       ),
+      status: startStepStatus,
+      title: i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+        defaultMessage: 'Start',
+      }),
     },
     {
-      title: 'Deployment',
       children: '',
+      content: <DeploymentStep />,
+
       status: deploymentStepStatus,
-      content: <DeploymentStep title="Deployment" />,
+      title: i18n.translate(
+        'xpack.enterpriseSearch.createConnector.deploymentStep.deploymentLabel',
+        { defaultMessage: 'Deployment' }
+      ),
     },
     {
-      title: 'Configuration',
       children: '',
+      content: (
+        <ConfigurationStep
+          title={i18n.translate(
+            'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+            { defaultMessage: 'Configuration' }
+          )}
+        />
+      ),
       status: configurationStepStatus,
-      content: <ConfigurationStep title="Configuration" />,
+      title: i18n.translate(
+        'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+        { defaultMessage: 'Configuration' }
+      ),
     },
     {
-      title: 'Finish up',
       children: '',
+
+      content: (
+        <FinishUpStep
+          title={i18n.translate(
+            'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
+            { defaultMessage: 'Finish up' }
+          )}
+        />
+      ),
       status: finishUpStepStatus,
-      content: <FinishUpStep title="Finish up" />,
+      title: i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
+        defaultMessage: 'Finish up',
+      }),
     },
   ];
 
   const elasticManagedSteps: CustomEuiStepInterface[] = [
     {
-      title: 'Start',
       children: <EuiSpacer size="xs" />,
-      status: startStepStatus,
       content: (
         <StartStep
-          title="Start"
+          title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+            defaultMessage: 'Start',
+          })}
           setSelfManaged={setSelfManaged}
           selfManaged={selfManaged}
           setConnectorSelected={setConnectorSelected}
           connectorSelected={connectorSelected}
         />
       ),
+      status: startStepStatus,
+      title: i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+        defaultMessage: i18n.translate(
+          'xpack.enterpriseSearch.createConnector.startStep.startLabel',
+          {
+            defaultMessage: 'Start',
+          }
+        ),
+      }),
     },
     {
-      title: 'Configuration',
       children: '',
+      content: (
+        <ConfigurationStep
+          title={i18n.translate(
+            'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+            { defaultMessage: 'Configuration' }
+          )}
+        />
+      ),
       status: configurationStepStatus,
-      content: <ConfigurationStep title="Configuration" />,
+      title: i18n.translate(
+        'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+        { defaultMessage: 'Configuration' }
+      ),
     },
     {
-      title: 'Finish up',
       children: '',
+      content: (
+        <FinishUpStep
+          title={i18n.translate(
+            'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
+            { defaultMessage: 'Finish up' }
+          )}
+        />
+      ),
       status: finishUpStepStatus,
-      content: <FinishUpStep title="Finish up" />,
+      title: i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
+        defaultMessage: 'Finish up',
+      }),
     },
   ];
 
@@ -273,16 +329,26 @@ export const CreateConnector: React.FC = () => {
             `}
           >
             <EuiFlexGroup>
-              <EuiButtonEmpty iconType="arrowLeft" size="s" onClick={() => updateStep('back')}>
-                Back
+              <EuiButtonEmpty
+                data-test-subj="enterpriseSearchCreateConnectorBackButton"
+                iconType="arrowLeft"
+                size="s"
+                onClick={() => updateStep('back')}
+              >
+                {i18n.translate('xpack.enterpriseSearch.createConnector.backButtonEmptyLabel', {
+                  defaultMessage: 'Back',
+                })}
               </EuiButtonEmpty>
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchCreateConnectorNextButton"
                 iconSide="right"
                 iconType="arrowRight"
                 size="s"
                 onClick={() => updateStep('next')}
               >
-                Next
+                {i18n.translate('xpack.enterpriseSearch.createConnector.nextButtonEmptyLabel', {
+                  defaultMessage: 'Next',
+                })}
               </EuiButtonEmpty>
             </EuiFlexGroup>
 
@@ -290,7 +356,7 @@ export const CreateConnector: React.FC = () => {
             <EuiSteps
               titleSize="xxs"
               steps={selfManaged === true ? selfManagedSteps : elasticManagedSteps}
-              css={({ euiTheme }) => css`
+              css={() => css`
                 .euiStep__content {
                   padding-block-end: ${euiTheme.size.m};
                 }
@@ -299,18 +365,31 @@ export const CreateConnector: React.FC = () => {
             {currentStep > 0 && (
               <>
                 <EuiSpacer size="xl" />
-                <EuiFormRow label="Connector">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.euiFormRow.connectorLabel',
+                    { defaultMessage: 'Connector' }
+                  )}
+                >
                   <EuiSuperSelect
                     readOnly
                     valueOfSelected="item1"
-                    options={[{ value: 'item1', inputDisplay: connectorSelected }]}
+                    options={[{ inputDisplay: connectorSelected, value: 'item1' }]}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiText size="s">
                   <p>
-                    <EuiLink href="http://www.elastic.co" target="_blank">
-                      {connectorSelected} connector docs
+                    <EuiLink
+                      data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
+                      href="http://www.elastic.co"
+                      target="_blank"
+                    >
+                      {connectorSelected}{' '}
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
+                        { defaultMessage: 'connector docs' }
+                      )}
                     </EuiLink>
                   </p>
                 </EuiText>

@@ -7,11 +7,6 @@
 
 import React, { useState } from 'react';
 
-// import { useLocation } from 'react-router-dom';
-
-import { css } from '@emotion/react';
-// import { useValues } from 'kea';
-
 import {
   EuiBadge,
   EuiIcon,
@@ -19,15 +14,13 @@ import {
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n-react';
 
 import dropbox from '../assets/dropbox.svg';
 
 interface ChooseConnectorSelectableProps {
-  setConnectorSelected: Function;
   connectorSelected: string;
+  setConnectorSelected: Function;
 }
 interface OptionData {
   secondaryContent?: string;
@@ -39,44 +32,117 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
 }) => {
   const connectorsData = [
     {
-      name: 'Azure Blob Storage',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: false,
       checked: 'on',
-    },
-    {
-      name: 'Confluence Cloud & Server',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: true,
-    },
-    {
-      name: 'Confluence Data Center',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: false,
-    },
-    {
-      name: 'Dropbox',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-      techPreview: true,
-    },
-    {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
       name: 'Azure Blob Storage',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
       techPreview: false,
     },
     {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
       name: 'Confluence Cloud & Server',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
       techPreview: true,
     },
     {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
       name: 'Confluence Data Center',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
       techPreview: false,
     },
     {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
       name: 'Dropbox',
-      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
+    {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
+      name: 'Azure Blob Storage',
+      techPreview: false,
+    },
+    {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
+      name: 'Confluence Cloud & Server',
+      techPreview: true,
+    },
+    {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
+      name: 'Confluence Data Center',
+      techPreview: false,
+    },
+    {
+      icon: (
+        <EuiIcon
+          type={dropbox}
+          size="l"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
+            { defaultMessage: 'Dropbox' }
+          )}
+        />
+      ),
+      name: 'Dropbox',
+
       techPreview: true,
     },
   ];
@@ -85,20 +151,26 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   const [options, setOptions] = useState<Array<EuiSelectableOption<OptionData>>>([
     ...connectorsData.map(
       (connector): EuiSelectableOption => ({
-        label: `${connector.name}`,
-        prepend: connector.icon,
         append: connector.techPreview ? (
           <EuiBadge iconType="beaker" color="hollow">
-            Thech preview
+            {i18n.translate(
+              'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
+              { defaultMessage: 'Thech preview' }
+            )}
           </EuiBadge>
         ) : null,
+        label: `${connector.name}`,
+        prepend: connector.icon,
       })
     ),
   ]);
 
   return (
     <EuiSelectable
-      aria-label="Selectable + input popover example"
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
+        { defaultMessage: 'Selectable + input popover example' }
+      )}
       options={options}
       onChange={(newOptions, event, changedOption) => {
         setOptions(newOptions);
@@ -112,27 +184,27 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         }
       }}
       listProps={{
+        css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
         rowHeight: 50,
         showIcons: false,
-        css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
       }}
       singleSelection
       searchable
       searchProps={{
         fullWidth: true,
         isClearable: true,
-        placeholder: 'Choose a data source',
-        value: connectorSelected,
         onChange: (value) => {
           setConnectorSelected(value);
           setIsSearching(true);
         },
+        onClick: () => setIsOpen(true),
+        onFocus: () => setIsOpen(true),
         onKeyDown: (event) => {
           if (event.key === 'Tab') return setIsOpen(false);
           if (event.key !== 'Escape') return setIsOpen(true);
         },
-        onClick: () => setIsOpen(true),
-        onFocus: () => setIsOpen(true),
+        placeholder: 'Choose a data source',
+        value: connectorSelected,
       }}
       isPreFiltered={isSearching ? false : { highlightSearch: false }} // Shows the full list when not actively typing to search
     >

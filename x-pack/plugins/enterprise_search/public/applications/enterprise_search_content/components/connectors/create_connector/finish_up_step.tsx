@@ -60,13 +60,21 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
 
   const items = [
     <EuiContextMenuItem key="copy" icon="indexEdit" onClick={closePopover}>
-      Manage attached index
+      {i18n.translate(
+        'xpack.enterpriseSearch.finishUpStep.manageAttachedIndexContextMenuItemLabel',
+        { defaultMessage: 'Manage attached index' }
+      )}
     </EuiContextMenuItem>,
     <EuiContextMenuItem key="edit" icon="refresh" onClick={closePopover}>
-      Incremental content sync
+      {i18n.translate(
+        'xpack.enterpriseSearch.finishUpStep.incrementalContentSyncContextMenuItemLabel',
+        { defaultMessage: 'Incremental content sync' }
+      )}
     </EuiContextMenuItem>,
     <EuiContextMenuItem key="share" icon="clockCounter" onClick={closePopover}>
-      Schedule a sync
+      {i18n.translate('xpack.enterpriseSearch.finishUpStep.scheduleASyncContextMenuItemLabel', {
+        defaultMessage: 'Schedule a sync',
+      })}
     </EuiContextMenuItem>,
   ];
   return (
@@ -82,11 +90,17 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
               <>
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
-                    <EuiText size="xs">Syncing data</EuiText>
+                    <EuiText size="xs">
+                      {i18n.translate('xpack.enterpriseSearch.finishUpStep.syncingDataTextLabel', {
+                        defaultMessage: 'Syncing data',
+                      })}
+                    </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText textAlign="right" size="xs">
-                      4 Documents
+                      {i18n.translate('xpack.enterpriseSearch.finishUpStep.DocumentsTextLabel', {
+                        defaultMessage: '4 Documents',
+                      })}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -108,20 +122,36 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="machineLearningApp" />}
                     titleSize="s"
-                    title="Chat with your data"
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.finishUpStep.euiCard.chatWithYourDataLabel',
+                      { defaultMessage: 'Chat with your data' }
+                    )}
                     description="Combine your data with the power of LLMs for retrieval augmented generation (RAG)."
                     footer={
                       hasData ? (
-                        <EuiButton aria-label="Start Search Playground">
-                          Start Search Playground
+                        <EuiButton
+                          data-test-subj="enterpriseSearchFinishUpStepStartSearchPlaygroundButton"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.finishUpStep.euiButton.startSearchPlaygroundLabel',
+                            { defaultMessage: 'Start Search Playground' }
+                          )}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.finishUpStep.startSearchPlaygroundButtonLabel',
+                            { defaultMessage: 'Start Search Playground' }
+                          )}
                         </EuiButton>
                       ) : (
                         <EuiButton
+                          data-test-subj="enterpriseSearchFinishUpStepButton"
                           color="warning"
                           iconSide="left"
                           iconType="refresh"
                           isLoading={syncing}
-                          aria-label="First sync data"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.finishUpStep.euiButton.firstSyncDataLabel',
+                            { defaultMessage: 'First sync data' }
+                          )}
                           onClick={() => {
                             setSyncing(true);
                           }}
@@ -136,18 +166,36 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
                     titleSize="s"
-                    title="Explore your data"
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.finishUpStep.euiCard.exploreYourDataLabel',
+                      { defaultMessage: 'Explore your data' }
+                    )}
                     description="See your connector documents or make a data view to explore it."
                     footer={
                       hasData ? (
-                        <EuiButton aria-label="View in Discover">View in Discover</EuiButton>
+                        <EuiButton
+                          data-test-subj="enterpriseSearchFinishUpStepViewInDiscoverButton"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.finishUpStep.euiButton.viewInDiscoverLabel',
+                            { defaultMessage: 'View in Discover' }
+                          )}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.finishUpStep.viewInDiscoverButtonLabel',
+                            { defaultMessage: 'View in Discover' }
+                          )}
+                        </EuiButton>
                       ) : (
                         <EuiButton
+                          data-test-subj="enterpriseSearchFinishUpStepButton"
                           color="warning"
                           iconSide="left"
                           iconType="refresh"
                           isLoading={syncing}
-                          aria-label="First sync data"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.finishUpStep.euiButton.firstSyncDataLabel',
+                            { defaultMessage: 'First sync data' }
+                          )}
                           onClick={() => {
                             setSyncing(true);
                           }}
@@ -162,13 +210,23 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   <EuiCard
                     icon={<EuiIcon size="xxl" type={connectorLogo} />}
                     titleSize="s"
-                    title="Manage your connector"
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.finishUpStep.euiCard.manageYourConnectorLabel',
+                      { defaultMessage: 'Manage your connector' }
+                    )}
                     description="Now you can manage your connector, schedule a sync and much more"
                     footer={
                       <EuiFlexGroup responsive={false} gutterSize="xs" justifyContent="center">
                         <EuiFlexItem grow={false}>
-                          <EuiButton size="m" fill>
-                            Manage connector
+                          <EuiButton
+                            data-test-subj="enterpriseSearchFinishUpStepManageConnectorButton"
+                            size="m"
+                            fill
+                          >
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.finishUpStep.manageConnectorButtonLabel',
+                              { defaultMessage: 'Manage connector' }
+                            )}
                           </EuiButton>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -176,10 +234,14 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             id={splitButtonPopoverId}
                             button={
                               <EuiButtonIcon
+                                data-test-subj="enterpriseSearchFinishUpStepButton"
                                 display="fill"
                                 size="m"
                                 iconType="boxesVertical"
-                                aria-label="More"
+                                aria-label={i18n.translate(
+                                  'xpack.enterpriseSearch.finishUpStep.euiButtonIcon.moreLabel',
+                                  { defaultMessage: 'More' }
+                                )}
                                 onClick={onButtonClick}
                               />
                             }
@@ -188,7 +250,14 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             panelPaddingSize="none"
                             anchorPosition="downLeft"
                           >
-                            <EuiContextMenuPanel title="Manage connector" size="s" items={items} />
+                            <EuiContextMenuPanel
+                              title={i18n.translate(
+                                'xpack.enterpriseSearch.finishUpStep.euiContextMenuPanel.manageConnectorLabel',
+                                { defaultMessage: 'Manage connector' }
+                              )}
+                              size="s"
+                              items={items}
+                            />
                           </EuiPopover>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -199,7 +268,11 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
             </EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
             <EuiTitle size="s">
-              <h3>Query your data</h3>
+              <h3>
+                {i18n.translate('xpack.enterpriseSearch.finishUpStep.h3.queryYourDataLabel', {
+                  defaultMessage: 'Query your data',
+                })}
+              </h3>
             </EuiTitle>
             <EuiSpacer size="l" />
             <EuiFlexGroup gutterSize="m">
@@ -208,14 +281,17 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   layout="horizontal"
                   icon={
                     <EuiIcon
-                      css={({ euiTheme }) => css`
+                      css={() => css`
                         margin-top: ${euiTheme.size.xs};
                       `}
                       size="m"
                       type="visVega"
                     />
                   }
-                  title="Query with language clients"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.finishUpStep.euiCard.queryWithLanguageClientsLabel',
+                    { defaultMessage: 'Query with language clients' }
+                  )}
                   titleSize="xs"
                   description="Use your favourite language client to query your data in your app."
                   onClick={() => {}}
@@ -227,14 +303,17 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   layout="horizontal"
                   icon={
                     <EuiIcon
-                      css={({ euiTheme }) => css`
+                      css={() => css`
                         margin-top: ${euiTheme.size.xs};
                       `}
                       size="m"
                       type="console"
                     />
                   }
-                  title="Dev tools"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.finishUpStep.euiCard.devToolsLabel',
+                    { defaultMessage: 'Dev tools' }
+                  )}
                   titleSize="xs"
                   description="Tools for interacting with your data, such a console, profiler, Grok debugger and more.."
                   onClick={() => {}}

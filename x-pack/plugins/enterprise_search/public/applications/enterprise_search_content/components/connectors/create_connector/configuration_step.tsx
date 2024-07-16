@@ -7,22 +7,8 @@
 
 import React from 'react';
 
-// import { useLocation } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { css } from '@emotion/react';
-// import { useValues } from 'kea';
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ConfigurationStepProps {

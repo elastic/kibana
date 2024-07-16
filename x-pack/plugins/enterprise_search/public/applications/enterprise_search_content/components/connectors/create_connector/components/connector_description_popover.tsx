@@ -94,6 +94,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
       anchorPosition="upCenter"
       button={
         <EuiButtonIcon
+          data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
           iconType="iInCircle"
           onClick={() => setIsPopoverOpen(() => !isPopoverOpen)}
         />

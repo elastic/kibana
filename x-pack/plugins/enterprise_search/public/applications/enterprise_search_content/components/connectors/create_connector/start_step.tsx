@@ -7,11 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-// import { useLocation } from 'react-router-dom';
-
-import { css } from '@emotion/react';
-// import { useValues } from 'kea';
-
 import {
   EuiButton,
   EuiFieldText,
@@ -23,7 +18,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -34,11 +28,11 @@ import { ChooseConnectorSelectable } from './components/choose_connector_selecta
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 
 interface StartStepProps {
-  setSelfManaged: Function;
-  title: string;
+  connectorSelected: string;
   selfManaged: boolean;
   setConnectorSelected: Function;
-  connectorSelected: string;
+  setSelfManaged: Function;
+  title: string;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -48,8 +42,6 @@ export const StartStep: React.FC<StartStepProps> = ({
   setConnectorSelected,
   connectorSelected,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
   const [radioIdSelected, setRadioIdSelected] = useState(
@@ -72,7 +64,13 @@ export const StartStep: React.FC<StartStepProps> = ({
             <EuiSpacer size="m" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiFormRow fullWidth label="Connector">
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.startStep.euiFormRow.connectorLabel',
+                    { defaultMessage: 'Connector' }
+                  )}
+                >
                   <ChooseConnectorSelectable
                     setConnectorSelected={setConnectorSelected}
                     connectorSelected={connectorSelected}
@@ -80,15 +78,35 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow fullWidth label="Connector name">
-                  <EuiFieldText fullWidth name="first" />
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.startStep.euiFormRow.connectorNameLabel',
+                    { defaultMessage: 'Connector name' }
+                  )}
+                >
+                  <EuiFieldText
+                    data-test-subj="enterpriseSearchStartStepFieldText"
+                    fullWidth
+                    name="first"
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             <EuiFlexItem>
-              <EuiFormRow fullWidth label="Description">
-                <EuiFieldText fullWidth name="first" />
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.startStep.euiFormRow.descriptionLabel',
+                  { defaultMessage: 'Description' }
+                )}
+              >
+                <EuiFieldText
+                  data-test-subj="enterpriseSearchStartStepFieldText"
+                  fullWidth
+                  name="first"
+                />
               </EuiFormRow>
             </EuiFlexItem>
           </EuiPanel>
@@ -97,31 +115,46 @@ export const StartStep: React.FC<StartStepProps> = ({
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="s">
-              <h4>Set up</h4>
+              <h4>
+                {i18n.translate('xpack.enterpriseSearch.startStep.h4.setUpLabel', {
+                  defaultMessage: 'Set up',
+                })}
+              </h4>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiText size="s">
-              <p>Where do you want to store the connector and how do you want to manage it?</p>
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.startStep.p.whereDoYouWantLabel', {
+                  defaultMessage:
+                    'Where do you want to store the connector and how do you want to manage it?',
+                })}
+              </p>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiRadio
                   id={elasticManagedRadioButtonId}
-                  label="Elastic managed"
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.startStep.euiRadio.elasticManagedLabel',
+                    { defaultMessage: 'Elastic managed' }
+                  )}
                   checked={!selfManaged}
                   onChange={() => setRadioIdSelected(elasticManagedRadioButtonId)}
                   name="setUp"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover isNative={true} />
+                <ConnectorDescriptionPopover isNative />
               </EuiFlexItem>
               &nbsp; &nbsp;
               <EuiFlexItem grow={false}>
                 <EuiRadio
                   id={selfManagedRadioButtonId}
-                  label="Self managed"
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.startStep.euiRadio.selfManagedLabel',
+                    { defaultMessage: 'Self managed' }
+                  )}
                   checked={selfManaged}
                   onChange={() => setRadioIdSelected(selfManagedRadioButtonId)}
                   name="setUp"
@@ -133,40 +166,62 @@ export const StartStep: React.FC<StartStepProps> = ({
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        {/* Configure index */}
         {selfManaged ? (
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="l">
               <EuiTitle size="s">
-                <h4>Deployment</h4>
+                <h4>
+                  {i18n.translate('xpack.enterpriseSearch.startStep.h4.deploymentLabel', {
+                    defaultMessage: 'Deployment',
+                  })}
+                </h4>
               </EuiTitle>
               <EuiSpacer size="m" />
               <EuiText size="s">
                 <p>
-                  You will start the process of creating a new index, API key, and a Web Crawler
-                  Connector ID manually. Optionally you can bring your own configuration as well.
+                  {i18n.translate('xpack.enterpriseSearch.startStep.p.youWillStartTheLabel', {
+                    defaultMessage:
+                      'You will start the process of creating a new index, API key, and a Web Crawler Connector ID manually. Optionally you can bring your own configuration as well.',
+                  })}
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiButton fill>Next</EuiButton>
+              <EuiButton data-test-subj="enterpriseSearchStartStepNextButton" fill>
+                {i18n.translate('xpack.enterpriseSearch.startStep.nextButtonLabel', {
+                  defaultMessage: 'Next',
+                })}
+              </EuiButton>
             </EuiPanel>
           </EuiFlexItem>
         ) : (
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="l">
               <EuiTitle size="s">
-                <h4>Configure index and API key</h4>
+                <h4>
+                  {i18n.translate('xpack.enterpriseSearch.startStep.h4.configureIndexAndAPILabel', {
+                    defaultMessage: 'Configure index and API key',
+                  })}
+                </h4>
               </EuiTitle>
               <EuiSpacer size="m" />
               <EuiText size="s">
                 <p>
-                  This process will create a new index, API key, and a Connector ID. Optionally you
-                  can bring your own configuration as well.
+                  {i18n.translate('xpack.enterpriseSearch.startStep.p.thisProcessWillCreateLabel', {
+                    defaultMessage:
+                      'This process will create a new index, API key, and a Connector ID. Optionally you can bring your own configuration as well.',
+                  })}
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiButton iconType="sparkles" fill>
-                Generate configuration
+              <EuiButton
+                data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+                iconType="sparkles"
+                fill
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
+                  { defaultMessage: 'Generate configuration' }
+                )}
               </EuiButton>
             </EuiPanel>
           </EuiFlexItem>

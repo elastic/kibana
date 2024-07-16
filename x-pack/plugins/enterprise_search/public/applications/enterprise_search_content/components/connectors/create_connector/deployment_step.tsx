@@ -13,10 +13,6 @@ import { ConnectorDeployment } from '../../connector_detail/deployment';
 
 // import { FormattedMessage } from '@kbn/i18n-react';
 
-interface DeploymentStepProps {
-  title: string;
-}
-
-export const DeploymentStep: React.FC<DeploymentStepProps> = ({ title }) => {
+export const DeploymentStep: React.FC = () => {
   return <ConnectorDeployment />;
 };
