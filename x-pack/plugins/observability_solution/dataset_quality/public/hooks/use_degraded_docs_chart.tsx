@@ -99,6 +99,10 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   );
 
   useEffect(() => {
+    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
+  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldEcsAsserted]);
+
+  useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 
     const lensAttributes = getLensAttributes({
@@ -108,15 +112,12 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
       breakdownFieldName: breakdownDataViewField?.name,
     });
     setAttributes(lensAttributes);
-    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
   }, [
     breakdownDataViewField?.name,
     euiTheme.colors.danger,
     setAttributes,
     dataStream,
     dataStreamStat?.title,
-    trackDatasetDetailsBreakdownFieldChanged,
-    isBreakdownFieldEcsAsserted,
   ]);
 
   const openInLensCallback = useCallback(() => {

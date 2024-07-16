@@ -371,7 +371,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                         },
                         onError: {
                           target: 'done',
-                          actions: ['notifyAssertBreakdownFieldEcsFailed'], // change
+                          actions: ['notifyAssertBreakdownFieldEcsFailed'],
                         },
                       },
                     },
