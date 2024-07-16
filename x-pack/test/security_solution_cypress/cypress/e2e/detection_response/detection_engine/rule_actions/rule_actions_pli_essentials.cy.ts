@@ -15,6 +15,7 @@ import {
   XMATTERS_ACTION_BTN,
   SERVER_LOG_ACTION_BTN,
   ACTION_BTN,
+  CASES_SYSTEM_ACTION_BTN,
 } from '../../../../screens/common/rule_actions';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -68,6 +69,7 @@ describe(
       cy.get(WEBHOOK_ACTION_BTN).should('not.exist');
       cy.get(XMATTERS_ACTION_BTN).should('not.exist');
       cy.get(SERVER_LOG_ACTION_BTN).should('not.exist');
+      cy.get(CASES_SYSTEM_ACTION_BTN).should('not.exist');
     });
   }
 );
