@@ -34,7 +34,7 @@ export const ShareMenuTabs = () => {
 
   tabs.push(linkTab);
 
-  if (shareMenuItems.length > 0) {
+  if (shareMenuItems.length > 0 && shareMenuItems[0].shareMenuItem?.disabled !== true) {
     tabs.push(exportTab);
   }
 
