@@ -18,7 +18,7 @@ import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getTimeTypeValue,
-  isRuleAction,
+  isRuleAction as getIsRuleAction,
 } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import * as i18n from './translations';
 
@@ -98,17 +98,17 @@ export function NotificationAction({
   connectors,
   actionTypeRegistry,
 }: NotificationActionProps) {
-  const _isRuleAction = isRuleAction(action, actionTypeRegistry);
+  const isRuleAction = getIsRuleAction(action, actionTypeRegistry);
   const connectorType = connectorTypes.find(({ id }) => id === action.actionTypeId);
   const registeredAction = actionTypeRegistry.get(action.actionTypeId);
 
-  const connectorTypeName = _isRuleAction
+  const connectorTypeName = isRuleAction
     ? connectorType?.name ?? ''
     : registeredAction.actionTypeTitle ?? '';
   const iconType = registeredAction?.iconClass ?? 'apps';
 
   const connector = connectors.find(({ id }) => id === action.id);
-  const connectorName = _isRuleAction
+  const connectorName = isRuleAction
     ? connector?.name ?? ''
     : registeredAction.actionTypeTitle ?? '';
 
@@ -127,7 +127,7 @@ export function NotificationAction({
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="bell" color="subdued" />
             </EuiFlexItem>
-            {_isRuleAction && <FrequencyDescription frequency={action.frequency} />}
+            {isRuleAction && <FrequencyDescription frequency={action.frequency} />}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
