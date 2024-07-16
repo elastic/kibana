@@ -111,7 +111,7 @@ import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
-import { sendPackageUpdateTelemetryEvents } from './upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from './event_sender';
 import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,

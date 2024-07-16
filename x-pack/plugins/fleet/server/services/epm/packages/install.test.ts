@@ -12,7 +12,7 @@ import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 import type { InstallablePackage, Installation } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
-import { sendPackageUpdateTelemetryEvents } from '../../upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from '../../event_sender';
 import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
 import { appContextService } from '../../app_context';

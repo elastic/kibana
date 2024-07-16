@@ -11,8 +11,10 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
-import { sendPackageUpdateTelemetryEvents, capErrorSize, UpdateEventType } from './upgrade_sender';
-import type { PackageUpdateEvent } from './upgrade_sender';
+import { UpdateEventType } from '../telemetry/types';
+import type { PackageUpdateEvent } from '../telemetry/types';
+
+import { sendPackageUpdateTelemetryEvents, capErrorSize } from './event_sender';
 
 describe('sendPackageUpdateTelemetryEvents', () => {
   let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;

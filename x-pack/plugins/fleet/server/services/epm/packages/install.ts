@@ -75,7 +75,7 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { UpdateEventType } from '../../../telemetry/types';
 import type { PackageUpdateEvent } from '../../../telemetry/types';
-import { sendPackageUpdateTelemetryEvents } from '../../upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from '../../event_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
 

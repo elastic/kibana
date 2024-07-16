@@ -15,7 +15,7 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { UpdateEventType } from '../services/upgrade_sender';
+import { UpdateEventType } from './types';
 
 import { TelemetryEventsSender } from './sender';
 

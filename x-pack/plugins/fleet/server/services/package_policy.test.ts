@@ -68,7 +68,7 @@ import {
 import { appContextService } from './app_context';
 
 import { getPackageInfo } from './epm/packages';
-import { sendPackageUpdateTelemetryEvents } from './upgrade_sender';
+import { sendPackageUpdateTelemetryEvents } from './event_sender';
 import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
 
