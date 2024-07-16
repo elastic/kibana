@@ -18,11 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /api/console/es_config', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it('returns es host', async () => {
       const { body } = await supertestWithoutAuth

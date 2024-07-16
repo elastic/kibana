@@ -671,7 +671,9 @@ describe('<EditPolicy /> serialization', () => {
       expect(parsedReqBody.phases.delete).toEqual({
         min_age: '365d',
         actions: {
-          delete: {},
+          delete: {
+            delete_searchable_snapshot: true,
+          },
           wait_for_snapshot: {
             policy: 'test',
           },
