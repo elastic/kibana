@@ -37,6 +37,7 @@ export const CopyBinScripts: Task = {
               darwin: platform.isMac(),
               linux: platform.isLinux(),
               serverless: platform.isServerless(),
+              overridePointerCompression: Boolean(process.env.CI_USE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
             });
             writeFileSync(join(scriptsDest, script), output, {
               mode: '0755',
