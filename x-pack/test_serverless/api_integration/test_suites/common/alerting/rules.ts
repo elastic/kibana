@@ -52,11 +52,11 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
+      roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
     afterEach(async () => {

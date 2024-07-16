@@ -4,6 +4,7 @@ exports[`generateLatestTransform(definition) should generate a valid latest tran
 Object {
   "_meta": Object {
     "definitionVersion": "999.999.999",
+    "managed": false,
   },
   "defer_validation": true,
   "dest": Object {
@@ -44,6 +45,18 @@ Object {
       "entity.firstSeenTimestamp": Object {
         "min": Object {
           "field": "@timestamp",
+        },
+      },
+      "entity.identity.event.category": Object {
+        "terms": Object {
+          "field": "event.category",
+          "size": 1,
+        },
+      },
+      "entity.identity.log.logger": Object {
+        "terms": Object {
+          "field": "log.logger",
+          "size": 1,
         },
       },
       "entity.lastSeenTimestamp": Object {
@@ -137,26 +150,9 @@ Object {
       },
     },
     "group_by": Object {
-      "entity.displayName": Object {
-        "terms": Object {
-          "field": "entity.displayName.keyword",
-        },
-      },
       "entity.id": Object {
         "terms": Object {
           "field": "entity.id",
-        },
-      },
-      "entity.identityFields.event.category": Object {
-        "terms": Object {
-          "field": "entity.identityFields.event.category",
-          "missing_bucket": true,
-        },
-      },
-      "entity.identityFields.log.logger": Object {
-        "terms": Object {
-          "field": "entity.identityFields.log.logger",
-          "missing_bucket": false,
         },
       },
     },
