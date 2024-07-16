@@ -8,7 +8,6 @@
 import { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import {
   checkIfEntityDiscoveryAPIKeyIsValid,
   deleteEntityDiscoveryAPIKey,
@@ -25,7 +24,7 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.delete<unknown, { deleteData?: boolean }, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
+      path: '/internal/api/entities/managed/enablement',
       validate: {
         query: schema.object({
           deleteData: schema.maybe(schema.boolean({ defaultValue: false })),
