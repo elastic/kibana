@@ -6,3 +6,4 @@
  */
 
 export * from './slos_overview.journey';
+export * from './annotation_list.journey';

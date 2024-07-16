@@ -129,7 +129,12 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate(
         'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
-        { defaultMessage: 'Actions' }
+        {
+          defaultMessage: 'Actions for "{name}" column',
+          values: {
+            name: item.name,
+          },
+        }
       )}
     />
   );
