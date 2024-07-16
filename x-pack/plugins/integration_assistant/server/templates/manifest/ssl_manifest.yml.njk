@@ -36,21 +36,24 @@
     multi: true
     required: false
     show_user: false
-    description: The list of root certificates for verifications is required. If certificate_authorities is empty or not set, the system keystore is used. Example: /etc/pki/root/ca.pem
+    description: |
+      The list of root certificates for verifications is required. If certificate_authorities is empty or not set, the system keystore is used. Example: /etc/pki/root/ca.pem
   - name: ssl_certificate
     type: text
     title: SSL Certificate
     multi: false
     required: false
     show_user: false
-    description: Path to the SSL certificate file to be used. Example: /etc/pki/client/cert.pem
+    description: |
+      Path to the SSL certificate file to be used. Example: /etc/pki/client/cert.pem
   - name: ssl_certificate_key
     type: text
     title: SSL Certificate Key
     multi: false
     required: false
     show_user: false
-    description: Path to the SSL certificate key file to be used. Example: /etc/pki/client/cert.key
+    description: |
+      Path to the SSL certificate key file to be used. Example: /etc/pki/client/cert.key
   - name: ssl_certificate_key_passphrase
     type: text
     title: SSL Certificate Key Passphrase

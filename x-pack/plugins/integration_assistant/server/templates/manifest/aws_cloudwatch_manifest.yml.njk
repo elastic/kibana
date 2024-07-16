@@ -1,7 +1,9 @@
 - input: aws-cloudwatch
   template_path: aws-cloudwatch.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: log_group_arn
       type: text

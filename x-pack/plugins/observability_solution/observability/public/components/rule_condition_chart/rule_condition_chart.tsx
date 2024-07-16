@@ -69,7 +69,7 @@ export interface RuleConditionChartExpressions {
   timeUnit?: TimeUnitChar;
   equation?: string;
 }
-interface RuleConditionChartProps {
+export interface RuleConditionChartProps {
   metricExpression: RuleConditionChartExpressions;
   searchConfiguration: GenericSearchSourceFields;
   dataView?: DataView;
@@ -471,3 +471,6 @@ export function RuleConditionChart({
     </div>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default RuleConditionChart;

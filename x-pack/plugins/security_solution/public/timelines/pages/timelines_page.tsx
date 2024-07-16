@@ -41,7 +41,7 @@ export const TimelinesPage = React.memo(() => {
       {indicesExist ? (
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
-            {capabilitiesCanUserCRUD && (
+            {capabilitiesCanUserCRUD && tabName !== 'notes' ? (
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
                   <EuiButton
@@ -56,7 +56,7 @@ export const TimelinesPage = React.memo(() => {
                   <NewTimelineButton type={timelineType} />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            )}
+            ) : null}
           </HeaderPage>
 
           <StatefulOpenTimeline
@@ -66,6 +66,7 @@ export const TimelinesPage = React.memo(() => {
             setImportDataModalToggle={setImportDataModal}
             title={i18n.ALL_TIMELINES_PANEL_TITLE}
             data-test-subj="stateful-open-timeline"
+            tabName={tabName}
           />
         </SecuritySolutionPageWrapper>
       ) : (

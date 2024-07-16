@@ -30,7 +30,7 @@ export const useMarkdownSessionStorage = ({
 
   const [sessionValue, setSessionValue] = useSessionStorage(sessionKey, '', true);
 
-  if (!isEmpty(sessionValue) && isFirstRender.current) {
+  if (!isEmpty(sessionValue) && !isEmpty(sessionKey) && isFirstRender.current) {
     field.setValue(sessionValue);
   }
 
@@ -45,7 +45,9 @@ export const useMarkdownSessionStorage = ({
 
   useDebounce(
     () => {
-      setSessionValue(field.value);
+      if (!isEmpty(sessionKey)) {
+        setSessionValue(field.value);
+      }
     },
     STORAGE_DEBOUNCE_TIME,
     [field.value]

@@ -58,7 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await cspDashboard.index.remove();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Kubernetes Dashboard', () => {

@@ -14,10 +14,33 @@ servers:
         default: '5601'
 
 paths:
+  # TODO delete on a future serverless release
   /api/risk_scores/calculation/entity:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      summary: Deprecated Trigger calculation of Risk Scores for an entity. Moved to /internal/risk_score/calculation/entity
+      description: Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+      requestBody:
+        description: The entity type and identifier
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskScoresEntityCalculationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoresEntityCalculationResponse'
+        '400':
+          description: Invalid request
+
+  /internal/risk_score/calculation/entity:
+    post:
+      x-labels: [ess, serverless]
       summary: Trigger calculation of Risk Scores for an entity
       description: Calculates and persists Risk Scores for an entity, returning the calculated risk score.
       requestBody:

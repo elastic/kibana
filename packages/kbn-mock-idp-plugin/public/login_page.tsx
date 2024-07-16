@@ -145,7 +145,7 @@ export const LoginPage = () => {
                 >
                   Log in
                 </EuiButton>,
-                <EuiButtonEmpty size="xs" href="/">
+                <EuiButtonEmpty size="xs" href="/login">
                   More login options
                 </EuiButtonEmpty>,
               ]}

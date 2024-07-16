@@ -18,6 +18,7 @@ import {
   ExecutionContextStart,
   HttpSetup,
   IUiSettingsClient,
+  OverlayStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -62,8 +63,8 @@ export interface AppDependencies {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    enableDataStreamStats: boolean;
     editableIndexSettings: 'all' | 'limited';
-    enableDataStreamsStorageColumn: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
     enableSemanticText: boolean;
@@ -75,6 +76,7 @@ export interface AppDependencies {
   url: SharePluginStart['url'];
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
+  overlays: OverlayStart;
 }
 
 export const AppContextProvider = ({

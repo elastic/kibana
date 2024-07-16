@@ -16,10 +16,10 @@ export type PackageName = z.infer<typeof PackageName>;
 export const PackageName = z.string().min(1);
 
 /**
- * Datastream name for the integration to be built.
+ * DataStream name for the integration to be built.
  */
-export type DatastreamName = z.infer<typeof DatastreamName>;
-export const DatastreamName = z.string().min(1);
+export type DataStreamName = z.infer<typeof DataStreamName>;
+export const DataStreamName = z.string().min(1);
 
 /**
  * String array containing the json raw samples that are used for ecs mapping.
@@ -31,7 +31,7 @@ export const RawSamples = z.array(z.string());
  * mapping object to ECS Mapping Request.
  */
 export type Mapping = z.infer<typeof Mapping>;
-export const Mapping = z.object({});
+export const Mapping = z.object({}).passthrough();
 
 /**
  * LLM Connector to be used in each API request.
@@ -43,7 +43,7 @@ export const Connector = z.string();
  * An array of processed documents.
  */
 export type Docs = z.infer<typeof Docs>;
-export const Docs = z.array(z.object({}));
+export const Docs = z.array(z.object({}).passthrough());
 
 /**
  * The pipeline object.
@@ -73,7 +73,7 @@ export const Pipeline = z.object({
 });
 
 /**
- * The input type for the datastream to pull logs from.
+ * The input type for the dataStream to pull logs from.
  */
 export type InputType = z.infer<typeof InputType>;
 export const InputType = z.enum([
@@ -81,6 +81,7 @@ export const InputType = z.enum([
   'aws_s3',
   'azure_blob_storage',
   'azure_eventhub',
+  'cel',
   'cloudfoundry',
   'filestream',
   'gcp_pubsub',
@@ -95,36 +96,36 @@ export type InputTypeEnum = typeof InputType.enum;
 export const InputTypeEnum = InputType.enum;
 
 /**
- * The datastream object.
+ * The dataStream object.
  */
-export type Datastream = z.infer<typeof Datastream>;
-export const Datastream = z.object({
+export type DataStream = z.infer<typeof DataStream>;
+export const DataStream = z.object({
   /**
-   * The name of the datastream.
+   * The name of the dataStream.
    */
   name: z.string(),
   /**
-   * The title of the datastream.
+   * The title of the dataStream.
    */
   title: z.string(),
   /**
-   * The description of the datastream.
+   * The description of the dataStream.
    */
   description: z.string(),
   /**
-   * The input types of the datastream.
+   * The input types of the dataStream.
    */
   inputTypes: z.array(InputType),
   /**
-   * The raw samples of the datastream.
+   * The raw samples of the dataStream.
    */
   rawSamples: RawSamples,
   /**
-   * The pipeline of the datastream.
+   * The pipeline of the dataStream.
    */
   pipeline: Pipeline,
   /**
-   * The documents of the datastream.
+   * The documents of the dataStream.
    */
   docs: Docs,
 });
@@ -147,9 +148,9 @@ export const Integration = z.object({
    */
   description: z.string(),
   /**
-   * The datastreams of the integration.
+   * The dataStreams of the integration.
    */
-  dataStreams: z.array(Datastream),
+  dataStreams: z.array(DataStream),
   /**
    * The logo of the integration.
    */
@@ -157,13 +158,16 @@ export const Integration = z.object({
 });
 
 /**
- * An array of pipeline results.
+ * The LangSmith options object.
  */
-export type PipelineResults = z.infer<typeof PipelineResults>;
-export const PipelineResults = z.array(z.object({}));
-
-/**
- * An array of errors.
- */
-export type Errors = z.infer<typeof Errors>;
-export const Errors = z.array(z.object({}));
+export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
+export const LangSmithOptions = z.object({
+  /**
+   * The project name to use with tracing.
+   */
+  projectName: z.string(),
+  /**
+   * The api key for the project
+   */
+  apiKey: z.string(),
+});

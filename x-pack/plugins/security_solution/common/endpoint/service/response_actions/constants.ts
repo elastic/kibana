@@ -65,9 +65,9 @@ export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
 export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'release',
+  'processes',
   'kill-process',
   'suspend-process',
-  'processes',
   'get-file',
   'execute',
   'upload',

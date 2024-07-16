@@ -9,10 +9,10 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { tmpdir } from 'os';
 import { join as joinPath } from 'path';
-import type { Datastream, Integration } from '../../common';
-import { copySync, createSync, ensureDirSync, generateUniqueId } from '../util';
+import type { DataStream, Integration } from '../../common';
+import { createSync, ensureDirSync, generateUniqueId } from '../util';
 import { createAgentInput } from './agent';
-import { createDatastream } from './data_stream';
+import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 
@@ -26,27 +26,30 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   });
 
   const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
-  const packageDir = createDirectories(tmpDir, integration);
+  const packageDirectoryName = `${integration.name}-0.1.0`;
+  const packageDir = createDirectories(tmpDir, integration, packageDirectoryName);
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
 
   for (const dataStream of integration.dataStreams) {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-    createDatastream(integration.name, specificDataStreamDir, dataStream);
+    createDataStream(integration.name, specificDataStreamDir, dataStream);
     createAgentInput(specificDataStreamDir, dataStream.inputTypes);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
     createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
   }
 
-  const tmpPackageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
-
-  const zipBuffer = await createZipArchive(tmpPackageDir);
+  const zipBuffer = await createZipArchive(tmpDir, packageDirectoryName);
   return zipBuffer;
 }
 
-function createDirectories(tmpDir: string, integration: Integration): string {
-  const packageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
+function createDirectories(
+  tmpDir: string,
+  integration: Integration,
+  packageDirectoryName: string
+): string {
+  const packageDir = joinPath(tmpDir, packageDirectoryName);
   ensureDirSync(tmpDir);
   ensureDirSync(packageDir);
   createPackage(packageDir, integration);
@@ -60,20 +63,17 @@ function createPackage(packageDir: string, integration: Integration): void {
   createPackageManifest(packageDir, integration);
   //  Skipping creation of system tests temporarily for custom package generation
   //  createPackageSystemTests(packageDir, integration);
-  createLogo(packageDir, integration);
+  if (integration?.logo !== undefined) {
+    createLogo(packageDir, integration.logo);
+  }
 }
 
-function createLogo(packageDir: string, integration: Integration): void {
+function createLogo(packageDir: string, logo: string): void {
   const logoDir = joinPath(packageDir, 'img');
   ensureDirSync(logoDir);
 
-  if (integration?.logo !== undefined) {
-    const buffer = Buffer.from(integration.logo, 'base64');
-    createSync(joinPath(logoDir, 'logo.svg'), buffer);
-  } else {
-    const imgTemplateDir = joinPath(__dirname, '../templates/img');
-    copySync(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
-  }
+  const buffer = Buffer.from(logo, 'base64');
+  createSync(joinPath(logoDir, 'logo.svg'), buffer);
 }
 
 function createBuildFile(packageDir: string): void {
@@ -95,7 +95,7 @@ function createChangelog(packageDir: string): void {
 function createReadme(packageDir: string, integration: Integration) {
   const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
   ensureDirSync(readmeDirPath);
-  const readmeTemplate = nunjucks.render('readme.md.njk', {
+  const readmeTemplate = nunjucks.render('package_readme.md.njk', {
     package_name: integration.name,
     data_streams: integration.dataStreams,
   });
@@ -103,9 +103,10 @@ function createReadme(packageDir: string, integration: Integration) {
   createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
 }
 
-async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
+async function createZipArchive(tmpDir: string, packageDirectoryName: string): Promise<Buffer> {
+  const tmpPackageDir = joinPath(tmpDir, packageDirectoryName);
   const zip = new AdmZip();
-  zip.addLocalFolder(tmpPackageDir);
+  zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
   const buffer = zip.toBuffer();
   return buffer;
 }
@@ -113,7 +114,7 @@ async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
 function createPackageManifest(packageDir: string, integration: Integration): void {
   const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
 
-  integration.dataStreams.forEach((dataStream: Datastream) => {
+  integration.dataStreams.forEach((dataStream: DataStream) => {
     dataStream.inputTypes.forEach((inputType: string) => {
       if (!uniqueInputs[inputType]) {
         uniqueInputs[inputType] = {
@@ -133,6 +134,7 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     package_name: integration.name,
     package_version: '0.1.0',
     package_description: integration.description,
+    package_logo: integration.logo,
     package_owner: '@elastic/custom-integrations',
     min_version: '^8.13.0',
     inputs: uniqueInputsList,

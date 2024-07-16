@@ -12,10 +12,10 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/integration_assistant',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/integration_assistant/{common,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/plugins/integration_assistant/{common,server,public}/**/*.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/integration_assistant/{__jest__}/**/*',
-    '!<rootDir>/x-pack/plugins/integration_assistant/*.test.{ts,tsx}',
-    '!<rootDir>/x-pack/plugins/integration_assistant/*.config.ts',
+    '!<rootDir>/x-pack/plugins/integration_assistant/**/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/plugins/integration_assistant/**/*.config.ts',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

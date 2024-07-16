@@ -12,18 +12,18 @@ import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
+  DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsRuleOverviewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
 import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
-import type { RightPanelProps } from './document_details/right';
+import type { DocumentDetailsProps } from './document_details/shared/types';
+import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
-import { RightPanelProvider } from './document_details/right/context';
-import type { LeftPanelProps } from './document_details/left';
 import { LeftPanel } from './document_details/left';
-import { LeftPanelProvider } from './document_details/left/context';
+import { PreviewPanel } from './document_details/preview';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
@@ -31,11 +31,11 @@ import type { RuleOverviewPanelProps } from './document_details/rule_overview';
 import { RuleOverviewPanel } from './document_details/rule_overview';
 import { RuleOverviewPanelProvider } from './document_details/rule_overview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
-import { UserPanel, UserPanelKey } from './entity_details/user_right';
+import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 
@@ -47,17 +47,25 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: DocumentDetailsRightPanelKey,
     component: (props) => (
-      <RightPanelProvider {...(props as RightPanelProps).params}>
-        <RightPanel path={props.path as RightPanelProps['path']} />
-      </RightPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <RightPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
     key: DocumentDetailsLeftPanelKey,
     component: (props) => (
-      <LeftPanelProvider {...(props as LeftPanelProps).params}>
-        <LeftPanel path={props.path as LeftPanelProps['path']} />
-      </LeftPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <LeftPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
+    ),
+  },
+  {
+    key: DocumentDetailsPreviewPanelKey,
+    component: (props) => (
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <PreviewPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
@@ -95,6 +103,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: UserPreviewPanelKey,
+    component: (props) => (
+      <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+  {
     key: HostPanelKey,
     component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
   },
@@ -102,6 +116,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: HostDetailsPanelKey,
     component: (props) => (
       <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: HostPreviewPanelKey,
+    component: (props) => (
+      <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
 ];

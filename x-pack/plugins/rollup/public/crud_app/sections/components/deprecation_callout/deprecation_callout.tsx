@@ -11,10 +11,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { documentationLinks } from '../../../services/documentation_links';
 
+interface DeprecationCalloutProps {
+  /** The prefix to be applied at the test subjects for the doc links.
+   * Used for clicks tracking in Fullstory. */
+  linksTestSubjPrefix: string;
+}
+
 /*
 A component for displaying a deprecation warning.
  */
-export const DeprecationCallout = () => {
+export const DeprecationCallout = ({ linksTestSubjPrefix }: DeprecationCalloutProps) => {
   return (
     <EuiCallOut
       title="Deprecated in 8.11.0"
@@ -30,6 +36,7 @@ export const DeprecationCallout = () => {
             <EuiLink
               href={documentationLinks.elasticsearch.rollupMigratingToDownsampling}
               target="_blank"
+              data-test-subj={`${linksTestSubjPrefix}-rollupDeprecationCalloutMigrationGuideLink`}
             >
               {i18n.translate('xpack.rollupJobs.deprecationCallout.migrationGuideLink', {
                 defaultMessage: 'migration guide',
@@ -37,7 +44,11 @@ export const DeprecationCallout = () => {
             </EuiLink>
           ),
           downsamplingLink: (
-            <EuiLink href={documentationLinks.fleet.datastreamsDownsampling} target="_blank">
+            <EuiLink
+              href={documentationLinks.fleet.datastreamsDownsampling}
+              target="_blank"
+              data-test-subj={`${linksTestSubjPrefix}-rollupDeprecationCalloutDownsamplingDocLink`}
+            >
               {i18n.translate('xpack.rollupJobs.deprecationCallout.downsamplingLink', {
                 defaultMessage: 'downsampling',
               })}

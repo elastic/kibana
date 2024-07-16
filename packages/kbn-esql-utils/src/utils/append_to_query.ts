@@ -85,9 +85,9 @@ export function appendWhereClauseToESQLQuery(
       }
     }
     // filter does not exist in the where clause
-    const whereClause = `and ${fieldName}${operator}${filterValue}`;
+    const whereClause = `AND ${fieldName}${operator}${filterValue}`;
     return appendToESQLQuery(baseESQLQuery, whereClause);
   }
-  const whereClause = `| where ${fieldName}${operator}${filterValue}`;
+  const whereClause = `| WHERE ${fieldName}${operator}${filterValue}`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }

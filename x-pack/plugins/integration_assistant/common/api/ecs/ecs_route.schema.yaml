@@ -19,20 +19,22 @@ paths:
               type: object
               required:
                 - packageName
-                - datastreamName
+                - dataStreamName
                 - rawSamples
                 - connectorId
               properties:
                 packageName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
-                datastreamName:
-                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DatastreamName"
+                dataStreamName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
                 rawSamples:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/RawSamples"
                 mapping:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
                 connectorId:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
+                langSmithOptions:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
       responses:
         200:
           description: Indicates a successful call.

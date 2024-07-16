@@ -39,6 +39,15 @@ import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  FormChangesProvider,
+  FormField,
+  FormLabel,
+  FormRow,
+  OptionalText,
+  useFormChanges,
+  useFormChangesContext,
+} from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
@@ -54,14 +63,6 @@ import {
 } from '../../../common/model';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
-import {
-  FormChangesProvider,
-  useFormChanges,
-  useFormChangesContext,
-} from '../../components/form_changes';
-import { FormField } from '../../components/form_field';
-import { FormLabel } from '../../components/form_label';
-import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
 

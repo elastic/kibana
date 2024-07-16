@@ -12,7 +12,6 @@ import { renderWrapper } from '../../test/mock_server/mock_server_test_provider'
 import { NoFindingsStates } from './no_findings_states';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import * as benchmarksHandlers from '../../../server/routes/benchmarks/benchmarks.handlers.mock';
-import { fleetCspPackageHandler } from './no_findings_states.handlers.mock';
 
 const server = setupMockServer();
 
@@ -22,10 +21,6 @@ const renderNoFindingsStates = (postureType: 'cspm' | 'kspm' = 'cspm') => {
 
 describe('NoFindingsStates', () => {
   startMockServer(server);
-
-  beforeEach(() => {
-    server.use(fleetCspPackageHandler);
-  });
 
   it('shows integrations installation prompt with installation links when integration is not-installed', async () => {
     server.use(statusHandlers.notInstalledHandler);

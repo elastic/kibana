@@ -18,11 +18,12 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-utility",
     "@kbn/i18n",
-    "@kbn/cloud-plugin",
     "@kbn/console-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
+    "@kbn/cloud",
+    "@kbn/analytics",
   ],
   "exclude": [
     "target/**/*",
