@@ -708,8 +708,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=min()',
       [
-        ...getFieldNamesByType(['number', 'date']),
-        ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+        ...getFieldNamesByType(['number', 'date', 'boolean']),
+        ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean'], {
           evalMath: true,
         }),
       ],
@@ -731,8 +731,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=min(b), b=max()',
       [
-        ...getFieldNamesByType(['number', 'date']),
-        ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+        ...getFieldNamesByType(['number', 'date', 'boolean']),
+        ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean'], {
           evalMath: true,
         }),
       ],

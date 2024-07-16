@@ -11,8 +11,8 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../common/http_api';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 
