@@ -12,7 +12,7 @@
         "tags": [],
         "label": "InfraFormatterType",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/public/lib/lib.ts",
+        "path": "x-pack/plugins/observability_solution/infra/public/common/inventory/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
