@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import { fromKueryExpression, KueryNode, toKqlExpression } from '@kbn/es-query';
+import { KueryNode, toKqlExpression } from '@kbn/es-query';
 import { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { AlertingAuthorization } from './alerting_authorization';
-import { RecoveredActionGroup } from '../../common';
-import { NormalizedRuleType, RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
-import { schema } from '@kbn/config-schema';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import {
-  CheckPrivilegesDynamically,
-  CheckPrivilegesResponse,
-  SecurityPluginStart,
-} from '@kbn/security-plugin-types-server';
+import { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { WriteOperations, AlertingAuthorizationEntity, ReadOperations } from './types';
-import { SubFeature } from '@kbn/features-plugin/common';
-
-const getSpace = jest.fn();
-const getSpaceId = () => 'space1';
 
 const mockAuthorizationAction = (
   ruleType: string,
@@ -35,19 +24,6 @@ const mockAuthorizationAction = (
   entity: string,
   operation: string
 ) => `${ruleType}/${consumer}/${entity}/${operation}`;
-
-function mockSecurity() {
-  const security = securityMock.createStart();
-  const authorization = security.authz;
-  // typescript is having trouble inferring jest's automocking
-  (
-    authorization.actions.alerting.get as jest.MockedFunction<
-      typeof authorization.actions.alerting.get
-    >
-  ).mockImplementation(mockAuthorizationAction);
-  authorization.mode.useRbacForRequest.mockReturnValue(true);
-  return { authorization };
-}
 
 function mockFeatureWithConsumers(
   appName: string,
@@ -153,61 +129,83 @@ function mockFeatureWithConsumers(
   });
 }
 
-const myAppFeature = mockFeatureWithConsumers('myApp', [
-  { ruleTypeId: 'myType', consumers: ['myApp'] },
-]);
-
-const myOtherAppFeature = mockFeatureWithConsumers('myOtherApp', [
-  { ruleTypeId: 'myType', consumers: ['myOtherApp'] },
-]);
-
-const myAppWithSubFeature = mockFeatureWithConsumers(
-  'myAppWithSubFeature',
-  [{ ruleTypeId: 'myType', consumers: ['myAppWithSubFeature'] }],
-  true
-);
-
-const myFeatureWithoutAlerting = mockFeatureWithConsumers('myOtherApp');
+type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privileges'> & {
+  privileges: Omit<CheckPrivilegesResponse['privileges'], 'elasticsearch'>;
+};
 
 describe('AlertingAuthorization', () => {
+  const getSpace = jest.fn();
+  const getSpaceId = () => 'space1';
   const allRegisteredConsumers = new Set<string>();
   const ruleTypesConsumersMap = new Map<string, Set<string>>();
+
+  const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
+    username: 'elastic',
+    hasAllRequested: true,
+    privileges: { kibana: [] },
+  }));
+
+  const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
+  const consumers = ['consumer-a', 'consumer-b', 'consumer-c', 'consumer-d'];
+
   let request: KibanaRequest;
   let ruleTypeRegistry = ruleTypeRegistryMock.create();
+  let securityStart: ReturnType<typeof securityMock.createStart>;
+  let features: jest.Mocked<FeaturesPluginStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    request = httpServerMock.createKibanaRequest();
-
-    ruleTypeRegistry.get.mockImplementation((id) => ({
-      id,
-      name: 'My Alert Type',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      async executor() {
-        return { state: {} };
-      },
-      category: 'test',
-      producer: 'myApp',
-      validate: {
-        params: schema.any(),
-      },
-      validLegacyConsumers: [],
-    }));
-
-    getSpace.mockResolvedValue(undefined);
-
+    allRegisteredConsumers.clear();
     allRegisteredConsumers.clear();
     ruleTypesConsumersMap.clear();
+
+    securityStart = securityMock.createStart();
+    securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+    securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    request = httpServerMock.createKibanaRequest();
+    getSpace.mockResolvedValue(undefined);
+
+    features = featuresPluginMock.createStart();
+    features.getKibanaFeatures.mockReturnValue([
+      mockFeatureWithConsumers('feature-id-1', [
+        {
+          ruleTypeId: 'rule-type-id-1',
+          consumers: ['alerts', 'consumer-a'],
+        },
+        { ruleTypeId: 'rule-type-id-2', consumers: ['alerts', 'consumer-b'] },
+      ]),
+      mockFeatureWithConsumers('feature-id-2', [
+        {
+          ruleTypeId: 'rule-type-id-1',
+          consumers: ['alerts', 'consumer-b'],
+        },
+        {
+          ruleTypeId: 'rule-type-id-3',
+          consumers: ['alerts', 'consumer-c'],
+        },
+      ]),
+      mockFeatureWithConsumers('feature-id-3', [
+        {
+          ruleTypeId: 'rule-type-id-4',
+          consumers: ['consumer-d'],
+        },
+      ]),
+    ]);
+
+    const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
+    alertingGet.mockImplementation(mockAuthorizationAction);
+
+    ruleTypeRegistry = ruleTypeRegistryMock.create();
+    ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
+    ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
+      ruleTypeIds.includes(ruleTypeId)
+    );
+
+    // @ts-expect-error: only the id is needed for the tests
+    ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
   });
 
   describe('create', () => {
-    let securityStart: jest.Mocked<SecurityPluginStart>;
-    let features: jest.Mocked<FeaturesPluginStart>;
-
     beforeEach(() => {
       jest.clearAllMocks();
       securityStart = securityMock.createStart();
@@ -395,19 +393,10 @@ describe('AlertingAuthorization', () => {
   });
 
   describe('ensureAuthorized', () => {
-    const checkPrivileges = jest.fn(async () => ({ hasAllRequested: true }));
-    let securityStart: ReturnType<typeof securityMock.createStart>;
-
     beforeEach(() => {
       jest.clearAllMocks();
       allRegisteredConsumers.clear();
       allRegisteredConsumers.add('myApp');
-      securityStart = securityMock.createStart();
-      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
-      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-
-      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
-      alertingGet.mockImplementation(mockAuthorizationAction);
     });
 
     it('is a no-op when there is no authorization api', async () => {
@@ -599,7 +588,6 @@ describe('AlertingAuthorization', () => {
     });
 
     it('throws an error when the consumer does not exist because it was from a disabled plugin', async () => {
-      const features = featuresPluginMock.createStart();
       features.getKibanaFeatures.mockReturnValue([
         mockFeatureWithConsumers('my-feature-1', [
           { ruleTypeId: 'rule-type-1', consumers: ['disabled-feature-consumer'] },
@@ -669,68 +657,6 @@ describe('AlertingAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privileges'> & {
-      privileges: Omit<CheckPrivilegesResponse['privileges'], 'elasticsearch'>;
-    };
-
-    const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
-      username: 'elastic',
-      hasAllRequested: true,
-      privileges: { kibana: [] },
-    }));
-
-    const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
-
-    let securityStart: ReturnType<typeof securityMock.createStart>;
-    let features: jest.Mocked<FeaturesPluginStart>;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      allRegisteredConsumers.clear();
-      securityStart = securityMock.createStart();
-      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
-      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-
-      features = featuresPluginMock.createStart();
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('feature-id-1', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-a'],
-          },
-          { ruleTypeId: 'rule-type-id-2', consumers: ['alerts', 'consumer-b'] },
-        ]),
-        mockFeatureWithConsumers('feature-id-2', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-b'],
-          },
-          {
-            ruleTypeId: 'rule-type-id-3',
-            consumers: ['alerts', 'consumer-c'],
-          },
-        ]),
-        mockFeatureWithConsumers('feature-id-3', [
-          {
-            ruleTypeId: 'rule-type-id-4',
-            consumers: ['consumer-d'],
-          },
-        ]),
-      ]);
-
-      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
-      alertingGet.mockImplementation(mockAuthorizationAction);
-
-      ruleTypeRegistry = ruleTypeRegistryMock.create();
-      ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
-      ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
-        ruleTypeIds.includes(ruleTypeId)
-      );
-
-      // @ts-expect-error: only the id is needed for the tests
-      ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
-    });
-
     it('creates a filter based on the privileged types', async () => {
       const auth = await AlertingAuthorization.create({
         request,
@@ -814,72 +740,56 @@ describe('AlertingAuthorization', () => {
         `"((path.to.rule_type_id: rule-type-id-1 AND (consumer-field: alerts OR consumer-field: consumer-a OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-2 AND (consumer-field: alerts OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-3 AND (consumer-field: consumer-c OR consumer-field: alerts)))"`
       );
     });
+
+    it('does not throw if the rule type is authorized', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('rule-type-id-2', 'consumer-b', 'rule', 'find'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      const { ensureRuleTypeIsAuthorized } = await auth.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule_type_id',
+            consumer: 'consumer-field',
+          },
+        }
+      );
+
+      expect(() =>
+        ensureRuleTypeIsAuthorized('rule-type-id-1', 'consumer-a', 'rule')
+      ).not.toThrow();
+
+      expect(() =>
+        ensureRuleTypeIsAuthorized('rule-type-id-2', 'consumer-b', 'rule')
+      ).not.toThrow();
+    });
   });
 
   describe('getAuthorizationFilter', () => {
-    type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privileges'> & {
-      privileges: Omit<CheckPrivilegesResponse['privileges'], 'elasticsearch'>;
-    };
-
-    const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
-      username: 'elastic',
-      hasAllRequested: true,
-      privileges: { kibana: [] },
-    }));
-
-    const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
-    const consumers = ['consumer-a', 'consumer-b', 'consumer-c', 'consumer-d'];
-
-    let securityStart: ReturnType<typeof securityMock.createStart>;
-    let features: jest.Mocked<FeaturesPluginStart>;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      allRegisteredConsumers.clear();
-      securityStart = securityMock.createStart();
-      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
-      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-
-      features = featuresPluginMock.createStart();
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('feature-id-1', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-a'],
-          },
-          { ruleTypeId: 'rule-type-id-2', consumers: ['alerts', 'consumer-b'] },
-        ]),
-        mockFeatureWithConsumers('feature-id-2', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-b'],
-          },
-          {
-            ruleTypeId: 'rule-type-id-3',
-            consumers: ['alerts', 'consumer-c'],
-          },
-        ]),
-        mockFeatureWithConsumers('feature-id-3', [
-          {
-            ruleTypeId: 'rule-type-id-4',
-            consumers: ['consumer-d'],
-          },
-        ]),
-      ]);
-
-      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
-      alertingGet.mockImplementation(mockAuthorizationAction);
-
-      ruleTypeRegistry = ruleTypeRegistryMock.create();
-      ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
-      ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
-        ruleTypeIds.includes(ruleTypeId)
-      );
-
-      // @ts-expect-error: only the id is needed for the tests
-      ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
-    });
-
     describe('filter', () => {
       it('gets the filter correctly with no security and no spaceIds in the fields names', async () => {
         const auth = await AlertingAuthorization.create({
@@ -1237,625 +1147,94 @@ describe('AlertingAuthorization', () => {
     });
   });
 
-  describe('getAuthorizedRuleTypesForAllConsumers', () => {
-    const myOtherAppAlertType: RegistryRuleType = {
-      actionGroups: [],
-      actionVariables: undefined,
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      id: 'myOtherAppAlertType',
-      name: 'myOtherAppAlertType',
-      category: 'test',
-      producer: 'myOtherApp',
-      enabledInLicense: true,
-      hasAlertsMappings: false,
-      hasFieldsForAAD: false,
-      validLegacyConsumers: [],
-    };
-    const myAppAlertType: RegistryRuleType = {
-      actionGroups: [],
-      actionVariables: undefined,
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      id: 'myAppAlertType',
-      name: 'myAppAlertType',
-      category: 'test',
-      producer: 'myApp',
-      enabledInLicense: true,
-      hasAlertsMappings: false,
-      hasFieldsForAAD: false,
-      validLegacyConsumers: [],
-    };
-    const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
-    beforeEach(() => {
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('myApp', [
-          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
-        ]),
-        mockFeatureWithConsumers('myOtherApp', [
-          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
-        ]),
-      ]);
-    });
-    it('augments a list of types with all features when there is no authorization api', async () => {
-      features.getKibanaFeatures.mockReturnValue([
-        myAppFeature,
-        myOtherAppFeature,
-        myAppWithSubFeature,
-        myFeatureWithoutAlerting,
-      ]);
-      const alertAuthorization = new AlertingAuthorization({
+  describe('getAuthorizedRuleTypes', () => {
+    it('calls checkPrivileges correctly', async () => {
+      const auth = await AlertingAuthorization.create({
         request,
         ruleTypeRegistry,
         getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
       });
-      ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      await expect(
-        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
-          new Set([myAppAlertType, myOtherAppAlertType]),
+      await auth.getAuthorizedRuleTypes(
+        new Set(['rule-type-id-1']),
+        [WriteOperations.Create],
+        AlertingAuthorizationEntity.Rule
+      );
+
+      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "kibana": Array [
+              "rule-type-id-1/alerts/rule/create",
+              "rule-type-id-1/consumer-a/rule/create",
+              "rule-type-id-1/consumer-b/rule/create",
+            ],
+          },
+        ]
+      `);
+    });
+
+    it('returns the authorized rules correctly', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'create'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('rule-type-id-2', 'consumer-b', 'rule', 'get'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('rule-type-id-3', 'consumer-c', 'rule', 'create'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      expect(
+        await auth.getAuthorizedRuleTypes(
+          new Set(['rule-type-id-1']),
           [WriteOperations.Create],
           AlertingAuthorizationEntity.Rule
         )
-      ).resolves.toMatchInlineSnapshot(`
-        Set {
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
+      ).toMatchInlineSnapshot(`
+        Map {
+          "rule-type-id-1" => Object {
             "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": true,
-                "read": true,
-              },
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-              "myAppWithSubFeature": Object {
-                "all": true,
-                "read": true,
-              },
-              "myOtherApp": Object {
+              "consumer-a": Object {
                 "all": true,
                 "read": true,
               },
             },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myAppAlertType",
-            "producer": "myApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": true,
-                "read": true,
-              },
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-              "myAppWithSubFeature": Object {
-                "all": true,
-                "read": true,
-              },
-              "myOtherApp": Object {
-                "all": true,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myOtherAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myOtherAppAlertType",
-            "producer": "myOtherApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-        }
-      `);
-    });
-
-    it('augments a list of types with consumers under which the operation is authorized', async () => {
-      const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<
-        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-      > = jest.fn();
-      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'rule', 'create'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'rule',
-                'create'
-              ),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'rule', 'create'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'rule', 'create'),
-              authorized: true,
-            },
-          ],
-        },
-      });
-
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        ruleTypeRegistry,
-        authorization: securityStart.authz,
-        getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-      ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
-      await expect(
-        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
-          new Set([myAppAlertType, myOtherAppAlertType]),
-          [WriteOperations.Create],
-          AlertingAuthorizationEntity.Rule
-        )
-      ).resolves.toMatchInlineSnapshot(`
-        Set {
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myOtherAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myOtherAppAlertType",
-            "producer": "myOtherApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-              "myOtherApp": Object {
-                "all": true,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myAppAlertType",
-            "producer": "myApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-        }
-      `);
-    });
-
-    it('authorizes user under the `alerts` consumer when they are authorized by the producer', async () => {
-      const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<
-        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-      > = jest.fn();
-      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'alert', 'create'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'alert', 'create'),
-              authorized: false,
-            },
-          ],
-        },
-      });
-
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        ruleTypeRegistry,
-        authorization: securityStart.authz,
-        getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-      ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
-      await expect(
-        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
-          new Set([myAppAlertType]),
-          [WriteOperations.Create],
-          AlertingAuthorizationEntity.Alert
-        )
-      ).resolves.toMatchInlineSnapshot(`
-        Set {
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myAppAlertType",
-            "producer": "myApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-        }
-      `);
-    });
-
-    it('augments a list of types with consumers under which multiple operations are authorized', async () => {
-      const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<
-        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-      > = jest.fn();
-      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'create'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'alert',
-                'create'
-              ),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'alert', 'create'),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'alert', 'create'),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'get'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'alert',
-                'get'
-              ),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'alert', 'get'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'alert', 'get'),
-              authorized: true,
-            },
-          ],
-        },
-      });
-
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        ruleTypeRegistry,
-        authorization: securityStart.authz,
-        getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-      ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
-      await expect(
-        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
-          new Set([myAppAlertType, myOtherAppAlertType]),
-          [WriteOperations.Create, ReadOperations.Get],
-          AlertingAuthorizationEntity.Alert
-        )
-      ).resolves.toMatchInlineSnapshot(`
-        Set {
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-              "myOtherApp": Object {
-                "all": false,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myOtherAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myOtherAppAlertType",
-            "producer": "myOtherApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "myApp": Object {
-                "all": false,
-                "read": true,
-              },
-              "myOtherApp": Object {
-                "all": false,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myAppAlertType",
-            "producer": "myApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
-          },
-        }
-      `);
-    });
-
-    it('omits types which have no consumers under which the operation is authorized', async () => {
-      const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<
-        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-      > = jest.fn();
-      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'create'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'alert',
-                'create'
-              ),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'alert', 'create'),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'alert', 'create'),
-              authorized: false,
-            },
-          ],
-        },
-      });
-
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        ruleTypeRegistry,
-        authorization: securityStart.authz,
-        getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-      ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
-      await expect(
-        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
-          new Set([myAppAlertType, myOtherAppAlertType]),
-          [WriteOperations.Create],
-          AlertingAuthorizationEntity.Alert
-        )
-      ).resolves.toMatchInlineSnapshot(`
-        Set {
-          Object {
-            "actionGroups": Array [],
-            "actionVariables": undefined,
-            "authorizedConsumers": Object {
-              "myApp": Object {
-                "all": true,
-                "read": true,
-              },
-              "myOtherApp": Object {
-                "all": true,
-                "read": true,
-              },
-            },
-            "category": "test",
-            "defaultActionGroupId": "default",
-            "enabledInLicense": true,
-            "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
-            "id": "myOtherAppAlertType",
-            "isExportable": true,
-            "minimumLicenseRequired": "basic",
-            "name": "myOtherAppAlertType",
-            "producer": "myOtherApp",
-            "recoveryActionGroup": Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-            "validLegacyConsumers": Array [],
           },
         }
       `);
     });
   });
 
-  describe('getAuthorizedRuleTypesWithAuthorizedConsumers', () => {
-    type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privileges'> & {
-      privileges: Omit<CheckPrivilegesResponse['privileges'], 'elasticsearch'>;
-    };
-
-    const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
-      username: 'elastic',
-      hasAllRequested: true,
-      privileges: { kibana: [] },
-    }));
-
-    const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
-    const consumers = ['consumer-a', 'consumer-b', 'consumer-c', 'consumer-d'];
-
-    let securityStart: ReturnType<typeof securityMock.createStart>;
-    let features: jest.Mocked<FeaturesPluginStart>;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      allRegisteredConsumers.clear();
-      securityStart = securityMock.createStart();
-      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
-      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-
-      features = featuresPluginMock.createStart();
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('feature-id-1', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-a'],
-          },
-          { ruleTypeId: 'rule-type-id-2', consumers: ['alerts', 'consumer-b'] },
-        ]),
-        mockFeatureWithConsumers('feature-id-2', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-b'],
-          },
-          {
-            ruleTypeId: 'rule-type-id-3',
-            consumers: ['alerts', 'consumer-c'],
-          },
-        ]),
-        mockFeatureWithConsumers('feature-id-3', [
-          {
-            ruleTypeId: 'rule-type-id-4',
-            consumers: ['consumer-d'],
-          },
-        ]),
-      ]);
-
-      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
-      alertingGet.mockImplementation(mockAuthorizationAction);
-
-      ruleTypeRegistry = ruleTypeRegistryMock.create();
-      ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
-      ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
-        ruleTypeIds.includes(ruleTypeId)
-      );
-
-      // @ts-expect-error: only the id is needed for the tests
-      ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
-    });
-
+  describe('getAllAuthorizedRuleTypes', () => {
     it('get authorized rule types with authorized consumers', async () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -1892,7 +1271,7 @@ describe('AlertingAuthorization', () => {
       });
 
       expect(
-        await auth.getAuthorizedRuleTypesWithAuthorizedConsumers(
+        await auth.getAllAuthorizedRuleTypes(
           consumers,
           [ReadOperations.Get, WriteOperations.Create],
           AlertingAuthorizationEntity.Rule
@@ -1933,7 +1312,7 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      await auth.getAuthorizedRuleTypesWithAuthorizedConsumers(
+      await auth.getAllAuthorizedRuleTypes(
         consumers,
         [ReadOperations.Get, WriteOperations.Create],
         AlertingAuthorizationEntity.Rule
@@ -1962,69 +1341,6 @@ describe('AlertingAuthorization', () => {
   });
 
   describe('_getAuthorizedRuleTypesWithAuthorizedConsumers', () => {
-    type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privileges'> & {
-      privileges: Omit<CheckPrivilegesResponse['privileges'], 'elasticsearch'>;
-    };
-
-    const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
-      username: 'elastic',
-      hasAllRequested: true,
-      privileges: { kibana: [] },
-    }));
-
-    const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
-    const consumers = ['consumer-a', 'consumer-b', 'consumer-c', 'consumer-d'];
-
-    let securityStart: ReturnType<typeof securityMock.createStart>;
-    let features: jest.Mocked<FeaturesPluginStart>;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      allRegisteredConsumers.clear();
-      securityStart = securityMock.createStart();
-      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
-      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-
-      features = featuresPluginMock.createStart();
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('feature-id-1', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-a'],
-          },
-          { ruleTypeId: 'rule-type-id-2', consumers: ['alerts', 'consumer-b'] },
-        ]),
-        mockFeatureWithConsumers('feature-id-2', [
-          {
-            ruleTypeId: 'rule-type-id-1',
-            consumers: ['alerts', 'consumer-b'],
-          },
-          {
-            ruleTypeId: 'rule-type-id-3',
-            consumers: ['alerts', 'consumer-c'],
-          },
-        ]),
-        mockFeatureWithConsumers('feature-id-3', [
-          {
-            ruleTypeId: 'rule-type-id-4',
-            consumers: ['consumer-d'],
-          },
-        ]),
-      ]);
-
-      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
-      alertingGet.mockImplementation(mockAuthorizationAction);
-
-      ruleTypeRegistry = ruleTypeRegistryMock.create();
-      ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
-      ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
-        ruleTypeIds.includes(ruleTypeId)
-      );
-
-      // @ts-expect-error: only the id is needed for the tests
-      ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
-    });
-
     it('returns all rule types with all consumers as authorized with no authorization', async () => {
       const auth = await AlertingAuthorization.create({
         request,
@@ -3038,645 +2354,6 @@ describe('AlertingAuthorization', () => {
           },
         ]
       `);
-    });
-  });
-
-  describe('8.11+', () => {
-    let alertAuthorization: AlertingAuthorization;
-
-    const setOfRuleTypes: RegistryRuleType[] = [
-      {
-        actionGroups: [],
-        actionVariables: undefined,
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        id: '.esQuery',
-        name: 'ES Query',
-        category: 'management',
-        producer: 'stackAlerts',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: ['discover', 'alerts'],
-      },
-      {
-        actionGroups: [],
-        actionVariables: undefined,
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        id: '.threshold-rule-o11y',
-        name: 'New threshold 011y',
-        category: 'observability',
-        producer: 'observability',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: [],
-      },
-      {
-        actionGroups: [],
-        actionVariables: undefined,
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        id: '.infrastructure-threshold-o11y',
-        name: 'Metrics o11y',
-        category: 'observability',
-        producer: 'infrastructure',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: ['alerts'],
-      },
-      {
-        actionGroups: [],
-        actionVariables: undefined,
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        id: '.logs-threshold-o11y',
-        name: 'Logs o11y',
-        category: 'observability',
-        producer: 'logs',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: ['alerts'],
-      },
-    ];
-
-    const onlyStackAlertsKibanaPrivileges = [
-      {
-        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'create'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'find'),
-        authorized: true,
-      },
-    ];
-    const only011yKibanaPrivileges = [
-      {
-        privilege: mockAuthorizationAction(
-          '.infrastructure-threshold-o11y',
-          'infrastructure',
-          'rule',
-          'create'
-        ),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction(
-          '.infrastructure-threshold-o11y',
-          'infrastructure',
-          'rule',
-          'find'
-        ),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction(
-          '.threshold-rule-o11y',
-          'infrastructure',
-          'rule',
-          'create'
-        ),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction(
-          '.threshold-rule-o11y',
-          'infrastructure',
-          'rule',
-          'find'
-        ),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'create'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'find'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'create'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'find'),
-        authorized: true,
-      },
-    ];
-    const onlyLogsAndStackAlertsKibanaPrivileges = [
-      {
-        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'create'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'find'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'create'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'find'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'create'),
-        authorized: true,
-      },
-      {
-        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'find'),
-        authorized: true,
-      },
-    ];
-
-    beforeEach(async () => {
-      ruleTypeRegistry.list.mockReturnValue(new Set(setOfRuleTypes));
-      ruleTypeRegistry.get.mockImplementation((id: string) => {
-        if (setOfRuleTypes.some((rt) => rt.id === id)) {
-          const ruleType = setOfRuleTypes.find((rt) => rt.id === id);
-          return (ruleType ?? {}) as NormalizedRuleType<{}, {}, {}, {}, {}, '', '', {}>;
-        }
-        return {} as NormalizedRuleType<{}, {}, {}, {}, {}, '', '', {}>;
-      });
-    });
-
-    describe('user only access to stack alerts + discover', () => {
-      beforeEach(() => {
-        const { authorization } = mockSecurity();
-        const checkPrivileges: jest.MockedFunction<
-          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-        > = jest.fn();
-        authorization.mode.useRbacForRequest.mockReturnValue(true);
-
-        features.getKibanaFeatures.mockReset();
-        features.getKibanaFeatures.mockReturnValue([
-          mockFeatureWithConsumers('stackAlerts', [
-            { ruleTypeId: '.esQuery', consumers: ['stackAlerts'] },
-          ]),
-          mockFeatureWithConsumers('discover'),
-        ]);
-        checkPrivileges.mockReset();
-        checkPrivileges.mockResolvedValue({
-          username: 'onlyStack',
-          hasAllRequested: true,
-          privileges: {
-            kibana: onlyStackAlertsKibanaPrivileges,
-          },
-        });
-        authorization.checkPrivilegesDynamicallyWithRequest.mockReset();
-        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-        alertAuthorization = new AlertingAuthorization({
-          request,
-          ruleTypeRegistry,
-          authorization: securityStart.authz,
-          getSpaceId,
-          allRegisteredConsumers,
-          ruleTypesConsumersMap,
-        });
-      });
-
-      describe('ensureAuthorized', () => {
-        it('should allow to create .esquery rule type with stackAlerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'stackAlerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .esquery rule type with discover consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'discover',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .esquery rule type with alerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .esquery rule type with logs consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'logs',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"logs\\" to create \\".esQuery\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'infrastructure',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"infrastructure\\" to create \\".esQuery\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.threshold-rule-o11y',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"alerts\\" to create \\".threshold-rule-o11y\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .logs-threshold-o11y rule type with alerts infrastructure', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.logs-threshold-o11y',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"alerts\\" to create \\".logs-threshold-o11y\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-      });
-
-      it('creates a filter based on the privileged types', async () => {
-        expect(
-          (
-            await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-              type: AlertingAuthorizationFilterType.KQL,
-              fieldNames: {
-                ruleTypeId: 'path.to.rule_type_id',
-                consumer: 'consumer-field',
-              },
-            })
-          ).filter
-        ).toEqual(
-          fromKueryExpression(
-            `path.to.rule_type_id:.esQuery and consumer-field:(alerts or stackAlerts or discover)`
-          )
-        );
-      });
-    });
-
-    describe('user only access to o11y', () => {
-      beforeEach(() => {
-        const { authorization } = mockSecurity();
-        const checkPrivileges: jest.MockedFunction<
-          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-        > = jest.fn();
-        authorization.mode.useRbacForRequest.mockReturnValue(true);
-
-        features.getKibanaFeatures.mockReset();
-        features.getKibanaFeatures.mockReturnValue([
-          mockFeatureWithConsumers('infrastructure', [
-            { ruleTypeId: '.infrastructure-threshold-o11y', consumers: ['infrastructure'] },
-            { ruleTypeId: '.threshold-rule-o11y', consumers: ['myApp'] },
-            { ruleTypeId: '.esQuery', consumers: ['myApp'] },
-          ]),
-          mockFeatureWithConsumers('logs', [
-            { ruleTypeId: '.threshold-rule-o11y', consumers: ['logs'] },
-            { ruleTypeId: '.esQuery', consumers: ['logs'] },
-            { ruleTypeId: '.logs-threshold-o11y', consumers: ['logs'] },
-          ]),
-        ]);
-        checkPrivileges.mockReset();
-        checkPrivileges.mockResolvedValue({
-          username: 'onlyO11y',
-          hasAllRequested: true,
-          privileges: {
-            kibana: only011yKibanaPrivileges,
-          },
-        });
-        authorization.checkPrivilegesDynamicallyWithRequest.mockReset();
-        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-        alertAuthorization = new AlertingAuthorization({
-          request,
-          ruleTypeRegistry,
-          authorization: securityStart.authz,
-          getSpaceId,
-          allRegisteredConsumers,
-          ruleTypesConsumersMap,
-        });
-      });
-
-      describe('ensureAuthorized', () => {
-        it('should throw an error to create .esquery rule type with stackAlerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'stackAlerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"stackAlerts\\" to create \\".esQuery\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .esquery rule type with discover consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'discover',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"discover\\" to create \\".esQuery\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.threshold-rule-o11y',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"alerts\\" to create \\".threshold-rule-o11y\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .esquery rule type with logs consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'logs',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .esquery rule type with logs infrastructure', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'infrastructure',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.logs-threshold-o11y',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.threshold-rule-o11y',
-              consumer: 'logs',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-      });
-      it('creates a filter based on the privileged types', async () => {
-        expect(
-          (
-            await alertAuthorization.getFindAuthorizationFilter(
-              AlertingAuthorizationEntity.Rule,
-              {
-                type: AlertingAuthorizationFilterType.KQL,
-                fieldNames: {
-                  ruleTypeId: 'path.to.rule_type_id',
-                  consumer: 'consumer-field',
-                },
-              },
-              new Set(['infrastructure', 'logs'])
-            )
-          ).filter
-        ).toEqual(
-          fromKueryExpression(
-            `(path.to.rule_type_id:.infrastructure-threshold-o11y and consumer-field:(infrastructure or alerts)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(infrastructure or logs)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(logs or alerts))`
-          )
-        );
-      });
-    });
-
-    describe('user only access to logs and stackAlerts', () => {
-      beforeEach(() => {
-        const { authorization } = mockSecurity();
-        const checkPrivileges: jest.MockedFunction<
-          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-        > = jest.fn();
-        authorization.mode.useRbacForRequest.mockReturnValue(true);
-
-        features.getKibanaFeatures.mockClear();
-        features.getKibanaFeatures.mockReturnValue([
-          mockFeatureWithConsumers('stackAlerts', [
-            { ruleTypeId: '.esQuery', consumers: ['stackAlerts'] },
-          ]),
-          mockFeatureWithConsumers('logs', [
-            { ruleTypeId: '.logs-threshold-o11y', consumers: ['logs'] },
-            { ruleTypeId: '.threshold-rule-o11y', consumers: ['logs'] },
-            { ruleTypeId: '.esQuery', consumers: ['logs'] },
-          ]),
-        ]);
-        checkPrivileges.mockClear();
-        checkPrivileges.mockResolvedValue({
-          username: 'stackAndLogs',
-          hasAllRequested: true,
-          privileges: {
-            kibana: onlyLogsAndStackAlertsKibanaPrivileges,
-          },
-        });
-        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-        alertAuthorization = new AlertingAuthorization({
-          request,
-          ruleTypeRegistry,
-          authorization: securityStart.authz,
-          getSpaceId,
-          allRegisteredConsumers,
-          ruleTypesConsumersMap,
-        });
-      });
-
-      describe('ensureAuthorized', () => {
-        it('should allow to create .esquery rule type with stackAlerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'stackAlerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .esquery rule type with discover consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'discover',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .esquery rule type with logs consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'logs',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.logs-threshold-o11y',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.threshold-rule-o11y',
-              consumer: 'logs',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).resolves.toEqual(undefined);
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .esquery rule type with logs infrastructure', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'infrastructure',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"infrastructure\\" to create \\".esQuery\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.threshold-rule-o11y',
-              consumer: 'alerts',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"alerts\\" to create \\".threshold-rule-o11y\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-        it('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
-          await expect(
-            alertAuthorization.ensureAuthorized({
-              ruleTypeId: '.esQuery',
-              consumer: 'infrastructure',
-              operation: WriteOperations.Create,
-              entity: AlertingAuthorizationEntity.Rule,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unauthorized by \\"infrastructure\\" to create \\".esQuery\\" rule"`
-          );
-
-          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
-        });
-      });
-      it('creates a filter based on the privileged types', async () => {
-        expect(
-          (
-            await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-              type: AlertingAuthorizationFilterType.KQL,
-              fieldNames: {
-                ruleTypeId: 'path.to.rule_type_id',
-                consumer: 'consumer-field',
-              },
-            })
-          ).filter
-        ).toEqual(
-          fromKueryExpression(
-            `(path.to.rule_type_id:.esQuery and consumer-field:(alerts or stackAlerts or logs or discover)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(alerts or stackAlerts or logs or discover)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(alerts or stackAlerts or logs or discover))`
-          )
-        );
-      });
     });
   });
 });
