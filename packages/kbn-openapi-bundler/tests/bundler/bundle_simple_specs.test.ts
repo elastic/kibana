@@ -7,7 +7,7 @@
  */
 
 import { bundleSpecs } from './bundle_specs';
-import { createOASDocument } from './create_oas_document';
+import { createOASDocument } from '../create_oas_document';
 
 describe('OpenAPI Bundler - simple specs', () => {
   it('bundles two simple specs', async () => {
