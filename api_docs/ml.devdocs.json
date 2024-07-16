@@ -1660,7 +1660,23 @@
         "IngestPipeline",
         "): Promise<",
         "IngestSimulateResponse",
-        ">; deleteTrainedModel(modelId: string, options?: { with_pipelines?: boolean | undefined; force?: boolean | undefined; }): Promise<{ acknowledge: boolean; }>; getTrainedModelsNodesOverview(): Promise<",
+        ">; deleteTrainedModel(modelId: string, options?: { with_pipelines?: boolean | undefined; force?: boolean | undefined; }): Promise<{ acknowledge: boolean; }>; getCuratedModelConfig(modelName: string, options?: ",
+        {
+          "pluginId": "@kbn/ml-trained-models-utils",
+          "scope": "common",
+          "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+          "section": "def-common.GetModelDownloadConfigOptions",
+          "text": "GetModelDownloadConfigOptions"
+        },
+        " | undefined): Promise<",
+        {
+          "pluginId": "@kbn/ml-trained-models-utils",
+          "scope": "common",
+          "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+          "section": "def-common.ModelDefinitionResponse",
+          "text": "ModelDefinitionResponse"
+        },
+        ">; getTrainedModelsNodesOverview(): Promise<",
         "NodesOverviewResponse",
         ">; startModelAllocation(modelId: string, queryParams?: { number_of_allocations: number; threads_per_allocation: number; priority: \"normal\" | \"low\"; deployment_id?: string | undefined; } | undefined): Promise<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
         {

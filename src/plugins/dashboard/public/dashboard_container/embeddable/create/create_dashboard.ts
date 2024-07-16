@@ -397,16 +397,16 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
-
       if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+        panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
         runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
       } else {
         panelToUpdate.explicitInput = nextRuntimeState;
       }
 
-      untilDashboardReady().then((container) => {
-        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string);
-      });
+      untilDashboardReady().then((container) =>
+        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
+      );
     } else {
       // otherwise this incoming embeddable is brand new and can be added after the dashboard container is created.
 
@@ -456,7 +456,6 @@ export const initializeDashboard = async ({
               },
             };
           })();
-
           container.updateInput({
             panels: {
               ...container.getInput().panels,
