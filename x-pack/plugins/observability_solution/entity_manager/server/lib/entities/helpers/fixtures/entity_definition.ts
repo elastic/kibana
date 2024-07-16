@@ -8,7 +8,7 @@
 import { entityDefinitionSchema } from '@kbn/entities-schema';
 export const entityDefinition = entityDefinitionSchema.parse({
   id: 'admin-console-services',
-  version: '999.999.999',
+  version: '1.0.0',
   name: 'Services for Admin Console',
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
