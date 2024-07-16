@@ -44,7 +44,7 @@ describe('getEsqlDataView', () => {
     expect(dataView.timeFieldName).toBe('@timestamp');
   });
 
-  it('creates an adhoc dataview if the current dataview is ad hoc and query pattern is different from the dataview', async () => {
+  it('creates an adhoc dataview if the current dataview is ad hoc and query index pattern is different from the dataview index pattern', async () => {
     discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
       ...dataViewAdHoc,
       isPersisted: () => false,
