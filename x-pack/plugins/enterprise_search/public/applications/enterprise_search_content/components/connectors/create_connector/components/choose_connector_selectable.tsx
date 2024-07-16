@@ -25,50 +25,6 @@ import { i18n } from '@kbn/i18n';
 
 import dropbox from '../assets/dropbox.svg';
 
-const connectorsData = [
-  {
-    name: 'Azure Blob Storage',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: false,
-    checked: 'on',
-  },
-  {
-    name: 'Confluence Cloud & Server',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: true,
-  },
-  {
-    name: 'Confluence Data Center',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: false,
-  },
-  {
-    name: 'Dropbox',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: true,
-  },
-  {
-    name: 'Azure Blob Storage',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: false,
-  },
-  {
-    name: 'Confluence Cloud & Server',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: true,
-  },
-  {
-    name: 'Confluence Data Center',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: false,
-  },
-  {
-    name: 'Dropbox',
-    icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
-    techPreview: true,
-  },
-];
-
 interface ChooseConnectorSelectableProps {
   setConnectorSelected: Function;
   connectorSelected: string;
@@ -81,8 +37,50 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   setConnectorSelected,
   connectorSelected,
 }) => {
+  const connectorsData = [
+    {
+      name: 'Azure Blob Storage',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: false,
+      checked: 'on',
+    },
+    {
+      name: 'Confluence Cloud & Server',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
+    {
+      name: 'Confluence Data Center',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: false,
+    },
+    {
+      name: 'Dropbox',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
+    {
+      name: 'Azure Blob Storage',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: false,
+    },
+    {
+      name: 'Confluence Cloud & Server',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
+    {
+      name: 'Confluence Data Center',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: false,
+    },
+    {
+      name: 'Dropbox',
+      icon: <EuiIcon type={dropbox} size="l" title="Dropbox" />,
+      techPreview: true,
+    },
+  ];
   const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
   const [options, setOptions] = useState<Array<EuiSelectableOption<OptionData>>>([
     ...connectorsData.map(
@@ -106,11 +104,11 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         setOptions(newOptions);
         setIsOpen(false);
         if (changedOption.checked === 'on') {
-          setInputValue(changedOption.label);
-        //   setConnectorSelected(changedOption.label);
+          setConnectorSelected(changedOption.label);
+          //   setConnectorSelected(changedOption.label);
           setIsSearching(false);
         } else {
-          setInputValue('');
+          setConnectorSelected('');
         }
       }}
       listProps={{
@@ -124,9 +122,9 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         fullWidth: true,
         isClearable: true,
         placeholder: 'Choose a data source',
-        value: inputValue,
+        value: connectorSelected,
         onChange: (value) => {
-          setInputValue(value);
+          setConnectorSelected(value);
           setIsSearching(true);
         },
         onKeyDown: (event) => {

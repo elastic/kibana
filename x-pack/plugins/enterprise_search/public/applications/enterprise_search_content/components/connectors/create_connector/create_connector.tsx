@@ -142,6 +142,7 @@ export const CreateConnector: React.FC = () => {
           setSelfManaged={setSelfManaged}
           selfManaged={selfManaged}
           setConnectorSelected={setConnectorSelected}
+          connectorSelected={connectorSelected}
         />
       ),
     },
@@ -264,7 +265,7 @@ export const CreateConnector: React.FC = () => {
             color="subdued"
             paddingSize="l"
             css={css`
-              background-image: url(${connectorsBackgroundImage});
+              ${currentStep === 0 ? `background-image: url(${connectorsBackgroundImage});` : ''}
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
@@ -309,12 +310,14 @@ export const CreateConnector: React.FC = () => {
                 <EuiText size="s">
                   <p>
                     <EuiLink href="http://www.elastic.co" target="_blank">
-                      Dropbox connector docs
+                      {connectorSelected} connector docs
                     </EuiLink>
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
-                <EuiBadge color="hollow">Native connector</EuiBadge>
+                <EuiBadge color="hollow">
+                  {selfManaged ? 'Self managed' : 'Elastic managed'}
+                </EuiBadge>
               </>
             )}
           </EuiPanel>
