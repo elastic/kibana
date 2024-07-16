@@ -1245,6 +1245,84 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
+    test('should handle task cancellation signal due to timeout when for last schedule entry', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...mockedAdHocRunSO,
+        attributes: {
+          ...mockedAdHocRunSO.attributes,
+          schedule: [{ ...schedule1, status: adHocRunStatus.COMPLETE }, schedule2],
+        },
+      });
+      const taskRunner = new AdHocTaskRunner({
+        context: taskRunnerFactoryInitializerParams,
+        internalSavedObjectsRepository,
+        taskInstance: mockedTaskInstance,
+      });
+
+      const promise = taskRunner.run();
+      await Promise.resolve();
+      await taskRunner.cancel();
+      await promise;
+      await taskRunner.cleanup();
+
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        'abc',
+        {}
+      );
+      expect(ruleTypeRegistry.get).toHaveBeenCalledWith('siem.queryRule');
+      expect(ruleTypeRegistry.ensureRuleTypeEnabled).toHaveBeenCalledWith('siem.queryRule');
+      expect(mockValidateRuleTypeParams).toHaveBeenCalledWith(
+        mockedAdHocRunSO.attributes.rule.params,
+        ruleTypeWithAlerts.validate.params
+      );
+
+      // @ts-ignore - accessing private variable
+      // should run the first entry in the schedule
+      expect(taskRunner.scheduleToRunIndex).toEqual(1);
+      expect(RuleRunMetricsStore).toHaveBeenCalledTimes(1);
+      expect(ruleTypeWithAlerts.executor).toHaveBeenCalledTimes(1);
+
+      expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        mockedAdHocRunSO.id,
+        {
+          schedule: [
+            { ...schedule1, status: adHocRunStatus.COMPLETE },
+            { ...schedule2, status: adHocRunStatus.TIMEOUT },
+          ],
+        },
+        { namespace: undefined, refresh: false }
+      );
+
+      expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        mockedAdHocRunSO.id,
+        { namespace: undefined, refresh: false }
+      );
+
+      testAlertingEventLogCalls({
+        status: 'ok',
+        timeout: true,
+        backfillRunAt: schedule2.runAt,
+        backfillInterval: schedule2.interval,
+      });
+      expect(logger.debug).toHaveBeenCalledTimes(3);
+      expect(logger.debug).nthCalledWith(
+        1,
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
+      );
+      expect(logger.debug).nthCalledWith(
+        2,
+        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
+      );
+      expect(logger.debug).nthCalledWith(
+        3,
+        `Aborting any in-progress ES searches for rule type test with id rule-id`
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
     test('should handle task cancellation that leads to executor throwing error', async () => {
       ruleTypeWithAlerts.executor.mockImplementationOnce(() => {
         throw new Error('Search has been aborted due to cancelled execution');

@@ -14,11 +14,13 @@ import {
 } from '../service/response_actions/constants';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
 import type { HapiReadableStream } from '../../../server/types';
-import { EndpointActionListRequestSchema, UploadActionRequestSchema } from '../../api/endpoint';
 import {
-  KillOrSuspendProcessRequestSchema,
-  NoParametersRequestSchema,
-} from '../../api/endpoint/actions/common/base';
+  EndpointActionListRequestSchema,
+  KillProcessRouteRequestSchema,
+  SuspendProcessRouteRequestSchema,
+  UploadActionRequestSchema,
+} from '../../api/endpoint';
+import { NoParametersRequestSchema } from '../../api/endpoint/actions/common/base';
 import { ExecuteActionRequestSchema } from '../../api/endpoint/actions/execute_route';
 import { ScanActionRequestSchema } from '../../api/endpoint/actions/scan_route';
 
@@ -507,16 +509,20 @@ describe('actions schemas', () => {
     });
   });
 
-  describe('KillOrSuspendProcessRequestSchema', () => {
+  describe.each`
+    name                                  | killOrSuspendSchema
+    ${'KillProcessRouteRequestSchema'}    | ${KillProcessRouteRequestSchema}
+    ${'SuspendProcessRouteRequestSchema'} | ${SuspendProcessRouteRequestSchema}
+  `('$name', ({ name, killOrSuspendSchema }) => {
     it('should not accept when no endpoint_ids', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({});
+        killOrSuspendSchema.body.validate({});
       }).toThrow();
     });
 
     it('should not accept empty endpoint_ids array', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: [],
         });
       }).toThrow();
@@ -524,7 +530,7 @@ describe('actions schemas', () => {
 
     it('should not accept empty string as endpoint id', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: [' '],
         });
       }).toThrow();
@@ -532,7 +538,7 @@ describe('actions schemas', () => {
 
     it('should not accept any empty string in endpoint_ids array', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: ['x', ' ', 'y'],
         });
       }).toThrow();
@@ -540,7 +546,7 @@ describe('actions schemas', () => {
 
     it('should accept pid', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
@@ -551,7 +557,7 @@ describe('actions schemas', () => {
 
     it('should accept entity_id', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             entity_id: 'abc123',
@@ -562,7 +568,7 @@ describe('actions schemas', () => {
 
     it('should reject pid and entity_id together', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
@@ -574,7 +580,7 @@ describe('actions schemas', () => {
 
     it('should reject if no pid or entity_id', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
           parameters: {},
@@ -584,11 +590,46 @@ describe('actions schemas', () => {
 
     it('should accept a comment', () => {
       expect(() => {
-        KillOrSuspendProcessRequestSchema.body.validate({
+        killOrSuspendSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
           parameters: {
             pid: 1234,
+          },
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('KillProcessRequestSchema for SentinelOne', () => {
+    it('should error if agentType is not sentinel_one and process_name parameter is used', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['abc'],
+          parameters: {
+            process_name: 'explorer.exe',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should error if agentType is sentinel_one but process_name is not defined', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['abc'],
+          agent_type: 'sentinel_one',
+          parameters: { pid: 4 },
+        });
+      }).toThrow();
+    });
+
+    it('should allow use of process_name if agentType is sentinel_one', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['abc'],
+          agent_type: 'sentinel_one',
+          parameters: {
+            process_name: 'explorer.exe',
           },
         });
       }).not.toThrow();

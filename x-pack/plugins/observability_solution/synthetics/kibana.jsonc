@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/synthetics-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": "@elastic/obs-ux-management-team",
   "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions.",
   "plugin": {
     "id": "synthetics",

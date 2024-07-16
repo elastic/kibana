@@ -62,7 +62,6 @@ const testProps = {
   selectedConversation: welcomeConvo,
   onClose,
   onSave,
-  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },

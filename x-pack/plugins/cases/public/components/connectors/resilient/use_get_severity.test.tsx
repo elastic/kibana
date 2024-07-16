@@ -19,7 +19,8 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-describe('useGetSeverity', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187456
+describe.skip('useGetSeverity', () => {
   const { http } = useKibanaMock().services;
   let appMockRender: AppMockRenderer;
 

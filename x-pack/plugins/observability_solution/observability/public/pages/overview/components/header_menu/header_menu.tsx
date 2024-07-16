@@ -6,6 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
@@ -14,7 +18,12 @@ import { useKibana } from '../../../../utils/kibana_react';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http, theme } = useKibana().services;
+  const { share, theme, http } = useKibana().services;
+
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const href = onboardingLocator?.useUrl({});
 
   const { appMountParameters } = usePluginContext();
 
@@ -26,13 +35,18 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks>
+            <EuiHeaderLink color="primary" href={href} iconType="indexOpen">
+              {i18n.translate('xpack.observability.home.addData', {
+                defaultMessage: 'Add data',
+              })}
+            </EuiHeaderLink>
             <EuiHeaderLink
               color="primary"
-              href={http.basePath.prepend('/app/integrations/browse')}
-              iconType="indexOpen"
+              href={http.basePath.prepend('/app/observability/annotations')}
+              iconType="brush"
             >
-              {i18n.translate('xpack.observability.home.addData', {
-                defaultMessage: 'Add integrations',
+              {i18n.translate('xpack.observability.home.annotations', {
+                defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
           </EuiHeaderLinks>

@@ -6,7 +6,6 @@
  */
 
 export * from './aggregated_prebuilt_rules_error';
-export * from './diff/diffable_rule/build_schema';
 export * from './diff/diffable_rule/diffable_field_types';
 export * from './diff/diffable_rule/diffable_rule';
 export * from './diff/rule_diff/fields_diff';

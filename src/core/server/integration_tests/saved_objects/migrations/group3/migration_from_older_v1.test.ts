@@ -170,8 +170,6 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
   beforeAll(async () => {
