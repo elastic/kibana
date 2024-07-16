@@ -22,7 +22,7 @@ export const NotesDetails = memo(() => {
   const dispatch = useDispatch();
   const { eventId } = useDocumentDetailsContext();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
-  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud !== false;
+  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
 
   useEffect(() => {
     dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));

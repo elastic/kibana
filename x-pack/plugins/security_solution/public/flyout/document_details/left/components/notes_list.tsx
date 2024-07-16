@@ -81,7 +81,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
-  const canDeleteNotes = kibanaSecuritySolutionsPrivileges.crud !== false;
+  const canDeleteNotes = kibanaSecuritySolutionsPrivileges.crud;
 
   const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineDisabled'
