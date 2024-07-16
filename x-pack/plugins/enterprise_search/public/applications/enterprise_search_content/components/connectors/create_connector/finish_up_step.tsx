@@ -81,7 +81,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
               <>
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
-                    <EuiText size="xs">Syncing</EuiText>
+                    <EuiText size="xs">Syncing data</EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText textAlign="right" size="xs">
@@ -119,12 +119,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           color="warning"
                           iconSide="left"
                           iconType="refresh"
+                          isLoading={syncing}
                           aria-label="First sync data"
                           onClick={() => {
                             setSyncing(true);
                           }}
                         >
-                          First sync data
+                          {syncing ? 'Syncing data' : 'First sync data'}
                         </EuiButton>
                       )
                     }
@@ -144,12 +145,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           color="warning"
                           iconSide="left"
                           iconType="refresh"
+                          isLoading={syncing}
                           aria-label="First sync data"
                           onClick={() => {
                             setSyncing(true);
                           }}
                         >
-                          First sync data
+                          {syncing ? 'Syncing data' : 'First sync data'}
                         </EuiButton>
                       )
                     }
