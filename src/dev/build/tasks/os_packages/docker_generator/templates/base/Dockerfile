@@ -156,6 +156,7 @@ RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
 RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
+ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
 
 {{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana

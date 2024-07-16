@@ -11,6 +11,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import type {
@@ -22,7 +23,6 @@ import {
   InfraCustomDashboardRT,
   InfraDeleteCustomDashboardsResponseBodyRT,
 } from '../../../../common/http_api/custom_dashboards_api';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 
 type ActionType = 'create' | 'update' | 'delete';
 const errorMessages: Record<ActionType, string> = {
