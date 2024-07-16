@@ -306,8 +306,6 @@ export class DataViewLazy extends AbstractDataView {
         aggregatable: true,
         searchable: true,
         count: config.popularity ?? 0,
-        customLabel: config.customLabel,
-        customDescription: config.customDescription,
         readFromDocValues: false,
         shortDotsEnable: this.shortDotsEnable,
       });

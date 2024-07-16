@@ -506,7 +506,7 @@ describe('IndexPattern', () => {
     });
   });
 
-  describe('should initialize with field attributes', () => {
+  describe('should initialize from spec with field attributes', () => {
     it('should read field attrs from fields', () => {
       const dataView = create('test', {
         fields: {
