@@ -24,7 +24,7 @@ import {
   UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
 import { MetricsExplorerView } from '../../common/metrics_explorer_views';
-import { useUrlState } from '../utils/use_url_state';
+import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 import { useKibanaContextForPlugin } from './use_kibana';
