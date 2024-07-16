@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('ui settings service', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       // Creating a test setting
       await supertestWithoutAuth
         .post(`/internal/kibana/settings/${TEST_SETTING}`)
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     // We don't test the public routes as they are not available in serverless
