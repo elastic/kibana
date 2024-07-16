@@ -35,6 +35,10 @@ export interface FleetConfigType {
       url: string;
     };
   };
+  spaceSettings?: Array<{
+    space_id: string;
+    allowed_namespace_prefixes: string[] | null;
+  }>;
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
