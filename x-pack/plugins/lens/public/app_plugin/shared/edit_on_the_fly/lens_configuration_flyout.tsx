@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -544,6 +545,11 @@ export function LensEditConfigurationFlyout({
                     setIsLayerAccordionOpen(!status);
                   }
                 }}
+                extraAction={
+                  <EuiNotificationBadge size="m" color="subdued">
+                    {dataGridAttrs.values.length}
+                  </EuiNotificationBadge>
+                }
               >
                 <>
                   <ESQLDataGrid
