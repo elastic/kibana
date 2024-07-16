@@ -20,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let objectRemover: ObjectRemover;
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/187818
-  describe.skip('Maintenance windows table', function () {
+  describe('Maintenance windows table', function () {
     before(async () => {
       objectRemover = await createObjectRemover({ getService });
     });
@@ -35,6 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should should cancel a running maintenance window', async () => {
+      await new Promise((res) => setTimeout(res, 20 * 1000));
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -42,6 +42,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenance-windows-table');
+      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -76,6 +80,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
 
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenance-windows-table');
+      });
+
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
       let list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
@@ -106,6 +114,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenance-windows-table');
+      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -139,6 +151,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenance-windows-table');
+      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -200,6 +216,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenance-windows-table');
+      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows('mw');
 
