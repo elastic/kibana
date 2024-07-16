@@ -81,7 +81,7 @@ export const TryInConsoleButton = ({
         defaultMessage: 'Try the snipped in the Console - opens in embedded console',
       });
     }
-    return i18n.translate('tryInConsole.button', {
+    return i18n.translate('tryInConsole.inNewTab.button', {
       defaultMessage: 'Try the below snippet in Console - opens in a new tab',
     });
   };
