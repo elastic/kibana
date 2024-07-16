@@ -164,7 +164,7 @@ export class AlertingAuthorization {
    * This method exposes the private '_getAuthorizedRuleTypesWithAuthorizedConsumers' to be
    * used by the RAC/Alerts client
    */
-  public async getAuthorizedRuleTypesWithAuthorizedConsumers(
+  public async getAllAuthorizedRuleTypesWithAuthorizedConsumers(
     featureIds: readonly string[],
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity
@@ -236,7 +236,7 @@ export class AlertingAuthorization {
     );
   }
 
-  public async getAuthorizedRuleTypes(
+  public async getAllAuthorizedRuleTypesFindOperation(
     authorizationEntity: AlertingAuthorizationEntity,
     featuresIds?: Set<string>
   ): Promise<AuthorizedRuleTypes> {
@@ -302,7 +302,7 @@ export class AlertingAuthorization {
     };
   }
 
-  public async filterByRuleTypeAuthorization(
+  public async getAuthorizedRuleTypesForAllConsumers(
     ruleTypeIds: Set<string>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity
@@ -312,6 +312,7 @@ export class AlertingAuthorization {
       operations,
       authorizationEntity
     );
+
     return authorizedRuleTypes;
   }
 

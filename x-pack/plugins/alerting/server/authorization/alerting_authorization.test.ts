@@ -692,66 +692,6 @@ describe('AlertingAuthorization', () => {
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
 
       features = featuresPluginMock.createStart();
-
-      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
-      alertingGet.mockImplementation(mockAuthorizationAction);
-
-      ruleTypeRegistry = ruleTypeRegistryMock.create();
-      ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
-      ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
-        ruleTypeIds.includes(ruleTypeId)
-      );
-
-      // @ts-expect-error: only the id is needed for the tests
-      ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
-    });
-
-    it('omits filter when there is no authorization api', async () => {
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-
-      const { filter, ensureRuleTypeIsAuthorized } =
-        await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'ruleId',
-            consumer: 'consumer',
-          },
-        });
-
-      expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
-      expect(filter).toEqual(undefined);
-    });
-
-    it('ensureRuleTypeIsAuthorized is no-op when there is no authorization api', async () => {
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-
-      const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationEntity.Rule,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'ruleId',
-            consumer: 'consumer',
-          },
-        }
-      );
-
-      expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
-    });
-
-    it('creates a filter based on the privileged types', async () => {
       features.getKibanaFeatures.mockReturnValue([
         mockFeatureWithConsumers('feature-id-1', [
           {
@@ -778,6 +718,20 @@ describe('AlertingAuthorization', () => {
         ]),
       ]);
 
+      const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
+      alertingGet.mockImplementation(mockAuthorizationAction);
+
+      ruleTypeRegistry = ruleTypeRegistryMock.create();
+      ruleTypeRegistry.getAllTypes.mockReturnValue(ruleTypeIds);
+      ruleTypeRegistry.has.mockImplementation((ruleTypeId: string) =>
+        ruleTypeIds.includes(ruleTypeId)
+      );
+
+      // @ts-expect-error: only the id is needed for the tests
+      ruleTypeRegistry.get.mockImplementation((ruleTypeId: string) => ({ id: ruleTypeId }));
+    });
+
+    it('creates a filter based on the privileged types', async () => {
       const auth = await AlertingAuthorization.create({
         request,
         ruleTypeRegistry,
@@ -860,293 +814,9 @@ describe('AlertingAuthorization', () => {
         `"((path.to.rule_type_id: rule-type-id-1 AND (consumer-field: alerts OR consumer-field: consumer-a OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-2 AND (consumer-field: alerts OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-3 AND (consumer-field: consumer-c OR consumer-field: alerts)))"`
       );
     });
-
-    it('throws if user has no privileges to any rule type', async () => {
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'rule', 'create'),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myType', 'myApp', 'rule', 'create'),
-              authorized: false,
-            },
-          ],
-        },
-      });
-
-      const auth = await AlertingAuthorization.create({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        features,
-        getSpace,
-        authorization: securityStart.authz,
-      });
-
-      await expect(
-        auth.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-          },
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to find rules for any rule types"`
-      );
-    });
-
-    it('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('myApp', [
-          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
-        ]),
-        mockFeatureWithConsumers('myOtherApp', [
-          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myOtherApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myOtherApp'] },
-        ]),
-      ]);
-
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'alert', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'alert',
-                'find'
-              ),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'alert', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'alert', 'find'),
-              authorized: false,
-            },
-          ],
-        },
-      });
-
-      const auth = await AlertingAuthorization.create({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        features,
-        getSpace,
-        authorization: securityStart.authz,
-      });
-
-      const { ensureRuleTypeIsAuthorized } = await auth.getFindAuthorizationFilter(
-        AlertingAuthorizationEntity.Alert,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'ruleId',
-            consumer: 'consumer',
-          },
-        }
-      );
-
-      expect(() => {
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'alert');
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"myOtherApp\\" to find \\"myAppAlertType\\" alert"`
-      );
-    });
-
-    it('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('myApp', [
-          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
-        ]),
-        mockFeatureWithConsumers('myOtherApp', [
-          { ruleTypeId: 'myOtherApp', consumers: ['myOtherApp'] },
-        ]),
-      ]);
-
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'rule', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'rule',
-                'find'
-              ),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'rule', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'rule', 'find'),
-              authorized: true,
-            },
-          ],
-        },
-      });
-
-      const auth = await AlertingAuthorization.create({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        features,
-        getSpace,
-        authorization: securityStart.authz,
-      });
-
-      const { ensureRuleTypeIsAuthorized } = await auth.getFindAuthorizationFilter(
-        AlertingAuthorizationEntity.Rule,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'ruleId',
-            consumer: 'consumer',
-          },
-        }
-      );
-
-      expect(() => {
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
-      }).not.toThrow();
-    });
-
-    it('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
-      features.getKibanaFeatures.mockReturnValue([
-        mockFeatureWithConsumers('myApp', [
-          { ruleTypeId: 'myOtherAppAlertType', consumers: ['myApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myApp'] },
-          { ruleTypeId: 'mySecondAppAlertType', consumers: ['myApp'] },
-        ]),
-        mockFeatureWithConsumers('myOtherApp', [
-          { ruleTypeId: 'mySecondAppAlertType', consumers: ['myOtherApp'] },
-          { ruleTypeId: 'myAppAlertType', consumers: ['myOtherApp'] },
-        ]),
-      ]);
-
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: false,
-        privileges: {
-          kibana: [
-            {
-              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'rule', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'myOtherAppAlertType',
-                'myOtherApp',
-                'rule',
-                'find'
-              ),
-              authorized: false,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'rule', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'rule', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction('mySecondAppAlertType', 'myApp', 'rule', 'find'),
-              authorized: true,
-            },
-            {
-              privilege: mockAuthorizationAction(
-                'mySecondAppAlertType',
-                'myOtherApp',
-                'rule',
-                'find'
-              ),
-              authorized: true,
-            },
-          ],
-        },
-      });
-
-      const auth = await AlertingAuthorization.create({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        features,
-        getSpace,
-        authorization: securityStart.authz,
-      });
-
-      const { ensureRuleTypeIsAuthorized } = await auth.getFindAuthorizationFilter(
-        AlertingAuthorizationEntity.Rule,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'ruleId',
-            consumer: 'consumer',
-          },
-        }
-      );
-
-      expect(() => {
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
-        ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
-      }).not.toThrow();
-    });
-
-    // This is a specific use case currently for alerts as data
-    // Space ids are stored in the alerts documents and even if security is disabled
-    // still need to consider the users space privileges
-    it('creates a spaceId only filter if security is disabled, but require space awareness', async () => {
-      const auth = await AlertingAuthorization.create({
-        request,
-        ruleTypeRegistry,
-        getSpaceId,
-        features,
-        getSpace,
-      });
-
-      const { filter } = await auth.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
-        type: AlertingAuthorizationFilterType.ESDSL,
-        fieldNames: {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
-          spaceIds: 'path.to.space.id',
-        },
-      });
-
-      expect(filter).toEqual({
-        bool: { minimum_should_match: 1, should: [{ match: { 'path.to.space.id': 'space1' } }] },
-      });
-    });
   });
 
-  describe.only('getAuthorizationFilter', () => {
+  describe('getAuthorizationFilter', () => {
     type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privileges'> & {
       privileges: Omit<CheckPrivilegesResponse['privileges'], 'elasticsearch'>;
     };
@@ -1235,6 +905,9 @@ describe('AlertingAuthorization', () => {
         expect(filter).toEqual(undefined);
       });
 
+      // This is a specific use case currently for alerts as data
+      // Space ids are stored in the alerts documents and even if security is disabled
+      // still need to consider the users space privileges
       it('gets the filter correctly with no security and spaceIds in the fields names', async () => {
         const auth = await AlertingAuthorization.create({
           request,
@@ -1251,13 +924,15 @@ describe('AlertingAuthorization', () => {
             fieldNames: {
               ruleTypeId: 'ruleId',
               consumer: 'consumer',
-              spaceIds: 'space-id',
+              spaceIds: 'path.to.space.id',
             },
           },
           ReadOperations.Get
         );
 
-        expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(`"space-id: space1"`);
+        expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
+          `"path.to.space.id: space1"`
+        );
       });
 
       it('gets the filter correctly with security disabled', async () => {
@@ -1392,6 +1067,10 @@ describe('AlertingAuthorization', () => {
                 privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
                 authorized: true,
               },
+              {
+                privilege: mockAuthorizationAction('rule-type-id-2', 'consumer-b', 'rule', 'get'),
+                authorized: true,
+              },
             ],
           },
         });
@@ -1420,6 +1099,10 @@ describe('AlertingAuthorization', () => {
 
         expect(() =>
           ensureRuleTypeIsAuthorized('rule-type-id-1', 'consumer-a', 'rule')
+        ).not.toThrow();
+
+        expect(() =>
+          ensureRuleTypeIsAuthorized('rule-type-id-2', 'consumer-b', 'rule')
         ).not.toThrow();
       });
 
@@ -1554,7 +1237,7 @@ describe('AlertingAuthorization', () => {
     });
   });
 
-  describe('filterByRuleTypeAuthorization', () => {
+  describe('getAuthorizedRuleTypesForAllConsumers', () => {
     const myOtherAppAlertType: RegistryRuleType = {
       actionGroups: [],
       actionVariables: undefined,
@@ -1617,7 +1300,7 @@ describe('AlertingAuthorization', () => {
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.filterByRuleTypeAuthorization(
+        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
           AlertingAuthorizationEntity.Rule
@@ -1749,7 +1432,7 @@ describe('AlertingAuthorization', () => {
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.filterByRuleTypeAuthorization(
+        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
           AlertingAuthorizationEntity.Rule
@@ -1848,7 +1531,7 @@ describe('AlertingAuthorization', () => {
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.filterByRuleTypeAuthorization(
+        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
           new Set([myAppAlertType]),
           [WriteOperations.Create],
           AlertingAuthorizationEntity.Alert
@@ -1952,7 +1635,7 @@ describe('AlertingAuthorization', () => {
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.filterByRuleTypeAuthorization(
+        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create, ReadOperations.Get],
           AlertingAuthorizationEntity.Alert
@@ -2068,7 +1751,7 @@ describe('AlertingAuthorization', () => {
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       await expect(
-        alertAuthorization.filterByRuleTypeAuthorization(
+        alertAuthorization.getAuthorizedRuleTypesForAllConsumers(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
           AlertingAuthorizationEntity.Alert
