@@ -25,6 +25,7 @@ import {
   testIndexEditableSettingsAll,
   testIndexEditableSettingsLimited,
   testIndexMappings,
+  testIndexMappingsWithSemanticText,
   testIndexMock,
   testIndexName,
   testIndexSettings,
@@ -121,6 +122,80 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.errorSection.noIndexNameMessageIsDisplayed()).toBe(true);
       // no extra http request was sent
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+    });
+  });
+
+  describe('Semantic text index errors', () => {
+    it('does not render an error callout by default', () => {
+      expect(testBed.actions.overview.indexErrorCalloutExists()).toBe(false);
+    });
+    it('renders an error callout when the mapping contains semantic text errors', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(
+        testIndexName,
+        testIndexMappingsWithSemanticText.mappings
+      );
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            docLinks: {
+              links: {
+                ml: '',
+                enterpriseSearch: '',
+              },
+            },
+            core: {
+              application: { capabilities: { ml: { canGetTrainedModels: true } } },
+            },
+            plugins: {
+              ml: {
+                mlApi: {
+                  trainedModels: {
+                    getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
+                    getTrainedModels: jest.fn().mockResolvedValue([
+                      {
+                        model_id: '.elser_model_2',
+                        model_type: 'pytorch',
+                        model_package: {
+                          packaged_model_id: '.elser_model_2',
+                          model_repository: 'https://ml-models.elastic.co',
+                          minimum_version: '11.0.0',
+                          size: 438123914,
+                          sha256: '',
+                          metadata: {},
+                          tags: [],
+                          vocabulary_file: 'elser_model_2.vocab.json',
+                        },
+                        description: 'Elastic Learned Sparse EncodeR v2',
+                        tags: ['elastic'],
+                      },
+                    ]),
+                    getTrainedModelStats: jest.fn().mockResolvedValue({
+                      count: 1,
+                      trained_model_stats: [
+                        {
+                          model_id: '.elser_model_2',
+
+                          deployment_stats: {
+                            deployment_id: '.elser_model_2',
+                            model_id: '.elser_model_2',
+                            threads_per_allocation: 1,
+                            number_of_allocations: 1,
+                            queue_capacity: 1024,
+                            state: 'started',
+                          },
+                        },
+                      ],
+                    }),
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      expect(testBed.actions.overview.indexErrorCalloutExists()).toBe(true);
     });
   });
 
