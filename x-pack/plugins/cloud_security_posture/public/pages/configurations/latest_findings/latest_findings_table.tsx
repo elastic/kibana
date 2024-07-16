@@ -11,6 +11,7 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -48,6 +49,12 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
     const finding = rows[rowIndex].raw._source;
 
     return <CspEvaluationBadge type={finding?.result?.evaluation} />;
+  },
+  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const finding = rows[rowIndex].raw._source;
+    const source = getDatasetDisplayName(finding.data_stream.dataset);
+
+    return source || finding.data_stream.dataset;
   },
   '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = rows[rowIndex].raw._source;
