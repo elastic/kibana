@@ -138,14 +138,4 @@ describe('Knowledge base settings', () => {
     );
     expect(queryByTestId('knowledgeBaseActionButton')).not.toBeInTheDocument();
   });
-
-  it('renders the alerts settings', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('alertsSwitch')).toBeInTheDocument();
-  });
 });
