@@ -142,21 +142,6 @@ export const getOptionsListControlFactory = ({
           dataControl.api.setDataLoading(isLoading);
         });
 
-      /** Fetch the allowExpensiveQuries setting to determine how suggestion fetching happens */
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
-      core.http
-        .get<{
-          allowExpensiveQueries: boolean;
-        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
-          version: '1',
-        })
-        .catch(() => {
-          return { allowExpensiveQueries: true }; // default to true on error
-        })
-        .then((result) => {
-          allowExpensiveQueries$.next(result.allowExpensiveQueries);
-        });
-
       /** Debounce the search string changes to reduce the number of fetch requests */
       const debouncedSearchString = stateManager.searchString.pipe(debounceTime(100));
 
@@ -192,6 +177,21 @@ export const getOptionsListControlFactory = ({
           sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
 
+      /** Fetch the allowExpensiveQuries setting to determine how suggestion fetching happens */
+      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
+      core.http
+        .get<{
+          allowExpensiveQueries: boolean;
+        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+          version: '1',
+        })
+        .catch(() => {
+          return { allowExpensiveQueries: true }; // default to true on error
+        })
+        .then((result) => {
+          allowExpensiveQueries$.next(result.allowExpensiveQueries);
+        });
+
       /** Fetch the suggestions and perform validation */
       const fetchSubscription = fetchAndValidate$({
         services: { http: core.http, uiSettings: core.uiSettings, data: dataService },
@@ -205,7 +205,7 @@ export const getOptionsListControlFactory = ({
         },
         stateManager,
       }).subscribe((result) => {
-        if (Object(result).hasOwnProperty('error')) {
+        if (Object.hasOwn(result, 'error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
           return;
         }
@@ -344,7 +344,7 @@ export const getOptionsListControlFactory = ({
         Component: ({ className: controlPanelClassName }) => {
           useEffect(() => {
             return () => {
-              /** On unmount, clean up all subscriptions */
+              // on unmount, clean up all subscriptions
               dataLoadingSubscription.unsubscribe();
               fetchSubscription.unsubscribe();
               fieldChangedSubscription.unsubscribe();

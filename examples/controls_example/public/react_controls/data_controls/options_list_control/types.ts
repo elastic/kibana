@@ -19,6 +19,7 @@ export interface OptionsListDisplaySettings {
   hideExists?: boolean;
   hideSort?: boolean;
 }
+
 export interface OptionsListControlState
   extends DefaultDataControlState,
     OptionsListDisplaySettings {
@@ -31,13 +32,6 @@ export interface OptionsListControlState
   exclude?: boolean;
 }
 
-export interface PublishesOptions {
-  availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
-  invalidSelections$: PublishingSubject<Set<string>>;
-  totalCardinality$: PublishingSubject<number>;
-  allowExpensiveQueries$: PublishingSubject<boolean>;
-}
-
 export type OptionsListControlApi = DataControlApi;
 
 export interface OptionsListComponentState
@@ -47,8 +41,15 @@ export interface OptionsListComponentState
   requestSize: number;
 }
 
+interface PublishesOptions {
+  availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
+  invalidSelections$: PublishingSubject<Set<string>>;
+  totalCardinality$: PublishingSubject<number>;
+}
+
 export type OptionsListComponentApi = OptionsListControlApi &
   PublishesOptions & {
     deselectOption: (key: string) => void;
     makeSelection: (key: string, showOnlySelected: boolean) => void;
+    allowExpensiveQueries$: PublishingSubject<boolean>;
   };
