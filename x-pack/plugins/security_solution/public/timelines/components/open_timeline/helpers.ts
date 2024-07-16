@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import type {
+import {
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
@@ -21,6 +21,7 @@ import type {
   DataProviderResult,
   PinnedEvent,
   Note,
+  RowRendererId,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
@@ -256,6 +257,7 @@ export const defaultTimelineToTimelineModel = (
           }
         : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
+    excludedRowRendererIds: isTemplate ? [] : Object.keys(RowRendererId),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
@@ -358,9 +360,10 @@ export const useQueryTimelineById = () => {
           show: openTimeline,
           initialized: true,
           savedSearchId: savedSearchId ?? null,
-          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineType.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         },
       });
       resetDiscoverAppState();
