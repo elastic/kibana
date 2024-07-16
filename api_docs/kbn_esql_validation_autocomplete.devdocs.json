@@ -1151,7 +1151,15 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => { getFieldsByType: (expectedType?: string | string[], ignored?: string[]) => Promise<string[]>; getFieldsMap: () => Promise<Map<string, ",
+          " | undefined) => { getFieldsByType: (expectedType?: string | string[], ignored?: string[]) => Promise<",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.ESQLRealField",
+            "text": "ESQLRealField"
+          },
+          "[]>; getFieldsMap: () => Promise<Map<string, ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -2024,16 +2032,16 @@
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
             "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-            "section": "def-common.ESQLVariable",
-            "text": "ESQLVariable"
+            "section": "def-common.ESQLRealField",
+            "text": "ESQLRealField"
           },
           " | ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
             "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-            "section": "def-common.ESQLRealField",
-            "text": "ESQLRealField"
+            "section": "def-common.ESQLVariable",
+            "text": "ESQLVariable"
           },
           " | undefined"
         ],
@@ -3006,7 +3014,15 @@
             "label": "getFieldsFor",
             "description": [],
             "signature": [
-              "CallbackFn<{ query: string; }, { name: string; type: string; }> | undefined"
+              "CallbackFn<{ query: string; }, ",
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLRealField",
+                "text": "ESQLRealField"
+              },
+              "> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
@@ -3122,6 +3138,20 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLRealField.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ description?: string | undefined; type?: string | undefined; } | undefined"
+            ],
             "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false

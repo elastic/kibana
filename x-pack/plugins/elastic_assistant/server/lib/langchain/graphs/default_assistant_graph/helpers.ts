@@ -82,6 +82,7 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
+
   if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
     const stream = await assistantGraph.streamEvents(
       inputs,
@@ -107,65 +108,106 @@ export const streamGraph = async ({
         handleStreamEnd(data.output.content);
       }
     }
-  } else {
-    let finalMessage = '';
-    const stream = assistantGraph.streamEvents(inputs, {
-      callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      streamMode: 'values',
-      tags: traceOptions?.tags ?? [],
-      version: 'v1',
-    });
+    return responseWithHeaders;
+  }
+  const stream = assistantGraph.streamEvents(inputs, {
+    callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+    runName: DEFAULT_ASSISTANT_GRAPH_ID,
+    streamMode: 'values',
+    tags: traceOptions?.tags ?? [],
+    version: 'v1',
+  });
+  let finalMessage = '';
 
-    const processEvent = async () => {
-      try {
-        const { value, done } = await stream.next();
-        if (done) return;
-        const event = value;
-        // only process events that are part of the agent run
-        if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+  let currentOutput = '';
+  let finalOutputIndex = -1;
+  const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+  let streamingFinished = false;
+  const finalOutputStopRegex = /(?<!\\)"/;
+  let extraOutput = '';
+  const processEvent = async () => {
+    try {
+      const { value, done } = await stream.next();
+      if (done) return;
+
+      const event = value;
+      // only process events that are part of the agent run
+      if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+        if (event.name === 'ActionsClientChatOpenAI') {
           if (event.event === 'on_llm_stream') {
             const chunk = event.data?.chunk;
-            if (event.name === 'ActionsClientChatOpenAI') {
-              const msg = chunk.message;
-              if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
-                /* empty */
-              } else if (!didEnd) {
-                if (msg.response_metadata.finish_reason === 'stop') {
-                  handleStreamEnd(finalMessage);
-                } else {
-                  push({ payload: msg.content, type: 'content' });
-                  finalMessage += msg.content;
-                }
-              }
+            const msg = chunk.message;
+            if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+              // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
+              // however, no harm to keep it in
+              /* empty */
+            } else if (!didEnd) {
+              push({ payload: msg.content, type: 'content' });
+              finalMessage += msg.content;
             }
-          } else if (event.event === 'on_llm_end') {
-            if (event.name === 'ActionsClientChatOpenAI') {
-              const generations = event.data.output?.generations[0];
-              if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-                handleStreamEnd(finalMessage);
-              }
+          } else if (event.event === 'on_llm_end' && !didEnd) {
+            const generations = event.data.output?.generations[0];
+            if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
+              handleStreamEnd(generations[0]?.text ?? finalMessage);
             }
           }
         }
-        void processEvent();
-      } catch (err) {
-        // if I throw an error here, it crashes the server. Not sure how to get around that.
-        // If I put await on this function the error works properly, but when there is not an error
-        // it waits for the entire stream to complete before resolving
-        const error = transformError(err);
-        if (error.message === 'AbortError') {
-          // user aborted the stream, we must end it manually here
-          return handleStreamEnd(finalMessage);
+        if (event.name === 'ActionsClientSimpleChatModel') {
+          if (event.event === 'on_llm_stream') {
+            const chunk = event.data?.chunk;
+
+            const msg = chunk.content;
+            if (finalOutputIndex === -1) {
+              currentOutput += msg;
+              // Remove whitespace to simplify parsing
+              const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
+              if (noWhitespaceOutput.includes(finalOutputStartToken)) {
+                const nonStrippedToken = '"action_input": "';
+                finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+                const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
+                extraOutput = currentOutput.substring(contentStartIndex);
+                push({ payload: extraOutput, type: 'content' });
+                finalMessage += extraOutput;
+              }
+            } else if (!streamingFinished && !didEnd) {
+              const finalOutputEndIndex = msg.search(finalOutputStopRegex);
+              if (finalOutputEndIndex !== -1) {
+                extraOutput = msg.substring(0, finalOutputEndIndex);
+                streamingFinished = true;
+                if (extraOutput.length > 0) {
+                  push({ payload: extraOutput, type: 'content' });
+                  finalMessage += extraOutput;
+                }
+              } else {
+                push({ payload: chunk.content, type: 'content' });
+                finalMessage += chunk.content;
+              }
+            }
+          } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
+            handleStreamEnd(finalMessage);
+          }
         }
-        logger.error(`Error streaming from LangChain: ${error.message}`);
-        push({ payload: error.message, type: 'content' });
-        handleStreamEnd(error.message, true);
       }
-    };
-    // Start processing events, do not await! Return `responseWithHeaders` immediately
-    await processEvent();
-  }
+
+      void processEvent();
+    } catch (err) {
+      // if I throw an error here, it crashes the server. Not sure how to get around that.
+      // If I put await on this function the error works properly, but when there is not an error
+      // it waits for the entire stream to complete before resolving
+      const error = transformError(err);
+
+      if (error.message === 'AbortError') {
+        // user aborted the stream, we must end it manually here
+        return handleStreamEnd(finalMessage);
+      }
+      logger.error(`Error streaming from LangChain: ${error.message}`);
+      push({ payload: error.message, type: 'content' });
+      handleStreamEnd(error.message, true);
+    }
+  };
+
+  // Start processing events, do not await! Return `responseWithHeaders` immediately
+  void processEvent();
 
   return responseWithHeaders;
 };
