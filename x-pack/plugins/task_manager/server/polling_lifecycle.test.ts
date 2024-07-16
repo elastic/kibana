@@ -89,6 +89,7 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
+    startingCapacity: 20,
     capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
@@ -144,19 +145,19 @@ describe('TaskPollingLifecycle', () => {
         .calls[0][0].getAvailableCapacity;
 
       capacity$.next(40);
-      expect(taskClaimingGetCapacity()).toEqual(20);
+      expect(taskClaimingGetCapacity()).toEqual(40);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
 
       capacity$.next(60);
-      expect(taskClaimingGetCapacity()).toEqual(30);
+      expect(taskClaimingGetCapacity()).toEqual(60);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
 
       capacity$.next(4);
-      expect(taskClaimingGetCapacity()).toEqual(2);
+      expect(taskClaimingGetCapacity()).toEqual(4);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(2);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(4);
     });
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
@@ -174,19 +175,19 @@ describe('TaskPollingLifecycle', () => {
         .calls[0][0].getAvailableCapacity;
 
       capacity$.next(40);
-      expect(taskClaimingGetCapacity()).toEqual(40);
+      expect(taskClaimingGetCapacity()).toEqual(80);
       expect(taskClaimingGetCapacity('report')).toEqual(10);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
 
       capacity$.next(60);
-      expect(taskClaimingGetCapacity()).toEqual(60);
+      expect(taskClaimingGetCapacity()).toEqual(120);
       expect(taskClaimingGetCapacity('report')).toEqual(10);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
 
       capacity$.next(4);
-      expect(taskClaimingGetCapacity()).toEqual(4);
-      expect(taskClaimingGetCapacity('report')).toEqual(4);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(4);
+      expect(taskClaimingGetCapacity()).toEqual(8);
+      expect(taskClaimingGetCapacity('report')).toEqual(8);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(8);
     });
   });
 

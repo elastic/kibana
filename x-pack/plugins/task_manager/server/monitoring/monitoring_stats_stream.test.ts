@@ -39,6 +39,7 @@ describe('createMonitoringStatsStream', () => {
             stats: {
               configuration: {
                 value: {
+                  capacity: 10,
                   poll_interval: 6000000,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
@@ -71,6 +72,7 @@ describe('createMonitoringStatsStream', () => {
               configuration: {
                 timestamp: expect.any(String),
                 value: {
+                  capacity: 10,
                   poll_interval: 6000000,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
@@ -103,6 +105,7 @@ describe('createMonitoringStatsStream', () => {
               configuration: {
                 timestamp: expect.any(String),
                 value: {
+                  capacity: 10,
                   poll_interval: 6000000,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
