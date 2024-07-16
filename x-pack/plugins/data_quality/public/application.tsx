@@ -16,6 +16,7 @@ import { KbnUrlStateStorageFromRouterProvider } from './utils/kbn_url_state_cont
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { AppPluginStartDependencies, DataQualityPluginStart } from './types';
 import { DatasetQualityRoute } from './routes';
+import { ApplyChangeRoute } from './routes/apply_change';
 
 export const renderApp = (
   core: CoreStart,
@@ -56,6 +57,7 @@ const App = ({ core, plugins, pluginStart, params }: AppProps) => {
             <PerformanceContextProvider>
               <Routes>
                 <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
+                <Route path="/apply-change" exact={true} render={() => <ApplyChangeRoute />} />
               </Routes>
             </PerformanceContextProvider>
           </Router>
