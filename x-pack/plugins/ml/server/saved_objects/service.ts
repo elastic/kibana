@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import RE2 from 're2';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -281,7 +280,7 @@ export function jobSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return jobIds.includes(id);
       }
-      const regex = new RE2(id.replace('*', '.*'));
+      const regex = new RegExp(id.replace('*', '.*'));
       return jobIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }

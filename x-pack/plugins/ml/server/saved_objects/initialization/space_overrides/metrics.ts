@@ -6,7 +6,6 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import RE2 from 're2';
 import { mlLog } from '../../../lib/log';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -50,7 +49,7 @@ export async function metricsJobsSpaces({
 }
 
 function findMetricsJobSpaceFactory() {
-  const reg = new RE2(`${MODULE_PREFIX}-(.+)-(${SOURCES.join('|')})-(${JOB_IDS.join('|')})`);
+  const reg = new RegExp(`${MODULE_PREFIX}-(.+)-(${SOURCES.join('|')})-(${JOB_IDS.join('|')})`);
 
   return (jobId: string) => {
     const result = reg.exec(jobId);
