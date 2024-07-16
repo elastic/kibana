@@ -11,7 +11,7 @@ import { useSelector } from '@xstate/react';
 import { getDateISORange } from '@kbn/timerange';
 import { AggregateQuery, Query } from '@kbn/es-query';
 
-import { MASKED_FIELD_PLACEHOLDER } from '../../common/constants';
+import { MASKED_FIELD_PLACEHOLDER, UNKOWN_FIELD_PLACEHOLDER } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats';
 import { DataStreamDetails } from '../../common/api_types';
 import { mapPercentageToQuality } from '../../common/utils';
@@ -365,7 +365,7 @@ function getDatasetDetailsEbtProps(
     integration: flyoutDataset.integration?.name,
     breakdown_field: breakdownField
       ? isBreakdownFieldEcs === null
-        ? undefined
+        ? UNKOWN_FIELD_PLACEHOLDER
         : getMaskedBreakdownField(breakdownField, isBreakdownFieldEcs)
       : breakdownField,
   };

@@ -40,3 +40,4 @@ export const MAX_HOSTS_METRIC_VALUE = 50;
 export const MAX_DEGRADED_FIELDS = 1000;
 
 export const MASKED_FIELD_PLACEHOLDER = '<custom field>';
+export const UNKOWN_FIELD_PLACEHOLDER = '<unkwon>';
