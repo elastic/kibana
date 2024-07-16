@@ -237,8 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
             await cleanup();
           });
 
-          // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/188109
-          it.skip(`Checking error messages`, async () => {
+          it(`Checking error messages`, async () => {
             for (const { query, error } of queryToErrors) {
               const jsonBody = await sendESQLQuery(query);
 

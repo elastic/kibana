@@ -23,6 +23,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationPopover,
@@ -56,6 +57,7 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
+import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 
 import './overwrite.scss';
 
@@ -123,6 +125,7 @@ interface TextBasedEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -167,8 +170,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    docLinks,
+    core,
+    fieldsMetadata,
+  } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState<string | null>(null);
@@ -430,7 +440,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            const columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
           }
@@ -458,6 +469,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     expressions,
     abortController,
     indexManagementApiService,
+    fieldsMetadata,
   ]);
 
   const parseMessages = useCallback(async () => {

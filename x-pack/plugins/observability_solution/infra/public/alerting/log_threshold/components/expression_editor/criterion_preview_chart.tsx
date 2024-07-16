@@ -23,6 +23,7 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { ExecutionTimeRange } from '../../../../types';
 import {
@@ -49,7 +50,6 @@ import {
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
 } from '../../../../../common/http_api';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 const GROUP_LIMIT = 5;

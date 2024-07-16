@@ -145,6 +145,10 @@ export interface ApmPluginStartDeps {
   entityManager: EntityManagerPublicPluginSetup;
 }
 
+const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
+  defaultMessage: 'Applications',
+});
+
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
@@ -205,7 +209,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
             return [
               // APM navigation
               {
-                label: 'APM',
+                label: applicationsTitle,
                 sortKey: 400,
                 entries: [
                   {

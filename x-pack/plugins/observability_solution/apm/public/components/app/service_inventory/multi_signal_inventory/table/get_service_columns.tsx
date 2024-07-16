@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
@@ -22,6 +24,10 @@ import {
   getTimeSeriesColor,
   ChartType,
 } from '../../../../shared/charts/helper/get_timeseries_color';
+import {
+  getMetricsFormula,
+  ChartMetricType,
+} from '../../../../shared/charts/helper/get_metrics_formulas';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
@@ -31,6 +37,7 @@ import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { ColumnHeader } from './column_header';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -167,9 +174,36 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogRatePerMinute,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
-        defaultMessage: 'Log rate (per min.)',
-      }),
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
+            defaultMessage: 'Log rate (per min.)',
+          })}
+          formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="Rate of logs per minute observed for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
@@ -189,9 +223,36 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogErrorRate,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-        defaultMessage: 'Log error rate',
-      }),
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
+            defaultMessage: 'Log error rate',
+          })}
+          formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="% of logs where error detected for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,

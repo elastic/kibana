@@ -71,6 +71,7 @@ import {
   buildSettingDefinitions,
   buildValueDefinitions,
   getDateLiterals,
+  buildFieldsDefinitionsWithMetadata,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -293,7 +294,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildFieldsDefinitionsWithMetadata(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };

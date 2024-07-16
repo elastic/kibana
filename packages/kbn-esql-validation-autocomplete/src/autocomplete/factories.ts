@@ -22,6 +22,7 @@ import {
 import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import type { ESQLRealField } from '../validation/types';
 
 const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
@@ -127,8 +128,34 @@ export function getSuggestionCommandDefinition(
   };
 }
 
-export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] =>
-  fields.map((label) => ({
+export const buildFieldsDefinitionsWithMetadata = (
+  fields: ESQLRealField[]
+): SuggestionRawDefinition[] => {
+  return fields.map((field) => {
+    const description = field.metadata?.description;
+
+    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    return {
+      label: field.name,
+      text: getSafeInsertText(field.name),
+      kind: 'Variable',
+      detail: titleCaseType,
+      documentation: description
+        ? {
+            value: `
+---
+
+${description}`,
+          }
+        : undefined,
+      // If there is a description, it is a field from ECS, so it should be sorted to the top
+      sortText: description ? '1D' : 'D',
+    };
+  });
+};
+
+export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] => {
+  return fields.map((label) => ({
     label,
     text: getSafeInsertText(label),
     kind: 'Variable',
@@ -137,7 +164,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
     }),
     sortText: 'D',
   }));
-
+};
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
   variables.map((label) => ({
     label,
