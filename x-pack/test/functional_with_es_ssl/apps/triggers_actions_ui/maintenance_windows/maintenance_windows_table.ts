@@ -33,8 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    it('should should cancel a running maintenance window', async () => {
-      await new Promise((res) => setTimeout(res, 20 * 1000));
+    it('should cancel a running maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -69,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.not.eql('Running');
     });
 
-    it('should should archive finished maintenance window', async () => {
+    it('should archive finished maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -106,7 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.eql('Archived');
     });
 
-    it('should should cancel and archive a running maintenance window', async () => {
+    it('should cancel and archive a running maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -141,7 +140,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.eql('Archived');
     });
 
-    it('should should unarchive a maintenance window', async () => {
+    it('should unarchive a maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
