@@ -77,7 +77,7 @@ export default function (providerContext: FtrProviderContext) {
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
               'confirmCloudFormationModalConfirmButton',
-              1
+              2
             )
           ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);
