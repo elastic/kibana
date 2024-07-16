@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { LegendValue } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import {
   BucketColumns,
@@ -381,6 +382,6 @@ export const createMockWaffleParams = (): PartitionVisParams => {
         },
       ],
     },
-    showValuesInLegend: true,
+    legendStats: [LegendValue.Value],
   };
 };

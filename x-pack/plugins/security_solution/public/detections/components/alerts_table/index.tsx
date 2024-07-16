@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert, Alerts } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -22,22 +22,24 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
   useSessionView,
   useSessionViewNavigation,
-} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getColumns } from '../../configurations/security_solution_detections';
@@ -255,11 +257,28 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
   );
 
+  const cellContext = useMemo(() => {
+    return {
+      rowRenderers: defaultRowRenderers,
+      isDetails: false,
+      truncate: true,
+      isDraggable: false,
+    };
+  }, []);
+
+  const onLoaded = useCallback(
+    (alerts: Alerts) => {
+      const alertIds = alerts.map((alert: Alert) => alert._id);
+      dispatch(fetchNotesByDocumentIds({ documentIds: alertIds }));
+    },
+    [dispatch]
+  );
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
-      // stores saperate configuration based on the view of the table
+      // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       featureIds: ['siem'],
       query: finalBoolQuery,
@@ -269,6 +288,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       columns: finalColumns,
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
+      cellContext,
+      onLoaded,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -288,6 +309,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onAlertTableUpdate,
       runtimeMappings,
       isEventRenderedView,
+      cellContext,
+      onLoaded,
     ]
   );
 

@@ -10,11 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export function TimeoutPrompt({
-  isGlobalServiceMap,
-}: {
-  isGlobalServiceMap: boolean;
-}) {
+export function TimeoutPrompt({ isGlobalServiceMap }: { isGlobalServiceMap: boolean }) {
   return (
     <EuiEmptyPrompt
       iconType="warning"
@@ -29,7 +25,7 @@ export function TimeoutPrompt({
       body={
         <p>
           {i18n.translate('xpack.apm.serviceMap.timeoutPromptDescription', {
-            defaultMessage: `Timed out while fetching data for service map. Limit the scope by selecting a smaller time range, or use configuration setting '{configName}' with a reduced value.`,
+            defaultMessage: `Timed out while fetching data for service map. Limit the scope by selecting a smaller time range, or use configuration setting ''{configName}'' with a reduced value.`,
             values: {
               configName: isGlobalServiceMap
                 ? 'xpack.apm.serviceMapFingerprintGlobalBucketSize'

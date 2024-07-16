@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const ENABLE_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:enable';
-
-export const OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:optInStatus';
-
-export const DEFAULT_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:default';
+export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';

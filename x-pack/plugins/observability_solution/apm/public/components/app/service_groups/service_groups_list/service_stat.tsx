@@ -13,18 +13,10 @@ interface Props {
   grow?: boolean;
 }
 
-export function ServiceStat({
-  loading,
-  grow = true,
-  children,
-}: PropsWithChildren<Props>) {
+export function ServiceStat({ loading, grow = true, children }: PropsWithChildren<Props>) {
   return (
     <EuiFlexItem grow={grow}>
-      {loading ? (
-        <EuiSkeletonText lines={1} style={{ marginTop: '4px' }} />
-      ) : (
-        <>{children}</>
-      )}
+      {loading ? <EuiSkeletonText lines={1} style={{ marginTop: '4px' }} /> : <>{children}</>}
     </EuiFlexItem>
   );
 }

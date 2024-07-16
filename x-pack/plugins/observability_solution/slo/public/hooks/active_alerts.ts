@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-type SLO = Pick<SLOResponse, 'id' | 'instanceId'>;
+type SLO = Pick<SLOWithSummaryResponse, 'id' | 'instanceId'>;
 export class ActiveAlerts {
   private data: Map<string, number> = new Map();
 

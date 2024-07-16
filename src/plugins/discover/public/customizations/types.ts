@@ -6,32 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { AppDeepLink } from '@kbn/core/public';
-import type { DiscoverStateContainer } from '../application/main/services/discover_state';
+import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { DiscoverCustomizationService } from './customization_service';
-
-export type DiscoverProfileId = string;
-
-export interface DiscoverProfile {
-  id: DiscoverProfileId;
-  customizationCallbacks: CustomizationCallback[];
-  deepLinks?: AppDeepLink[];
-}
 
 export interface CustomizationCallbackContext {
   customizations: DiscoverCustomizationService;
   stateContainer: DiscoverStateContainer;
 }
-
-export interface DiscoverProfileOptions {
-  customize: CustomizationCallback;
-  deepLinks?: AppDeepLink[];
-}
-
-export type RegisterCustomizationProfile = (
-  id: DiscoverProfileId,
-  options: DiscoverProfileOptions
-) => void;
 
 export type CustomizationCallback = (
   options: CustomizationCallbackContext
@@ -40,6 +21,10 @@ export type CustomizationCallback = (
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
 
 export interface DiscoverCustomizationContext {
+  /**
+   * The current solution nav ID
+   */
+  solutionNavId: string | null;
   /*
    * Display mode in which discover is running
    */

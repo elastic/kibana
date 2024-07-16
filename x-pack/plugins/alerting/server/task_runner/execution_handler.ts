@@ -57,6 +57,7 @@ import {
 } from './rule_action_helper';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { ConnectorAdapter } from '../connector_adapters/types';
+import { withAlertingSpan } from './lib';
 
 enum Reasons {
   MUTED = 'muted',
@@ -88,6 +89,7 @@ interface RunSystemActionArgs<Params extends RuleTypeParams> {
   connectorAdapter: ConnectorAdapter;
   summarizedAlerts: CombinedSummarizedAlerts;
   rule: SanitizedRule<Params>;
+  ruleProducer: string;
   spaceId: string;
   bulkActions: EnqueueExecutionOptions[];
 }
@@ -318,6 +320,7 @@ export class ExecutionHandler<
           connectorAdapter,
           summarizedAlerts,
           rule: this.rule,
+          ruleProducer: this.ruleType.producer,
           spaceId,
           bulkActions,
         });
@@ -351,7 +354,9 @@ export class ExecutionHandler<
       for (const c of chunk(bulkActions, CHUNK_SIZE)) {
         let enqueueResponse;
         try {
-          enqueueResponse = await this.actionsClient!.bulkEnqueueExecution(c);
+          enqueueResponse = await withAlertingSpan('alerting:bulk-enqueue-actions', () =>
+            this.actionsClient!.bulkEnqueueExecution(c)
+          );
         } catch (e) {
           if (e.statusCode === 404) {
             throw createTaskRunError(e, TaskErrorSource.USER);
@@ -453,13 +458,20 @@ export class ExecutionHandler<
     connectorAdapter,
     summarizedAlerts,
     rule,
+    ruleProducer,
     bulkActions,
   }: RunSystemActionArgs<Params>): Promise<LogAction> {
     const ruleUrl = this.buildRuleUrl(spaceId);
 
     const connectorAdapterActionParams = connectorAdapter.buildActionParams({
       alerts: summarizedAlerts,
-      rule: { id: rule.id, tags: rule.tags, name: rule.name },
+      rule: {
+        id: rule.id,
+        tags: rule.tags,
+        name: rule.name,
+        consumer: rule.consumer,
+        producer: ruleProducer,
+      },
       ruleUrl: ruleUrl?.absoluteUrl,
       spaceId,
       params: action.params,
@@ -895,7 +907,9 @@ export class ExecutionHandler<
 
     let alerts;
     try {
-      alerts = await this.alertsClient.getSummarizedAlerts!(options);
+      alerts = await withAlertingSpan(`alerting:get-summarized-alerts-${action.uuid}`, () =>
+        this.alertsClient.getSummarizedAlerts!(options)
+      );
     } catch (e) {
       throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
     }

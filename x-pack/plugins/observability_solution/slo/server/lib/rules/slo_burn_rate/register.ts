@@ -24,6 +24,7 @@ import {
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
+  SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 
 import { getRuleExecutor } from './executor';
@@ -43,6 +44,11 @@ const windowSchema = schema.object({
   actionGroup: schema.string(),
 });
 
+const dependency = schema.object({
+  ruleId: schema.string(),
+  actionGroupsToSuppressOn: schema.arrayOf(schema.string()),
+});
+
 export function sloBurnRateRuleType(
   basePath: IBasePath,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
@@ -50,6 +56,7 @@ export function sloBurnRateRuleType(
   const paramsSchema = schema.object({
     sloId: schema.string(),
     windows: schema.arrayOf(windowSchema),
+    dependencies: schema.maybe(schema.arrayOf(dependency)),
   });
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
@@ -67,7 +74,13 @@ export function sloBurnRateRuleType(
       },
     },
     defaultActionGroupId: ALERT_ACTION.id,
-    actionGroups: [ALERT_ACTION, HIGH_PRIORITY_ACTION, MEDIUM_PRIORITY_ACTION, LOW_PRIORITY_ACTION],
+    actionGroups: [
+      ALERT_ACTION,
+      HIGH_PRIORITY_ACTION,
+      MEDIUM_PRIORITY_ACTION,
+      LOW_PRIORITY_ACTION,
+      SUPPRESSED_PRIORITY_ACTION,
+    ],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
@@ -86,6 +99,17 @@ export function sloBurnRateRuleType(
         { name: 'sloId', description: sloIdActionVariableDescription },
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
+        { name: 'suppressedAction', description: suppressedActionVariableDescription },
+        { name: 'sliValue', description: sliValueActionVariableDescription },
+        { name: 'sloStatus', description: sloStatusActionVariableDescription },
+        {
+          name: 'sloErrorBudgetRemaining',
+          description: sloErrorBudgetRemainingActionVariableDescription,
+        },
+        {
+          name: 'sloErrorBudgetConsumed',
+          description: sloErrorBudgetConsumedActionVariableDescription,
+        },
       ],
     },
     alerts: {
@@ -157,5 +181,40 @@ export const sloInstanceIdActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloInstanceIdDescription',
   {
     defaultMessage: 'The SLO instance id.',
+  }
+);
+
+export const suppressedActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.suppressedActionDescription',
+  {
+    defaultMessage: 'The suppressed action group.',
+  }
+);
+
+export const sliValueActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sliValueDescription',
+  {
+    defaultMessage: 'The SLI value at the time of firing the alert.',
+  }
+);
+
+export const sloStatusActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloStatusDescription',
+  {
+    defaultMessage: 'The SLO status at the time of firing the alert.',
+  }
+);
+
+export const sloErrorBudgetRemainingActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloErrorBudgetRemainingDescription',
+  {
+    defaultMessage: 'The remaining error budget at the time of firing the alert.',
+  }
+);
+
+export const sloErrorBudgetConsumedActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloErrorBudgetConsumedDescription',
+  {
+    defaultMessage: 'The consumed error budget at the time of firing the alert.',
   }
 );

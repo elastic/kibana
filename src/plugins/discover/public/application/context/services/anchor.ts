@@ -88,7 +88,7 @@ export function updateSearchSource(
     .setField('trackTotalHits', false);
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
   }
   return searchSource;
 }

@@ -12,8 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
-import type { ISearchOptions } from '@kbn/data-plugin/common';
-import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import type { ISearchOptions } from '@kbn/search-types';
+import { getSafeAggregationName } from '@kbn/ml-query-utils';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -87,7 +88,6 @@ export function useFieldStatsSearchStrategy(
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
-
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     setFetchState({
@@ -147,7 +147,7 @@ export function useFieldStatsSearchStrategy(
       return;
     }
 
-    const filterCriteria = buildBaseFilterCriteria(
+    const filterCriteria = buildFilterCriteria(
       searchStrategyParams.timeFieldName,
       searchStrategyParams.earliest,
       searchStrategyParams.latest,
@@ -275,7 +275,12 @@ export function useFieldStatsSearchStrategy(
 
         if (Array.isArray(fieldBatches)) {
           fieldBatches.forEach((f) => {
-            if (Array.isArray(f) && f.length === 1) {
+            if (
+              Array.isArray(f) &&
+              f.length === 1 &&
+              Array.isArray(f[0].fields) &&
+              f[0].fields.length > 0
+            ) {
               statsMap.set(f[0].fields[0], f[0]);
             }
           });
@@ -317,8 +322,11 @@ export function useFieldStatsSearchStrategy(
   // auto-update
   useEffect(() => {
     startFetch();
+  }, [startFetch]);
+
+  useEffect(() => {
     return cancelFetch;
-  }, [startFetch, cancelFetch]);
+  }, [cancelFetch]);
 
   return {
     progress: fetchState,

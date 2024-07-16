@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, type PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -37,9 +37,9 @@ import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
+import type { ChangePointEmbeddableRuntimeState } from '../../embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
-import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -470,7 +470,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
     ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const embeddableInput: Partial<EmbeddableChangePointChartInput> = {
+      const embeddableInput: Partial<ChangePointEmbeddableRuntimeState> = {
         title: newTitle,
         description: newDescription,
         viewType: dashboardAttachment.viewType,
@@ -567,7 +567,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     )}
                     iconType="boxesHorizontal"
                     color="text"
-                    onClick={setIsActionMenuOpen.bind(null, true)}
+                    onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
                   />
                 }
                 isOpen={isActionMenuOpen}
@@ -631,7 +631,11 @@ interface FieldsControlsProps {
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
+export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
+  fieldConfig,
+  onChange,
+  children,
+}) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();

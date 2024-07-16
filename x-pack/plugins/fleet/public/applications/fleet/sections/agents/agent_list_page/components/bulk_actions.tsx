@@ -68,7 +68,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [updateModalState, setUpgradeModalState] = useState({
+  const [upgradeModalState, setUpgradeModalState] = useState({
     isOpen: false,
     isScheduled: false,
     isUpdating: false,
@@ -130,23 +130,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     {
       name: (
         <FormattedMessage
-          id="xpack.fleet.agentBulkActions.unenrollAgents"
-          data-test-subj="agentBulkActionsUnenroll"
-          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="trash" size="m" />,
-      onClick: () => {
-        closeMenu();
-        setIsUnenrollModalOpen(true);
-      },
-    },
-    {
-      name: (
-        <FormattedMessage
           id="xpack.fleet.agentBulkActions.upgradeAgents"
           data-test-subj="agentBulkActionsUpgrade"
           defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
@@ -179,45 +162,62 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
       },
     },
-  ];
-
-  menuItems.push({
-    name: (
-      <FormattedMessage
-        id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
-        data-test-subj="agentBulkActionsRestartUpgrade"
-        defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
-        values={{
-          agentCount,
-        }}
-      />
-    ),
-    icon: <EuiIcon type="refresh" size="m" />,
-    onClick: () => {
-      closeMenu();
-      setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
-    },
-  });
-
-  if (diagnosticFileUploadEnabled) {
-    menuItems.push({
+    {
       name: (
         <FormattedMessage
-          id="xpack.fleet.agentBulkActions.requestDiagnostics"
-          data-test-subj="agentBulkActionsRequestDiagnostics"
-          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+          id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
+          data-test-subj="agentBulkActionsRestartUpgrade"
+          defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
           values={{
             agentCount,
           }}
         />
       ),
-      icon: <EuiIcon type="download" size="m" />,
+      icon: <EuiIcon type="refresh" size="m" />,
       onClick: () => {
         closeMenu();
-        setIsRequestDiagnosticsModalOpen(true);
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
-    });
-  }
+    },
+    ...(diagnosticFileUploadEnabled
+      ? [
+          {
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.requestDiagnostics"
+                data-test-subj="agentBulkActionsRequestDiagnostics"
+                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+                values={{
+                  agentCount,
+                }}
+              />
+            ),
+            icon: <EuiIcon type="download" size="m" />,
+            onClick: () => {
+              closeMenu();
+              setIsRequestDiagnosticsModalOpen(true);
+            },
+          },
+        ]
+      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.unenrollAgents"
+          data-test-subj="agentBulkActionsUnenroll"
+          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="trash" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsUnenrollModalOpen(true);
+      },
+    },
+  ];
 
   const panels = [
     {
@@ -256,13 +256,13 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         </EuiPortal>
       )}
-      {updateModalState.isOpen && (
+      {upgradeModalState.isOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
             agents={agents}
             agentCount={agentCount}
-            isScheduled={updateModalState.isScheduled}
-            isUpdating={updateModalState.isUpdating}
+            isScheduled={upgradeModalState.isScheduled}
+            isUpdating={upgradeModalState.isUpdating}
             onClose={() => {
               setUpgradeModalState({ isOpen: false, isScheduled: false, isUpdating: false });
               refreshAgents();

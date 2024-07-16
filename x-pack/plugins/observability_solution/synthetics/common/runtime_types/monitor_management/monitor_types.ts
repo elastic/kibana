@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { AlertConfigsCodec } from './alert_config';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
@@ -25,6 +26,12 @@ import {
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
+import {
+  getNonEmptyStringCodec,
+  InlineScriptString,
+  NameSpaceString,
+  TimeoutString,
+} from '../common';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -33,7 +40,7 @@ const ScheduleCodec = t.interface({
 
 // TLSFields
 export const TLSFieldsCodec = t.partial({
-  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.string,
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.union([t.string, t.array(t.string)]),
   [ConfigKey.TLS_CERTIFICATE]: t.string,
   [ConfigKey.TLS_VERIFICATION_MODE]: VerificationModeCodec,
   [ConfigKey.TLS_VERSION]: t.array(TLSVersionCodec),
@@ -46,15 +53,17 @@ export const TLSSensitiveFieldsCodec = t.partial({
 
 export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
 
-const MonitorLocationsCodec = t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec]));
+const MonitorLocationsCodec = NonEmptyArray(
+  t.union([MonitorServiceLocationCodec, PrivateLocationCodec])
+);
 
 export type MonitorLocations = t.TypeOf<typeof MonitorLocationsCodec>;
 
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.NAME]: t.string,
-    [ConfigKey.NAMESPACE]: t.string,
+    [ConfigKey.NAME]: NonEmptyString,
+    [ConfigKey.NAMESPACE]: NameSpaceString,
     [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: ScheduleCodec,
@@ -67,7 +76,7 @@ export const CommonFieldsCodec = t.intersection([
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
-    [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
+    [ConfigKey.TIMEOUT]: t.union([TimeoutString, t.null, t.number]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_HASH]: t.string,
@@ -77,6 +86,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
     [ConfigKey.PARAMS]: t.string,
+    retest_on_failure: t.boolean,
   }),
 ]);
 
@@ -84,7 +94,7 @@ export const CommonFieldsCodec = t.intersection([
 export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
-    [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.HOSTS]: getNonEmptyStringCodec('host'),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   t.partial({
@@ -119,12 +129,14 @@ export const TCPAdvancedCodec = t.intersection([
 export type TCPAdvancedFields = t.TypeOf<typeof TCPAdvancedCodec>;
 
 // TCPFields
+// All fields for TCP monitor, excluding sensitive fields
 export const EncryptedTCPFieldsCodec = t.intersection([
   TCPSimpleFieldsCodec,
   TCPAdvancedFieldsCodec,
   TLSFieldsCodec,
 ]);
 
+// All fields for TCP monitor, including sensitive fields
 export const TCPFieldsCodec = t.intersection([
   EncryptedTCPFieldsCodec,
   TCPSensitiveAdvancedFieldsCodec,
@@ -136,7 +148,7 @@ export type TCPFields = t.TypeOf<typeof TCPFieldsCodec>;
 // ICMP SimpleFields
 export const ICMPSimpleFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.HOSTS]: NonEmptyString,
     [ConfigKey.WAIT]: t.string,
   }),
   CommonFieldsCodec,
@@ -161,7 +173,7 @@ export const HTTPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.MAX_REDIRECTS]: t.string,
-    [ConfigKey.URLS]: t.string,
+    [ConfigKey.URLS]: getNonEmptyStringCodec('url'),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
@@ -208,12 +220,14 @@ export const HTTPAdvancedCodec = t.intersection([
 ]);
 
 // HTTPFields
+// All fields for HTTP monitor, excluding sensitive fields
 export const EncryptedHTTPFieldsCodec = t.intersection([
   HTTPSimpleFieldsCodec,
   HTTPAdvancedFieldsCodec,
   TLSFieldsCodec,
 ]);
 
+// All fields for HTTP monitor, including sensitive fields
 export const HTTPFieldsCodec = t.intersection([
   EncryptedHTTPFieldsCodec,
   HTTPSensitiveAdvancedFieldsCodec,
@@ -235,7 +249,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
 
 export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.SOURCE_INLINE]: t.string,
+    [ConfigKey.SOURCE_INLINE]: InlineScriptString,
     [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
@@ -281,12 +295,14 @@ export const BrowserAdvancedFieldsCodec = t.intersection([
   BrowserSensitiveAdvancedFieldsCodec,
 ]);
 
+// All fields for Browser monitor, excluding sensitive fields
 export const EncryptedBrowserFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
   EncryptedBrowserAdvancedFieldsCodec,
   TLSFieldsCodec,
 ]);
 
+// All fields for Browser monitor, including sensitive fields
 export const BrowserFieldsCodec = t.intersection([
   BrowserSimpleFieldsCodec,
   BrowserAdvancedFieldsCodec,
@@ -301,7 +317,7 @@ export const MonitorFieldsCodec = t.intersection([
   BrowserFieldsCodec,
 ]);
 
-// Monitor, represents one of (Icmp | Tcp | Http | Browser)
+// Monitor, represents one of (Icmp | Tcp | Http | Browser) decrypted
 export const SyntheticsMonitorCodec = t.union([
   HTTPFieldsCodec,
   TCPFieldsCodec,
@@ -309,6 +325,7 @@ export const SyntheticsMonitorCodec = t.union([
   BrowserFieldsCodec,
 ]);
 
+// Monitor, represents one of (Icmp | Tcp | Http | Browser) encrypted
 export const EncryptedSyntheticsMonitorCodec = t.union([
   EncryptedHTTPFieldsCodec,
   EncryptedTCPFieldsCodec,

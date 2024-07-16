@@ -13,7 +13,8 @@
       "security",
       "cloud",
       "fleet",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "apmDataAccess",
     ],
     "requiredPlugins": [
       "charts",
@@ -25,7 +26,6 @@
       "observabilityShared",
       "unifiedSearch",
       "share",
-      "embeddable",
       "profilingDataAccess"
     ],
     "requiredBundles": [

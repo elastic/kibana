@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { Editor as AceEditor } from 'brace';
 
+import { SearchProfilerStartServices } from '../../../../types';
 import { ace } from '../../../../shared_imports';
 import { initializeEditor } from './init_editor';
 
@@ -19,7 +20,7 @@ type EditorShim = ReturnType<typeof createEditorShim>;
 
 export type EditorInstance = EditorShim;
 
-export interface Props {
+export interface Props extends SearchProfilerStartServices {
   licenseEnabled: boolean;
   initialValue: string;
   onEditorReady: (editor: EditorShim) => void;
@@ -38,43 +39,45 @@ const createEditorShim = (aceEditor: AceEditor) => {
 
 const EDITOR_INPUT_ID = 'SearchProfilerTextArea';
 
-export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Props) => {
-  const containerRef = useRef<HTMLDivElement>(null as any);
-  const editorInstanceRef = useRef<AceEditor>(null as any);
+export const Editor = memo(
+  ({ licenseEnabled, initialValue, onEditorReady, ...startServices }: Props) => {
+    const containerRef = useRef<HTMLDivElement>(null as any);
+    const editorInstanceRef = useRef<AceEditor>(null as any);
 
-  const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
+    const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
 
-  useUIAceKeyboardMode(textArea);
+    useUIAceKeyboardMode(textArea, startServices);
 
-  useEffect(() => {
-    const divEl = containerRef.current;
-    editorInstanceRef.current = initializeEditor({ el: divEl, licenseEnabled });
-    editorInstanceRef.current.setValue(initialValue, 1);
-    const textarea = divEl.querySelector<HTMLTextAreaElement>('textarea');
-    if (textarea) {
-      textarea.setAttribute('id', EDITOR_INPUT_ID);
-    }
-    setTextArea(licenseEnabled ? containerRef.current!.querySelector('textarea') : null);
-
-    onEditorReady(createEditorShim(editorInstanceRef.current));
-
-    return () => {
-      if (editorInstanceRef.current) {
-        editorInstanceRef.current.destroy();
+    useEffect(() => {
+      const divEl = containerRef.current;
+      editorInstanceRef.current = initializeEditor({ el: divEl, licenseEnabled });
+      editorInstanceRef.current.setValue(initialValue, 1);
+      const textarea = divEl.querySelector<HTMLTextAreaElement>('textarea');
+      if (textarea) {
+        textarea.setAttribute('id', EDITOR_INPUT_ID);
       }
-    };
-  }, [initialValue, onEditorReady, licenseEnabled]);
+      setTextArea(licenseEnabled ? containerRef.current!.querySelector('textarea') : null);
 
-  return (
-    <>
-      <EuiScreenReaderOnly>
-        <label htmlFor={EDITOR_INPUT_ID}>
-          {i18n.translate('xpack.searchProfiler.editorElementLabel', {
-            defaultMessage: 'Dev Tools Search Profiler editor',
-          })}
-        </label>
-      </EuiScreenReaderOnly>
-      <div data-test-subj="searchProfilerEditor" ref={containerRef} />
-    </>
-  );
-});
+      onEditorReady(createEditorShim(editorInstanceRef.current));
+
+      return () => {
+        if (editorInstanceRef.current) {
+          editorInstanceRef.current.destroy();
+        }
+      };
+    }, [initialValue, onEditorReady, licenseEnabled]);
+
+    return (
+      <>
+        <EuiScreenReaderOnly>
+          <label htmlFor={EDITOR_INPUT_ID}>
+            {i18n.translate('xpack.searchProfiler.editorElementLabel', {
+              defaultMessage: 'Dev Tools Search Profiler editor',
+            })}
+          </label>
+        </EuiScreenReaderOnly>
+        <div data-test-subj="searchProfilerEditor" ref={containerRef} />
+      </>
+    );
+  }
+);

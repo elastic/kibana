@@ -5,51 +5,66 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { Conversation, Prompt, QuickPrompt } from '../../../..';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import {
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
 import {
   ConversationsBulkActions,
-  bulkChangeConversations,
-} from '../../api/conversations/use_bulk_actions_conversations';
+  bulkUpdateConversations,
+} from '../../api/conversations/bulk_update_actions_conversations';
+import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
+import { bulkUpdatePrompts } from '../../api/prompts/bulk_update_prompts';
 
 interface UseSettingsUpdater {
+  assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
+  updatedAnonymizationData: FindAnonymizationFieldsResponse;
   knowledgeBase: KnowledgeBaseConfig;
-  quickPromptSettings: QuickPrompt[];
+  quickPromptSettings: PromptResponse[];
   resetSettings: () => void;
-  systemPromptSettings: Prompt[];
-  setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  systemPromptSettings: PromptResponse[];
+  setUpdatedAnonymizationData: React.Dispatch<
+    React.SetStateAction<FindAnonymizationFieldsResponse>
+  >;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
+  anonymizationFieldsBulkActions: PerformBulkActionRequestBody;
+  setAnonymizationFieldsBulkActions: React.Dispatch<
+    React.SetStateAction<PerformBulkActionRequestBody>
+  >;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   saveSettings: () => Promise<boolean>;
 }
 
 export const useSettingsUpdater = (
-  conversations: Record<string, Conversation>
+  conversations: Record<string, Conversation>,
+  allPrompts: FindPromptsResponse,
+  conversationsLoaded: boolean,
+  anonymizationFields: FindAnonymizationFieldsResponse
 ): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
-    allQuickPrompts,
-    allSystemPrompts,
     assistantTelemetry,
-    defaultAllow,
-    defaultAllowReplacement,
     knowledgeBase,
-    setAllQuickPrompts,
-    setAllSystemPrompts,
-    setDefaultAllow,
-    setDefaultAllowReplacement,
+    assistantStreamingEnabled,
+    setAssistantStreamingEnabled,
     setKnowledgeBase,
     http,
     toasts,
@@ -64,15 +79,24 @@ export const useSettingsUpdater = (
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
   // Quick Prompts
-  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
-    useState<QuickPrompt[]>(allQuickPrompts);
+  const [quickPromptSettings, setUpdatedQuickPromptSettings] = useState<PromptResponse[]>(
+    allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+  );
   // System Prompts
-  const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
-    useState<Prompt[]>(allSystemPrompts);
+  const [systemPromptSettings, setUpdatedSystemPromptSettings] = useState<PromptResponse[]>(
+    allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+  );
   // Anonymization
-  const [updatedDefaultAllow, setUpdatedDefaultAllow] = useState<string[]>(defaultAllow);
-  const [updatedDefaultAllowReplacement, setUpdatedDefaultAllowReplacement] =
-    useState<string[]>(defaultAllowReplacement);
+  const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
+    useState<PerformBulkActionRequestBody>({});
+  // Prompts
+  const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
+    {}
+  );
+  const [updatedAnonymizationData, setUpdatedAnonymizationData] =
+    useState<FindAnonymizationFieldsResponse>(anonymizationFields);
+  const [updatedAssistantStreamingEnabled, setUpdatedAssistantStreamingEnabled] =
+    useState<boolean>(assistantStreamingEnabled);
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
@@ -83,40 +107,68 @@ export const useSettingsUpdater = (
   const resetSettings = useCallback((): void => {
     setConversationSettings(conversations);
     setConversationsSettingsBulkActions({});
-    setUpdatedQuickPromptSettings(allQuickPrompts);
+    setUpdatedQuickPromptSettings(
+      allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+    );
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
-    setUpdatedSystemPromptSettings(allSystemPrompts);
-    setUpdatedDefaultAllow(defaultAllow);
-    setUpdatedDefaultAllowReplacement(defaultAllowReplacement);
-  }, [
-    allQuickPrompts,
-    allSystemPrompts,
-    conversations,
-    defaultAllow,
-    defaultAllowReplacement,
-    knowledgeBase,
-  ]);
+    setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
+    setUpdatedSystemPromptSettings(
+      allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+    );
+    setUpdatedAnonymizationData(anonymizationFields);
+  }, [allPrompts, anonymizationFields, assistantStreamingEnabled, conversations, knowledgeBase]);
 
+  const hasBulkConversations =
+    conversationsSettingsBulkActions.create ||
+    conversationsSettingsBulkActions.update ||
+    conversationsSettingsBulkActions.delete;
+
+  const hasBulkAnonymizationFields =
+    anonymizationFieldsBulkActions.create ||
+    anonymizationFieldsBulkActions.update ||
+    anonymizationFieldsBulkActions.delete;
+
+  const hasBulkPrompts =
+    promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
   /**
    * Save all pending settings
    */
   const saveSettings = useCallback(async (): Promise<boolean> => {
-    setAllQuickPrompts(updatedQuickPromptSettings);
-    setAllSystemPrompts(updatedSystemPromptSettings);
+    const bulkPromptsResult = hasBulkPrompts
+      ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
+      : undefined;
 
-    const hasBulkConversations =
-      conversationsSettingsBulkActions.create ||
-      conversationsSettingsBulkActions.update ||
-      conversationsSettingsBulkActions.delete;
+    // replace conversation references for created
+    if (bulkPromptsResult) {
+      bulkPromptsResult.attributes.results.created.forEach((p) => {
+        if (conversationsSettingsBulkActions.create) {
+          Object.values(conversationsSettingsBulkActions.create).forEach((c) => {
+            if (c.apiConfig?.defaultSystemPromptId === p.name) {
+              c.apiConfig.defaultSystemPromptId = p.id;
+            }
+          });
+        }
+        if (conversationsSettingsBulkActions.update) {
+          Object.values(conversationsSettingsBulkActions.update).forEach((c) => {
+            if (c.apiConfig?.defaultSystemPromptId === p.name) {
+              c.apiConfig.defaultSystemPromptId = p.id;
+            }
+          });
+        }
+      });
+    }
+
     const bulkResult = hasBulkConversations
-      ? await bulkChangeConversations(http, conversationsSettingsBulkActions, toasts)
+      ? await bulkUpdateConversations(http, conversationsSettingsBulkActions, toasts)
       : undefined;
 
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
     const didUpdateRAGAlerts =
       knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
-    if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
+    const didUpdateAssistantStreamingEnabled =
+      assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
+    if (didUpdateKnowledgeBase || didUpdateRAGAlerts || didUpdateAssistantStreamingEnabled) {
       assistantTelemetry?.reportAssistantSettingToggled({
         ...(didUpdateKnowledgeBase
           ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
@@ -124,48 +176,85 @@ export const useSettingsUpdater = (
         ...(didUpdateRAGAlerts
           ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
           : {}),
+        ...(didUpdateAssistantStreamingEnabled
+          ? { assistantStreamingEnabled: updatedAssistantStreamingEnabled }
+          : {}),
       });
     }
+    setAssistantStreamingEnabled(updatedAssistantStreamingEnabled);
     setKnowledgeBase(updatedKnowledgeBaseSettings);
-    setDefaultAllow(updatedDefaultAllow);
-    setDefaultAllowReplacement(updatedDefaultAllowReplacement);
 
-    return bulkResult?.success ?? true;
+    const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
+      ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
+      : undefined;
+
+    return (
+      (bulkResult?.success ?? true) &&
+      (bulkAnonymizationFieldsResult?.success ?? true) &&
+      (bulkPromptsResult?.success ?? true)
+    );
   }, [
-    setAllQuickPrompts,
-    updatedQuickPromptSettings,
-    setAllSystemPrompts,
-    updatedSystemPromptSettings,
+    hasBulkConversations,
     http,
     conversationsSettingsBulkActions,
     toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
     updatedKnowledgeBaseSettings,
+    assistantStreamingEnabled,
+    updatedAssistantStreamingEnabled,
+    setAssistantStreamingEnabled,
     setKnowledgeBase,
-    setDefaultAllow,
-    updatedDefaultAllow,
-    setDefaultAllowReplacement,
-    updatedDefaultAllowReplacement,
+    hasBulkAnonymizationFields,
+    anonymizationFieldsBulkActions,
+    hasBulkPrompts,
+    promptsBulkActions,
     assistantTelemetry,
   ]);
+
+  useEffect(() => {
+    if (
+      !(
+        anonymizationFieldsBulkActions.create?.length ||
+        anonymizationFieldsBulkActions.update?.length ||
+        anonymizationFieldsBulkActions.delete?.ids?.length
+      )
+    )
+      setUpdatedAnonymizationData(anonymizationFields);
+  }, [
+    anonymizationFields,
+    anonymizationFieldsBulkActions.create?.length,
+    anonymizationFieldsBulkActions.delete?.ids?.length,
+    anonymizationFieldsBulkActions.update?.length,
+  ]);
+
+  useEffect(() => {
+    // Update conversation settings when conversations are loaded
+    if (conversationsLoaded) {
+      setConversationSettings(conversations);
+    }
+  }, [conversations, conversationsLoaded]);
 
   return {
     conversationSettings,
     conversationsSettingsBulkActions,
-    defaultAllow: updatedDefaultAllow,
-    defaultAllowReplacement: updatedDefaultAllowReplacement,
     knowledgeBase: updatedKnowledgeBaseSettings,
-    quickPromptSettings: updatedQuickPromptSettings,
+    assistantStreamingEnabled: updatedAssistantStreamingEnabled,
+    quickPromptSettings,
     resetSettings,
-    systemPromptSettings: updatedSystemPromptSettings,
+    systemPromptSettings,
     saveSettings,
-    setUpdatedDefaultAllow,
-    setUpdatedDefaultAllowReplacement,
+    updatedAnonymizationData,
+    setUpdatedAnonymizationData,
+    anonymizationFieldsBulkActions,
+    setAnonymizationFieldsBulkActions,
     setUpdatedKnowledgeBaseSettings,
+    setUpdatedAssistantStreamingEnabled,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,
     setConversationSettings,
     setConversationsSettingsBulkActions,
+    promptsBulkActions,
+    setPromptsBulkActions,
   };
 };

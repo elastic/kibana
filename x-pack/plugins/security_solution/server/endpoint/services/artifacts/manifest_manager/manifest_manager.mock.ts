@@ -72,6 +72,7 @@ export interface ManifestManagerMockOptions {
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   productFeaturesService: ProductFeaturesService;
+  experimentalFeatures?: string[];
 }
 
 export const buildManifestManagerMockOptions = (
@@ -98,7 +99,8 @@ export const buildManifestManagerContextMock = (
     ...fullOpts,
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
-    experimentalFeatures: parseExperimentalConfigValue([]).features,
+    experimentalFeatures: parseExperimentalConfigValue([...(opts.experimentalFeatures ?? [])])
+      .features,
     packagerTaskPackagePolicyUpdateBatchSize: 10,
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };

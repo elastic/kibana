@@ -6,14 +6,15 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { getEsQueryConfig, Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  Comparator,
   CustomMetricExpressionParams,
+  CustomThresholdSearchSourceFields,
 } from '../../../../common/custom_threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
@@ -24,7 +25,7 @@ export function validateCustomThreshold({
   uiSettings,
 }: {
   criteria: CustomMetricExpressionParams[];
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: CustomThresholdSearchSourceFields;
   uiSettings: IUiSettingsClient;
 }): ValidationResult {
   const validationResult = { errors: {} };
@@ -58,7 +59,7 @@ export function validateCustomThreshold({
     try {
       buildEsQuery(
         undefined,
-        [{ query: (searchConfiguration.query as Query).query, language: 'kuery' }],
+        [{ query: searchConfiguration.query.query, language: 'kuery' }],
         [],
         getEsQueryConfig(uiSettings)
       );
@@ -110,7 +111,7 @@ export function validateCustomThreshold({
     // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
     // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
     const { comparator, threshold } = { comparator: c.comparator, threshold: c.threshold } as {
-      comparator?: Comparator;
+      comparator?: COMPARATORS;
       threshold?: number[];
     };
     if (threshold && threshold.length && ![...threshold].every(isNumber)) {
@@ -129,7 +130,7 @@ export function validateCustomThreshold({
       });
     }
 
-    if (comparator === Comparator.BETWEEN && (!threshold || threshold.length < 2)) {
+    if (comparator === COMPARATORS.BETWEEN && (!threshold || threshold.length < 2)) {
       errors[id].critical.threshold1.push(
         i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',

@@ -21,12 +21,15 @@ To use the create or update role API, you must have the `manage_security` cluste
 [[role-management-api-response-body]]
 ==== Request body
 
+`description`::
+  (Optional, string) Description for the role.
+
 `metadata`::
   (Optional, object) In the `metadata` object, keys that begin with `_` are reserved for system usage.
 
 `elasticsearch`::
   (Optional, object) {es} cluster and index privileges. Valid keys include
-  `cluster`, `indices`, `remote_indices`, and `run_as`. For more information, see
+  `cluster`, `indices`, `remote_indices`, `remote_cluster`, and `run_as`. For more information, see
   {ref}/defining-roles.html[Defining roles].
 
 `kibana`::
@@ -74,6 +77,7 @@ Grant access to various features in all spaces:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
+  "description": "my_kibana_role_description",
   "metadata": {
     "version": 1
   },
@@ -112,6 +116,7 @@ Grant dashboard-only access to only the Marketing space:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
+  "description": "Grants dashboard-only access to only the Marketing space.",
   "metadata": {
     "version": 1
   },
@@ -138,6 +143,7 @@ Grant full access to all features in the Default space:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
+  "description": "Grants full access to all features in the Default space.",
   "metadata": {
     "version": 1
   },
@@ -162,6 +168,7 @@ Grant different access to different spaces:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
+  "description": "Grants full access to discover and dashboard features in the default space. Grants read access in the marketing, and sales spaces.",
   "metadata": {
     "version": 1
   },
@@ -193,6 +200,7 @@ Grant access to {kib} and {es}:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
+  "description": "Grants all cluster privileges and full access to index1 and index2. Grants full access to remote_index1 and remote_index2, and the monitor_enrich cluster privilege on remote_cluster1. Grants all Kibana privileges in the default space.",
   "metadata": {
     "version": 1
   },
@@ -209,6 +217,12 @@ $ curl -X PUT api/security/role/my_kibana_role
         "clusters": [ "remote_cluster1" ],
         "names": [ "remote_index1", "remote_index2" ],
         "privileges": [ "all" ]
+      }
+    ],
+    "remote_cluster": [
+      {
+        "clusters": [ "remote_cluster1" ],
+        "privileges": [ "monitor_enrich" ]
       }
     ]
   },

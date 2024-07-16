@@ -13,11 +13,7 @@ import { getOverallLatencyDistribution } from './get_overall_latency_distributio
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
   latencyDistributionChartTypeRt,
   LatencyDistributionChartType,
@@ -95,9 +91,8 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(TRANSACTION_NAME, transactionName),
-            ...(termFilters?.flatMap(
-              (fieldValuePair): QueryDslQueryContainer[] =>
-                termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
+            ...(termFilters?.flatMap((fieldValuePair): QueryDslQueryContainer[] =>
+              termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
             ) ?? []),
           ],
         },
@@ -110,5 +105,4 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   },
 });
 
-export const latencyDistributionRouteRepository =
-  latencyOverallTransactionDistributionRoute;
+export const latencyDistributionRouteRepository = latencyOverallTransactionDistributionRoute;

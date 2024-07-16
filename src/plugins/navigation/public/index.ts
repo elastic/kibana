@@ -19,8 +19,8 @@ export { TopNavMenu, TopNavMenuItems, TopNavMenuBadges } from './top_nav_menu';
 export type {
   NavigationPublicSetup as NavigationPublicPluginSetup,
   NavigationPublicStart as NavigationPublicPluginStart,
-  SolutionNavigationOptInStatus,
   SolutionType,
+  AddSolutionNavigationArg,
 } from './types';
 
 // Export plugin after all other imports

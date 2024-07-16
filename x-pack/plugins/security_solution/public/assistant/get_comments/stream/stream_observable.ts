@@ -13,21 +13,49 @@ import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
 interface StreamObservable {
-  llmType: string;
+  actionTypeId: string;
+  isEnabledLangChain: boolean;
+  isError: boolean;
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  isError: boolean;
 }
+
+interface ResponseSchema {
+  candidates: Candidate[];
+  usageMetadata: {
+    promptTokenCount: number;
+    candidatesTokenCount: number;
+    totalTokenCount: number;
+  };
+}
+
+interface Part {
+  text: string;
+}
+
+interface Candidate {
+  content: Content;
+  finishReason: string;
+}
+
+interface Content {
+  role: string;
+  parts: Part[];
+}
+
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
+ * @param connectorTypeTitle - The title of the connector type.
+ * @param isEnabledLangChain - indicates whether langchain is enabled or not
+ * @param isError - indicates whether the reader response is an error message or not
  * @param reader - The ReadableStreamDefaultReader used to read data from the stream.
  * @param setLoading - A function to update the loading state.
- * @param isError - indicates whether the reader response is an error message or not
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = ({
-  llmType,
+  actionTypeId,
+  isEnabledLangChain,
   isError,
   reader,
   setLoading,
@@ -38,9 +66,72 @@ export const getStreamObservable = ({
     const chunks: string[] = [];
     // Initialize an empty string to store the OpenAI buffer.
     let openAIBuffer: string = '';
-
+    // Initialize an empty string to store the LangChain buffer.
+    let langChainBuffer: string = '';
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
+    // Initialize an empty string to store the Gemini buffer.
+    let geminiBuffer: string = '';
+
+    // read data from LangChain stream
+    function readLangChain() {
+      reader
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            if (done) {
+              if (langChainBuffer) {
+                const finalChunk = getLangChainChunks([langChainBuffer])[0];
+                if (finalChunk && finalChunk.length > 0) chunks.push(finalChunk);
+              }
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
+              observer.complete();
+              return;
+            }
+            const decoded = decoder.decode(value);
+            let nextChunks;
+            if (isError) {
+              nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
+            } else {
+              const output = decoded;
+              const lines = output.split('\n');
+              lines[0] = langChainBuffer + lines[0];
+              langChainBuffer = lines.pop() || '';
+
+              nextChunks = getLangChainChunks(lines);
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
+            }
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readLangChain();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
+    }
+
+    // read data from OpenAI stream
     function readOpenAI() {
       reader
         .read()
@@ -87,6 +178,8 @@ export const getStreamObservable = ({
           observer.error(err);
         });
     }
+
+    // read data from Bedrock stream
     function readBedrock() {
       reader
         .read()
@@ -134,18 +227,68 @@ export const getStreamObservable = ({
           observer.error(err);
         });
     }
+
+    // read data from Gemini stream
+    function readGemini() {
+      reader
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            if (done) {
+              if (geminiBuffer) {
+                chunks.push(getGeminiChunks([geminiBuffer])[0]);
+              }
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
+              observer.complete();
+              return;
+            }
+
+            const decoded = decoder.decode(value, { stream: true });
+            const lines = decoded.split('\r');
+            lines[0] = geminiBuffer + lines[0];
+            geminiBuffer = lines.pop() || '';
+
+            const nextChunks = getGeminiChunks(lines);
+
+            nextChunks.forEach((chunk: string) => {
+              const splitBySpace = chunk.split(' ');
+              for (const word of splitBySpace) {
+                chunks.push(`${word} `);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              }
+            });
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readGemini();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
+    }
+
     // this should never actually happen
     function badConnector() {
       observer.next({
-        chunks: [`Invalid connector type - ${llmType} is not a supported GenAI connector.`],
-        message: `Invalid connector type - ${llmType} is not a supported GenAI connector.`,
+        chunks: [`Invalid connector type - ${actionTypeId} is not a supported GenAI connector.`],
+        message: `Invalid connector type - ${actionTypeId} is not a supported GenAI connector.`,
         loading: false,
       });
       observer.complete();
     }
-
-    if (llmType === '.bedrock') readBedrock();
-    else if (llmType === '.gen-ai') readOpenAI();
+    if (isEnabledLangChain) readLangChain();
+    else if (actionTypeId === '.bedrock') readBedrock();
+    else if (actionTypeId === '.gen-ai') readOpenAI();
+    else if (actionTypeId === '.gemini') readGemini();
     else badConnector();
 
     return () => {
@@ -200,6 +343,46 @@ const getOpenAIChunks = (lines: string[]): string[] => {
       }
     });
   return nextChunk;
+};
+
+/**
+ * Parses a LangChain response from a string.
+ * @param lines
+ * @returns {string[]} - Parsed string array from the LangChain response.
+ */
+const getLangChainChunks = (lines: string[]): string[] =>
+  lines.reduce((acc: string[], b: string) => {
+    if (b.length) {
+      try {
+        const obj = JSON.parse(b);
+        if (obj.type === 'content' && obj.payload.length > 0) {
+          return [...acc, obj.payload];
+        }
+        return acc;
+      } catch (e) {
+        return acc;
+      }
+    }
+    return acc;
+  }, []);
+
+/**
+ * Parses an Gemini response from a string.
+ * @param lines
+ * @returns {string[]} - Parsed string array from the Gemini response.
+ */
+const getGeminiChunks = (lines: string[]): string[] => {
+  return lines
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const newLine = line.replaceAll('data: ', '');
+        const geminiResponse: ResponseSchema = JSON.parse(newLine);
+        return geminiResponse.candidates[0]?.content.parts.map((part) => part.text).join('') ?? '';
+      } catch (err) {
+        return '';
+      }
+    });
 };
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

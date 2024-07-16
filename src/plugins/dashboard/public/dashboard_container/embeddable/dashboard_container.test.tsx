@@ -240,4 +240,25 @@ describe('getInheritedInput', () => {
     expect(embeddableInput.timeRange).toEqual(embeddableTimeRange);
     expect(embeddableInput.timeslice).toBeUndefined();
   });
+
+  test('Should pass dashboard settings to inherited input', async () => {
+    const container = buildMockDashboard({});
+    const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
+      CONTACT_CARD_EMBEDDABLE,
+      {
+        firstName: 'Kibana',
+      }
+    );
+    expect(embeddable).toBeDefined();
+
+    const embeddableInput = container
+      .getChild<ContactCardEmbeddable>(embeddable.id)
+      .getInput() as ContactCardEmbeddableInput & {
+      timeRange: TimeRange;
+      timeslice: [number, number];
+    };
+    expect(embeddableInput.syncTooltips).toBe(false);
+    expect(embeddableInput.syncColors).toBe(false);
+    expect(embeddableInput.syncCursor).toBe(true);
+  });
 });

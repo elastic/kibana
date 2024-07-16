@@ -255,6 +255,7 @@ describe('Request schema of Get rule execution results', () => {
         sort_order: 'desc',
         start: '2021-08-01T00:00:00.000Z',
         status_filters: [],
+        run_type_filters: [],
       });
     });
   });

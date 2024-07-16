@@ -27,7 +27,7 @@ export const LogDateRow: React.FC<LogDateRowProps> = ({ time }) => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiHorizontalRule />
+        <EuiHorizontalRule aria-hidden="true" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { injectI18n, IntlShape } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import React, { ReactNode, useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -21,8 +21,8 @@ export interface Props {
   onFiltersUpdated?: (filters: Filter[]) => void;
   className?: string;
   indexPatterns: DataView[];
-  intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
+  intl: IntlShape;
   filtersForSuggestions?: Filter[];
   hiddenPanelOptions?: FilterItemsProps['hiddenPanelOptions'];
   /**

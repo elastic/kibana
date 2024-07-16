@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import type { HostItem } from '../../../../../common/search_strategy';
@@ -21,7 +21,6 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
-import { getSourcererScopeId } from '../../../../helpers';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -100,7 +99,7 @@ export const ExpandableHostDetails = ({
       {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
+          scopeId={scopeId}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}

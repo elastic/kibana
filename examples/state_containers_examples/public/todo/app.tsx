@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
+
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createHashHistory } from 'history';
 import { TodoAppPage } from './todo';
 import { StateContainersExamplesPage, ExampleLink } from '../common/example_page';
@@ -29,15 +31,18 @@ export interface Deps {
 }
 
 export const renderApp = (
+  core: CoreStart,
   { appBasePath, element, history: platformHistory }: AppMountParameters,
   { appTitle, historyType }: AppOptions,
   { navigateToApp, exampleLinks }: Deps
 ) => {
   const history = historyType === History.Browser ? platformHistory : createHashHistory();
   ReactDOM.render(
-    <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
-      <TodoAppPage history={history} appTitle={appTitle} appBasePath={appBasePath} />
-    </StateContainersExamplesPage>,
+    <KibanaRenderContextProvider {...core}>
+      <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
+        <TodoAppPage history={history} appTitle={appTitle} appBasePath={appBasePath} />
+      </StateContainersExamplesPage>
+    </KibanaRenderContextProvider>,
     element
   );
 

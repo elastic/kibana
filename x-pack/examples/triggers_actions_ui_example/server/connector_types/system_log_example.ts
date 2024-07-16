@@ -66,11 +66,13 @@ export function getConnectorType(): ServerLogConnectorType {
   };
 }
 
-export const connectorAdapter: ConnectorAdapter = {
+export const connectorAdapter: ConnectorAdapter<{ message: string }, { message: string }> = {
   connectorTypeId: ConnectorTypeId,
   ruleActionParamsSchema: ParamsSchema,
   buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
-    return { ...params };
+    const message = `The system has detected ${alerts.new.count} new, ${alerts.ongoing.count} ongoing, and ${alerts.recovered.count} recovered alerts.`;
+
+    return { ...params, message };
   },
 };
 
@@ -82,7 +84,7 @@ async function executor(
   const { actionId, params, logger } = execOptions;
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {
-    logger.info<LogMeta>(`SYSTEM ACTION EXAMPLE Server log: ${sanitizedMessage}`);
+    logger.info<LogMeta>(`System action example: Server log: ${sanitizedMessage}`);
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.serverLog.errorLoggingErrorMessage', {
       defaultMessage: 'error logging message',

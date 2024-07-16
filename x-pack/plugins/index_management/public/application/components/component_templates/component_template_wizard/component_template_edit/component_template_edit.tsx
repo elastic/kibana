@@ -115,7 +115,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template '{name}'"
+              defaultMessage="Edit component template ''{name}''"
               values={{ name: decodedName }}
             />
           </span>

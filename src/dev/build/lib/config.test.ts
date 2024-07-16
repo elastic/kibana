@@ -33,6 +33,7 @@ const setup = async ({
   return await Config.create({
     isRelease,
     targetAllPlatforms,
+    targetServerlessPlatforms: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,
@@ -123,6 +124,8 @@ describe('#getTargetPlatforms()', () => {
         "darwin-arm64",
         "darwin-x64",
         "linux-arm64",
+        "linux-arm64",
+        "linux-x64",
         "linux-x64",
         "win32-x64",
       ]
@@ -146,7 +149,15 @@ describe('#getNodePlatforms()', () => {
         .getTargetPlatforms()
         .map((p) => p.getNodeArch())
         .sort()
-    ).toEqual(['darwin-arm64', 'darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
+    ).toEqual([
+      'darwin-arm64',
+      'darwin-x64',
+      'linux-arm64',
+      'linux-arm64',
+      'linux-x64',
+      'linux-x64',
+      'win32-x64',
+    ]);
   });
 
   it('returns this platform and linux, when targetAllPlatforms = false', async () => {

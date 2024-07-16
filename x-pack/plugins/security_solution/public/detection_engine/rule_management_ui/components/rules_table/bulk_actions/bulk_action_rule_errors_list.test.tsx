@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
@@ -15,7 +15,7 @@ import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
-const Wrapper: FC = ({ children }) => {
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <IntlProvider locale="en">
       <>{children}</>
@@ -85,6 +85,33 @@ describe('Component BulkEditRuleErrorsList', () => {
     ];
     render(
       <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    expect(screen.getByText(value)).toBeInTheDocument();
+  });
+
+  test.each([
+    [
+      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE,
+      '2 rules (Manual rule run feature is disabled)',
+    ],
+    [
+      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE,
+      '2 rules (Cannot schedule manual rule run for disabled rules)',
+    ],
+  ])('should render correct message for "%s" errorCode', (errorCode, value) => {
+    const ruleErrors: DryRunResult['ruleErrors'] = [
+      {
+        message: 'test failure',
+        errorCode,
+        ruleIds: ['rule:1', 'rule:2'],
+      },
+    ];
+    render(
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.run} ruleErrors={ruleErrors} />,
       {
         wrapper: Wrapper,
       }

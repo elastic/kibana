@@ -34,7 +34,7 @@ export const AgentPolicySelectionStep = ({
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
-      defaultMessage: 'What type of host are you adding?',
+      defaultMessage: 'What type of host do you want to monitor?',
     }),
     children: (
       <>

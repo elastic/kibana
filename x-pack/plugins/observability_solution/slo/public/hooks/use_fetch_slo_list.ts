@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { useKibana } from '../utils/kibana_react';
+import {
+  DEFAULT_SLO_PAGE_SIZE,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../common/constants';
 import { SearchState } from '../pages/slos/hooks/use_url_search_state';
+import { useKibana } from '../utils/kibana_react';
 import { useCreateDataView } from './use_create_data_view';
-import { DEFAULT_SLO_PAGE_SIZE, SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
 
 import { sloKeys } from './query_key_factory';
 
@@ -58,7 +61,7 @@ export function useFetchSloList({
   const queryClient = useQueryClient();
 
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   });
 
   const filters = useMemo(() => {
@@ -100,6 +103,7 @@ export function useFetchSloList({
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
           ...(filters && { filters }),
+          hideStale: true,
         },
         signal,
       });
@@ -111,6 +115,7 @@ export function useFetchSloList({
       if (String(error) === 'Error: Forbidden') {
         return false;
       }
+
       return failureCount < 4;
     },
     onSuccess: ({ results }: FindSLOResponse) => {

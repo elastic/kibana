@@ -7,8 +7,9 @@
 
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
+import { appendToESQLQuery } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
@@ -31,13 +32,15 @@ export const getESQLKeywordFieldStats = async ({
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
   const keywordFields = columns.map((field) => {
-    const query =
-      esqlBaseQuery +
-      `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
+    const query = appendToESQLQuery(
+      esqlBaseQuery,
+      `| STATS ${getSafeESQLName(`${field.name}_in_records`)} = count(MV_MIN(${getSafeESQLName(
         field.name
-      )}) BY ${getSafeESQLName(field.name)}
-    | LIMIT 10
-    | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC`;
+      )}))
+    BY ${getSafeESQLName(field.name)}
+  | SORT ${getSafeESQLName(`${field.name}_in_records`)} DESC
+  | LIMIT 10`
+    );
     return {
       field,
       request: {
@@ -52,7 +55,7 @@ export const getESQLKeywordFieldStats = async ({
   if (keywordFields.length > 0) {
     const keywordTopTermsResp = await Promise.allSettled(
       keywordFields.map(({ request }) =>
-        limiter(() => runRequest(request, { strategy: ESQL_SEARCH_STRATEGY }))
+        limiter(() => runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY }))
       )
     );
     if (keywordTopTermsResp) {
@@ -61,8 +64,15 @@ export const getESQLKeywordFieldStats = async ({
         if (!resp) return;
 
         if (isFulfilled(resp)) {
-          const results = resp.value?.rawResponse.values as Array<[BucketCount, BucketTerm]>;
+          const results = resp.value?.rawResponse?.values as Array<
+            [BucketCount, BucketCount, BucketTerm]
+          >;
+
           if (results) {
+            const topValuesSampleSize = results.reduce((acc, row) => {
+              return row[0] + acc;
+            }, 0);
+
             const terms = results.map((row) => ({
               key: row[1],
               doc_count: row[0],
@@ -71,7 +81,9 @@ export const getESQLKeywordFieldStats = async ({
             return {
               fieldName: field.name,
               topValues: terms,
-              isTopValuesSampled: false,
+              isTopValuesSampled: true,
+              approximate: true,
+              topValuesSampleSize,
             } as StringFieldStats;
           }
           return;

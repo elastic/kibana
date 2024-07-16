@@ -4,20 +4,9 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-    ReadSavedQueryRequestQueryParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/ReadSavedQueryRequestQuery'
   schemas:
     ReadSavedQueryRequestQuery:
       type: object
       properties:
         id:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

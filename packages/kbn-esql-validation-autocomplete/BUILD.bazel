@@ -3,6 +3,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 SRCS = glob(
   [
     "**/*.ts",
+    "**/*functions.json",
   ],
   exclude = [
     "**/*.config.js",
@@ -21,7 +22,7 @@ SRCS = glob(
 
 SHARED_DEPS = [
   "//packages/kbn-i18n",
-  "@npm//js-levenshtein",
+  "@npm//fastest-levenshtein",
 ]
 
 js_library(

@@ -5,51 +5,31 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
+import { EuiPanel } from '@elastic/eui';
+import { useLLMsModels } from '../../hooks/use_llms_models';
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { ChatFormFields } from '../../types';
-import { OpenAIKeyFlyOut } from './open_ai_key_flyout';
-import { OpenAISummarizationModel } from './open_ai_summarization_model';
+import { ChatForm, ChatFormFields } from '../../types';
+import { SummarizationModel } from './summarization_model';
 
 export const SummarizationPanel: React.FC = () => {
-  const { control } = useFormContext();
-  const [isOpenAIFlyOutOpen, setIsOpenAIFlyOutOpen] = useState<boolean>(false);
-
-  const onCloseOpenAIFlyOut = () => {
-    setIsOpenAIFlyOutOpen(!isOpenAIFlyOutOpen);
-  };
-  const handleOpenAIFlyOut = () => {
-    setIsOpenAIFlyOutOpen(true);
-  };
+  const { control } = useFormContext<ChatForm>();
+  const models = useLLMsModels();
 
   return (
-    <>
-      {isOpenAIFlyOutOpen && (
-        <Controller
-          name={ChatFormFields.openAIKey}
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <OpenAIKeyFlyOut
-              openAPIKey={field.value}
-              onSave={field.onChange}
-              onClose={onCloseOpenAIFlyOut}
-            />
-          )}
-        />
-      )}
-
+    <EuiPanel data-test-subj="summarizationPanel">
       <Controller
         name={ChatFormFields.summarizationModel}
+        rules={{ required: true }}
         control={control}
         render={({ field }) => (
-          <OpenAISummarizationModel
-            model={field.value}
-            onSelect={field.onChange}
-            openAIFlyOutOpen={handleOpenAIFlyOut}
+          <SummarizationModel
+            selectedModel={field.value}
+            onSelect={(model) => field.onChange(model)}
+            models={models}
           />
         )}
       />
@@ -57,7 +37,8 @@ export const SummarizationPanel: React.FC = () => {
       <Controller
         name={ChatFormFields.prompt}
         control={control}
-        defaultValue=""
+        rules={{ required: true }}
+        defaultValue="You are an assistant for question-answering tasks."
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
       />
 
@@ -69,6 +50,6 @@ export const SummarizationPanel: React.FC = () => {
           <IncludeCitationsField checked={field.value} onChange={field.onChange} />
         )}
       />
-    </>
+    </EuiPanel>
   );
 };

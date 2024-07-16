@@ -1,5 +1,5 @@
 post:
-  summary: Runs a connector.
+  summary: Run a connector
   operationId: legacyRunConnector
   deprecated: true
   description: Deprecated in 7.13.0. Use the run connector API instead.

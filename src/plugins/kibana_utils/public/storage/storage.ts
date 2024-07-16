@@ -32,9 +32,13 @@ export class Storage implements IStorageWrapper {
     }
   };
 
-  public set = (key: string, value: any) => {
+  public set = (key: string, value: any, includeUndefined: boolean = false) => {
+    const replacer = includeUndefined
+      ? (_: string, currentValue: any) =>
+          typeof currentValue === 'undefined' ? null : currentValue
+      : undefined;
     try {
-      return this.store.setItem(key, JSON.stringify(value));
+      return this.store.setItem(key, JSON.stringify(value, replacer));
     } catch (e) {
       return false;
     }

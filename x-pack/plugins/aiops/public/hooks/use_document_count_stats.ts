@@ -14,8 +14,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
+import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
-import type { DocumentCountStats, DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -56,7 +57,8 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
   searchParamsCompare: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  changePointsByDefault = true
 ): DocumentStats {
   const {
     data,
@@ -96,7 +98,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsResp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest(totalHitsParams, undefined, true),
+            params: getDocumentCountStatsRequest(totalHitsParams, undefined, changePointsByDefault),
           },
           { abortSignal: abortCtrl.current.signal }
         )
@@ -116,7 +118,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
               { ...searchParams, trackTotalHits: false },
               randomSamplerWrapper,
               false,
-              searchParamsCompare === undefined
+              searchParamsCompare === undefined && changePointsByDefault
             ),
           },
           { abortSignal: abortCtrl.current.signal }

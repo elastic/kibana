@@ -16,6 +16,8 @@ export const RULES_PATH = '/alerts/rules' as const;
 export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
 export const CASES_PATH = '/cases' as const;
+export const ANNOTATIONS_PATH = '/annotations' as const;
+export const SETTINGS_PATH = '/slos/settings' as const;
 
 // // SLOs have been moved to its own app (slo). Keeping around for redirecting purposes.
 export const OLD_SLOS_PATH = '/slos' as const;
@@ -29,6 +31,7 @@ export const SLO_DETAIL_PATH = '/:sloId' as const;
 export const paths = {
   observability: {
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}`,
+    annotations: `${OBSERVABILITY_BASE_PATH}${ANNOTATIONS_PATH}`,
     alertDetails: (alertId: string) =>
       `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,

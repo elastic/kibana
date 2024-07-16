@@ -14,6 +14,10 @@ export const registerGetRoute = (router: IRouter, url: ServerUrlService) => {
   router.get(
     {
       path: '/api/short_url/{id}',
+      options: {
+        access: 'public',
+        summary: `Get a short URL`,
+      },
       validate: {
         params: schema.object({
           id: schema.string({

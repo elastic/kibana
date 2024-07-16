@@ -36,7 +36,10 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/ui-theme",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/index-management",
+    "@kbn/react-kibana-context-render",
+    "@kbn/unsaved-changes-prompt",
   ],
   "exclude": [
     "target/**/*",

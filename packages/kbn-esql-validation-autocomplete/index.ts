@@ -49,11 +49,10 @@ export {
   getCommandDefinition,
   getAllCommands,
   getCommandOption,
-  getColumnHit,
-  columnExists,
+  lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,
-  isEqualType,
+  checkFunctionArgMatchesDefinition as isEqualType,
   isSourceItem,
   isSettingItem,
   isFunctionItem,
@@ -74,3 +73,5 @@ export {
   getPolicyHelper,
   getSourcesHelper,
 } from './src/shared/resources_helpers';
+
+export { wrapAsEditorMessage } from './src/code_actions/utils';

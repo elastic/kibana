@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { filter, Observable, tap } from 'rxjs';
+import { filter, OperatorFunction, tap } from 'rxjs';
 import {
   ChatCompletionError,
   ChatCompletionErrorCode,
   type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
   type ChatCompletionErrorEvent,
+  BufferFlushEvent,
 } from '../conversation_complete';
 
-export function throwSerializedChatCompletionErrors() {
-  return <T extends StreamingChatResponseEvent>(
-    source$: Observable<StreamingChatResponseEvent>
-  ): Observable<Exclude<T, ChatCompletionErrorEvent>> => {
-    return source$.pipe(
+export function throwSerializedChatCompletionErrors<
+  T extends StreamingChatResponseEvent | BufferFlushEvent
+>(): OperatorFunction<T, Exclude<T, ChatCompletionErrorEvent>> {
+  return (source$) =>
+    source$.pipe(
       tap((event) => {
-        // de-serialise error
+        // de-serialize error
         if (event.type === StreamingChatResponseEventType.ChatCompletionError) {
           const code = event.error.code ?? ChatCompletionErrorCode.InternalError;
           const message = event.error.message;
@@ -33,5 +34,4 @@ export function throwSerializedChatCompletionErrors() {
           event.type !== StreamingChatResponseEventType.ChatCompletionError
       )
     );
-  };
 }

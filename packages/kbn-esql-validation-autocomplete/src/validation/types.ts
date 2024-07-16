@@ -18,6 +18,10 @@ export interface ESQLVariable {
 export interface ESQLRealField {
   name: string;
   type: string;
+  metadata?: {
+    description?: string;
+    type?: string;
+  };
 }
 
 export interface ESQLPolicy {
@@ -32,7 +36,6 @@ export interface ReferenceMaps {
   variables: Map<string, ESQLVariable[]>;
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
-  metadataFields: Set<string>;
   query: string;
 }
 
@@ -95,6 +98,10 @@ export interface ValidationErrors {
   unsupportedFunctionForCommandOption: {
     message: string;
     type: { name: string; command: string; option: string };
+  };
+  unsupportedLiteralOption: {
+    message: string;
+    type: { name: string; value: string; supportedOptions: string };
   };
   shadowFieldType: {
     message: string;
@@ -163,6 +170,26 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
+  };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
   };
 }
 

@@ -47,6 +47,24 @@ describe('initializeEs', () => {
     );
   });
 
+  test(`should handle null response from getExistingLegacyIndexTemplates`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue(null);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should handle undefined response from getExistingLegacyIndexTemplates`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue(undefined);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
+  });
+
   test(`should not update existing index templates if any exist and are already hidden`, async () => {
     const testTemplate = {
       order: 0,
@@ -198,6 +216,24 @@ describe('initializeEs', () => {
     esContext.esAdapter.getExistingIndices.mockResolvedValue({
       'foo-bar-000001': testSettings,
     });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should handle null response from getExistingIndices`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingIndices.mockResolvedValue(null);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should handle undefined response from getExistingIndices`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingIndices.mockResolvedValue(undefined);
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
@@ -448,6 +484,29 @@ describe('parseIndexAliases', () => {
         is_write_index: true,
       },
     ]);
+  });
+
+  test('should handle null or undefined input', () => {
+    // @ts-expect-error
+    expect(parseIndexAliases(null)).toEqual([]);
+
+    // @ts-expect-error
+    expect(parseIndexAliases(undefined)).toEqual([]);
+
+    expect(
+      parseIndexAliases({
+        '.kibana-event-log-7.15.2-000003': {
+          // @ts-expect-error
+          aliases: null,
+        },
+        '.kibana-event-log-7.15.2-000002': {
+          // @ts-expect-error
+          aliases: undefined,
+        },
+        // @ts-expect-error
+        '.kibana-event-log-7.15.2-000001': {},
+      })
+    ).toEqual([]);
   });
 });
 

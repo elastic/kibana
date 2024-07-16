@@ -7,6 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
@@ -48,7 +50,10 @@ import {
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  InstallKibanaAssetsRequestSchema,
+  DeleteKibanaAssetsRequestSchema,
 } from '../../types';
+import type { FleetConfigType } from '../../config';
 
 import {
   getCategoriesHandler,
@@ -70,6 +75,10 @@ import {
   getInputsHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
+import {
+  deletePackageKibanaAssetsHandler,
+  installPackageKibanaAssetsHandler,
+} from './kibana_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -81,11 +90,14 @@ export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
   integrations: { readPackageInfo: true },
 };
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
   router.versioned
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get package categories`,
     })
     .addVersion(
       {
@@ -99,6 +111,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get list of packages`,
     })
     .addVersion(
       {
@@ -125,6 +138,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get limited package list`,
     })
     .addVersion(
       {
@@ -192,7 +206,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: EPM_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
+        integrations: { writePackageSettings: true },
       },
     })
     .addVersion(
@@ -215,6 +229,38 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       installPackageFromRegistryHandler
     );
+
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: InstallKibanaAssetsRequestSchema },
+        },
+        installPackageKibanaAssetsHandler
+      );
+
+    router.versioned
+      .delete({
+        path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: DeleteKibanaAssetsRequestSchema },
+        },
+        deletePackageKibanaAssetsHandler
+      );
+  }
 
   router.versioned
     .post({
@@ -287,6 +333,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get a package signature verification key ID`,
     })
     .addVersion(
       {
@@ -313,6 +360,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get bulk assets`,
     })
     .addVersion(
       {
@@ -359,7 +407,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
 
       fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
+        integrations: { writePackageSettings: true },
       },
     })
     .addVersion(

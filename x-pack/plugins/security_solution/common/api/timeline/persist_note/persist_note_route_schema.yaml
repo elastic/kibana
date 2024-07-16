@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Notes API
-  version: 8.9.0
+  version: 8.14.0
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
   description: Documentation
@@ -15,8 +15,8 @@ servers:
 paths:
   /api/note:
     patch:
-      operationId: persistNoteroute
-      description: Persists a note to a timeline.
+      operationId: persistNoteRoute
+      summary: Persists a note to a timeline.
       tags:
         - access:securitySolution
       requestBody:
@@ -41,8 +41,8 @@ paths:
                   type: string
                   nullable: true
       responses:
-        200:
-          description: Indicates the favorite status was successfully updated.
+        '200':
+          description: Indicates the note was successfully created.
           content:
             application/json:
               schema:

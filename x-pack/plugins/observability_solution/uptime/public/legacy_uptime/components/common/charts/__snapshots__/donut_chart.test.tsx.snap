@@ -51,6 +51,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -420,6 +421,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -433,6 +441,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -458,12 +467,15 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "left",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -517,6 +529,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,

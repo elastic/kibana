@@ -62,7 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Oct 22, 2018 @ 00:00:00.000',
           'Dec 3, 2018 @ 00:00:00.000'
         );
-        await dashboard.saveDashboard('test time slider control', { exitFromEditMode: false });
+        await dashboard.saveDashboard('test time slider control', {
+          exitFromEditMode: false,
+          saveAsNew: true,
+        });
       });
 
       it('can create a new time slider control from a blank state', async () => {

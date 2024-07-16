@@ -7,9 +7,9 @@
  */
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
-  gitRevExecMock,
-  mockedRootDir,
   packageMock,
+  mockedRootDir,
+  gitRevExecMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';
@@ -146,6 +146,35 @@ describe('ApmConfiguration', () => {
     );
   });
 
+  it('flattens the `globalLabels` object', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          globalLabels: {
+            keyOne: 'k1',
+            objectOne: {
+              objectOneKeyOne: 'o1k1',
+              objectOneKeyTwo: {
+                objectOneKeyTwoSubkeyOne: 'o1k2s1',
+              },
+            },
+          },
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        globalLabels: {
+          git_rev: 'sha',
+          keyOne: 'k1',
+          'objectOne.objectOneKeyOne': 'o1k1',
+          'objectOne.objectOneKeyTwo.objectOneKeyTwoSubkeyOne': 'o1k2s1',
+        },
+      })
+    );
+  });
+
   describe('env vars', () => {
     beforeEach(() => {
       delete process.env.ELASTIC_APM_ENVIRONMENT;
@@ -153,7 +182,6 @@ describe('ApmConfiguration', () => {
       delete process.env.ELASTIC_APM_API_KEY;
       delete process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE;
       delete process.env.ELASTIC_APM_SERVER_URL;
-      delete process.env.ELASTIC_APM_GLOBAL_LABELS;
       delete process.env.NODE_ENV;
     });
 
@@ -183,21 +211,6 @@ describe('ApmConfiguration', () => {
         expect(config.getConfig('serviceName')).toEqual(
           expect.objectContaining({
             environment: 'ci',
-          })
-        );
-      });
-
-      it('ELASTIC_APM_GLOBAL_LABELS', () => {
-        process.env.ELASTIC_APM_GLOBAL_LABELS = 'test1=1,test2=2';
-        const config = new ApmConfiguration(mockedRootDir, {}, true);
-
-        expect(config.getConfig('serviceName')).toEqual(
-          expect.objectContaining({
-            globalLabels: {
-              git_rev: 'sha',
-              test1: '1',
-              test2: '2',
-            },
           })
         );
       });

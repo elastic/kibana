@@ -70,7 +70,7 @@ export async function getAllUnsecured({
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
   const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
 
-  const connectors = await getAllHelper({
+  return await getAllHelper({
     esClient,
     // Unsecured execution does not currently support system actions so we filter them out
     inMemoryConnectors: inMemoryConnectors.filter((connector) => !connector.isSystemAction),
@@ -79,8 +79,6 @@ export async function getAllUnsecured({
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
   });
-
-  return connectors.map((connector) => omit(connector, 'secrets'));
 }
 
 async function getAllHelper({
@@ -94,9 +92,13 @@ async function getAllHelper({
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
-  ).saved_objects.map((rawAction) =>
-    connectorFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
-  );
+  ).saved_objects.map((rawAction) => {
+    const connector = connectorFromSavedObject(
+      rawAction,
+      isConnectorDeprecated(rawAction.attributes)
+    );
+    return omit(connector, 'secrets');
+  });
 
   if (auditLogger) {
     savedObjectsActions.forEach(({ id }) =>

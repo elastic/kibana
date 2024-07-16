@@ -23,14 +23,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
-
 import {
   getNumTransformAssets,
   TransformInstallWithCurrentUserPermissionCallout,
 } from '../../../../../../../components/transform_install_as_current_user_callout';
 
+import type { FleetStartServices } from '../../../../../../../plugin';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -47,6 +45,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
@@ -83,20 +82,21 @@ const UpdatesAvailableMsg = ({
       defaultMessage: 'New version available',
     })}
   >
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-          defaultMessage="Upgrade to version {latestVersion} to get the latest features."
-          values={{ latestVersion }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <p>
-          <EuiLink onClick={toggleChangelogModal}>{'View changelog.'}</EuiLink>
-        </p>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <FormattedMessage
+      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+      defaultMessage="Upgrade to version {latestVersion} to get the latest features. {changelogLink}"
+      values={{
+        latestVersion,
+        changelogLink: (
+          <EuiLink onClick={toggleChangelogModal}>
+            <FormattedMessage
+              id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
+              defaultMessage="View changelog."
+            />
+          </EuiLink>
+        ),
+      }}
+    />
   </EuiCallOut>
 );
 
@@ -117,10 +117,10 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
-  theme$: Observable<CoreTheme>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
+export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices }: Props) => {
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
@@ -142,7 +142,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
   );
 
   const agentPolicyIds = useMemo(
-    () => packagePoliciesData?.items.map(({ policy_id: agentPolicyId }) => agentPolicyId) ?? [],
+    () => packagePoliciesData?.items.flatMap((packagePolicy) => packagePolicy.policy_ids) ?? [],
     [packagePoliciesData]
   );
 
@@ -256,8 +256,8 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={6}>
+        <SideBarColumn grow={1} />
+        <EuiFlexItem grow={7}>
           <EuiText>
             <EuiTitle>
               <h3>
@@ -339,7 +339,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                         dryRunData={dryRunData}
                         isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                         setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
-                        theme$={theme$}
+                        startServices={startServices}
                       />
                     </p>
                   </>

@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertTypeWithExecutor } from '@kbn/rule-registry-plugin/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroupId,
 } from '@kbn/alerting-plugin/common';
 import { RuleType } from '@kbn/alerting-plugin/server';
-import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
-import { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
@@ -22,11 +20,15 @@ import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
  *
  * When we register all the alerts we can inject this field.
  */
-export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTypeWithExecutor<
+export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = RuleType<
   Record<string, any>,
+  never,
   Record<string, any>,
+  AlertInstanceState,
   AlertInstanceContext,
-  LifecycleAlertServices<Record<string, any>, AlertInstanceContext, TActionGroupIds>
+  TActionGroupIds,
+  RecoveredActionGroupId,
+  ObservabilityUptimeAlert
 >;
 
 export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
@@ -49,3 +51,18 @@ export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
   RecoveredActionGroupId,
   DefaultAlert
 >;
+
+export interface MonitorSummary {
+  checkedAt: string;
+  monitorUrl?: string;
+  monitorId: string;
+  configId?: string;
+  monitorName: string;
+  monitorType: string;
+  latestErrorMessage?: string;
+  observerLocation: string;
+  observerName?: string;
+  observerHostname?: string;
+  tags?: string[];
+  reason: string;
+}

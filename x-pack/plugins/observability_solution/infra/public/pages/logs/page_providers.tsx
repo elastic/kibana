@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, FC, PropsWithChildren } from 'react';
 import {
   LogViewProvider,
   initializeFromUrl as createInitializeFromUrl,
@@ -14,9 +14,9 @@ import {
 } from '@kbn/logs-shared-plugin/public';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
+import { useKbnUrlStateStorageFromRouterContext } from '../../containers/kbn_url_state_context';
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     services: {
       notifications: { toasts: toastsService },

@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
+  BareNote,
   PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
@@ -180,8 +181,8 @@ const combineFilters = (filters: Array<string | null>) =>
 
 const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
   const username = request.user?.username ?? UNAUTHENTICATED_USER;
-  const updatedBy = `siem-ui-timeline.attributes.updatedBy: ${username}`;
-  const createdBy = `siem-ui-timeline.attributes.createdBy: ${username}`;
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${username}"`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: "${username}"`;
   return combineFilters([updatedBy, createdBy]);
 };
 
@@ -548,27 +549,18 @@ export const updatePartialSavedTimeline = async (
 
 export const resetTimeline = async (
   request: FrameworkRequest,
-  timelineIds: string[],
+  timelineId: string,
   timelineType: TimelineType
 ) => {
-  if (!timelineIds.length) {
-    return Promise.reject(new Error('timelineIds is empty'));
-  }
+  await Promise.all([
+    note.deleteNotesByTimelineId(request, timelineId),
+    pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+  ]);
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
-      Promise.all([
-        note.deleteNoteByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    )
-  );
-
-  const response = await Promise.all(
-    timelineIds.map((timelineId) =>
-      updatePartialSavedTimeline(request, timelineId, { ...draftTimelineDefaults, timelineType })
-    )
-  );
+  const response = await updatePartialSavedTimeline(request, timelineId, {
+    ...draftTimelineDefaults,
+    timelineType,
+  });
 
   return response;
 };
@@ -584,7 +576,7 @@ export const deleteTimeline = async (
     ...timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNoteByTimelineId(request, timelineId),
+        note.deleteNotesByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
     ),
@@ -619,13 +611,14 @@ export const copyTimeline = async (
 
   const copiedNotes = Promise.all(
     notes.map((_note) => {
+      const newNote: BareNote = {
+        ..._note,
+        timelineId: newTimelineId,
+      };
       return note.persistNote({
         request,
         noteId: null,
-        note: {
-          ..._note,
-          timelineId: newTimelineId,
-        },
+        note: newNote,
         overrideOwner: false,
       });
     })

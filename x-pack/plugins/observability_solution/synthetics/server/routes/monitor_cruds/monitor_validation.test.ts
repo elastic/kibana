@@ -30,7 +30,7 @@ import {
   TLSVersion,
   VerificationMode,
 } from '../../../common/runtime_types';
-import { validateMonitor, validateProjectMonitor } from './monitor_validation';
+import { normalizeAPIConfig, validateMonitor, validateProjectMonitor } from './monitor_validation';
 
 describe('validateMonitor', () => {
   let testSchedule;
@@ -61,7 +61,7 @@ describe('validateMonitor', () => {
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
       [ConfigKey.APM_SERVICE_NAME]: '',
-      [ConfigKey.TIMEOUT]: '3m',
+      [ConfigKey.TIMEOUT]: '30',
       [ConfigKey.LOCATIONS]: [
         {
           id: 'eu-west-1',
@@ -202,12 +202,13 @@ describe('validateMonitor', () => {
           unit: ScheduleUnit.MINUTES,
           number: '3',
         },
+        locations: ['somewhere'],
       } as unknown as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: 'Invalid value "undefined" supplied to "MonitorType"',
+        details: 'Invalid value "undefined" supplied to "type"',
       });
     });
 
@@ -218,12 +219,13 @@ describe('validateMonitor', () => {
           unit: ScheduleUnit.MINUTES,
           number: '3',
         },
+        locations: ['somewhere'],
       } as unknown as MonitorFields;
       const result = validateMonitor(monitor);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: 'Invalid value "non-HTTP" supplied to "MonitorType"',
+        details: 'Invalid value "non-HTTP" supplied to "type"',
       });
     });
 
@@ -239,7 +241,19 @@ describe('validateMonitor', () => {
         valid: false,
         reason: 'Monitor schedule is invalid',
         details:
-          'Invalid schedule 4 minutes supplied to monitor configuration. Please use a supported monitor schedule.',
+          'Invalid schedule 4 minutes supplied to monitor configuration. Supported schedule values in minutes are 1, 2, 3, 5, 10, 15, 20, 30, 60, 120, 240',
+      });
+    });
+
+    it(`when timeout is not valid`, () => {
+      const result = validateMonitor({
+        ...testICMPFields,
+        timeout: '3m',
+      } as unknown as MonitorFields);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type icmp',
+        details: 'Invalid value "3m" supplied to "timeout"',
       });
     });
 
@@ -291,8 +305,37 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when payload is a correct Browser monitor', () => {
+    it('when payload is not a correct Browser monitor', () => {
       const testMonitor = testBrowserFields as MonitorFields;
+      const result = validateMonitor(testMonitor);
+      expect(result).toMatchObject({
+        valid: false,
+        details: 'source.inline.script: Script is required for browser monitor.',
+        reason: 'Monitor is not a valid monitor of type browser',
+        payload: testMonitor,
+      });
+    });
+
+    it('when payload is not a valid Browser monitor', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'journey()',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type browser',
+        details:
+          'source.inline.script: Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when payload is a correct Browser monitor', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+      } as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: true,
@@ -327,14 +370,15 @@ describe('validateMonitor', () => {
       const testMonitor = {
         ...testTCPFields,
         ...({
-          [ConfigKey.NAME]: undefined,
+          [ConfigKey.HOSTS]: undefined,
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
       const result = validateMonitor(testMonitor);
 
-      expect(result.details).toEqual(expect.stringContaining('Invalid value'));
-      expect(result.details).toEqual(expect.stringContaining(ConfigKey.NAME));
+      expect(result.details).toEqual(
+        expect.stringContaining('Invalid field "host", must be a non-empty string.')
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.TCP}`,
@@ -352,8 +396,7 @@ describe('validateMonitor', () => {
 
       const result = validateMonitor(testMonitor);
 
-      expect(result.details).toEqual(expect.stringContaining('Invalid value'));
-      expect(result.details).toEqual(expect.stringContaining(ConfigKey.URLS));
+      expect(result.details).toEqual('Invalid field "url", must be a non-empty string.');
       expect(result).toMatchObject({
         valid: false,
         reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.HTTP}`,
@@ -371,7 +414,9 @@ describe('validateMonitor', () => {
 
       const result = validateMonitor(testMonitor);
 
-      expect(result.details).toEqual(expect.stringContaining('Invalid value'));
+      expect(result.details).toEqual(
+        expect.stringContaining('source.inline.script: Inline script must be a non-empty string')
+      );
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.SOURCE_INLINE));
       expect(result).toMatchObject({
         valid: false,
@@ -415,6 +460,40 @@ describe('validateMonitor', () => {
         payload: testMonitor,
       });
     });
+    it('when parsed from serialized JSON for alert', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+
+      const result = validateMonitor({
+        ...testMonitor,
+        alert: {},
+      });
+
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Invalid alert configuration',
+        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
+        payload: testMonitor,
+      });
+    });
+    it('when parsed from serialized JSON for alert invalid key', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+
+      const result = validateMonitor({
+        ...testMonitor,
+        alert: {
+          // @ts-ignore
+          invalidKey: 'invalid',
+          enabled: true,
+        },
+      });
+
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Invalid alert configuration',
+        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
+        payload: testMonitor,
+      });
+    });
   });
 
   describe('Project Monitor', () => {
@@ -455,6 +534,268 @@ describe('validateMonitor', () => {
   });
 });
 
+describe('normalizeAPIConfig', () => {
+  it('empty object', function () {
+    const result = normalizeAPIConfig({} as any);
+
+    expect(result).toEqual({
+      errorMessage: 'Invalid value "undefined" supplied to "type"',
+    });
+  });
+
+  it('only type', function () {
+    const result = normalizeAPIConfig({ type: 'http' } as any);
+
+    expect(result).toEqual({
+      formattedConfig: {
+        type: 'http',
+      },
+    });
+  });
+
+  it('urls key mappings', function () {
+    expect(normalizeAPIConfig({ type: 'http', urls: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        urls: 'https://www.google.com',
+        type: 'http',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'http', url: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        urls: 'https://www.google.com',
+        type: 'http',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'browser', urls: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for browser type:  urls',
+      formattedConfig: {
+        type: 'browser',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'browser', url: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for browser type:  url',
+      formattedConfig: {
+        type: 'browser',
+      },
+    });
+  });
+
+  it('host key mapping validation', function () {
+    expect(normalizeAPIConfig({ type: 'tcp', hosts: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        hosts: 'https://www.google.com',
+        type: 'tcp',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'tcp', host: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        hosts: 'https://www.google.com',
+        type: 'tcp',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'browser', hosts: 'https://www.google.com' } as any)).toEqual(
+      {
+        errorMessage: 'Invalid monitor key(s) for browser type:  hosts',
+        formattedConfig: {
+          type: 'browser',
+        },
+      }
+    );
+
+    expect(normalizeAPIConfig({ type: 'browser', host: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for browser type:  host',
+      formattedConfig: {
+        type: 'browser',
+      },
+    });
+  });
+
+  it('inline script mapping validation', function () {
+    expect(
+      normalizeAPIConfig({ type: 'tcp', inline_script: 'https://www.google.com' } as any)
+    ).toEqual({
+      errorMessage: 'Invalid monitor key(s) for tcp type:  inline_script',
+      formattedConfig: {
+        type: 'tcp',
+      },
+    });
+
+    expect(
+      normalizeAPIConfig({ type: 'browser', inline_script: 'https://www.google.com' } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        'source.inline.script': 'https://www.google.com',
+      },
+    });
+
+    expect(
+      normalizeAPIConfig({ type: 'tcp', 'source.inline.script': 'https://www.google.com' } as any)
+    ).toEqual({
+      errorMessage: 'Invalid monitor key(s) for tcp type:  source.inline.script',
+      formattedConfig: {
+        type: 'tcp',
+      },
+    });
+
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        'source.inline.script': 'https://www.google.com',
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        'source.inline.script': 'https://www.google.com',
+      },
+    });
+  });
+
+  it('params key mapping validation', function () {
+    expect(normalizeAPIConfig({ type: 'browser', params: '{}' } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
+      errorMessage: "Invalid params: Expected property name or '}' in JSON at position 1",
+      formattedConfig: {
+        type: 'browser',
+        params: '{d}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: {} } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: { a: [] } } as any)).toEqual({
+      errorMessage: 'Invalid params: [a]: expected value of type [string] but got [Array]',
+      formattedConfig: {
+        type: 'browser',
+        params: { a: [] },
+      },
+    });
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: { username: 'test', pass: 'test' } } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{"username":"test","pass":"test"}',
+      },
+    });
+  });
+
+  it('playwright_options key mapping validation', function () {
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{}' } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{d}' } as any)).toEqual({
+      errorMessage:
+        "Invalid playwright_options: Expected property name or '}' in JSON at position 1",
+      formattedConfig: {
+        playwright_options: '{d}',
+        type: 'browser',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: {} } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: { a: [] } } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{"a":[]}',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        playwright_options: {
+          a: {
+            b: 'c',
+            d: 'e',
+          },
+        },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{"a":{"b":"c","d":"e"}}',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        playwright_options: { username: 'test', pass: 'test' },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{"username":"test","pass":"test"}',
+      },
+    });
+  });
+
+  it('ssl key normalization', function () {
+    expect(
+      normalizeAPIConfig({
+        type: 'http',
+        ssl: {
+          key: '',
+          certificate: '',
+          verification_mode: 'full',
+          supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        __ui: {
+          is_tls_enabled: true,
+        },
+        type: 'http',
+        'ssl.certificate': '',
+        'ssl.key': '',
+        'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        'ssl.verification_mode': 'full',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'http',
+        __ui: { is_tls_enabled: false },
+        ssl: {
+          key: '',
+          certificate: '',
+          verification_mode: 'full',
+          supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        __ui: { is_tls_enabled: false },
+        type: 'http',
+        'ssl.certificate': '',
+        'ssl.key': '',
+        'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        'ssl.verification_mode': 'full',
+      },
+    });
+  });
+});
+
 function getJsonPayload() {
   const json =
     '{' +
@@ -469,7 +810,7 @@ function getJsonPayload() {
     '    "unit": "m"' +
     '  },' +
     '  "service.name": "",' +
-    '  "timeout": "3m",' +
+    '  "timeout": "30",' +
     '  "__ui": {' +
     '    "is_tls_enabled": false,' +
     '    "script_source": {' +

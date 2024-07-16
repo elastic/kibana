@@ -58,14 +58,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
       return response.forbidden();
     }
 
-    const client = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
       const { analysis, logDebugMessage, stateHandler, responseStream, responseWithHeaders } =
         responseStreamFactory<T>({
           version,
-          client,
+          esClient,
           requestBody: request.body,
           events: request.events,
           headers: request.headers,
@@ -81,7 +81,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
           analysis.overridesHandler();
           responseStream.pushPingWithTimeout();
 
-          // Step 1: Index Info: Field candidates, total doc count, sample probability
+          // Step 1: Index Info: Field candidates and zero docs fallback flag
           const indexInfo = await analysis.indexInfoHandler();
 
           if (!indexInfo) {
@@ -133,7 +133,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
       }
 
       // Do not call this using `await` so it will run asynchronously while we return the stream already.
-      runAnalysis();
+      void runAnalysis();
 
       return response.ok(responseWithHeaders);
     });

@@ -6,27 +6,37 @@
  */
 
 import { Readable } from 'stream';
-import { finished } from 'stream/promises';
-import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
 import { Logger } from '@kbn/core/server';
+import { parseBedrockStream, parseGeminiResponse } from '@kbn/langchain/server';
 
-type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
+type StreamParser = (
+  responseStream: Readable,
+  logger: Logger,
+  abortSignal?: AbortSignal,
+  tokenHandler?: (token: string) => void
+) => Promise<string>;
 
 export const handleStreamStorage = async ({
+  abortSignal,
   responseStream,
   actionTypeId,
   onMessageSent,
   logger,
 }: {
+  abortSignal?: AbortSignal;
   responseStream: Readable;
   actionTypeId: string;
   onMessageSent?: (content: string) => void;
   logger: Logger;
 }): Promise<void> => {
   try {
-    const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-    // TODO @steph add abort signal
-    const parsedResponse = await parser(responseStream, logger);
+    const parser =
+      actionTypeId === '.bedrock'
+        ? parseBedrockStream
+        : actionTypeId === '.gemini'
+        ? parseGeminiStream
+        : parseOpenAIStream;
+    const parsedResponse = await parser(responseStream, logger, abortSignal);
     if (onMessageSent) {
       onMessageSent(parsedResponse);
     }
@@ -37,7 +47,7 @@ export const handleStreamStorage = async ({
   }
 };
 
-const parseOpenAIStream: StreamParser = async (stream) => {
+const parseOpenAIStream: StreamParser = async (stream, logger, abortSignal) => {
   let responseBody = '';
   stream.on('data', (chunk) => {
     responseBody += chunk.toString();
@@ -49,6 +59,12 @@ const parseOpenAIStream: StreamParser = async (stream) => {
     stream.on('error', (err) => {
       reject(err);
     });
+    if (abortSignal) {
+      abortSignal.addEventListener('abort', () => {
+        stream.destroy();
+        resolve(parseOpenAIResponse(responseBody));
+      });
+    }
   });
 };
 
@@ -77,33 +93,24 @@ const parseOpenAIResponse = (responseBody: string) =>
       return prev + (msg.content || '');
     }, '');
 
-const parseBedrockStream: StreamParser = async (responseStream, logger: Logger) => {
-  const responseBuffer: Uint8Array[] = [];
-  responseStream.on('data', (chunk) => {
-    // special encoding for bedrock, do not attempt to convert to string
-    responseBuffer.push(chunk);
+export const parseGeminiStream: StreamParser = async (stream, logger, abortSignal) => {
+  let responseBody = '';
+  stream.on('data', (chunk) => {
+    responseBody += chunk.toString();
   });
-  await finished(responseStream);
-
-  return parseBedrockBuffer(responseBuffer, logger);
-};
-
-/**
- * Parses a Bedrock buffer from an array of chunks.
- *
- * @param {Uint8Array[]} chunks - Array of Uint8Array chunks to be parsed.
- * @returns {string} - Parsed string from the Bedrock buffer.
- */
-const parseBedrockBuffer = (chunks: Uint8Array[], logger: Logger): string => {
-  // Initialize an empty Uint8Array to store the concatenated buffer.
-  let bedrockBuffer: Uint8Array = new Uint8Array(0);
-
-  // Map through each chunk to process the Bedrock buffer.
-  return chunks
-    .map((chunk) => {
-      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer, logger });
-      bedrockBuffer = processedChunk.bedrockBuffer;
-      return processedChunk.decodedChunk;
-    })
-    .join('');
+  return new Promise((resolve, reject) => {
+    stream.on('end', () => {
+      resolve(parseGeminiResponse(responseBody));
+    });
+    stream.on('error', (err) => {
+      reject(err);
+    });
+    if (abortSignal) {
+      abortSignal.addEventListener('abort', () => {
+        stream.destroy();
+        logger.info('Gemini stream parsing was aborted.');
+        resolve(parseGeminiResponse(responseBody));
+      });
+    }
+  });
 };

@@ -33,7 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.addVisualizations([
           PageObjects.dashboard.getTestVisualizationNames()[0],
         ]);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: false,
+          saveAsNew: true,
+        });
       });
 
       it('Does not set the time picker on open', async () => {
@@ -51,7 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is saved with time', async function () {
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: true,
+          saveAsNew: false,
+        });
       });
 
       it('sets time on open', async function () {

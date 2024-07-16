@@ -17,7 +17,7 @@ import {
   EuiTitle,
   EuiSwitch,
 } from '@elastic/eui';
-import { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
+import { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { v4 } from 'uuid';
@@ -34,9 +34,10 @@ import {
 } from '../../../common/constants';
 import { WindowResult } from './validation';
 import { BudgetConsumed } from './budget_consumed';
+import { ShortWindowDuration } from './short_window_duration';
 
 interface WindowProps extends WindowSchema {
-  slo?: SLOResponse;
+  slo?: SLODefinitionResponse;
   onChange: (windowDef: WindowSchema) => void;
   onDelete: (id: string) => void;
   disableDelete: boolean;
@@ -53,7 +54,7 @@ const ACTION_GROUP_OPTIONS = [
 
 export const calculateMaxBurnRateThreshold = (
   longWindow: Duration,
-  slo?: SLOResponse | CreateSLOInput
+  slo?: SLODefinitionResponse | CreateSLOInput
 ) => {
   return slo
     ? Math.floor(toMinutes(toDuration(slo.timeWindow.duration)) / toMinutes(longWindow))
@@ -75,14 +76,23 @@ function Window({
   budgetMode = true,
 }: WindowProps) {
   const onLongWindowDurationChange = (duration: Duration) => {
-    const longWindowDurationInMinutes = toMinutes(duration);
-    const shortWindowDurationValue = Math.floor(longWindowDurationInMinutes / 12);
     onChange({
       id,
       burnRateThreshold,
       maxBurnRateThreshold,
       longWindow: duration,
-      shortWindow: { value: shortWindowDurationValue, unit: 'm' },
+      shortWindow,
+      actionGroup,
+    });
+  };
+
+  const onShortWindowDurationChange = (duration: Duration) => {
+    onChange({
+      id,
+      burnRateThreshold,
+      maxBurnRateThreshold,
+      longWindow,
+      shortWindow: duration,
       actionGroup,
     });
   };
@@ -135,13 +145,20 @@ function Window({
 
   return (
     <>
-      <EuiFlexGroup direction="row" alignItems="center">
+      <EuiFlexGroup direction="row" alignItems="flexEnd">
         <EuiFlexItem>
           <LongWindowDuration
             initialDuration={longWindow}
-            shortWindowDuration={shortWindow}
             onChange={onLongWindowDurationChange}
             errors={errors.longWindow}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ShortWindowDuration
+            longWindowDuration={longWindow}
+            initialDuration={shortWindow}
+            onChange={onShortWindowDurationChange}
+            errors={errors.shortWindow}
           />
         </EuiFlexItem>
         {!budgetMode && (
@@ -246,7 +263,7 @@ const getErrorBudgetExhaustionText = (
         },
       });
 export const createNewWindow = (
-  slo?: SLOResponse | CreateSLOInput,
+  slo?: SLODefinitionResponse | CreateSLOInput,
   partialWindow: Partial<WindowSchema> = {}
 ): WindowSchema => {
   const longWindow = partialWindow.longWindow || { value: 1, unit: 'h' };
@@ -264,7 +281,7 @@ export const createNewWindow = (
 interface WindowsProps {
   windows: WindowSchema[];
   onChange: (windows: WindowSchema[]) => void;
-  slo?: SLOResponse;
+  slo?: SLODefinitionResponse;
   errors: WindowResult[];
   totalNumberOfWindows?: number;
 }
@@ -300,6 +317,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
       {windows.map((windowDef, index) => {
         const windowErrors = errors[index] || {
           longWindow: new Array<string>(),
+          shortWindow: new Array<string>(),
           burnRateThreshold: new Array<string>(),
         };
         return (

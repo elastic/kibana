@@ -14,7 +14,7 @@ import type SuperTest from 'supertest';
  * @param supertest Supertest instance
  * @returns The API endpoint response. Will have status 200 if package installed or 404 if not
  */
-export async function getPrebuiltRulesFleetPackage(supertest: SuperTest.SuperTest<SuperTest.Test>) {
+export async function getPrebuiltRulesFleetPackage(supertest: SuperTest.Agent) {
   return await supertest
     .get(epmRouteService.getInfoPath('security_detection_engine'))
     .set('kbn-xsrf', 'true')

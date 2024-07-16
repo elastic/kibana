@@ -5,48 +5,58 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { panels } from './panels';
-
-export type PreviewPanelPaths = 'rule-preview' | 'alert-reason-preview';
-export const RulePreviewPanel: PreviewPanelPaths = 'rule-preview';
-export const AlertReasonPreviewPanel: PreviewPanelPaths = 'alert-reason-preview';
-export const DocumentDetailsPreviewPanelKey: PreviewPanelProps['key'] = 'document-details-preview';
-
-export interface PreviewPanelProps extends FlyoutPanelProps {
-  key: 'document-details-preview';
-  path?: PanelPath;
-  params?: {
-    id: string;
-    indexName: string;
-    scopeId: string;
-    ruleId?: string;
-  };
-}
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
+import { useTabs } from '../right/hooks/use_tabs';
+import { useFlyoutIsExpandable } from '../right/hooks/use_flyout_is_expandable';
+import { useDocumentDetailsContext } from '../shared/context';
+import type { DocumentDetailsProps } from '../shared/types';
+import { PanelHeader } from '../right/header';
+import { PanelContent } from '../right/content';
+import { PreviewPanelFooter } from './footer';
+import type { RightPanelTabType } from '../right/tabs';
+import { ALERT_PREVIEW_BANNER } from './constants';
 
 /**
- * Preview panel to be displayed on top of the document details expandable flyout right section
+ * Panel to be displayed in the document details expandable flyout on top of right section
  */
-export const PreviewPanel: React.FC<Partial<PreviewPanelProps>> = memo(({ path }) => {
-  const previewPanel = useMemo(() => {
-    return path ? panels.find((panel) => panel.id === path.tab) : null;
-  }, [path]);
+export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { eventId, indexName, scopeId, getFieldsData, dataAsNestedObject } =
+    useDocumentDetailsContext();
+  const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
 
-  if (!previewPanel) {
-    return null;
-  }
+  const { tabsDisplayed, selectedTabId } = useTabs({ flyoutIsExpandable, path });
+
+  const setSelectedTabId = (tabId: RightPanelTabType['id']) => {
+    openPreviewPanel({
+      id: DocumentDetailsPreviewPanelKey,
+      path: {
+        tab: tabId,
+      },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        isPreviewMode: true,
+        banner: ALERT_PREVIEW_BANNER,
+      },
+    });
+  };
+
   return (
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      direction="column"
-      gutterSize="none"
-      style={{ height: '100%' }}
-    >
-      <EuiFlexItem style={{ marginTop: '-15px' }}>{previewPanel.content}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{previewPanel.footer}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <PanelHeader
+        tabs={tabsDisplayed}
+        selectedTabId={selectedTabId}
+        setSelectedTabId={setSelectedTabId}
+        style={{ marginTop: '-15px' }}
+      />
+      <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
+      <PreviewPanelFooter />
+    </>
   );
 });
 

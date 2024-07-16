@@ -561,6 +561,7 @@ describe('getFullAgentPolicy', () => {
           updated_by: '',
           revision: 1,
           policy_id: '',
+          policy_ids: [''],
         },
         {
           id: 'package-policy-uuid-test-123',
@@ -598,6 +599,7 @@ describe('getFullAgentPolicy', () => {
           updated_by: '',
           revision: 1,
           policy_id: '',
+          policy_ids: [''],
         },
       ],
       is_managed: false,
@@ -714,6 +716,24 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
     });
   });
+
+  it('should return a policy with advanced settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_limits_go_max_procs: 2,
+        agent_logging_level: 'debug',
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      agent: {
+        limits: { go_max_procs: 2 },
+        logging: { level: 'debug' },
+      },
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {
@@ -797,7 +817,7 @@ ssl.test: 123
     `);
   });
 
-  it('should return placeholder ES_USERNAME and ES_PASSWORD for elasticsearch output type in standalone ', () => {
+  it('should return placeholder API_KEY for elasticsearch output type in standalone ', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
         id: 'id123',
@@ -813,18 +833,17 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
+        "api_key": "\${API_KEY}",
         "hosts": Array [
           "http://host.fr",
         ],
-        "password": "\${ES_PASSWORD}",
         "preset": "balanced",
         "type": "elasticsearch",
-        "username": "\${ES_USERNAME}",
       }
     `);
   });
 
-  it('should not return placeholder ES_USERNAME and ES_PASSWORD for logstash output type in standalone ', () => {
+  it('should not return placeholder API_KEY for logstash output type in standalone ', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
         id: 'id123',

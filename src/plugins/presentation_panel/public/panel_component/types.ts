@@ -8,14 +8,13 @@
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  PhaseEvent,
+  HasParentApi,
+  HasUniqueId,
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesBlockingError,
-  HasUniqueId,
   PublishesPanelDescription,
   PublishesPanelTitle,
-  HasParentApi,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
@@ -43,8 +42,6 @@ export interface PresentationPanelInternalProps<
 
   hideHeader?: boolean;
   hideInspector?: boolean;
-
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;

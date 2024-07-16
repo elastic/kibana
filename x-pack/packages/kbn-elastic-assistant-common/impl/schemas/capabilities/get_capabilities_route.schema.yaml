@@ -19,13 +19,13 @@ paths:
               schema:
                 type: object
                 properties:
+                  assistantKnowledgeBaseByDefault:
+                    type: boolean
                   assistantModelEvaluation:
                     type: boolean
-                  assistantStreamingEnabled:
-                    type: boolean
                 required:
+                  - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
-                  - assistantStreamingEnabled
         '400':
           description: Generic Error
           content:

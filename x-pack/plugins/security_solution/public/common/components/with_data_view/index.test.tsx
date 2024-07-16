@@ -8,13 +8,13 @@ import React, { useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { render, screen } from '@testing-library/react';
 import { withDataView } from '.';
-import { useGetScopedSourcererDataView } from '../sourcerer/use_get_sourcerer_data_view';
+import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 
 interface TestComponentProps {
   dataView: DataView;
 }
 
-jest.mock('../sourcerer/use_get_sourcerer_data_view');
+jest.mock('../../../sourcerer/components/use_get_sourcerer_data_view');
 
 const TEST_ID = {
   DATA_VIEW_ERROR_COMPONENT: 'dataViewErrorComponent',

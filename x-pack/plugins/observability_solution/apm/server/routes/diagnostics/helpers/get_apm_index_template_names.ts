@@ -7,6 +7,7 @@
 
 import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 
+const suffix = 'template';
 export function getApmIndexTemplateNames() {
   const indexTemplateNames = [
     'logs-apm.app',
@@ -27,31 +28,35 @@ export function getApmIndexTemplateNames() {
     ].map((ds) => `${ds}.${interval}`);
   });
 
-  return [...indexTemplateNames, ...rollupIndexTemplateNames];
+  // For retrocompatibility, it returns index template names both pre and post APM integration package v8.15.0
+  return [...indexTemplateNames, ...rollupIndexTemplateNames].reduce((acc, indexTemplateName) => {
+    acc[indexTemplateName] = [indexTemplateName, `${indexTemplateName}@${suffix}`];
+    return acc;
+  }, {} as Record<string, string[]>);
 }
 
 export function getApmIndexTemplates(
   existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
 ) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
-  const standardIndexTemplates = apmIndexTemplateNames.map((templateName) => {
-    const matchingTemplate = existingIndexTemplates.find(
-      ({ name }) => name === templateName
-    );
+  const standardIndexTemplates = Object.entries(apmIndexTemplateNames).map(
+    ([baseTemplateName, validIndexTemplateNames]) => {
+      const matchingTemplate = validIndexTemplateNames.find((templateName) =>
+        existingIndexTemplates.find(({ name }) => name === templateName)
+      );
 
-    return {
-      name: templateName,
-      exists: Boolean(matchingTemplate),
-      isNonStandard: false,
-    };
-  });
+      return {
+        name: matchingTemplate ?? baseTemplateName,
+        exists: Boolean(matchingTemplate),
+        isNonStandard: false,
+      };
+    }
+  );
 
   const nonStandardIndexTemplates = existingIndexTemplates
     .filter(
       (indexTemplate) =>
-        standardIndexTemplates.some(
-          ({ name }) => name === indexTemplate.name
-        ) === false
+        standardIndexTemplates.some(({ name }) => name === indexTemplate.name) === false
     )
     .map((indexTemplate) => ({
       name: indexTemplate.name,

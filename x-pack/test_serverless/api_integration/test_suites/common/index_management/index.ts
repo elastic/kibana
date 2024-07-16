@@ -8,11 +8,12 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Index Management APIs', function () {
+  describe('Serverless Index Management APIs', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./index_templates'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./inference_endpoints'));
     loadTestFile(require.resolve('./enrich_policies'));
     loadTestFile(require.resolve('./create_enrich_policies'));
     loadTestFile(require.resolve('./index_component_templates'));

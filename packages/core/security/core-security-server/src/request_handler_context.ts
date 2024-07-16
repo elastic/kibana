@@ -8,10 +8,19 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
+import { AuditLogger } from './audit_logging/audit_logger';
+import type { APIKeysServiceWithContext } from './authentication/api_keys';
+
 export interface SecurityRequestHandlerContext {
   authc: AuthcRequestHandlerContext;
+  audit: AuditRequestHandlerContext;
 }
 
 export interface AuthcRequestHandlerContext {
   getCurrentUser(): AuthenticatedUser | null;
+  apiKeys: APIKeysServiceWithContext;
+}
+
+export interface AuditRequestHandlerContext {
+  logger: AuditLogger;
 }

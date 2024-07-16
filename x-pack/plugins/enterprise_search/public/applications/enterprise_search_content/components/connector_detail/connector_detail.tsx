@@ -18,12 +18,12 @@ import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { connectorsBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
+import { getHeaderActions } from '../shared/header_actions/header_actions';
 
 import { ConnectorConfiguration } from './connector_configuration';
 import { ConnectorNameAndDescription } from './connector_name_and_description';
@@ -58,9 +58,20 @@ export const ConnectorDetail: React.FC = () => {
   }>();
 
   const {
-    productAccess: { hasAppSearchAccess },
+    guidedOnboarding,
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('databaseSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS = [
     {
@@ -126,7 +137,7 @@ export const ConnectorDetail: React.FC = () => {
       ? [
           {
             content: <ConnectorSyncRules />,
-            disabled: !connector?.index_name,
+            disabled: !index,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
@@ -189,7 +200,7 @@ export const ConnectorDetail: React.FC = () => {
 
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
-    disabled: !connector?.index_name,
+    disabled: !index,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
@@ -239,7 +250,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
+        rightSideItems: getHeaderActions(index, connector),
         tabs,
       }}
     >

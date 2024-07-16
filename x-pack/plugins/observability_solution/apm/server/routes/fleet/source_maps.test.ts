@@ -14,7 +14,7 @@ const packagePolicy = {
   name: 'apm-1',
   description: '',
   namespace: 'default',
-  policy_id: '7a87c160-c961-11eb-81e2-f7327d61c92a',
+  policy_ids: ['7a87c160-c961-11eb-81e2-f7327d61c92a'],
   enabled: true,
   inputs: [
     {
@@ -116,18 +116,14 @@ describe('Source maps', () => {
                         {
                           'service.name': 'service_name',
                           'service.version': '1.0.0',
-                          'bundle.filepath':
-                            'http://localhost:3000/static/js/main.chunk.js',
-                          'sourcemap.url':
-                            '/api/fleet/artifacts/service_name-1.0.0/my-id-1',
+                          'bundle.filepath': 'http://localhost:3000/static/js/main.chunk.js',
+                          'sourcemap.url': '/api/fleet/artifacts/service_name-1.0.0/my-id-1',
                         },
                         {
                           'service.name': 'service_name',
                           'service.version': '2.0.0',
-                          'bundle.filepath':
-                            'http://localhost:3000/static/js/main.chunk.js',
-                          'sourcemap.url':
-                            '/api/fleet/artifacts/service_name-2.0.0/my-id-2',
+                          'bundle.filepath': 'http://localhost:3000/static/js/main.chunk.js',
+                          'sourcemap.url': '/api/fleet/artifacts/service_name-2.0.0/my-id-2',
                         },
                       ],
                     },
@@ -160,18 +156,14 @@ describe('Source maps', () => {
                   {
                     'service.name': 'service_name',
                     'service.version': '1.0.0',
-                    'bundle.filepath':
-                      'http://localhost:3000/static/js/main.chunk.js',
-                    'sourcemap.url':
-                      '/api/fleet/artifacts/service_name-1.0.0/my-id-1',
+                    'bundle.filepath': 'http://localhost:3000/static/js/main.chunk.js',
+                    'sourcemap.url': '/api/fleet/artifacts/service_name-1.0.0/my-id-1',
                   },
                   {
                     'service.name': 'service_name',
                     'service.version': '2.0.0',
-                    'bundle.filepath':
-                      'http://localhost:3000/static/js/main.chunk.js',
-                    'sourcemap.url':
-                      '/api/fleet/artifacts/service_name-2.0.0/my-id-2',
+                    'bundle.filepath': 'http://localhost:3000/static/js/main.chunk.js',
+                    'sourcemap.url': '/api/fleet/artifacts/service_name-2.0.0/my-id-2',
                   },
                 ],
               },
@@ -191,9 +183,9 @@ describe('Source maps', () => {
     });
 
     it('returns same path when it is not a valid url', () => {
-      expect(
-        getCleanedBundleFilePath('/general-usecase/bundle.js.map')
-      ).toEqual('/general-usecase/bundle.js.map');
+      expect(getCleanedBundleFilePath('/general-usecase/bundle.js.map')).toEqual(
+        '/general-usecase/bundle.js.map'
+      );
     });
   });
 });

@@ -24,7 +24,7 @@ export const SETTINGS_DESCRIPTION = i18n.translate(
 export const RUN_DETAILS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.runDetailsTitle',
   {
-    defaultMessage: '🏃 Run Details',
+    defaultMessage: 'Run Details',
   }
 );
 
@@ -38,7 +38,7 @@ export const RUN_DETAILS_DESCRIPTION = i18n.translate(
 export const PREDICTION_DETAILS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.predictionDetailsTitle',
   {
-    defaultMessage: '🔮 Predictions',
+    defaultMessage: 'Predictions',
   }
 );
 
@@ -53,7 +53,7 @@ export const PREDICTION_DETAILS_DESCRIPTION = i18n.translate(
 export const EVALUATION_DETAILS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluationDetailsTitle',
   {
-    defaultMessage: '🧮 Evaluation (Optional)',
+    defaultMessage: 'Evaluation (Optional)',
   }
 );
 
@@ -190,6 +190,60 @@ export const EVALUATOR_OUTPUT_INDEX_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Index to write results to. Must be prefixed with ".kibana-elastic-ai-assistant-"',
+  }
+);
+
+export const SHOW_TRACE_OPTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.showTraceOptionsLabel',
+  {
+    defaultMessage: 'Show Trace Options (for internal use only)',
+  }
+);
+
+export const APM_URL_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.apmUrlLabel',
+  {
+    defaultMessage: 'APM URL',
+  }
+);
+
+export const APM_URL_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.apmUrlDescription',
+  {
+    defaultMessage:
+      'URL for the Kibana APM app. Used to link to APM traces for evaluation results. Defaults to "{defaultUrlPath}"',
+    values: {
+      defaultUrlPath: '${basePath}/app/apm',
+    },
+  }
+);
+
+export const LANGSMITH_PROJECT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithProjectLabel',
+  {
+    defaultMessage: 'LangSmith Project',
+  }
+);
+
+export const LANGSMITH_PROJECT_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithProjectDescription',
+  {
+    defaultMessage: 'LangSmith Project to write traces to',
+  }
+);
+
+export const LANGSMITH_API_KEY_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithApiKeyLabel',
+  {
+    defaultMessage: 'LangSmith API Key',
+  }
+);
+
+export const LANGSMITH_API_KEY_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.langSmithApiKeyDescription',
+  {
+    defaultMessage:
+      'API Key for writing traces to LangSmith. Stored in Session Storage. Close tab to clear session.',
   }
 );
 

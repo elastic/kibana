@@ -12,6 +12,8 @@ import {
   type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { capitalize } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -19,11 +21,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
-import { APM_HOST_FILTER_FIELD } from '../constants';
-import { LinkToAlertsRule, LinkToNodeDetails } from '../links';
+import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
+import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
+import { getApmField } from '../utils';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -95,7 +98,9 @@ const useRightSideItems = (links?: LinkOptions[]) => {
       nodeDetails: (
         <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
       ),
-      alertRule: <LinkToAlertsRule />,
+      alertRule: (
+        <CreateAlertRuleButton data-test-subj="infraAssetDetailsPageHeaderCreateAlertsRuleButton" />
+      ),
     }),
     [asset.id, asset.name, asset.type]
   );
@@ -111,13 +116,17 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 const useFeatureFlagTabs = () => {
   const { featureFlags } = usePluginConfig();
   const isProfilingEnabled = useProfilingIntegrationSetting();
+  const isInfrastructureAssetCustomDashboardsEnabled = useUiSetting<boolean>(
+    enableInfrastructureAssetCustomDashboards
+  );
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
       [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
       [ContentTabIds.PROFILING]: isProfilingEnabled,
+      [ContentTabIds.DASHBOARDS]: isInfrastructureAssetCustomDashboardsEnabled,
     }),
-    [featureFlags.osqueryEnabled, isProfilingEnabled]
+    [featureFlags.osqueryEnabled, isInfrastructureAssetCustomDashboardsEnabled, isProfilingEnabled]
   );
 
   const isTabEnabled = useCallback(
@@ -148,7 +157,7 @@ const useTabs = (tabs: Tab[]) => {
     app: 'apm',
     hash: 'traces',
     search: {
-      kuery: `${APM_HOST_FILTER_FIELD}:"${asset.name}"`,
+      kuery: `${getApmField(asset.type)}:"${asset.id}"`,
     },
   });
 

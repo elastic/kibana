@@ -244,7 +244,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                   </span>
                 </div>
                 <hr
-                  class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
+                  class="euiHorizontalRule emotion-euiHorizontalRule-full-m"
                 />
                 <form>
                   <div
@@ -279,7 +279,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             >
                               <input
                                 aria-describedby="generated-id-help-0"
-                                class="euiFieldText euiFieldText--compressed"
+                                class="euiFieldText emotion-euiFieldText-compressed"
                                 id="generated-id"
                                 type="text"
                                 value="5s"

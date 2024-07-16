@@ -11,11 +11,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
-  MULTILAYER_TIME_AXIS_STYLE,
-  renderEndzoneTooltip,
-  useActiveCursor,
-} from '@kbn/charts-plugin/public';
-import {
+  LegendValue,
   Axis,
   Chart,
   Position,
@@ -27,6 +23,11 @@ import {
   Placement,
   Tooltip,
 } from '@elastic/charts';
+import {
+  MULTILAYER_TIME_AXIS_STYLE,
+  renderEndzoneTooltip,
+  useActiveCursor,
+} from '@kbn/charts-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
@@ -183,7 +184,7 @@ export const TimeSeries = ({
       <Settings
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
-        showLegendExtra={true}
+        legendValues={[LegendValue.CurrentAndLastValue]}
         onRenderChange={onRenderChange}
         allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}

@@ -24,10 +24,8 @@
       "discover"
     ],
     "optionalPlugins": [
-      "securitySolutionEss"
+      "securitySolutionEss",
+      "integrationAssistant"
     ],
-    "requiredBundles": [
-      "usageCollection"
-    ]
   }
 }

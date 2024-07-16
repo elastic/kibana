@@ -85,16 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(
-        await find.existsByCssSelector(
-          '[aria-label="Chrome Mobile iOS; Activate to hide series in graph"]'
-        )
-      ).to.eql(true);
-      expect(
-        await find.existsByCssSelector(
-          '[aria-label="Mobile Safari; Activate to hide series in graph"]'
-        )
-      ).to.eql(true);
+      // if breakdown we should have multiple legend items
+      const legendItems = await find.allByCssSelector('.echLegendItem');
+      expect(legendItems.length).to.be(11);
     });
   });
 }

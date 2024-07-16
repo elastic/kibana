@@ -10,10 +10,12 @@ import { recurse } from 'cypress-recurse';
 import {
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_MANUAL_RULE_RUN_WARNING_BTN,
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
   MODAL_CONFIRMATION_BODY,
+  MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_TITLE,
   RULES_TAGS_FILTER_BTN,
   TOASTER_BODY,
@@ -21,6 +23,7 @@ import {
 import { EUI_SELECTABLE_LIST_ITEM, TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
   ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   ADD_RULE_ACTIONS_MENU_ITEM,
   ADD_TAGS_RULE_BULK_MENU_ITEM,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
@@ -28,22 +31,28 @@ import {
   BULK_ACTIONS_PROGRESS_BTN,
   BULK_EXPORT_ACTION_BTN,
   DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   DELETE_RULE_BULK_BTN,
   DELETE_TAGS_RULE_BULK_MENU_ITEM,
   DISABLE_RULE_BULK_BTN,
   DUPLICATE_RULE_BULK_BTN,
   ENABLE_RULE_BULK_BTN,
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_FORM_CONFIRM_BTN,
   RULES_BULK_EDIT_FORM_TITLE,
   RULES_BULK_EDIT_INDEX_PATTERNS,
+  RULES_BULK_EDIT_INVESTIGATION_FIELDS,
   RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
+  RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
+  BULK_MANUAL_RULE_RUN_BTN,
+  BULK_MANUAL_RULE_RUN_WARNING_MODAL,
   TAGS_RULE_BULK_MENU_ITEM,
   UPDATE_SCHEDULE_INTERVAL_INPUT,
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
@@ -232,6 +241,46 @@ export const checkTagsInTagsFilter = (tags: string[], srOnlyText: string = '') =
     });
 };
 
+// EDIT-INVESTIGATION FIELDS
+const clickInvestigationFieldsMenuItem = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+};
+
+export const clickAddInvestigationFieldsMenuItem = () => {
+  clickInvestigationFieldsMenuItem();
+  cy.get(ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+};
+
+export const openBulkEditAddInvestigationFieldsForm = () => {
+  clickAddInvestigationFieldsMenuItem();
+
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add custom highlighted fields');
+};
+
+export const openBulkEditDeleteInvestigationFieldsForm = () => {
+  clickInvestigationFieldsMenuItem();
+  cy.get(DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete custom highlighted fields');
+};
+
+export const typeInvestigationFields = (fields: string[]) => {
+  cy.get(RULES_BULK_EDIT_INVESTIGATION_FIELDS)
+    .find('input')
+    .type(fields.join('{enter}') + '{enter}');
+};
+
+export const checkOverwriteInvestigationFieldsCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
+    .should('have.text', 'Overwrite the custom highlighted fields for the selected rules')
+    .click();
+  cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
+    .should('have.text', 'Overwrite the custom highlighted fields for the selected rules')
+    .get('input')
+    .should('be.checked');
+};
+
 // EDIT-SCHEDULE
 export const clickUpdateScheduleMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
@@ -383,4 +432,22 @@ export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
     'have.text',
     `This action can only be applied to ${customRulesCount} custom rules`
   );
+};
+
+// SCHEDULE MANUAL RULE RUN
+export const scheduleManualRuleRunForSelectedRules = (
+  enabledCount: number,
+  disabledCount: number
+) => {
+  cy.log('Bulk schedule manual rule run for selected rules');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_MANUAL_RULE_RUN_BTN).click();
+  if (disabledCount > 0) {
+    cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
+      'have.text',
+      `This action can only be applied to ${enabledCount} custom rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} custom rules`
+    );
+    cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
+  }
+  cy.get(MODAL_CONFIRMATION_BTN).click();
 };

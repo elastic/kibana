@@ -7,16 +7,17 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from '@kbn/core/server';
+import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { RiskScoreAuditActions } from '../../risk_score/audit';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import type { StartPlugins } from '../../../../plugin';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { getUserRiskEnginePrivileges } from '../risk_engine_privileges';
 
 export const riskEnginePrivilegesRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  router: EntityAnalyticsRoutesDeps['router'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
@@ -28,9 +29,20 @@ export const riskEnginePrivilegesRoute = (
     })
     .addVersion({ version: '1', validate: false }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-
       const [_, { security }] = await getStartServices();
-      const body = await getUserRiskEnginePrivileges(request, security);
+      const securitySolution = await context.securitySolution;
+
+      const body: EntityAnalyticsPrivileges = await getUserRiskEnginePrivileges(request, security);
+
+      securitySolution.getAuditLogger()?.log({
+        message: 'User checked if they have the required privileges to configure the risk engine',
+        event: {
+          action: RiskScoreAuditActions.RISK_ENGINE_PRIVILEGES_GET,
+          category: AUDIT_CATEGORY.AUTHENTICATION,
+          type: AUDIT_TYPE.ACCESS,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
 
       try {
         return response.ok({

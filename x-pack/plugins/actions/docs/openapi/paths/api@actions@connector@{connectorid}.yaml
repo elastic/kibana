@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a connector by ID.
+  summary: Get a connector information
   operationId: getConnector
   tags:
     - connectors
@@ -21,7 +21,7 @@ get:
       $ref: '../components/responses/404.yaml'
 
 delete:
-  summary: Deletes a connector.
+  summary: Delete a connector
   operationId: deleteConnector
   tags:
     - connectors
@@ -37,7 +37,7 @@ delete:
       $ref: '../components/responses/404.yaml'
 
 post:
-  summary: Creates a connector.
+  summary: Create a connector
   operationId: createConnectorId
   tags:
     - connectors
@@ -51,8 +51,7 @@ post:
       required: true
       schema:
         type: string
-        examples:
-          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
@@ -76,7 +75,7 @@ post:
       $ref: '../components/responses/401.yaml'
 
 put:
-  summary: Updates the attributes for a connector.
+  summary: Update a connector
   operationId: updateConnector
   tags:
     - connectors

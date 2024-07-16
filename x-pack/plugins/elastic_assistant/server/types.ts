@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
@@ -17,23 +18,33 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
-  SavedObjectsClientContract,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  AttackDiscoveryPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
 } from '@kbn/elastic-assistant-common';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
+
+import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
+import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -89,7 +100,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -102,6 +113,10 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getAIAssistantKnowledgeBaseDataClient: (
+    initializeKnowledgeBase: boolean
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -111,6 +126,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
  */
 export type ElasticAssistantRequestHandlerContext = CustomRequestHandlerContext<{
   elasticAssistant: ElasticAssistantApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
 }>;
 
 export type ElasticAssistantPluginRouter = IRouter<ElasticAssistantRequestHandlerContext>;
@@ -120,10 +136,7 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
   ElasticAssistantPluginStart
 >;
 
-export type GetElser = (
-  request: KibanaRequest,
-  savedObjectsClient: SavedObjectsClientContract
-) => Promise<string> | never;
+export type GetElser = () => Promise<string> | never;
 
 export interface InitAssistantResult {
   assistantResourcesInstalled: boolean;
@@ -135,30 +148,34 @@ export interface InitAssistantResult {
 export interface AssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
   };
   indexTemplate: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
   };
   aliases: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
   };
   indexPatterns: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
   };
   pipelines: {
-    kb: string;
+    knowledgeBase: string;
   };
 }
 
@@ -193,19 +210,26 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | null;
+  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
+  anonymizationFields?: AnonymizationFieldResponse[];
   isEnabledKnowledgeBase: boolean;
-  chain: RetrievalQAChain;
+  chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
+  langChainTimeout?: number;
+  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  request: KibanaRequest<
+    unknown,
+    unknown,
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
+  >;
   size?: number;
 }

@@ -134,9 +134,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getColumnIndex(columnName: string) {
       const element = await this.getElement();
-      const columnIndex = await (
+      const columnIndexAttr = await (
         await element.findByCssSelector(`[data-gridcell-column-id="${columnName}"]`)
       ).getAttribute('data-gridcell-column-index');
+      expect(columnIndexAttr).to.not.be(null);
+      const columnIndex = parseInt(columnIndexAttr ?? '-1', 10);
       expect(columnIndex).to.be.greaterThan(-1);
       return columnIndex;
     },
@@ -335,6 +337,10 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     return trueOrFalse;
   };
 
+  const getUnprivilegedPrompt = async () => {
+    return await testSubjects.find('status-api-unprivileged');
+  };
+
   return {
     navigateToLatestFindingsPage,
     navigateToLatestVulnerabilitiesPage,
@@ -354,5 +360,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     findingsGrouping,
     createDataTableObject,
     isLatestFindingsTableThere,
+    getUnprivilegedPrompt,
   };
 }

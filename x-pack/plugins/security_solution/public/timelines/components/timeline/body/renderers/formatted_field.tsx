@@ -9,7 +9,7 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isEmpty } from 'lodash/fp';
+import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 
@@ -18,9 +18,7 @@ import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
-import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -32,25 +30,26 @@ import { Port } from '../../../../../explore/network/components/port';
 import { PORT_NAMES } from '../../../../../explore/network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
+  AGENT_STATUS_FIELD_NAME,
   DATE_FIELD_TYPE,
+  EVENT_MODULE_FIELD_NAME,
+  EVENT_URL_FIELD_NAME,
+  GEO_FIELD_TYPE,
   HOST_NAME_FIELD_NAME,
-  USER_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
-  EVENT_MODULE_FIELD_NAME,
+  REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
-  REFERENCE_URL_FIELD_NAME,
-  EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
-  AGENT_STATUS_FIELD_NAME,
-  GEO_FIELD_TYPE,
+  USER_NAME_FIELD_NAME,
 } from './constants';
-import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
+import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
 import { AssetCriticalityLevel } from './asset_criticality_level';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -72,7 +71,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;
   fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<BrowserField>;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
@@ -126,7 +125,7 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldType === GEO_FIELD_TYPE) {
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
-    const classNames = truncate ? 'eui-textTruncate eui-alignMiddle' : undefined;
+    const classNames = truncate ? 'eui-textTruncate' : undefined;
     const date = (
       <FormattedDate
         className={classNames}
@@ -270,10 +269,10 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (
-    fieldName === SENTINEL_ONE_AGENT_ID_FIELD ||
-    fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
+    fieldName === AGENT_STATUS_FIELD_NAME &&
+    fieldFromBrowserField?.name === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one
   ) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
+    return <AgentStatus agentId={String(value ?? '')} agentType="sentinel_one" />;
   } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel
@@ -288,8 +287,9 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
-      <EndpointAgentStatusById
-        endpointAgentId={String(value ?? '')}
+      <AgentStatus
+        agentId={String(value ?? '')}
+        agentType="endpoint"
         data-test-subj="endpointHostAgentStatus"
       />
     );

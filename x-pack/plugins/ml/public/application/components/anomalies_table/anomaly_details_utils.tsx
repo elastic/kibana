@@ -10,14 +10,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiToolTip,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import {
   getAnomalyScoreExplanationImpactValue,
@@ -231,43 +230,49 @@ export const DetailsItems: FC<{
 
   items.push({
     title: (
-      <EuiToolTip
-        position="left"
-        content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
-          defaultMessage:
-            'A normalized score between 0-100, which indicates the relative significance of the anomaly record result. This value might change as new data is analyzed.',
+      <span>
+        {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTitle', {
+          defaultMessage: 'Record score',
         })}
-      >
-        <span>
-          {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTitle', {
-            defaultMessage: 'Record score',
+        &nbsp;
+        <EuiIconTip
+          size="s"
+          color="subdued"
+          type="questionInCircle"
+          className="eui-alignTop"
+          position="left"
+          content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
+            defaultMessage:
+              'A normalized score between 0-100, which indicates the relative significance of the anomaly record result. This value might change as new data is analyzed.',
           })}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
+        />
+      </span>
     ),
     description: Math.floor(1000 * source.record_score) / 1000,
   });
 
   items.push({
     title: (
-      <EuiToolTip
-        position="left"
-        content={i18n.translate(
-          'xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip',
-          {
-            defaultMessage:
-              'A normalized score between 0-100, which indicates the relative significance of the anomaly record when the bucket was initially processed.',
-          }
-        )}
-      >
-        <span>
-          {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTitle', {
-            defaultMessage: 'Initial record score',
-          })}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
+      <span>
+        {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTitle', {
+          defaultMessage: 'Initial record score',
+        })}
+        &nbsp;
+        <EuiIconTip
+          size="s"
+          color="subdued"
+          type="questionInCircle"
+          className="eui-alignTop"
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip',
+            {
+              defaultMessage:
+                'A normalized score between 0-100, which indicates the relative significance of the anomaly record when the bucket was initially processed.',
+            }
+          )}
+        />
+      </span>
     ),
     description: Math.floor(1000 * source.initial_record_score) / 1000,
   });
@@ -368,24 +373,27 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (scoreDifference > ACCEPTABLE_NORMALIZATION) {
     explanationDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScoreTooltip',
-            {
-              defaultMessage:
-                'The initial record score has been reduced based on the analysis of subsequent data.',
-            }
-          )}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScore"
-              defaultMessage="Record score reduction"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScore"
+            defaultMessage="Record score reduction"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={i18n.translate(
+              'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScoreTooltip',
+              {
+                defaultMessage:
+                  'The initial record score has been reduced based on the analysis of subsequent data.',
+              }
+            )}
+          />
+        </span>
       ),
       description: (
         <EuiFlexGroup gutterSize="xs">
@@ -406,21 +414,24 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (explanation.anomaly_characteristics_impact !== undefined) {
     impactDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={getImpactTooltip(
-            explanation.anomaly_characteristics_impact,
-            'anomaly_characteristics'
-          )}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristics"
-              defaultMessage="Anomaly characteristics impact"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristics"
+            defaultMessage="Anomaly characteristics impact"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={getImpactTooltip(
+              explanation.anomaly_characteristics_impact,
+              'anomaly_characteristics'
+            )}
+          />
+        </span>
       ),
       description: <ImpactVisual score={explanation.anomaly_characteristics_impact} />,
     });
@@ -429,18 +440,21 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (explanation.single_bucket_impact !== undefined) {
     impactDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={getImpactTooltip(explanation.single_bucket_impact, 'single_bucket')}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucket"
-              defaultMessage="Single bucket impact"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucket"
+            defaultMessage="Single bucket impact"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={getImpactTooltip(explanation.single_bucket_impact, 'single_bucket')}
+          />
+        </span>
       ),
       description: <ImpactVisual score={explanation.single_bucket_impact} />,
     });
@@ -448,18 +462,21 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (explanation.multi_bucket_impact !== undefined) {
     impactDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={getImpactTooltip(explanation.multi_bucket_impact, 'multi_bucket')}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucket"
-              defaultMessage="Multi bucket impact"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucket"
+            defaultMessage="Multi bucket impact"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={getImpactTooltip(explanation.multi_bucket_impact, 'multi_bucket')}
+          />
+        </span>
       ),
       description: <ImpactVisual score={explanation.multi_bucket_impact} />,
     });
@@ -467,24 +484,27 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (explanation.high_variance_penalty !== undefined) {
     impactDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVarianceTooltip',
-            {
-              defaultMessage:
-                'Indicates reduction of anomaly score for the bucket with large confidence intervals. If a bucket has large confidence intervals, the score is reduced.',
-            }
-          )}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVariance"
-              defaultMessage="High variance interval"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVariance"
+            defaultMessage="High variance interval"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={i18n.translate(
+              'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVarianceTooltip',
+              {
+                defaultMessage:
+                  'Indicates reduction of anomaly score for the bucket with large confidence intervals. If a bucket has large confidence intervals, the score is reduced.',
+              }
+            )}
+          />
+        </span>
       ),
       description: explanation.high_variance_penalty ? yes : no,
     });
@@ -492,24 +512,27 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (explanation.multimodal_distribution !== undefined) {
     impactDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodalTooltip',
-            {
-              defaultMessage:
-                'Indicates whether the prior distribution of the time series is multi-modal or has a single mode.',
-            }
-          )}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodal"
-              defaultMessage="Multi-modal distribution"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodal"
+            defaultMessage="Multi-modal distribution"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={i18n.translate(
+              'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodalTooltip',
+              {
+                defaultMessage:
+                  'Indicates whether the prior distribution of the time series is multi-modal or has a single mode.',
+              }
+            )}
+          />
+        </span>
       ),
       description: explanation.multimodal_distribution ? yes : no,
     });
@@ -517,24 +540,27 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   if (explanation.incomplete_bucket_penalty !== undefined) {
     impactDetails.push({
       title: (
-        <EuiToolTip
-          position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
-            {
-              defaultMessage:
-                'If the bucket contains fewer samples than expected, the score is reduced.',
-            }
-          )}
-        >
-          <span>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucket"
-              defaultMessage="Incomplete bucket"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucket"
+            defaultMessage="Incomplete bucket"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="left"
+            content={i18n.translate(
+              'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
+              {
+                defaultMessage:
+                  'If the bucket contains fewer samples than expected, the score is reduced.',
+              }
+            )}
+          />
+        </span>
       ),
       description: explanation.incomplete_bucket_penalty ? yes : no,
     });

@@ -73,10 +73,9 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -89,10 +88,9 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -179,10 +177,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -195,10 +192,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -280,10 +276,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -296,10 +291,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -365,10 +359,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -381,10 +374,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -450,10 +442,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -466,10 +457,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -552,10 +542,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -568,10 +557,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -654,10 +642,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -670,10 +657,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -756,10 +742,9 @@ exports[`EditFilterList updates the items per page 1`] = `
           data-test-subj="mlFilterListCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -772,10 +757,9 @@ exports[`EditFilterList updates the items per page 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save"
             id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiText,
+  EuiTitle,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,17 +18,17 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from '../../tags/translations';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { Tags } from '../../tags/tags';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { schemaTags } from '../../create/schema';
+import { schema as createCaseSchema } from '../../create/schema';
 
-export const schema: FormSchema = {
-  tags: schemaTags,
+export const schema = {
+  tags: createCaseSchema.tags as FieldConfig<string[]>,
 };
 
 export interface EditTagsProps {
@@ -71,108 +71,109 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiText data-test-subj="case-view-tag-list">
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="none"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <h4>{i18n.TAGS}</h4>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        responsive={false}
+        data-test-subj="case-view-tag-list"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{i18n.TAGS}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
+        {!isLoading && permissions.update && (
+          <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
+            <EuiButtonIcon
+              data-test-subj="tag-list-edit-button"
+              aria-label={i18n.EDIT_TAGS_ARIA}
+              iconType={'pencil'}
+              onClick={() => setIsEditTags(true)}
+            />
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-          {!isLoading && permissions.update && (
-            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
-              <EuiButtonIcon
-                data-test-subj="tag-list-edit-button"
-                aria-label={i18n.EDIT_TAGS_ARIA}
-                iconType={'pencil'}
-                onClick={() => setIsEditTags(true)}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="xs" />
-        <EuiFlexGroup
-          css={css`
-            width: 100%;
-            p {
-              font-size: ${euiTheme.size.m};
-              margin-block-end: unset;
-            }
-          `}
-          gutterSize="none"
-          data-test-subj="case-tags"
-        >
-          {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {!isEditTags && (
-            <EuiFlexItem>
-              <Tags tags={tags} color="hollow" />
-            </EuiFlexItem>
-          )}
-          {isEditTags && (
-            <EuiFlexGroup
-              css={css`
-                & {
-                  max-width: 100%;
-                  @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
-                    flex-direction: row;
-                  }
+        )}
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="xs" />
+      <EuiFlexGroup
+        css={css`
+          width: 100%;
+          p {
+            font-size: ${euiTheme.size.m};
+            margin-block-end: unset;
+          }
+        `}
+        gutterSize="none"
+        data-test-subj="case-tags"
+      >
+        {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
+        {!isEditTags && (
+          <EuiFlexItem>
+            <Tags tags={tags} color="hollow" />
+          </EuiFlexItem>
+        )}
+        {isEditTags && (
+          <EuiFlexGroup
+            css={css`
+              & {
+                max-width: 100%;
+                @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
+                  flex-direction: row;
                 }
-              `}
-              data-test-subj="edit-tags"
-              direction="column"
-            >
-              <EuiFlexItem>
-                <Form form={form}>
-                  <UseField
-                    path="tags"
-                    component={ComboBoxField}
-                    componentProps={{
-                      idAria: 'caseTags',
-                      'data-test-subj': 'caseTags',
-                      euiFieldProps: {
-                        fullWidth: true,
-                        placeholder: '',
-                        options,
-                        noSuggestions: false,
-                        customOptionText: i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX,
-                      },
-                    }}
-                  />
-                </Form>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="success"
-                      data-test-subj="edit-tags-submit"
-                      fill
-                      iconType="save"
-                      onClick={onSubmitTags}
-                      size="s"
-                    >
-                      {i18n.SAVE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="edit-tags-cancel"
-                      iconType="cross"
-                      onClick={() => setIsEditTags(false)}
-                      size="s"
-                    >
-                      {i18n.CANCEL}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexGroup>
-      </EuiText>
+              }
+            `}
+            data-test-subj="edit-tags"
+            direction="column"
+          >
+            <EuiFlexItem>
+              <Form form={form}>
+                <UseField
+                  path="tags"
+                  component={ComboBoxField}
+                  componentProps={{
+                    idAria: 'caseTags',
+                    'data-test-subj': 'caseTags',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      placeholder: '',
+                      options,
+                      noSuggestions: false,
+                      customOptionText: i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX,
+                    },
+                  }}
+                />
+              </Form>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="success"
+                    data-test-subj="edit-tags-submit"
+                    fill
+                    iconType="save"
+                    onClick={onSubmitTags}
+                    size="s"
+                  >
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="edit-tags-cancel"
+                    iconType="cross"
+                    onClick={() => setIsEditTags(false)}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 });

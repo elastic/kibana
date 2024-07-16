@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
+
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import { _getMissingPrivilegesMessage } from './risk_engine_privileges';
 
 describe('_getMissingPrivilegesMessage', () => {

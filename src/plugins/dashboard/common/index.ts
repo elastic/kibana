@@ -15,7 +15,7 @@ export type {
   DashboardContainerByReferenceInput,
 } from './dashboard_container/types';
 
-export type { DashboardAttributes } from './content_management';
+export type { DashboardAttributes, SavedDashboardPanel } from './content_management';
 
 export {
   injectReferences,
@@ -26,6 +26,8 @@ export {
   createInject,
   createExtract,
 } from './dashboard_container/persistable_state/dashboard_container_references';
+
+export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
 
 export {
   convertPanelStateToSavedDashboardPanel,

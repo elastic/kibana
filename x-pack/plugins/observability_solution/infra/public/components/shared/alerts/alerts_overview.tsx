@@ -11,6 +11,7 @@ import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
@@ -20,19 +21,21 @@ import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
 interface AlertsOverviewProps {
-  assetName: string;
+  assetId: string;
   dateRange: TimeRange;
   onLoaded: (alertsCount?: AlertsCount) => void;
   onRangeSelection?: HostsStateUpdater;
+  assetType?: InventoryItemType;
 }
 
 const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
 
 export const AlertsOverview = ({
-  assetName,
+  assetId,
   dateRange,
   onLoaded,
   onRangeSelection,
+  assetType,
 }: AlertsOverviewProps) => {
   const { services } = useKibanaContextForPlugin();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
@@ -54,20 +57,22 @@ export const AlertsOverview = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [assetName],
+        assetIds: [assetId],
         status: alertStatus,
+        assetType,
       }),
-    [assetName, dateRange, alertStatus]
+    [dateRange, assetId, alertStatus, assetType]
   );
 
   const alertsEsQuery = useMemo(
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [assetName],
+        assetIds: [assetId],
         status: ALERT_STATUS_ALL,
+        assetType,
       }),
-    [assetName, dateRange]
+    [assetId, assetType, dateRange]
   );
 
   const summaryTimeRange = useSummaryTimeRange(dateRange);

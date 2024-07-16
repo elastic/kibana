@@ -103,7 +103,7 @@ export const EditConnector: React.FC = () => {
               <DeleteConnectorModal
                 closeDeleteModal={() => setDeleteModalIsOpen(false)}
                 connectorId={connector.id}
-                connectorName={connector.name || CONNECTOR_LABEL}
+                connectorName={connector.name}
                 onSuccess={() => navigateToUrl('./')}
               />
             )}

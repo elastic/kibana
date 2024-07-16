@@ -89,6 +89,10 @@ export const getPreviousDailyTaskTimestamp = (
   return lastExecutionTimestamp;
 };
 
+export function safeValue<T>(promise: PromiseSettledResult<T>, defaultValue: unknown = {}): T {
+  return promise.status === 'fulfilled' ? promise.value : (defaultValue as T);
+}
+
 /**
  * Chunks an Array<T> into an Array<Array<T>>
  * This is to prevent overloading the telemetry channel + user resources
@@ -190,7 +194,7 @@ export const ruleExceptionListItemToTelemetryEvent = (
 export const templateExceptionList = (
   listData: ExceptionListItem[],
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined,
+  licenseInfo: Nullable<ESLicense>,
   listType: string
 ) => {
   return listData.map((item) => {
@@ -234,7 +238,7 @@ export const templateExceptionList = (
 /**
  * Convert counter label list to kebab case
  *
- * @param label_list the list of labels to create standardized UsageCounter from
+ * @param labelList the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
 export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
@@ -256,7 +260,7 @@ export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfi
 export const formatValueListMetaData = (
   valueListResponse: ValueListResponse,
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined
+  licenseInfo: Nullable<ESLicense>
 ) => ({
   '@timestamp': moment().toISOString(),
   cluster_uuid: clusterInfo.cluster_uuid,
@@ -302,8 +306,11 @@ export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
   telemetryLogger(logger, message, meta);
 };
 
-export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
-  return new TelemetryLoggerImpl(logger);
+export const newTelemetryLogger = (
+  logger: Logger,
+  mdc?: LogMeta | object | undefined
+): TelemetryLogger => {
+  return new TelemetryLoggerImpl(logger, mdc);
 };
 
 function obfuscateString(clusterId: string, toHash: string): string {
@@ -360,6 +367,16 @@ export const ranges = (
   return { rangeFrom, rangeTo };
 };
 
+export const copyLicenseFields = (lic: ESLicense) => {
+  return {
+    uid: lic.uid,
+    status: lic.status,
+    type: lic.type,
+    ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
+    ...(lic.issuer ? { issuer: lic.issuer } : {}),
+  };
+};
+
 export class TelemetryTimelineFetcher {
   private receiver: ITelemetryReceiver;
   private extraInfo: Promise<ExtraInfo>;
@@ -382,7 +399,8 @@ export class TelemetryTimelineFetcher {
       entities[0].id,
       entities[0].schema,
       this.timeFrame.startOfDay,
-      this.timeFrame.endOfDay
+      this.timeFrame.endOfDay,
+      entities[0].agentId || ''
     );
 
     const nodeIds = Array.isArray(tree) ? tree.map((node) => node?.id.toString()) : [];
@@ -445,7 +463,7 @@ export class TelemetryTimelineFetcher {
     const _clusterInfo: ESClusterInfo =
       clusterInfoPromise.status === 'fulfilled' ? clusterInfoPromise.value : ({} as ESClusterInfo);
 
-    const licenseInfo: ESLicense | undefined =
+    const licenseInfo: Nullable<ESLicense> =
       licenseInfoPromise.status === 'fulfilled' ? licenseInfoPromise.value : ({} as ESLicense);
 
     return { clusterInfo: _clusterInfo, licenseInfo };

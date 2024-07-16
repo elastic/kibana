@@ -21,7 +21,7 @@ import {
  * @param supertest
  */
 export const createRuleThroughAlertingEndpoint = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   rule: InternalRuleCreate
 ): Promise<Rule<BaseRuleParams>> => {
   const { body } = await supertest

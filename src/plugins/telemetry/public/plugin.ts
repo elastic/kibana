@@ -22,7 +22,7 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+import { ElasticV3BrowserShipper } from '@kbn/ebt/shippers/elastic_v3/browser';
 import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
@@ -229,7 +229,7 @@ export class TelemetryPlugin
   }
 
   public start(
-    { analytics, http, overlays, theme, application, docLinks }: CoreStart,
+    { analytics, http, overlays, application, docLinks, ...startServices }: CoreStart,
     { screenshotMode }: TelemetryPluginStartDependencies
   ): TelemetryPluginStart {
     if (!this.telemetryService) {
@@ -243,9 +243,10 @@ export class TelemetryPlugin
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
-      theme,
       telemetryService: this.telemetryService,
       telemetryConstants,
+      analytics,
+      ...startServices,
     });
     this.telemetryNotifications = telemetryNotifications;
 

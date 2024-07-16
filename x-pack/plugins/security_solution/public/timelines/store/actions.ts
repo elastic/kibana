@@ -37,9 +37,11 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timel
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
-export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
-  'ADD_NOTE_TO_EVENT'
-);
+export const addNoteToEvent = actionCreator<{
+  id: string;
+  noteId: string;
+  eventId: string;
+}>('ADD_NOTE_TO_EVENT');
 
 export const deleteNoteFromEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
   'DELETE_NOTE_FROM_EVENT'
@@ -270,7 +272,7 @@ export const updateTotalCount = actionCreator<{ id: string; totalCount: number }
 
 export const updateSavedSearchId = actionCreator<{
   id: string;
-  savedSearchId: string;
+  savedSearchId: string | null;
 }>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
 
 export const initializeSavedSearch = actionCreator<{

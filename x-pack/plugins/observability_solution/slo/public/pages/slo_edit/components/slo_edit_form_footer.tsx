@@ -11,7 +11,7 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { useCreateRule } from '@kbn/observability-plugin/public';
+import { useCreateRule } from '../../../hooks/use_create_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
@@ -25,7 +25,7 @@ import {
 } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
-import { SLOInspectWrapper } from './common/slo_inspect';
+import { SLOInspectWrapper } from './common/slo_inspect/slo_inspect';
 
 export interface Props {
   slo?: GetSLOResponse;

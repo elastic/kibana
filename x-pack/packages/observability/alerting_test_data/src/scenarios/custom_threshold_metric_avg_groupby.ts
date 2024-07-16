@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 export const scenario5 = {
   dataView: {
@@ -22,7 +20,7 @@ export const scenario5 = {
     params: {
       criteria: [
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [80],
           timeSize: 5,
           timeUnit: 'm',

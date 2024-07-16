@@ -8,8 +8,8 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { SlosWelcomePage as Component } from './slos_welcome';
+import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 
 export default {
   component: Component,

@@ -6,12 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  isoToEpochRt,
-  jsonRt,
-  toBooleanRt,
-  toNumberRt,
-} from '@kbn/io-ts-utils';
+import { isoToEpochRt, jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
@@ -38,33 +33,22 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  filtersRt,
   kueryRt,
   probabilityRt,
   rangeRt,
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import {
-  getServiceAnnotations,
-  ServiceAnnotationResponse,
-} from './annotations';
-import {
-  getServicesItems,
-  ServicesItemsResponse,
-} from './get_services/get_services_items';
-import {
-  getServicesAlerts,
-  ServiceAlertsResponse,
-} from './get_services/get_service_alerts';
+import { getServiceAnnotations, ServiceAnnotationResponse } from './annotations';
+import { getServicesItems, ServicesItemsResponse } from './get_services/get_services_items';
+import { getServicesAlerts, ServiceAlertsResponse } from './get_services/get_service_alerts';
 import {
   getServiceTransactionDetailedStatsPeriods,
   ServiceTransactionDetailedStatPeriodsResponse,
 } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getServiceAgent, ServiceAgentResponse } from './get_service_agent';
-import {
-  getServiceDependencies,
-  ServiceDependenciesResponse,
-} from './get_service_dependencies';
+import { getServiceDependencies, ServiceDependenciesResponse } from './get_service_dependencies';
 import {
   getServiceDependenciesBreakdown,
   ServiceDependenciesBreakdownResponse,
@@ -85,18 +69,9 @@ import {
   getServiceInstanceMetadataDetails,
   ServiceInstanceMetadataDetailsResponse,
 } from './get_service_instance_metadata_details';
-import {
-  getServiceMetadataDetails,
-  ServiceMetadataDetails,
-} from './get_service_metadata_details';
-import {
-  getServiceMetadataIcons,
-  ServiceMetadataIcons,
-} from './get_service_metadata_icons';
-import {
-  getServiceNodeMetadata,
-  ServiceNodeMetadataResponse,
-} from './get_service_node_metadata';
+import { getServiceMetadataDetails, ServiceMetadataDetails } from './get_service_metadata_details';
+import { getServiceMetadataIcons, ServiceMetadataIcons } from './get_service_metadata_icons';
+import { getServiceNodeMetadata, ServiceNodeMetadataResponse } from './get_service_node_metadata';
 import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
 import {
   getServiceTransactionTypes,
@@ -150,21 +125,16 @@ const servicesRoute = createApmServerRoute({
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const [
-      mlClient,
-      apmEventClient,
-      apmAlertsClient,
-      serviceGroup,
-      randomSampler,
-    ] = await Promise.all([
-      getMlClient(resources),
-      getApmEventClient(resources),
-      getApmAlertsClient(resources),
-      serviceGroupId
-        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-        : Promise.resolve(null),
-      getRandomSampler({ security, request, probability }),
-    ]);
+    const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        getApmAlertsClient(resources),
+        serviceGroupId
+          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+          : Promise.resolve(null),
+        getRandomSampler({ security, request, probability }),
+      ]);
 
     return getServicesItems({
       environment,
@@ -200,9 +170,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
     body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<ServiceTransactionDetailedStatPeriodsResponse> => {
+  handler: async (resources): Promise<ServiceTransactionDetailedStatPeriodsResponse> => {
     const {
       params,
       request,
@@ -367,27 +335,20 @@ const serviceTransactionTypesRoute = createApmServerRoute({
 });
 
 const serviceNodeMetadataRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+  endpoint: 'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
   params: t.type({
     path: t.type({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      serviceTransactionDataSourceRt,
-    ]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt, serviceTransactionDataSourceRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceNodeMetadataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery, start, end, environment, documentType, rollupInterval } =
-      params.query;
+    const { kuery, start, end, environment, documentType, rollupInterval } = params.query;
 
     return getServiceNodeMetadata({
       kuery,
@@ -411,7 +372,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm', 'oas-tag:APM annotations'] },
   handler: async (resources): Promise<ServiceAnnotationResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, plugins, context, request, logger, config } = resources;
@@ -421,24 +382,22 @@ const serviceAnnotationsRoute = createApmServerRoute({
 
     const { observability } = plugins;
 
-    const [annotationsClient, searchAggregatedTransactions] = await Promise.all(
-      [
-        observability
-          ? withApmSpan(
-              'get_scoped_annotations_client',
-              (): Promise<undefined | ScopedAnnotationsClient> =>
-                observability.setup.getScopedAnnotationsClient(context, request)
-            )
-          : undefined,
-        getSearchTransactionsEvents({
-          apmEventClient,
-          config,
-          start,
-          end,
-          kuery: '',
-        }),
-      ]
-    );
+    const [annotationsClient, searchAggregatedTransactions] = await Promise.all([
+      observability
+        ? withApmSpan(
+            'get_scoped_annotations_client',
+            (): Promise<undefined | ScopedAnnotationsClient> =>
+              observability.setup.getScopedAnnotationsClient(context, request)
+          )
+        : undefined,
+      getSearchTransactionsEvents({
+        apmEventClient,
+        config,
+        start,
+        end,
+        kuery: '',
+      }),
+    ]);
 
     return getServiceAnnotations({
       environment,
@@ -457,7 +416,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
 const serviceAnnotationsCreateRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_write', 'oas-tag:APM annotations'],
   },
   params: t.type({
     path: t.type({
@@ -537,14 +496,8 @@ const serviceThroughputRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string }),
-      t.intersection([
-        environmentRt,
-        kueryRt,
-        rangeRt,
-        offsetRt,
-        serviceTransactionDataSourceRt,
-      ]),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -560,6 +513,7 @@ const serviceThroughputRoute = createApmServerRoute({
     const {
       environment,
       kuery,
+      filters,
       transactionType,
       transactionName,
       offset,
@@ -573,6 +527,7 @@ const serviceThroughputRoute = createApmServerRoute({
     const commonProps = {
       environment,
       kuery,
+      filters,
       serviceName,
       apmEventClient,
       transactionType,
@@ -609,8 +564,7 @@ const serviceThroughputRoute = createApmServerRoute({
 });
 
 const serviceInstancesMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -674,9 +628,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
 
     const [currentPeriod, previousPeriod] = await Promise.all([
       getServiceInstancesMainStatistics(commonParams),
-      ...(offset
-        ? [getServiceInstancesMainStatistics({ ...commonParams, offset })]
-        : []),
+      ...(offset ? [getServiceInstancesMainStatistics({ ...commonParams, offset })] : []),
     ]);
 
     return { currentPeriod, previousPeriod };
@@ -704,9 +656,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<ServiceInstancesDetailedStatisticsResponse> => {
+  handler: async (resources): Promise<ServiceInstancesDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { serviceName } = params.path;
@@ -761,22 +711,20 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    ServiceInstanceMetadataDetailsResponse &
-      (ServiceInstanceContainerMetadataDetails | {})
+    ServiceInstanceMetadataDetailsResponse & (ServiceInstanceContainerMetadataDetails | {})
   > => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
 
-    const serviceInstanceMetadataDetails =
-      await getServiceInstanceMetadataDetails({
-        apmEventClient,
-        serviceName,
-        serviceNodeName,
-        start,
-        end,
-      });
+    const serviceInstanceMetadataDetails = await getServiceInstanceMetadataDetails({
+      apmEventClient,
+      serviceName,
+      serviceNodeName,
+      start,
+      end,
+    });
 
     if (serviceInstanceMetadataDetails?.container?.id) {
       const infraMetricsClient = createInfraMetricsClient(resources);
@@ -812,11 +760,18 @@ export const serviceDependenciesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  async handler(
-    resources
-  ): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+  async handler(resources): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { serviceName } = params.path;
     const { environment, numBuckets, start, end, offset } = params.query;
 
@@ -829,6 +784,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
         environment,
         numBuckets,
         offset,
+        randomSampler,
       }),
     };
   },
@@ -850,8 +806,17 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
   ): Promise<{
     breakdown: ServiceDependenciesBreakdownResponse;
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { serviceName } = params.path;
     const { environment, start, end, kuery } = params.query;
 
@@ -862,6 +827,7 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
       serviceName,
       environment,
       kuery,
+      randomSampler,
     });
 
     return {
@@ -876,11 +842,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      t.type({ transactionType: t.string }),
-    ]),
+    query: t.intersection([rangeRt, environmentRt, t.type({ transactionType: t.string })]),
   }),
   options: {
     tags: ['access:apm'],
@@ -953,9 +915,7 @@ const serviceAlertsRoute = createApmServerRoute({
       end,
     });
 
-    return servicesAlerts.length > 0
-      ? servicesAlerts[0]
-      : { serviceName, alertsCount: 0 };
+    return servicesAlerts.length > 0 ? servicesAlerts[0] : { serviceName, alertsCount: 0 };
   },
 });
 

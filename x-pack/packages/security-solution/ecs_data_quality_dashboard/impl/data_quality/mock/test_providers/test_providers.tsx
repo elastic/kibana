@@ -31,6 +31,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+  const mockNavigateToApp = jest.fn();
   const mockTelemetryEvents = {
     reportDataQualityIndexChecked: jest.fn(),
     reportDataQualityCheckAllCompleted: jest.fn(),
@@ -39,6 +40,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
+    hasUpdateAIAssistantAnonymization: true,
     isAssistantEnabled: true,
   };
   const queryClient = new QueryClient({
@@ -62,20 +64,16 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={mockAssistantAvailability}
             augmentMessageCodeBlocks={jest.fn()}
-            baseAllow={[]}
-            baseAllowReplacement={[]}
             basePath={'https://localhost:5601/kbn'}
-            defaultAllow={[]}
-            defaultAllowReplacement={[]}
             docLinks={{
               ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
               DOC_LINK_VERSION: 'current',
             }}
             getComments={mockGetComments}
-            setDefaultAllow={jest.fn()}
-            setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
             baseConversations={{}}
+            navigateToApp={mockNavigateToApp}
+            currentAppId={'securitySolutionUI'}
           >
             <DataQualityProvider
               httpFetch={http.fetch}

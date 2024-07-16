@@ -8,5 +8,5 @@
 export { appModel } from './app';
 export { dragAndDropModel } from './drag_and_drop';
 export { inputsModel } from './inputs';
-export { sourcererModel } from './sourcerer';
+export { sourcererModel } from '../../sourcerer/store';
 export * from './types';

@@ -17,7 +17,7 @@ import {
   KQLCustomIndicator,
   MetricCustomIndicator,
   TimesliceMetricIndicator,
-  TimeWindow,
+  TimeWindowType,
 } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -78,7 +78,7 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
   },
 ];
 
-export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindow; text: string }> = [
+export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindowType; text: string }> = [
   {
     value: 'rolling',
     text: i18n.translate('xpack.slo.sloEdit.timeWindow.rolling', {
@@ -219,6 +219,9 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
+  settings: {
+    preventInitialBackfill: false,
+  },
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
@@ -235,6 +238,9 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
+  settings: {
+    preventInitialBackfill: false,
+  },
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm = {
@@ -251,6 +257,9 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm
     target: 99,
   },
   groupBy: SYNTHETICS_DEFAULT_GROUPINGS,
+  settings: {
+    preventInitialBackfill: false,
+  },
 };
 
 export const COMPARATOR_GT = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.gtLabel', {

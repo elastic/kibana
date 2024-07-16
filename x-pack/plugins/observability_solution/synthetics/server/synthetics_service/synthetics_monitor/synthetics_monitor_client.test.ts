@@ -52,7 +52,7 @@ describe('SyntheticsMonitorClient', () => {
 
   const serverMock: SyntheticsServerSetup = {
     logger,
-    uptimeEsClient: mockEsClient,
+    syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
@@ -153,7 +153,6 @@ describe('SyntheticsMonitorClient', () => {
         {
           id,
           monitor,
-          previousMonitor,
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
@@ -186,7 +185,6 @@ describe('SyntheticsMonitorClient', () => {
         {
           monitor,
           id,
-          previousMonitor,
           decryptedPreviousMonitor: previousMonitor,
         },
       ],

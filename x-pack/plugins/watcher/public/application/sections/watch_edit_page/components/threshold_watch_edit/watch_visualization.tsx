@@ -10,6 +10,7 @@ import {
   AnnotationDomainType,
   Axis,
   Chart,
+  LegendValue,
   LineAnnotation,
   LineSeries,
   PartialTheme,
@@ -89,9 +90,9 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { createTimeBuckets, theme, uiSettings } = useAppContext();
+  const { createTimeBuckets, chartsTheme, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartBaseTheme = theme.useChartsBaseTheme();
+  const chartBaseTheme = chartsTheme.useChartsBaseTheme();
   const {
     index,
     timeField,
@@ -221,7 +222,7 @@ export const WatchVisualization = () => {
               baseTheme={chartBaseTheme}
               xDomain={domain}
               showLegend={!!watch.termField}
-              showLegendExtra
+              legendValues={[LegendValue.CurrentAndLastValue]}
               legendPosition={Position.Bottom}
               locale={i18n.getLocale()}
             />

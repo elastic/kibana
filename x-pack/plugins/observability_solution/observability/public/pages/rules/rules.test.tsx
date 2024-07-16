@@ -38,6 +38,10 @@ jest.mock('../../utils/kibana_react', () => ({
   })),
 }));
 
+jest.mock('../../hooks/use_get_available_rules_with_descriptions', () => ({
+  useGetAvailableRulesWithDescriptions: jest.fn(),
+}));
+
 jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
@@ -54,7 +58,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
     unsafe: {
       alertDetails: {
         apm: { enabled: false },
-        metrics: { enabled: false },
         uptime: { enabled: false },
         observability: { enabled: false },
       },
@@ -212,7 +215,11 @@ describe('RulesPage with show only capability', () => {
       },
     });
 
-    return render(<RulesPage />);
+    return render(
+      <IntlProvider>
+        <RulesPage />
+      </IntlProvider>
+    );
   }
 
   it('renders a create rule button which is not disabled', async () => {

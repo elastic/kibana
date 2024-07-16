@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import { Formats } from '@kbn/i18n';
 
 export { serializeToJson } from './json';
 export { serializeToJson5 } from './json5';
 
 export type Serializer = (
   messages: Array<[string, { message: string; description?: string }]>,
-  formats?: typeof i18n.formats
+  formats?: Formats
 ) => string;

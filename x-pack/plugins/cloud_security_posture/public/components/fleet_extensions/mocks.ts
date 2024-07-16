@@ -6,7 +6,8 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
@@ -28,9 +29,7 @@ export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
-export const getMockAgentlessAgentPolicy = () => {
-  return createAgentPolicyMock({ id: 'agentless' });
-};
+export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
   return {
@@ -142,7 +141,7 @@ const getPolicyMock = (
 
   const awsVarsMock = {
     access_key_id: { type: 'text' },
-    secret_access_key: { type: 'text' },
+    secret_access_key: { type: 'password', isSecret: true },
     session_token: { type: 'text' },
     shared_credential_file: { type: 'text' },
     credential_profile_name: { type: 'text' },
@@ -152,7 +151,7 @@ const getPolicyMock = (
 
   const eksVarsMock = {
     access_key_id: { type: 'text' },
-    secret_access_key: { type: 'text' },
+    secret_access_key: { type: 'password', isSecret: true },
     session_token: { type: 'text' },
     shared_credential_file: { type: 'text' },
     credential_profile_name: { type: 'text' },
@@ -260,5 +259,97 @@ const getPolicyMock = (
         streams: [{ enabled: type === CLOUDBEAT_VULN_MGMT_AWS, data_stream: dataStream }],
       },
     ],
+  };
+};
+
+export const getPackageInfoMock = () => {
+  return {
+    data_streams: [
+      {
+        dataset: 'cloud_security_posture.findings',
+        type: 'logs',
+
+        package: 'cloud_security_posture',
+        path: 'findings',
+        release: 'ga' as RegistryRelease,
+
+        title: 'Cloud Security Posture Findings',
+        streams: [
+          {
+            input: 'cloudbeat/cis_aws',
+            template_path: 'aws.yml.hbs',
+            title: 'CIS AWS Benchmark',
+            vars: [
+              {
+                name: 'secret_access_key',
+                title: 'Secret Access Key',
+                secret: true,
+                type: 'text' as RegistryVarType,
+              },
+            ],
+          },
+          {
+            input: 'cloudbeat/cis_eks',
+            template_path: 'eks.yml.hbs',
+            title: 'Amazon EKS Benchmark',
+            vars: [
+              {
+                name: 'secret_access_key',
+                title: 'Secret Access Key',
+                secret: true,
+                type: 'text' as RegistryVarType,
+              },
+            ],
+          },
+          {
+            input: 'cloudbeat/cis_azure',
+            template_path: 'azure.yml.hbs',
+            title: 'CIS Azure Benchmark',
+            vars: [
+              {
+                multi: false,
+                name: 'azure.credentials.client_secret',
+                required: false,
+                secret: true,
+                show_user: true,
+                title: 'Client Secret',
+                type: 'text' as RegistryVarType,
+              },
+              {
+                multi: false,
+                name: 'azure.credentials.client_password',
+                required: false,
+                secret: true,
+                show_user: true,
+                title: 'Client Password',
+                type: 'text' as RegistryVarType,
+              },
+              {
+                multi: false,
+                name: 'azure.credentials.client_certificate_password',
+                required: false,
+                secret: true,
+                show_user: true,
+                title: 'Client Certificate Password',
+                type: 'text' as RegistryVarType,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    format_version: '3.0.0',
+    version: '1.9.0-preview109',
+    name: 'cloud_security_posture',
+    description: 'Identify & remediate configuration risks in your Cloud infrastructure',
+    owner: {
+      github: 'elastic/cloud-security-posture',
+      type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
+    },
+    title: 'Security Posture Management',
+    latestVersion: '1.9.0',
+    assets: {
+      kibana: {},
+    },
   };
 };

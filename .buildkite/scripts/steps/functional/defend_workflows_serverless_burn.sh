@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
-source .buildkite/scripts/steps/functional/common_cypress.sh
 
 .buildkite/scripts/bootstrap.sh
 node scripts/build_kibana_platform_plugins.js

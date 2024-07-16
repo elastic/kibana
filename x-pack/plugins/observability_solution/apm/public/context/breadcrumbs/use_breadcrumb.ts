@@ -10,10 +10,7 @@ import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 
-export function useBreadcrumb(
-  callback: () => Breadcrumb | Breadcrumb[],
-  fnDeps: any[]
-) {
+export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps: any[]) {
   const api = useContext(BreadcrumbsContext);
 
   if (!api) {

@@ -20,7 +20,17 @@ export const getLensAttributesFromSuggestion = ({
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
-}) => {
+}): {
+  references: Array<{ name: string; id: string; type: string }>;
+  visualizationType: string;
+  state: {
+    visualization: {};
+    datasourceStates: Record<string, unknown>;
+    query: Query | AggregateQuery;
+    filters: Filter[];
+  };
+  title: string;
+} => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -35,18 +45,12 @@ export const getLensAttributesFromSuggestion = ({
         };
   const visualization = suggestionVisualizationState;
   const attributes = {
-    title: suggestion
-      ? suggestion.title
-      : i18n.translate('visualizationUtils.config.suggestion.title', {
-          defaultMessage: 'New suggestion',
-        }),
-    references: [
-      {
-        id: dataView?.id ?? '',
-        name: `textBasedLanguages-datasource-layer-suggestion`,
-        type: 'index-pattern',
-      },
-    ],
+    title:
+      suggestion?.title ??
+      i18n.translate('visualizationUtils.config.suggestion.title', {
+        defaultMessage: 'New suggestion',
+      }),
+    references: [],
     state: {
       datasourceStates,
       filters,
@@ -55,7 +59,7 @@ export const getLensAttributesFromSuggestion = ({
       ...(dataView &&
         dataView.id &&
         !dataView.isPersisted() && {
-          adHocDataViews: { [dataView.id]: dataView.toSpec(false) },
+          adHocDataViews: { [dataView.id]: dataView.toMinimalSpec() },
         }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',

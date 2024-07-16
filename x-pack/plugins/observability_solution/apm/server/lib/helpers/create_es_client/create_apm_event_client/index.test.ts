@@ -5,19 +5,16 @@
  * 2.0.
  */
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
-import {
-  contextServiceMock,
-  executionContextServiceMock,
-} from '@kbn/core/server/mocks';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
 import { APMEventClient } from '.';
 
 describe('APMEventClient', () => {
-  let server: ReturnType<typeof createHttpServer>;
+  let server: ReturnType<typeof createHttpService>;
 
   beforeEach(() => {
-    server = createHttpServer();
+    server = createHttpService();
   });
 
   afterEach(async () => {
@@ -29,45 +26,37 @@ describe('APMEventClient', () => {
     });
     const { server: innerServer, createRouter } = await server.setup({
       context: contextServiceMock.createSetupContract(),
-      executionContext:
-        executionContextServiceMock.createInternalSetupContract(),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
     const router = createRouter('/');
 
     let abortSignal: AbortSignal | undefined;
-    router.get(
-      { path: '/', validate: false },
-      async (context, request, res) => {
-        const eventClient = new APMEventClient({
-          esClient: {
-            search: async (
-              params: any,
-              { signal }: { signal: AbortSignal }
-            ) => {
-              abortSignal = signal;
-              await setTimeoutPromise(3_000);
-              return {};
-            },
-          } as any,
-          debug: false,
-          request,
-          indices: {} as any,
-          options: {
-            includeFrozen: false,
-            forceSyntheticSource: false,
+    router.get({ path: '/', validate: false }, async (context, request, res) => {
+      const eventClient = new APMEventClient({
+        esClient: {
+          search: async (params: any, { signal }: { signal: AbortSignal }) => {
+            abortSignal = signal;
+            await setTimeoutPromise(3_000);
+            return {};
           },
-        });
+        } as any,
+        debug: false,
+        request,
+        indices: {} as any,
+        options: {
+          includeFrozen: false,
+        },
+      });
 
-        await eventClient.search('foo', {
-          apm: {
-            events: [],
-          },
-          body: { size: 0, track_total_hits: false },
-        });
+      await eventClient.search('foo', {
+        apm: {
+          events: [],
+        },
+        body: { size: 0, track_total_hits: false },
+      });
 
-        return res.ok({ body: 'ok' });
-      }
-    );
+      return res.ok({ body: 'ok' });
+    });
 
     await server.start();
 
@@ -80,12 +69,12 @@ describe('APMEventClient', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        incomingRequest.on('abort', () => {
+        void incomingRequest.on('abort', () => {
           setTimeout(() => {
             resolve(undefined);
           }, 100);
         });
-        incomingRequest.abort();
+        void incomingRequest.abort();
       }, 100);
     });
 

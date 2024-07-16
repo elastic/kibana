@@ -6,12 +6,14 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { policyFactory } from './policy_config';
 import {
   disableProtections,
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isBillablePolicy,
+  getPolicyProtectionsReference,
 } from './policy_config_helpers';
 import { set } from 'lodash';
 
@@ -128,7 +130,12 @@ describe('Policy Config helpers', () => {
 
   describe('setPolicyToEventCollectionOnly()', () => {
     it('should set the policy to event collection only', () => {
-      expect(ensureOnlyEventCollectionIsAllowed(policyFactory())).toEqual(eventsOnlyPolicy());
+      const policyConfig = policyFactory();
+      policyConfig.windows.antivirus_registration = {
+        enabled: true,
+        mode: AntivirusRegistrationModes.enabled,
+      };
+      expect(ensureOnlyEventCollectionIsAllowed(policyConfig)).toEqual(eventsOnlyPolicy());
     });
   });
 
@@ -187,6 +194,35 @@ describe('Policy Config helpers', () => {
       }
     );
   });
+
+  describe('isBillablePolicy', () => {
+    it('doesnt bill if serverless false', () => {
+      const policy = policyFactory();
+      const isBillable = isBillablePolicy(policy);
+      expect(policy.meta.serverless).toBe(false);
+      expect(isBillable).toBe(false);
+    });
+
+    it('doesnt bill if event collection only', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      policy.meta.serverless = true;
+      const isBillable = isBillablePolicy(policy);
+      expect(isBillable).toBe(false);
+    });
+
+    it.each(getPolicyProtectionsReference())(
+      'correctly bills if $keyPath is enabled',
+      (feature) => {
+        for (const os of feature.osList) {
+          const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+          policy.meta.serverless = true;
+          set(policy, `${os}.${feature.keyPath}`, feature.enableValue);
+          const isBillable = isBillablePolicy(policy);
+          expect(isBillable).toBe(true);
+        }
+      }
+    );
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
@@ -200,6 +236,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
     cluster_name: '',
     cluster_uuid: '',
     serverless: false,
+    billable: false,
   },
   windows: {
     events: {
@@ -223,7 +260,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       behavior_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
-    antivirus_registration: { enabled: false },
+    antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
     attack_surface_reduction: { credential_hardening: { enabled: false } },
   },
   mac: {

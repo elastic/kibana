@@ -27,7 +27,6 @@ import {
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  isSavingField: false,
 };
 
 /**
@@ -55,7 +54,7 @@ export const getSearchCallMeta = () => {
 };
 
 export const setSearchResponse = (
-  documents: Array<{ _id: string; _index: string; _source: TestDoc }>
+  documents: Array<{ _id: string; _index: string; fields: TestDoc }>
 ) => {
   spySearchQueryResponse.mockResolvedValue({
     rawResponse: {

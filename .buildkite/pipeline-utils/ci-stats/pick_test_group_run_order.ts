@@ -16,6 +16,7 @@ import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+import { expandAgentQueue } from '#pipeline-utils';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -418,9 +419,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              queue: 'n2-4-spot',
-            },
+            agents: expandAgentQueue('n2-4-spot'),
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -438,9 +437,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: {
-              queue: 'n2-4-spot',
-            },
+            agents: expandAgentQueue('n2-4-spot'),
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -474,9 +471,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 90,
-                  agents: {
-                    queue,
-                  },
+                  agents: expandAgentQueue(queue),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
                     ...FTR_EXTRA_ARGS,

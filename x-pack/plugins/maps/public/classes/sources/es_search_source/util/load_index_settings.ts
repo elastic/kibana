@@ -45,8 +45,8 @@ async function fetchIndexSettings(indexPatternTitle: string): Promise<INDEX_SETT
     });
   } catch (err) {
     const warningMsg = i18n.translate('xpack.maps.indexSettings.fetchErrorMsg', {
-      defaultMessage: `Unable to fetch index settings for data view '{indexPatternTitle}'.
-      Ensure you have '{viewIndexMetaRole}' role.`,
+      defaultMessage: `Unable to fetch index settings for data view ''{indexPatternTitle}''.
+      Ensure you have ''{viewIndexMetaRole}'' role.`,
       values: {
         indexPatternTitle,
         viewIndexMetaRole: 'view_index_metadata',

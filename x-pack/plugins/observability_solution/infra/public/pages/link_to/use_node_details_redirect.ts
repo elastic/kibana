@@ -7,16 +7,19 @@
 
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import rison from '@kbn/rison';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import {
+  type AssetDetailsLocatorParams,
+  ASSET_DETAILS_LOCATOR_ID,
+} from '@kbn/observability-shared-plugin/public';
+import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import type { AssetDetailsUrlState, RouteState } from '../../components/asset_details/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import {
   REDIRECT_NODE_DETAILS_FROM_KEY,
   REDIRECT_NODE_DETAILS_TO_KEY,
-  REDIRECT_ASSET_DETAILS_KEY,
 } from './redirect_to_node_detail';
 
 export interface MetricDetailsQueryParams {
@@ -42,42 +45,66 @@ export const useNodeDetailsRedirect = () => {
   const {
     services: {
       application: { currentAppId$ },
+      share,
     },
   } = useKibanaContextForPlugin();
-
   const appId = useObservable(currentAppId$);
+  const locator = share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
   const getNodeDetailUrl = useCallback(
     <T extends InventoryItemType>({
       assetType,
       assetId,
       search,
-    }: NodeDetailsRedirectParams<T>): LinkDescriptor => {
+    }: NodeDetailsRedirectParams<T>): RouterLinkProps => {
       const { from, to, ...additionalParams } = search;
-
-      return {
-        app: 'metrics',
-        pathname: `link-to/${assetType}-detail/${assetId}`,
-        search: {
-          ...(Object.keys(additionalParams).length > 0
-            ? { [REDIRECT_ASSET_DETAILS_KEY]: rison.encodeUnknown(additionalParams) }
-            : undefined),
-          // retrocompatibility
-          ...(from ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: `${from}` } : undefined),
-          ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: `${to}` } : undefined),
+      const queryParams = {
+        assetDetails:
+          Object.keys(additionalParams).length > 0
+            ? {
+                ...additionalParams,
+                dateRange: {
+                  from: from ? new Date(from).toISOString() : undefined,
+                  to: to ? new Date(to).toISOString() : undefined,
+                },
+              }
+            : {},
+        _a: {
+          time: {
+            ...(from
+              ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: new Date(from).toISOString() }
+              : undefined),
+            interval: '>=1m', // need to pass the interval to consider the time valid
+            ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: new Date(to).toISOString() } : undefined),
+          },
         },
+      };
+
+      const nodeDetailsLocatorParams = {
+        ...queryParams,
+        assetType,
+        assetId,
         state: {
+          ...(location.state ?? {}),
           ...(location.key
             ? ({
                 originAppId: appId,
                 originSearch: location.search,
                 originPathname: location.pathname,
               } as RouteState)
-            : undefined),
+            : {}),
         },
       };
-    },
-    [location.key, location.search, location.pathname, appId]
-  );
+      const nodeDetailsLinkProps = getRouterLinkProps({
+        href: locator?.getRedirectUrl(nodeDetailsLocatorParams),
+        onClick: () => {
+          locator?.navigate(nodeDetailsLocatorParams, { replace: false });
+        },
+      });
 
+      return nodeDetailsLinkProps;
+    },
+    [appId, location.key, location.pathname, location.search, location.state, locator]
+  );
   return { getNodeDetailUrl };
 };

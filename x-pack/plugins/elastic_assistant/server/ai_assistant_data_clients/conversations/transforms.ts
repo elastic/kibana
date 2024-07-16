@@ -36,6 +36,7 @@ export const transformESSearchToConversations = (
           ? {
               apiConfig: {
                 connectorId: conversationSchema.api_config.connector_id,
+                actionTypeId: conversationSchema.api_config.action_type_id,
                 defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
                 model: conversationSchema.api_config.model,
                 provider: conversationSchema.api_config.provider,
@@ -80,7 +81,8 @@ export const transformESSearchToConversations = (
           return acc;
         }, {}),
         namespace: conversationSchema.namespace,
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
       };
 
       return conversation;
@@ -112,6 +114,7 @@ export const transformESToConversations = (
       ...(conversationSchema.api_config
         ? {
             apiConfig: {
+              actionTypeId: conversationSchema.api_config.action_type_id,
               connectorId: conversationSchema.api_config.connector_id,
               defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
               model: conversationSchema.api_config.model,

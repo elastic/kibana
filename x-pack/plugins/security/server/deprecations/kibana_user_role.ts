@@ -156,7 +156,7 @@ async function getRoleMappingsDeprecations(
   }
 
   const roleMappingsWithKibanaUserRole = Object.entries(roleMappings)
-    .filter(([, roleMapping]) => roleMapping.roles.includes(KIBANA_USER_ROLE_NAME))
+    .filter(([, roleMapping]) => roleMapping.roles?.includes(KIBANA_USER_ROLE_NAME))
     .map(([mappingName]) => mappingName);
   if (roleMappingsWithKibanaUserRole.length === 0) {
     return [];

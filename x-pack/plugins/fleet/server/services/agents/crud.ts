@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { groupBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
@@ -35,7 +37,9 @@ import { getLatestAvailableAgentVersion } from './versions';
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
+export function _joinFilters(
+  filters: Array<string | undefined | KueryNode>
+): KueryNode | undefined {
   try {
     return filters
       .filter((filter) => filter !== undefined)
@@ -212,6 +216,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
     getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -239,8 +244,18 @@ export async function getAgentsByKuery(
     searchAfter,
     pitId,
     aggregations,
+    spaceId,
   } = options;
   const filters = [];
+
+  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  if (useSpaceAwareness && spaceId) {
+    if (spaceId === DEFAULT_SPACE_ID) {
+      filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+    } else {
+      filters.push(`namespaces:"${spaceId}"`);
+    }
+  }
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -488,21 +503,22 @@ export async function getAgentsById(
 // this is used to get all fleet server versions
 export async function getAgentVersionsForAgentPolicyIds(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentPolicyIds: string[]
-): Promise<Record<string, number>> {
-  const versionCount: Record<string, number> = {};
+): Promise<Array<{ policyId: string; versionCounts: Record<string, number> }>> {
+  const result: Array<{ policyId: string; versionCounts: Record<string, number> }> = [];
 
   if (!agentPolicyIds.length) {
-    return versionCount;
+    return result;
   }
 
   try {
-    const res = esClient.search<
+    const {
+      hits: { hits },
+    } = await esClient.search<
       FleetServerAgent,
       Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
     >({
-      size: 0,
-      track_total_hits: false,
       body: {
         query: {
           bool: {
@@ -515,25 +531,27 @@ export async function getAgentVersionsForAgentPolicyIds(
             ],
           },
         },
-        aggs: {
-          agent_versions: {
-            terms: {
-              field: 'local_metadata.elastic.agent.version.keyword',
-              size: 1000,
-            },
-          },
-        },
       },
       index: AGENTS_INDEX,
       ignore_unavailable: true,
     });
 
-    const { aggregations } = await res;
+    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
 
-    if (aggregations && aggregations.agent_versions) {
-      aggregations.agent_versions.buckets.forEach((bucket) => {
-        versionCount[bucket.key] = bucket.doc_count;
-      });
+    for (const [policyId, policyHits] of Object.entries(groupedHits)) {
+      const versionCounts: Record<string, number> = {};
+
+      for (const hit of policyHits) {
+        const agentVersion = hit._source?.local_metadata?.elastic?.agent?.version;
+
+        if (!agentVersion) {
+          continue;
+        }
+
+        versionCounts[agentVersion] = (versionCounts[agentVersion] || 0) + 1;
+      }
+
+      result.push({ policyId, versionCounts });
     }
   } catch (error) {
     if (error.statusCode !== 404) {
@@ -541,7 +559,7 @@ export async function getAgentVersionsForAgentPolicyIds(
     }
   }
 
-  return versionCount;
+  return result;
 }
 
 export async function getAgentByAccessAPIKeyId(

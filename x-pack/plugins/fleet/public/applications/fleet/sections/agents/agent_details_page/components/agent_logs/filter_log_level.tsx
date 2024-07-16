@@ -10,9 +10,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AGENT_LOG_LEVELS } from './constants';
-
-const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
+import { AGENT_LOG_LEVELS } from '../../../../../../../../common/constants';
 
 export const LogLevelFilter: React.FunctionComponent<{
   selectedLevels: string[];
@@ -24,7 +22,7 @@ export const LogLevelFilter: React.FunctionComponent<{
   const closePopover = useCallback(() => setIsOpen(false), []);
 
   const [options, setOptions] = useState<EuiSelectableOption[]>(
-    LEVEL_VALUES.map((level) => ({
+    AGENT_LOG_LEVELS.map((level) => ({
       label: level,
       checked: selectedLevels.includes(level) ? 'on' : undefined,
       key: level,
@@ -39,7 +37,7 @@ export const LogLevelFilter: React.FunctionComponent<{
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}
-          numFilters={LEVEL_VALUES.length}
+          numFilters={options.length}
           hasActiveFilters={selectedLevels.length > 0}
           numActiveFilters={selectedLevels.length}
         >

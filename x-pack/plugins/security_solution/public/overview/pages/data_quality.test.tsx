@@ -42,7 +42,7 @@ const defaultUseSourcererReturn = {
   selectedPatterns: ['auditbeat-*', 'logs-*', 'packetbeat-*'],
 };
 const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../common/containers/sourcerer', () => ({
+jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 

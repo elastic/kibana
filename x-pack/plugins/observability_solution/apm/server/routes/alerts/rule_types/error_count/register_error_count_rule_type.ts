@@ -14,7 +14,6 @@ import {
   RuleTypeState,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -30,10 +29,7 @@ import {
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import {
-  getParsedFilterQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -49,10 +45,7 @@ import {
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
-import {
-  errorCountParamsSchema,
-  ApmRuleParamsType,
-} from '../../../../../common/rules/schema';
+import { errorCountParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
 import { apmActionVariables } from '../../action_variables';
@@ -62,9 +55,9 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFields,
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
@@ -134,23 +127,13 @@ export function registerErrorCountRuleType({
         ErrorCountAlert
       >
     ) => {
-      const {
-        params: ruleParams,
-        services,
-        spaceId,
-        startedAt,
-        getTimeRange,
-      } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } =
-        services;
+      const { params: ruleParams, services, spaceId, startedAt, getTimeRange } = options;
+      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
 
-      const allGroupByFields = getAllGroupByFields(
-        ApmRuleType.ErrorCount,
-        ruleParams.groupBy
-      );
+      const allGroupByFields = getAllGroupByFields(ApmRuleType.ErrorCount, ruleParams.groupBy);
 
       const indices = await getApmIndices(savedObjectsClient);
 
@@ -166,9 +149,7 @@ export function registerErrorCountRuleType({
           ]
         : [];
 
-      const { dateStart } = getTimeRange(
-        `${ruleParams.windowSize}${ruleParams.windowUnit}`
-      );
+      const { dateStart } = getTimeRange(`${ruleParams.windowSize}${ruleParams.windowUnit}`);
 
       const searchParams = {
         index: indices.error,
@@ -187,9 +168,7 @@ export function registerErrorCountRuleType({
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                 ...termFilterQuery,
-                ...getParsedFilterQuery(
-                  ruleParams.searchConfiguration?.query?.query as string
-                ),
+                ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
               ],
             },
           },
@@ -200,7 +179,7 @@ export function registerErrorCountRuleType({
                 size: 1000,
                 order: { _count: 'desc' as const },
               },
-              aggs: getServiceGroupFieldsAgg(),
+              aggs: getApmAlertSourceFieldsAgg(),
             },
           },
         },
@@ -213,28 +192,23 @@ export function registerErrorCountRuleType({
 
       const errorCountResults =
         response.aggregations?.error_counts.buckets.map((bucket) => {
-          const groupByFields = bucket.key.reduce(
-            (obj, bucketKey, bucketIndex) => {
-              obj[allGroupByFields[bucketIndex]] = bucketKey;
-              return obj;
-            },
-            {} as Record<string, string>
-          );
+          const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
+            obj[allGroupByFields[bucketIndex]] = bucketKey;
+            return obj;
+          }, {} as Record<string, string>);
 
           const bucketKey = bucket.key;
 
           return {
             errorCount: bucket.doc_count,
-            sourceFields: getServiceGroupFields(bucket),
+            sourceFields: getApmAlertSourceFields(bucket),
             groupByFields,
             bucketKey,
           };
         }) ?? [];
 
       await asyncForEach(
-        errorCountResults.filter(
-          (result) => result.errorCount >= ruleParams.threshold
-        ),
+        errorCountResults.filter((result) => result.errorCount >= ruleParams.threshold),
         async (result) => {
           const { errorCount, sourceFields, groupByFields, bucketKey } = result;
           const alertId = bucketKey.join('_');
@@ -254,9 +228,7 @@ export function registerErrorCountRuleType({
 
           const relativeViewInAppUrl = getAlertUrlErrorCount(
             groupByFields[SERVICE_NAME],
-            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
-              SERVICE_ENVIRONMENT
-            ]
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[SERVICE_ENVIRONMENT]
           );
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
@@ -270,8 +242,7 @@ export function registerErrorCountRuleType({
             alertsLocator,
             basePath.publicBaseUrl
           );
-          const groupByActionVariables =
-            getGroupByActionVariables(groupByFields);
+          const groupByActionVariables = getGroupByActionVariables(groupByFields);
 
           const payload = {
             [PROCESSOR_EVENT]: ProcessorEvent.error,
@@ -308,10 +279,7 @@ export function registerErrorCountRuleType({
 
       return { state: {} };
     },
-    alerts: {
-      ...ApmRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<ErrorCountAlert>,
+    alerts: ApmRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

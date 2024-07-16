@@ -11,10 +11,12 @@ import { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
-import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { getPromptsSearchEsMock } from './prompts_schema.mock';
-import { SearchEsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
+import { getAttackDiscoverySearchEsMock } from './attack_discovery_schema.mock';
+import { EsAttackDiscoverySchema } from '../ai_assistant_data_clients/attack_discovery/types';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
@@ -34,7 +36,15 @@ export const getFindConversationsResultWithSingleHit = (): FindResponse<EsConver
   data: getConversationSearchEsMock(),
 });
 
-export const getFindPromptsResultWithSingleHit = (): FindResponse<SearchEsPromptsSchema> => ({
+export const getFindAttackDiscoveryResultWithSingleHit =
+  (): FindResponse<EsAttackDiscoverySchema> => ({
+    page: 1,
+    perPage: 1,
+    total: 1,
+    data: getAttackDiscoverySearchEsMock(),
+  });
+
+export const getFindPromptsResultWithSingleHit = (): FindResponse<EsPromptsSchema> => ({
   page: 1,
   perPage: 1,
   total: 1,
@@ -42,7 +52,7 @@ export const getFindPromptsResultWithSingleHit = (): FindResponse<SearchEsPrompt
 });
 
 export const getFindAnonymizationFieldsResultWithSingleHit =
-  (): FindResponse<SearchEsAnonymizationFieldsSchema> => ({
+  (): FindResponse<EsAnonymizationFieldsSchema> => ({
     page: 1,
     perPage: 1,
     total: 1,
@@ -67,6 +77,7 @@ export const getConversationResponseMock = (
   title: 'test',
   apiConfig: {
     connectorId: '1',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',

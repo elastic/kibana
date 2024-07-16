@@ -1,0 +1,33 @@
+## STARTS_WITH
+
+The `STARTS_WITH` function in ES|QL is used to check if a keyword string starts with another string. It returns a boolean value indicating the result of this comparison.
+
+### Syntax
+
+The syntax for using the `STARTS_WITH` function is as follows:
+
+`STARTS_WITH(str, prefix)`
+
+#### Parameters
+
+- `str`: This is a string expression. If null, the function returns null.
+- `prefix`: This is another string expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples showing how to use the `STARTS_WITH` function in ES|QL queries:
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_S = STARTS_WITH(last_name, "B")
+```
+
+In this example, the `STARTS_WITH` function is used to check if the `last_name` of employees starts with the letter "B". The result is stored in the `ln_S` field.
+
+```esql
+FROM logs-*
+| WHERE STARTS_WITH(log_message, "ERROR")
+```
+
+In this second example, the `STARTS_WITH` function is used in a `WHERE` clause to filter out log messages that start with the word "ERROR".

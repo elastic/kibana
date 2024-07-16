@@ -10,48 +10,60 @@ import type {
   SnapshotNodeResponse,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { RoleCredentials } from '../../../../shared/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { DATES, ARCHIVE_NAME } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
+
   const fetchSnapshot = async (
-    body: SnapshotRequest
+    body: SnapshotRequest,
+    roleAuthc: RoleCredentials
   ): Promise<SnapshotNodeResponse | undefined> => {
-    const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-    const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
-    const response = await supertest
+    const response = await supertestWithoutAuth
       .post('/api/metrics/snapshot')
-      .set('kbn-xsrf', 'foo')
-      .set('x-elastic-internal-origin', 'foo')
-      .auth(username, password)
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);
     return response.body;
   };
 
   describe('API /metrics/snapshot', () => {
+    let roleAuthc: RoleCredentials;
+
     describe('Snapshot nodes', () => {
       const { min, max } = DATES.serverlessTestingHost;
-      before(() => esArchiver.load(ARCHIVE_NAME));
-      after(() => esArchiver.unload(ARCHIVE_NAME));
+      before(async () => {
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+        await esArchiver.load(ARCHIVE_NAME);
+      });
+      after(async () => {
+        await esArchiver.unload(ARCHIVE_NAME);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      });
 
       it('should work', async () => {
-        const snapshot = await fetchSnapshot({
-          sourceId: 'default',
-          timerange: {
-            to: max,
-            from: min,
-            interval: '10m',
+        const snapshot = await fetchSnapshot(
+          {
+            sourceId: 'default',
+            timerange: {
+              to: max,
+              from: min,
+              interval: '10m',
+            },
+            metrics: [{ type: 'cpu' }],
+            nodeType: 'host',
+            groupBy: [],
+            includeTimeseries: false,
           },
-          metrics: [{ type: 'cpu' }],
-          nodeType: 'host',
-          groupBy: [],
-          includeTimeseries: false,
-        });
+          roleAuthc
+        );
 
         if (!snapshot) {
           return;

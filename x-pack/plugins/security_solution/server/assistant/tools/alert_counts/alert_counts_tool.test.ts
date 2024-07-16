@@ -7,9 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { DynamicTool } from 'langchain/tools';
-import { omit } from 'lodash/fp';
-
+import type { DynamicTool } from '@langchain/core/tools';
+import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
@@ -24,8 +23,6 @@ describe('AlertCountsTool', () => {
     body: {
       isEnabledKnowledgeBase: false,
       alertsIndexPattern: '.alerts-security.alerts-default',
-      allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
-      allowReplacement: ['user.name'],
       replacements,
       size: 20,
     },
@@ -33,9 +30,11 @@ describe('AlertCountsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const modelExists = true;
+  const logger = loggerMock.create();
   const rest = {
     isEnabledKnowledgeBase,
     chain,
+    logger,
     modelExists,
   };
 
@@ -159,24 +158,6 @@ describe('AlertCountsTool', () => {
         },
         size: 0,
       });
-    });
-
-    it('returns null when the request is missing required anonymization parameters', () => {
-      const requestWithMissingParams = omit('body.allow', request) as unknown as KibanaRequest<
-        unknown,
-        unknown,
-        ExecuteConnectorRequestBody
-      >;
-
-      const tool = ALERT_COUNTS_TOOL.getTool({
-        alertsIndexPattern,
-        esClient,
-        replacements,
-        request: requestWithMissingParams,
-        ...rest,
-      });
-
-      expect(tool).toBeNull();
     });
 
     it('returns null when the alertsIndexPattern is undefined', () => {

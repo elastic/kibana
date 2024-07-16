@@ -24,6 +24,10 @@ export const modelAndDeploymentIdSchema = schema.object({
    */
   deploymentId: schema.string(),
 });
+export const createInferenceSchema = schema.object({
+  taskType: schema.oneOf([schema.literal('sparse_embedding'), schema.literal('text_embedding')]),
+  inferenceId: schema.string(),
+});
 
 export const threadingParamsSchema = schema.maybe(
   schema.object({
@@ -92,3 +96,9 @@ export const createIngestPipelineSchema = schema.object({
 export const modelDownloadsQuery = schema.object({
   version: schema.maybe(schema.oneOf([schema.literal('1'), schema.literal('2')])),
 });
+
+export const curatedModelsParamsSchema = schema.object({
+  modelName: schema.string(),
+});
+
+export const curatedModelsQuerySchema = schema.object({ version: schema.maybe(schema.number()) });

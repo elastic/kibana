@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { LogDocument, StackTraceFields } from '../../common/document';
+import { getFieldFromDoc, LogDocument, StackTraceFields } from '@kbn/discover-utils/src';
 import * as constants from '../../common/constants';
-import { getFieldFromDoc } from './get_field_from_flattened_doc';
 
 export const getStacktraceFields = (doc: LogDocument): StackTraceFields => {
   const errorStackTrace = getFieldFromDoc(doc, constants.ERROR_STACK_TRACE);

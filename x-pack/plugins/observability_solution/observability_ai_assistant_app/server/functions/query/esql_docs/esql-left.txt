@@ -1,7 +1,20 @@
-LEFT
+## LEFT
 
+The `LEFT` function in ES|QL is used to extract a substring from a string, starting from the left. The number of characters to return is specified by the `length` parameter.
 
-Return the substring that extracts length chars from the string starting from the left.
+### Syntax
+
+`LEFT(string, length)`
+
+#### Parameters
+
+- `string`: The string from which to return a substring.
+- `length`: The number of characters to return.
+
+### Examples
+
+Here are a couple of examples of how to use the `LEFT` function in ES|QL:
+
 ```esql
 FROM employees
 | KEEP last_name
@@ -10,4 +23,11 @@ FROM employees
 | LIMIT 5
 ```
 
-Supported types:
+In this example, the `LEFT` function is used to extract the first three characters from the `last_name` field of the `employees` index. The query then sorts the results in ascending order by `last_name` and limits the output to the first 5 records.
+
+```esql
+FROM logs-*
+| EVAL left_chars = LEFT(message, 10)
+```
+
+In this second example, the `LEFT` function is used to extract the first 10 characters from the `message` field of the `logs-*` index. The result is stored in the `left_chars` field.

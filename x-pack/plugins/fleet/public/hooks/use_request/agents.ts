@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type {
+  GetActionStatusRequest,
   GetActionStatusResponse,
   GetAgentTagsResponse,
   GetAgentUploadsResponse,
@@ -16,6 +17,7 @@ import type {
   PostRequestBulkDiagnosticsRequest,
   PostRequestDiagnosticsRequest,
   PostRequestDiagnosticsResponse,
+  DeleteAgentUploadResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
 
@@ -243,6 +245,15 @@ export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
   });
 }
 
+export function sendDeleteAgentUpload(fileId: string, options?: RequestOptions) {
+  return sendRequest<DeleteAgentUploadResponse>({
+    path: agentRouteService.getAgentFileDeletePath(fileId),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    ...options,
+  });
+}
+
 export const useGetAgentUploads = (agentId: string, options?: RequestOptions) => {
   return useRequest<GetAgentUploadsResponse>({
     path: agentRouteService.getListAgentUploads(agentId),
@@ -279,11 +290,12 @@ export function sendPostBulkAgentUpgrade(
   });
 }
 
-export function sendGetActionStatus() {
+export function sendGetActionStatus(query: GetActionStatusRequest['query'] = {}) {
   return sendRequest<GetActionStatusResponse>({
     path: agentRouteService.getActionStatusPath(),
     method: 'get',
     version: API_VERSIONS.public.v1,
+    query,
   });
 }
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
@@ -25,15 +25,44 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
 }) => {
   const {
     services: {
+      observabilityAIAssistant,
       observabilityShared: {
         navigation: { PageTemplate },
       },
+      share,
       docLinks,
     },
   } = useKibanaContextForPlugin();
 
-  const { http } = useKibana().services;
-  const basePath = http!.basePath.get();
+  const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+  const href = onboardingLocator?.getRedirectUrl({ category: 'logs' });
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  useEffect(() => {
+    return setScreenContext?.({
+      starterPrompts: [
+        ...(!isDataLoading && !hasData
+          ? [
+              {
+                title: i18n.translate(
+                  'xpack.infra.aiAssistant.starterPrompts.explainNoData.title',
+                  {
+                    defaultMessage: 'Explain',
+                  }
+                ),
+                prompt: i18n.translate(
+                  'xpack.infra.aiAssistant.starterPrompts.explainNoData.prompt',
+                  {
+                    defaultMessage: "Why don't I see any data?",
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
+    });
+  }, [hasData, isDataLoading, setScreenContext]);
 
   const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
@@ -50,7 +79,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
               defaultMessage:
                 'Use the Elastic Agent or Beats to send logs to Elasticsearch. We make it easy with integrations for many popular systems and apps.',
             }),
-            href: basePath + `/app/integrations/browse`,
+            href,
           },
         },
         docsLink: docLinks.links.observability.guide,

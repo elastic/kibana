@@ -40,6 +40,7 @@ interface KBAgentDef {
   spot?: boolean;
   zones?: string[];
   nestedVirtualization?: boolean;
+  serviceAccount?: string;
 }
 type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
 
@@ -209,15 +210,17 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   // Mapping based on expected fields in https://github.com/elastic/ci/blob/0df8430357109a19957dcfb1d867db9cfdd27937/docs/gobld/providers.mdx#L96
   return removeNullish({
     image: 'family/kibana-ubuntu-2004',
-    imageProject: 'elastic-images-qa',
+    imageProject: 'elastic-images-prod',
     provider: 'gcp',
     assignExternalIP: agent.disableExternalIp === true ? false : undefined,
     diskSizeGb: agent.diskSizeGb,
     diskType: agent.diskType,
     enableNestedVirtualization: agent.nestedVirtualization,
     localSsds: agent.localSsds,
+    localSsdInterface: !!agent.localSsds ? 'nvme' : undefined,
     machineType: agent.machineType,
     preemptible: agent.spot,
+    serviceAccount: agent.serviceAccount,
   });
 }
 

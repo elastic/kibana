@@ -25,9 +25,7 @@ import { ITableColumn } from '../../../../../shared/managed_table';
 type MobileMainStatisticsByField =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/main_statistics'>;
 
-type MobileMainStatisticsByFieldItem = ValuesType<
-  MobileMainStatisticsByField['mainStatistics']
->;
+type MobileMainStatisticsByFieldItem = ValuesType<MobileMainStatisticsByField['mainStatistics']>;
 
 type MobileDetailedStatisticsByField =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics'>;
@@ -47,28 +45,20 @@ export function getColumns({
     // version/device
     {
       field: 'name',
-      name: i18n.translate(
-        'xpack.apm.mobile.transactions.overview.table.nameColumnLabel',
-        {
-          defaultMessage: 'Name',
-        }
-      ),
+      name: i18n.translate('xpack.apm.mobile.transactions.overview.table.nameColumnLabel', {
+        defaultMessage: 'Name',
+      }),
     },
     // latency
     {
       field: 'latency',
-      name: i18n.translate(
-        'xpack.apm.mobile.transactions.overview.table.latencyColumnAvgLabel',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      ),
+      name: i18n.translate('xpack.apm.mobile.transactions.overview.table.latencyColumnAvgLabel', {
+        defaultMessage: 'Latency (avg.)',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { latency, name }) => {
-        const currentPeriodTimeseries =
-          detailedStatistics?.currentPeriod?.[name]?.latency;
-        const previousPeriodTimeseries =
-          detailedStatistics?.previousPeriod?.[name]?.latency;
+        const currentPeriodTimeseries = detailedStatistics?.currentPeriod?.[name]?.latency;
+        const previousPeriodTimeseries = detailedStatistics?.previousPeriod?.[name]?.latency;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
@@ -81,9 +71,7 @@ export function getColumns({
             series={currentPeriodTimeseries}
             valueLabel={asMillisecondDuration(latency)}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -99,10 +87,8 @@ export function getColumns({
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
-        const currentPeriodTimeseries =
-          detailedStatistics?.currentPeriod?.[name]?.throughput;
-        const previousPeriodTimeseries =
-          detailedStatistics?.previousPeriod?.[name]?.throughput;
+        const currentPeriodTimeseries = detailedStatistics?.currentPeriod?.[name]?.throughput;
+        const previousPeriodTimeseries = detailedStatistics?.previousPeriod?.[name]?.throughput;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
@@ -115,9 +101,7 @@ export function getColumns({
             series={currentPeriodTimeseries}
             valueLabel={asTransactionRate(throughput)}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -127,12 +111,9 @@ export function getColumns({
     // crash rate
     {
       field: 'crashRate',
-      name: i18n.translate(
-        'xpack.apm.mobile.transactions.overview.table.crashRateColumnLabel',
-        {
-          defaultMessage: 'Crash rate',
-        }
-      ),
+      name: i18n.translate('xpack.apm.mobile.transactions.overview.table.crashRateColumnLabel', {
+        defaultMessage: 'Crash rate',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { crashRate }) => {
         return (

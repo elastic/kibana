@@ -71,15 +71,31 @@ describe('KnowledgeBaseTab', () => {
 
       fireEvent.click(getByTestId('knowledgeBaseSingleEntryContextMenuItem'));
 
-      fireEvent.click(getByTestId('knowledgeBaseEditManualEntryFlyoutFieldText'));
-
-      fireEvent.change(getByTestId('knowledgeBaseEditManualEntryFlyoutFieldText'), {
+      fireEvent.change(getByTestId('knowledgeBaseEditManualEntryFlyoutIdInput'), {
         target: { value: 'foo' },
+      });
+
+      fireEvent.change(getByTestId('euiMarkdownEditorTextArea'), {
+        target: { value: 'bar' },
       });
 
       getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton').click();
 
-      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', text: '' } });
+      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', public: false, text: 'bar' } });
+    });
+
+    it('should require an id', () => {
+      const { getByTestId } = render(<KnowledgeBaseTab />);
+
+      fireEvent.click(getByTestId('knowledgeBaseNewEntryButton'));
+
+      fireEvent.click(getByTestId('knowledgeBaseSingleEntryContextMenuItem'));
+
+      fireEvent.change(getByTestId('knowledgeBaseEditManualEntryFlyoutIdInput'), {
+        target: { value: 'foo' },
+      });
+
+      expect(getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton')).toBeDisabled();
     });
   });
 
@@ -105,6 +121,7 @@ describe('KnowledgeBaseTab', () => {
   describe('when there are entries', () => {
     beforeEach(() => {
       useGetKnowledgeBaseEntriesMock.mockReturnValue({
+        refetch: jest.fn(),
         loading: false,
         entries: [
           {
@@ -145,6 +162,11 @@ describe('KnowledgeBaseTab', () => {
 
       useDeleteKnowledgeBaseEntryMock.mockReturnValue({
         mutateAsync: deleteMock,
+      });
+
+      useCreateKnowledgeBaseEntryMock.mockReturnValue({
+        mutateAsync: createMock,
+        isLoading: false,
       });
     });
 

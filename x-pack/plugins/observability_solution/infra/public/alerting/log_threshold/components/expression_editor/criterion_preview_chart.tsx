@@ -23,7 +23,8 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
@@ -49,7 +50,6 @@ import {
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
 } from '../../../../../common/http_api';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 const GROUP_LIMIT = 5;
@@ -61,7 +61,7 @@ interface Props {
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
-  filterSeriesByGroupName?: string[];
+  filterSeriesByGroupName?: string;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -107,7 +107,9 @@ export const CriterionPreview: React.FC<Props> = ({
   return (
     <CriterionPreviewChart
       buckets={
-        !chartAlertParams.groupBy || chartAlertParams.groupBy.length === 0
+        executionTimeRange?.buckets
+          ? executionTimeRange.buckets
+          : !chartAlertParams.groupBy || chartAlertParams.groupBy.length === 0
           ? NUM_BUCKETS
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
@@ -130,7 +132,7 @@ interface ChartProps {
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
-  filterSeriesByGroupName?: string[];
+  filterSeriesByGroupName?: string;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -190,7 +192,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
       return series;
     }
     if (filterSeriesByGroupName && filterSeriesByGroupName.length) {
-      return series.filter((item) => filterSeriesByGroupName.includes(item.id));
+      return series.filter((item) => filterSeriesByGroupName === item.id);
     }
     const sortedByMax = series.sort((a, b) => {
       const aMax = Math.max(...a.points.map((point) => point.value));
@@ -331,7 +333,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings baseTheme={chartTheme.baseTheme} locale={i18n.getLocale()} />
+          <Settings
+            baseTheme={chartTheme.baseTheme}
+            theme={{ chartMargins: { top: 35 } }}
+            locale={i18n.getLocale()}
+          />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

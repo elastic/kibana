@@ -32,17 +32,17 @@ export const SECURITY_DISPLAY_NAME = i18n.translate(
   }
 );
 
-export const STACK_MANAGEMENT_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.stackManagement',
+export const STACK_DISPLAY_NAME = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.stack',
   {
-    defaultMessage: 'Stack management',
+    defaultMessage: 'Stack',
   }
 );
 
 export const STACK_MONITORING_DISPLAY_NAME = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.stackMonitoring',
   {
-    defaultMessage: 'Stack monitoring',
+    defaultMessage: 'Stack Monitoring',
   }
 );
 
@@ -86,5 +86,69 @@ export const FEATURE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.globalAlerts.quickFilters.feature',
   {
     defaultMessage: 'Feature',
+  }
+);
+
+export const TECH_PREVIEW_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.technicalPreviewBadgeLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.technicalPreviewBadgeDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
+
+const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitleEdit',
+  {
+    defaultMessage: 'edit',
+  }
+);
+
+const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitleCreate',
+  {
+    defaultMessage: 'create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
+  i18n.translate('xpack.triggersActionsUI.sections.showRequestModal.subheadingTitle', {
+    defaultMessage: 'This Kibana request will {requestType} this rule.',
+    values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
+  });
+
+const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.headerTitleEdit',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
+const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.headerTitleCreate',
+  {
+    defaultMessage: 'Create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
+  i18n.translate('xpack.triggersActionsUI.sections.showRequestModal.headerTitle', {
+    defaultMessage: '{requestType} alerting rule request',
+    values: {
+      requestType: edit ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
+    },
+  });
+
+export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.somethingWentWrongDescription',
+  {
+    defaultMessage: 'Sorry about that, something went wrong.',
   }
 );

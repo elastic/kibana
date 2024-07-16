@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -27,10 +28,12 @@ const MESSAGE = 'This rule is attempting to query data but...';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockGetComments = jest.fn(() => []);
 const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const mockNavigationToApp = jest.fn();
 const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
+  hasUpdateAIAssistantAnonymization: true,
   isAssistantEnabled: true,
 };
 const queryClient = new QueryClient({
@@ -46,26 +49,22 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={mockAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn()}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
       basePath={'https://localhost:5601/kbn'}
-      defaultAllow={[]}
-      defaultAllowReplacement={[]}
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
       }}
       getComments={mockGetComments}
       http={mockHttp}
+      navigateToApp={mockNavigationToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
+      currentAppId={'security'}
     >
       {children}
     </AssistantProvider>

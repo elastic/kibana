@@ -32,9 +32,7 @@ const mainApiRequestsToIntercept = [
   },
 ];
 
-const mainAliasNames = mainApiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
-);
+const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
 describe('Service inventory', () => {
   before(() => {
@@ -93,7 +91,7 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click();
 
@@ -105,6 +103,7 @@ describe('Service inventory', () => {
 
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
+      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
@@ -123,7 +122,7 @@ describe('Service inventory', () => {
     it('Toggles fast filter when clicking on link', () => {
       cy.visitKibana(serviceInventoryHref);
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.contains('Try the new Fast Filter').click();
+      cy.contains('Enable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
       cy.contains('Try it').should('not.exist');
       cy.contains('opbeans-node');
@@ -137,7 +136,7 @@ describe('Service inventory', () => {
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
-      cy.contains('Turn off Fast Filter').click();
+      cy.contains('Disable fast filter').click();
       cy.contains('Try it').should('exist');
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
     });
@@ -151,11 +150,7 @@ describe('Service inventory', () => {
     it('Should not be able to turn it on', () => {
       cy.visitKibana(serviceInventoryHref);
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.contains('Try the new Fast Filter').should('not.exist');
-      cy.get('[data-test-subj="apmPopoverButton"]').click();
-      cy.contains(
-        'Please ask your administrator to turn it on by enabling it in within settings.'
-      );
+      cy.get('[data-test-subj="apmLink"]').should('be.disabled');
     });
   });
 
@@ -184,47 +179,21 @@ describe('Service inventory', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-      cy.intercept('GET', '/internal/apm/services?*').as(
-        'mainStatisticsRequest'
-      );
+      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
-      cy.visitKibana(
-        `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
-      );
+      cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
       cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
-          JSON.stringify([
-            '0',
-            '1',
-            '10',
-            '11',
-            '12',
-            '13',
-            '14',
-            '15',
-            '16',
-            '17',
-          ])
+          JSON.stringify(['0', '1', '10', '11', '12', '13', '14', '15', '16', '17'])
         );
       });
       cy.getByTestSubj('pagination-button-1').click();
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
-          JSON.stringify([
-            '18',
-            '19',
-            '2',
-            '20',
-            '21',
-            '22',
-            '23',
-            '24',
-            '25',
-            '26',
-          ])
+          JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
         );
       });
     });

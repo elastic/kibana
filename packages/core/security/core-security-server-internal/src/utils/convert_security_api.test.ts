@@ -6,13 +6,35 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { convertSecurityApi } from './convert_security_api';
+import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
 
 describe('convertSecurityApi', () => {
   it('returns the API from the source', () => {
-    const source: CoreSecurityContract = { authc: { getCurrentUser: jest.fn() } };
+    const source: CoreSecurityDelegateContract = {
+      authc: {
+        getCurrentUser: jest.fn(),
+        apiKeys: {
+          areAPIKeysEnabled: jest.fn(),
+          areCrossClusterAPIKeysEnabled: jest.fn(),
+          validate: jest.fn(),
+          invalidate: jest.fn(),
+          invalidateAsInternalUser: jest.fn(),
+          grantAsInternalUser: jest.fn(),
+          create: jest.fn(),
+          update: jest.fn(),
+        },
+      },
+      audit: {
+        asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),
+        withoutRequest: createAuditLoggerMock.create(),
+      },
+    };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);
+    expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
+    expect(output.audit.asScoped).toBe(source.audit.asScoped);
+    expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);
   });
 });

@@ -49,7 +49,7 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
           <h1>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileTitle"
-              defaultMessage="Visualize data from a log file"
+              defaultMessage="Upload data from a file"
             />
           </h1>
         </EuiTitle>

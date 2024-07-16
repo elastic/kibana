@@ -135,12 +135,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         }
       ),
       render: (connector: ConnectorViewItem) => {
-        const label = connectorStatusToText(connector.status, !!connector.index_name);
-        return (
-          <EuiBadge color={connectorStatusToColor(connector.status, !!connector.index_name)}>
-            {label}
-          </EuiBadge>
-        );
+        const label = connectorStatusToText(connector);
+        return <EuiBadge color={connectorStatusToColor(connector)}>{label}</EuiBadge>;
       },
       truncateText: true,
       width: '15%',
@@ -165,10 +161,15 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           type: 'icon',
         },
         {
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
-            { defaultMessage: 'View this connector' }
-          ),
+          description: isCrawler
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewCrawler',
+                { defaultMessage: 'View this crawler' }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
+                { defaultMessage: 'View this connector' }
+              ),
           enabled: (connector) => !!connector.index_name,
           icon: 'eye',
           isPrimary: false,
@@ -183,11 +184,22 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
               }
             ),
           onClick: (connector) => {
-            navigateToUrl(
-              generateEncodedPath(CONNECTOR_DETAIL_PATH, {
-                connectorId: connector.id,
-              })
-            );
+            if (isCrawler) {
+              // crawler always has an index this is to satisfy TS
+              if (connector.index_name) {
+                navigateToUrl(
+                  generateEncodedPath(SEARCH_INDEX_PATH, {
+                    indexName: connector.index_name,
+                  })
+                );
+              }
+            } else {
+              navigateToUrl(
+                generateEncodedPath(CONNECTOR_DETAIL_PATH, {
+                  connectorId: connector.id,
+                })
+              );
+            }
           },
           type: 'icon',
         },

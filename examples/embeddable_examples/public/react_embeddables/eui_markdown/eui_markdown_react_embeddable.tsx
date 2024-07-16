@@ -19,19 +19,19 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState, MarkdownEditorApi } from './types';
+import {
+  MarkdownEditorApi,
+  MarkdownEditorRuntimeState,
+  MarkdownEditorSerializedState,
+} from './types';
 
 export const markdownEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
+  MarkdownEditorRuntimeState,
   MarkdownEditorApi
 > = {
   type: EUI_MARKDOWN_ID,
-  deserializeState: (state) => {
-    /**
-     * Here we can run clientside migrations and inject references.
-     */
-    return state.rawState as MarkdownEditorSerializedState;
-  },
+  deserializeState: (state) => state.rawState,
   /**
    * The buildEmbeddable function is async so you can async import the component or load a saved
    * object here. The loading will be handed gracefully by the Presentation Container.

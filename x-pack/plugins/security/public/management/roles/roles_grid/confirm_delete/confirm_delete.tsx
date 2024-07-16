@@ -8,6 +8,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -17,19 +19,24 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { StartServices } from '../../../..';
 import type { RolesAPIClient } from '../../roles_api_client';
 
-interface Props {
+interface Props extends StartServices {
   rolesToDelete: string[];
   callback: (rolesToDelete: string[], errors: string[]) => void;
   onCancel: () => void;
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  buildFlavor: BuildFlavor;
+  cloudOrgUrl?: string;
 }
 
 interface State {
@@ -45,10 +52,10 @@ export class ConfirmDelete extends Component<Props, State> {
   }
 
   public render() {
-    const { rolesToDelete } = this.props;
+    const { rolesToDelete, buildFlavor } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
     const title = i18n.translate('xpack.security.management.roles.deleteRoleTitle', {
-      defaultMessage: 'Delete role{value, plural, one {{roleName}} other {s}}',
+      defaultMessage: `Delete role{value, plural, one {{roleName}} other {s}}?`,
       values: { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` },
     });
 
@@ -64,25 +71,49 @@ export class ConfirmDelete extends Component<Props, State> {
           <EuiText>
             {moreThanOne ? (
               <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.security.management.roles.confirmDelete.removingRolesDescription"
-                    defaultMessage="You are about to delete these roles:"
-                  />
-                </p>
+                {buildFlavor === 'traditional' && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.roles.confirmDelete.removingRolesDescription"
+                      defaultMessage="You are about to delete these roles:"
+                    />
+                  </p>
+                )}
+                {buildFlavor === 'serverless' && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.roles.confirmDelete.serverless.removingRolesDescription"
+                      defaultMessage="Users with the following roles assigned may lose access to the project if they are not assigned any other roles:"
+                    />
+                  </p>
+                )}
                 <ul>
                   {rolesToDelete.map((roleName) => (
                     <li key={roleName}>{roleName}</li>
                   ))}
                 </ul>
               </Fragment>
-            ) : null}
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.roles.deletingRolesWarningMessage"
-                defaultMessage="You can't undo this operation."
-              />
-            </p>
+            ) : (
+              <Fragment>
+                {buildFlavor === 'serverless' && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.roles.confirmDelete.serverless.removingSingleRoleDescription"
+                      defaultMessage="Users with the {roleName} role assigned may lose access to the project if they are not assigned any other roles."
+                      values={{ roleName: rolesToDelete[0] }}
+                    />
+                  </p>
+                )}
+              </Fragment>
+            )}
+            {buildFlavor === 'traditional' && (
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.roles.deletingRolesWarningMessage"
+                  defaultMessage="You can't undo this operation."
+                />
+              </p>
+            )}
           </EuiText>
         </EuiModalBody>
         <EuiModalFooter>
@@ -126,18 +157,20 @@ export class ConfirmDelete extends Component<Props, State> {
   };
 
   private deleteRoles = async () => {
-    const { rolesToDelete, callback, rolesAPIClient, notifications } = this.props;
+    const { rolesToDelete, callback, rolesAPIClient, notifications, buildFlavor } = this.props;
     const errors: string[] = [];
     const deleteOperations = rolesToDelete.map((roleName) => {
       const deleteRoleTask = async () => {
         try {
           await rolesAPIClient.deleteRole(roleName);
-          notifications.toasts.addSuccess(
-            i18n.translate(
-              'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
-              { defaultMessage: 'Deleted role {roleName}', values: { roleName } }
-            )
-          );
+          if (buildFlavor === 'traditional') {
+            notifications.toasts.addSuccess(
+              i18n.translate(
+                'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
+                { defaultMessage: 'Deleted role {roleName}', values: { roleName } }
+              )
+            );
+          }
         } catch (e) {
           errors.push(roleName);
           notifications.toasts.addDanger(
@@ -153,6 +186,35 @@ export class ConfirmDelete extends Component<Props, State> {
     });
 
     await Promise.all(deleteOperations);
+
+    if (buildFlavor === 'serverless') {
+      this.props.notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
+          defaultMessage:
+            '{numberOfCustomRoles, plural, one {# custom role} other {# custom roles}} deleted',
+          values: { numberOfCustomRoles: deleteOperations.length },
+        }),
+        text: toMountPoint(
+          <>
+            <p>
+              {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                defaultMessage: `The deleted role will still appear listed on the user profile in Organization
+                  Management and on the User Profile for those that don't have admin access.`,
+              })}
+            </p>
+
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={this.props.cloudOrgUrl}>
+                  Manage Members
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>,
+          this.props
+        ),
+      });
+    }
 
     callback(rolesToDelete, errors);
   };

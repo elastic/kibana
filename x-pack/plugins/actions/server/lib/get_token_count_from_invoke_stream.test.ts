@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
+import {
+  getTokenCountFromInvokeStream,
+  parseGeminiStreamForUsageMetadata,
+} from './get_token_count_from_invoke_stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
@@ -57,8 +60,29 @@ describe('getTokenCountFromInvokeStream', () => {
     ],
   };
 
+  const geminiChunk = {
+    candidates: [
+      {
+        content: {
+          role: 'model',
+          parts: [
+            {
+              text: '. I be no real-life pirate, but I be mighty good at pretendin!',
+            },
+          ],
+        },
+      },
+    ],
+    usageMetadata: {
+      promptTokenCount: 23,
+      candidatesTokenCount: 50,
+      totalTokenCount: 73,
+    },
+  };
+
   const PROMPT_TOKEN_COUNT = 34;
   const COMPLETION_TOKEN_COUNT = 2;
+
   describe('OpenAI stream', () => {
     beforeEach(() => {
       stream = createStreamMock();
@@ -93,6 +117,30 @@ describe('getTokenCountFromInvokeStream', () => {
         completion: COMPLETION_TOKEN_COUNT,
       });
       expect(logger.error).toHaveBeenCalled();
+    });
+    it('Stops the stream early when the request is aborted', async () => {
+      const mockDestroy = jest.spyOn(stream.transform, 'destroy');
+      const abortController = new AbortController();
+
+      const tokenPromise = getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body: {
+          ...body,
+          signal: abortController.signal,
+        },
+        logger,
+        actionTypeId: '.gen-ai',
+      });
+
+      abortController.abort();
+
+      await expect(tokenPromise).resolves.toEqual({
+        prompt: PROMPT_TOKEN_COUNT,
+        total: PROMPT_TOKEN_COUNT + 0,
+        completion: 0,
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(mockDestroy).toHaveBeenCalled();
     });
   });
   describe('Bedrock stream', () => {
@@ -154,6 +202,44 @@ describe('getTokenCountFromInvokeStream', () => {
         completion: COMPLETION_TOKEN_COUNT,
       });
       expect(logger.error).toHaveBeenCalled();
+    });
+    it('Does not stop the stream early when the request is aborted', async () => {
+      const abortController = new AbortController();
+      const tokenPromise = getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body: {
+          ...body,
+          signal: abortController.signal,
+        },
+        logger,
+        actionTypeId: '.bedrock',
+      });
+
+      abortController.abort();
+      stream.complete();
+      await expect(tokenPromise).resolves.toEqual({
+        prompt: PROMPT_TOKEN_COUNT,
+        total: PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT,
+        completion: COMPLETION_TOKEN_COUNT,
+      });
+    });
+  });
+  describe('Gemini stream', () => {
+    beforeEach(() => {
+      stream = createStreamMock();
+      stream.write(`data: ${JSON.stringify(geminiChunk)}`);
+    });
+
+    it('counts the prompt, completion & total tokens for Gemini response', async () => {
+      stream.complete();
+      const tokens = await parseGeminiStreamForUsageMetadata({
+        responseStream: stream.transform,
+        logger,
+      });
+
+      expect(tokens.promptTokenCount).toBe(23);
+      expect(tokens.candidatesTokenCount).toBe(50);
+      expect(tokens.totalTokenCount).toBe(73);
     });
   });
 });

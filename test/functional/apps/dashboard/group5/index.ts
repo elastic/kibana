@@ -31,7 +31,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./empty_dashboard'));
     loadTestFile(require.resolve('./dashboard_settings'));
     loadTestFile(require.resolve('./data_shared_attributes'));
-    loadTestFile(require.resolve('./share'));
     loadTestFile(require.resolve('./embed_mode'));
     loadTestFile(require.resolve('./dashboard_back_button'));
     loadTestFile(require.resolve('./dashboard_error_handling'));

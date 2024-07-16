@@ -63,14 +63,13 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react
   })),
 }));
 
-const config = {
+const config: ConfigSchema = {
   unsafe: {
     alertDetails: {
-      metrics: { enabled: false },
       uptime: { enabled: false },
     },
   },
-} as ConfigSchema;
+};
 
 const getFormatterMock = jest.fn();
 const createRuleTypeRegistryMock = () => ({
@@ -147,8 +146,6 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').exists()).toBeTruthy();
     });
   });
 
@@ -157,7 +154,15 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
+    });
+  });
+
+  it('"View alert details" menu item should open alert details page', async () => {
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj~="viewAlertDetailsPage"]').hostNodes().length).toBe(1);
+      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').exists()).toBeFalsy();
     });
   });
 
@@ -239,13 +244,13 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup(RULE_DETAILS_PAGE_ID);
 
     expect(
-      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props
-    ).toEqual(expect.objectContaining({ href: 'http://localhost:5620/app/o11y/log-explorer' }));
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props.onClick
+    ).toBeDefined();
 
     prependMock.mockClear();
 
     await waitFor(() => {
-      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseOver');
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseover');
       expect(prependMock).toBeCalledTimes(1);
     });
   });

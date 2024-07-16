@@ -13,12 +13,8 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-import {
-  CONTAINER_ID,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../../common/es_fields/apm';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
@@ -26,27 +22,24 @@ export function ServiceLogs() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/logs');
+  } = useAnyOfApmParams('/services/{serviceName}/logs', '/logs-services/{serviceName}/logs');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
             },
-          }
-        );
+          },
+        });
       }
     },
     [environment, kuery, serviceName, start, end]
@@ -89,7 +82,5 @@ export function getInfrastructureKQLFilter({
     ? [`((${containerIdKql}) and not ${SERVICE_NAME}: *)`]
     : [];
 
-  return [serviceNameAndEnvironmentCorrelation, ...containerIdCorrelation].join(
-    ' or '
-  );
+  return [serviceNameAndEnvironmentCorrelation, ...containerIdCorrelation].join(' or ');
 }

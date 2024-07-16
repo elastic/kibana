@@ -42,12 +42,13 @@ describe('http normalizers', () => {
     ];
     const monitors = [
       {
-        locations: ['dev'],
+        privateLocations: ['Germany'],
+        locations: ['us_central'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-2',
         name: 'My Monitor 2',
-        urls: ['http://localhost:9200', 'http://anotherurl:9200'],
+        urls: ['http://localhost:9200?withComma=1,2,3', 'http://anotherurl:9200'],
         schedule: 60,
         timeout: '80s',
         'check.request': {
@@ -80,7 +81,8 @@ describe('http normalizers', () => {
         max_redirects: 2,
       },
       {
-        locations: ['dev'],
+        privateLocations: ['Germany'],
+        locations: ['us_central'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-3',
@@ -142,6 +144,23 @@ describe('http normalizers', () => {
             __ui: {
               is_tls_enabled: true,
             },
+            locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+                agentPolicyId: 'germany',
+              },
+            ],
             'check.request.body': {
               type: 'json',
               value: '{"json":"body"}',
@@ -159,7 +178,6 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-2',
-            locations: [],
             max_redirects: '2',
             name: 'My Monitor 2',
             namespace: 'test_space',
@@ -184,7 +202,7 @@ describe('http normalizers', () => {
             tags: [],
             timeout: '80',
             type: 'http',
-            urls: 'http://localhost:9200',
+            urls: 'http://localhost:9200?withComma=1,2,3',
             'url.port': null,
             username: '',
             id: '',
@@ -199,6 +217,23 @@ describe('http normalizers', () => {
             __ui: {
               is_tls_enabled: true,
             },
+            locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+                agentPolicyId: 'germany',
+              },
+            ],
             'check.request.body': {
               type: 'text',
               value: 'sometextbody',
@@ -216,7 +251,6 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-3',
-            locations: [],
             max_redirects: '0',
             name: 'My Monitor 3',
             namespace: 'test_space',
@@ -299,7 +333,23 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-2',
-            locations: [],
+            locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+                agentPolicyId: 'germany',
+              },
+            ],
             max_redirects: '2',
             name: 'My Monitor 2',
             namespace: 'test_space',
@@ -324,7 +374,7 @@ describe('http normalizers', () => {
             tags: [],
             timeout: '80',
             type: 'http',
-            urls: 'http://localhost:9200',
+            urls: 'http://localhost:9200?withComma=1,2,3',
             'url.port': null,
             username: '',
             id: '',
@@ -356,7 +406,23 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-3',
-            locations: [],
+            locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+                agentPolicyId: 'germany',
+              },
+            ],
             max_redirects: '0',
             name: 'My Monitor 3',
             namespace: 'test_space',

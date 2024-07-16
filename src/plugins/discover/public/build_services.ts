@@ -7,13 +7,13 @@
  */
 
 import { History } from 'history';
-
-import {
+import type {
   Capabilities,
   ChromeStart,
   CoreStart,
   DocLinksStart,
   ToastsStart,
+  I18nStart,
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
@@ -23,28 +23,26 @@ import {
   AppMountParameters,
   ScopedHistory,
 } from '@kbn/core/public';
-import {
+import type {
   FilterManager,
   TimefilterContract,
   DataViewsContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -53,12 +51,16 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { DiscoverStartPlugins } from './plugin';
-import { DiscoverContextAppLocator } from './application/context/services/locator';
-import { DiscoverSingleDocLocator } from './application/doc/locator';
-import { DiscoverAppLocator } from '../common';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { DiscoverStartPlugins } from './types';
+import type { DiscoverContextAppLocator } from './application/context/services/locator';
+import type { DiscoverSingleDocLocator } from './application/doc/locator';
+import type { DiscoverAppLocator } from '../common';
+import type { ProfilesManager } from './context_awareness';
 
 /**
  * Location state of internal Discover history instance
@@ -74,9 +76,11 @@ export interface UrlTracker {
 }
 
 export interface DiscoverServices {
+  aiops?: AiopsPluginStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -104,6 +108,7 @@ export interface DiscoverServices {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
+  dataVisualizer?: DataVisualizerPluginStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -121,6 +126,8 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  profilesManager: ProfilesManager;
 }
 
 export const buildServices = memoize(
@@ -134,6 +141,7 @@ export const buildServices = memoize(
     history,
     scopedHistory,
     urlTracker,
+    profilesManager,
     setHeaderActionMenu = noop,
   }: {
     core: CoreStart;
@@ -145,12 +153,14 @@ export const buildServices = memoize(
     history: History<HistoryLocationState>;
     scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
+    profilesManager: ProfilesManager;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
     const { usageCollection } = plugins;
     const storage = new Storage(localStorage);
 
     return {
+      aiops: plugins.aiops,
       application: core.application,
       addBasePath: core.http.basePath.prepend,
       analytics: core.analytics,
@@ -158,8 +168,10 @@ export const buildServices = memoize(
       chrome: core.chrome,
       core,
       data: plugins.data,
+      dataVisualizer: plugins.dataVisualizer,
       docLinks: core.docLinks,
       embeddable: plugins.embeddable,
+      i18n: core.i18n,
       theme: core.theme,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
@@ -200,6 +212,8 @@ export const buildServices = memoize(
       uiActions: plugins.uiActions,
       contentClient: plugins.contentManagement.client,
       noDataPage: plugins.noDataPage,
+      observabilityAIAssistant: plugins.observabilityAIAssistant,
+      profilesManager,
     };
   }
 );

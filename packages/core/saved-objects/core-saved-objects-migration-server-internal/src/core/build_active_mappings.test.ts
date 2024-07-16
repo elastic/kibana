@@ -99,8 +99,14 @@ describe('getBaseMappings', () => {
         updated_at: {
           type: 'date',
         },
+        updated_by: {
+          type: 'keyword',
+        },
         created_at: {
           type: 'date',
+        },
+        created_by: {
+          type: 'keyword',
         },
         references: {
           type: 'nested',

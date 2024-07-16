@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -16,7 +17,6 @@ import {
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
-import { isInternalURL } from '../../../common/is_internal_url';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -187,9 +187,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Login has been successfully performed.');
     } else {
       this.logger.debug(
-        `Failed to perform a login: ${
-          authenticationResult.error && getDetailedErrorMessage(authenticationResult.error)
-        }`
+        () =>
+          `Failed to perform a login: ${
+            authenticationResult.error && getDetailedErrorMessage(authenticationResult.error)
+          }`
       );
     }
 
@@ -286,7 +287,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           return DeauthenticationResult.redirectTo(redirect);
         }
       } catch (err) {
-        this.logger.debug(`Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
+        this.logger.debug(() => `Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
         return DeauthenticationResult.failed(err);
       }
     }
@@ -467,7 +468,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       });
     } catch (err) {
       this.logger.debug(
-        `Failed to perform IdP initiated local logout: ${getDetailedErrorMessage(err)}`
+        () => `Failed to perform IdP initiated local logout: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -500,7 +501,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
+        () => `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -593,7 +594,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         state: { requestId, redirectURL, realm },
       });
     } catch (err) {
-      this.logger.debug(`Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
+      this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
   }

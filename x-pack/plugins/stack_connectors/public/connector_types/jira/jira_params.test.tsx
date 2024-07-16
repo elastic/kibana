@@ -12,7 +12,7 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -487,6 +487,16 @@ describe('JiraParamsFields renders', () => {
       });
 
       expect(editAction.mock.calls[0][1].incident.otherFields).toEqual(TEST_VALUE);
+    });
+
+    it('updating additional fields with an empty string sets its value to null', async () => {
+      render(<JiraParamsFields {...defaultProps} />);
+      const otherFields = await screen.findByTestId('otherFieldsJsonEditor');
+
+      userEvent.paste(otherFields, 'foobar');
+      userEvent.clear(otherFields);
+
+      expect(editAction.mock.calls[1][1].incident.otherFields).toEqual(null);
     });
 
     it('Clears any left behind priority when issueType changes and hasPriority becomes false', async () => {

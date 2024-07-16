@@ -7,7 +7,7 @@
 
 import { get, set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 interface PolicyProtectionReference {
   keyPath: string;
@@ -22,7 +22,7 @@ const allOsValues = [
   PolicyOperatingSystem.windows,
 ];
 
-const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
+export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
   {
     keyPath: 'malware.mode',
     osList: [...allOsValues],
@@ -143,6 +143,11 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     ...policy.windows.ransomware,
     mode: ProtectionModes.off,
   },
+  antivirus_registration: {
+    ...policy.windows.antivirus_registration,
+    mode: AntivirusRegistrationModes.disabled,
+    enabled: false,
+  },
   attack_surface_reduction: {
     ...policy.windows.attack_surface_reduction,
     credential_hardening: {
@@ -165,6 +170,7 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
 export const ensureOnlyEventCollectionIsAllowed = (policy: PolicyConfig): PolicyConfig => {
   const updatedPolicy = disableProtections(policy);
 
+  set(updatedPolicy, 'windows.antivirus_registration.mode', AntivirusRegistrationModes.disabled);
   set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
 
   return updatedPolicy;
@@ -198,3 +204,9 @@ export const isPolicySetToEventCollectionOnly = (
     message,
   };
 };
+
+export function isBillablePolicy(policy: PolicyConfig) {
+  if (!policy.meta.serverless) return false;
+
+  return !isPolicySetToEventCollectionOnly(policy).isOnlyCollectingEvents;
+}

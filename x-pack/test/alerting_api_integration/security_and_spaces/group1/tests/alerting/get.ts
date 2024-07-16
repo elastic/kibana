@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -19,7 +19,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 const getTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   supertestWithoutAuth: any
 ) => {
   describe(describeType, () => {

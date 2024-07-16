@@ -9,9 +9,9 @@ import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
-
 import { EuiBasicTable, EuiTab } from '@elastic/eui';
+
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 
@@ -42,7 +42,9 @@ describe('AnalyticsCollectionOverviewTable', () => {
   });
 
   it('should call setSelectedTable with the correct table id when a tab is clicked', () => {
-    const wrapper = shallow(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);
+    const wrapper = shallowWithIntl(
+      <AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />
+    );
 
     const topReferrersTab = wrapper.find(EuiTab).at(0);
     topReferrersTab.simulate('click');
@@ -56,7 +58,9 @@ describe('AnalyticsCollectionOverviewTable', () => {
 
   it('should render a table with the selectedTable', () => {
     setMockValues({ ...mockValues, selectedTable: ExploreTables.WorsePerformers });
-    const wrapper = mount(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);
+    const wrapper = mountWithIntl(
+      <AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />
+    );
     expect(wrapper.find(EuiBasicTable).prop('itemId')).toBe(ExploreTables.WorsePerformers);
   });
 });

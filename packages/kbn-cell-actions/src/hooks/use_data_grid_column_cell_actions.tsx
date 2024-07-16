@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { MutableRefObject, useCallback, useMemo, useRef } from 'react';
-import {
-  EuiDataGridRefProps,
-  EuiLoadingSpinner,
-  type EuiDataGridColumnCellAction,
-} from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { MutableRefObject } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import { type EuiDataGridColumnCellAction } from '@elastic/eui';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CellAction,
   CellActionCompatibilityContext,
@@ -48,10 +46,6 @@ export type UseDataGridColumnsCellActions<
   P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
-// static actions array references to prevent React updates
-const loadingColumnActions: EuiDataGridColumnCellAction[] = [
-  () => <EuiLoadingSpinner size="s" data-test-subj="dataGridColumnCellAction-loading" />,
-];
 const emptyActions: EuiDataGridColumnCellAction[][] = [];
 
 export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
@@ -62,6 +56,8 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   dataGridRef,
   disabledActionTypes = [],
 }) => {
+  const [cellActions, setCellActions] = useState<EuiDataGridColumnCellAction[][]>(emptyActions);
+
   const bulkContexts: CellActionCompatibilityContext[] | undefined = useMemo(() => {
     if (!triggerId || !fields?.length) {
       return undefined;
@@ -77,35 +73,35 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
     disabledActionTypes,
   });
 
-  const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
-    if (loading) {
-      return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
-    }
-    if (!triggerId || !columnsActions?.length || !fields?.length) {
-      return emptyActions;
+  useEffect(() => {
+    // no-op
+    if (loading || !triggerId || !columnsActions?.length || !fields?.length) {
+      return;
     }
 
     // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
     // It will eventually update to a consistent state
     if (columnsActions.length !== fields.length) {
-      return emptyActions;
+      return;
     }
 
-    return columnsActions.map((actions, columnIndex) =>
-      actions.map((action) =>
-        createColumnCellAction({
-          action,
-          field: fields[columnIndex],
-          getCellValue,
-          metadata,
-          triggerId,
-          dataGridRef,
-        })
+    setCellActions(
+      columnsActions.map((actions, columnIndex) =>
+        actions.map((action) =>
+          createColumnCellAction({
+            action,
+            field: fields[columnIndex],
+            getCellValue,
+            metadata,
+            triggerId,
+            dataGridRef,
+          })
+        )
       )
     );
   }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
 
-  return columnsCellActions;
+  return cellActions;
 };
 
 interface CreateColumnCellActionParams
@@ -157,7 +153,7 @@ const createColumnCellAction = ({
         aria-label={action.getDisplayName(actionContext)}
         title={action.getDisplayName(actionContext)}
         data-test-subj={`dataGridColumnCellAction-${action.id}`}
-        iconType={action.getIconType(actionContext)!}
+        iconType={action.getIconType(actionContext) ?? ''}
         onClick={onClick}
       >
         {action.getDisplayName(actionContext)}

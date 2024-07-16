@@ -1,9 +1,19 @@
-TO_VERSION
+## TO_VERSION
 
+TO_VERSION function converts an input string to a version value.
 
-Converts an input string to a version value. For example:
+### Examples
+
+Here are a couple of examples of how you can use the TO_VERSION function in ES|QL queries:
+
 ```esql
 ROW v = TO_VERSION("1.2.3")
 ```
 
-The input can be a single- or multi-valued field or an expression.Alias: TO_VERSupported types:
+In this example, the TO_VERSION function is used to convert the string "1.2.3" to a version value.
+
+```esql
+ROW v = TO_VERSION("2.3.4")
+```
+
+In this example, the TO_VERSION function is used to convert the string "2.3.4" to a version value.

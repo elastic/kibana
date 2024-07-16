@@ -9,13 +9,11 @@ import { Connector } from '@kbn/search-connectors';
 import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 
-export const useConnectors = (from: number = 0, size: number = 10) => {
+export const useConnectors = () => {
   const { http } = useKibanaServices();
   return useQuery({
-    queryKey: ['fetchConnectors', from, size],
+    queryKey: ['fetchConnectors'],
     queryFn: () =>
-      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors', {
-        query: { from, size },
-      }),
+      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
   });
 };

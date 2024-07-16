@@ -9,10 +9,9 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Input format"
         id="indexPatternFieldEditor.duration.inputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -39,10 +38,9 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Output format"
         id="indexPatternFieldEditor.duration.outputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -74,10 +72,9 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Decimal places"
         id="indexPatternFieldEditor.duration.decimalPlacesLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -101,10 +98,9 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
       checked={false}
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Use short suffix"
           id="indexPatternFieldEditor.duration.showSuffixLabel.short"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -121,10 +117,9 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
       checked={true}
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Include space between suffix and value"
           id="indexPatternFieldEditor.duration.includeSpace"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -185,10 +180,9 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Input format"
         id="indexPatternFieldEditor.duration.inputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -215,10 +209,9 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Output format"
         id="indexPatternFieldEditor.duration.outputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -297,10 +290,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Input format"
         id="indexPatternFieldEditor.duration.inputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -327,10 +319,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Output format"
         id="indexPatternFieldEditor.duration.outputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -362,10 +353,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Decimal places"
         id="indexPatternFieldEditor.duration.decimalPlacesLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -388,10 +378,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     <EuiSwitch
       checked={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Show suffix"
           id="indexPatternFieldEditor.duration.showSuffixLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -408,10 +397,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       checked={false}
       disabled={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Use short suffix"
           id="indexPatternFieldEditor.duration.showSuffixLabel.short"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -428,10 +416,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       checked={true}
       disabled={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Include space between suffix and value"
           id="indexPatternFieldEditor.duration.includeSpace"
-          values={Object {}}
         />
       }
       onChange={[Function]}

@@ -8,23 +8,23 @@
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IndexPattern } from '../../types';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { documentField } from '../form_based/document_field';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import { FieldIcon } from '@kbn/field-utils';
+import * as loadFieldStatsModule from '@kbn/unified-field-list/src/services/field_stats';
 import { FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { IndexPattern } from '../../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { documentField } from '../form_based/document_field';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -178,29 +178,25 @@ describe('Lens Field Item', () => {
   });
 
   beforeEach(() => {
-    (loadFieldStats as jest.Mock).mockReset();
-    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
-  });
-
-  it('should display displayName of a field', async () => {
-    const wrapper = await getComponent(defaultProps);
-
-    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
-    // which can't be seen, but shows in the text content
-    expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toContain(
-      'bytes'
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockReset();
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockImplementation(() =>
+      Promise.resolve({})
     );
   });
 
-  it('should show gauge icon for gauge fields', async () => {
-    const wrapper = await getComponent({
-      ...defaultProps,
-      field: { ...defaultProps.field, timeSeriesMetric: 'gauge' },
-    });
+  it('should display displayName of a field', async () => {
+    render(<InnerFieldItemWrapper {...defaultProps} />);
+    expect(screen.getAllByTestId('lnsFieldListPanelField')[0]).toHaveTextContent('bytes');
+  });
 
-    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
-    // which can't be seen, but shows in the text content
-    expect(wrapper.find(FieldIcon).first().prop('type')).toEqual('gauge');
+  it('should show gauge icon for gauge fields', async () => {
+    render(
+      <InnerFieldItemWrapper
+        {...defaultProps}
+        field={{ ...defaultProps.field, timeSeriesMetric: 'gauge' }}
+      />
+    );
+    expect(screen.getByText('Gauge metric')).toBeInTheDocument();
   });
 
   it('should render edit field button if callback is set', async () => {
@@ -251,7 +247,7 @@ describe('Lens Field Item', () => {
   it('should pass add filter callback and pass result to filter manager', async () => {
     let resolveFunction: (arg: unknown) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
@@ -300,7 +296,7 @@ describe('Lens Field Item', () => {
     const dataViewField = new DataViewField(defaultProps.field);
     let resolveFunction: (arg: unknown) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    (loadFieldStatsModule.loadFieldStats as jest.Mock).mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
@@ -312,7 +308,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -355,7 +351,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalledTimes(1);
 
     act(() => {
       const closePopover = wrapper.find(EuiPopover).prop('closePopover');
@@ -386,8 +382,8 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(2);
-    expect(loadFieldStats).toHaveBeenLastCalledWith({
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalledTimes(2);
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenLastCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -425,7 +421,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
@@ -447,7 +443,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
@@ -470,7 +466,7 @@ describe('Lens Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(loadFieldStatsModule.loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe(
@@ -478,23 +474,21 @@ describe('Lens Field Item', () => {
     );
     expect(wrapper.find(FieldPopoverFooter).exists()).toBeTruthy();
   });
+  const clickFieldRtl = async (fieldname: string) => {
+    userEvent.click(screen.getByTestId(`field-${fieldname}-showDetails`));
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+  };
 
   it('should display Explore in discover button', async () => {
-    const wrapper = await mountWithIntl(<InnerFieldItemWrapper {...defaultProps} />);
-
-    await clickField(wrapper, 'bytes');
-
-    await wrapper.update();
-
-    const exploreInDiscoverBtn = findTestSubject(
-      wrapper,
-      'lnsFieldListPanel-exploreInDiscover-bytes'
-    );
-    expect(exploreInDiscoverBtn.length).toBe(1);
+    render(<InnerFieldItemWrapper {...defaultProps} />);
+    await clickFieldRtl('bytes');
+    expect(
+      screen.getAllByTestId('lnsFieldListPanel-exploreInDiscover-bytes')[0]
+    ).toBeInTheDocument();
   });
 
   it('should not display Explore in discover button for a geo_point field', async () => {
-    const wrapper = await mountWithIntl(
+    render(
       <InnerFieldItemWrapper
         {...defaultProps}
         field={{
@@ -506,16 +500,10 @@ describe('Lens Field Item', () => {
         }}
       />
     );
-
-    await clickField(wrapper, 'geo_point');
-
-    await wrapper.update();
-
-    const exploreInDiscoverBtn = findTestSubject(
-      wrapper,
-      'lnsFieldListPanel-exploreInDiscover-geo_point'
-    );
-    expect(exploreInDiscoverBtn.length).toBe(0);
+    await clickFieldRtl('geo_point');
+    expect(
+      screen.queryByTestId('lnsFieldListPanel-exploreInDiscover-geo_point')
+    ).not.toBeInTheDocument();
   });
 
   it('should not display Explore in discover button if discover capabilities show is false', async () => {
@@ -527,20 +515,15 @@ describe('Lens Field Item', () => {
         },
       },
     };
-    const wrapper = await mountWithIntl(
+
+    render(
       <KibanaContextProvider services={services}>
         <InnerFieldItem {...defaultProps} />
       </KibanaContextProvider>
     );
-
-    await clickField(wrapper, 'bytes');
-
-    await wrapper.update();
-
-    const exploreInDiscoverBtn = findTestSubject(
-      wrapper,
-      'lnsFieldListPanel-exploreInDiscover-bytes'
-    );
-    expect(exploreInDiscoverBtn.length).toBe(0);
+    await clickFieldRtl('bytes');
+    expect(
+      screen.getAllByTestId('lnsFieldListPanel-exploreInDiscover-bytes')[0]
+    ).toBeInTheDocument();
   });
 });

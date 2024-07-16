@@ -20,6 +20,10 @@ export const getAllConnectorsRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connectors`,
+      options: {
+        access: 'public',
+        summary: `Get all connectors`,
+      },
       validate: {},
     },
     router.handleLegacyErrors(

@@ -31,8 +31,7 @@ export function EmptyBanner() {
   const { docLinks } = useApmPluginContext().core;
 
   useEffect(() => {
-    const handler: cytoscape.EventHandler = (event) =>
-      setNodeCount(event.cy.nodes().length);
+    const handler: cytoscape.EventHandler = (event) => setNodeCount(event.cy.nodes().length);
 
     if (cy) {
       cy.on('add remove', 'node', handler);
@@ -52,10 +51,7 @@ export function EmptyBanner() {
 
   // Since we're absolutely positioned, we need to get the full width and
   // subtract the space for controls and margins.
-  const width =
-    cy.width() -
-    parseInt(theme.eui.euiSizeXXL, 10) -
-    parseInt(theme.eui.euiSizeL, 10);
+  const width = cy.width() - parseInt(theme.eui.euiSizeXXL, 10) - parseInt(theme.eui.euiSizeL, 10);
 
   return (
     <EmptyBannerContainer style={{ width }}>

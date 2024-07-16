@@ -29,7 +29,7 @@ import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './change_csp_rule_state';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import {
   showChangeBenchmarkRuleStatesSuccessToast,
@@ -43,7 +43,6 @@ export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStates;
-  refetchRulesStates: () => void;
 }
 
 const tabs = [
@@ -65,14 +64,16 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
-  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { mutate: mutateRuleState } = useChangeCspRuleState();
   const { data: rulesData } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTags(rule.metadata)
   );
+  const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const startServices = { notifications, analytics, i18n: i18nStart, theme };
   const isRuleMuted = rule?.state === 'muted';
-  const { notifications } = useKibana().services;
+
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
@@ -82,9 +83,11 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         rule_id: rule.metadata.id,
       };
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
-      await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
-      await refetchRulesStates();
-      await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+      await mutateRuleState({
+        newState: nextRuleStates,
+        ruleIds: [rulesObjectRequest],
+      });
+      showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
         numberOfRules: 1,
         numberOfDetectionRules: rulesData?.total || 0,
       });
@@ -96,7 +99,6 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
 
   return (
     <EuiFlyout
-      ownFocus={false}
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
       outsideClickCloses

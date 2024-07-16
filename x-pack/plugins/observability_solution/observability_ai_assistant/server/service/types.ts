@@ -7,13 +7,17 @@
 
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
-import { ChatCompletionChunkEvent } from '../../common/conversation_complete';
+import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
   FunctionResponse,
 } from '../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
+import type {
+  Message,
+  ObservabilityAIAssistantScreenContextRequest,
+  UserInstructionOrPlainText,
+} from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -23,17 +27,33 @@ export type RespondFunctionResources = Pick<
   'context' | 'logger' | 'plugins' | 'request'
 >;
 
-export type ChatFn = (
-  ...args: Parameters<ObservabilityAIAssistantClient['chat']>
-) => Promise<Observable<ChatCompletionChunkEvent>>;
+export type ChatFunction = (
+  name: string,
+  params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
+) => Observable<ChatEvent>;
+
+export type ChatFunctionWithoutConnector = (
+  name: string,
+  params: Omit<
+    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    'connectorId' | 'simulateFunctionCalling' | 'signal'
+  >
+) => Observable<ChatEvent>;
+
+export type FunctionCallChatFunction = (
+  name: string,
+  params: Omit<
+    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    'connectorId' | 'simulateFunctionCalling' | 'tracer'
+  >
+) => Observable<ChatCompletionChunkEvent>;
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
     arguments: TArguments;
     messages: Message[];
-    connectorId: string;
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
-    chat: ChatFn;
+    chat: FunctionCallChatFunction;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
@@ -42,6 +62,18 @@ export interface FunctionHandler {
   definition: FunctionDefinition;
   respond: RespondFunction<any, FunctionResponse>;
 }
+
+export type RegisteredInstruction = UserInstructionOrPlainText | RegisterInstructionCallback;
+
+type RegisterInstructionCallback = ({
+  availableFunctionNames,
+}: {
+  availableFunctionNames: string[];
+}) => UserInstructionOrPlainText | UserInstructionOrPlainText[] | undefined;
+
+export type RegisterInstruction = (
+  ...instructions: Array<UserInstructionOrPlainText | RegisterInstructionCallback>
+) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
@@ -59,25 +91,3 @@ export type RegistrationCallback = ({}: {
   client: ObservabilityAIAssistantClient;
   functions: ChatFunctionClient;
 }) => Promise<void>;
-
-export interface ObservabilityAIAssistantResourceNames {
-  componentTemplate: {
-    conversations: string;
-    kb: string;
-  };
-  indexTemplate: {
-    conversations: string;
-    kb: string;
-  };
-  aliases: {
-    conversations: string;
-    kb: string;
-  };
-  indexPatterns: {
-    conversations: string;
-    kb: string;
-  };
-  pipelines: {
-    kb: string;
-  };
-}

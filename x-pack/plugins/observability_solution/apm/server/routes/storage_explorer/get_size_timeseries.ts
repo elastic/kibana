@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  rangeQuery,
-  kqlQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -20,10 +16,7 @@ import {
 } from '../../../common/storage_explorer_types';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  getTotalIndicesStats,
-  getEstimatedSizeForDocumentsInIndex,
-} from './indices_stats_helpers';
+import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type SizeTimeseriesResponse = Array<{
@@ -79,10 +72,7 @@ export async function getSizeTimeseries({
               ...kqlQuery(kuery),
               ...rangeQuery(start, end),
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(
-                    TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                  )
+                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
                 : []),
             ],
           },
@@ -134,27 +124,25 @@ export async function getSizeTimeseries({
 
   return (
     res.aggregations?.sample.services.buckets.map((serviceBucket) => {
-      const timeseries = serviceBucket.storageTimeSeries.buckets.map(
-        (dateHistogramBucket) => {
-          const estimatedSize = allIndicesStats
-            ? dateHistogramBucket.indices.buckets.reduce((prev, curr) => {
-                return (
-                  prev +
-                  getEstimatedSizeForDocumentsInIndex({
-                    allIndicesStats,
-                    indexName: curr.key as string,
-                    numberOfDocs: curr.number_of_metric_docs_for_index.value,
-                  })
-                );
-              }, 0)
-            : 0;
+      const timeseries = serviceBucket.storageTimeSeries.buckets.map((dateHistogramBucket) => {
+        const estimatedSize = allIndicesStats
+          ? dateHistogramBucket.indices.buckets.reduce((prev, curr) => {
+              return (
+                prev +
+                getEstimatedSizeForDocumentsInIndex({
+                  allIndicesStats,
+                  indexName: curr.key as string,
+                  numberOfDocs: curr.number_of_metric_docs_for_index.value,
+                })
+              );
+            }, 0)
+          : 0;
 
-          return {
-            x: dateHistogramBucket.key,
-            y: estimatedSize,
-          };
-        }
-      );
+        return {
+          x: dateHistogramBucket.key,
+          y: estimatedSize,
+        };
+      });
 
       return {
         serviceName: serviceBucket.key as string,

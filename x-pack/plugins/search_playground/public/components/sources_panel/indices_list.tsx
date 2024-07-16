@@ -32,6 +32,7 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
             color="primary"
             label={index}
             size="s"
+            data-test-subj="indicesInAccordian"
             extraAction={{
               alwaysShow: true,
               'aria-label': i18n.translate('xpack.searchPlayground.sources.indices.removeIndex', {
@@ -41,6 +42,7 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
               iconType: 'minusInCircle',
               onClick: () => onRemoveClick(index),
               disabled: indices.length === 1,
+              'data-test-subj': `removeIndexButton`,
             }}
           />
         ))}

@@ -65,6 +65,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
@@ -128,6 +129,7 @@ export type SecurityAlertType<
 
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
+  actions: SetupPlugins['actions'];
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;
@@ -136,6 +138,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   version: string;
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
+  alerting: SetupPlugins['alerting'];
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -388,6 +391,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
 }

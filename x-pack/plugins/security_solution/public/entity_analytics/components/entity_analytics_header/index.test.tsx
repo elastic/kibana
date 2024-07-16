@@ -18,11 +18,11 @@ import { UsersTableType } from '../../../explore/users/store/model';
 import type { SeverityCount } from '../severity/types';
 
 const mockSeverityCount: SeverityCount = {
-  [RiskSeverity.low]: 1,
-  [RiskSeverity.high]: 1,
-  [RiskSeverity.moderate]: 1,
-  [RiskSeverity.unknown]: 1,
-  [RiskSeverity.critical]: 99,
+  [RiskSeverity.Low]: 1,
+  [RiskSeverity.High]: 1,
+  [RiskSeverity.Moderate]: 1,
+  [RiskSeverity.Unknown]: 1,
+  [RiskSeverity.Critical]: 99,
 };
 
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
@@ -82,7 +82,7 @@ describe('Entity analytics header', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(
         usersActions.updateUserRiskScoreSeverityFilter({
-          severitySelection: [RiskSeverity.critical],
+          severitySelection: [RiskSeverity.Critical],
         })
       );
 
@@ -109,7 +109,7 @@ describe('Entity analytics header', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(
         hostsActions.updateHostRiskScoreSeverityFilter({
-          severitySelection: [RiskSeverity.critical],
+          severitySelection: [RiskSeverity.Critical],
           hostsType: HostsType.page,
         })
       );

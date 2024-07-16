@@ -38,9 +38,7 @@ import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 
 function getContentsComponent(
-  selectedElementData:
-    | cytoscape.NodeDataDefinition
-    | cytoscape.EdgeDataDefinition,
+  selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition,
   isTraceExplorerEnabled: boolean
 ) {
   if (
@@ -56,15 +54,15 @@ function getContentsComponent(
     return ResourceContents;
   }
 
-  if (
-    isTraceExplorerEnabled &&
-    selectedElementData.source &&
-    selectedElementData.target
-  ) {
+  if (isTraceExplorerEnabled && selectedElementData.sourceData && selectedElementData.targetData) {
     return EdgeContents;
   }
 
-  return DependencyContents;
+  if (selectedElementData.label) {
+    return DependencyContents;
+  }
+
+  return null;
 }
 
 export interface ContentsProps {
@@ -84,13 +82,7 @@ interface PopoverProps {
   end: string;
 }
 
-export function Popover({
-  focusedServiceName,
-  environment,
-  kuery,
-  start,
-  end,
-}: PopoverProps) {
+export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedElement, setSelectedElement] = useState<
@@ -112,7 +104,6 @@ export function Popover({
   const x = box ? box.x1 + box.w / 2 : -10000;
   const y = box ? box.y1 + box.h / 2 : -10000;
 
-  const isOpen = !!selectedElement;
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
@@ -187,10 +178,9 @@ export function Popover({
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(
-    selectedElementData,
-    isTraceExplorerEnabled
-  );
+  const ContentsComponent = getContentsComponent(selectedElementData, isTraceExplorerEnabled);
+
+  const isOpen = !!selectedElement && !!ContentsComponent;
 
   return (
     <EuiPopover
@@ -201,11 +191,7 @@ export function Popover({
       ref={popoverRef}
       style={popoverStyle}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        style={{ minWidth: popoverWidth }}
-      >
+      <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }}>
@@ -213,13 +199,9 @@ export function Popover({
               {kuery && (
                 <EuiToolTip
                   position="bottom"
-                  content={i18n.translate(
-                    'xpack.apm.serviceMap.kqlFilterInfo',
-                    {
-                      defaultMessage:
-                        'The KQL filter is not applied in the displayed stats.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                    defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                  })}
                 >
                   <EuiIcon tabIndex={0} type="iInCircle" />
                 </EuiToolTip>
@@ -228,14 +210,16 @@ export function Popover({
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>
-        <ContentsComponent
-          onFocusClick={onFocusClick}
-          elementData={selectedElementData}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-        />
+        {ContentsComponent && (
+          <ContentsComponent
+            onFocusClick={onFocusClick}
+            elementData={selectedElementData}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+          />
+        )}
       </EuiFlexGroup>
     </EuiPopover>
   );

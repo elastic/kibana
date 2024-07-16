@@ -27,7 +27,7 @@ describe('syncEditedMonitor', () => {
   const logger = loggerMock.create();
 
   const serverMock: SyntheticsServerSetup = {
-    uptimeEsClient: { search: jest.fn() },
+    syntheticsEsClient: { search: jest.fn() },
     stackVersion: null,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
@@ -90,7 +90,6 @@ describe('syncEditedMonitor', () => {
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
-      previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
       routeContext: {

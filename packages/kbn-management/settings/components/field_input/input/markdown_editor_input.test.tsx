@@ -71,11 +71,15 @@ describe('MarkdownEditorInput', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: '# New Markdown Title' } });
 
-    await waitFor(() =>
+    await waitFor(() => {
+      expect(defaultProps.onInputChange).not.toHaveBeenCalledWith({
+        error: expect.any(String),
+      });
+
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
         type: 'markdown',
         unsavedValue: '# New Markdown Title',
-      })
-    );
+      });
+    });
   });
 });

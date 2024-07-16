@@ -8,21 +8,27 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
+import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
+import { CONVERSATIONS_TAB } from './const';
 
 interface Props {
   defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
-  selectedConversation: Conversation;
+  selectedConversationId?: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 /**
@@ -34,10 +40,12 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversation,
+    selectedConversationId,
     onConversationSelected,
     conversations,
+    conversationsLoaded,
     refetchConversationsState,
+    refetchPrompts,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -54,6 +62,9 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       async (success: boolean) => {
         cleanupAndCloseModal();
         await refetchConversationsState();
+        if (refetchPrompts) {
+          await refetchPrompts();
+        }
         if (success) {
           toasts?.addSuccess({
             iconType: 'check',
@@ -61,7 +72,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
           });
         }
       },
-      [cleanupAndCloseModal, refetchConversationsState, toasts]
+      [cleanupAndCloseModal, refetchConversationsState, refetchPrompts, toasts]
     );
 
     const handleShowConversationSettings = useCallback(() => {
@@ -79,17 +90,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             isDisabled={isDisabled}
             iconType="gear"
             size="xs"
+            color="text"
           />
         </EuiToolTip>
 
         {isSettingsModalVisible && (
           <AssistantSettings
             defaultConnector={defaultConnector}
-            selectedConversation={selectedConversation}
+            selectedConversationId={selectedConversationId}
             onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
           />
         )}
       </>

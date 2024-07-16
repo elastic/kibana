@@ -24,6 +24,13 @@ interface SloGroupListFilter {
   kqlQuery: string;
   filters: string;
   lastRefresh?: number;
+  groupsFilter?: string[];
+}
+
+interface SLOOverviewFilter {
+  kqlQuery: string;
+  filters: string;
+  lastRefresh?: number;
 }
 
 export const sloKeys = {
@@ -32,6 +39,7 @@ export const sloKeys = {
   list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
   group: (filters: SloGroupListFilter) => [...sloKeys.groups(), filters] as const,
   groups: () => [...sloKeys.all, 'group'] as const,
+  overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,
@@ -45,6 +53,8 @@ export const sloKeys = {
   definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
     [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
+    [...sloKeys.all, 'health', list] as const,
   burnRates: (
     sloId: string,
     instanceId: string | undefined,
@@ -52,9 +62,10 @@ export const sloKeys = {
   ) => [...sloKeys.all, 'burnRates', sloId, instanceId, windows] as const,
   preview: (
     indicator: Indicator,
-    range: { start: number; end: number },
+    range: { from: Date; to: Date },
     groupings?: Record<string, unknown>
   ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
+  burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
 };
 
 export type SloKeys = typeof sloKeys;

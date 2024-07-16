@@ -27,20 +27,18 @@ describe('RedirectWithOffset', () => {
   ) {
     history.replace(location);
 
-    jest
-      .spyOn(useApmPluginContextExports, 'useApmPluginContext')
-      .mockReturnValue({
-        core: {
-          http: {
-            basePath: {
-              prepend: () => {},
-            },
-          },
-          uiSettings: {
-            get: () => defaultSetting,
+    jest.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
+      core: {
+        http: {
+          basePath: {
+            prepend: () => {},
           },
         },
-      } as any);
+        uiSettings: {
+          get: () => defaultSetting,
+        },
+      },
+    } as any);
 
     return render(
       <RouterProvider history={history} router={apmRouter as any}>
@@ -52,10 +50,7 @@ describe('RedirectWithOffset', () => {
   }
 
   it('eventually renders the child element', async () => {
-    const element = renderUrl(
-      { pathname: '/services', search: location.search, hash: '' },
-      false
-    );
+    const element = renderUrl({ pathname: '/services', search: location.search, hash: '' }, false);
 
     await expect(element.findByText('Foo')).resolves.not.toBeUndefined();
 
@@ -64,20 +59,14 @@ describe('RedirectWithOffset', () => {
   });
 
   it('redirects with comparisonEnabled=false when comparison is disabled in advanced settings', async () => {
-    renderUrl(
-      { pathname: '/services', search: location.search, hash: '' },
-      false
-    );
+    renderUrl({ pathname: '/services', search: location.search, hash: '' }, false);
 
     const query = qs.parse(history.entries[0].search);
     expect(query.comparisonEnabled).toBe('false');
   });
 
   it('redirects with comparisonEnabled=true when comparison is enabled in advanced settings', async () => {
-    renderUrl(
-      { pathname: '/services', search: location.search, hash: '' },
-      true
-    );
+    renderUrl({ pathname: '/services', search: location.search, hash: '' }, true);
 
     const query = qs.parse(history.entries[0].search);
     expect(query.comparisonEnabled).toBe('true');

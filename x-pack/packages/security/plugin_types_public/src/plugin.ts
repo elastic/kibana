@@ -14,6 +14,8 @@ import type { UserProfileAPIClient } from './user_profile';
 export interface SecurityPluginSetup {
   /**
    * Exposes authentication information about the currently logged in user.
+   *
+   * @deprecated in favor of Core's `security` service
    */
   authc: AuthenticationServiceSetup;
   /**
@@ -33,6 +35,8 @@ export interface SecurityPluginStart {
   navControlService: SecurityNavControlServiceStart;
   /**
    * Exposes authentication information about the currently logged in user.
+   *
+   * @deprecated in favor of Core's `security` service
    */
   authc: AuthenticationServiceStart;
   /**
@@ -41,6 +45,8 @@ export interface SecurityPluginStart {
   authz: AuthorizationServiceStart;
   /**
    * A set of methods to work with Kibana user profiles.
+   *
+   * @deprecated in favor of Core's `userProfile` service.
    */
   userProfiles: UserProfileAPIClient;
 }

@@ -61,6 +61,9 @@ function createIndexRequest(
           if (type === 'cartesian_point') {
             esType = 'point';
           }
+          if (type === 'cartesian_shape') {
+            esType = 'shape';
+          }
           if (type === 'unsupported') {
             esType = 'integer_range';
           }
@@ -149,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       for (const policy of policies) {
         log.info(`deleting policy "${policy}"...`);
+        // TODO: Maybe `policy` -> `policy.name`?
         await es.enrich.deletePolicy({ name: policy }, { ignore: [404] });
       }
     }

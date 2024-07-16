@@ -14,7 +14,7 @@ import { createOpenAiChunk } from './create_openai_chunk';
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
-type RequestHandler = (request: Request, response: Response) => void;
+type RequestHandler = (request: Request, response: Response, body: string) => void;
 
 interface RequestInterceptor {
   name: string;
@@ -22,6 +22,7 @@ interface RequestInterceptor {
 }
 
 export interface LlmResponseSimulator {
+  body: string;
   status: (code: number) => Promise<void>;
   next: (
     msg:
@@ -56,7 +57,7 @@ export class LlmProxy {
 
           if (interceptor.when(body)) {
             pull(this.interceptors, interceptor);
-            interceptor.handle(request, response);
+            interceptor.handle(request, response, body);
             return;
           }
         }
@@ -97,14 +98,14 @@ export class LlmProxy {
         waitForIntercept: () => Promise<LlmResponseSimulator>;
       }
     : {
-        complete: () => Promise<void>;
+        completeAfterIntercept: () => Promise<void>;
       } {
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
         this.interceptors.push({
           name,
           when,
-          handle: (request, response) => {
+          handle: (request, response, body) => {
             this.log.info(`LLM request intercepted by "${name}"`);
 
             function write(chunk: string) {
@@ -115,6 +116,7 @@ export class LlmProxy {
             }
 
             const simulator: LlmResponseSimulator = {
+              body,
               status: once(async (status: number) => {
                 response.writeHead(status, {
                   'Content-Type': 'text/event-stream',
@@ -147,7 +149,7 @@ export class LlmProxy {
         });
       }),
       new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 5000ms`)), 5000);
+        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 20000ms`)), 20000);
       }),
     ]);
 
@@ -160,7 +162,7 @@ export class LlmProxy {
       : responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
 
     return {
-      complete: async () => {
+      completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);

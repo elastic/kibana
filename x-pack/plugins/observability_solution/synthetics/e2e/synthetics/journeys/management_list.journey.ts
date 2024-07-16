@@ -7,7 +7,6 @@
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
 import { byTestId } from '../../helpers/utils';
-import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -16,9 +15,7 @@ import {
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey(`MonitorManagementList`, async ({ page, params }) => {
-  recordVideo(page);
-
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const testMonitor1 = 'Test monitor 1';
   const testMonitor2 = 'Test monitor 2';
   const testMonitor3 = 'Test monitor 3';

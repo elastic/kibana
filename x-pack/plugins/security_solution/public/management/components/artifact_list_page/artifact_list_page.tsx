@@ -18,6 +18,7 @@ import { AdministrationListPage } from '../administration_list_page';
 import type { PaginatedContentProps } from '../paginated_content';
 import { PaginatedContent } from '../paginated_content';
 
+import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
 import type { ArtifactListPageLabels } from './translations';
@@ -75,6 +76,7 @@ export interface ArtifactListPageProps {
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
@@ -90,6 +92,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardEditAction = true,
     allowCardCreateAction = true,
     allowCardDeleteAction = true,
+    CardDecorator,
   }) => {
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -354,6 +357,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               pagination={uiPagination}
               contentClassName="card-container"
               data-test-subj={getTestId('list')}
+              CardDecorator={CardDecorator}
             />
           </>
         )}

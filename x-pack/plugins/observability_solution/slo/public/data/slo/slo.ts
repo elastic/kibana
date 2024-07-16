@@ -51,6 +51,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   settings: {
     syncDelay: '1m',
     frequency: '1m',
+    preventInitialBackfill: false,
   },
   summary: {
     status: 'HEALTHY',
@@ -61,6 +62,9 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       remaining: 0.936,
       isEstimated: false,
     },
+    fiveMinuteBurnRate: 0,
+    oneHourBurnRate: 0,
+    oneDayBurnRate: 0,
   },
   groupBy: ALL_VALUE,
   groupings: {},

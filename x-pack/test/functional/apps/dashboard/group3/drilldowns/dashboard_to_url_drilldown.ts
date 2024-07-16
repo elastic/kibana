@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // create drilldown
       await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickContextMenuMoreItem();
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();

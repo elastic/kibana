@@ -8,8 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
 import { Observable, of } from 'rxjs';
-import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
-import { ScreenContextActionDefinition } from '../common/types';
+import type {
+  ChatCompletionChunkEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../common/conversation_complete';
+import { MessageRole, ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
@@ -21,9 +24,8 @@ import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils
 
 export const mockChatService: ObservabilityAIAssistantChatService = {
   sendAnalyticsEvent: noop,
-  chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
+  chat: (options) => new Observable<ChatCompletionChunkEvent>(),
   complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
-  getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   renderFunction: (name) => (
     <div>
@@ -35,6 +37,13 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
+  getSystemMessage: () => ({
+    '@timestamp': new Date().toISOString(),
+    message: {
+      role: MessageRole.System,
+      content: 'System',
+    },
+  }),
 };
 
 export const mockService: ObservabilityAIAssistantService = {

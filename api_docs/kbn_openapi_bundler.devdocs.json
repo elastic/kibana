@@ -27,7 +27,7 @@
         "label": "bundle",
         "description": [],
         "signature": [
-          "(config: ",
+          "({ sourceGlob, outputFilePath, options, }: ",
           {
             "pluginId": "@kbn/openapi-bundler",
             "scope": "common",
@@ -46,7 +46,7 @@
             "id": "def-common.bundle.$1",
             "type": "Object",
             "tags": [],
-            "label": "config",
+            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled-{version}.schema.yaml',\n  options,\n}",
             "description": [],
             "signature": [
               {
@@ -81,17 +81,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/openapi-bundler",
-            "id": "def-common.BundlerConfig.rootDir",
-            "type": "string",
-            "tags": [],
-            "label": "rootDir",
-            "description": [],
-            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/openapi-bundler",
             "id": "def-common.BundlerConfig.sourceGlob",
             "type": "string",
             "tags": [],
@@ -108,6 +97,20 @@
             "tags": [],
             "label": "outputFilePath",
             "description": [],
+            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-bundler",
+            "id": "def-common.BundlerConfig.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "BundleOptions | undefined"
+            ],
             "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,
             "trackAdoption": false

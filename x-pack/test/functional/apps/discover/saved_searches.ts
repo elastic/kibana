@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -55,7 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await panelActions.customizePanel();
         await dashboardCustomizePanel.enableCustomTimeRange();
-        await dashboardCustomizePanel.openDatePickerQuickMenu();
+        await retry.waitFor('quick menu', async () => {
+          await dashboardCustomizePanel.openDatePickerQuickMenu();
+          return await testSubjects.exists('superDatePickerCommonlyUsed_Last_90 days');
+        });
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
 

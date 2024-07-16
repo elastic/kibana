@@ -9,14 +9,36 @@ import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { registerAgentStatusRoute } from './agent_status_handler';
-import { ENDPOINT_AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ExperimentalFeatures } from '../../../../common';
+import { agentServiceMocks as mockAgentService } from '../../services/agent/mocks';
+import { getAgentStatusClient as _getAgentStatusClient } from '../../services';
+import type { DeepMutable } from '../../../../common/endpoint/types';
+
+jest.mock('../../services', () => {
+  const realModule = jest.requireActual('../../services');
+
+  return {
+    ...realModule,
+    getAgentStatusClient: jest.fn((agentType: ResponseActionAgentType) => {
+      return mockAgentService.createClient(agentType);
+    }),
+  };
+});
+
+const getAgentStatusClientMock = _getAgentStatusClient as jest.Mock;
 
 describe('Agent Status API route handler', () => {
-  let apiTestSetup: HttpApiTestSetupMock<never, EndpointAgentStatusRequestQueryParams>;
+  let apiTestSetup: HttpApiTestSetupMock<never, DeepMutable<EndpointAgentStatusRequestQueryParams>>;
   let httpRequestMock: ReturnType<
-    HttpApiTestSetupMock<never, EndpointAgentStatusRequestQueryParams>['createRequestMock']
+    HttpApiTestSetupMock<
+      never,
+      DeepMutable<EndpointAgentStatusRequestQueryParams>
+    >['createRequestMock']
   >;
   let httpHandlerContextMock: HttpApiTestSetupMock<
     never,
@@ -42,43 +64,60 @@ describe('Agent Status API route handler', () => {
     apiTestSetup.endpointAppContextMock.experimentalFeatures = {
       ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
       responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     };
 
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
-  it('should error if the sentinel_one feature flag is turned off', async () => {
-    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsSentinelOneV1Enabled: false,
-    };
+  it.each`
+    agentType         | featureFlag
+    ${'sentinel_one'} | ${'responseActionsSentinelOneV1Enabled'}
+    ${'crowdstrike'}  | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
+  `(
+    'should error if the $agentType feature flag ($featureFlag) is turned off',
+    async ({
+      agentType,
+      featureFlag,
+    }: {
+      agentType: ResponseActionAgentType;
+      featureFlag: keyof ExperimentalFeatures;
+    }) => {
+      apiTestSetup.endpointAppContextMock.experimentalFeatures = {
+        ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
+        [featureFlag]: false,
+      };
+      httpRequestMock.query.agentType = agentType;
 
+      await apiTestSetup
+        .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
+        .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+
+      expect(httpResponseMock.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: expect.any(CustomHttpRequestError),
+      });
+    }
+  );
+
+  it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {
+    httpRequestMock.query.agentType = agentType;
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', ENDPOINT_AGENT_STATUS_ROUTE, '1')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
-    expect(httpResponseMock.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: expect.any(CustomHttpRequestError),
-    });
-  });
-
-  it('should only (v8.13) accept agent type of sentinel_one', async () => {
-    // @ts-expect-error `query.*` is not mutable
-    httpRequestMock.query.agentType = 'endpoint';
-    await apiTestSetup
-      .getRegisteredVersionedRoute('get', ENDPOINT_AGENT_STATUS_ROUTE, '1')
-      .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-    expect(httpResponseMock.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: expect.any(CustomHttpRequestError),
+    expect(httpResponseMock.ok).toHaveBeenCalled();
+    expect(getAgentStatusClientMock).toHaveBeenCalledWith(agentType, {
+      esClient: (await httpHandlerContextMock.core).elasticsearch.client.asInternalUser,
+      soClient: (await httpHandlerContextMock.core).savedObjects.client,
+      connectorActionsClient: (await httpHandlerContextMock.actions).getActionsClient(),
+      endpointService: apiTestSetup.endpointAppContextMock.service,
     });
   });
 
   it('should return status code 200 with expected payload', async () => {
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', ENDPOINT_AGENT_STATUS_ROUTE, '1')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.ok).toHaveBeenCalledWith({
@@ -86,43 +125,21 @@ describe('Agent Status API route handler', () => {
         data: {
           one: {
             agentType: 'sentinel_one',
-            found: false,
-            id: 'one',
-            isUninstalled: false,
-            isPendingUninstall: false,
+            found: true,
+            agentId: 'one',
             isolated: false,
-            lastSeen: '',
-            pendingActions: {
-              execute: 0,
-              'get-file': 0,
-              isolate: 0,
-              'kill-process': 0,
-              'running-processes': 0,
-              'suspend-process': 0,
-              unisolate: 0,
-              upload: 0,
-            },
-            status: 'unenrolled',
+            lastSeen: expect.any(String),
+            pendingActions: {},
+            status: 'healthy',
           },
           two: {
             agentType: 'sentinel_one',
-            found: false,
-            id: 'two',
-            isUninstalled: false,
-            isPendingUninstall: false,
+            found: true,
+            agentId: 'two',
             isolated: false,
-            lastSeen: '',
-            pendingActions: {
-              execute: 0,
-              'get-file': 0,
-              isolate: 0,
-              'kill-process': 0,
-              'running-processes': 0,
-              'suspend-process': 0,
-              unisolate: 0,
-              upload: 0,
-            },
-            status: 'unenrolled',
+            lastSeen: expect.any(String),
+            pendingActions: {},
+            status: 'healthy',
           },
         },
       },

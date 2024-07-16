@@ -7,19 +7,17 @@
 
 import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
+import { EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -42,6 +40,7 @@ import { EPMApp } from './sections/epm';
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
+import { ReadOnlyContextProvider } from './hooks/use_read_only_context';
 
 const queryClient = new QueryClient();
 
@@ -59,10 +58,10 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
   fleetStatus?: FleetStatusProviderProps;
+  children: React.ReactNode;
 }> = memo(
   ({
     children,
@@ -72,59 +71,66 @@ export const IntegrationsAppContext: React.FC<{
     kibanaVersion,
     extensions,
     setHeaderActionMenu,
-    theme$,
     fleetStatus,
   }) => {
-    const theme = useObservable(theme$);
-    const isDarkMode = theme && theme.darkMode;
+    const XXL_BREAKPOINT = 1600;
+    const darkModeObservable = useObservable(startServices.theme.theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
-      <RedirectAppLinks
-        coreStart={{
-          application: startServices.application,
+      <KibanaRenderContextProvider
+        {...startServices}
+        theme={startServices.theme}
+        modify={{
+          breakpoint: {
+            xxl: XXL_BREAKPOINT,
+          },
         }}
       >
-        <startServices.i18n.Context>
+        <RedirectAppLinks
+          coreStart={{
+            application: startServices.application,
+          }}
+        >
           <KibanaContextProvider services={{ ...startServices }}>
-            <EuiErrorBoundary>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <KibanaThemeProvider theme$={theme$}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={false} />
-                        <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                            <startServices.customIntegrations.ContextProvider>
-                              <CloudContext>
-                                <Router history={history}>
-                                  <AgentPolicyContextProvider>
-                                    <PackageInstallProvider
-                                      notifications={startServices.notifications}
-                                      theme$={theme$}
-                                    >
-                                      <FlyoutContextProvider>
-                                        <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                        {children}
-                                      </FlyoutContextProvider>
-                                    </PackageInstallProvider>
-                                  </AgentPolicyContextProvider>
-                                </Router>
-                              </CloudContext>
-                            </startServices.customIntegrations.ContextProvider>
-                          </FleetStatusProvider>
-                        </UIExtensionsContext.Provider>
-                      </QueryClientProvider>
-                    </EuiThemeProvider>
-                  </KibanaThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </EuiErrorBoundary>
+            <ConfigContext.Provider value={config}>
+              <KibanaVersionContext.Provider value={kibanaVersion}>
+                {/* This should be removed since theme is passed to `KibanaRenderContextProvider`,
+                however, removing this breaks usages of `props.theme.eui` in styled components */}
+                <EuiThemeProvider darkMode={isDarkMode}>
+                  <QueryClientProvider client={queryClient}>
+                    <ReactQueryDevtools initialIsOpen={false} />
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                        <startServices.customIntegrations.ContextProvider>
+                          <CloudContext>
+                            <Router history={history}>
+                              <ReadOnlyContextProvider>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider startServices={startServices}>
+                                    <FlyoutContextProvider>
+                                      <IntegrationsHeader
+                                        {...{ setHeaderActionMenu, startServices }}
+                                      />
+                                      {children}
+                                    </FlyoutContextProvider>
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </ReadOnlyContextProvider>
+                            </Router>
+                          </CloudContext>
+                        </startServices.customIntegrations.ContextProvider>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </QueryClientProvider>
+                </EuiThemeProvider>
+              </KibanaVersionContext.Provider>
+            </ConfigContext.Provider>
           </KibanaContextProvider>
-        </startServices.i18n.Context>
-      </RedirectAppLinks>
+        </RedirectAppLinks>
+      </KibanaRenderContextProvider>
     );
   }
 );

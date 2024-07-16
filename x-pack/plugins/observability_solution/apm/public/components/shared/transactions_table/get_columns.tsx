@@ -9,8 +9,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiToolTip,
+  EuiIconTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,10 +24,7 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ImpactBar } from '../impact_bar';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
@@ -36,10 +33,7 @@ import { getLatencyColumnLabel } from './get_latency_column_label';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { unit } from '../../../utils/style';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import {
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/es_fields/apm';
+import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { fieldValuePairToKql } from '../../../../common/utils/field_value_pair_to_kql';
 import { ITableColumn } from '../managed_table';
 
@@ -83,10 +77,9 @@ export function getColumns({
           {
             field: 'alertsCount',
             sortable: true,
-            name: i18n.translate(
-              'xpack.apm.transactionsTableColumnName.alertsColumnLabel',
-              { defaultMessage: 'Active alerts' }
-            ),
+            name: i18n.translate('xpack.apm.transactionsTableColumnName.alertsColumnLabel', {
+              defaultMessage: 'Active alerts',
+            }),
             width: `${unit * 6}px`,
             render: (_, { alertsCount, name, transactionType }) => {
               if (!alertsCount) {
@@ -112,10 +105,7 @@ export function getColumns({
                         kuery: [
                           query.kuery,
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),
-                          ...fieldValuePairToKql(
-                            TRANSACTION_TYPE,
-                            transactionType
-                          ),
+                          ...fieldValuePairToKql(TRANSACTION_TYPE, transactionType),
                         ]
                           .filter(Boolean)
                           .join(' and '),
@@ -134,10 +124,9 @@ export function getColumns({
     {
       field: 'name',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnName',
-        { defaultMessage: 'Name' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnName', {
+        defaultMessage: 'Name',
+      }),
       width: '30%',
       render: (_, { name, transactionType: type }) => {
         return (
@@ -161,10 +150,8 @@ export function getColumns({
       name: getLatencyColumnLabel(latencyAggregationType),
       align: RIGHT_ALIGNMENT,
       render: (_, { latency, name }) => {
-        const currentTimeseries =
-          detailedStatistics?.currentPeriod?.[name]?.latency;
-        const previousTimeseries =
-          detailedStatistics?.previousPeriod?.[name]?.latency;
+        const currentTimeseries = detailedStatistics?.currentPeriod?.[name]?.latency;
+        const previousTimeseries = detailedStatistics?.previousPeriod?.[name]?.latency;
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
         );
@@ -176,9 +163,7 @@ export function getColumns({
             isLoading={detailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousTimeseries : undefined
             }
             valueLabel={asMillisecondDuration(latency)}
             comparisonSeriesColor={previousPeriodColor}
@@ -189,16 +174,13 @@ export function getColumns({
     {
       field: 'throughput',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnThroughput', {
+        defaultMessage: 'Throughput',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
-        const currentTimeseries =
-          detailedStatistics?.currentPeriod?.[name]?.throughput;
-        const previousTimeseries =
-          detailedStatistics?.previousPeriod?.[name]?.throughput;
+        const currentTimeseries = detailedStatistics?.currentPeriod?.[name]?.throughput;
+        const previousTimeseries = detailedStatistics?.previousPeriod?.[name]?.throughput;
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
         );
@@ -210,9 +192,7 @@ export function getColumns({
             isLoading={detailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousTimeseries : undefined
             }
             valueLabel={asTransactionRate(throughput)}
             comparisonSeriesColor={previousPeriodColor}
@@ -224,38 +204,30 @@ export function getColumns({
       field: 'errorRate',
       sortable: true,
       name: (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
-            {
-              defaultMessage:
-                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            }
-          )}
-        >
-          <>
-            {i18n.translate(
-              'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
+        <>
+          {i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnErrorRate', {
+            defaultMessage: 'Failed transaction rate',
+          })}
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignCenter"
+            content={i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
               {
-                defaultMessage: 'Failed transaction rate',
+                defaultMessage:
+                  "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
               }
             )}
-            &nbsp;
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignCenter"
-            />
-          </>
-        </EuiToolTip>
+          />
+        </>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
-        const currentTimeseries =
-          detailedStatistics?.currentPeriod?.[name]?.errorRate;
-        const previousTimeseries =
-          detailedStatistics?.previousPeriod?.[name]?.errorRate;
+        const currentTimeseries = detailedStatistics?.currentPeriod?.[name]?.errorRate;
+        const previousTimeseries = detailedStatistics?.previousPeriod?.[name]?.errorRate;
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.FAILED_TRANSACTION_RATE
         );
@@ -267,9 +239,7 @@ export function getColumns({
             isLoading={detailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousTimeseries : undefined
             }
             valueLabel={asPercent(errorRate, 1)}
             comparisonSeriesColor={previousPeriodColor}
@@ -281,38 +251,27 @@ export function getColumns({
       field: 'impact',
       sortable: true,
       name: (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.serviceOverview.transactionsTableColumnImpactTip',
-            {
+        <>
+          {i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpact', {
+            defaultMessage: 'Impact',
+          })}
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignCenter"
+            content={i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpactTip', {
               defaultMessage:
                 'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            }
-          )}
-        >
-          <>
-            {i18n.translate(
-              'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-              {
-                defaultMessage: 'Impact',
-              }
-            )}
-            &nbsp;
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignCenter"
-            />
-          </>
-        </EuiToolTip>
+            })}
+          />
+        </>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {
-        const currentImpact =
-          detailedStatistics?.currentPeriod?.[name]?.impact ?? 0;
-        const previousImpact =
-          detailedStatistics?.previousPeriod?.[name]?.impact;
+        const currentImpact = detailedStatistics?.currentPeriod?.[name]?.impact ?? 0;
+        const previousImpact = detailedStatistics?.previousPeriod?.[name]?.impact;
         return (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>

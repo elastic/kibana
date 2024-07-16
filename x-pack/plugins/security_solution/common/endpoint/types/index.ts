@@ -14,6 +14,7 @@ export * from './os';
 export * from './trusted_apps';
 export * from './utility_types';
 export * from './agents';
+export * from './sentinel_one';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -148,6 +149,7 @@ export interface ResolverNode {
   parent?: string | number;
   name?: string;
   stats: EventStats;
+  agentId?: string;
 }
 
 /**
@@ -863,6 +865,11 @@ export interface ResolverSchema {
    * parent represents the field that is the edge between two nodes.
    */
   parent: string;
+
+  /**
+   * agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }
 
 /**
@@ -882,6 +889,11 @@ export type ResolverEntityIndex = Array<{
    * Unique ID value for the requested document using the `_id` field passed to the /entity route
    */
   id: string;
+
+  /**
+   * Agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }>;
 
 /**
@@ -948,6 +960,7 @@ export interface PolicyConfig {
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;
+    billable?: boolean;
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
@@ -999,6 +1012,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -1121,7 +1135,7 @@ export interface BlocklistFields {
 }
 
 export interface OnWriteScanFields {
-  on_write_scan?: boolean;
+  on_write_scan: boolean;
 }
 
 /** Policy protection mode options */
@@ -1129,6 +1143,12 @@ export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
   off = 'off',
+}
+
+export enum AntivirusRegistrationModes {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  sync = 'sync_with_malware_prevent',
 }
 
 /**
@@ -1205,6 +1225,9 @@ export interface HostPolicyResponseAppliedAction {
 export type HostPolicyResponseConfiguration =
   HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
+export type HostPolicyResponseArtifacts =
+  HostPolicyResponse['Endpoint']['policy']['applied']['artifacts'];
+
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
   concerned_actions: HostPolicyActionName[];
@@ -1213,7 +1236,7 @@ interface HostPolicyResponseConfigurationStatus {
 /**
  * Host Policy Response Applied Artifact
  */
-interface HostPolicyResponseAppliedArtifact {
+export interface HostPolicyResponseAppliedArtifact {
   name: string;
   sha256: string;
 }

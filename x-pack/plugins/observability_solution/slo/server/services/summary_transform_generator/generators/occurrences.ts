@@ -6,17 +6,20 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_DESTINATION_INDEX_NAME,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
+import { SLODefinition } from '../../../domain/models';
 import { getGroupBy } from './common';
+import { buildBurnRateAgg } from './utils';
 
-export function generateSummaryTransformForOccurrences(slo: SLO): TransformPutTransformRequest {
+export function generateSummaryTransformForOccurrences(
+  slo: SLODefinition
+): TransformPutTransformRequest {
   return {
     transform_id: getSLOSummaryTransformId(slo.id, slo.revision),
     dest: {
@@ -24,7 +27,7 @@ export function generateSummaryTransformForOccurrences(slo: SLO): TransformPutTr
       index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
     },
     source: {
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: `${SLO_DESTINATION_INDEX_NAME}*`,
       query: {
         bool: {
           filter: [
@@ -113,6 +116,9 @@ export function generateSummaryTransformForOccurrences(slo: SLO): TransformPutTr
             field: '@timestamp',
           },
         },
+        ...buildBurnRateAgg('fiveMinuteBurnRate', slo),
+        ...buildBurnRateAgg('oneHourBurnRate', slo),
+        ...buildBurnRateAgg('oneDayBurnRate', slo),
       },
     },
     description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,

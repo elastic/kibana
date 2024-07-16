@@ -18,7 +18,6 @@
     "@kbn/observability-plugin",
     "@kbn/i18n",
     "@kbn/core-http-browser",
-    "@kbn/ui-theme",
     "@kbn/server-route-repository",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
@@ -34,7 +33,19 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/fleet-plugin",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/cloud-experiments-plugin",
+    "@kbn/home-sample-data-tab",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/discover-plugin",
+    "@kbn/utility-types",
+    "@kbn/spaces-plugin",
+    "@kbn/ebt",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

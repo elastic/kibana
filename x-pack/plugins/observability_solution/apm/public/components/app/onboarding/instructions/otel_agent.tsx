@@ -47,8 +47,7 @@ export const createOpenTelemetryAgentInstructions = (
             defaultMessage:
               'See the [OpenTelemetry Instrumentation guides]({openTelemetryInstrumentationLink}) to download the OpenTelemetry Agent or SDK for your language.',
             values: {
-              openTelemetryInstrumentationLink:
-                'https://opentelemetry.io/docs/instrumentation',
+              openTelemetryInstrumentationLink: 'https://opentelemetry.io/docs/instrumentation',
             },
           })}
         </EuiMarkdownFormat>
@@ -61,18 +60,14 @@ export const createOpenTelemetryAgentInstructions = (
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.otel.configureAgent.textPre',
-              {
-                defaultMessage:
-                  'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some bootstrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
-                values: {
-                  openTelemetryDocumentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
-                  openTelemetryInstrumentationLink:
-                    'https://opentelemetry.io/docs/instrumentation',
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.onboarding.otel.configureAgent.textPre', {
+              defaultMessage:
+                'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some bootstrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
+              values: {
+                openTelemetryDocumentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
+                openTelemetryInstrumentationLink: 'https://opentelemetry.io/docs/instrumentation',
+              },
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
@@ -86,22 +81,16 @@ export const createOpenTelemetryAgentInstructions = (
               <EuiSpacer />
             </>
           )}
-          <OpenTelemetryInstructions
-            apmServerUrl={apmServerUrl}
-            apiKeyDetails={apiKeyDetails}
-          />
+          <OpenTelemetryInstructions apmServerUrl={apmServerUrl} apiKeyDetails={apiKeyDetails} />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.otel.configureAgent.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.onboarding.otel.configureAgent.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),
@@ -153,12 +142,9 @@ function ConfigurationValueColumn({
       {value && (
         <EuiButtonIcon
           data-test-subj="apmConfigurationValueColumnButton"
-          aria-label={i18n.translate(
-            'xpack.apm.onboarding.otel.column.value.copyIconText',
-            {
-              defaultMessage: 'Copy to clipboard',
-            }
-          )}
+          aria-label={i18n.translate('xpack.apm.onboarding.otel.column.value.copyIconText', {
+            defaultMessage: 'Copy to clipboard',
+          })}
           color="text"
           iconType="copy"
           onClick={() => copyToClipboard(value)}
@@ -215,22 +201,16 @@ export function OpenTelemetryInstructions({
     {
       field: 'setting',
       width: '23%',
-      name: i18n.translate(
-        'xpack.apm.onboarding.config_otel.column.configSettings',
-        {
-          defaultMessage: 'Configuration setting (1)',
-        }
-      ),
+      name: i18n.translate('xpack.apm.onboarding.config_otel.column.configSettings', {
+        defaultMessage: 'Configuration setting (1)',
+      }),
     },
     {
       field: 'value',
       width: '55%',
-      name: i18n.translate(
-        'xpack.apm.onboarding.config_otel.column.configValue',
-        {
-          defaultMessage: 'Configuration value',
-        }
-      ),
+      name: i18n.translate('xpack.apm.onboarding.config_otel.column.configValue', {
+        defaultMessage: 'Configuration value',
+      }),
       render: (_, { value, setting, apiKey }) => (
         <ConfigurationValueColumn
           setting={setting}
@@ -251,11 +231,7 @@ export function OpenTelemetryInstructions({
 
   return (
     <>
-      <EuiBasicTable
-        items={items}
-        columns={columns}
-        data-test-subj="otel-instructions-table"
-      />
+      <EuiBasicTable items={items} columns={columns} data-test-subj="otel-instructions-table" />
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
         <FormattedMessage
@@ -307,12 +283,9 @@ export function OpenTelemetryInstructions({
                 target="_blank"
                 href="https://opentelemetry.io/docs/instrumentation"
               >
-                {i18n.translate(
-                  'xpack.apm.onboarding.config_otel.instrumentationGuide',
-                  {
-                    defaultMessage: 'OpenTelemetry Instrumentation guide',
-                  }
-                )}
+                {i18n.translate('xpack.apm.onboarding.config_otel.instrumentationGuide', {
+                  defaultMessage: 'OpenTelemetry Instrumentation guide',
+                })}
               </EuiLink>
             ),
           }}

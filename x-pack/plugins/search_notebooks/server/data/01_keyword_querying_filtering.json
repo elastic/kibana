@@ -1,0 +1,950 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "83LdOUCwwHzs"
+   },
+   "source": [
+    "# Keyword querying and filtering\n",
+    "\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/01-keyword-querying-filtering.ipynb)\n",
+    "\n",
+    "This interactive notebook will introduce you to the basic Elasticsearch queries, using the official Elasticsearch Python client. Before getting started on this section you should work through our [quick start](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb), as you will be using the same dataset."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Install and import libraries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!pip install -qU elasticsearch pandas"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from elasticsearch import Elasticsearch\n",
+    "from getpass import getpass"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Create the client instance\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#finding-your-cloud-id\n",
+    "ELASTIC_CLOUD_ID = getpass(\"Elastic Cloud ID: \")\n",
+    "\n",
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#creating-an-api-key\n",
+    "ELASTIC_API_KEY = getpass(\"Elastic Api Key: \")\n",
+    "\n",
+    "# Create the client instance\n",
+    "client = Elasticsearch(\n",
+    "    # For local development\n",
+    "    # hosts=[\"http://localhost:9200\"]\n",
+    "    cloud_id=ELASTIC_CLOUD_ID,\n",
+    "    api_key=ELASTIC_API_KEY,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Enable Telemetry\n",
+    "\n",
+    "Knowing that you are using this notebook helps us decide where to invest our efforts to improve our products. We would like to ask you that you run the following code to let us gather anonymous usage statistics. See [telemetry.py](https://github.com/elastic/elasticsearch-labs/blob/main/telemetry/telemetry.py) for details. Thank you!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!curl -O -s https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/telemetry/telemetry.py\n",
+    "from telemetry import enable_telemetry\n",
+    "\n",
+    "client = enable_telemetry(client, \"01-keyword-querying-filtering\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Test the Client\n",
+    "Before you continue, confirm that the client has connected with this test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(client.info())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Pretty printing Elasticsearch responses\n",
+    "\n",
+    "Let's add a helper function to print Elasticsearch responses in a readable format. This function is similar to the one that was used in the [quickstart](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb) guide."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def pretty_response(response):\n",
+    "    if len(response[\"hits\"][\"hits\"]) == 0:\n",
+    "        print(\"Your search returned no results.\")\n",
+    "    else:\n",
+    "        for hit in response[\"hits\"][\"hits\"]:\n",
+    "            id = hit[\"_id\"]\n",
+    "            publication_date = hit[\"_source\"][\"publish_date\"]\n",
+    "            score = hit[\"_score\"]\n",
+    "            title = hit[\"_source\"][\"title\"]\n",
+    "            summary = hit[\"_source\"][\"summary\"]\n",
+    "            publisher = hit[\"_source\"][\"publisher\"]\n",
+    "            num_reviews = hit[\"_source\"][\"num_reviews\"]\n",
+    "            authors = hit[\"_source\"][\"authors\"]\n",
+    "            pretty_output = f\"\\nID: {id}\\nPublication date: {publication_date}\\nTitle: {title}\\nSummary: {summary}\\nPublisher: {publisher}\\nReviews: {num_reviews}\\nAuthors: {authors}\\nScore: {score}\"\n",
+    "            print(pretty_output)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "22onltbgxxGm"
+   },
+   "source": [
+    "## Querying\n",
+    "🔐 NOTE: to run the queries that follow you need the `book_index` dataset from our [quick start](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb). If you haven't worked through the quick start, please follow the steps described there to create an Elasticsearch deployment with the dataset in it, and then come back to run the queries here.\n",
+    "\n",
+    "In the query context, a query clause answers the question _“How well does this document match this query clause?”_. In addition to deciding whether or not the document matches, the query clause also calculates a relevance score in the `_score `metadata field.\n",
+    "\n",
+    "### Full text queries\n",
+    "\n",
+    "Full text queries enable you to search analyzed text fields such as the body of an email. The query string is processed using the same analyzer that was applied to the field during indexing.\n",
+    "\n",
+    "* **match**.\n",
+    "    The standard query for performing full text queries, including fuzzy matching and phrase or proximity queries.\n",
+    "* **multi-match**.\n",
+    "    The multi-field version of the match query."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "clXQwoFQ6x61"
+   },
+   "source": [
+    "#### Match query\n",
+    "Returns documents that `match` a provided text, number, date or boolean value. The provided text is analyzed before matching.\n",
+    "\n",
+    "The `match` query is the standard query for performing a full-text search, including options for fuzzy matching.\n",
+    "\n",
+    "[Read more](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html#match-query-ex-request).\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 197
+    },
+    "id": "q_OE0XVx6_qX",
+    "outputId": "6a1d7760-5fb9-4809-e060-e35a398ed3c4"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: HwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2019-10-29\n",
+      "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
+      "Summary: A guide to pragmatic programming for software engineers and developers\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 30\n",
+      "Authors: ['andrew hunt', 'david thomas']\n",
+      "Score: 0.7042277\n",
+      "\n",
+      "ID: IAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2019-05-03\n",
+      "Title: Python Crash Course\n",
+      "Summary: A fast-paced, no-nonsense guide to programming in Python\n",
+      "Publisher: no starch press\n",
+      "Reviews: 42\n",
+      "Authors: ['eric matthes']\n",
+      "Score: 0.7042277\n",
+      "\n",
+      "ID: JgOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2011-05-13\n",
+      "Title: The Clean Coder: A Code of Conduct for Professional Programmers\n",
+      "Summary: A guide to professional conduct in the field of software engineering\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 20\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.6771651\n",
+      "\n",
+      "ID: IgOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-08-11\n",
+      "Title: Clean Code: A Handbook of Agile Software Craftsmanship\n",
+      "Summary: A guide to writing code that is easy to read, understand and maintain\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 55\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.62883455\n",
+      "\n",
+      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 0.62883455\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\", query={\"match\": {\"summary\": {\"query\": \"guide\"}}}\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "H-n6hoVsfAqc"
+   },
+   "source": [
+    "#### Multi-match query\n",
+    "\n",
+    "The `multi_match` query builds on the match query to allow multi-field queries.\n",
+    "\n",
+    "[Read more](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 154
+    },
+    "id": "TRmGYM94gCtb",
+    "outputId": "dc58b19f-e585-4d0a-d065-ac3fc18ae123"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2018-12-04\n",
+      "Title: Eloquent JavaScript\n",
+      "Summary: A modern introduction to programming\n",
+      "Publisher: no starch press\n",
+      "Reviews: 38\n",
+      "Authors: ['marijn haverbeke']\n",
+      "Score: 2.0307527\n",
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 1.7064086\n",
+      "\n",
+      "ID: IwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2015-03-27\n",
+      "Title: You Don't Know JS: Up & Going\n",
+      "Summary: Introduction to JavaScript and programming as a whole\n",
+      "Publisher: oreilly\n",
+      "Reviews: 36\n",
+      "Authors: ['kyle simpson']\n",
+      "Score: 1.6360576\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\"multi_match\": {\"query\": \"javascript\", \"fields\": [\"summary\", \"title\"]}},\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "FnBeBIVKiPnS"
+   },
+   "source": [
+    "Individual fields can be boosted with the caret (^) notation. Note in the following query how the score of the results that have \"JavaScript\" in their title is multiplied."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 154
+    },
+    "id": "_aI7hnH0ixkG",
+    "outputId": "2af27f3d-f9fd-4c7a-cab5-7cb06132582c"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2018-12-04\n",
+      "Title: Eloquent JavaScript\n",
+      "Summary: A modern introduction to programming\n",
+      "Publisher: no starch press\n",
+      "Reviews: 38\n",
+      "Authors: ['marijn haverbeke']\n",
+      "Score: 6.0922585\n",
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 5.1192265\n",
+      "\n",
+      "ID: IwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2015-03-27\n",
+      "Title: You Don't Know JS: Up & Going\n",
+      "Summary: Introduction to JavaScript and programming as a whole\n",
+      "Publisher: oreilly\n",
+      "Reviews: 36\n",
+      "Authors: ['kyle simpson']\n",
+      "Score: 1.6360576\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\"multi_match\": {\"query\": \"javascript\", \"fields\": [\"summary\", \"title^3\"]}},\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "yXipv0xSk-nK"
+   },
+   "source": [
+    "### Term-level Queries\n",
+    "\n",
+    "You can use term-level queries to find documents based on precise values in structured data. Examples of structured data include date ranges, IP addresses, prices, or product IDs."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Term search\n",
+    "\n",
+    "Returns document that contain exactly the search term."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: HwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2019-10-29\n",
+      "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
+      "Summary: A guide to pragmatic programming for software engineers and developers\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 30\n",
+      "Authors: ['andrew hunt', 'david thomas']\n",
+      "Score: 1.4816045\n",
+      "\n",
+      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 1.4816045\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\", query={\"term\": {\"publisher.keyword\": \"addison-wesley\"}}\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Range search\n",
+    "\n",
+    "Returns documents that contain terms within a provided range.\n",
+    "\n",
+    "The following example returns books that have at least 45 reviews."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: IgOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-08-11\n",
+      "Title: Clean Code: A Handbook of Agile Software Craftsmanship\n",
+      "Summary: A guide to writing code that is easy to read, understand and maintain\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 55\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 1.0\n",
+      "\n",
+      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 1.0\n",
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 1.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\", query={\"range\": {\"num_reviews\": {\"gte\": 45}}}\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Prefix search\n",
+    "\n",
+    "Returns documents that contain a specific prefix in a provided field.\n",
+    "\n",
+    "[Read more](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-prefix-query.html)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 133
+    },
+    "id": "dCr1pwlqlOE7",
+    "outputId": "ae55cd66-0ded-4868-dac5-5815ea317c44"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2018-12-04\n",
+      "Title: Eloquent JavaScript\n",
+      "Summary: A modern introduction to programming\n",
+      "Publisher: no starch press\n",
+      "Reviews: 38\n",
+      "Authors: ['marijn haverbeke']\n",
+      "Score: 1.0\n",
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 1.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\", query={\"prefix\": {\"title\": {\"value\": \"java\"}}}\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "a606YcCmmLHW"
+   },
+   "source": [
+    "#### Fuzzy search\n",
+    "\n",
+    "Returns documents that contain terms similar to the search term, as measured by a Levenshtein edit distance.\n",
+    "\n",
+    "An edit distance is the number of one-character changes needed to turn one term into another. These changes can include:\n",
+    "\n",
+    "* Changing a character (box → fox)\n",
+    "* Removing a character (black → lack)\n",
+    "* Inserting a character (sic → sick)\n",
+    "* Transposing two adjacent characters (act → cat)\n",
+    "\n",
+    "[Read more](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 133
+    },
+    "id": "dTMc-IxPmbtC",
+    "outputId": "9acf74fd-bc16-45df-80f3-49504860b10a"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2018-12-04\n",
+      "Title: Eloquent JavaScript\n",
+      "Summary: A modern introduction to programming\n",
+      "Publisher: no starch press\n",
+      "Reviews: 38\n",
+      "Authors: ['marijn haverbeke']\n",
+      "Score: 1.6246022\n",
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 1.3651271\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\", query={\"fuzzy\": {\"title\": {\"value\": \"pyvascript\"}}}\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Combining Query Conditions\n",
+    "\n",
+    "Compound queries wrap other compound or leaf queries, either to combine their results and scores, or to change their behaviour. They also allow you to switch from query to filter context, but that will be covered later in the Filtering section."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "7do0lmxA_v25"
+   },
+   "source": [
+    "#### bool.must (AND)\n",
+    "The clauses must appear in matching documents and will contribute to the score. This effectively performs an \"AND\" logical operation on the given sub-queries."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 111
+    },
+    "id": "8_C-JHRQFDl7",
+    "outputId": "be59d18b-5e20-4db0-8697-2e7746251742"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 3.788629\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\n",
+    "        \"bool\": {\n",
+    "            \"must\": [\n",
+    "                {\"term\": {\"publisher.keyword\": \"addison-wesley\"}},\n",
+    "                {\"term\": {\"authors.keyword\": \"richard helm\"}},\n",
+    "            ]\n",
+    "        }\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "eNlncytRIl9h"
+   },
+   "source": [
+    "#### bool.should (OR)\n",
+    "\n",
+    "The clause should appear in the matching document. This performs an \"OR\" logical operation on the given sub-queries."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 219
+    },
+    "id": "GRm9T1vfIsmF",
+    "outputId": "d9fb6936-3ffb-4fff-9467-1f7ac7b41490"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 2.3070245\n",
+      "\n",
+      "ID: HwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2019-10-29\n",
+      "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
+      "Summary: A guide to pragmatic programming for software engineers and developers\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 30\n",
+      "Authors: ['andrew hunt', 'david thomas']\n",
+      "Score: 1.4816045\n",
+      "\n",
+      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 1.4816045\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\n",
+    "        \"bool\": {\n",
+    "            \"should\": [\n",
+    "                {\"term\": {\"publisher.keyword\": \"addison-wesley\"}},\n",
+    "                {\"term\": {\"authors.keyword\": \"douglas crockford\"}},\n",
+    "            ]\n",
+    "        }\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "PG9TYqL-8H29"
+   },
+   "source": [
+    "## Filtering\n",
+    "\n",
+    "In a filter context, a query clause answers the question *“Does this document match this query clause?”* The answer is a simple Yes or No — no scores are calculated. Filter context is mostly used for filtering structured data, for example:\n",
+    "* Does this `timestamp` fall into the range 2015 to 2016?\n",
+    "* Is the `status` field set to `\"published\"`?\n",
+    "\n",
+    "Filter context is in effect whenever a query clause is passed to a `filter` parameter, such as the `filter` or `must_not` parameters in the `bool` query.\n",
+    "\n",
+    "[Read more](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "PGTFXUIkJG4t"
+   },
+   "source": [
+    "### bool.filter\n",
+    "\n",
+    "The clause (query) must appear for the document to be included in the results. Unlike query context searches such as `term`, `bool.must` or `bool.should`, a matching `score` isn't calculated because filter clauses are executed in filter context."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 197
+    },
+    "id": "6RH0OALLJPHv",
+    "outputId": "338419b0-3e60-4ac9-ddeb-67cac6202ca2"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: IgOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-08-11\n",
+      "Title: Clean Code: A Handbook of Agile Software Craftsmanship\n",
+      "Summary: A guide to writing code that is easy to read, understand and maintain\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 55\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.0\n",
+      "\n",
+      "ID: JgOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2011-05-13\n",
+      "Title: The Clean Coder: A Code of Conduct for Professional Programmers\n",
+      "Summary: A guide to professional conduct in the field of software engineering\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 20\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\"bool\": {\"filter\": [{\"term\": {\"publisher.keyword\": \"prentice hall\"}}]}},\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### bool.must_not\n",
+    "The clause (query) must not appear in the matching documents. Because this query also runs in filter context, no scores are calculated; the filter just determines if a document is included in the results or not."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: IgOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-08-11\n",
+      "Title: Clean Code: A Handbook of Agile Software Craftsmanship\n",
+      "Summary: A guide to writing code that is easy to read, understand and maintain\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 55\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.0\n",
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 0.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\"bool\": {\"must_not\": [{\"range\": {\"num_reviews\": {\"lte\": 45}}}]}},\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Using Filters with Queries\n",
+    "Filters are often added to search queries with the intention of limiting the search to a subset of the documents. A filter can cleanly eliminate documents from a search, without altering the relevance scores of the results.\n",
+    "\n",
+    "The next example returns books that have the word \"javascript\" in their title, only among the books that have more than 45 reviews."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 1.7064086\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    query={\n",
+    "        \"bool\": {\n",
+    "            \"must\": [{\"match\": {\"title\": {\"query\": \"javascript\"}}}],\n",
+    "            \"must_not\": [{\"range\": {\"num_reviews\": {\"lte\": 45}}}],\n",
+    "        }\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "b0fa6594d8f4cbf19f97940f81e996739fb7646882a419484c72d19e05852a7e"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

@@ -25,7 +25,7 @@ import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
-    timelineId: unionWithNullType(runtimeTypes.string),
+    timelineId: runtimeTypes.string,
   }),
   runtimeTypes.partial({
     eventId: unionWithNullType(runtimeTypes.string),
@@ -45,14 +45,21 @@ export type BareNote = runtimeTypes.TypeOf<typeof BareNoteSchema>;
  */
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
 
+export const BareNoteWithoutExternalRefsSchema = runtimeTypes.partial({
+  timelineId: unionWithNullType(runtimeTypes.string),
+  eventId: unionWithNullType(runtimeTypes.string),
+  note: unionWithNullType(runtimeTypes.string),
+  created: unionWithNullType(runtimeTypes.number),
+  createdBy: unionWithNullType(runtimeTypes.string),
+  updated: unionWithNullType(runtimeTypes.number),
+  updatedBy: unionWithNullType(runtimeTypes.string),
+});
+
 export const NoteRuntimeType = runtimeTypes.intersection([
   BareNoteSchema,
   runtimeTypes.type({
     noteId: runtimeTypes.string,
     version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
@@ -265,6 +272,8 @@ export enum RowRendererId {
   threat_match = 'threat_match',
   zeek = 'zeek',
 }
+
+export const RowRendererCount = Object.keys(RowRendererId).length;
 
 const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 

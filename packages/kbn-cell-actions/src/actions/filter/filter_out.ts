@@ -7,8 +7,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
-import { createFilter, isEmptyFilterValue } from './create_filter';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { addFilter, isEmptyFilterValue } from './add_filter';
+
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
 import {
@@ -18,7 +19,7 @@ import {
   filterOutNullableValues,
 } from '../utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
-import { DefaultActionsSupportedValue } from '../types';
+import type { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'minusInCircle';
 const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
@@ -81,12 +82,12 @@ export const addFilterOut = ({
   dataViewId?: string;
 }) => {
   if (filterManager != null) {
-    const filter = createFilter({
+    addFilter({
+      filterManager,
       key: fieldName,
       value,
       negate: !isEmptyFilterValue(value),
       dataViewId,
     });
-    filterManager.addFilters(filter);
   }
 };

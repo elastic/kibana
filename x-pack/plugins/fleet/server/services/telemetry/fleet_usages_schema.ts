@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/server';
 
 export const fleetAgentsSchema: RootSchema<any> = {
   agents_per_version: {
@@ -131,6 +131,26 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agents enrolled that use this output type as monitoring output',
+        },
+      },
+    },
+  },
+  agents_per_privileges: {
+    _meta: {
+      description: 'Agents per privileges telemetry',
+      optional: true,
+    },
+    properties: {
+      root: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents running with root privilege',
+        },
+      },
+      unprivileged: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents running without root privilege',
         },
       },
     },
@@ -262,6 +282,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'The total number of enrolled Fleet Server agents currently offline',
         },
       },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled Fleet Server agents',
+        },
+      },
       num_host_urls: {
         type: 'long',
         _meta: {
@@ -312,6 +344,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
         items: {
           type: 'keyword',
           _meta: { description: 'Output types of agent policies' },
+        },
+      },
+      count_with_global_data_tags: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using global data tags',
+        },
+      },
+      avg_number_global_data_tags_per_policy: {
+        type: 'long',
+        _meta: {
+          description:
+            'Average number of global data tags defined per agent policy (accross policies using global data tags)',
+          optional: true,
         },
       },
     },
@@ -392,5 +438,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
         },
       },
     },
+  },
+  license_issued_to: {
+    type: 'text',
+    _meta: { description: 'The name of the user the license is issued to' },
+  },
+  deployment_id: {
+    type: 'keyword',
+    _meta: { description: 'id of the deployment', optional: true },
   },
 };

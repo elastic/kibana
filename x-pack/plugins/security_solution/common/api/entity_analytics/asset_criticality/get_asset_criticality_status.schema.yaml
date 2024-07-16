@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '1'
   title: Asset Criticality Status Schema
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality/status:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: AssetCriticalityGetStatus
       summary: Get Asset Criticality Status
       responses:

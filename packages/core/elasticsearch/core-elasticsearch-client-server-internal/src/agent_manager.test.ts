@@ -33,7 +33,7 @@ describe('AgentManager', () => {
 
   describe('#getAgentFactory()', () => {
     it('provides factories which are different at each call', () => {
-      const agentManager = new AgentManager(logger);
+      const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
       const agentFactory1 = agentManager.getAgentFactory();
       const agentFactory2 = agentManager.getAgentFactory();
       expect(agentFactory1).not.toEqual(agentFactory2);
@@ -45,7 +45,7 @@ describe('AgentManager', () => {
         HttpAgentMock.mockImplementationOnce(() => mockedHttpAgent);
         const mockedHttpsAgent = new HttpsAgent();
         HttpsAgentMock.mockImplementationOnce(() => mockedHttpsAgent);
-        const agentManager = new AgentManager(logger);
+        const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
         const agentFactory = agentManager.getAgentFactory();
         const httpAgent = agentFactory({ url: new URL('http://elastic-node-1:9200') });
         const httpsAgent = agentFactory({ url: new URL('https://elastic-node-1:9200') });
@@ -54,7 +54,7 @@ describe('AgentManager', () => {
       });
 
       it('takes into account the provided configurations', () => {
-        const agentManager = new AgentManager(logger);
+        const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
         const agentFactory = agentManager.getAgentFactory({
           maxTotalSockets: 1024,
           scheduling: 'fifo',
@@ -77,7 +77,7 @@ describe('AgentManager', () => {
       });
 
       it('provides Agents that match the URLs protocol', () => {
-        const agentManager = new AgentManager(logger);
+        const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
         const agentFactory = agentManager.getAgentFactory();
         agentFactory({ url: new URL('http://elastic-node-1:9200') });
         expect(HttpAgent).toHaveBeenCalledTimes(1);
@@ -88,7 +88,7 @@ describe('AgentManager', () => {
       });
 
       it('provides the same Agent if URLs use the same protocol', () => {
-        const agentManager = new AgentManager(logger);
+        const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
         const agentFactory = agentManager.getAgentFactory();
         const agent1 = agentFactory({ url: new URL('http://elastic-node-1:9200') });
         const agent2 = agentFactory({ url: new URL('http://elastic-node-2:9200') });
@@ -101,7 +101,7 @@ describe('AgentManager', () => {
       });
 
       it('dereferences an agent instance when the agent is closed', () => {
-        const agentManager = new AgentManager(logger);
+        const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
         const agentFactory = agentManager.getAgentFactory();
         const agent = agentFactory({ url: new URL('http://elastic-node-1:9200') });
         // eslint-disable-next-line dot-notation
@@ -114,7 +114,7 @@ describe('AgentManager', () => {
 
     describe('two agent factories', () => {
       it('never provide the same Agent instance even if they use the same type', () => {
-        const agentManager = new AgentManager(logger);
+        const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
         const agentFactory1 = agentManager.getAgentFactory();
         const agentFactory2 = agentManager.getAgentFactory();
         const agent1 = agentFactory1({ url: new URL('http://elastic-node-1:9200') });
@@ -126,7 +126,7 @@ describe('AgentManager', () => {
 
   describe('#getAgentsStats()', () => {
     it('returns the stats of the agents', () => {
-      const agentManager = new AgentManager(logger);
+      const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
       const metrics: ElasticsearchClientsMetrics = {
         totalQueuedRequests: 0,
         totalIdleSockets: 100,
@@ -138,7 +138,7 @@ describe('AgentManager', () => {
     });
 
     it('warns when there are queued requests (requests unassigned to any socket)', () => {
-      const agentManager = new AgentManager(logger);
+      const agentManager = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
       const metrics: ElasticsearchClientsMetrics = {
         totalQueuedRequests: 2,
         totalIdleSockets: 100, // There may be idle sockets when many clients are initialized. It should not be taken as an indicator of health.

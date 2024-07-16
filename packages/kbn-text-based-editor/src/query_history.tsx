@@ -27,7 +27,8 @@ import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_local_storage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 
-const CONTAINER_MAX_HEIGHT = 190;
+const CONTAINER_MAX_HEIGHT_EXPANDED = 190;
+const CONTAINER_MAX_HEIGHT_COMPACT = 250;
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -46,16 +47,35 @@ export function QueryHistoryAction({
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="TextBasedLangEditor-toggle-query-history-icon">
-          <EuiIcon
-            type="clock"
-            color="primary"
-            size="m"
-            onClick={toggleHistory}
-            css={css`
-              margin-right: ${euiTheme.size.s};
-              cursor: pointer;
-            `}
-          />
+          <EuiToolTip
+            position="top"
+            content={
+              isHistoryOpen
+                ? i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel',
+                    {
+                      defaultMessage: 'Hide recent queries',
+                    }
+                  )
+                : i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.showQueriesLabel',
+                    {
+                      defaultMessage: 'Show recent queries',
+                    }
+                  )
+            }
+          >
+            <EuiIcon
+              type="clockCounter"
+              color="primary"
+              size="m"
+              onClick={toggleHistory}
+              css={css`
+                margin-right: ${euiTheme.size.s};
+                cursor: pointer;
+              `}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
@@ -70,7 +90,7 @@ export function QueryHistoryAction({
             css={css`
               padding-inline: 0;
             `}
-            iconType="clock"
+            iconType="clockCounter"
             data-test-subj="TextBasedLangEditor-toggle-query-history-button"
           >
             {isHistoryOpen
@@ -103,30 +123,60 @@ export const getTableColumns = (
           case 'success':
           default:
             return (
-              <EuiIcon
-                type="checkInCircleFilled"
-                color="success"
-                size="s"
-                data-test-subj="TextBasedLangEditor-queryHistory-success"
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.success',
+                  {
+                    defaultMessage: 'Query ran successfully',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="checkInCircleFilled"
+                  color="success"
+                  size="m"
+                  data-test-subj="TextBasedLangEditor-queryHistory-success"
+                />
+              </EuiToolTip>
             );
           case 'error':
             return (
-              <EuiIcon
-                type="error"
-                color="danger"
-                size="s"
-                data-test-subj="TextBasedLangEditor-queryHistory-error"
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.error',
+                  {
+                    defaultMessage: 'Query failed',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="error"
+                  color="danger"
+                  size="m"
+                  data-test-subj="TextBasedLangEditor-queryHistory-error"
+                />
+              </EuiToolTip>
             );
           case 'warning':
             return (
-              <EuiIcon
-                type="warning"
-                color="warning"
-                size="s"
-                data-test-subj="TextBasedLangEditor-queryHistory-warning"
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.error',
+                  {
+                    defaultMessage: 'Query failed',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="warning"
+                  color="warning"
+                  size="m"
+                  data-test-subj="TextBasedLangEditor-queryHistory-warning"
+                />
+              </EuiToolTip>
             );
         }
       },
@@ -171,12 +221,13 @@ export const getTableColumns = (
       ),
       sortable: false,
       width: isOnReducedSpaceLayout ? 'auto' : '120px',
+      css: { justifyContent: 'flex-end' as const }, // right alignment
     },
     {
       name: '',
       actions,
       'data-test-subj': 'actions',
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '60px',
     },
   ];
 
@@ -189,11 +240,13 @@ export function QueryHistory({
   containerWidth,
   refetchHistoryItems,
   onUpdateAndSubmit,
+  isInCompactMode,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
   refetchHistoryItems?: boolean;
+  isInCompactMode?: boolean;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -224,7 +277,7 @@ export function QueryHistory({
                   )}
                 >
                   <EuiButtonIcon
-                    iconType="playFilled"
+                    iconType="play"
                     aria-label={i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryRun',
                       {
@@ -253,7 +306,7 @@ export function QueryHistory({
                 >
                   {(copy) => (
                     <EuiButtonIcon
-                      iconType="copy"
+                      iconType="copyClipboard"
                       iconSize="m"
                       onClick={copy}
                       css={css`
@@ -294,17 +347,26 @@ export function QueryHistory({
     },
   };
   const { euiTheme } = theme;
-  const extraStyling = isOnReducedSpaceLayout
-    ? getReducedSpaceStyling()
-    : `width: ${containerWidth}px`;
+  const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
+
   const tableStyling = css`
     .euiTable {
       background-color: ${euiTheme.colors.lightestShade};
     }
     .euiTable tbody tr:nth-child(odd) {
-      background-color: ${euiTheme.colors.emptyShade};
+      background-color: ${euiTheme.colors.lightestShade};
+      filter: brightness(97%);
     }
-    max-height: ${CONTAINER_MAX_HEIGHT}px;
+    .euiTableRowCell {
+      vertical-align: top;
+      border: none;
+    }
+    .euiTable th[data-test-subj='tableHeaderCell_duration_3'] span {
+      justify-content: flex-end;
+    }
+    border-bottom-left-radius: ${euiTheme.border.radius.medium};
+    border-top-left-radius: ${euiTheme.border.radius.medium};
+    max-height: ${isInCompactMode ? CONTAINER_MAX_HEIGHT_COMPACT : CONTAINER_MAX_HEIGHT_EXPANDED}px;
     overflow-y: auto;
     ${scrollBarStyles}
     ${extraStyling}
@@ -319,7 +381,7 @@ export function QueryHistory({
             defaultMessage: 'Queries history table',
           }
         )}
-        responsive={false}
+        responsiveBreakpoint={false}
         items={historyItems}
         columns={columns}
         sorting={sorting}
@@ -372,6 +434,7 @@ export function QueryColumn({
           }
           iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
           size="xs"
+          color="text"
         />
       )}
       <span
@@ -382,6 +445,8 @@ export function QueryColumn({
           padding-left: ${isExpandable ? euiTheme.size.s : euiTheme.size.m ? 0 : euiTheme.size.xl};
           color: ${isOnReducedSpaceLayout ? euiTheme.colors.subduedText : euiTheme.colors.text};
           font-size: ${isOnReducedSpaceLayout ? euiTheme.size.m : 'inherit'};
+          font-family: ${euiTheme.font.familyCode};
+          line-height: 1.5;
         `}
         ref={containerRef}
       >

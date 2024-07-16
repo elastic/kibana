@@ -18,7 +18,11 @@ import { merge } from 'lodash';
 import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
 import type { ResponseActionsClient } from '../..';
+import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import {
@@ -41,9 +45,10 @@ import { ACTION_RESPONSE_INDICES } from '../constants';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
-  ResponseActionGetFileRequestBody,
   IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../common/api/endpoint';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
@@ -62,6 +67,9 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     release: jest.fn().mockReturnValue(Promise.resolve()),
     runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
     processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
+    getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
+    getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
+    scan: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -164,11 +172,10 @@ const createNoParamsResponseActionOptionsMock = (
 const createKillOrSuspendProcessOptionsMock = (
   overrides: Partial<KillOrSuspendProcessRequestBody> = {}
 ): KillOrSuspendProcessRequestBody => {
+  const parameters = overrides.parameters ?? { pid: 999 };
   const options: KillOrSuspendProcessRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
-    parameters: {
-      pid: 999,
-    },
+    parameters,
   };
   return merge(options, overrides);
 };
@@ -215,6 +222,18 @@ const createUploadOptionsMock = (
     file: createHapiReadableStreamMock(),
   };
 
+  return merge(options, overrides);
+};
+
+const createScanOptionsMock = (
+  overrides: Partial<ScanActionRequestBody> = {}
+): ScanActionRequestBody => {
+  const options: ScanActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      path: '/scan/folder',
+    },
+  };
   return merge(options, overrides);
 };
 
@@ -267,6 +286,20 @@ const createConnectorActionsClientMock = ({
   return client;
 };
 
+const createNormalizedExternalConnectorClientMock = (
+  connectorActionsClientMock: ActionsClientMock = createConnectorActionsClientMock()
+): DeeplyMockedKeys<NormalizedExternalConnectorClient> => {
+  const normalizedClient = new NormalizedExternalConnectorClient(
+    connectorActionsClientMock,
+    loggingSystemMock.createLogger()
+  );
+
+  jest.spyOn(normalizedClient, 'execute');
+  jest.spyOn(normalizedClient, 'setup');
+
+  return normalizedClient as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
+};
+
 export const responseActionsClientMock = Object.freeze({
   create: createResponseActionClientMock,
   createConstructorOptions: createConstructorOptionsMock,
@@ -279,10 +312,13 @@ export const responseActionsClientMock = Object.freeze({
   createGetFileOptions: createGetFileOptionsMock,
   createExecuteOptions: createExecuteOptionsMock,
   createUploadOptions: createUploadOptionsMock,
+  createScanOptions: createScanOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 
-  // Some common mocks when working with connector actions
+  createNormalizedExternalConnectorClient: createNormalizedExternalConnectorClientMock,
+
+  // Some common mocks when working with connector actions client (actions plugin)
   createConnectorActionsClient: createConnectorActionsClientMock,
   /** Create a mock connector instance */
   createConnector: createConnectorMock,

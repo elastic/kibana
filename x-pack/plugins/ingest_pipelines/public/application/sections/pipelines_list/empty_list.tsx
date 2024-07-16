@@ -42,12 +42,13 @@ export const EmptyList: FunctionComponent = () => {
 
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType="managementApp"
+      iconType="pipelineApp"
+      iconColor="default"
       data-test-subj="emptyList"
       title={
         <h2 data-test-subj="title">
           {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptTitle', {
-            defaultMessage: 'Start by creating a pipeline',
+            defaultMessage: 'Create your first pipeline',
           })}
         </h2>
       }

@@ -15,12 +15,10 @@ properties:
     description: The type of connector.
     enum:
       - .d3security
-    examples:
-      - .d3security
+    example: .d3security
   name:
     type: string
     description: The display name for the connector.
-    examples:
-      - my-connector
+    example: my-connector
   secrets:
     $ref: 'secrets_properties_d3security.yaml'

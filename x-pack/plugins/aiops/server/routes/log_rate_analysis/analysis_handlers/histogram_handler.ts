@@ -18,9 +18,9 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
 import {
-  addSignificantItemsHistogramAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+  addSignificantItemsHistogram,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
@@ -35,13 +35,12 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const histogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
     responseStream,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async (
     fieldValuePairsCount: number,
@@ -51,7 +50,7 @@ export const histogramHandlerFactory =
   ) => {
     function pushHistogramDataLoadingState() {
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
@@ -91,27 +90,26 @@ export const histogramHandlerFactory =
 
           try {
             cpTimeSeries = (
-              (await fetchHistogramsForFields(
-                client,
-                requestBody.index,
-                histogramQuery,
-                // fields
-                [
-                  {
-                    fieldName: requestBody.timeFieldName,
-                    type: KBN_FIELD_TYPES.DATE,
-                    interval: overallTimeSeries.interval,
-                    min: overallTimeSeries.stats[0],
-                    max: overallTimeSeries.stats[1],
-                  },
-                ],
-                // samplerShardSize
-                -1,
-                undefined,
+              (await fetchHistogramsForFields({
+                esClient,
                 abortSignal,
-                stateHandler.sampleProbability(),
-                RANDOM_SAMPLER_SEED
-              )) as [NumericChartData]
+                arguments: {
+                  indexPattern: requestBody.index,
+                  query: histogramQuery,
+                  fields: [
+                    {
+                      fieldName: requestBody.timeFieldName,
+                      type: KBN_FIELD_TYPES.DATE,
+                      interval: overallTimeSeries.interval,
+                      min: overallTimeSeries.stats[0],
+                      max: overallTimeSeries.stats[1],
+                    },
+                  ],
+                  samplerShardSize: -1,
+                  randomSamplerProbability: stateHandler.sampleProbability(),
+                  randomSamplerSeed: RANDOM_SAMPLER_SEED,
+                },
+              })) as [NumericChartData]
             )[0];
           } catch (e) {
             logger.error(
@@ -132,14 +130,6 @@ export const histogramHandlerFactory =
               ) ?? {
                 doc_count: 0,
               };
-              if (version === '1') {
-                return {
-                  key: o.key,
-                  key_as_string: o.key_as_string ?? '',
-                  doc_count_significant_term: current.doc_count,
-                  doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                };
-              }
 
               return {
                 key: o.key,
@@ -154,21 +144,18 @@ export const histogramHandlerFactory =
           stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
           pushHistogramDataLoadingState();
           responseStream.push(
-            addSignificantItemsHistogramAction(
-              [
-                {
-                  fieldName,
-                  fieldValue,
-                  histogram,
-                },
-              ],
-              version
-            )
+            addSignificantItemsHistogram([
+              {
+                fieldName,
+                fieldValue,
+                histogram,
+              },
+            ])
           );
         }
       }, MAX_CONCURRENT_QUERIES);
 
-      fieldValueHistogramQueue.push(significantTerms);
+      await fieldValueHistogramQueue.push(significantTerms);
       await fieldValueHistogramQueue.drain();
     }
 
@@ -195,27 +182,26 @@ export const histogramHandlerFactory =
 
         try {
           catTimeSeries = (
-            (await fetchHistogramsForFields(
-              client,
-              requestBody.index,
-              histogramQuery,
-              // fields
-              [
-                {
-                  fieldName: requestBody.timeFieldName,
-                  type: KBN_FIELD_TYPES.DATE,
-                  interval: overallTimeSeries.interval,
-                  min: overallTimeSeries.stats[0],
-                  max: overallTimeSeries.stats[1],
-                },
-              ],
-              // samplerShardSize
-              -1,
-              undefined,
+            (await fetchHistogramsForFields({
+              esClient,
               abortSignal,
-              stateHandler.sampleProbability(),
-              RANDOM_SAMPLER_SEED
-            )) as [NumericChartData]
+              arguments: {
+                indexPattern: requestBody.index,
+                query: histogramQuery,
+                fields: [
+                  {
+                    fieldName: requestBody.timeFieldName,
+                    type: KBN_FIELD_TYPES.DATE,
+                    interval: overallTimeSeries.interval,
+                    min: overallTimeSeries.stats[0],
+                    max: overallTimeSeries.stats[1],
+                  },
+                ],
+                samplerShardSize: -1,
+                randomSamplerProbability: stateHandler.sampleProbability(),
+                randomSamplerSeed: RANDOM_SAMPLER_SEED,
+              },
+            })) as [NumericChartData]
           )[0];
         } catch (e) {
           logger.error(
@@ -237,15 +223,6 @@ export const histogramHandlerFactory =
               doc_count: 0,
             };
 
-            if (version === '1') {
-              return {
-                key: o.key,
-                key_as_string: o.key_as_string ?? '',
-                doc_count_significant_term: current.doc_count,
-                doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-              };
-            }
-
             return {
               key: o.key,
               key_as_string: o.key_as_string ?? '',
@@ -259,16 +236,13 @@ export const histogramHandlerFactory =
         stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
         pushHistogramDataLoadingState();
         responseStream.push(
-          addSignificantItemsHistogramAction(
-            [
-              {
-                fieldName,
-                fieldValue,
-                histogram,
-              },
-            ],
-            version
-          )
+          addSignificantItemsHistogram([
+            {
+              fieldName,
+              fieldValue,
+              histogram,
+            },
+          ])
         );
       }
     }

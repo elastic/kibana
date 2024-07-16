@@ -62,7 +62,7 @@ exports[`NumberList should be rendered with default set of props 1`] = `
       onClick={[Function]}
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add {unitName}"
         id="visDefaultEditor.controls.numberList.addUnitButtonLabel"
         values={

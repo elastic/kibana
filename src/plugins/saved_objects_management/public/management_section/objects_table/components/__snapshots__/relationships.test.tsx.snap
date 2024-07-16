@@ -111,7 +111,6 @@ exports[`Relationships should render dashboards normally 1`] = `
         ]
       }
       pagination={true}
-      responsive={true}
       rowProps={[Function]}
       search={
         Object {
@@ -189,10 +188,9 @@ exports[`Relationships should render errors 1`] = `
     <EuiCallOut
       color="danger"
       title={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Error"
           id="savedObjectsManagement.objectsTable.relationships.renderErrorMessage"
-          values={Object {}}
         />
       }
     >
@@ -313,7 +311,6 @@ exports[`Relationships should render index patterns normally 1`] = `
         ]
       }
       pagination={true}
-      responsive={true}
       rowProps={[Function]}
       search={
         Object {
@@ -447,7 +444,6 @@ exports[`Relationships should render invalid relations 1`] = `
         ]
       }
       pagination={true}
-      responsive={true}
       rowProps={[Function]}
       searchFormat="eql"
       tableLayout="fixed"
@@ -506,7 +502,6 @@ exports[`Relationships should render invalid relations 1`] = `
       }
       items={Array []}
       pagination={true}
-      responsive={true}
       rowProps={[Function]}
       search={
         Object {
@@ -658,7 +653,6 @@ exports[`Relationships should render searches normally 1`] = `
         ]
       }
       pagination={true}
-      responsive={true}
       rowProps={[Function]}
       search={
         Object {
@@ -820,7 +814,6 @@ exports[`Relationships should render visualizations normally 1`] = `
         ]
       }
       pagination={true}
-      responsive={true}
       rowProps={[Function]}
       search={
         Object {

@@ -14,6 +14,7 @@ export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.getBySel('agentSelection').find('input').should('not.be.disabled');
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').click();
@@ -69,11 +70,14 @@ export const checkResults = () => {
 
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
+
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
   cy
     .getBySel('osqueryColumnValueSelect')
     .eq(index)
     .within(() => {
+      cy.getBySel('comboBoxInput').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('comboBoxInput').type(text);
     });
 

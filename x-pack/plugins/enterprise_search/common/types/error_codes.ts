@@ -25,6 +25,8 @@ export enum ErrorCode {
   SEARCH_APPLICATION_ALREADY_EXISTS = 'search_application_already_exists',
   SEARCH_APPLICATION_NAME_INVALID = 'search_application_name_invalid',
   SEARCH_APPLICATION_NOT_FOUND = 'search_application_not_found',
+  STATUS_TRANSITION_ERROR = 'status_transition_error',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
+  GENERATE_INDEX_NAME_ERROR = 'generate_index_name_error',
 }

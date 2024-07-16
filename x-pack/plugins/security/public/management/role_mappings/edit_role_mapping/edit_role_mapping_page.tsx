@@ -28,6 +28,7 @@ import { RuleEditorPanel } from './rule_editor_panel';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';
 import type { RoleMapping } from '../../../../common';
 import type { RolesAPIClient } from '../../roles';
+import type { SecurityFeaturesAPIClient } from '../../security_features';
 import {
   DeleteProvider,
   NoCompatibleRealms,
@@ -55,6 +56,7 @@ interface Props {
   name?: string;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  securityFeaturesAPI: PublicMethodsOf<SecurityFeaturesAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
@@ -329,7 +331,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
       .then(() => {
         this.props.notifications.toasts.addSuccess({
           title: i18n.translate('xpack.security.management.editRoleMapping.saveSuccess', {
-            defaultMessage: `Saved role mapping '{roleMappingName}'`,
+            defaultMessage: `Saved role mapping ''{roleMappingName}''`,
             values: {
               roleMappingName,
             },
@@ -361,7 +363,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   private async loadAppData() {
     try {
       const [features, roleMapping] = await Promise.all([
-        this.props.roleMappingsAPI.checkRoleMappingFeatures(),
+        this.props.securityFeaturesAPI.checkFeatures(),
         this.editingExistingRoleMapping() || this.cloningExistingRoleMapping()
           ? this.props.roleMappingsAPI.getRoleMapping(this.props.name!)
           : Promise.resolve({
@@ -374,15 +376,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
             }),
       ]);
 
-      const {
-        canManageRoleMappings,
-        canUseStoredScripts,
-        canUseInlineScripts,
-        hasCompatibleRealms,
-      } = features;
+      const { canReadSecurity, canUseStoredScripts, canUseInlineScripts, hasCompatibleRealms } =
+        features;
 
-      const canLoad = canManageRoleMappings || this.props.readOnly;
-      const loadState: State['loadState'] = canLoad ? 'ready' : 'permissionDenied';
+      const loadState: State['loadState'] = canReadSecurity ? 'ready' : 'permissionDenied';
 
       this.setState({
         loadState,

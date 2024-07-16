@@ -56,6 +56,9 @@ export { ValidatedDualRange } from './validated_range';
 export type { ToastInput, KibanaReactNotifications } from './notifications';
 export { createNotifications } from './notifications';
 
+/** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
+export { Markdown, MarkdownSimple } from './markdown';
+
 export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 

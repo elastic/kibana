@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,21 +42,25 @@ export const DeleteMonitor = ({
   }, [configId, isDeleting]);
 
   useEffect(() => {
+    const { core, toasts } = kibanaService;
     if (!isDeleting) {
       return;
     }
     if (monitorDeleteStatus === FETCH_STATUS.FAILURE) {
-      kibanaService.toasts.addDanger(
+      toasts.addDanger(
         {
           title: toMountPoint(
-            <p data-test-subj="uptimeDeleteMonitorFailure">{labels.MONITOR_DELETE_FAILURE_LABEL}</p>
+            <p data-test-subj="uptimeDeleteMonitorFailure">
+              {labels.MONITOR_DELETE_FAILURE_LABEL}
+            </p>,
+            core
           ),
         },
         { toastLifeTimeMs: 3000 }
       );
     } else if (monitorDeleteStatus === FETCH_STATUS.SUCCESS) {
       reloadPage();
-      kibanaService.toasts.addSuccess(
+      toasts.addSuccess(
         {
           title: toMountPoint(
             <p data-test-subj="uptimeDeleteMonitorSuccess">
@@ -67,7 +71,8 @@ export const DeleteMonitor = ({
                   values: { name },
                 }
               )}
-            </p>
+            </p>,
+            core
           ),
         },
         { toastLifeTimeMs: 3000 }

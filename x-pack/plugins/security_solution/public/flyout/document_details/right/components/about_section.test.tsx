@@ -15,11 +15,12 @@ import {
   EVENT_CATEGORY_DESCRIPTION_TEST_ID,
   REASON_TITLE_TEST_ID,
   MITRE_ATTACK_TITLE_TEST_ID,
+  EVENT_RENDERER_TEST_ID,
 } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { AboutSection } from './about_section';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
 
 jest.mock('../../../../common/components/link_to');
@@ -41,9 +42,9 @@ const renderAboutSection = (getFieldsData = mockGetFieldsData) => {
   };
   return render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <AboutSection />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 };
@@ -111,6 +112,8 @@ describe('<AboutSection />', () => {
       expect(
         queryByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)
       ).not.toBeInTheDocument();
+
+      expect(getByTestId(EVENT_RENDERER_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -136,6 +139,8 @@ describe('<AboutSection />', () => {
       expect(queryByTestId(EVENT_KIND_DESCRIPTION_TEST_ID)).not.toBeInTheDocument();
 
       expect(getByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)).toBeInTheDocument();
+
+      expect(getByTestId(EVENT_RENDERER_TEST_ID)).toBeInTheDocument();
     });
   });
 });

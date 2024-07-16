@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { UnifiedDataTable, type UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { renderCustomToolbar } from './render_custom_toolbar';
+import React, { useMemo } from 'react';
+import {
+  renderCustomToolbar,
+  UnifiedDataTable,
+  type UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
+import { useProfileAccessor } from '../../context_awareness';
 
 /**
  * Customized version of the UnifiedDataTable
@@ -16,5 +20,18 @@ import { renderCustomToolbar } from './render_custom_toolbar';
  * @constructor
  */
 export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
-  return <UnifiedDataTable showColumnTokens renderCustomToolbar={renderCustomToolbar} {...props} />;
+  const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
+  const getRowIndicator = useMemo(() => {
+    return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
+  }, [getRowIndicatorProvider, props.dataView]);
+
+  return (
+    <UnifiedDataTable
+      showColumnTokens
+      enableComparisonMode
+      renderCustomToolbar={renderCustomToolbar}
+      getRowIndicator={getRowIndicator}
+      {...props}
+    />
+  );
 };

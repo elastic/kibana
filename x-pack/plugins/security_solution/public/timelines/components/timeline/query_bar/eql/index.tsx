@@ -8,15 +8,15 @@
 import { isEmpty, isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 
 import type {
   EqlOptionsSelected,
   FieldsEqlOptions,
 } from '../../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
 
 import {
@@ -64,7 +64,7 @@ const schema: FormSchema<TimelineEqlQueryBar> = {
   },
 };
 
-const HiddenUseField = styled(UseField)`
+const hiddenUseFieldClassName = css`
   display: none;
 `;
 
@@ -83,14 +83,17 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const initialState = {
-    ...defaultValues,
-    index: selectedPatterns.sort(),
-    eqlQueryBar: {
-      ...defaultValues.eqlQueryBar,
-      query: { query: optionsSelected.query ?? '', language: 'eql' },
-    },
-  };
+  const initialState = useMemo(
+    () => ({
+      ...defaultValues,
+      index: [...selectedPatterns].sort(),
+      eqlQueryBar: {
+        ...defaultValues.eqlQueryBar,
+        query: { query: optionsSelected.query ?? '', language: 'eql' },
+      },
+    }),
+    [optionsSelected.query, selectedPatterns]
+  );
 
   const { form } = useForm<TimelineEqlQueryBar>({
     defaultValue: initialState,
@@ -144,7 +147,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   useEffect(() => {
     const { index: indexField } = getFields();
-    const newIndexValue = selectedPatterns.sort();
+    const newIndexValue = [...selectedPatterns].sort();
     const indexFieldValue = (indexField.value as string[]).sort();
     if (!isEqual(indexFieldValue, newIndexValue)) {
       indexField.setValue(newIndexValue);
@@ -188,8 +191,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   return (
     <Form form={form} data-test-subj="EqlQueryBarTimeline">
-      <HiddenUseField key="Index" path="index" />
-      <HiddenUseField key="EqlOptions" path="eqlOptions" />
+      <UseField key="Index" path="index" className={hiddenUseFieldClassName} />
+      <UseField key="EqlOptions" path="eqlOptions" className={hiddenUseFieldClassName} />
       <UseField
         key="EqlQueryBar"
         path="eqlQueryBar"

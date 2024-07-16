@@ -36,8 +36,7 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 export const SERVICE_TARGET_TYPE = 'service.target.type';
-export const SERVICE_OVERFLOW_COUNT =
-  'service_transaction.aggregation.overflow_count';
+export const SERVICE_OVERFLOW_COUNT = 'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
@@ -61,12 +60,10 @@ export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 export const TRANSACTION_FAILURE_COUNT = 'transaction.failure_count';
 export const TRANSACTION_SUCCESS_COUNT = 'transaction.success_count';
-export const TRANSACTION_OVERFLOW_COUNT =
-  'transaction.aggregation.overflow_count';
+export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
-export const TRANSACTION_PROFILER_STACK_TRACE_IDS =
-  'transaction.profiler_stack_trace_ids';
+export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
 
 export const EVENT_OUTCOME = 'event.outcome';
 
@@ -79,8 +76,7 @@ export const SPAN_SELF_TIME_SUM = 'span.self_time.sum.us';
 export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
-export const SPAN_DESTINATION_SERVICE_RESOURCE =
-  'span.destination.service.resource';
+export const SPAN_DESTINATION_SERVICE_RESOURCE = 'span.destination.service.resource';
 export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT =
   'span.destination.service.response_time.count';
 
@@ -93,8 +89,7 @@ export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
 export const SPAN_COMPOSITE_COUNT = 'span.composite.count';
 export const SPAN_COMPOSITE_SUM = 'span.composite.sum.us';
-export const SPAN_COMPOSITE_COMPRESSION_STRATEGY =
-  'span.composite.compression_strategy';
+export const SPAN_COMPOSITE_COMPRESSION_STRATEGY = 'span.composite.compression_strategy';
 
 export const SPAN_SYNC = 'span.sync';
 
@@ -119,17 +114,14 @@ export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
-export const METRIC_CGROUP_MEMORY_LIMIT_BYTES =
-  'system.process.cgroup.memory.mem.limit.bytes';
-export const METRIC_CGROUP_MEMORY_USAGE_BYTES =
-  'system.process.cgroup.memory.mem.usage.bytes';
+export const METRIC_CGROUP_MEMORY_LIMIT_BYTES = 'system.process.cgroup.memory.mem.limit.bytes';
+export const METRIC_CGROUP_MEMORY_USAGE_BYTES = 'system.process.cgroup.memory.mem.usage.bytes';
 
 export const METRIC_JAVA_HEAP_MEMORY_MAX = 'jvm.memory.heap.max';
 export const METRIC_JAVA_HEAP_MEMORY_COMMITTED = 'jvm.memory.heap.committed';
 export const METRIC_JAVA_HEAP_MEMORY_USED = 'jvm.memory.heap.used';
 export const METRIC_JAVA_NON_HEAP_MEMORY_MAX = 'jvm.memory.non_heap.max';
-export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED =
-  'jvm.memory.non_heap.committed';
+export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED = 'jvm.memory.non_heap.committed';
 export const METRIC_JAVA_NON_HEAP_MEMORY_USED = 'jvm.memory.non_heap.used';
 export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
@@ -169,21 +161,14 @@ export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 
 // OpenTelemetry Metrics
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
-export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION =
-  'system.memory.utilization';
+export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';
 
-export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT =
-  'process.runtime.jvm.cpu.utilization';
-export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE =
-  'process.runtime.jvm.memory.usage';
-export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED =
-  'process.runtime.jvm.memory.committed';
-export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT =
-  'process.runtime.jvm.memory.limit';
-export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT =
-  'process.runtime.jvm.threads.count';
-export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT =
-  'process.runtime.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT = 'process.runtime.jvm.cpu.utilization';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE = 'process.runtime.jvm.memory.usage';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED = 'process.runtime.jvm.memory.committed';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT = 'process.runtime.jvm.memory.limit';
+export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT = 'process.runtime.jvm.threads.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cpu.utilization';
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
@@ -191,6 +176,7 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 // Metadata
 export const TIER = '_tier';
 export const INDEX = '_index';
+export const DATA_STEAM_TYPE = 'data_stream.type';
 
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';

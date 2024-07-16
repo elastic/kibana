@@ -7,7 +7,13 @@
 
 import { useContext } from 'react';
 import { PluginContext } from '../context/plugin_context';
+import type { PluginContextValue } from '../context/plugin_context';
 
-export function usePluginContext() {
-  return useContext(PluginContext);
+export function usePluginContext(): PluginContextValue {
+  const context = useContext(PluginContext);
+  if (!context) {
+    throw new Error('Plugin context value is missing!');
+  }
+
+  return context;
 }

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getConversation } from './get_conversation';
 import { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from './types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -25,6 +24,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   excludeFromLastConversationStorage: false,
   timestamp: '2020-04-20T15:25:31.830Z',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: 'c1',
     defaultSystemPromptId: 'prompt-1',
     model: 'test',
@@ -76,6 +76,7 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
           is_default: true,
           exclude_from_last_conversation_storage: false,
           api_config: {
+            action_type_id: '.gen-ai',
             connector_id: 'c1',
             default_system_prompt_id: 'prompt-1',
             model: 'test',

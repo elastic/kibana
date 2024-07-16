@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GROUPING_OPTIONS } from './constants';
+
+import { VULNERABILITY_GROUPING_OPTIONS } from '../../common/constants';
 
 export const FILTER_IN = i18n.translate('xpack.csp.vulnerabilities.table.filterIn', {
   defaultMessage: 'Filter in',
@@ -38,17 +39,17 @@ export const VULNERABILITIES_GROUPS_UNIT = (
   const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
 
   switch (selectedGroup) {
-    case GROUPING_OPTIONS.RESOURCE_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit.resource', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {resource} other {resources}}`,
       });
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit.cloudAccount', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
       });
-    case GROUPING_OPTIONS.CVE:
+    case VULNERABILITY_GROUPING_OPTIONS.CVE:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit.cve', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {CVE} other {CVEs}}`,

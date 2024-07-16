@@ -58,6 +58,7 @@ import {
   getLifecycleAlertsQueries,
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
+  isAlertImproving,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
@@ -103,6 +104,7 @@ export class AlertsClient<
   };
 
   private startedAtString: string | null = null;
+  private runTimestampString: string | undefined;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
@@ -132,6 +134,9 @@ export class AlertsClient<
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
+    if (opts.runTimestamp) {
+      this.runTimestampString = opts.runTimestamp.toISOString();
+    }
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -413,7 +418,7 @@ export class AlertsClient<
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -427,6 +432,13 @@ export class AlertsClient<
           this.fetchedAlerts.data.hasOwnProperty(id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
+          const isImproving = isAlertImproving<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -438,6 +450,8 @@ export class AlertsClient<
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              isImproving,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -459,6 +473,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -478,7 +493,7 @@ export class AlertsClient<
       // If there is not, log an error because there should be
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
+          currentRecoveredAlerts[id]
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -487,8 +502,9 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: recoveredAlerts[id],
+                legacyAlert: currentRecoveredAlerts[id],
                 rule: this.rule,
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
@@ -497,15 +513,17 @@ export class AlertsClient<
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,
               })
         );
       } else {
         this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
-            id
-          ].getUuid()}`
+          () =>
+            `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
+              id
+            ].getUuid()}`
         );
       }
     }

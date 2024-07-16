@@ -8,7 +8,7 @@
 import http from 'http';
 import https from 'https';
 import getPort from 'get-port';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import {
@@ -177,7 +177,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 }
 
 export async function createWebhookAction(
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   webhookSimulatorURL: string,
   config: Record<string, string | Record<string, string>> = {}
 ): Promise<string> {

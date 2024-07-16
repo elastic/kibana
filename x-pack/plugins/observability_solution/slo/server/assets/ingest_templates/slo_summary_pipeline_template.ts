@@ -9,10 +9,10 @@ import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export const getSLOSummaryPipelineTemplate = (
-  slo: SLO,
+  slo: SLODefinition,
   spaceId: string,
   basePath: IBasePath
 ): IngestPutPipelineRequest => {
@@ -166,8 +166,10 @@ export const getSLOSummaryPipelineTemplate = (
           value: spaceId,
         },
       },
+      // >= 8.14:
       {
         set: {
+          description: 'Store the indicator params',
           field: 'slo.indicator.params',
           value: slo.indicator.params,
           ignore_failure: true,
@@ -192,6 +194,46 @@ export const getSLOSummaryPipelineTemplate = (
           ignore_failure: true,
         },
       },
+      // >= 8.15:
+      {
+        script: {
+          description: 'Computes the last five minute burn rate value',
+          lang: 'painless',
+          params: {
+            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
+            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+              ? Math.floor(5 / slo.objective.timesliceWindow!.asMinutes())
+              : 0,
+          },
+          source: getBurnRateSource('fiveMinuteBurnRate'),
+        },
+      },
+      {
+        script: {
+          description: 'Computes the last hour burn rate value',
+          lang: 'painless',
+          params: {
+            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
+            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+              ? Math.floor(60 / slo.objective.timesliceWindow!.asMinutes())
+              : 0,
+          },
+          source: getBurnRateSource('oneHourBurnRate'),
+        },
+      },
+      {
+        script: {
+          description: 'Computes the last day burn rate value',
+          lang: 'painless',
+          params: {
+            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
+            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+              ? Math.floor(1440 / slo.objective.timesliceWindow!.asMinutes())
+              : 0,
+          },
+          source: getBurnRateSource('oneDayBurnRate'),
+        },
+      },
     ],
     _meta: {
       description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,
@@ -201,3 +243,27 @@ export const getSLOSummaryPipelineTemplate = (
     },
   };
 };
+
+function getBurnRateSource(
+  burnRateKey: 'oneDayBurnRate' | 'oneHourBurnRate' | 'fiveMinuteBurnRate'
+): string {
+  return `def totalEvents = ctx["${burnRateKey}"]["totalEvents"];
+  def goodEvents = ctx["${burnRateKey}"]["goodEvents"];
+  def errorBudgetInitial = ctx["errorBudgetInitial"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx["${burnRateKey}"]["value"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params["totalSlicesInRange"];
+  def isTimeslice = params["isTimeslice"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx["${burnRateKey}"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx["${burnRateKey}"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+  }`;
+}

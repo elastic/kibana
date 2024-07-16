@@ -70,7 +70,9 @@ reports, you might need to change the following settings.
 If capturing a report fails for any reason, {kib} will re-queue the report job for retry, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.queue.indexInterval`::
-How often the index that stores reporting jobs rolls over to a new index. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
+deprecated:[8.15.0,This setting has no effect.] How often Reporting creates a new index to store report jobs and file contents.
+Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
+*NOTE*: This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data.
 
 [[xpack-reportingQueue-pollEnabled]] `xpack.reporting.queue.pollEnabled` ::
 When `true`, enables the {kib} instance to poll {es} for pending jobs and claim them for
@@ -243,6 +245,7 @@ Choose the API method used to page through data during CSV export. Valid options
 [NOTE]
 ============
 Each method has its own unique limitations which are important to understand.
+
 * Scroll API: Search is limited to 500 shards at the very most. In cases where data shards are unavailable or time out, the export may return partial data.
 * PIT API: Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or datastreams. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
 ============

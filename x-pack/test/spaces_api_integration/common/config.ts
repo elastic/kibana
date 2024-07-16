@@ -44,6 +44,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
         spaces: config.xpack.api.get('services.spaces'),
+        usageAPI: config.xpack.api.get('services.usageAPI'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,

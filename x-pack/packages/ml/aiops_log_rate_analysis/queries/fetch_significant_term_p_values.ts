@@ -56,8 +56,18 @@ export const getSignificantTermRequest = (
     ];
   }
 
-  const pValueAgg: Record<'change_point_p_value', estypes.AggregationsAggregationContainer> = {
-    change_point_p_value: {
+  const pValueAgg: Record<
+    'sig_term_p_value' | 'distinct_count',
+    estypes.AggregationsAggregationContainer
+  > = {
+    // Used to identify fields with only one distinct value which we'll ignore in the analysis.
+    distinct_count: {
+      cardinality: {
+        field: fieldName,
+      },
+    },
+    // Used to calculate the p-value for terms of the field.
+    sig_term_p_value: {
       significant_terms: {
         field: fieldName,
         background_filter: {
@@ -101,16 +111,25 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
   buckets: estypes.AggregationsSignificantLongTermsBucket[];
 }
 
-export const fetchSignificantTermPValues = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  fieldNames: string[],
-  logger: Logger,
+export const fetchSignificantTermPValues = async ({
+  esClient,
+  abortSignal,
+  logger,
+  emitError,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  logger?: Logger;
+  emitError?: (m: string) => void;
+  arguments: AiopsLogRateAnalysisSchema & {
+    fieldNames: string[];
+    sampleProbability?: number;
+  };
+}): Promise<SignificantItem[]> => {
   // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1,
-  emitError: (m: string) => void,
-  abortSignal?: AbortSignal
-): Promise<SignificantItem[]> => {
+  const { fieldNames, sampleProbability = 1, ...params } = args;
+
   const randomSamplerWrapper = createRandomSamplerWrapper({
     probability: sampleProbability,
     seed: RANDOM_SAMPLER_SEED,
@@ -129,14 +148,19 @@ export const fetchSignificantTermPValues = async (
 
   function reportError(fieldName: string, error: unknown) {
     if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      if (logger) {
+        logger.error(
+          `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+            error,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      }
     }
   }
 
@@ -158,13 +182,26 @@ export const fetchSignificantTermPValues = async (
     }
 
     const overallResult = (
-      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'change_point_p_value', Aggs>
-    ).change_point_p_value;
+      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'sig_term_p_value', Aggs>
+    ).sig_term_p_value;
+
+    const distinctCount = (
+      randomSamplerWrapper.unwrap(resp.aggregations) as Record<
+        'distinct_count',
+        estypes.AggregationsCardinalityAggregate
+      >
+    ).distinct_count.value;
 
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
 
-      if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD) {
+      if (
+        typeof pValue === 'number' &&
+        // Skip items where the p-value is not significant.
+        pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD &&
+        // Skip items where the field has only one distinct value.
+        distinctCount > 1
+      ) {
         result.push({
           key: `${fieldName}:${String(bucket.key)}`,
           type: SIGNIFICANT_ITEM_TYPE.KEYWORD,

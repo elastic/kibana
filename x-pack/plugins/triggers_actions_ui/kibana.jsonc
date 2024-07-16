@@ -25,7 +25,9 @@
       "dashboard",
       "licensing",
       "expressions",
-      "lens"
+      "lens",
+      "controls",
+      "embeddable"
     ],
     "optionalPlugins": [
       "cloud",
@@ -43,7 +45,7 @@
     ],
     "extraPublicDirs": [
       "public/common",
-      "public/common/constants"
+      "public/common/constants",
     ]
   }
 }

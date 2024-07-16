@@ -7,6 +7,7 @@
 import datemath from '@elastic/datemath';
 import * as t from 'io-ts';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -16,12 +17,12 @@ import { NodeType } from '../../../../common/connections';
 
 export const downstreamDependenciesRouteRt = t.intersection([
   t.type({
-    'service.name': t.string,
+    serviceName: t.string,
     start: t.string,
     end: t.string,
   }),
   t.partial({
-    'service.environment': t.string,
+    serviceEnvironment: t.string,
   }),
 ]);
 
@@ -35,21 +36,24 @@ export interface APMDownstreamDependency {
 export async function getAssistantDownstreamDependencies({
   arguments: args,
   apmEventClient,
+  randomSampler,
 }: {
   arguments: t.TypeOf<typeof downstreamDependenciesRouteRt>;
   apmEventClient: APMEventClient;
+  randomSampler: RandomSampler;
 }): Promise<APMDownstreamDependency[]> {
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 
-  const map = await getDestinationMap({
+  const { nodesBydependencyName: map } = await getDestinationMap({
     start,
     end,
     apmEventClient,
     filter: [
-      ...termQuery(SERVICE_NAME, args['service.name']),
-      ...environmentQuery(args['service.environment'] ?? ENVIRONMENT_ALL.value),
+      ...termQuery(SERVICE_NAME, args.serviceName),
+      ...environmentQuery(args.serviceEnvironment ?? ENVIRONMENT_ALL.value),
     ],
+    randomSampler,
   });
 
   const items: Array<{

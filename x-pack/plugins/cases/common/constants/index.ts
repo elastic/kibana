@@ -24,6 +24,7 @@ export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' a
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
+export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -132,6 +133,12 @@ export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
+export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
+export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATES_LENGTH = 10 as const;
+export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
+export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 
 /**
  * Cases features
@@ -191,6 +198,7 @@ export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
+export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 
 /**
  * Delays
@@ -210,7 +218,15 @@ export const LOCAL_STORAGE_KEYS = {
  * Connectors
  */
 
+export enum CASES_CONNECTOR_SUB_ACTION {
+  RUN = 'run',
+}
+
 export const NONE_CONNECTOR_ID: string = 'none';
+export const CASES_CONNECTOR_ID = '.cases';
+export const CASES_CONNECTOR_TITLE = 'Cases';
+
+export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
 
 /**
  * This field is used for authorization of the entities within the cases plugin. Each entity within Cases will have the owner field

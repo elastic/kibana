@@ -38,13 +38,18 @@ const projectType: ServerlessProjectType = 'es';
  */
 export function createTestServerlessInstances({
   adjustTimeout,
+  kibana = {},
 }: {
-  adjustTimeout: (timeout: number) => void;
-}): TestServerlessUtils {
+  kibana?: {
+    settings?: {};
+    cliArgs?: Partial<CliArgs>;
+  };
+  adjustTimeout?: (timeout: number) => void;
+} = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
   const esUtils = createServerlessES();
-  const kbUtils = createServerlessKibana();
+  const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
     startES: async () => {
@@ -77,6 +82,9 @@ function createServerlessES() {
   });
   const es = new Cluster({ log });
   const esPort = esTestConfig.getPort();
+  const esServerlessImageParams = parseEsServerlessImageOverride(
+    esTestConfig.getESServerlessImage()
+  );
   return {
     es,
     start: async () => {
@@ -88,6 +96,7 @@ function createServerlessES() {
         clean: true,
         kill: true,
         waitForReady: true,
+        ...esServerlessImageParams,
         // security is enabled by default, if needed kibana requires serviceAccountToken
         esArgs: ['xpack.security.enabled=false'],
       });
@@ -154,4 +163,21 @@ function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
     ...cliArgs,
     serverless: true,
   });
+}
+
+function parseEsServerlessImageOverride(dockerImageOrTag: string | undefined): {
+  image?: string;
+  tag?: string;
+} {
+  if (!dockerImageOrTag) {
+    return {};
+  } else if (dockerImageOrTag.includes(':')) {
+    return {
+      image: dockerImageOrTag,
+    };
+  } else {
+    return {
+      tag: dockerImageOrTag,
+    };
+  }
 }

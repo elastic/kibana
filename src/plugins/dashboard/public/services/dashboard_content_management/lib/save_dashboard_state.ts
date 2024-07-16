@@ -20,7 +20,6 @@ import { isFilterPinned } from '@kbn/es-query';
 
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
-import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
@@ -33,6 +32,7 @@ import {
   SavedDashboardInput,
 } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 
 export const serializeControlGroupInput = (
   controlGroupInput: SavedDashboardInput['controlGroupInput']
@@ -103,8 +103,14 @@ export const saveDashboardState = async ({
   } = currentState;
 
   let { panels, controlGroupInput } = currentState;
+  let prefixedPanelReferences = panelReferences;
   if (saveOptions.saveAsCopy) {
-    panels = generateNewPanelIds(panels);
+    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
+      panels,
+      panelReferences
+    );
+    panels = newPanels;
+    prefixedPanelReferences = newPanelReferences;
     controlGroupInput = generateNewControlIds(controlGroupInput);
   }
 
@@ -180,25 +186,39 @@ export const saveDashboardState = async ({
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
-  const allReferences = [...references, ...(panelReferences ?? [])];
+  const allReferences = [...references, ...(prefixedPanelReferences ?? [])];
 
   /**
    * Save the saved object using the content management
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
+
   try {
-    const result = await contentManagement.client.create<
-      DashboardCrudTypes['CreateIn'],
-      DashboardCrudTypes['CreateOut']
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: attributes,
-      options: {
-        id: idToSaveTo,
-        references: allReferences,
-        overwrite: true,
-      },
-    });
+    const result = idToSaveTo
+      ? await contentManagement.client.update<
+          DashboardCrudTypes['UpdateIn'],
+          DashboardCrudTypes['UpdateOut']
+        >({
+          id: idToSaveTo,
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: attributes,
+          options: {
+            references: allReferences,
+            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+            mergeAttributes: false,
+          },
+        })
+      : await contentManagement.client.create<
+          DashboardCrudTypes['CreateIn'],
+          DashboardCrudTypes['CreateOut']
+        >({
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: attributes,
+          options: {
+            references: allReferences,
+          },
+        });
+
     const newId = result.item.id;
 
     if (newId) {

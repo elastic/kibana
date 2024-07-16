@@ -59,6 +59,8 @@ To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi]
 - **previousPreviewPanel**: navigate to the previous preview panel
 - **closeFlyout**: close the flyout
 
+> The expandable flyout propagates the `onClose` callback from the EuiFlyout component. As we recommend having a single instance of the flyout in your application, it's up to the application's code to dispatch the event (through Redux, window events, observable, prop drilling...). 
+
 ## Usage
 
 To use the expandable flyout in your plugin, first you need wrap your code with the [context provider](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) at a high enough level as follows:

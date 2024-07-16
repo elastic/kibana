@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: Alerts search API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/search:
+    post:
+      x-labels: [serverless, ess]
+      operationId: SearchAlerts
+      x-codegen-enabled: true
+      summary: Find and/or aggregate detection alerts that match the given query
+      tags:
+        - Alerts API
+      requestBody:
+        description: Search and/or aggregation query
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: object
+                  additionalProperties: true
+                aggs:
+                  type: object
+                  additionalProperties: true
+                size:
+                  type: integer
+                  minimum: 0
+                track_total_hits:
+                  type: boolean
+                _source:
+                  oneOf:
+                    - type: boolean
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                fields:
+                  type: array
+                  items:
+                    type: string
+                runtime_mappings:
+                  type: object
+                  additionalProperties: true
+                sort:
+                  $ref: '#/components/schemas/AlertsSort'
+              description: Elasticsearch query and aggregation request
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                description: Elasticsearch search response
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    AlertsSortCombinations:
+      anyOf:
+        - type: string
+        - type: object
+          additionalProperties: true
+
+    AlertsSort:
+      oneOf:
+        - $ref: '#/components/schemas/AlertsSortCombinations'
+        - type: array
+          items:
+            $ref: '#/components/schemas/AlertsSortCombinations'

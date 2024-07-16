@@ -108,7 +108,7 @@ export class DataViewLazy extends AbstractDataView {
 
     return {
       getFieldMap: () => fieldMap,
-      getFieldMapSorted: () => {
+      getFieldMapSorted: (): Record<string, DataViewField> => {
         if (!hasBeenSorted) {
           fieldMapSorted = chain(fieldMap).toPairs().sortBy(0).fromPairs().value();
           hasBeenSorted = true;
@@ -391,8 +391,8 @@ export class DataViewLazy extends AbstractDataView {
       fld = new DataViewField({
         ...field,
         scripted: true,
-        searchable: false,
-        aggregatable: false,
+        searchable: true,
+        aggregatable: true,
         count: this.fieldAttrs?.[field.name]?.count,
         customLabel: this.fieldAttrs?.[field.name]?.customLabel,
         customDescription: this.fieldAttrs?.[field.name]?.customDescription,
@@ -503,7 +503,6 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    // @ts-expect-error composite type is not yet supported by es client but it can be forced
     return this.runtimeFieldMap;
   }
 

@@ -45,6 +45,9 @@ export type SaveModalContainerProps = {
     | 'http'
     | 'chrome'
     | 'overlays'
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
     | 'stateTransfer'
     | 'savedObjectStore'
   >;
@@ -140,14 +143,13 @@ export function SaveModalContainer({
           ...lensServices,
           lastKnownDoc,
           initialInput,
-          attributeService,
           redirectTo,
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
-          savedObjectStore: lensServices.savedObjectStore,
+          ...lensServices,
         },
         saveProps,
         options
@@ -223,6 +225,9 @@ export const runSaveLensVisualization = async (
       | 'application'
       | 'chrome'
       | 'overlays'
+      | 'analytics'
+      | 'i18n'
+      | 'theme'
       | 'notifications'
       | 'stateTransfer'
       | 'attributeService'
@@ -236,7 +241,6 @@ export const runSaveLensVisualization = async (
     initialInput,
     lastKnownDoc,
     persistedDoc,
-    overlays,
     notifications,
     stateTransfer,
     attributeService,
@@ -249,6 +253,9 @@ export const runSaveLensVisualization = async (
     switchDatasource,
     application,
     savedObjectStore,
+    getOriginatingPath,
+    originatingApp,
+    ...startServices
   } = props;
 
   if (!lastKnownDoc) {
@@ -298,7 +305,7 @@ export const runSaveLensVisualization = async (
         saveProps.onTitleDuplicate,
         {
           client: savedObjectStore,
-          overlays,
+          ...startServices,
         }
       );
     } catch (e) {
@@ -342,7 +349,7 @@ export const runSaveLensVisualization = async (
 
     notifications.toasts.addSuccess(
       i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-        defaultMessage: `Saved '{visTitle}'`,
+        defaultMessage: `Saved ''{visTitle}''`,
         values: {
           visTitle: docToSave.title,
         },

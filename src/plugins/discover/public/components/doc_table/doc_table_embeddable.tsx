@@ -29,7 +29,7 @@ export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSu
 
 export type DocTableEmbeddableSearchProps = Omit<
   DocTableEmbeddableProps,
-  'sampleSizeState' | 'isPlainRecord'
+  'sampleSizeState' | 'isEsqlMode'
 >;
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);

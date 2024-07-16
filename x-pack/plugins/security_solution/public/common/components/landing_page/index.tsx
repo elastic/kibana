@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { Onboarding } from './onboarding';
 
 export const LandingPageComponent = memo(() => {

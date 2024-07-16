@@ -7,7 +7,7 @@
 
 import { UpsertMonitorRequest } from '..';
 import { UpsertMonitorResponse } from '../monitor_management/api';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
@@ -46,13 +46,19 @@ export const fetchMonitorManagementList = async (
 
   return await apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-    params,
+    { ...params, version: INITIAL_REST_VERSION },
     MonitorManagementListResultCodec
   );
 };
 
 export const fetchDeleteMonitor = async ({ configId }: { configId: string }): Promise<void> => {
-  return await apiService.delete(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`);
+  return await apiService.delete(
+    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+    { version: INITIAL_REST_VERSION },
+    {
+      ids: [configId],
+    }
+  );
 };
 
 export const fetchUpsertMonitor = async ({
@@ -60,9 +66,19 @@ export const fetchUpsertMonitor = async ({
   configId,
 }: UpsertMonitorRequest): Promise<UpsertMonitorResponse> => {
   if (configId) {
-    return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`, monitor);
+    return await apiService.put(
+      `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`,
+      monitor,
+      null,
+      {
+        version: INITIAL_REST_VERSION,
+        ui: true,
+      }
+    );
   } else {
-    return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor);
+    return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
+      version: INITIAL_REST_VERSION,
+    });
   }
 };
 
@@ -73,6 +89,7 @@ export const createGettingStartedMonitor = async ({
 }): Promise<UpsertMonitorResponse> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
     gettingStarted: true,
+    version: INITIAL_REST_VERSION,
   });
 };
 

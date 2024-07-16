@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('unlink map panel from embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-embeddablelibrarymap');
-      await dashboardPanelActions.unlinkFromLibary(originalPanel);
+      await dashboardPanelActions.unlinkFromLibrary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-embeddablelibrarymap');

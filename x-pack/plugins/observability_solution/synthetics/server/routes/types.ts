@@ -16,8 +16,12 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
 } from '@kbn/core/server';
-import { FullValidationConfig, HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
-import { UptimeEsClient } from '../lib';
+import {
+  VersionedRouteValidation,
+  HttpResponsePayload,
+  ResponseError,
+} from '@kbn/core-http-server';
+import { SyntheticsEsClient } from '../lib';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 export type SyntheticsRequest = KibanaRequest<
@@ -35,7 +39,7 @@ export interface UMServerRoute<T> {
   method: SupportedMethod;
   writeAccess?: boolean;
   handler: T;
-  validation?: FullValidationConfig<any, any, any>;
+  validation?: VersionedRouteValidation<any, any, any>;
   streamHandler?: (
     context: UptimeRequestHandlerContext,
     request: SyntheticsRequest,
@@ -80,7 +84,7 @@ export type SyntheticsRouteWrapper = (
 ) => UMKibanaRoute;
 
 export interface UptimeRouteContext {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
   context: UptimeRequestHandlerContext;
   request: SyntheticsRequest;
   response: KibanaResponseFactory;
@@ -94,7 +98,7 @@ export interface RouteContext<
   Query = Record<string, any>,
   Body = any
 > {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
   context: UptimeRequestHandlerContext;
   request: KibanaRequest<Params, Query, Body>;
   response: KibanaResponseFactory;
@@ -111,7 +115,7 @@ export type SyntheticsRouteHandler<
   Query = Record<string, any>,
   Body = any
 > = ({
-  uptimeEsClient,
+  syntheticsEsClient,
   context,
   request,
   response,

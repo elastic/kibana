@@ -336,7 +336,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.createLayer();
+      await PageObjects.lens.createLayer('data', undefined, 'bar');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('bar'));
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',

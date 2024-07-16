@@ -39,6 +39,7 @@ export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.Perl]: [0xf98bb9, 0xfaa2c7, 0xfbb9d5, 0xfdd1e3],
   [FrameType.JavaScript]: [0xcbc3e3, 0xd5cfe8, 0xdfdbee, 0xeae7f3],
   [FrameType.PHPJIT]: [0xccfc82, 0xd1fc8e, 0xd6fc9b, 0xdbfca7],
+  [FrameType.DotNET]: [0x6c60e1, 0x8075e5, 0x948be9, 0xa8a0ed],
   [FrameType.ErrorFlag]: [0x0, 0x0, 0x0, 0x0], // This is a special case, it's not a real frame type
   [FrameType.Error]: [0xfd8484, 0xfd9d9d, 0xfeb5b5, 0xfecece],
 };

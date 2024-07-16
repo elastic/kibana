@@ -19,7 +19,6 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { isOfEsqlQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { useUrl } from './hooks/use_url';
@@ -31,7 +30,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
-import { DiscoverMainProvider } from './services/discover_state_provider';
+import { DiscoverMainProvider } from './state_management/discover_state_provider';
 import {
   CustomizationCallback,
   DiscoverCustomizationContext,
@@ -39,8 +38,9 @@ import {
   useDiscoverCustomizationService,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
-import { isTextBasedQuery } from './utils/is_text_based_query';
-import { DiscoverStateContainer, LoadParams } from './services/discover_state';
+import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
+import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
+import { useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -49,13 +49,13 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  customizationCallbacks: CustomizationCallback[];
+  customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
   customizationContext: DiscoverCustomizationContext;
 }
 
 export function DiscoverMainRoute({
-  customizationCallbacks,
+  customizationCallbacks = [],
   customizationContext,
   stateStorageContainer,
 }: MainRouteProps) {
@@ -78,7 +78,6 @@ export function DiscoverMainRoute({
     customizationContext,
     stateStorageContainer,
   });
-
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
       customizationCallbacks,
@@ -116,7 +115,7 @@ export function DiscoverMainRoute({
         return true; // bypass NoData screen
       }
 
-      if (isOfEsqlQueryType(stateContainer.appState.getState().query)) {
+      if (isDataSourceType(stateContainer.appState.getState().dataSource, DataSourceType.Esql)) {
         return true;
       }
 
@@ -340,11 +339,14 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
+  const { solutionNavId } = customizationContext;
+  const { rootProfileLoading } = useRootProfile({ solutionNavId });
+
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService) {
+  if (!customizationService || rootProfileLoading) {
     return loadingIndicator;
   }
 
@@ -369,8 +371,7 @@ function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
   const prevAppState = stateContainer.appState.getState();
   const prevDataView = stateContainer.internalState.getState().dataView;
   const initialAppState =
-    prevAppState?.query &&
-    isTextBasedQuery(prevAppState.query) &&
+    isDataSourceType(prevAppState.dataSource, DataSourceType.Esql) &&
     prevDataView &&
     prevDataView.type === ESQL_TYPE
       ? {

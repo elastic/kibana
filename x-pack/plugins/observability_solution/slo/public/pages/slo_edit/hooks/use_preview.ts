@@ -13,7 +13,7 @@ import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 export function useDebouncedGetPreviewData(
   isIndicatorValid: boolean,
   indicator: Indicator,
-  range: { start: number; end: number }
+  range: { from: Date; to: Date }
 ) {
   const serializedIndicator = JSON.stringify(indicator);
   const [indicatorState, setIndicatorState] = useState<string>(serializedIndicator);

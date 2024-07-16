@@ -63,16 +63,10 @@ export function TransactionDistribution({
   const { serviceName } = useApmServiceContext();
 
   const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction
-      .duration.us;
+    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
-  const {
-    chartData,
-    hasData,
-    percentileThresholdValue,
-    status,
-    totalDocCount,
-  } = useTransactionDistributionChartData();
+  const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
+    useTransactionDistributionChartData();
 
   const onShowCriticalPathChange = useCallback(
     (nextShowCriticalPath: boolean) => {
@@ -98,6 +92,20 @@ export function TransactionDistribution({
     [history]
   );
 
+  const onSampleClick = useCallback(
+    (sample: { transactionId: string; traceId: string }) => {
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          transactionId: sample.transactionId,
+          traceId: sample.traceId,
+        }),
+      });
+    },
+    [history]
+  );
+
   return (
     <ResettingHeightRetainer reset={!traceId}>
       <div data-test-subj="apmTransactionDistributionTabContent">
@@ -117,21 +125,13 @@ export function TransactionDistribution({
         <EuiSpacer size="s" />
         <WaterfallWithSummary
           environment={environment}
-          onSampleClick={(sample) => {
-            history.push({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
-                transactionId: sample.transactionId,
-                traceId: sample.traceId,
-              }),
-            });
-          }}
+          onSampleClick={onSampleClick}
           onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfallFetchResult={waterfallFetchResult}
+          waterfallFetchResult={waterfallFetchResult.waterfall}
+          waterfallFetchStatus={waterfallFetchResult.status}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}

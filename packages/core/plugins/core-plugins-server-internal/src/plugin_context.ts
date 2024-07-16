@@ -272,9 +272,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerGlobal: deps.uiSettings.registerGlobal,
       setAllowlist: deps.uiSettings.setAllowlist,
     },
-    userSettings: {
-      setUserProfileSettings: deps.userSettings.setUserProfileSettings,
-    },
+    userSettings: {},
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
@@ -285,7 +283,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     security: {
-      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
+      fips: deps.security.fips,
+    },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
     },
   };
 }
@@ -365,6 +368,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     security: {
       authc: deps.security.authc,
+      audit: deps.security.audit,
     },
+    userProfile: deps.userProfile,
   };
 }

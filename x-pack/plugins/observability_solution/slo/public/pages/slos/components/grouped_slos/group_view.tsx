@@ -5,28 +5,41 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
-import React from 'react';
+import { Filter } from '@kbn/es-query';
+import React, { useEffect } from 'react';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
-import { useUrlSearchState } from '../../hooks/use_url_search_state';
-import type { SortDirection } from '../slo_list_search_bar';
+import type { SortDirection } from '../../hooks/use_url_search_state';
+import { SortField, useUrlSearchState } from '../../hooks/use_url_search_state';
+import { GroupByField } from '../slo_list_group_by';
 import { SLOView } from '../toggle_slo_view';
 import { SloGroupListEmpty } from './group_list_empty';
 import { SloGroupListError } from './group_list_error';
 import { GroupListView } from './group_list_view';
 
 interface Props {
-  groupBy: string;
-  kqlQuery: string;
-  sloView: SLOView;
-  sort: string;
-  direction: SortDirection;
+  groupBy: GroupByField;
+  kqlQuery?: string;
+  view: SLOView;
+  sort?: SortField;
+  direction?: SortDirection;
+  filters?: Filter[];
+  lastRefreshTime?: number;
+  groupsFilter?: string[];
 }
 
-export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props) {
+export function GroupView({
+  kqlQuery,
+  view,
+  sort,
+  direction,
+  groupBy,
+  groupsFilter,
+  filters,
+  lastRefreshTime,
+}: Props) {
   const { state, onStateChange } = useUrlSearchState();
-  const { tagsFilter, statusFilter, filters, page, perPage, lastRefresh } = state;
-
-  const { data, isLoading, isError } = useFetchSloGroups({
+  const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
+  const { data, isLoading, isError, isRefetching, refetch } = useFetchSloGroups({
     perPage,
     page: page + 1,
     groupBy,
@@ -35,13 +48,19 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
     statusFilter,
     filters,
     lastRefresh,
+    groupsFilter,
   });
+
+  useEffect(() => {
+    refetch();
+  }, [lastRefreshTime, refetch]);
+
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
     onStateChange({ page: pageNumber });
   };
 
-  if (isLoading) {
+  if (isLoading || isRefetching) {
     return (
       <EuiEmptyPrompt
         data-test-subj="sloGroupListLoading"
@@ -64,7 +83,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
           <GroupListView
             groupBy={result.groupBy}
             key={result.group}
-            sloView={sloView}
+            view={view}
             group={result.group}
             kqlQuery={kqlQuery}
             sort={sort}
@@ -74,7 +93,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
           />
         ))}
 
-      {total > 0 ? (
+      {total > 0 && total > perPage ? (
         <EuiFlexItem>
           <EuiTablePagination
             data-test-subj="sloGroupListPagination"
@@ -84,7 +103,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              onStateChange({ perPage: newPerPage });
+              onStateChange({ perPage: newPerPage, page: 0 });
             }}
           />
         </EuiFlexItem>

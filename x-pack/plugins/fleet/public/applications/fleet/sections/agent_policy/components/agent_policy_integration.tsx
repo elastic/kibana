@@ -35,8 +35,6 @@ interface Props {
   withSysMonitoring: boolean;
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
-  isEditing?: boolean;
-  onDelete?: () => void;
 }
 
 export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
@@ -45,19 +43,18 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
   withSysMonitoring,
   updateSysMonitoring,
   validation,
-  isEditing = false,
-  onDelete = () => {},
 }) => {
   return (
     <EuiForm>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.createAgentPolicyLabel"
               defaultMessage="Create agent policy"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -101,7 +98,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
             agentPolicy={agentPolicy}
             updateAgentPolicy={updateAgentPolicy}
             validation={validation}
-            isEditing={isEditing}
           />
         </StyledEuiAccordion>
       </>

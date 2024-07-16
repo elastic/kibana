@@ -12,11 +12,13 @@ import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 
-import { sendGetPackagePolicies } from '../../../../../hooks';
+import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
 
 import { SelectedPolicyTab } from '../../components';
 
 import { useOnSubmit } from './form';
+
+type MockFn = jest.MockedFunction<any>;
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -31,6 +33,7 @@ jest.mock('../../../../../hooks', () => {
     sendGetStatus: jest
       .fn()
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
+    useConfig: jest.fn(),
   };
 });
 
@@ -80,11 +83,15 @@ describe('useOnSubmit', () => {
         selectedPolicyTab: SelectedPolicyTab.NEW,
         newAgentPolicy: { name: 'test', namespace: '' },
         queryParamsPolicyId: undefined,
+        hasFleetAddAgentsPrivileges: true,
       })
     ));
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+    (useConfig as MockFn).mockReturnValue({
+      agentless: undefined,
+    } as any);
   });
 
   describe('default API response', () => {
@@ -105,7 +112,7 @@ describe('useOnSubmit', () => {
 
       expect(renderResult.result.current.packagePolicy).toEqual({
         id: 'new-id',
-        policy_id: '',
+        policy_ids: [],
         namespace: 'newspace',
         description: '',
         enabled: true,
@@ -145,7 +152,7 @@ describe('useOnSubmit', () => {
         inputs: [],
         name: 'apache-1',
         namespace: '',
-        policy_id: '',
+        policy_ids: [],
         package: {
           name: 'apache',
           title: 'Apache',
@@ -190,7 +197,7 @@ describe('useOnSubmit', () => {
       inputs: [],
       name: 'apache-11',
       namespace: '',
-      policy_id: '',
+      policy_ids: [],
       package: {
         name: 'apache',
         title: 'Apache',

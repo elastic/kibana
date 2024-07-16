@@ -35,6 +35,11 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types",
+    "@kbn/discover-shared-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/router-utils",
   ]
 }

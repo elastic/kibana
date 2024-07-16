@@ -5,10 +5,9 @@ exports[`ExplorerNoInfluencersFound snapshot 1`] = `
   body={
     <React.Fragment>
       <p>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Try widening the time selection or moving further back in time"
           id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
-          values={Object {}}
         />
       </p>
     </React.Fragment>

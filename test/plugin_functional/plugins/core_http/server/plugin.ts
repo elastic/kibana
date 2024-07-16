@@ -31,6 +31,62 @@ export class CoreHttpPlugin implements Plugin {
         return res.ok({ body: req.headers });
       }
     );
+
+    router.versioned
+      .get({
+        path: '/api/core_http/public_versioned_route',
+        access: 'public',
+        enableQueryVersion: false,
+      })
+      .addVersion({ version: '2023-10-31', validate: false }, (ctx, req, res) => {
+        return res.ok({
+          body: {
+            version: '2023-10-31',
+          },
+        });
+      });
+
+    router.versioned
+      .get({
+        path: '/api/core_http/internal_versioned_route',
+        access: 'internal',
+        enableQueryVersion: false,
+      })
+      .addVersion({ version: '1', validate: false }, (ctx, req, res) => {
+        return res.ok({
+          body: {
+            version: 1,
+          },
+        });
+      })
+      .addVersion({ version: '2', validate: false }, (ctx, req, res) => {
+        return res.ok({
+          body: {
+            version: 2,
+          },
+        });
+      });
+
+    router.versioned
+      .get({
+        path: '/api/core_http/versioned_route_with_query_version',
+        access: 'internal',
+        enableQueryVersion: true,
+      })
+      .addVersion({ version: '1', validate: false }, (ctx, req, res) => {
+        return res.ok({
+          body: {
+            version: 1,
+          },
+        });
+      })
+      .addVersion({ version: '2', validate: false }, (ctx, req, res) => {
+        return res.ok({
+          body: {
+            version: 2,
+          },
+        });
+      });
   }
 
   public start() {}

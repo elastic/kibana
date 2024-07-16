@@ -6,6 +6,7 @@
  */
 
 import styled from 'styled-components';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { HostRisk, UserRisk } from '../../../../entity_analytics/api/types';
@@ -17,7 +18,7 @@ import type {
   TimelineEventsDetailsItem,
   RiskSeverity,
 } from '../../../../../common/search_strategy';
-import { RiskSummary } from '../../../../entity_analytics/components/risk_summary';
+import { RiskSummaryPanel } from '../../../../entity_analytics/components/risk_summary_panel';
 import { EnrichmentSummary } from './enrichment_summary';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
@@ -27,7 +28,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
+const ThreatSummaryPanelTitle: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>
@@ -136,7 +137,7 @@ const ThreatSummaryViewComponent: React.FC<{
         {hasEntityAnalyticsCapability && (
           <>
             <EuiFlexItem grow={false}>
-              <RiskSummary
+              <RiskSummaryPanel
                 riskEntity={RiskScoreEntity.host}
                 risk={hostRisk}
                 originalRisk={originalHostRisk}
@@ -144,7 +145,7 @@ const ThreatSummaryViewComponent: React.FC<{
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <RiskSummary
+              <RiskSummaryPanel
                 riskEntity={RiskScoreEntity.user}
                 risk={userRisk}
                 originalRisk={originalUserRisk}

@@ -10,6 +10,7 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   assets = 'assets',
+  attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -42,9 +43,12 @@ export enum SecurityPageName {
   exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
+  hostsAll = 'hosts-all',
   hostsAnomalies = 'hosts-anomalies',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
+  hostsSessions = 'hosts-sessions',
+  hostsUncommonProcesses = 'hosts-uncommon_processes',
   investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
@@ -53,6 +57,7 @@ export enum SecurityPageName {
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
   networkEvents = 'network-events',
+  networkFlows = 'network-flows',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   noPage = '',
@@ -63,7 +68,6 @@ export enum SecurityPageName {
   rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
-  sessions = 'sessions',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
@@ -72,13 +76,15 @@ export enum SecurityPageName {
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
-  uncommonProcesses = 'uncommon_processes',
   users = 'users',
+  usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
   entityAnalytics = 'entity_analytics',
   entityAnalyticsManagement = 'entity_analytics-management',
+  entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
   coverageOverview = 'coverage-overview',
+  notesManagement = 'notes-management',
 }

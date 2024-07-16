@@ -16,47 +16,72 @@ import React, {
   useState,
 } from 'react';
 import {
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiCommentList,
-  EuiSwitchEvent,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiText,
 } from '@elastic/eui';
-
+import { euiThemeVars } from '@kbn/ui-theme';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import deepEqual from 'fast-deep-equal';
 
+import { find, isEmpty, uniqBy } from 'lodash';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
-import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import {
   getDefaultConnector,
   getBlockBotConversation,
   mergeBaseWithPersistedConversations,
+  sleep,
 } from './helpers';
 
-import { useAssistantContext } from '../assistant_context';
+import { useAssistantContext, UserAvatar } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
-import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { useConnectorSetup } from '../connectorland/connector_setup';
+import { ConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
+import { ConversationSidePanel } from './conversations/conversation_sidepanel';
+import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
+import { SystemPrompt } from './prompt_editor/system_prompt';
+import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
+import { AssistantHeader } from './assistant_header';
+import * as i18n from './translations';
+
+export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
+
+const CommentContainer = styled('span')`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+`;
+
 import {
   FetchConversationsResponse,
   useFetchCurrentUserConversations,
+  CONVERSATIONS_QUERY_KEYS,
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
-import { clearPresentationData } from '../connectorland/connector_setup/helpers';
+import { getGenAiConfig } from '../connectorland/helpers';
+import { AssistantAnimatedIcon } from './assistant_animated_icon';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
+import { useFetchPrompts } from './api/prompts/use_fetch_prompts';
 
 export interface Props {
   conversationTitle?: string;
@@ -65,6 +90,10 @@ export interface Props {
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
   setConversationTitle?: Dispatch<SetStateAction<string>>;
+  onCloseFlyout?: () => void;
+  chatHistoryVisible?: boolean;
+  setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
+  currentUserAvatar?: UserAvatar;
 }
 
 /**
@@ -78,30 +107,36 @@ const AssistantComponent: React.FC<Props> = ({
   shouldRefocusPrompt = false,
   showTitle = true,
   setConversationTitle,
+  onCloseFlyout,
+  chatHistoryVisible,
+  setChatHistoryVisible,
+  currentUserAvatar,
 }) => {
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    defaultAllow,
-    defaultAllowReplacement,
-    docLinks,
     getComments,
     http,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
-    setLastConversationTitle,
-    getLastConversationTitle,
-    title,
-    allSystemPrompts,
+    setLastConversationId,
+    getLastConversationId,
     baseConversations,
   } = useAssistantContext();
 
-  const { getDefaultConversation, getConversation, deleteConversation } = useConversation();
+  const {
+    getDefaultConversation,
+    getConversation,
+    deleteConversation,
+    setApiConfig,
+    createConversation,
+  } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
-  const [conversations, setConversations] = useState<Record<string, Conversation>>({});
+
   const selectedPromptContextsCount = useMemo(
     () => Object.keys(selectedPromptContexts).length,
     [selectedPromptContexts]
@@ -112,88 +147,148 @@ const AssistantComponent: React.FC<Props> = ({
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
+  const [isStreaming, setIsStreaming] = useState(false);
+
   const {
-    data: conversationsData,
+    data: conversations,
     isLoading,
-    isError,
-    refetch,
-  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+    refetch: refetchResults,
+    isFetched: conversationsLoaded,
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    refetchOnWindowFocus: !isStreaming,
+    isAssistantEnabled,
+  });
 
-  useEffect(() => {
-    if (!isLoading && !isError) {
-      setConversations(conversationsData ?? {});
-    }
-  }, [conversationsData, isError, isLoading]);
+  const {
+    data: anonymizationFields,
+    isLoading: isLoadingAnonymizationFields,
+    isError: isErrorAnonymizationFields,
+    isFetched: isFetchedAnonymizationFields,
+  } = useFetchAnonymizationFields();
 
-  const refetchResults = useCallback(async () => {
-    const updatedConv = await refetch();
-    if (!updatedConv.isLoading) {
-      setConversations(updatedConv.data ?? {});
-      return updatedConv.data;
+  const {
+    data: { data: allPrompts },
+    refetch: refetchPrompts,
+    isLoading: isLoadingPrompts,
+  } = useFetchPrompts();
+
+  const allSystemPrompts = useMemo(() => {
+    if (!isLoadingPrompts) {
+      return allPrompts.filter((p) => p.promptType === PromptTypeEnum.system);
     }
-  }, [refetch]);
+    return [];
+  }, [allPrompts, isLoadingPrompts]);
 
   // Connector details
-  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
+  const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-  const [selectedConversationTitle, setSelectedConversationTitle] = useState<string>(
-    isAssistantEnabled ? getLastConversationTitle(conversationTitle) : WELCOME_CONVERSATION_TITLE
-  );
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
+
+  const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
 
   useEffect(() => {
-    if (setConversationTitle) {
-      setConversationTitle(selectedConversationTitle);
+    if (setConversationTitle && currentConversation?.title) {
+      setConversationTitle(currentConversation?.title);
     }
-  }, [selectedConversationTitle, setConversationTitle]);
-
-  const [currentConversation, setCurrentConversation] = useState<Conversation>(
-    getDefaultConversation({ cTitle: selectedConversationTitle })
-  );
+  }, [currentConversation?.title, setConversationTitle]);
 
   const refetchCurrentConversation = useCallback(
-    async (cId?: string) => {
-      if (cId === '' || !conversations[selectedConversationTitle]) {
+    async ({
+      cId,
+      cTitle,
+      isStreamRefetch = false,
+    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
+      if (cId === '' || (cTitle && !conversations[cTitle])) {
         return;
       }
-      const updatedConversation = await getConversation(
-        cId ?? conversations[selectedConversationTitle].id
-      );
-      if (updatedConversation) {
-        setCurrentConversation(updatedConversation);
+
+      const conversationId = cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
+
+      if (conversationId) {
+        let updatedConversation = await getConversation(conversationId);
+        let retries = 0;
+        const maxRetries = 5;
+
+        // this retry is a workaround for the stream not YET being persisted to the stored conversation
+        while (
+          isStreamRefetch &&
+          updatedConversation &&
+          updatedConversation.messages[updatedConversation.messages.length - 1].role !==
+            'assistant' &&
+          retries < maxRetries
+        ) {
+          retries++;
+          await sleep(2000);
+          updatedConversation = await getConversation(conversationId);
+        }
+
+        if (updatedConversation) {
+          setCurrentConversation(updatedConversation);
+        }
+
+        return updatedConversation;
       }
-      return updatedConversation;
     },
-    [conversations, getConversation, selectedConversationTitle]
+    [conversations, currentConversation?.id, getConversation]
   );
 
   useEffect(() => {
-    if (!isLoading && Object.keys(conversations).length > 0) {
-      const conversation =
-        conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
-      // Set the last conversation as current conversation or use persisted or non-persisted Welcom conversation
-      setCurrentConversation(
-        conversation ??
+    if (areConnectorsFetched && conversationsLoaded && Object.keys(conversations).length > 0) {
+      setCurrentConversation((prev) => {
+        const nextConversation =
+          (currentConversationId && conversations[currentConversationId]) ||
+          (isAssistantEnabled &&
+            (conversations[getLastConversationId(conversationTitle)] ||
+              find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
+          find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
+
+        if (deepEqual(prev, nextConversation)) return prev;
+
+        const conversationToReturn =
+          (nextConversation &&
+            conversations[
+              nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
+            ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
-      );
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+
+        if (
+          prev &&
+          prev.id === conversationToReturn.id &&
+          // if the conversation id has not changed and the previous conversation has more messages
+          // it is because the local conversation has a readable stream running
+          // and it has not yet been persisted to the stored conversation
+          prev.messages.length > conversationToReturn.messages.length
+        ) {
+          return {
+            ...conversationToReturn,
+            messages: prev.messages,
+          };
+        }
+        return conversationToReturn;
+      });
     }
   }, [
+    areConnectorsFetched,
     conversationTitle,
     conversations,
+    conversationsLoaded,
+    currentConversationId,
     getDefaultConversation,
-    getLastConversationTitle,
-    isLoading,
-    selectedConversationTitle,
+    getLastConversationId,
+    isAssistantEnabled,
   ]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
     // if any conversation has a connector id, we're not in welcome set up
     return Object.keys(conversations).some(
-      (conversation) => conversations[conversation].apiConfig?.connectorId != null
+      (conversation) => conversations[conversation]?.apiConfig?.connectorId != null
     )
       ? false
       : (connectors?.length ?? 0) === 0;
@@ -203,7 +298,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const blockBotConversation = useMemo(
-    () => getBlockBotConversation(currentConversation, isAssistantEnabled),
+    () => currentConversation && getBlockBotConversation(currentConversation, isAssistantEnabled),
     [currentConversation, isAssistantEnabled]
   );
 
@@ -214,37 +309,60 @@ const AssistantComponent: React.FC<Props> = ({
   // Clear it if there is no connectors
   useEffect(() => {
     if (areConnectorsFetched && !connectors?.length) {
-      return setLastConversationTitle(WELCOME_CONVERSATION_TITLE);
+      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
     }
 
-    if (!currentConversation.excludeFromLastConversationStorage) {
-      setLastConversationTitle(currentConversation.title);
+    if (!currentConversation?.excludeFromLastConversationStorage) {
+      setLastConversationId(
+        !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title
+      );
     }
   }, [
     areConnectorsFetched,
     connectors?.length,
-    conversationsData,
+    conversations,
     currentConversation,
     isLoading,
-    setLastConversationTitle,
+    setLastConversationId,
   ]);
 
-  const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
-
-  const [showMissingConnectorCallout, setShowMissingConnectorCallout] = useState<boolean>(false);
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
-    // need in order for code block controls to be added to the DOM
-    setTimeout(() => {
-      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
-    }, 0);
+    if (currentConversation) {
+      // need in order for code block controls to be added to the DOM
+      setTimeout(() => {
+        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
+      }, 0);
+    }
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
+
+  // Show missing connector callout if no connectors are configured
+
+  const showMissingConnectorCallout = useMemo(() => {
+    if (!isLoading && areConnectorsFetched && currentConversation?.id !== '') {
+      if (!currentConversation?.apiConfig?.connectorId) {
+        return true;
+      }
+
+      return !connectors?.some(
+        (connector) => connector.id === currentConversation.apiConfig?.connectorId
+      );
+    }
+
+    return false;
+  }, [
+    areConnectorsFetched,
+    connectors,
+    currentConversation?.apiConfig?.connectorId,
+    currentConversation?.id,
+    isLoading,
+  ]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -273,20 +391,25 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     const parent = commentsContainerRef.current?.parentElement;
+
     if (!parent) {
       return;
     }
     // when scrollHeight changes, parent is scrolled to bottom
     parent.scrollTop = parent.scrollHeight;
+
+    (
+      commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
+    ).lastElementChild?.scrollIntoView();
   });
-
-  const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
-    isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
-
   //  End Scrolling
 
   const selectedSystemPrompt = useMemo(
-    () => getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation }),
+    () =>
+      getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation: currentConversation,
+      }),
     [allSystemPrompts, currentConversation]
   );
 
@@ -296,53 +419,33 @@ const AssistantComponent: React.FC<Props> = ({
 
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
-      if (cId === '') {
-        const updatedConv = await refetchResults();
-        if (updatedConv) {
-          setCurrentConversation(updatedConv[cTitle]);
-          setSelectedConversationTitle(cTitle);
-          setEditingSystemPromptId(
-            getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cTitle] })?.id
-          );
-        }
-      } else {
-        setSelectedConversationTitle(cTitle);
-        const refetchedConversation = await refetchCurrentConversation(cId);
-        setEditingSystemPromptId(
-          getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
-        );
-        if (refetchedConversation) {
-          setConversations({
-            ...conversations,
-            [refetchedConversation.title]: refetchedConversation,
-          });
-        }
-      }
-    },
-    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
-  );
+      const updatedConv = await refetchResults();
 
-  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
-    conversation: blockBotConversation,
-    onConversationUpdate: handleOnConversationSelected,
-    onSetupComplete: () => {
-      setConversations({
-        ...conversations,
-        [currentConversation.title]: clearPresentationData(currentConversation),
-      });
+      let selectedConversation;
+      if (cId === '') {
+        setCurrentConversationId(cTitle);
+        selectedConversation = updatedConv?.data?.[cTitle];
+        setCurrentConversationId(cTitle);
+      } else {
+        selectedConversation = await refetchCurrentConversation({ cId });
+        setCurrentConversationId(cId);
+      }
+      setEditingSystemPromptId(
+        getDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation: selectedConversation,
+        })?.id
+      );
     },
-  });
+    [allSystemPrompts, refetchCurrentConversation, refetchResults]
+  );
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {
-      setTimeout(() => {
-        deleteConversation(conversations[cTitle].id);
-      }, 0);
-      const deletedConv = { ...conversations };
-      delete deletedConv[cTitle];
-      setConversations(deletedConv);
+      await deleteConversation(conversations[cTitle].id);
+      await refetchResults();
     },
-    [conversations, deleteConversation]
+    [conversations, deleteConversation, refetchResults]
   );
 
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
@@ -355,18 +458,18 @@ const AssistantComponent: React.FC<Props> = ({
   codeBlockContainers.forEach((e) => (e.style.minHeight = '75px'));
   ////
 
-  const onToggleShowAnonymizedValues = useCallback(
-    (e: EuiSwitchEvent) => {
-      if (setShowAnonymizedValues != null) {
-        setShowAnonymizedValues(e.target.checked);
-      }
-    },
-    [setShowAnonymizedValues]
+  const onToggleShowAnonymizedValues = useCallback(() => {
+    setShowAnonymizedValues((prevValue) => !prevValue);
+  }, [setShowAnonymizedValues]);
+
+  const isNewConversation = useMemo(
+    () => currentConversation?.messages.length === 0,
+    [currentConversation?.messages.length]
   );
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
-    if (currentConversation.messages.length || conversationTitle !== selectedConversationTitle) {
+    if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
       return;
     }
 
@@ -375,14 +478,19 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     const promptContext: PromptContext | undefined = promptContexts[promptContextId];
-    if (promptContext != null) {
+    if (
+      promptContext != null &&
+      !isLoadingAnonymizationFields &&
+      !isErrorAnonymizationFields &&
+      isFetchedAnonymizationFields &&
+      anonymizationFields
+    ) {
       setAutoPopulatedOnce(true);
 
       if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
         const addNewSelectedPromptContext = async () => {
           const newSelectedPromptContext = await getNewSelectedPromptContext({
-            defaultAllow,
-            defaultAllowReplacement,
+            anonymizationFields,
             promptContext,
           });
 
@@ -400,25 +508,18 @@ const AssistantComponent: React.FC<Props> = ({
       }
     }
   }, [
-    currentConversation.messages,
+    currentConversation?.messages,
     promptContexts,
     promptContextId,
     conversationTitle,
-    selectedConversationTitle,
+    currentConversation?.title,
     selectedPromptContexts,
     autoPopulatedOnce,
-    defaultAllow,
-    defaultAllowReplacement,
+    isLoadingAnonymizationFields,
+    isErrorAnonymizationFields,
+    anonymizationFields,
+    isFetchedAnonymizationFields,
   ]);
-
-  // Show missing connector callout if no connectors are configured
-  useEffect(() => {
-    const connectorExists =
-      connectors?.some(
-        (connector) => connector.id === currentConversation.apiConfig?.connectorId
-      ) ?? false;
-    setShowMissingConnectorCallout(!connectorExists);
-  }, [connectors, currentConversation]);
 
   const createCodeBlockPortals = useCallback(
     () =>
@@ -441,8 +542,8 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
-    handleButtonSendMessage,
-    handleOnChatCleared,
+    abortStream,
+    handleOnChatCleared: onChatCleared,
     handlePromptChange,
     handleSendMessage,
     handleRegenerateResponse,
@@ -450,7 +551,6 @@ const AssistantComponent: React.FC<Props> = ({
   } = useChatSend({
     allSystemPrompts,
     currentConversation,
-    setPromptTextPreview,
     setUserPrompt,
     editingSystemPromptId,
     http,
@@ -460,190 +560,471 @@ const AssistantComponent: React.FC<Props> = ({
     setCurrentConversation,
   });
 
-  const chatbotComments = useMemo(
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchResults();
+  }, [onChatCleared, refetchResults]);
+
+  const handleChatSend = useCallback(
+    async (promptText: string) => {
+      await handleSendMessage(promptText);
+      if (currentConversation?.title === NEW_CHAT) {
+        await refetchResults();
+      }
+    },
+    [currentConversation, handleSendMessage, refetchResults]
+  );
+
+  const comments = useMemo(
     () => (
       <>
         <EuiCommentList
           comments={getComments({
+            abortStream,
             currentConversation,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
+            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
+            setIsStreaming,
+            currentUserAvatar,
           })}
+          // Avoid comments going off the flyout
           css={css`
-            margin-right: 20px;
+            padding-bottom: ${euiThemeVars.euiSizeL};
+
+            > li > div:nth-child(2) {
+              overflow: hidden;
+            }
           `}
         />
 
-        {currentConversation.messages.length !== 0 && selectedPromptContextsCount > 0 && (
+        {currentConversation?.messages.length !== 0 && selectedPromptContextsCount > 0 && (
           <EuiSpacer size={'m'} />
-        )}
-
-        {(currentConversation.messages.length === 0 || selectedPromptContextsCount > 0) && (
-          <PromptEditor
-            conversation={currentConversation}
-            editingSystemPromptId={editingSystemPromptId}
-            isNewConversation={currentConversation.messages.length === 0}
-            isSettingsModalVisible={isSettingsModalVisible}
-            promptContexts={promptContexts}
-            promptTextPreview={promptTextPreview}
-            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
-            selectedPromptContexts={selectedPromptContexts}
-            setIsSettingsModalVisible={setIsSettingsModalVisible}
-            setSelectedPromptContexts={setSelectedPromptContexts}
-          />
         )}
       </>
     ),
     [
-      refetchCurrentConversation,
-      currentConversation,
-      editingSystemPromptId,
       getComments,
-      handleOnSystemPromptSelectionChange,
-      handleRegenerateResponse,
-      isLoadingChatSend,
-      isSettingsModalVisible,
-      promptContexts,
-      promptTextPreview,
-      selectedPromptContexts,
-      selectedPromptContextsCount,
+      abortStream,
+      currentConversation,
       showAnonymizedValues,
+      refetchCurrentConversation,
+      handleRegenerateResponse,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
+      isLoadingChatSend,
+      currentUserAvatar,
+      selectedPromptContextsCount,
     ]
   );
 
-  const comments = useMemo(() => {
-    if (isDisabled) {
-      return (
-        <EuiCommentList
-          comments={connectorComments}
-          css={css`
-            margin-right: 20px;
-          `}
-        />
-      );
-    }
-
-    return chatbotComments;
-  }, [connectorComments, isDisabled, chatbotComments]);
-
   const trackPrompt = useCallback(
     (promptTitle: string) => {
-      assistantTelemetry?.reportAssistantQuickPrompt({
-        conversationId: currentConversation.title,
-        promptTitle,
-      });
+      if (currentConversation?.title) {
+        assistantTelemetry?.reportAssistantQuickPrompt({
+          conversationId: currentConversation?.title,
+          promptTitle,
+        });
+      }
     },
-    [assistantTelemetry, currentConversation.title]
+    [assistantTelemetry, currentConversation?.title]
   );
 
   const refetchConversationsState = useCallback(async () => {
-    const refetchedConversations = await refetchResults();
-    if (refetchedConversations && refetchedConversations[currentConversation.title]) {
-      setCurrentConversation(refetchedConversations[currentConversation.title]);
-    }
-  }, [currentConversation.title, refetchResults]);
+    await refetchResults();
+  }, [refetchResults]);
 
-  return getWrapper(
-    <>
-      <EuiModalHeader
-        css={css`
-          align-items: flex-start;
-          flex-direction: column;
-        `}
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation<Conversation | undefined, unknown, Conversation>(
+    ['SET_DEFAULT_CONNECTOR'],
+    {
+      mutationFn: async (payload) => {
+        const apiConfig = getGenAiConfig(defaultConnector);
+        return setApiConfig({
+          conversation: payload,
+          apiConfig: {
+            ...payload?.apiConfig,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
+            provider: apiConfig?.apiProvider,
+            model: apiConfig?.defaultModel,
+          },
+        });
+      },
+      onSuccess: async (data) => {
+        await queryClient.cancelQueries({ queryKey: CONVERSATIONS_QUERY_KEYS });
+        if (data) {
+          queryClient.setQueryData<{ data: Conversation[] }>(CONVERSATIONS_QUERY_KEYS, (prev) => ({
+            ...(prev ?? {}),
+            data: uniqBy([data, ...(prev?.data ?? [])], 'id'),
+          }));
+        }
+        return data;
+      },
+    }
+  );
+
+  useEffect(() => {
+    (async () => {
+      if (areConnectorsFetched && currentConversation?.id === '') {
+        const conversation = await mutateAsync(currentConversation);
+        if (currentConversation.id === '' && conversation) {
+          setCurrentConversationId(conversation.id);
+        }
+      }
+    })();
+  }, [areConnectorsFetched, currentConversation, mutateAsync]);
+
+  const handleCreateConversation = useCallback(async () => {
+    const newChatExists = find(conversations, ['title', NEW_CHAT]);
+    if (newChatExists && !newChatExists.messages.length) {
+      handleOnConversationSelected({
+        cId: newChatExists.id,
+        cTitle: newChatExists.title,
+      });
+      return;
+    }
+
+    const newConversation = await createConversation({
+      title: NEW_CHAT,
+      apiConfig: currentConversation?.apiConfig,
+    });
+
+    await refetchConversationsState();
+
+    if (newConversation) {
+      handleOnConversationSelected({
+        cId: newConversation.id,
+        cTitle: newConversation.title,
+      });
+    }
+  }, [
+    conversations,
+    createConversation,
+    currentConversation?.apiConfig,
+    handleOnConversationSelected,
+    refetchConversationsState,
+  ]);
+
+  const disclaimer = useMemo(
+    () =>
+      isNewConversation && (
+        <EuiText
+          data-test-subj="assistant-disclaimer"
+          textAlign="center"
+          color={euiThemeVars.euiColorMediumShade}
+          size="xs"
+          css={css`
+            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+          `}
+        >
+          {i18n.DISCLAIMER}
+        </EuiText>
+      ),
+    [isNewConversation]
+  );
+
+  const flyoutBodyContent = useMemo(() => {
+    if (isWelcomeSetup) {
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              css={css`
+                max-width: 400px;
+                text-align: center;
+              `}
+            >
+              <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+                <EuiFlexItem grow={false}>
+                  <AssistantAnimatedIcon />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <h3>{i18n.WELCOME_SCREEN_TITLE}</h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">
+                    <p>{i18n.WELCOME_SCREEN_DESCRIPTION}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} data-test-subj="connector-prompt">
+                  <ConnectorSetup
+                    conversation={blockBotConversation}
+                    onConversationUpdate={handleOnConversationSelected}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (currentConversation?.messages.length === 0) {
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              css={css`
+                max-width: 400px;
+                text-align: center;
+              `}
+            >
+              <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+                <EuiFlexItem grow={false}>
+                  <AssistantAnimatedIcon />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
+                    <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SystemPrompt
+                    conversation={currentConversation}
+                    editingSystemPromptId={editingSystemPromptId}
+                    onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    allSystemPrompts={allSystemPrompts}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InstallKnowledgeBaseButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <EuiPanel
+        hasShadow={false}
+        panelRef={(element) => {
+          commentsContainerRef.current = (element?.parentElement as HTMLDivElement) || null;
+        }}
       >
-        {showTitle && (
-          <AssistantHeader
+        {comments}
+      </EuiPanel>
+    );
+  }, [
+    allSystemPrompts,
+    blockBotConversation,
+    comments,
+    currentConversation,
+    editingSystemPromptId,
+    handleOnConversationSelected,
+    handleOnSystemPromptSelectionChange,
+    isSettingsModalVisible,
+    isWelcomeSetup,
+  ]);
+
+  return (
+    <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
+      {chatHistoryVisible && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
+            border-right: 1px solid ${euiThemeVars.euiColorLightShade};
+          `}
+        >
+          <ConversationSidePanel
             currentConversation={currentConversation}
-            setCurrentConversation={setCurrentConversation}
-            defaultConnector={defaultConnector}
-            docLinks={docLinks}
-            isDisabled={isDisabled}
-            isSettingsModalVisible={isSettingsModalVisible}
             onConversationSelected={handleOnConversationSelected}
-            onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-            setIsSettingsModalVisible={setIsSettingsModalVisible}
-            showAnonymizedValues={showAnonymizedValues}
-            title={title}
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
+            onConversationCreate={handleCreateConversation}
             refetchConversationsState={refetchConversationsState}
           />
-        )}
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem
+        css={css`
+          overflow: hidden;
+        `}
+      >
+        <CommentContainer>
+          <EuiFlexGroup
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexItem
+              css={css`
+                max-width: 100%;
+              `}
+            >
+              <EuiFlyoutHeader hasBorder>
+                <AssistantHeader
+                  selectedConversation={currentConversation}
+                  defaultConnector={defaultConnector}
+                  isDisabled={isDisabled || isLoadingChatSend}
+                  isSettingsModalVisible={isSettingsModalVisible}
+                  onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
+                  setIsSettingsModalVisible={setIsSettingsModalVisible}
+                  showAnonymizedValues={showAnonymizedValues}
+                  onCloseFlyout={onCloseFlyout}
+                  onChatCleared={handleOnChatCleared}
+                  chatHistoryVisible={chatHistoryVisible}
+                  setChatHistoryVisible={setChatHistoryVisible}
+                  onConversationSelected={handleOnConversationSelected}
+                  conversations={conversations}
+                  conversationsLoaded={conversationsLoaded}
+                  refetchConversationsState={refetchConversationsState}
+                  onConversationCreate={handleCreateConversation}
+                  isAssistantEnabled={isAssistantEnabled}
+                  refetchPrompts={refetchPrompts}
+                />
 
-        {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-        {createCodeBlockPortals()}
+                {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
+                {createCodeBlockPortals()}
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody
+                css={css`
+                  min-height: 100px;
+                  flex: 1;
 
-        {!isDisabled && (
-          <>
-            <ContextPills
-              defaultAllow={defaultAllow}
-              defaultAllowReplacement={defaultAllowReplacement}
-              promptContexts={promptContexts}
-              selectedPromptContexts={selectedPromptContexts}
-              setSelectedPromptContexts={setSelectedPromptContexts}
-            />
-            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-          </>
-        )}
-      </EuiModalHeader>
-      <EuiModalBody>
-        {getWrapper(
-          <>
-            {comments}
+                  > div {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: stretch;
 
-            {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
-              <>
-                <EuiSpacer />
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
+                    > .euiFlyoutBody__banner {
+                      overflow-x: unset;
+                    }
+
+                    > .euiFlyoutBody__overflowContent {
+                      display: flex;
+                      flex: 1;
+                      overflow: auto;
+                    }
+                  }
+                `}
+                banner={
+                  !isDisabled &&
+                  showMissingConnectorCallout &&
+                  areConnectorsFetched && (
                     <ConnectorMissingCallout
-                      isConnectorConfigured={connectors?.length > 0}
+                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
                       isSettingsModalVisible={isSettingsModalVisible}
                       setIsSettingsModalVisible={setIsSettingsModalVisible}
                     />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            )}
-          </>,
-          !embeddedLayout
-        )}
-      </EuiModalBody>
-      <EuiModalFooter
-        css={css`
-          align-items: flex-start;
-          flex-direction: column;
-        `}
-      >
-        <BlockBotCallToAction
-          connectorPrompt={connectorPrompt}
-          http={http}
-          isAssistantEnabled={isAssistantEnabled}
-          isWelcomeSetup={isWelcomeSetup}
-        />
-        <ChatSend
-          isDisabled={isSendingDisabled}
-          shouldRefocusPrompt={shouldRefocusPrompt}
-          userPrompt={userPrompt}
-          handleButtonSendMessage={handleButtonSendMessage}
-          handleOnChatCleared={handleOnChatCleared}
-          handlePromptChange={handlePromptChange}
-          handleSendMessage={handleSendMessage}
-          handleRegenerateResponse={handleRegenerateResponse}
-          isLoading={isLoadingChatSend}
-        />
-        {!isDisabled && (
-          <QuickPrompts
-            setInput={setUserPrompt}
-            setIsSettingsModalVisible={setIsSettingsModalVisible}
-            trackPrompt={trackPrompt}
-          />
-        )}
-      </EuiModalFooter>
-    </>,
-    embeddedLayout
+                  )
+                }
+              >
+                {!isAssistantEnabled ? (
+                  <BlockBotCallToAction
+                    connectorPrompt={
+                      <ConnectorSetup
+                        conversation={blockBotConversation}
+                        onConversationUpdate={handleOnConversationSelected}
+                      />
+                    }
+                    http={http}
+                    isAssistantEnabled={isAssistantEnabled}
+                    isWelcomeSetup={isWelcomeSetup}
+                  />
+                ) : (
+                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiFlyoutBody>
+              <EuiFlyoutFooter
+                css={css`
+                  background: none;
+                  border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+                  overflow: hidden;
+                  max-height: 60%;
+                  display: flex;
+                  flex-direction: column;
+                `}
+              >
+                <EuiPanel
+                  paddingSize="m"
+                  hasShadow={false}
+                  css={css`
+                    overflow: auto;
+                  `}
+                >
+                  {!isDisabled &&
+                    Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <>
+                            <ContextPills
+                              anonymizationFields={anonymizationFields}
+                              promptContexts={promptContexts}
+                              selectedPromptContexts={selectedPromptContexts}
+                              setSelectedPromptContexts={setSelectedPromptContexts}
+                            />
+                            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
+                          </>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )}
+
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {Object.keys(selectedPromptContexts).length ? (
+                      <EuiFlexItem grow={false}>
+                        <SelectedPromptContexts
+                          promptContexts={promptContexts}
+                          selectedPromptContexts={selectedPromptContexts}
+                          setSelectedPromptContexts={setSelectedPromptContexts}
+                          currentReplacements={currentConversation?.replacements}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+
+                    <EuiFlexItem grow={false}>
+                      <ChatSend
+                        isDisabled={isSendingDisabled}
+                        shouldRefocusPrompt={shouldRefocusPrompt}
+                        userPrompt={userPrompt}
+                        handlePromptChange={handlePromptChange}
+                        handleSendMessage={handleChatSend}
+                        handleRegenerateResponse={handleRegenerateResponse}
+                        isLoading={isLoadingChatSend}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+
+                {!isDisabled && (
+                  <EuiPanel
+                    css={css`
+                      background: ${euiThemeVars.euiColorLightestShade};
+                    `}
+                    hasShadow={false}
+                    paddingSize="m"
+                    borderRadius="none"
+                  >
+                    <QuickPrompts
+                      setInput={setUserPrompt}
+                      setIsSettingsModalVisible={setIsSettingsModalVisible}
+                      trackPrompt={trackPrompt}
+                      allPrompts={allPrompts}
+                    />
+                  </EuiPanel>
+                )}
+              </EuiFlyoutFooter>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </CommentContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

@@ -21,7 +21,7 @@ import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { transformOperationsV1 } from './transforms';
-import { validateRequiredGroupInDefaultActions } from '../../../lib/validate_required_group_in_default_actions';
+import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -100,7 +100,10 @@ const validateRequiredGroupInDefaultActionsInOperations = (
 ) => {
   for (const operation of operations) {
     if (operation.field === 'actions') {
-      validateRequiredGroupInDefaultActions(operation.value, isSystemAction);
+      validateRequiredGroupInDefaultActionsV1({
+        actions: operation.value,
+        isSystemAction,
+      });
     }
   }
 };

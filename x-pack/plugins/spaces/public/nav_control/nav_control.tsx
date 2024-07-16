@@ -10,13 +10,15 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { SpacesManager } from '../spaces_manager';
 
-export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
-  const I18nContext = core.i18n.Context;
-  const { theme$ } = core.theme;
+export function initSpacesNavControl(
+  spacesManager: SpacesManager,
+  core: CoreStart,
+  solutionNavExperiment: Promise<boolean>
+) {
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
@@ -31,20 +33,19 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
       );
 
       ReactDOM.render(
-        <I18nContext>
-          <KibanaThemeProvider theme$={theme$}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <LazyNavControlPopover
-                spacesManager={spacesManager}
-                serverBasePath={core.http.basePath.serverBasePath}
-                anchorPosition="downLeft"
-                capabilities={core.application.capabilities}
-                navigateToApp={core.application.navigateToApp}
-                navigateToUrl={core.application.navigateToUrl}
-              />
-            </Suspense>
-          </KibanaThemeProvider>
-        </I18nContext>,
+        <KibanaRenderContextProvider {...core}>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <LazyNavControlPopover
+              spacesManager={spacesManager}
+              serverBasePath={core.http.basePath.serverBasePath}
+              anchorPosition="downLeft"
+              capabilities={core.application.capabilities}
+              navigateToApp={core.application.navigateToApp}
+              navigateToUrl={core.application.navigateToUrl}
+              solutionNavExperiment={solutionNavExperiment}
+            />
+          </Suspense>
+        </KibanaRenderContextProvider>,
         targetDomElement
       );
 
