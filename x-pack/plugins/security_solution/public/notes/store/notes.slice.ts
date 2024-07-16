@@ -276,8 +276,30 @@ export const selectFetchNotesError = (state: State) => state.notes.error.fetchNo
 export const selectFetchNotesStatus = (state: State) => state.notes.status.fetchNotes;
 
 export const selectNotesByDocumentId = createSelector(
-  [selectAllNotes, (state, documentId) => documentId],
+  [selectAllNotes, (state: State, documentId: string) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
+);
+
+export const selectSortedNotesByDocumentId = createSelector(
+  [
+    selectAllNotes,
+    (
+      state: State,
+      {
+        documentId,
+        sort,
+      }: { documentId: string; sort: { field: keyof Note; direction: 'asc' | 'desc' } }
+    ) => ({ documentId, sort }),
+  ],
+  (notes, { documentId, sort }) => {
+    const { field, direction } = sort;
+    return notes
+      .filter((note: Note) => note.eventId === documentId)
+      .sort((a: Note, b: Note) =>
+        // @ts-ignore Object is possibly null or undefined
+        direction === 'asc' ? (a[field] > b[field] ? 1 : -1) : a[field] > b[field] ? -1 : 1
+      );
+  }
 );
 
 export const {
