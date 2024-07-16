@@ -15,7 +15,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { TimeRange } from '@kbn/es-query';
 import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { FetchContext } from '@kbn/presentation-publishing';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { SortOrder } from '@kbn/unified-data-table';
 
@@ -45,15 +45,16 @@ export const getMockedSearchApi = ({
       savedSearch$: new BehaviorSubject<SavedSearch>(savedSearch),
     },
     stateManager: {
-      sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
-      columns: new BehaviorSubject<string[] | undefined>(undefined),
-      viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
-      totalHitCount: new BehaviorSubject<number | undefined>(0),
-      rowHeight: new BehaviorSubject<number | undefined>(undefined),
-      headerRowHeight: new BehaviorSubject<number | undefined>(undefined),
-      rowsPerPage: new BehaviorSubject<number | undefined>(undefined),
-      sampleSize: new BehaviorSubject<number | undefined>(undefined),
+      sort: new BehaviorSubject<SortOrder[] | undefined>(savedSearch.sort),
+      columns: new BehaviorSubject<string[] | undefined>(savedSearch.columns),
+      viewMode: new BehaviorSubject<VIEW_MODE | undefined>(savedSearch.viewMode),
+      rowHeight: new BehaviorSubject<number | undefined>(savedSearch.rowHeight),
+      headerRowHeight: new BehaviorSubject<number | undefined>(savedSearch.headerRowHeight),
+      rowsPerPage: new BehaviorSubject<number | undefined>(savedSearch.rowsPerPage),
+      sampleSize: new BehaviorSubject<number | undefined>(savedSearch.sampleSize),
+      grid: new BehaviorSubject<DiscoverGridSettings | undefined>(savedSearch.grid),
       rows: new BehaviorSubject<DataTableRecord[]>([]),
+      totalHitCount: new BehaviorSubject<number | undefined>(0),
       columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
     },
   };
