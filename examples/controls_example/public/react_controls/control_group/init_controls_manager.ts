@@ -50,9 +50,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         }
 
         // control removed before the control finished loading.
-        const controlState = controlsInOrder$.value.find(
-          (controlPanelState) => controlPanelState.id === id
-        );
+        const controlState = controlsInOrder$.value.find((element) => element.id === id);
         if (!controlState) {
           subscription.unsubscribe();
           resolve(undefined);
@@ -65,16 +63,17 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
     return children$.value[controlUuid];
   }
 
-  async function addNewPanel({ panelType, initialState }: PanelPackage<DefaultControlState>) {
+  async function addNewPanel(
+    { panelType, initialState }: PanelPackage<DefaultControlState>,
+    index: number
+  ) {
     const id = generateId();
-    const controlsInOrder = controlsInOrder$.getValue();
-    controlsInOrder$.next([
-      ...controlsInOrder,
-      {
-        id,
-        type: panelType,
-      },
-    ]);
+    const nextControlsInOrder = [...controlsInOrder$.value];
+    nextControlsInOrder.splice(index, 0, {
+      id,
+      type: panelType,
+    });
+    controlsInOrder$.next(nextControlsInOrder);
     controlsPanelState[id] = initialState ?? {};
     return await untilControlLoaded(id);
   }
@@ -141,11 +140,17 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       getPanelCount: () => {
         return controlsInOrder$.value.length;
       },
-      addNewPanel,
+      addNewPanel: async (panel: PanelPackage<DefaultControlState>) => {
+        return addNewPanel(panel, controlsInOrder$.value.length);
+      },
       removePanel,
       replacePanel: async (panelId, newPanel) => {
+        const index = controlsInOrder$.value.findIndex(({ id }) => id === panelId);
         removePanel(panelId);
-        const controlApi = await addNewPanel(newPanel);
+        const controlApi = await addNewPanel(
+          newPanel,
+          index >= 0 ? index : controlsInOrder$.value.length
+        );
         return controlApi ? controlApi.uuid : '';
       },
     } as PresentationContainer & HasSerializedChildState<ControlPanelState>,
