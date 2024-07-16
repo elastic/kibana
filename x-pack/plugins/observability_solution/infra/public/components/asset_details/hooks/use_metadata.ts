@@ -11,9 +11,9 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { BehaviorSubject } from 'rxjs';
+import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { type InfraMetadata, InfraMetadataRT } from '../../../../common/http_api/metadata_api';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 
 interface UseMetadataProps {

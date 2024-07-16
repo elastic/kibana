@@ -69,7 +69,7 @@ describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Sorting control is not visible', () => {
-    cy.get(DATA_GRID_FIELD_SORT_BTN).should('not.be.visible');
+    cy.get(DATA_GRID_FIELD_SORT_BTN).should('not.exist');
   });
 
   it('Column Order button is not visible', () => {
