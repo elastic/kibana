@@ -22,7 +22,7 @@ import {
   createBodySchemaV1,
   createParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/create';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchema } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { transformCreateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
@@ -37,8 +37,15 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         summary: `Create a rule`,
       },
       validate: {
-        body: createBodySchemaV1,
-        params: createParamsSchemaV1,
+        request: {
+          body: createBodySchemaV1,
+          params: createParamsSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => ruleResponseSchema,
+          },
+        },
       },
     },
     handleDisabledApiKeysError(
