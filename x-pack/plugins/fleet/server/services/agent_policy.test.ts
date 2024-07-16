@@ -73,9 +73,6 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
   return mock;
 }
 
-jest.mock('axios', () => jest.fn());
-jest.mock('./fleet_server_host');
-jest.mock('./api_keys');
 jest.mock('./output');
 jest.mock('./download_source');
 jest.mock('./agent_policy_update');
@@ -116,15 +113,6 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
-
-jest.mock('@kbn/server-http-tools', () => ({
-  ...jest.requireActual('@kbn/server-http-tools'),
-  SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
-    certificate,
-    key,
-    certificateAuthorities: [certificateAuthorities],
-  })),
-}));
 
 describe('Agent policy', () => {
   beforeEach(() => {
