@@ -26,8 +26,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
       : `node-v${version}-${arch}.tar.gz`;
 
     let variantPath = '';
-    if (variant === 'pointer-compression' || process.env.CI_USE_POINTER_COMPRESSION)
-      variantPath = 'node-pointer-compression/';
+    if (variant === 'pointer-compression') variantPath = 'node-pointer-compression/';
     const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${variantPath}dist/v${version}/${downloadName}`;
     const downloadPath = config.resolveFromRepo(
       '.node_binaries',
