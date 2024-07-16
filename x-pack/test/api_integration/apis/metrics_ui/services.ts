@@ -20,8 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const esClient = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176967
-  describe.skip('GET /infra/services', () => {
+  describe('GET /infra/services', () => {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
@@ -32,7 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
         packageVersion: version,
       });
     });
-    after(async () => apmSynthtraceKibanaClient.uninstallApmPackage());
+    after(async () => {
+      await apmSynthtraceKibanaClient.uninstallApmPackage();
+    });
 
     describe('with transactions', () => {
       before(async () =>
@@ -40,7 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
           generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
         )
       );
-      after(async () => synthtraceApmClient.clean());
+      after(async () => {
+        await synthtraceApmClient.clean();
+      });
 
       it('returns no services with no data', async () => {
         const filters = JSON.stringify({
@@ -103,7 +106,9 @@ export default function ({ getService }: FtrProviderContext) {
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
         )
       );
-      after(async () => synthtraceApmClient.clean());
+      after(async () => {
+        await synthtraceApmClient.clean();
+      });
       it('should return services with logs only data', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',
