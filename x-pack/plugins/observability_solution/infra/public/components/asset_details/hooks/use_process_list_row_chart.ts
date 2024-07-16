@@ -10,11 +10,11 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import {
   ProcessListAPIChartResponse,
   ProcessListAPIChartResponseRT,
 } from '../../../../common/http_api';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useProcessListContext } from './use_process_list';
 
