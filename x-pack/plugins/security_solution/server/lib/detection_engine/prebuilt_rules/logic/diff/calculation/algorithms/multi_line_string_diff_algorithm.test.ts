@@ -93,12 +93,12 @@ describe('multiLineStringDiffAlgorithm', () => {
   describe('if all three versions are different - scenario ABC', () => {
     it('returns a computated merged version without a conflict if 3 way merge is possible', () => {
       const mockVersions: ThreeVersionsOf<string> = {
-        base_version: `My description.\nThis is a second line.`,
-        current_version: `My GREAT description.\nThis is a second line.`,
-        target_version: `My description.\nThis is a second line, now longer.`,
+        base_version: `My description.\f\nThis is a second\u2001 line.\f\nThis is a third line.`,
+        current_version: `My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a third line.`,
+        target_version: `My description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.`,
       };
 
-      const expectedMergedVersion = `My GREAT description.\nThis is a second line, now longer.`;
+      const expectedMergedVersion = `My GREAT description.\f\nThis is a second\u2001 line.\f\nThis is a GREAT line.`;
 
       const result = multiLineStringDiffAlgorithm(mockVersions);
 

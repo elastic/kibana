@@ -95,7 +95,7 @@ const mergeVersions = ({
         };
       }
       const mergedVersion = merge(currentVersion, baseVersion, targetVersion, {
-        stringSeparator: /[^\S\r\n]+/, // Separates on all whitespace except for new lines, which we keep to preserve formatting
+        stringSeparator: /(\S+|\s+)/g, // Retains all whitespace, which we keep to preserve formatting
       });
 
       return mergedVersion.conflict
@@ -105,7 +105,7 @@ const mergeVersions = ({
           }
         : {
             mergeOutcome: ThreeWayMergeOutcome.Merged,
-            mergedVersion: mergedVersion.result.join(' '),
+            mergedVersion: mergedVersion.result.join(''),
           };
     }
     default:
