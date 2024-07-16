@@ -305,13 +305,13 @@ export class JourneyFtrHarness {
     ]);
   }
 
-  private async takeScreenshots(step: AnyStep) {
+  private async takeScreenshots(page: Page) {
     let screenshot;
     let fs;
     // screenshots taking might crash the browser
     try {
-      screenshot = await this.page.screenshot({ animations: 'disabled' });
-      fs = await this.page.screenshot({ animations: 'disabled', fullPage: true });
+      screenshot = await page.screenshot({ animations: 'disabled' });
+      fs = await page.screenshot({ animations: 'disabled', fullPage: true });
     } catch (e) {
       if (!screenshot) {
         this.log.error(`Failed to take screenshot of the visible viewport: ${e.message}`);
@@ -331,7 +331,7 @@ export class JourneyFtrHarness {
     }
 
     if (this.journeyConfig.takeScreenshotOnSuccess()) {
-      const { screenshot, fs } = await this.takeScreenshots(step);
+      const { screenshot, fs } = await this.takeScreenshots(this.page);
       if (screenshot && fs) {
         await this.screenshots.addSuccess(step, screenshot, fs);
       }
@@ -345,7 +345,7 @@ export class JourneyFtrHarness {
     }
 
     if (this.page) {
-      const { screenshot, fs } = await this.takeScreenshots(step);
+      const { screenshot, fs } = await this.takeScreenshots(this.page);
       if (screenshot && fs) {
         await this.screenshots.addError(step, screenshot, fs);
       }
