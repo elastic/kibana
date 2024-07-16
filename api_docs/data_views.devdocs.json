@@ -13261,18 +13261,6 @@
                 "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/common/dependency_mocks/index_patterns.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/common/dependency_mocks/index_patterns.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/common/dependency_mocks/index_patterns.ts"
-              },
-              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
               },

@@ -767,7 +767,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                         iconType={'trash'}
                         aria-label={i18n.translate(
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel',
-                          { defaultMessage: 'Delete' }
+                          { defaultMessage: 'Delete "{name}"', values: { name: rule.name } }
                         )}
                       />
                     </EuiFlexItem>
