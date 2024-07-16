@@ -9,7 +9,7 @@ import React from 'react';
 
 import {
   EuiButton,
-  EuiEmptyPrompt,
+  EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -20,8 +20,7 @@ import * as i18n from '../../../common/translations';
 
 import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 
-import { ElserPrompt } from './elser_prompt';
-import { MultilingualE5Prompt } from './multilingual_e5_prompt';
+import { EndpointPrompt } from './endpoint_prompt';
 
 import './add_empty_prompt.scss';
 
@@ -31,9 +30,12 @@ interface AddEmptyPromptProps {
 
 export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFlyoutVisible }) => {
   return (
-    <EuiEmptyPrompt
-      className="addEmptyPrompt"
+    <EuiPageTemplate.EmptyPrompt
       layout="horizontal"
+      restrictWidth
+      color="plain"
+      hasShadow
+      icon={<EuiImage size="fullWidth" src={inferenceEndpoint} alt="" />}
       title={<h2>{i18n.INFERENCE_ENDPOINT_LABEL}</h2>}
       body={
         <EuiFlexGroup direction="column">
@@ -60,20 +62,41 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
           <EuiFlexItem>
             <strong>{i18n.START_WITH_PREPARED_ENDPOINTS_LABEL}</strong>
           </EuiFlexItem>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <ElserPrompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
+              <EndpointPrompt
+                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
+                title={i18n.ELSER_TITLE}
+                description={i18n.ELSER_DESCRIPTION}
+                footer={
+                  <EuiButton
+                    iconType="plusInCircle"
+                    onClick={() => setIsInferenceFlyoutVisible(true)}
+                  >
+                    {i18n.ADD_ENDPOINT_LABEL}
+                  </EuiButton>
+                }
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <MultilingualE5Prompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
+              <EndpointPrompt
+                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
+                title={i18n.E5_TITLE}
+                description={i18n.E5_DESCRIPTION}
+                footer={
+                  <EuiButton
+                    iconType="plusInCircle"
+                    onClick={() => setIsInferenceFlyoutVisible(true)}
+                  >
+                    {i18n.ADD_ENDPOINT_LABEL}
+                  </EuiButton>
+                }
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>
       }
-      color="plain"
-      hasBorder
-      icon={<EuiImage size="fullWidth" src={inferenceEndpoint} alt="" />}
     />
   );
 };

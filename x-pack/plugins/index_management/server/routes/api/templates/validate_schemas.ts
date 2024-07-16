@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const templateSchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   indexPatterns: schema.arrayOf(schema.string()),
   version: schema.maybe(schema.number()),
   order: schema.maybe(schema.number()),

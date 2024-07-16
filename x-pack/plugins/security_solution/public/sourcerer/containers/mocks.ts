@@ -28,11 +28,8 @@ export const mockSourcererScope: SelectedDataView = {
       fields: {
         _id: {
           aggregatable: false,
-          description: 'Each document has an _id that uniquely identifies it',
           esTypes: undefined,
-          example: 'Y-6TfmcB0WOhS6qyMv3s',
           format: undefined,
-          indexes: mockPatterns,
           name: '_id',
           searchable: true,
           subType: undefined,

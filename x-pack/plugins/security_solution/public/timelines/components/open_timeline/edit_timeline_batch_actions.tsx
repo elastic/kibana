@@ -25,7 +25,7 @@ export const useEditTimelineBatchActions = ({
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
-  tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | undefined>;
+  tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
 }) => {
   const {

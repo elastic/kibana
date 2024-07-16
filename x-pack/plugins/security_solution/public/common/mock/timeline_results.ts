@@ -11,7 +11,7 @@ import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { RowRendererId, TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
@@ -2020,29 +2020,13 @@ export const mockTimelineResult = {
   stale: false,
 };
 
-const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
-  {
-    columnHeaderType: 'not-filtered',
-    id: '@timestamp',
-    type: 'date',
-    esTypes: ['date'],
-    initialWidth: 190,
-  },
-  { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
-];
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
     activeTab: TimelineTabs.query,
     prevActiveTab: TimelineTabs.query,
-    columns: defaultTimelineColumns,
-    defaultColumns: defaultTimelineColumns,
+    columns: timelineDefaults.columns,
+    defaultColumns: timelineDefaults.defaultColumns,
     dataProviders: [
       {
         and: [],
@@ -2068,7 +2052,26 @@ export const defaultTimelineProps: CreateTimelineProps = {
     },
     eventIdToNoteIds: {},
     eventType: 'all',
-    excludedRowRendererIds: [],
+    excludedRowRendererIds: [
+      RowRendererId.alert,
+      RowRendererId.alerts,
+      RowRendererId.auditd,
+      RowRendererId.auditd_file,
+      RowRendererId.library,
+      RowRendererId.netflow,
+      RowRendererId.plain,
+      RowRendererId.registry,
+      RowRendererId.suricata,
+      RowRendererId.system,
+      RowRendererId.system_dns,
+      RowRendererId.system_endgame_process,
+      RowRendererId.system_file,
+      RowRendererId.system_fim,
+      RowRendererId.system_security_event,
+      RowRendererId.system_socket,
+      RowRendererId.threat_match,
+      RowRendererId.zeek,
+    ],
     expandedDetail: {},
     filters: [],
     highlightedDropAndProviderId: '',

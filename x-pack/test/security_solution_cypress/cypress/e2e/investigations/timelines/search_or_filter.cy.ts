@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ADD_FILTER, SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
+import { ADD_FILTER, QUERY_EVENT_COUNT } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 
 import { login } from '../../../tasks/login';
@@ -37,7 +37,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
 
-      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+      cy.get(QUERY_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
     });
 
     it('should execute a Lucene query', () => {
@@ -46,7 +46,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       changeTimelineQueryLanguage('lucene');
       executeTimelineSearch(messageProcessQuery);
 
-      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+      cy.get(QUERY_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
     });
   });
 

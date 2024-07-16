@@ -17,6 +17,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -29,6 +30,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -97,6 +99,11 @@ export const alertFieldMap = {
     required: false,
     array: false,
   },
+  [ALERT_PREVIOUS_ACTION_GROUP]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [ALERT_REASON]: {
     type: 'keyword',
     array: false,
@@ -164,6 +171,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_SEVERITY_IMPROVING]: {
+    type: 'boolean',
+    array: false,
+    required: false,
   },
   [ALERT_START]: {
     type: 'date',

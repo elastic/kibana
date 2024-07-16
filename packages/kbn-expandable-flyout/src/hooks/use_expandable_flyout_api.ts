@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
 import {
@@ -30,6 +31,7 @@ export type { ExpandableFlyoutApi };
  */
 export const useExpandableFlyoutApi = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const { urlKey } = useExpandableFlyoutContext();
   // if no urlKey is provided, we are in memory storage mode and use the reserved word 'memory'
@@ -75,10 +77,13 @@ export const useExpandableFlyoutApi = () => {
     [dispatch, id]
   );
 
-  const previousPreviewPanel = useCallback(
-    () => dispatch(previousPreviewPanelAction({ id })),
-    [dispatch, id]
-  );
+  const previousPreviewPanel = useCallback(() => {
+    dispatch(previousPreviewPanelAction({ id }));
+
+    if (id !== REDUX_ID_FOR_MEMORY_STORAGE) {
+      history.goBack();
+    }
+  }, [dispatch, id, history]);
 
   const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
 

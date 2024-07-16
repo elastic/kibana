@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
@@ -38,6 +39,7 @@ interface PolicyArtifactsListProps {
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   canWriteArtifact?: boolean;
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -50,6 +52,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     labels,
     onDeleteActionCallback,
     canWriteArtifact = false,
+    CardDecorator,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -192,6 +195,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           pagination={artifacts ? pagination : undefined}
           loading={isLoadingArtifacts || isRefetchingArtifacts}
           data-test-subj={'artifacts-collapsed-list'}
+          CardDecorator={CardDecorator}
         />
       </>
     );

@@ -1507,7 +1507,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"memory\" | \"custom\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

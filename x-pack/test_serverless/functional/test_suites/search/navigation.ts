@@ -19,14 +19,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('navigation', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
     });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
-    });
-
     it('navigate search sidenav & breadcrumbs', async () => {
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 

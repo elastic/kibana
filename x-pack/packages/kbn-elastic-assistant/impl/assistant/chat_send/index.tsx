@@ -14,11 +14,10 @@ import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 import { useAutosizeTextArea } from './use_autosize_textarea';
 
-export interface Props extends Omit<UseChatSend, 'abortStream'> {
+export interface Props extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCleared'> {
   isDisabled: boolean;
   shouldRefocusPrompt: boolean;
   userPrompt: string | null;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -26,12 +25,10 @@ export interface Props extends Omit<UseChatSend, 'abortStream'> {
  * Allows the user to clear the chat and switch between different system prompts.
  */
 export const ChatSend: React.FC<Props> = ({
-  handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
   isDisabled,
   isLoading,
-  isFlyoutMode,
   shouldRefocusPrompt,
   userPrompt,
 }) => {
@@ -58,7 +55,7 @@ export const ChatSend: React.FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="none"
-      alignItems={isFlyoutMode ? 'flexEnd' : 'flexStart'}
+      alignItems={'flexEnd'}
       css={css`
         position: relative;
       `}
@@ -74,32 +71,21 @@ export const ChatSend: React.FC<Props> = ({
           handlePromptChange={handlePromptChange}
           value={promptValue}
           isDisabled={isDisabled}
-          isFlyoutMode={isFlyoutMode}
         />
       </EuiFlexItem>
       <EuiFlexItem
-        css={
-          isFlyoutMode
-            ? css`
-                right: 0;
-                position: absolute;
-                margin-right: ${euiThemeVars.euiSizeS};
-                margin-bottom: ${euiThemeVars.euiSizeS};
-              `
-            : css`
-                left: -34px;
-                position: relative;
-                top: 11px;
-              `
-        }
+        css={css`
+          right: 0;
+          position: absolute;
+          margin-right: ${euiThemeVars.euiSizeS};
+          margin-bottom: ${euiThemeVars.euiSizeS};
+        `}
         grow={false}
       >
         <ChatActions
-          onChatCleared={handleOnChatCleared}
           isDisabled={isDisabled}
           isLoading={isLoading}
           onSendMessage={onSendMessage}
-          isFlyoutMode={isFlyoutMode}
           promptValue={promptValue}
         />
       </EuiFlexItem>

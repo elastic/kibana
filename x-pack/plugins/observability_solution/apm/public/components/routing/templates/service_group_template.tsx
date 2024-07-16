@@ -12,7 +12,7 @@ import {
   EuiSkeletonTitle,
   EuiIcon,
 } from '@elastic/eui';
-import { apmEnableMultiSignal } from '@kbn/observability-plugin/common';
+import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -137,6 +137,7 @@ export function ServiceGroupTemplate({
       environmentFilter={environmentFilter}
       showServiceGroupSaveButton={!isAllServices}
       showServiceGroupsNav={isAllServices}
+      showEnablementCallout
       selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}
     >
@@ -153,7 +154,10 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map');
   const { core } = useApmPluginContext();
-  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
+  const isEntityCentricExperienceEnabled = core.uiSettings.get<boolean>(
+    entityCentricExperience,
+    false
+  );
 
   const tabs: ServiceGroupContextTab[] = [
     {
@@ -166,7 +170,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isMultiSignalEnabled && (
+            {isEntityCentricExperienceEnabled && (
               <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
             )}
           </EuiFlexItem>

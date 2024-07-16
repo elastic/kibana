@@ -44,10 +44,13 @@ export function createSearchSourceStub(hits: EsHitRecord[], timeField?: string) 
   const searchSourceStub: any = {
     _stubHits: hits,
     _stubTimeField: timeField,
-    _createStubHit: (timestamp: number, tiebreaker = 0) => ({
-      [searchSourceStub._stubTimeField]: timestamp,
-      sort: [timestamp, tiebreaker],
-    }),
+    _createStubHit: (timestamp: number, tiebreaker = 0) => {
+      const value = new Date(timestamp).toISOString();
+      return {
+        [searchSourceStub._stubTimeField]: value,
+        sort: [value, tiebreaker],
+      };
+    },
     setParent: sinon.spy(() => searchSourceStub),
     setField: sinon.spy(() => searchSourceStub),
     removeField: sinon.spy(() => searchSourceStub),
@@ -74,13 +77,13 @@ export function createContextSearchSourceStub(timeFieldName: string) {
     const sortDirection = lastSort[0][timeField].order;
     const sortFunction =
       sortDirection === 'asc'
-        ? (first: SortHit, second: SortHit) => first[timeField] - second[timeField]
-        : (first: SortHit, second: SortHit) => second[timeField] - first[timeField];
+        ? (first: SortHit, second: SortHit) => (first[timeField] < second[timeField] ? -1 : 1)
+        : (first: SortHit, second: SortHit) => (second[timeField] < first[timeField] ? -1 : 1);
     const filteredHits = searchSourceStub._stubHits
       .filter(
         (hit: SortHit) =>
-          moment(hit[timeField]).isSameOrAfter(timeRange.gte) &&
-          moment(hit[timeField]).isSameOrBefore(timeRange.lte)
+          moment(hit[timeField]).isSameOrAfter(moment(timeRange.gte)) &&
+          moment(hit[timeField]).isSameOrBefore(moment(timeRange.lte))
       )
       .sort(sortFunction);
 

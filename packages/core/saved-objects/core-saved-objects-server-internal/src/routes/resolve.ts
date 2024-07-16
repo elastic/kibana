@@ -30,8 +30,9 @@ export const registerResolveRoute = (
     {
       path: '/resolve/{type}/{id}',
       options: {
+        summary: `Resolve a saved object`,
+        tags: ['oas-tag:saved objects'],
         access,
-        description: `Resolve a saved object`,
       },
       validate: {
         params: schema.object({

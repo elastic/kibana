@@ -301,12 +301,14 @@
     "metrics",
     "name",
     "staticFields",
-    "type"
+    "type",
+    "version"
   ],
   "entity-discovery-api-key": [
     "apiKey"
   ],
   "epm-packages": [
+    "additional_spaces_installed_kibana",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -478,6 +480,7 @@
     "status",
     "uuid"
   ],
+  "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"
@@ -1027,6 +1030,13 @@
     "accessDate",
     "createDate",
     "slug"
+  ],
+  "usage-counter": [
+    "count",
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
   ],
   "usage-counters": [
     "domainId"

@@ -10465,6 +10465,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableFactory.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10755,7 +10769,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
-            "description": [],
+            "description": [
+              "\nFor react embeddables, this input must be runtime state."
+            ],
             "signature": [
               "object"
             ],
@@ -10786,29 +10802,6 @@
             "description": [],
             "signature": [
               "{ width?: number | undefined; height?: number | undefined; } | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddablePackageState.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [
-              "\nCopy dashboard panel transfers serialized panel state for React embeddables.\nThe rawState will be passed into the input and references are passed separately\nso the container can update its references array and the updated references\nare correctly passed to the factory's deserialize method.\n\nLegacy embeddables have already injected the references\ninto the input state, so they will not pass references."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
-                "text": "Reference"
-              },
-              "[] | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
@@ -13698,6 +13691,178 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.COMMON_EMBEDDABLE_GROUPING",
+        "type": "Object",
+        "tags": [],
+        "label": "COMMON_EMBEDDABLE_GROUPING",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
+            "type": "Object",
+            "tags": [],
+            "label": "legacy",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation",
+            "type": "Object",
+            "tags": [],
+            "label": "annotation",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other",
+            "type": "Object",
+            "tags": [],
+            "label": "other",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.getIconType",
+                "type": "Function",
+                "tags": [],
+                "label": "getIconType",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.contextMenuTrigger",
         "type": "Object",
         "tags": [],
@@ -14309,10 +14474,6 @@
             {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "links",
-              "path": "src/plugins/links/public/plugin.ts"
             }
           ],
           "children": [

@@ -1028,6 +1028,9 @@
       },
       "type": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
       }
     }
   },
@@ -1041,6 +1044,10 @@
   },
   "epm-packages": {
     "properties": {
+      "additional_spaces_installed_kibana": {
+        "index": false,
+        "type": "flattened"
+      },
       "es_index_patterns": {
         "dynamic": false,
         "properties": {}
@@ -1604,6 +1611,10 @@
         "type": "text"
       }
     }
+  },
+  "fleet-space-settings": {
+    "dynamic": false,
+    "properties": {}
   },
   "fleet-uninstall-tokens": {
     "dynamic": false,
@@ -3400,6 +3411,26 @@
           }
         },
         "type": "text"
+      }
+    }
+  },
+  "usage-counter": {
+    "dynamic": false,
+    "properties": {
+      "count": {
+        "type": "integer"
+      },
+      "counterName": {
+        "type": "keyword"
+      },
+      "counterType": {
+        "type": "keyword"
+      },
+      "domainId": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
       }
     }
   },
