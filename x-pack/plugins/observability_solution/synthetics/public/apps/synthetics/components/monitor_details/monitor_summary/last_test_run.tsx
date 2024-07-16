@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -87,6 +88,7 @@ export const LastTestRunComponent = ({
 
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
+      {loading && <EuiProgress size="xs" color="accent" />}
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
@@ -130,7 +132,7 @@ export const LastTestRunComponent = ({
           showExpand={isErrorDetails}
         />
       ) : (
-        <SinglePingResult ping={latestPing} loading={loading} />
+        <SinglePingResult ping={latestPing} />
       )}
     </EuiPanel>
   );

@@ -12,13 +12,12 @@ import {
   EuiDescriptionListDescription,
   EuiBadge,
   EuiLink,
-  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
-export const SinglePingResult = ({ ping, loading }: { ping?: Ping; loading: boolean }) => {
+export const SinglePingResult = ({ ping }: { ping?: Ping }) => {
   const ip = ping?.resolve?.ip;
   const durationUs = ping?.monitor?.duration?.us ?? NaN;
   const rtt = ping?.resolve?.rtt?.us ?? NaN;
@@ -27,7 +26,6 @@ export const SinglePingResult = ({ ping, loading }: { ping?: Ping; loading: bool
 
   return (
     <>
-      {loading && <EuiProgress size="xs" color="accent" />}
       <EuiDescriptionList type="column" compressed={true}>
         <EuiDescriptionListTitle>
           {i18n.translate('xpack.synthetics.singlePingResult.ipDescriptionListTitleLabel', {
