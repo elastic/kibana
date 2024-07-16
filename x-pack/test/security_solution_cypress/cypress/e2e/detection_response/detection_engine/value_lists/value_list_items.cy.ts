@@ -121,7 +121,7 @@ describe(
       );
     });
 
-    it.only('displays a toaster error when list item actions fail', () => {
+    it('displays a toaster error when list item actions fail', () => {
       mockCreateListItemError();
       mockUpdateListItemError();
       mockDeleteListItemError();
