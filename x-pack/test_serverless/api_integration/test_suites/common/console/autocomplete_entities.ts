@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
     const dataStreamName = 'test-data-stream-1';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       ({
         helpers: {
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteIndexTemplate(indexTemplateName);
       await deleteComponentTemplate(componentTemplateName);
 
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {

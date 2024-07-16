@@ -64,7 +64,7 @@ const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
     type: SEARCH_CONTROL_TYPE,
-    order: 0,
+    order: 2,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -79,7 +79,7 @@ const controlGroupPanels = {
   },
   [rangeSliderControlId]: {
     type: RANGE_SLIDER_CONTROL_TYPE,
-    order: 0,
+    order: 1,
     grow: true,
     width: 'medium',
     explicitInput: {

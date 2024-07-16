@@ -39,7 +39,7 @@ import {
 
 import { ControlRenderer } from '../control_renderer';
 import { DefaultControlApi } from '../types';
-import { dataControlFetch$ } from './data_control_fetch';
+import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import {
@@ -74,6 +74,9 @@ export const getControlGroupEmbeddableFactory = (services: {
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
+      function getControlApi(controlUuid: string) {
+        return children$.value[controlUuid];
+      }
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
@@ -105,7 +108,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         undefined
       );
 
-      const controlOrder = new BehaviorSubject<Array<{ id: string; order: number; type: string }>>(
+      const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
         Object.keys(childControlState)
           .map((key) => ({
             id: key,
@@ -115,7 +118,11 @@ export const getControlGroupEmbeddableFactory = (services: {
           .sort((a, b) => (a.order > b.order ? 1 : -1))
       );
       const api = setApi({
-        dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
+        controlFetch$: (controlUuid: string) =>
+          controlFetch$(
+            chaining$(controlUuid, chainingSystem$, controlsInOrder$, getControlApi),
+            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
+          ),
         ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
@@ -153,7 +160,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         serializeState: () => {
           return serializeControlGroup(
             children$.getValue(),
-            controlOrder.getValue().map(({ id }) => id),
+            controlsInOrder$.getValue().map(({ id }) => id),
             {
               labelPosition: labelPosition$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
@@ -231,7 +238,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const controlsInOrder = useStateFromPublishingSubject(controlOrder);
+          const controlsInOrder = useStateFromPublishingSubject(controlsInOrder$);
 
           useEffect(() => {
             return () => {
