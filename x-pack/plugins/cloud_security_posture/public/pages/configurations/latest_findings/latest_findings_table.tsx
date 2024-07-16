@@ -37,7 +37,7 @@ const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.E
   const finding = row.raw._source;
   if (!finding) return <></>;
 
-  return <FindingsRuleFlyout findings={row.raw._source} onClose={onCloseFlyout} />;
+  return <FindingsRuleFlyout finding={row.raw._source} onClose={onCloseFlyout} />;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {

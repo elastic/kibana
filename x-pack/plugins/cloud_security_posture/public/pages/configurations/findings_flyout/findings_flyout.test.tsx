@@ -21,7 +21,7 @@ const TestComponent = ({ ...overrideProps }) => (
       flyoutIndex={0}
       findingsCount={2}
       onPaginate={onPaginate}
-      findings={mockFindingsHit}
+      finding={mockFindingsHit}
       {...overrideProps}
     />
   </TestProvider>

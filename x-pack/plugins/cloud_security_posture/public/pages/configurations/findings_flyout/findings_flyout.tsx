@@ -88,7 +88,7 @@ type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;
-  findings: CspFinding;
+  finding: CspFinding;
   flyoutIndex?: number;
   findingsCount?: number;
   onPaginate?: (pageIndex: number) => void;
@@ -138,30 +138,30 @@ const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps[
     },
   ].filter(truthy);
 
-const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
+const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }) => {
   const { application } = useKibana().services;
 
   const ruleFlyoutLink =
-    findings.rule?.benchmark?.version &&
-    findings.rule?.benchmark?.id &&
-    findings.rule?.id &&
+    finding.rule?.benchmark?.version &&
+    finding.rule?.benchmark?.id &&
+    finding.rule?.id &&
     application.getUrlForApp('security', {
       path: generatePath(benchmarksNavigation.rules.path, {
-        benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
-        benchmarkId: findings.rule.benchmark.id,
-        ruleId: findings.rule.id,
+        benchmarkVersion: finding.rule.benchmark.version.split('v')[1], // removing the v from the version
+        benchmarkId: finding.rule.benchmark.id,
+        ruleId: finding.rule.id,
       }),
     });
 
   switch (tab.id) {
     case 'overview':
-      return <OverviewTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
+      return <OverviewTab data={finding} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'rule':
-      return <RuleTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
+      return <RuleTab data={finding} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'table':
-      return <TableTab data={findings} />;
+      return <TableTab data={finding} />;
     case 'json':
-      return <JsonTab data={findings} />;
+      return <JsonTab data={finding} />;
     default:
       assertNever(tab);
   }
@@ -192,7 +192,7 @@ const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
 
 export const FindingsRuleFlyout = ({
   onClose,
-  findings,
+  finding,
   flyoutIndex,
   findingsCount,
   onPaginate,
@@ -200,19 +200,19 @@ export const FindingsRuleFlyout = ({
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromBenchmarkRule(http, findings.rule);
+    await createDetectionRuleFromBenchmarkRule(http, finding.rule);
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <CspEvaluationBadge type={findings.result?.evaluation} />
+            <CspEvaluationBadge type={finding.result?.evaluation} />
           </EuiFlexItem>
           <EuiFlexItem grow style={{ minWidth: 0 }}>
             <EuiTitle size="m" className="eui-textTruncate">
-              <EuiTextColor color="primary" title={findings.rule?.name}>
-                {findings.rule?.name}
+              <EuiTextColor color="primary" title={finding.rule?.name}>
+                {finding.rule?.name}
               </EuiTextColor>
             </EuiTitle>
           </EuiFlexItem>
@@ -225,7 +225,7 @@ export const FindingsRuleFlyout = ({
         >
           <CspInlineDescriptionList
             testId={FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST}
-            listItems={getFlyoutDescriptionList(findings)}
+            listItems={getFlyoutDescriptionList(finding)}
           />
         </div>
         <EuiSpacer />
@@ -245,10 +245,10 @@ export const FindingsRuleFlyout = ({
       <EuiFlyoutBody key={tab.id}>
         {['overview', 'rule'].includes(tab.id) && (
           <div style={{ marginBottom: 16, borderRadius: 4, overflow: 'hidden' }}>
-            <MissingFieldsCallout finding={findings} />
+            <MissingFieldsCallout finding={finding} />
           </div>
         )}
-        <FindingsTab tab={tab} findings={findings} />
+        <FindingsTab tab={tab} finding={finding} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup
