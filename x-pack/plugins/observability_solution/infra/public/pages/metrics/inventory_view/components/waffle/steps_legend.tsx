@@ -14,7 +14,7 @@ import {
   InfraWaffleMapRuleOperator,
   InfraWaffleMapStepLegend,
   InfraWaffleMapStepRule,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 
 const OPERATORS = {
   [InfraWaffleMapRuleOperator.gte]: '>=',
