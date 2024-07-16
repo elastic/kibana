@@ -37,7 +37,7 @@ import {
 import { EuiFlexGroup } from '@elastic/eui';
 import { ControlRenderer } from '../control_renderer';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
+import { deserializeControlGroup } from './serialization_utils';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
@@ -138,21 +138,18 @@ export const getControlGroupEmbeddableFactory = (services: {
           i18n.translate('controls.controlGroup.displayName', {
             defaultMessage: 'Controls',
           }),
-        getSerializedStateForChild: (childId) => {
-          const controlPanelState = controlsManager.controlsInOrder$.getValue().find(controlPanelState => controlPanelState.id === childId);
-          return controlPanelState ? { rawState: controlPanelState } : undefined;
-        },
         serializeState: () => {
-          return serializeControlGroup(
-            controlsManager.api.children$.getValue(),
-            controlsManager.controlsInOrder$.getValue().map(({ id }) => id),
-            {
-              labelPosition: labelPosition$.getValue(),
+          const { panelsJSON, references } = controlsManager.serializeControls();
+          return {
+            rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              autoApplySelections: autoApplySelections$.getValue(),
-              ignoreParentSettings: ignoreParentSettings$.getValue(),
-            }
-          );
+              controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
+              showApplySelections: !autoApplySelections$.getValue(),
+              ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
+              panelsJSON,
+            },
+            references,
+          };
         },
         grow,
         width,

@@ -7,7 +7,8 @@
  */
 
 import { v4 as generateId } from 'uuid';
-import { PresentationContainer } from "@kbn/presentation-containers";
+import { HasSerializedChildState, PresentationContainer } from "@kbn/presentation-containers";
+import { Reference } from '@kbn/content-management-utils';
 import { BehaviorSubject, merge } from "rxjs";
 import { ControlPanelsState, ControlPanelState } from "./types";
 import { DefaultControlApi } from '../types';
@@ -47,18 +48,60 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
     });
   }
 
+  function getControlApi(controlUuid: string) {
+    return children$.value[controlUuid];
+  }
+
   return {
     controlsInOrder$: controlsInOrder$ as PublishingSubject<Array<ControlPanelState & { id: string }>>,
-    getControlApi: (controlUuid: string) => {
-      return children$.value[controlUuid];
-    },
+    getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
         ...children$.getValue(),
         [uuid]: controlApi,
       });
     },
+    serializeControls: () => {
+      const references: Reference[] = [];
+      const explicitInputPanels: {
+        [panelId: string]: ControlPanelState & { explicitInput: object };
+      } = {};
+
+      controlsInOrder$.getValue().forEach(({ id }, index) => {
+        const controlApi = getControlApi(id);
+        if (!controlApi) {
+          return;
+        }
+
+        const {
+          rawState: { grow, width, ...rest },
+          references: controlReferences,
+        } = controlApi.serializeState();
+
+        if (controlReferences && controlReferences.length > 0) {
+          references.push(...controlReferences);
+        }
+
+        explicitInputPanels[id] = {
+          grow,
+          order: index,
+          type: controlApi.type, 
+          width,
+          /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
+          explicitInput: rest
+        };
+      });
+
+      return {
+        panelsJSON: JSON.stringify(explicitInputPanels),
+        references,
+      };
+    },
     api: {
+      getSerializedStateForChild: (childId: string) => {
+        const controlPanelState = controlsInOrder$.getValue().find(controlPanelState => controlPanelState.id === childId);
+        return controlPanelState ? { rawState: controlPanelState } : undefined;
+      },
       children$: children$ as PublishingSubject<{
         [key: string]: DefaultControlApi;
       }>,
@@ -86,6 +129,6 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         // TODO: Replace a child control
         return Promise.resolve(panelId);
       },
-    } as PresentationContainer,
+    } as PresentationContainer & HasSerializedChildState<ControlPanelState>,
   }
 }
