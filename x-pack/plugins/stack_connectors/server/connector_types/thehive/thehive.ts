@@ -54,7 +54,7 @@ export class TheHiveConnector extends CaseConnector<
     this.url = this.config.url;
     this.organisation = this.config.organisation;
     this.apiKey = this.secrets.apiKey;
-    this.urlWithoutTrailingSlash = this.url.endsWith('/') ? this.url.slice(0, -1) : this.url;
+    this.urlWithoutTrailingSlash = this.url?.endsWith('/') ? this.url.slice(0, -1) : this.url;
   }
 
   private getAuthHeaders() {

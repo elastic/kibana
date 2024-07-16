@@ -67,11 +67,11 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
         index
       );
     }
-  }, [actionParams]);
+  }, [actionParams, editAction, index]);
 
   useEffect(() => {
     editAction('subAction', eventAction, index);
-  }, [eventAction]);
+  }, [eventAction, editAction, index]);
 
   const setEventActionType = (eventActionType: SUB_ACTION) => {
     const subActionParams =
