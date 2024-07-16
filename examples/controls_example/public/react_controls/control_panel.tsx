@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiFormRow, EuiIcon } from '@elastic/eui';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,7 +24,6 @@ import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
 import './control_panel.scss';
-
 /**
  * TODO: Handle dragging
  */
@@ -92,6 +92,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
   const isEditable = viewMode === ViewMode.EDIT;
+  const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
 
   return (
     <EuiFlexItem
@@ -100,10 +101,10 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       data-test-subj={`control-frame`}
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper--grow': grow,
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper--grow': grow === undefined ? DEFAULT_CONTROL_GROW : grow,
+        'controlFrameWrapper--small': controlWidth === 'small',
+        'controlFrameWrapper--medium': controlWidth === 'medium',
+        'controlFrameWrapper--large': controlWidth === 'large',
         // TODO: Add the following classes back once drag and drop logic is added
         // 'controlFrameWrapper-isDragging': isDragging,
         // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),

@@ -7,15 +7,7 @@
  */
 
 import { memoize } from 'lodash';
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  Observable,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, switchMap, tap, withLatestFrom } from 'rxjs';
 
 import {
   OptionsListRequest,
@@ -27,7 +19,7 @@ import { DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public
 import dateMath from '@kbn/datemath';
 import { buildEsQuery } from '@kbn/es-query';
 
-import { ControlGroupApi } from '../../control_group/types';
+import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
 import { OptionsListComponentState, OptionsListControlApi } from './types';
 
@@ -37,7 +29,7 @@ export function fetchAndValidate$({
   stateManager,
 }: {
   api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec'> & {
-    dataControlFetch$: ControlGroupApi['dataControlFetch$'];
+    controlFetch$: Observable<ControlFetchContext>;
     loadingSuggestions$: BehaviorSubject<boolean>;
     allowExpensiveQueries$: BehaviorSubject<boolean>;
     debouncedSearchString: Observable<string>;
@@ -64,27 +56,20 @@ export function fetchAndValidate$({
   return combineLatest([
     api.dataViews,
     api.fieldSpec,
-    api.dataControlFetch$,
+    api.controlFetch$,
     api.allowExpensiveQueries$,
     api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,
     stateManager.requestSize,
   ]).pipe(
-    debounceTime(0),
-    tap(() => {
-      if (prevRequestAbortController) {
-        prevRequestAbortController.abort();
-        prevRequestAbortController = undefined;
-      }
-    }),
     withLatestFrom(stateManager.runPastTimeout, stateManager.selectedOptions),
     switchMap(
       async ([
         [
           dataViews,
           fieldSpec,
-          dataControlFetchContext,
+          controlFetchContext,
           allowExpensiveQueries,
           searchString,
           sort,
@@ -102,24 +87,26 @@ export function fetchAndValidate$({
         /** Fetch the suggestions list + perform validation */
         const request = {
           sort,
-          size: requestSize,
-          field: fieldSpec,
-          query: dataControlFetchContext.query,
-          filters: dataControlFetchContext.unifiedSearchFilters,
           dataView,
-          timeRange: dataControlFetchContext.timeRange,
-          searchTechnique,
-          runPastTimeout,
-          selectedOptions,
-          allowExpensiveQueries,
           searchString,
+          runPastTimeout,
+          searchTechnique,
+          selectedOptions,
+          field: fieldSpec,
+          size: requestSize,
+          allowExpensiveQueries,
+          ...controlFetchContext,
         };
 
         try {
-          const abortController = new AbortController();
-          prevRequestAbortController = abortController;
-
           api.loadingSuggestions$.next(true);
+
+          const abortController = new AbortController();
+          if (prevRequestAbortController) {
+            prevRequestAbortController.abort();
+            prevRequestAbortController = abortController;
+          }
+
           return await cachedOptionsListRequest(request, abortController.signal, services);
         } catch (error) {
           // Remove rejected results from memoize cache

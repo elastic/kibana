@@ -17,6 +17,7 @@ import {
   useBatchedPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
+import { ControlWidth } from '@kbn/controls-plugin/common';
 import { ControlFactory } from '../types';
 import {
   TimesliderControlState,
@@ -185,7 +186,10 @@ export const getTimesliderControlFactory = (
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi(initialState);
+      const defaultControl = initializeDefaultControlApi({
+        ...initialState,
+        width: 'large' as ControlWidth,
+      });
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)

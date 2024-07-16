@@ -133,6 +133,10 @@ export const getOptionsListControlFactory = ({
           debounceTime(100) // debounce set loading so that it doesn't flash as the user types
         )
         .subscribe((isLoading) => {
+          // clear previous loading error on next loading start
+          if (isLoading && dataControl.api.blockingError.value) {
+            dataControl.api.setBlockingError(undefined);
+          }
           dataControl.api.setDataLoading(isLoading);
         });
 
@@ -193,7 +197,7 @@ export const getOptionsListControlFactory = ({
           loadingSuggestions$,
           dataViews: dataControl.api.dataViews,
           fieldSpec: dataControl.api.fieldSpec,
-          dataControlFetch$: controlGroupApi.dataControlFetch$,
+          controlFetch$: controlGroupApi.controlFetch$(uuid),
           allowExpensiveQueries$,
           debouncedSearchString,
         },
@@ -310,7 +314,10 @@ export const getOptionsListControlFactory = ({
           // the order of these checks matters, so be careful if rearranging them
           if (key === 'exists-option') {
             existsSelected$.next(!existsSelected);
-            if (!existsSelected) selections$.next([]);
+            if (!existsSelected) {
+              selections$.next([]);
+              invalidSelections$.next(new Set([]));
+            }
           } else if (showOnlySelected || selectedOptions.includes(key)) {
             componentApi.deselectOption(key);
           } else if (singleSelect) {
