@@ -50,8 +50,8 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
@@ -79,14 +79,14 @@ export const useCreateTimeline = ({
 
       dispatch(
         timelineActions.createTimeline({
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
           show,
           timelineType,
           updated: undefined,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
             ? timelineDefaults.excludedRowRendererIds
             : [],
         })
@@ -123,7 +123,7 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
-      unifiedComponentsInTimelineEnabled,
+      unifiedComponentsInTimelineDisabled,
     ]
   );
 
