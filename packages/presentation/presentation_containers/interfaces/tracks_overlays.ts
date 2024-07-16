@@ -21,6 +21,14 @@ export interface TracksOverlays {
   clearOverlays: () => void;
 }
 
+export interface CanFocusPanels {
+  setFocusedPanelId: (id?: string) => void;
+}
+
+export const apiCanFocusPanels = (root: unknown): root is CanFocusPanels => {
+  return Boolean(root && (root as CanFocusPanels).setFocusedPanelId);
+};
+
 export const tracksOverlays = (root: unknown): root is TracksOverlays => {
   return Boolean(
     root && (root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays

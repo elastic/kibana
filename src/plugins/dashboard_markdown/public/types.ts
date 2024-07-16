@@ -7,7 +7,7 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
 
 export type MarkdownEditorSerializedState = SerializedTitles & {
   content: string;
@@ -15,4 +15,5 @@ export type MarkdownEditorSerializedState = SerializedTitles & {
 
 export type MarkdownEditorRuntimeState = MarkdownEditorSerializedState;
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState>;
+export type MarkdownEditorApi = HasEditCapabilities &
+  DefaultEmbeddableApi<MarkdownEditorSerializedState>;

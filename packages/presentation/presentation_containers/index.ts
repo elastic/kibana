@@ -37,7 +37,12 @@ export {
   type HasSnapshottableState,
   type SerializedPanelState,
 } from './interfaces/serialized_state';
-export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+export {
+  tracksOverlays,
+  type TracksOverlays,
+  type CanFocusPanels,
+  apiCanFocusPanels,
+} from './interfaces/tracks_overlays';
 export {
   canTrackContentfulRender,
   type TrackContentfulRender,

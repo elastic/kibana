@@ -228,9 +228,13 @@ export abstract class Container<
       throw new PanelNotFoundError();
     }
 
-    if (newType && newType !== this.input.panels[id].type) {
-      const factory = this.getFactory(newType) as EmbeddableFactory<EEI, EEO, E> | undefined;
-      if (!factory) {
+    if (
+      newType &&
+      newType !== this.input.panels[id].type &&
+      !reactEmbeddableRegistryHasKey(newType)
+    ) {
+      const legacyFactory = this.getFactory(newType) as EmbeddableFactory<EEI, EEO, E> | undefined;
+      if (!legacyFactory) {
         throw new EmbeddableFactoryNotFoundError(newType);
       }
     }
@@ -327,11 +331,27 @@ export abstract class Container<
     this.subscription?.unsubscribe();
   }
 
-  public async untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(
+  public async untilEmbeddableLoaded<TEmbeddable extends object>(
     id: string
   ): Promise<TEmbeddable | ErrorEmbeddable> {
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
+    }
+
+    const embeddableType = this.getInput().panels[id].type;
+    if (reactEmbeddableRegistryHasKey(embeddableType)) {
+      if (this.children$.value[id] !== undefined) {
+        return this.children$.value[id] as TEmbeddable;
+      }
+      return new Promise<TEmbeddable>((resolve) => {
+        const subscription = this.children$.subscribe(() => {
+          const embeddable = this.children$.value[id];
+          if (embeddable) {
+            subscription.unsubscribe();
+            resolve(embeddable as TEmbeddable);
+          }
+        });
+      });
     }
 
     if (this.output.embeddableLoaded[id]) {
@@ -396,7 +416,7 @@ export abstract class Container<
     }
     // embeddable ids are equal so let's compare individual panels.
     for (const id of embeddableIdsA) {
-      const currentEmbeddable = await this.untilEmbeddableLoaded(id);
+      const currentEmbeddable = await this.untilEmbeddableLoaded<IEmbeddable>(id);
       const lastPanelInput = lastPanels[id].explicitInput;
       if (isErrorEmbeddable(currentEmbeddable)) continue;
       if (!(await currentEmbeddable.getExplicitInputIsEqual(lastPanelInput))) {

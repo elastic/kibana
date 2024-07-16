@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const EUI_MARKDOWN_ID = 'euiMarkdown';
-export const ADD_EUI_MARKDOWN_ACTION_ID = 'create_eui_markdown';
+import { PluginInitializerContext } from '@kbn/core/public';
+
+import { DashboardMarkdownPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardMarkdownPlugin();
+}

@@ -19,8 +19,6 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { setupApp } from './app/setup_app';
 import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
-import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
-import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
@@ -60,13 +58,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getFieldListFactory(coreStart, deps);
     });
 
-    embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
-      const { markdownEmbeddableFactory } = await import(
-        './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
-      );
-      return markdownEmbeddableFactory;
-    });
-
     embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
         './react_embeddables/data_table/data_table_react_embeddable'
@@ -92,8 +83,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
   public start(core: CoreStart, deps: StartDeps) {
     registerCreateFieldListAction(deps.uiActions);
     registerFieldListPanelPlacementSetting(deps.dashboard);
-
-    registerCreateEuiMarkdownAction(deps.uiActions);
 
     registerAddSearchPanelAction(deps.uiActions);
 
