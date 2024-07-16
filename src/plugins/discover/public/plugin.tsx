@@ -21,7 +21,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
@@ -59,6 +59,7 @@ import {
   RootProfileService,
 } from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
+import { deserializeState } from './embeddable/utils/serialization_utils';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -369,11 +370,19 @@ export class DiscoverPlugin
       return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 
-    plugins.embeddable.registerReactEmbeddableSavedObject({
-      onAdd: (container, savedObject) => {
+    plugins.embeddable.registerReactEmbeddableSavedObject<SavedSearchAttributes>({
+      onAdd: async (container, savedObject) => {
+        const services = await getDiscoverServicesInternal();
+        const initialState = await deserializeState({
+          serializedState: {
+            rawState: { savedObjectId: savedObject.id },
+            references: savedObject.references,
+          },
+          discoverServices: services,
+        });
         container.addNewPanel({
           panelType: SEARCH_EMBEDDABLE_TYPE,
-          initialState: { savedObjectId: savedObject.id },
+          initialState,
         });
       },
       embeddableType: SEARCH_EMBEDDABLE_TYPE,

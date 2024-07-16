@@ -193,9 +193,12 @@ export const initializeSearchEmbeddableApi = async (
       ],
 
       /** The following can't currently be changed from the dashboard */
-      serializedSearchSource: [serializedSearchSource$, (value) => {}, () => true],
-      viewMode: [savedSearchViewMode$, (value) => {}, () => true],
-      grid: [grid$, (value) => {}, () => true],
+      serializedSearchSource: [
+        serializedSearchSource$,
+        (value) => serializedSearchSource$.next(value),
+      ],
+      viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
+      grid: [grid$, (value) => grid$.next(value)],
     },
   };
 };
