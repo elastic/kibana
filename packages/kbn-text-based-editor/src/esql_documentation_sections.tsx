@@ -4577,6 +4577,7 @@ ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
