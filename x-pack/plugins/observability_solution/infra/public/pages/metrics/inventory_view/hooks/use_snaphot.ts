@@ -9,7 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   InfraTimerangeInput,
