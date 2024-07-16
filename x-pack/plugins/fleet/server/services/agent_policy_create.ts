@@ -21,6 +21,8 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
+import { agentlessAgentService } from './agents/agentless_agent';
+
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
@@ -173,7 +175,7 @@ export async function createAgentPolicyWithPackages({
 
   // Create the agentless agent
   if (agentPolicy.supports_agentless) {
-    await agentPolicyService.createAgentlessAgent(esClient, soClient, agentPolicy);
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
   }
 
   return agentPolicy;
