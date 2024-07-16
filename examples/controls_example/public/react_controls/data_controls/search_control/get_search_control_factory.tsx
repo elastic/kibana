@@ -11,10 +11,12 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
@@ -189,7 +191,7 @@ export const getSearchControlFactory = ({
          * The `controlPanelClassNamess` prop is necessary because it contains the class names from the generic
          * ControlPanel that are necessary for styling
          */
-        Component: (controlPanelClassNames) => {
+        Component: ({ className: controlPanelClassName }) => {
           const currentSearch = useStateFromPublishingSubject(searchString);
 
           useEffect(() => {
@@ -203,7 +205,10 @@ export const getSearchControlFactory = ({
 
           return (
             <EuiFieldSearch
-              {...controlPanelClassNames}
+              className={controlPanelClassName}
+              css={css`
+                height: calc(${euiThemeVars.euiButtonHeight} - 2px) !important;
+              `}
               incremental={true}
               isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}
