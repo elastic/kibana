@@ -9,6 +9,7 @@
     "configPath": ["xpack", "investigateApp"],
     "requiredPlugins": [
       "investigate",
+      "observabilityAIAssistant",
       "observabilityShared",
       "lens",
       "dataViews",
