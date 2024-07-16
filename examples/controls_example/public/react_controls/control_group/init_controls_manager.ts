@@ -7,13 +7,17 @@
  */
 
 import { v4 as generateId } from 'uuid';
-import { HasSerializedChildState, PanelPackage, PresentationContainer } from "@kbn/presentation-containers";
+import {
+  HasSerializedChildState,
+  PanelPackage,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import { Reference } from '@kbn/content-management-utils';
-import { BehaviorSubject, merge } from "rxjs";
-import { ControlPanelsState, ControlPanelState } from "./types";
-import { DefaultControlApi } from '../types';
+import { BehaviorSubject, merge } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
+import { ControlPanelsState, ControlPanelState } from './types';
+import { DefaultControlApi } from '../types';
 
 export function initControlsManager(controlPanelsState: ControlPanelsState) {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -21,12 +25,14 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
     Object.keys(controlPanelsState)
       .map((key) => ({
         id: key,
-        ...controlPanelsState[key]
+        ...controlPanelsState[key],
       }))
       .sort((a, b) => (a.order > b.order ? 1 : -1))
   );
 
-  function untilControlLoaded(id: string): DefaultControlApi | Promise<DefaultControlApi | undefined> {
+  function untilControlLoaded(
+    id: string
+  ): DefaultControlApi | Promise<DefaultControlApi | undefined> {
     if (children$.value[id]) {
       return children$.value[id];
     }
@@ -40,7 +46,9 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         }
 
         // control removed before the control finished loading.
-        const controlState = controlsInOrder$.value.find(controlPanelState => controlPanelState.id === id);
+        const controlState = controlsInOrder$.value.find(
+          (controlPanelState) => controlPanelState.id === id
+        );
         if (!controlState) {
           subscription.unsubscribe();
           resolve(undefined);
@@ -63,18 +71,20 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         type: panelType,
         order: controlsInOrder.length,
         ...(initialState ?? {}),
-      }
+      },
     ]);
     return await untilControlLoaded(id);
   }
 
   function removePanel(panelId: string) {
-    controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !==panelId));
+    controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !== panelId));
     children$.next(omit(children$.value, panelId));
   }
 
   return {
-    controlsInOrder$: controlsInOrder$ as PublishingSubject<Array<ControlPanelState & { id: string }>>,
+    controlsInOrder$: controlsInOrder$ as PublishingSubject<
+      Array<ControlPanelState & { id: string }>
+    >,
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
@@ -106,10 +116,10 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         explicitInputPanels[id] = {
           grow,
           order: index,
-          type: controlApi.type, 
+          type: controlApi.type,
           width,
           /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
-          explicitInput: rest
+          explicitInput: rest,
         };
       });
 
@@ -120,14 +130,16 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
     },
     api: {
       getSerializedStateForChild: (childId: string) => {
-        const controlPanelState = controlsInOrder$.getValue().find(controlPanelState => controlPanelState.id === childId);
+        const controlPanelState = controlsInOrder$
+          .getValue()
+          .find((element) => element.id === childId);
         return controlPanelState ? { rawState: controlPanelState } : undefined;
       },
       children$: children$ as PublishingSubject<{
         [key: string]: DefaultControlApi;
       }>,
       getPanelCount: () => {
-        return controlsInOrder$.value.length
+        return controlsInOrder$.value.length;
       },
       addNewPanel,
       removePanel,
@@ -137,5 +149,5 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
         return controlApi ? controlApi.uuid : '';
       },
     } as PresentationContainer & HasSerializedChildState<ControlPanelState>,
-  }
+  };
 }

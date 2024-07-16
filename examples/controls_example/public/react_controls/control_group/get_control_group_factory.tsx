@@ -107,7 +107,12 @@ export const getControlGroupEmbeddableFactory = (services: {
         ...controlsManager.api,
         controlFetch$: (controlUuid: string) =>
           controlFetch$(
-            chaining$(controlUuid, chainingSystem$, controlsManager.controlsInOrder$, controlsManager.getControlApi),
+            chaining$(
+              controlUuid,
+              chainingSystem$,
+              controlsManager.controlsInOrder$,
+              controlsManager.getControlApi
+            ),
             controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
           ),
         ignoreParentSettings$,

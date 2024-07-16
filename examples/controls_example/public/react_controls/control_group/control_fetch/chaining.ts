@@ -14,7 +14,7 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from 'rxjs';
-import { ControlPanelState } from "../types";
+import { ControlPanelState } from '../types';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;
