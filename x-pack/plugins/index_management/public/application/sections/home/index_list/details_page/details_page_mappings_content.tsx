@@ -155,6 +155,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   );
 
   const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
+  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
   const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
@@ -216,6 +217,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const updateMappings = useCallback(
     async (forceSaveMappings?: boolean) => {
       const hasSemanticText = hasSemanticTextField(state.fields);
+      setIsUpdatingMappings(true);
       try {
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
           await fetchInferenceToModelIdMap();
@@ -254,6 +256,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       } catch (exception) {
         setSaveMappingError(exception.message);
       }
+      setIsUpdatingMappings(false);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.fields]
@@ -605,6 +608,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           errorsInTrainedModelDeployment={errorsInTrainedModelDeployment}
           forceSaveMappings={() => updateMappings(true)}
           saveMappings={() => updateMappings()}
+          saveMappingsLoading={isUpdatingMappings}
           setErrorsInTrainedModelDeployment={setErrorsInTrainedModelDeployment}
         />
       )}

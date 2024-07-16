@@ -36,6 +36,7 @@ export interface TrainedModelsDeploymentModalProps {
   errorsInTrainedModelDeployment: Record<string, string | undefined>;
   forceSaveMappings: () => void;
   saveMappings: () => void;
+  saveMappingsLoading: boolean;
   setErrorsInTrainedModelDeployment: React.Dispatch<
     React.SetStateAction<Record<string, string | undefined>>
   >;
@@ -48,6 +49,7 @@ export function TrainedModelsDeploymentModal({
   errorsInTrainedModelDeployment = {},
   forceSaveMappings,
   saveMappings,
+  saveMappingsLoading,
   setErrorsInTrainedModelDeployment,
 }: TrainedModelsDeploymentModalProps) {
   const modalTitleId = useGeneratedHtmlId();
@@ -233,7 +235,11 @@ export function TrainedModelsDeploymentModal({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={saveMappings} data-test-subj="tryAgainModalButton" id="">
+            <EuiButton
+              onClick={saveMappings}
+              data-test-subj="tryAgainModalButton"
+              isLoading={saveMappingsLoading}
+            >
               {i18n.translate(
                 'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.tryAgainButtonLabel',
                 {
