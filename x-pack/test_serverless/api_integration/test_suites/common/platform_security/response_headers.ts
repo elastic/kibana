@@ -27,10 +27,10 @@ export default function ({ getService }: FtrProviderContext) {
     const defaultXFrameOptions = 'SAMEORIGIN';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it('API endpoint response contains default security headers', async () => {
       const { header } = await supertestWithoutAuth
