@@ -10,6 +10,10 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import {
+  getEntityHistoryIndexTemplateV1,
+  getEntityLatestIndexTemplateV1,
+} from '../../../common/helpers';
+import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,
 } from './create_and_install_ingest_pipeline';
@@ -28,7 +32,7 @@ import {
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
-import { upsertTemplate } from '../manage_index_templates';
+import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
 import { getEntitiesLatestIndexTemplateConfig } from '../../templates/entities_latest_template';
 import { getEntitiesHistoryIndexTemplateConfig } from '../../templates/entities_history_template';
 
@@ -55,6 +59,10 @@ export async function installEntityDefinition({
       latest: false,
     },
     definition: false,
+    indexTemplates: {
+      history: false,
+      latest: false,
+    },
   };
 
   try {
@@ -65,18 +73,19 @@ export async function installEntityDefinition({
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
 
-    // create scoped index template
+    // install scoped index template
     await upsertTemplate({
       esClient,
       logger,
       template: getEntitiesHistoryIndexTemplateConfig(definition.id),
     });
-
+    installState.indexTemplates.history = true;
     await upsertTemplate({
       esClient,
       logger,
       template: getEntitiesLatestIndexTemplateConfig(definition.id),
     });
+    installState.indexTemplates.latest = true;
 
     // install ingest pipelines
     logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
@@ -98,6 +107,21 @@ export async function installEntityDefinition({
     // Clean up anything that was successful.
     if (installState.definition) {
       await deleteEntityDefinition(soClient, definition, logger);
+    }
+
+    if (installState.indexTemplates.history) {
+      await deleteTemplate({
+        esClient,
+        logger,
+        name: getEntityHistoryIndexTemplateV1(definition.id),
+      });
+    }
+    if (installState.indexTemplates.latest) {
+      await deleteTemplate({
+        esClient,
+        logger,
+        name: getEntityLatestIndexTemplateV1(definition.id),
+      });
     }
 
     if (installState.ingestPipelines.history) {
