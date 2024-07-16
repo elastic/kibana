@@ -23,6 +23,12 @@ interface ComponentManagementOptions {
   logger: Logger;
 }
 
+interface DeleteTemplateOptions {
+  esClient: ElasticsearchClient;
+  name: string;
+  logger: Logger;
+}
+
 export async function upsertTemplate({ esClient, template, logger }: TemplateManagementOptions) {
   try {
     await esClient.indices.putIndexTemplate(template);
@@ -35,6 +41,15 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
     `Entity manager index template is up to date (use debug logging to see what was installed)`
   );
   logger.debug(() => `Entity manager index template: ${JSON.stringify(template)}`);
+}
+
+export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {
+  try {
+    await esClient.indices.deleteIndexTemplate({ name });
+  } catch (error: any) {
+    logger.error(`Error deleting entity manager index template: ${error.message}`);
+    return;
+  }
 }
 
 export async function upsertComponent({ esClient, component, logger }: ComponentManagementOptions) {

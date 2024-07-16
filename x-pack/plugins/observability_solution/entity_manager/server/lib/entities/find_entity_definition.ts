@@ -54,7 +54,7 @@ export async function findEntityDefinitions({
   );
 }
 
-async function getEntityDefinitionState(
+export async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
 ) {

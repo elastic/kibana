@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
@@ -14,9 +22,46 @@ import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { BETA } from '../../common/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityModel } from '../common/entity_model';
+
+import { useVectorSearch } from '../common/vector_search';
 
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
+  const { initialize, get, deleteAPI } = useEntityModel();
+  const { installModel: installVectorSearch, installSettings: installVectorSearchSettings } =
+    useVectorSearch();
+  const [state, setState] = useState('loading');
+
+  useEffect(() => {
+    get()
+      ?.then((models) => {
+        setState('installed');
+      })
+      .catch((error) => {
+        // 404 means the model is not installed
+        setState('uninstalled');
+      });
+  }, [get]);
+
+  const handleInitialize = () => {
+    setState('loading');
+
+    installVectorSearchSettings()
+      .then(initialize)
+      .then(installVectorSearch)
+      .then((_) => {
+        setState('installed');
+      });
+  };
+
+  const handleDelete = () => {
+    setState('loading');
+    deleteAPI().then((response) => {
+      setState('uninstalled');
+    });
+  };
+
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
@@ -29,6 +74,17 @@ export const EntityAnalyticsManagementPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiBetaBadge label={BETA} size="s" />
+        {state === 'loading' && <EuiLoadingSpinner size="m" css={{ marginLeft: 'auto' }} />}
+        {state === 'uninstalled' && (
+          <EuiButton onClick={handleInitialize} css={{ marginLeft: 'auto' }}>
+            {'Initialize Entity Model'}
+          </EuiButton>
+        )}
+        {state === 'installed' && (
+          <EuiButton onClick={handleDelete} css={{ marginLeft: 'auto' }}>
+            {'Delete Entity Model'}
+          </EuiButton>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">

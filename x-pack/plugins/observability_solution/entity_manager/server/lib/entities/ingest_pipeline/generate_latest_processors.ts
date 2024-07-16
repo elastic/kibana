@@ -122,5 +122,29 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: `${generateLatestIndexName(definition)}`,
       },
     },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-latest@platform`,
+      },
+    },
   ];
 }

@@ -9,18 +9,25 @@ import { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
+import {
+  findEntityDefinitions,
+  getEntityDefinitionState,
+} from '../../lib/entities/find_entity_definition';
+import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
+import { EntityDefinitionWithState } from '../../lib/entities/types';
 
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
+  logger,
 }: SetupRouteOptions<T>) {
-  router.get<unknown, { page?: number; perPage?: number }, unknown>(
+  router.get<unknown, { page?: number; perPage?: number; id?: string }, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
       validate: {
         query: schema.object({
           page: schema.maybe(schema.number()),
           perPage: schema.maybe(schema.number()),
+          id: schema.maybe(schema.string()),
         }),
       },
     },
@@ -28,12 +35,22 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const soClient = (await context.core).savedObjects.client;
-        const definitions = await findEntityDefinitions({
-          esClient,
-          soClient,
-          page: req.query.page ?? 1,
-          perPage: req.query.perPage ?? 10,
-        });
+
+        let definitions: EntityDefinitionWithState[];
+        if (req.query.id) {
+          const attributes = await readEntityDefinition(soClient, req.query.id, logger);
+          const state = await getEntityDefinitionState(esClient, attributes);
+
+          definitions = [{ ...attributes, state }];
+        } else {
+          definitions = await findEntityDefinitions({
+            esClient,
+            soClient,
+            page: req.query.page ?? 1,
+            perPage: req.query.perPage ?? 10,
+          });
+        }
+
         return res.ok({ body: definitions });
       } catch (e) {
         return res.customError({ body: e, statusCode: 500 });
