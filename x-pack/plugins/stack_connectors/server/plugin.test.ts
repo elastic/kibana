@@ -184,22 +184,22 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         8,
         expect.objectContaining({
-          id: '.sentinelone',
-          name: 'Sentinel One',
+          id: '.thehive',
+          name: 'TheHive',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         9,
         expect.objectContaining({
-          id: '.crowdstrike',
-          name: 'CrowdStrike',
+          id: '.sentinelone',
+          name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         10,
         expect.objectContaining({
-          id: '.thehive',
-          name: 'TheHive',
+          id: '.crowdstrike',
+          name: 'CrowdStrike',
         })
       );
     });

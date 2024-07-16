@@ -179,7 +179,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         <EuiComboBox
           data-test-subj="tagsInput"
           fullWidth
-          placeholder="Tags"
+          placeholder={translations.TAGS_PLACEHOLDER}
           selectedOptions={selectedOptions}
           onCreateOption={onCreateOption}
           onChange={onChange}

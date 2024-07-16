@@ -74,6 +74,13 @@ export const TAGS_LABEL = i18n.translate(
   }
 );
 
+export const TAGS_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.components.thehive.TagsMultiSelectFieldPlaceholder',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
 export const COMMENTS_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.commentsTextAreaFieldLabel',
   {

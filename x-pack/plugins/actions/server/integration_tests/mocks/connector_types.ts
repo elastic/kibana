@@ -24,6 +24,7 @@ export const connectorTypes: string[] = [
   '.torq',
   '.opsgenie',
   '.tines',
+  '.thehive',
   '.gen-ai',
   '.bedrock',
   '.gemini',
