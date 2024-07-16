@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { RowRendererCount, RowRendererId, TimelineType } from '../../../common/api/timeline';
+import { RowRendererCount, TimelineType } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
