@@ -6,13 +6,12 @@
  */
 
 import { RequestHandlerContextBase } from '@kbn/core-http-server';
-import { ENTITY_API_PREFIX } from '../../common/constants_entities';
 import { SetupRouteOptions } from './types';
 
 export function pingRoute<T extends RequestHandlerContextBase>({ router }: SetupRouteOptions<T>) {
   router.get(
     {
-      path: `${ENTITY_API_PREFIX}/ping`,
+      path: `/api/entities/ping`,
       validate: false,
     },
     async (_context, _req, res) => {
