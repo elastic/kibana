@@ -48,7 +48,6 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
         width: '100%',
         height: '100%',
         overflowY: 'auto',
-        padding: '10px',
       }}
     >
       <LogCategorizationEmbeddable

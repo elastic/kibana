@@ -136,6 +136,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
       data-test-subj="aiopsEmbeddablePatternAnalysis"
       css={{
         width: '100%',
+        padding: '10px',
       }}
     >
       <KibanaRenderContextProvider {...coreStart}>
