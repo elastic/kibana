@@ -23,7 +23,7 @@ import { isPlainObjectType } from './is_plain_object_type';
  */
 export function extractByJsonPointer(document: unknown, pointer: string): Record<string, unknown> {
   if (!pointer.startsWith('/')) {
-    throw new Error('$ref pointer must start with a leading slash');
+    throw new Error('JSON pointer must start with a leading slash');
   }
 
   if (!isPlainObjectType(document)) {
@@ -36,7 +36,9 @@ export function extractByJsonPointer(document: unknown, pointer: string): Record
     const nextTarget = target[segment];
 
     if (!isPlainObjectType(nextTarget)) {
-      throw new Error(`JSON Pointer "${pointer}" is not found in "${JSON.stringify(document)}"`);
+      throw new Error(
+        `JSON Pointer "${pointer}" is not resolvable in "${JSON.stringify(document)}"`
+      );
     }
 
     target = nextTarget;
