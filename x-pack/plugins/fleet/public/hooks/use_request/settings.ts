@@ -14,13 +14,13 @@ import type {
   GetSettingsResponse,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
-import { GetSpaceSettingsResponse } from '@kbn/fleet-plugin/common/types';
 
 export function useGetSettingsQuery(options?: { enabled?: boolean }) {
   return useQuery<GetSettingsResponse, RequestError>({
