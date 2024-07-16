@@ -151,6 +151,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     tools,
     responseLanguage,
     replacements,
+    llmType,
+    bedrockChatEnabled,
   });
   const inputs = { input: latestMessage[0]?.content as string };
 

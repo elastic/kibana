@@ -47,6 +47,8 @@ interface GetDefaultAssistantGraphParams {
   tools: StructuredTool[];
   responseLanguage: string;
   replacements: Replacements;
+  llmType: string | undefined;
+  bedrockChatEnabled?: boolean;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -64,6 +66,8 @@ export const getDefaultAssistantGraph = ({
   responseLanguage,
   tools,
   replacements,
+  llmType,
+  bedrockChatEnabled,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -193,7 +197,10 @@ export const getDefaultAssistantGraph = ({
     // Add conditional edge for basic routing
     graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, {
       continue: TOOLS_NODE,
-      end: RESPOND_NODE,
+      end:
+        llmType && bedrockChatEnabled && ['bedrock', 'gemini'].includes(llmType)
+          ? RESPOND_NODE
+          : END,
     });
     graph.addEdge(RESPOND_NODE, END);
     graph.addEdge(TOOLS_NODE, AGENT_NODE);
