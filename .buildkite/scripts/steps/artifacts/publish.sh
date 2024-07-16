@@ -62,31 +62,42 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(
   download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   export BEATS_MANIFEST_URL=$(jq -r .manifest_url /tmp/beats_manifest.json)
 
-  RELEASE_MANAGER_ARGS=$(cat << EOF
-    cli
-    collect
-    --project kibana
-    --branch $KIBANA_BASE_BRANCH
-    --commit $GIT_COMMIT
-    --workflow $WORKFLOW
-    --version $BASE_VERSION
-    --qualifier $VERSION_QUALIFIER
-    --dependency beats:$BEATS_MANIFEST_URL
-    --artifact-set main
-EOF
-)
-
   if [[ "$DRY_RUN" =~ ^(1|true)$ ]]; then
-    RELEASE_MANAGER_ARGS="$RELEASE_MANAGER_ARGS --dry-run"
+      docker run --rm \
+        --name release-manager \
+        -e VAULT_ADDR \
+        -e VAULT_ROLE_ID \
+        -e VAULT_SECRET_ID \
+        --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts/target \
+        docker.elastic.co/infra/release-manager:latest \
+          cli collect \
+            --project kibana \
+            --branch "$KIBANA_BASE_BRANCH" \
+            --commit "$GIT_COMMIT" \
+            --workflow "$WORKFLOW" \
+            --version "$BASE_VERSION" \
+            --qualifier "$VERSION_QUALIFIER" \
+            --dependency "beats:$BEATS_MANIFEST_URL" \
+            --artifact-set main \
+            --dry-run
+  else
+      docker run --rm \
+        --name release-manager \
+        -e VAULT_ADDR \
+        -e VAULT_ROLE_ID \
+        -e VAULT_SECRET_ID \
+        --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts/target \
+        docker.elastic.co/infra/release-manager:latest \
+          cli collect \
+            --project kibana \
+            --branch "$KIBANA_BASE_BRANCH" \
+            --commit "$GIT_COMMIT" \
+            --workflow "$WORKFLOW" \
+            --version "$BASE_VERSION" \
+            --qualifier "$VERSION_QUALIFIER" \
+            --dependency "beats:$BEATS_MANIFEST_URL" \
+            --artifact-set main
   fi
-
-  docker run --rm \
-    --name release-manager \
-    -e VAULT_ADDR \
-    -e VAULT_ROLE_ID \
-    -e VAULT_SECRET_ID \
-    --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts/target \
-    docker.elastic.co/infra/release-manager:latest $RELEASE_MANAGER_ARGS
 
   KIBANA_SUMMARY=$(curl -s "$KIBANA_MANIFEST_LATEST" | jq -re '.summary_url')
 
