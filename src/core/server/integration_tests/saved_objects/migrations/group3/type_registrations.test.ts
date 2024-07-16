@@ -72,6 +72,7 @@ const previouslyRegisteredTypes = [
   'fleet-proxy',
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
+  'fleet-space-settings',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
