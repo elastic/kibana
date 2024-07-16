@@ -196,10 +196,9 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   ): AsyncGenerator<ChatGenerationChunk> {
     const formattedMessages = _formatMessages(messages);
     this.#logger.debug(
-      () =>
-        `ActionsClientSimpleChatModel#stream\ntraceId: ${
-          this.#traceId
-        }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
+      `ActionsClientSimpleChatModel#stream\ntraceId: ${
+        this.#traceId
+      }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {
