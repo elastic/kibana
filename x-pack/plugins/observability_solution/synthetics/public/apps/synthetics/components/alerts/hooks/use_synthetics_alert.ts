@@ -81,7 +81,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   }, [defaultRules, isNewRule, triggersActionsUi, alertFlyoutVisible, dispatch]);
 
   const NewRuleFlyout = useMemo(() => {
-    if (!defaultRules || !isNewRule || !alertFlyoutVisible) {
+    if (!isNewRule || !alertFlyoutVisible) {
       return null;
     }
     return triggersActionsUi.getAddRuleFlyout({

@@ -48,10 +48,12 @@ export const ToggleAlertFlyoutButton = () => {
       items: [
         {
           name: STATUS_RULE_NAME,
+          'data-test-subj': 'manageStatusRuleName',
           panel: 1,
         },
         {
           name: TLS_RULE_NAME,
+          'data-test-subj': 'manageTlsRuleName',
           panel: 2,
         },
         {
@@ -125,7 +127,7 @@ export const ToggleAlertFlyoutButton = () => {
           <EuiHeaderLink
             color="text"
             aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
-            data-test-subj="xpack.synthetics.alertsPopover.toggleButton"
+            data-test-subj="syntheticsAlertsRulesButton"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsOpen(!isOpen)}
