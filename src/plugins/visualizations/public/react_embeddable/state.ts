@@ -221,6 +221,8 @@ export const savedObjectToRuntimeState: (
     : getSearch().searchSource.createEmpty();
 
   return {
+    title,
+    description,
     serializedVis: deserializeSavedVisState(
       {
         savedVis: {

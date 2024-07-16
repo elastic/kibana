@@ -65,7 +65,6 @@ export const getVisualizeEmbeddableFactory: (
 
     // when the serialized vis changes, update the vis instance
     serializedVis$.subscribe(async (serializedVis) => {
-      console.log('SERIALIZED VIS', serializedVis);
       vis$.next(await createVisInstance(serializedVis));
     });
 
