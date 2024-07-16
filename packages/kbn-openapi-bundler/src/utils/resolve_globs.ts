@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './src/openapi_bundler';
-export * from './src/openapi_merger';
+import globby from 'globby';
+import { resolve } from 'path';
+
+export async function resolveGlobs(globs: string[]): Promise<string[]> {
+  const normalizedGlobs = globs.map((glob) => resolve(glob));
+  const filePaths = await globby(normalizedGlobs);
+
+  return filePaths;
+}
