@@ -569,12 +569,14 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
           };
         }),
-        storeBreakdownFieldIsEcs: assign((context, event: DoneInvokeEvent<boolean>) => {
-          return 'data' in event
-            ? {
-                flyout: { ...context.flyout, isBreakdownFieldEcs: event.data },
-              }
-            : {};
+        storeBreakdownFieldIsEcs: assign((context, event: DoneInvokeEvent<boolean | null>) => {
+          return {
+            flyout: {
+              ...context.flyout,
+              isBreakdownFieldEcs:
+                'data' in event && typeof event.data === 'boolean' ? event.data : null,
+            },
+          };
         }),
         resetFlyoutOptions: assign((_context, _event) => ({ flyout: DEFAULT_CONTEXT.flyout })),
         storeDataStreamStats: assign(
@@ -718,7 +720,7 @@ export const createPureDatasetQualityControllerStateMachine = (
           return (
             'data' in event &&
             typeof event.data === 'object' &&
-            'statusCode' in event.data &&
+            'statusCode' in event.data! &&
             event.data.statusCode === 403
           );
         },
@@ -900,17 +902,15 @@ export const createDatasetQualityControllerStateMachine = ({
         if (context.flyout.breakdownField) {
           // This timeout is to avoid a runtime error that randomly happens on breakdown field change
           // TypeError: Cannot read properties of undefined (reading 'timeFieldName')
-          return new Promise((res) =>
-            setTimeout(async () => {
-              const client = await plugins.fieldsMetadata.getClient();
-              const { fields } = await client.find({
-                attributes: ['source'],
-                fieldNames: [context.flyout.breakdownField!],
-              });
+          await new Promise((res) => setTimeout(res, 300));
 
-              res(fields[context.flyout.breakdownField!]?.source === 'ecs');
-            }, 200)
-          );
+          const client = await plugins.fieldsMetadata.getClient();
+          const { fields } = await client.find({
+            attributes: ['source'],
+            fieldNames: [context.flyout.breakdownField],
+          });
+
+          return fields[context.flyout.breakdownField]?.source === 'ecs';
         }
 
         return true;

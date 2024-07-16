@@ -333,7 +333,7 @@ function getDatasetDetailsEbtProps(
   isNonAggregatable: boolean,
   canUserViewIntegrations: boolean,
   canUserAccessDashboards: boolean,
-  isBreakdownFieldEcs: boolean,
+  isBreakdownFieldEcs: boolean | null,
   breakdownField?: string
 ): DatasetDetailsEbtProps {
   const indexName = flyoutDataset.rawName;
@@ -364,7 +364,9 @@ function getDatasetDetailsEbtProps(
     degraded_percentage: degradedPercentage,
     integration: flyoutDataset.integration?.name,
     breakdown_field: breakdownField
-      ? getMaskedBreakdownField(breakdownField, isBreakdownFieldEcs)
+      ? isBreakdownFieldEcs === null
+        ? undefined
+        : getMaskedBreakdownField(breakdownField, isBreakdownFieldEcs)
       : breakdownField,
   };
 }

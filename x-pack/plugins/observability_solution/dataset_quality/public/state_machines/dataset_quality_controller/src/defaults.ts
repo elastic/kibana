@@ -58,7 +58,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
         },
       },
     },
-    isBreakdownFieldEcs: true,
+    isBreakdownFieldEcs: null,
   },
   datasets: [],
   isSizeStatsAvailable: true,

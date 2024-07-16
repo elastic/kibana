@@ -63,11 +63,17 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 
   const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
 
+  const isBreakdownFieldEcs = useSelector(
+    service,
+    (state) => state.context.flyout.isBreakdownFieldEcs
+  );
+
   const isBreakdownFieldEcsAsserted = useSelector(
     service,
     (state) =>
       state.matches('flyout.initializing.dataStreamDetails.done') &&
-      state.history?.matches('flyout.initializing.dataStreamDetails.assertBreakdownFieldIsEcs')
+      state.history?.matches('flyout.initializing.dataStreamDetails.assertBreakdownFieldIsEcs') &&
+      isBreakdownFieldEcs !== null
   );
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);

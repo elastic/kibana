@@ -76,7 +76,7 @@ export interface WithFlyoutOptions {
     degradedFields: DegradedFields;
     isNonAggregatable?: boolean;
     integration?: DataStreamIntegrations;
-    isBreakdownFieldEcs: boolean;
+    isBreakdownFieldEcs: boolean | null;
   };
 }
 
@@ -253,5 +253,5 @@ export type DatasetQualityControllerEvent =
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<Integration>
-  | DoneInvokeEvent<boolean>
+  | DoneInvokeEvent<boolean | null>
   | DoneInvokeEvent<Error>;
