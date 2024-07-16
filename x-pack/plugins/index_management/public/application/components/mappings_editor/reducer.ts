@@ -214,6 +214,9 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'editor.replaceViewMappings': {
+      return { ...state, mappingViewFields: action.value.fields };
+    }
     case 'configuration.update': {
       const nextState = {
         ...state,
@@ -322,28 +325,6 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'field.add': {
       return addFieldToState(action.value, state);
-    }
-    case 'field.addSemanticText': {
-      const addTexFieldWithCopyToActionValue: Field = {
-        name: action.value.referenceField as string,
-        type: 'text',
-        copy_to: [action.value.name],
-      };
-
-      // Add text field to state with copy_to of semantic_text field
-      let updatedState = addFieldToState(addTexFieldWithCopyToActionValue, state);
-
-      const addSemanticTextFieldActionValue: Field = {
-        name: action.value.name,
-        inference_id: action.value.inferenceId,
-        type: 'semantic_text',
-      };
-
-      // Add semantic_text field to state and reset fieldToAddFieldTo
-      updatedState = addFieldToState(addSemanticTextFieldActionValue, updatedState);
-      updatedState.documentFields.fieldToAddFieldTo = undefined;
-
-      return updatedState;
     }
     case 'field.remove': {
       const field = state.fields.byId[action.value];
