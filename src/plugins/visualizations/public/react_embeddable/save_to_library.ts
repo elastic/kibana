@@ -40,7 +40,9 @@ export const saveToLibrary = async ({
       title: serializedVis.title,
     },
     savedSearchId: serializedVis.data.savedSearchId,
-    savedSearchRefName: String(serializedVis.data.savedSearchRefName),
+    ...(serializedVis.data.savedSearchRefName
+      ? { savedSearchRefName: String(serializedVis.data.savedSearchRefName) }
+      : {}),
     searchSourceFields: serializedVis.data.searchSource,
     uiStateJSON: uiState.toString(),
     lastSavedTitle: '',
