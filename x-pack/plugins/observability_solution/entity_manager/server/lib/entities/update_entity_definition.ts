@@ -47,7 +47,12 @@ export async function updateBuiltInEntityDefinitions({
       logger.info(
         `Installing built-in entity definition [${latestDefinition.id}] v${latestDefinition.version}`
       );
-      return installAndStartDefinition({ esClient, soClient, logger, definition: latestDefinition });
+      return installAndStartDefinition({
+        esClient,
+        soClient,
+        logger,
+        definition: latestDefinition,
+      });
     }
 
     if (semver.eq(latestDefinition.version, installedDefinition.version)) {
