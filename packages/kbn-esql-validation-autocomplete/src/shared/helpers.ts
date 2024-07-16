@@ -43,7 +43,6 @@ import type {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { esqlToKibanaType } from './esql_to_kibana_type';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -433,7 +432,7 @@ export function checkFunctionArgMatchesDefinition(
   }
   if (arg.type === 'inlineCast') {
     // TODO - remove with https://github.com/elastic/kibana/issues/174710
-    return argType === esqlToKibanaType(arg.castType);
+    return argType === arg.castType;
   }
 }
 

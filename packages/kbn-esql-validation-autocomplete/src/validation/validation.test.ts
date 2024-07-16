@@ -1784,6 +1784,26 @@ describe('validation logic', () => {
             'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
           ]
         );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_diff(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff(stringField, stringField, stringField, extraArg)',
+          ['Error: [date_diff] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort date_diff(stringField, stringField, stringField)',
+          []
+        );
       });
 
       describe('abs', () => {
@@ -1835,6 +1855,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval abs(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval abs(nullVar)', []);
+        testErrorsAndWarnings('row abs("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = abs(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval abs(stringField, extraArg)', [
+          'Error: [abs] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort abs(stringField)', []);
       });
 
       describe('acos', () => {
@@ -1886,6 +1914,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval acos(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval acos(nullVar)', []);
+        testErrorsAndWarnings('row acos("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = acos(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval acos(stringField, extraArg)', [
+          'Error: [acos] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort acos(stringField)', []);
       });
 
       describe('asin', () => {
@@ -1937,6 +1973,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval asin(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval asin(nullVar)', []);
+        testErrorsAndWarnings('row asin("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = asin(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval asin(stringField, extraArg)', [
+          'Error: [asin] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort asin(stringField)', []);
       });
 
       describe('atan', () => {
@@ -1988,6 +2032,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval atan(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval atan(nullVar)', []);
+        testErrorsAndWarnings('row atan("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = atan(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval atan(stringField, extraArg)', [
+          'Error: [atan] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort atan(stringField)', []);
       });
 
       describe('atan2', () => {
@@ -2048,6 +2100,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval atan2(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval atan2(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row atan2("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval atan2(stringField, stringField, extraArg)', [
+          'Error: [atan2] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort atan2(stringField, stringField)', []);
       });
 
       describe('case', () => {
@@ -2113,6 +2173,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval ceil(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ceil(nullVar)', []);
+        testErrorsAndWarnings('row ceil("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = ceil(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval ceil(stringField, extraArg)', [
+          'Error: [ceil] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort ceil(stringField)', []);
       });
 
       describe('cidr_match', () => {
@@ -2160,6 +2228,11 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval cidr_match(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cidr_match(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = cidr_match(to_ip(to_ip("127.0.0.1")), "a")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = cidr_match(to_ip(ipField), stringField)',
+          []
+        );
       });
 
       describe('coalesce', () => {
@@ -2550,6 +2623,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval cos(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cos(nullVar)', []);
+        testErrorsAndWarnings('row cos("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = cos(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval cos(stringField, extraArg)', [
+          'Error: [cos] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort cos(stringField)', []);
       });
 
       describe('cosh', () => {
@@ -2601,6 +2682,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval cosh(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cosh(nullVar)', []);
+        testErrorsAndWarnings('row cosh("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = cosh(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval cosh(stringField, extraArg)', [
+          'Error: [cosh] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort cosh(stringField)', []);
       });
 
       describe('date_extract', () => {
@@ -2671,6 +2760,19 @@ describe('validation logic', () => {
             'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [string]',
           ]
         );
+        testErrorsAndWarnings('row var = date_extract("a", "a")', []);
+        testErrorsAndWarnings('row date_extract("a", "a")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_extract(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract(stringField, stringField, extraArg)',
+          ['Error: [date_extract] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort date_extract(stringField, stringField)', []);
       });
 
       describe('date_format', () => {
@@ -2714,6 +2816,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_format(stringField, concat("20", "22"))', [
           'Argument of [date_format] must be [date], found value [concat("20", "22")] type [string]',
         ]);
+        testErrorsAndWarnings('row var = date_format("a", "a")', []);
+        testErrorsAndWarnings('row date_format("a", "a")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_format(stringField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_format(stringField, stringField, extraArg)',
+          ['Error: [date_format] function expects no more than 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort date_format(stringField, stringField)', []);
       });
 
       describe('date_parse', () => {
@@ -2828,6 +2944,19 @@ describe('validation logic', () => {
             'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
           ]
         );
+        testErrorsAndWarnings('row var = date_trunc(1 year, "a")', []);
+        testErrorsAndWarnings('row date_trunc(1 year, "a")', []);
+        testErrorsAndWarnings('row var = date_trunc("a", "a")', []);
+        testErrorsAndWarnings('row date_trunc("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = date_trunc(1 year, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = date_trunc(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, stringField, extraArg)', [
+          'Error: [date_trunc] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort date_trunc(1 year, stringField)', []);
       });
 
       describe('e', () => {
@@ -2942,6 +3071,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval floor(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval floor(nullVar)', []);
+        testErrorsAndWarnings('row floor("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = floor(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval floor(stringField, extraArg)', [
+          'Error: [floor] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort floor(stringField)', []);
       });
 
       describe('greatest', () => {
@@ -3285,6 +3422,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval left(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval left(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = left("a", "a")', []);
+        testErrorsAndWarnings('row left("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = left(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval left(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval left(stringField, stringField, extraArg)', [
+          'Error: [left] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort left(stringField, stringField)', []);
       });
 
       describe('length', () => {
@@ -3419,6 +3566,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort log(numberField)', []);
         testErrorsAndWarnings('from a_index | eval log(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval log(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = log("a")', []);
+        testErrorsAndWarnings('row log("a")', []);
+        testErrorsAndWarnings('row log("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = log(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval log(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval log(stringField, stringField, extraArg)', [
+          'Error: [log] function expects no more than 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort log(stringField)', []);
       });
 
       describe('log10', () => {
@@ -3470,6 +3629,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval log10(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval log10(nullVar)', []);
+        testErrorsAndWarnings('row log10("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = log10(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval log10(stringField, extraArg)', [
+          'Error: [log10] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort log10(stringField)', []);
       });
 
       describe('ltrim', () => {
@@ -3572,6 +3739,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval mv_avg(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_avg(nullVar)', []);
+        testErrorsAndWarnings('row mv_avg("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_avg(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_avg(stringField, extraArg)', [
+          'Error: [mv_avg] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_avg(stringField)', []);
       });
 
       describe('mv_concat', () => {
@@ -4187,6 +4362,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval mv_median(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_median(nullVar)', []);
+        testErrorsAndWarnings('row mv_median("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_median(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_median(stringField, extraArg)', [
+          'Error: [mv_median] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_median(stringField)', []);
       });
 
       describe('mv_min', () => {
@@ -4617,6 +4800,189 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval mv_slice(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_slice(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = mv_slice(true, "a", "a")', []);
+        testErrorsAndWarnings('row mv_slice(true, "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_slice(to_boolean(true), "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianpoint("POINT (30 10)"), "a", "a")',
+          []
+        );
+
+        testErrorsAndWarnings('row mv_slice(to_cartesianpoint("POINT (30 10)"), "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), "a", "a")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianshape("POINT (30 10)"), "a", "a")',
+          []
+        );
+
+        testErrorsAndWarnings('row mv_slice(to_cartesianshape("POINT (30 10)"), "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), "a", "a")',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice("a", "a", "a")', []);
+        testErrorsAndWarnings('row mv_slice("a", "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_slice(to_geopoint("POINT (30 10)"), "a", "a")', []);
+        testErrorsAndWarnings('row mv_slice(to_geopoint("POINT (30 10)"), "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geopoint(to_geopoint("POINT (30 10)")), "a", "a")',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice(to_geoshape("POINT (30 10)"), "a", "a")', []);
+        testErrorsAndWarnings('row mv_slice(to_geoshape("POINT (30 10)"), "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geoshape(to_geopoint("POINT (30 10)")), "a", "a")',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice(to_ip("127.0.0.1"), "a", "a")', []);
+        testErrorsAndWarnings('row mv_slice(to_ip("127.0.0.1"), "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_slice(to_ip(to_ip("127.0.0.1")), "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_slice(to_version("1.0.0"), "a", "a")', []);
+        testErrorsAndWarnings('row mv_slice(to_version("1.0.0"), "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_slice(to_version("a"), "a", "a")', []);
+
+        testErrorsAndWarnings('row var = mv_slice(now(), true, true)', [
+          'Argument of [mv_slice] must be [boolean], found value [now()] type [date]',
+          'Argument of [mv_slice] must be [integer], found value [true] type [boolean]',
+          'Argument of [mv_slice] must be [integer], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(booleanField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(booleanField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_boolean(booleanField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(cartesianPointField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(cartesianPointField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_cartesianpoint(cartesianPointField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(cartesianShapeField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(cartesianShapeField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_cartesianshape(cartesianPointField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(geoPointField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(geoPointField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_geopoint(geoPointField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(geoShapeField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(geoShapeField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_geoshape(geoPointField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(ipField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(ipField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_ip(ipField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(versionField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(versionField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_version(stringField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(booleanField, stringField, stringField, extraArg)',
+          ['Error: [mv_slice] function expects no more than 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort mv_slice(booleanField, stringField, stringField)',
+          []
+        );
       });
 
       describe('mv_sort', () => {
@@ -4679,6 +5045,28 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_sort(booleanField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_sort(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = mv_sort(true, "a")', []);
+        testErrorsAndWarnings('row mv_sort(true, "a")', []);
+        testErrorsAndWarnings('row var = mv_sort("a", "a")', []);
+        testErrorsAndWarnings('row mv_sort("a", "a")', []);
+        testErrorsAndWarnings('row var = mv_sort(to_ip("127.0.0.1"), "a")', []);
+        testErrorsAndWarnings('row mv_sort(to_ip("127.0.0.1"), "a")', []);
+        testErrorsAndWarnings('row var = mv_sort(to_version("1.0.0"), "a")', []);
+        testErrorsAndWarnings('row mv_sort(to_version("1.0.0"), "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(booleanField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(booleanField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(ipField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(ipField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(versionField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(versionField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_sort(booleanField, stringField, extraArg)', [
+          'Error: [mv_sort] function expects no more than 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_sort(booleanField, stringField)', []);
       });
 
       describe('mv_sum', () => {
@@ -4730,6 +5118,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval mv_sum(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_sum(nullVar)', []);
+        testErrorsAndWarnings('row mv_sum("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sum(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_sum(stringField, extraArg)', [
+          'Error: [mv_sum] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_sum(stringField)', []);
       });
 
       describe('mv_zip', () => {
@@ -4946,6 +5342,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval pow(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval pow(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row pow("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval pow(stringField, stringField, extraArg)', [
+          'Error: [pow] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort pow(stringField, stringField)', []);
       });
 
       describe('replace', () => {
@@ -5111,6 +5515,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval right(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval right(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = right("a", "a")', []);
+        testErrorsAndWarnings('row right("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = right(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval right(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval right(stringField, stringField, extraArg)', [
+          'Error: [right] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort right(stringField, stringField)', []);
       });
 
       describe('round', () => {
@@ -5194,6 +5608,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort round(numberField)', []);
         testErrorsAndWarnings('from a_index | eval round(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval round(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = round("a")', []);
+        testErrorsAndWarnings('row round("a")', []);
+        testErrorsAndWarnings('row round("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = round(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval round(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval round(stringField, stringField, extraArg)', [
+          'Error: [round] function expects no more than 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort round(stringField)', []);
       });
 
       describe('rtrim', () => {
@@ -5296,6 +5722,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval signum(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval signum(nullVar)', []);
+        testErrorsAndWarnings('row signum("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = signum(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval signum(stringField, extraArg)', [
+          'Error: [signum] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort signum(stringField)', []);
       });
 
       describe('sin', () => {
@@ -5347,6 +5781,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval sin(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval sin(nullVar)', []);
+        testErrorsAndWarnings('row sin("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = sin(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval sin(stringField, extraArg)', [
+          'Error: [sin] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sin(stringField)', []);
       });
 
       describe('sinh', () => {
@@ -5398,6 +5840,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval sinh(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval sinh(nullVar)', []);
+        testErrorsAndWarnings('row sinh("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = sinh(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval sinh(stringField, extraArg)', [
+          'Error: [sinh] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sinh(stringField)', []);
       });
 
       describe('split', () => {
@@ -5515,6 +5965,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval sqrt(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval sqrt(nullVar)', []);
+        testErrorsAndWarnings('row sqrt("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = sqrt(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval sqrt(stringField, extraArg)', [
+          'Error: [sqrt] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sqrt(stringField)', []);
       });
 
       describe('st_contains', () => {
@@ -7225,6 +7683,28 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval substring(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval substring(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = substring("a", "a", "a")', []);
+        testErrorsAndWarnings('row substring("a", "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = substring(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval substring(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval substring(stringField, stringField, stringField, extraArg)',
+          ['Error: [substring] function expects no more than 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort substring(stringField, stringField, stringField)',
+          []
+        );
       });
 
       describe('tan', () => {
@@ -7276,6 +7756,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval tan(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval tan(nullVar)', []);
+        testErrorsAndWarnings('row tan("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = tan(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval tan(stringField, extraArg)', [
+          'Error: [tan] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort tan(stringField)', []);
       });
 
       describe('tanh', () => {
@@ -7327,6 +7815,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval tanh(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval tanh(nullVar)', []);
+        testErrorsAndWarnings('row tanh("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = tanh(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval tanh(stringField, extraArg)', [
+          'Error: [tanh] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort tanh(stringField)', []);
       });
 
       describe('tau', () => {
@@ -7585,6 +8081,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_datetime(dateField)', []);
         testErrorsAndWarnings('from a_index | eval to_datetime(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_datetime(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_datetime(stringField, extraArg)', [
+          'Error: [to_datetime] function expects exactly one argument, got 2.',
+        ]);
       });
 
       describe('to_degrees', () => {
@@ -7636,6 +8136,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval to_degrees(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_degrees(nullVar)', []);
+        testErrorsAndWarnings('row to_degrees("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = to_degrees(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_degrees(stringField, extraArg)', [
+          'Error: [to_degrees] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_degrees(stringField)', []);
       });
 
       describe('to_double', () => {
@@ -8075,6 +8583,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval to_radians(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_radians(nullVar)', []);
+        testErrorsAndWarnings('row to_radians("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = to_radians(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_radians(stringField, extraArg)', [
+          'Error: [to_radians] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_radians(stringField)', []);
       });
 
       describe('to_string', () => {
@@ -9755,6 +10271,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort cbrt(numberField)', []);
         testErrorsAndWarnings('from a_index | eval cbrt(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cbrt(nullVar)', []);
+        testErrorsAndWarnings('row var = cbrt("a")', []);
+        testErrorsAndWarnings('row cbrt("a")', []);
+        testErrorsAndWarnings('from a_index | eval var = cbrt(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval cbrt(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval cbrt(stringField, extraArg)', [
+          'Error: [cbrt] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort cbrt(stringField)', []);
       });
 
       describe('from_base64', () => {
@@ -9876,6 +10402,23 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort locate(stringField, stringField)', []);
         testErrorsAndWarnings('from a_index | eval locate(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval locate(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = locate("a", "a", "a")', []);
+        testErrorsAndWarnings('row locate("a", "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = locate(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(stringField, stringField, stringField, extraArg)',
+          ['Error: [locate] function expects no more than 3 arguments, got 4.']
+        );
       });
 
       describe('to_base64', () => {
@@ -9964,6 +10507,34 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval ip_prefix(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ip_prefix(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = ip_prefix(to_ip("127.0.0.1"), "a", "a")', []);
+        testErrorsAndWarnings('row ip_prefix(to_ip("127.0.0.1"), "a", "a")', []);
+        testErrorsAndWarnings('row var = ip_prefix(to_ip(to_ip("127.0.0.1")), "a", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(ipField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(to_ip(ipField), stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, stringField, stringField, extraArg)',
+          ['Error: [ip_prefix] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort ip_prefix(ipField, stringField, stringField)',
+          []
+        );
       });
 
       describe('mv_append', () => {
@@ -10214,6 +10785,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort repeat(stringField, numberField)', []);
         testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = repeat("a", "a")', []);
+        testErrorsAndWarnings('row repeat("a", "a")', []);
+        testErrorsAndWarnings('from a_index | eval var = repeat(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, stringField, extraArg)', [
+          'Error: [repeat] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort repeat(stringField, stringField)', []);
       });
 
       describe('top', () => {
@@ -10551,6 +11132,34 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
+      });
+
+      describe('exp', () => {
+        testErrorsAndWarnings('row var = exp("a")', []);
+        testErrorsAndWarnings('row exp("a")', []);
+
+        testErrorsAndWarnings('row var = exp(true)', [
+          'Argument of [exp] must be [double], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(stringField)', []);
+
+        testErrorsAndWarnings('from a_index | eval exp(booleanField)', [
+          'Argument of [exp] must be [double], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(*)', [
+          'Using wildcards (*) in exp is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval exp(stringField, extraArg)', [
+          'Error: [exp] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort exp(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval exp(nullVar)', []);
       });
     });
   });

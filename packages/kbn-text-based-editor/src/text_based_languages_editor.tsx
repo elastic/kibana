@@ -440,7 +440,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            const columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            const columns =
+              table?.columns.map((c) => ({ name: c.name, type: c.meta.esType })) || [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
