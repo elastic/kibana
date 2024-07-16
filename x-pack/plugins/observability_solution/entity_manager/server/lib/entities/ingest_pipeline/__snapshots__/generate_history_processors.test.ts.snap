@@ -86,6 +86,16 @@ if (ctx[\\"entity\\"][\\"identity\\"] != null) {
     },
   },
   Object {
+    "fingerprint": Object {
+      "fields": Array [
+        "@timestamp",
+        "entity.identity",
+      ],
+      "method": "MurmurHash3",
+      "target_field": "_id",
+    },
+  },
+  Object {
     "script": Object {
       "source": "if (ctx.entity?.metadata?.tags != null) {
   if (ctx.tags == null) {
