@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // here Lens suggests a XY so it is rendered
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('xyVisChart');
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        let cell = await dataGrid.getCellElement(0, 2);
+        let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        cell = await dataGrid.getCellElement(0, 2);
+        cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        const cell = await dataGrid.getCellElement(0, 3);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
         expect(await dataGrid.getHeaders()).to.eql([
           'Control column',
@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.discover.dragFieldToTable('a');
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
     });
@@ -398,7 +398,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains an initial value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '1,623';
         });
@@ -412,7 +412,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the highest value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '483';
         });
@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '483';
         });
@@ -438,7 +438,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '483';
         });
@@ -456,7 +456,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same highest value after reopening',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 2);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
             return text === '483';
           }
@@ -467,7 +467,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the lowest value', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -484,7 +484,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
 
         await retry.waitFor('first cell contains the lowest value for extension', async () => {
-          const cell = await dataGrid.getCellElement(0, 3);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === 'css';
         });
@@ -499,7 +499,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains the same lowest value after reload', async () => {
-          const cell = await dataGrid.getCellElement(0, 2);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -507,7 +507,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value for extension after reload',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 3);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === 'css';
           }
@@ -525,7 +525,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 2);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
             return text === '0';
           }
@@ -534,7 +534,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the lowest value for extension as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElement(0, 3);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === 'css';
           }
