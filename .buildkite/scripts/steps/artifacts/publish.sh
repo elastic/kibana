@@ -62,7 +62,7 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
   download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   export BEATS_MANIFEST_URL=$(jq -r .manifest_url /tmp/beats_manifest.json)
 
-  PUBLISH_CMD=$(cat < EOF
+  PUBLISH_CMD=$(cat << EOF
   docker run --rm \
     --name release-manager \
     -e VAULT_ADDR \
@@ -79,7 +79,8 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
         --qualifier "$VERSION_QUALIFIER" \
         --dependency "beats:$BEATS_MANIFEST_URL" \
         --artifact-set main
-EOF)
+EOF
+)
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     PUBLISH_CMD+=(" --dry-run")
   fi

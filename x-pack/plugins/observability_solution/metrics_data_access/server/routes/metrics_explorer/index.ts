@@ -10,12 +10,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
+import { throwErrors } from '@kbn/io-ts-utils';
 import {
   metricsExplorerRequestBodyRT,
   metricsExplorerResponseRT,
   MetricsExplorerPageInfo,
 } from '../../../common/http_api/metrics_explorer';
-import { throwErrors } from '../../../common/runtime_types';
 import { convertRequestToMetricsAPIOptions } from './lib/convert_request_to_metrics_api_options';
 import { createSearchClient } from '../../lib/create_search_client';
 import { findIntervalForMetrics } from './lib/find_interval_for_metrics';

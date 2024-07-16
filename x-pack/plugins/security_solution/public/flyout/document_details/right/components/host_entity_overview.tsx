@@ -187,7 +187,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+              <RiskScoreDocTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

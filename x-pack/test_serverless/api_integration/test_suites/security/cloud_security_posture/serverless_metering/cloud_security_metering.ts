@@ -52,7 +52,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
 
       await kibanaServer.savedObjects.cleanStandardList();
@@ -90,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
       ]);
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       mockUsageApiServer.close();
     });
 
