@@ -108,6 +108,7 @@ const mockContext = {
         indexTemplateAndPattern: {
           alias: 'knowledge-base-alias',
         },
+        isModelDeployed: jest.fn().mockResolvedValue(true),
       }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
