@@ -134,11 +134,12 @@ export class EntityManagerServerPlugin
         this.logger.error(err);
       })
       .then(() => {
-        updateBuiltInEntityDefinitions({
+        return updateBuiltInEntityDefinitions({
           definitions: builtInDefinitions,
           server: this.server!,
-        }).catch((err) => this.logger.error(err));
-      });
+        });
+      })
+      .catch((err) => this.logger.error(err));
 
     return {};
   }
