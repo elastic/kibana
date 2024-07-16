@@ -7,6 +7,7 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DocumentType } from '../../profiles';
 import { createContextAwarenessMocks } from '../../__mocks__';
 import { createLogDocumentProfileProvider } from './profile';
@@ -64,6 +65,32 @@ describe('logDocumentProfileProvider', () => {
         record: buildMockRecord('another-index'),
       })
     ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  describe('getDocViewer', () => {
+    it('adds a log overview doc view to the registry', () => {
+      const getDocViewer = logDocumentProfileProvider.profile.getDocViewer!(() => ({
+        title: 'test title',
+        docViewsRegistry: (registry) => registry,
+      }));
+      const docViewer = getDocViewer({
+        record: buildDataTableRecord({}),
+      });
+      const registry = new DocViewsRegistry();
+
+      expect(docViewer.title).toBe('test title');
+      expect(registry.getAll()).toHaveLength(0);
+      docViewer.docViewsRegistry(registry);
+      expect(registry.getAll()).toHaveLength(1);
+      expect(registry.getAll()[0]).toEqual(
+        expect.objectContaining({
+          id: 'doc_view_logs_overview',
+          title: 'Log overview',
+          order: 0,
+          component: expect.any(Function),
+        })
+      );
+    });
   });
 });
 
