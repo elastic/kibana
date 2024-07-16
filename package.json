@@ -938,7 +938,7 @@
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
-    "@langchain/community": "^0.2.19",
+    "@langchain/community": "0.2.18",
     "@langchain/core": "^0.2.16",
     "@langchain/google-common": "^0.0.20",
     "@langchain/langgraph": "^0.0.27",

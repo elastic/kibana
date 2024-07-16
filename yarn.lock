@@ -6986,12 +6986,12 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.19":
-  version "0.2.19"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.19.tgz#ca1fb64e57f94216d6d05aa9362950d4c5473bc3"
-  integrity sha512-NKUOFW7ykY+WcnxEV6MZJj1hKncogdloBGDsk5zfW/FkZtQQpSHTgA8bgAT7X4Bnr5+Cv1fLkiDtVs/yKI4/Ow==
+"@langchain/community@0.2.18":
+  version "0.2.18"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.18.tgz#127a7ac53a30dd6dedede887811fdd992061e2d2"
+  integrity sha512-UsCB97dMG87giQLniKx4bjv7OnMw2vQeavSt9gqOnGCnfb5IQBAgdjX4SjwFPbVGMz1HQoQKVlNqQ64ozCdgNg==
   dependencies:
-    "@langchain/core" ">=0.2.16 <0.3.0"
+    "@langchain/core" "~0.2.11"
     "@langchain/openai" "~0.1.0"
     binary-extensions "^2.2.0"
     expr-eval "^2.0.2"
@@ -7003,7 +7003,7 @@
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>=0.2.11 <0.3.0", "@langchain/core@>=0.2.16 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@^0.2.16":
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>=0.2.11 <0.3.0", "@langchain/core@>=0.2.16 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@^0.2.16", "@langchain/core@~0.2.11":
   version "0.2.16"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.16.tgz#0700a7def44c613ef775d351a2e6428e09cfbfda"
   integrity sha512-mPmQi0ecJ81QwhvUQX4cwGVAqsM30ly3ygIlWoeUwDOXv9UW/IB2LAq8KKoVYIHTyEsIWJiyMP9Sv3e0xwjV8g==
