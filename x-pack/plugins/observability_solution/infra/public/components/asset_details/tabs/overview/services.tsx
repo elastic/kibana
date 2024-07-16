@@ -15,7 +15,7 @@ import { ServicesAPIResponseRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { Section } from '../../components/section';
 import { ServicesSectionTitle } from './section_titles';
-import { HOST_FIELD } from '../../../../../common/constants';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
 import { APM_HOST_FILTER_FIELD } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
@@ -44,7 +44,7 @@ export const ServicesContent = ({
   });
   const params = useMemo(
     () => ({
-      filters: { [HOST_FIELD]: hostName },
+      filters: { [HOST_NAME_FIELD]: hostName },
       from: dateRange.from,
       to: dateRange.to,
     }),
