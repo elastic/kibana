@@ -13,6 +13,7 @@ import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
+import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
 import { SearchSessionsConfigSchema } from '../../../../../config';
 import { SearchUsageCollector } from '../../../collectors';
 
@@ -57,6 +58,9 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
           </EuiButtonEmpty>,
         ]}
       />
+
+      <EuiSpacer size="l" />
+      <SearchSessionsDeprecatedWarning />
 
       <EuiSpacer size="l" />
       <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />

@@ -63,6 +63,7 @@ export function createConfig(partialConfig: PartialConfig = {}) {
       reduceWeekendTrafficBy: DEFAULTS.REDUCE_WEEKEND_TRAFFIC_BY,
       ephemeralProjectIds: DEFAULTS.EPHEMERAL_PROJECT_IDS,
       alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL,
+      artificialIndexDelay: 0,
       ...(partialConfig.indexing ?? {}),
     },
     schedule: partialConfig.schedule ?? [schedule],

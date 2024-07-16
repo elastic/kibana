@@ -11,7 +11,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
-import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { AutoSizer } from '../../../../../components/auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
