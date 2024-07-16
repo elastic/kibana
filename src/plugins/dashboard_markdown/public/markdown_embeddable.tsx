@@ -222,6 +222,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
           </div>
         ) : (
           <EuiMarkdownFormat
+            tabIndex={0}
             className="eui-yScroll"
             css={css`
               width: 100%;
