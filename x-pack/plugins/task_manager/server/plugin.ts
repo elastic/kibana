@@ -19,9 +19,9 @@ import {
   CoreStatus,
 } from '@kbn/core/server';
 import {
-  registerRemoveInactiveNodesTaskDefinition,
-  scheduleRemoveInactiveNodesTaskDefinition,
-} from './kibana_discovery_service/remove_inactive_nodes_task';
+  registerDeleteInactiveNodesTaskDefinition,
+  scheduleDeleteInactiveNodesTaskDefinition,
+} from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
@@ -203,7 +203,7 @@ export class TaskManagerPlugin
       );
     }
 
-    registerRemoveInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -333,7 +333,7 @@ export class TaskManagerPlugin
       taskManagerId: taskStore.taskManagerId,
     });
 
-    scheduleRemoveInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),

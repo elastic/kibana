@@ -11,7 +11,7 @@ import {
   savedObjectsRepositoryMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { CLEANUP_INTERVAL, taskRunner } from './remove_inactive_nodes_task';
+import { CLEANUP_INTERVAL, taskRunner } from './delete_inactive_nodes_task';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import {
   SavedObjectsFindResponse,

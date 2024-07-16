@@ -13,13 +13,13 @@ import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_nod
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { TaskManagerStartContract } from '..';
 
-const TASK_TYPE = 'remove_inactive_background_task_nodes';
-export const TASK_ID = `task_manager-${TASK_TYPE}`;
+export const TASK_ID = 'delete_inactive_background_task_nodes';
+const TASK_TYPE = `task_manager:${TASK_ID}`;
 
 export const CLEANUP_INTERVAL = '1m';
 export const CLEANUP_LOOKBACK = '5m';
 
-export async function scheduleRemoveInactiveNodesTaskDefinition(
+export async function scheduleDeleteInactiveNodesTaskDefinition(
   logger: Logger,
   taskScheduling: TaskScheduling
 ) {
@@ -38,7 +38,7 @@ export async function scheduleRemoveInactiveNodesTaskDefinition(
   }
 }
 
-export function registerRemoveInactiveNodesTaskDefinition(
+export function registerDeleteInactiveNodesTaskDefinition(
   logger: Logger,
   coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>,
   taskTypeDictionary: TaskTypeDictionary
