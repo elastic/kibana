@@ -52,6 +52,12 @@ class VisEditorVisualizationUI extends Component {
 
   getSavedVis = () => ({
     ...omit(this.props.vis, 'uiState'),
+    data: {
+      ...this.props.vis.data,
+      ...(this.props.vis.data.searchSource
+        ? { searchSource: this.props.vis.data.searchSource.fields }
+        : {}),
+    },
     type: this.props.vis.type.name,
   });
 
