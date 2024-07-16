@@ -24122,9 +24122,7 @@
     },
     {
       "query": "from a_index | stats max(booleanField)",
-      "error": [
-        "Argument of [max] must be [number], found value [booleanField] type [boolean]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -24146,6 +24144,60 @@
       "query": "from a_index | stats max(concat(\"20\", \"22\"))",
       "error": [
         "Argument of [max] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(cartesianPointField)",
+      "error": [
+        "Argument of [max] must be [number], found value [cartesianPointField] type [cartesian_point]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(booleanField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(booleanField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(booleanField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(booleanField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(booleanField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(booleanField) > 0",
+      "error": [
+        "EVAL does not support function max"
       ],
       "warning": []
     },
@@ -24395,9 +24447,7 @@
     },
     {
       "query": "from a_index | stats min(booleanField)",
-      "error": [
-        "Argument of [min] must be [number], found value [booleanField] type [boolean]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -24419,6 +24469,60 @@
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
       "error": [
         "Argument of [min] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(cartesianPointField)",
+      "error": [
+        "Argument of [min] must be [number], found value [cartesianPointField] type [cartesian_point]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(booleanField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(booleanField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(booleanField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(booleanField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(booleanField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(booleanField) > 0",
+      "error": [
+        "EVAL does not support function min"
       ],
       "warning": []
     },
