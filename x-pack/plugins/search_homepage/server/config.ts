@@ -12,6 +12,7 @@ export * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  enableIndexStats: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

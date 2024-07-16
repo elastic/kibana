@@ -12,9 +12,11 @@ export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
   private readonly logger: Logger;
+  private readonly config: SearchHomepageConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
