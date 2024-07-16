@@ -258,6 +258,12 @@ const datasetDetailsBreakdownFieldChangedEventType: DatasetQualityTelemetryEvent
   eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED,
   schema: {
     ...datasetCommonSchema,
+    tracking_id: {
+      type: 'keyword',
+      _meta: {
+        description: `Locally generated session tracking ID for funnel analysis`,
+      },
+    },
     breakdown_field: {
       type: 'keyword',
       _meta: {

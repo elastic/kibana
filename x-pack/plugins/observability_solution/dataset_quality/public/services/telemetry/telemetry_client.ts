@@ -59,6 +59,7 @@ export class TelemetryClient implements ITelemetryClient {
   public trackDatasetDetailsBreakdownFieldChanged = (eventProps: DatasetDetailsEbtProps) => {
     this.analytics.reportEvent(DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED, {
       ...eventProps,
+      tracking_id: this.datasetDetailsTrackingId,
     });
   };
 }

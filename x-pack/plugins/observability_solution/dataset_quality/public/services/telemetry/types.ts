@@ -126,5 +126,5 @@ export type DatasetQualityTelemetryEvent =
     }
   | {
       eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED;
-      schema: RootSchema<DatasetDetailsEbtProps>;
+      schema: RootSchema<DatasetDetailsEbtProps & WithTrackingId>;
     };
