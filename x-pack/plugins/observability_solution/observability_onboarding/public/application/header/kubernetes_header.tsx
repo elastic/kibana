@@ -27,7 +27,7 @@ export function KubernetesHeaderSection() {
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
   return (
-    <EuiPageTemplate.Section paddingSize="xl">
+    <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
       <BackButton
         customLabel={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel',
@@ -37,7 +37,7 @@ export function KubernetesHeaderSection() {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div
             css={css`
@@ -67,7 +67,7 @@ export function KubernetesHeaderSection() {
               />
             </h1>
           </EuiTitle>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
           <p>
             <FormattedMessage
               id="xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesDescription"
