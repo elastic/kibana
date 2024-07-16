@@ -72,6 +72,8 @@ const getStatsWithTimestamp = ({
       configuration: {
         timestamp,
         value: {
+          capacity: { config: 10, as_cost: 20, as_workers: 10 },
+          claim_strategy: 'default',
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,
@@ -211,24 +213,29 @@ const getStatsWithTimestamp = ({
         timestamp,
         value: {
           count: 2,
+          cost: 4,
           task_types: {
             taskType1: {
               count: 1,
+              cost: 2,
               status: {
                 idle: 1,
               },
             },
             taskType2: {
               count: 1,
+              cost: 2,
               status: {
                 idle: 1,
               },
             },
           },
           non_recurring: 2,
+          non_recurring_cost: 4,
           owner_ids: 0,
           schedule: [['5m', 2]],
           overdue: 0,
+          overdue_cost: 0,
           overdue_non_recurring: 0,
           estimated_schedule_density: [
             0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
