@@ -23,14 +23,15 @@ import {
   generateHistoryIndexName,
   generateHistoryBackfillTransformId,
 } from '../helpers/generate_component_id';
+import { isBackfillEnabled } from '../helpers/is_backfill_enabled';
 
 export function generateHistoryTransform(
   definition: EntityDefinition,
   backfill = false
 ): TransformPutTransformRequest {
-  if (backfill && definition.history.settings?.backfillSyncDelay == null) {
+  if (backfill && !isBackfillEnabled(definition)) {
     throw new Error(
-      'This function was called with backfill=true without history.settigns.backfillSyncDelay'
+      'This function was called with backfill=true without history.settings.backfillSyncDelay'
     );
   }
 
@@ -58,6 +59,10 @@ export function generateHistoryTransform(
     ? generateHistoryBackfillTransformId(definition)
     : generateHistoryTransformId(definition);
 
+  const frequency = backfill
+    ? definition.history.settings?.backfillFrequency
+    : definition.history.settings?.frequency;
+
   return {
     transform_id: transformId,
     _meta: {
@@ -79,11 +84,11 @@ export function generateHistoryTransform(
       index: `${generateHistoryIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateHistoryIngestPipelineId(definition),
     },
-    frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
+    frequency: frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {
       time: {
         field: definition.history.settings?.syncField ?? definition.history.timestampField,
-        delay: syncDelay ?? ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
+        delay: syncDelay || ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
       },
     },
     settings: {

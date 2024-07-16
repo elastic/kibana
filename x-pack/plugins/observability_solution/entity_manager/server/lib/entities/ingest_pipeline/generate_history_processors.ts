@@ -134,17 +134,13 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         method: 'MurmurHash3',
       },
     },
-    ...(definition.history.settings?.backfillSyncDelay
-      ? [
-          {
-            fingerprint: {
-              fields: ['entity.id', '@timestamp'],
-              target_field: '_id',
-              method: 'MurmurHash3',
-            },
-          },
-        ]
-      : []),
+    {
+      fingerprint: {
+        fields: ['@timestamp', 'entity.identity'],
+        target_field: '_id',
+        method: 'MurmurHash3',
+      },
+    },
     ...(definition.staticFields != null
       ? Object.keys(definition.staticFields).map((field) => ({
           set: { field, value: definition.staticFields![field] },

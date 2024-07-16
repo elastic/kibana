@@ -29,6 +29,7 @@ import {
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
+import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -75,7 +76,7 @@ export async function installEntityDefinition({
     logger.debug(`Installing transforms for definition ${definition.id}`);
     await createAndInstallHistoryTransform(esClient, entityDefinition, logger);
     installState.transforms.history = true;
-    if (entityDefinition.history.settings?.backfillSyncDelay) {
+    if (isBackfillEnabled(entityDefinition)) {
       await createAndInstallHistoryBackfillTransform(esClient, entityDefinition, logger);
       installState.transforms.backfill = true;
     }
