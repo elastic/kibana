@@ -12,6 +12,8 @@ import { LLMChain } from 'langchain/chains';
 import { OutputFixingParser } from 'langchain/output_parsers';
 import { DynamicTool } from '@langchain/core/tools';
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
 import { getAnonymizedAlerts } from './get_anonymized_alerts';
 import { getOutputParser } from './get_output_parser';
@@ -37,9 +39,13 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AttackDiscoveryToolParams => {
     const { alertsIndexPattern, llm, request, size } = params;
-
+    const castedRequest = request as unknown as KibanaRequest<
+      unknown,
+      unknown,
+      AttackDiscoveryPostRequestBody
+    >;
     return (
-      requestHasRequiredAnonymizationParams(request) &&
+      requestHasRequiredAnonymizationParams(castedRequest) &&
       alertsIndexPattern != null &&
       size != null &&
       !sizeIsOutOfRange(size) &&

@@ -30,6 +30,9 @@ export * from './attack_discovery/cancel_attack_discovery_route.gen';
 // Chat Schemas
 export * from './chat/post_chat_complete_route.gen';
 
+// Entity Resolution Schemas
+export * from './entity_resolution/post_entity_resolution_route.gen';
+
 // Evaluation Schemas
 export * from './evaluation/post_evaluate_route.gen';
 export * from './evaluation/get_evaluate_route.gen';

@@ -10,6 +10,8 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
 
@@ -26,7 +28,12 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AlertCountsToolParams => {
     const { request, alertsIndexPattern } = params;
-    return requestHasRequiredAnonymizationParams(request) && alertsIndexPattern != null;
+    const castedRequest = request as KibanaRequest<
+      unknown,
+      unknown,
+      AttackDiscoveryPostRequestBody
+    >;
+    return requestHasRequiredAnonymizationParams(castedRequest) && alertsIndexPattern != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;

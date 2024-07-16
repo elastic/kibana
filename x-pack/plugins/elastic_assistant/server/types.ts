@@ -31,6 +31,8 @@ import {
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
+  EntityResolutionPostRequestBody,
+  SearchEntity,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
@@ -215,6 +217,8 @@ export interface AssistantTool {
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
+  entitiesIndexPattern?: string;
+  searchEntity?: SearchEntity;
   anonymizationFields?: AnonymizationFieldResponse[];
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
@@ -229,7 +233,7 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | EntityResolutionPostRequestBody
   >;
   size?: number;
 }
