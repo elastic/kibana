@@ -217,8 +217,6 @@ export const chatCompleteRoute = (
           const error = transformError(err as Error);
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
             model: request.body.model,
             errorMessage: error.message,
             // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
