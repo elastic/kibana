@@ -10,7 +10,6 @@ import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
 import { chaining$ } from './chaining';
-import { ControlPanelState } from '../types';
 
 const FILTER_ALPHA = {
   meta: {
@@ -36,7 +35,7 @@ const FILTER_DELTA = {
 describe('chaining$', () => {
   const onFireMock = jest.fn();
   const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL');
-  const controlsInOrder$ = new BehaviorSubject<Array<ControlPanelState & { id: string }>>([]);
+  const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
   const alphaControlApi = {
     filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
   };
@@ -78,10 +77,10 @@ describe('chaining$', () => {
     deltaControlApi.filters$.next([FILTER_DELTA]);
     chainingSystem$.next('HIERARCHICAL');
     controlsInOrder$.next([
-      { id: 'alpha' } as unknown as ControlPanelState & { id: string },
-      { id: 'bravo' } as unknown as ControlPanelState & { id: string },
-      { id: 'charlie' } as unknown as ControlPanelState & { id: string },
-      { id: 'delta' } as unknown as ControlPanelState & { id: string },
+      { id: 'alpha', type: 'whatever' },
+      { id: 'bravo', type: 'whatever' },
+      { id: 'charlie', type: 'whatever' },
+      { id: 'delta', type: 'whatever' },
     ]);
   });
 
@@ -135,10 +134,10 @@ describe('chaining$', () => {
 
       // Move control to right of 'delta' control
       controlsInOrder$.next([
-        { id: 'alpha' } as unknown as ControlPanelState & { id: string },
-        { id: 'bravo' } as unknown as ControlPanelState & { id: string },
-        { id: 'delta' } as unknown as ControlPanelState & { id: string },
-        { id: 'charlie' } as unknown as ControlPanelState & { id: string },
+        { id: 'alpha', type: 'whatever' },
+        { id: 'bravo', type: 'whatever' },
+        { id: 'delta', type: 'whatever' },
+        { id: 'charlie', type: 'whatever' },
       ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -164,9 +163,9 @@ describe('chaining$', () => {
 
       // remove 'bravo' control
       controlsInOrder$.next([
-        { id: 'alpha' } as unknown as ControlPanelState & { id: string },
-        { id: 'charlie' } as unknown as ControlPanelState & { id: string },
-        { id: 'delta' } as unknown as ControlPanelState & { id: string },
+        { id: 'alpha', type: 'whatever' },
+        { id: 'charlie', type: 'whatever' },
+        { id: 'delta', type: 'whatever' },
       ]);
       await new Promise((resolve) => setTimeout(resolve, 0));
 

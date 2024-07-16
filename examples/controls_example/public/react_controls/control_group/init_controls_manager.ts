@@ -17,15 +17,19 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { ControlPanelsState, ControlPanelState } from './types';
-import { DefaultControlApi } from '../types';
+import { DefaultControlApi, DefaultControlState } from '../types';
 
-export function initControlsManager(controlPanelsState: ControlPanelsState) {
+export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-  const controlsInOrder$ = new BehaviorSubject<Array<ControlPanelState & { id: string }>>(
-    Object.keys(controlPanelsState)
+  const controlsPanelState: { [panelId: string]: DefaultControlState } = {
+    ...initialControlPanelsState,
+  };
+  const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
+    Object.keys(initialControlPanelsState)
       .map((key) => ({
         id: key,
-        ...controlPanelsState[key],
+        order: initialControlPanelsState[key].order,
+        type: initialControlPanelsState[key].type,
       }))
       .sort((a, b) => (a.order > b.order ? 1 : -1))
   );
@@ -61,7 +65,7 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
     return children$.value[controlUuid];
   }
 
-  async function addNewPanel({ panelType, initialState }: PanelPackage<object>) {
+  async function addNewPanel({ panelType, initialState }: PanelPackage<DefaultControlState>) {
     const id = generateId();
     const controlsInOrder = controlsInOrder$.getValue();
     controlsInOrder$.next([
@@ -69,22 +73,20 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
       {
         id,
         type: panelType,
-        order: controlsInOrder.length,
-        ...(initialState ?? {}),
       },
     ]);
+    controlsPanelState[id] = initialState ?? {};
     return await untilControlLoaded(id);
   }
 
   function removePanel(panelId: string) {
+    delete controlsPanelState[panelId];
     controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !== panelId));
     children$.next(omit(children$.value, panelId));
   }
 
   return {
-    controlsInOrder$: controlsInOrder$ as PublishingSubject<
-      Array<ControlPanelState & { id: string }>
-    >,
+    controlsInOrder$: controlsInOrder$ as PublishingSubject<Array<{ id: string; type: string }>>,
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
@@ -130,9 +132,7 @@ export function initControlsManager(controlPanelsState: ControlPanelsState) {
     },
     api: {
       getSerializedStateForChild: (childId: string) => {
-        const controlPanelState = controlsInOrder$
-          .getValue()
-          .find((element) => element.id === childId);
+        const controlPanelState = controlsPanelState[childId];
         return controlPanelState ? { rawState: controlPanelState } : undefined;
       },
       children$: children$ as PublishingSubject<{

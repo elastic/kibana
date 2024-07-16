@@ -14,7 +14,6 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from 'rxjs';
-import { ControlPanelState } from '../types';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;
@@ -24,7 +23,7 @@ export interface ChainingContext {
 export function chaining$(
   uuid: string,
   chainingSystem$: PublishingSubject<ControlGroupChainingSystem>,
-  controlsInOrder$: PublishingSubject<Array<ControlPanelState & { id: string }>>,
+  controlsInOrder$: PublishingSubject<Array<{ id: string; type: string }>>,
   getControlApi: (uuid: string) => undefined | unknown
 ) {
   return combineLatest([chainingSystem$, controlsInOrder$]).pipe(
