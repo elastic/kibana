@@ -18,9 +18,13 @@ import {
 import { keyBy } from 'lodash/fp';
 
 import { css } from '@emotion/react';
+import {
+  PromptResponse,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../../../connectorland/connector_selector';
-import { Conversation, Prompt } from '../../../../..';
+import { Conversation } from '../../../../..';
 import * as i18n from './translations';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
@@ -34,16 +38,18 @@ interface Props {
   connectors: AIConnector[] | undefined;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
-  onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
-  selectedSystemPrompt: Prompt | undefined;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  onSelectedSystemPromptChange: (systemPrompt?: PromptResponse) => void;
+  selectedSystemPrompt: PromptResponse | undefined;
+  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  systemPromptSettings: Prompt[];
+  systemPromptSettings: PromptResponse[];
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
   defaultConnector?: AIConnector;
   resetSettings?: () => void;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 /**
@@ -61,6 +67,8 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   setConversationsSettingsBulkActions,
   defaultConnector,
   resetSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }) => {
   // Prompt
   const promptContent = useMemo(
@@ -72,11 +80,11 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   const handlePromptContentChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (selectedSystemPrompt != null) {
-        setUpdatedSystemPromptSettings((prev): Prompt[] => {
+        setUpdatedSystemPromptSettings((prev): PromptResponse[] => {
           const alreadyExists = prev.some((sp) => sp.id === selectedSystemPrompt.id);
 
           if (alreadyExists) {
-            return prev.map((sp): Prompt => {
+            return prev.map((sp): PromptResponse => {
               if (sp.id === selectedSystemPrompt.id) {
                 return {
                   ...sp,
@@ -89,9 +97,44 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
 
           return prev;
         });
+        const existingPrompt = systemPromptSettings.find((sp) => sp.id === selectedSystemPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedSystemPrompt.name !== selectedSystemPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedSystemPrompt.id
+                    ),
+                    {
+                      ...selectedSystemPrompt,
+                      content: e.target.value,
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedSystemPrompt.name
+                    ),
+                    {
+                      ...selectedSystemPrompt,
+                      content: e.target.value,
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedSystemPrompt, setUpdatedSystemPromptSettings]
+    [
+      promptsBulkActions,
+      selectedSystemPrompt,
+      setPromptsBulkActions,
+      setUpdatedSystemPromptSettings,
+      systemPromptSettings,
+    ]
   );
 
   const conversationsWithApiConfig = Object.entries(conversationSettings).reduce<
@@ -258,14 +301,47 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             };
           });
         });
+        setPromptsBulkActions({
+          ...promptsBulkActions,
+          ...(selectedSystemPrompt.name !== selectedSystemPrompt.id
+            ? {
+                update: [
+                  ...(promptsBulkActions.update ?? []).filter(
+                    (p) => p.id !== selectedSystemPrompt.id
+                  ),
+                  {
+                    ...selectedSystemPrompt,
+                    isNewConversationDefault: isChecked,
+                  },
+                ],
+              }
+            : {
+                create: [
+                  ...(promptsBulkActions.create ?? []).filter(
+                    (p) => p.name !== selectedSystemPrompt.name
+                  ),
+                  {
+                    ...selectedSystemPrompt,
+                    isNewConversationDefault: isChecked,
+                  },
+                ],
+              }),
+        });
       }
     },
-    [selectedSystemPrompt, setUpdatedSystemPromptSettings]
+    [
+      promptsBulkActions,
+      selectedSystemPrompt,
+      setPromptsBulkActions,
+      setUpdatedSystemPromptSettings,
+    ]
   );
 
   const { onSystemPromptSelectionChange, onSystemPromptDeleted } = useSystemPromptEditor({
     setUpdatedSystemPromptSettings,
     onSelectedSystemPromptChange,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   return (

@@ -12,6 +12,7 @@ import {
   PersistedLogViewReference,
   ResolvedLogView,
 } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormat } from '../../../common/http_api/latest';
 import {
   CategoriesSort,
@@ -21,7 +22,6 @@ import {
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
 import { startTracingSpan } from '../../../common/performance_tracing';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';

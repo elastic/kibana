@@ -73,6 +73,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
             http={mockHttp}
             baseConversations={{}}
             navigateToApp={mockNavigateToApp}
+            currentAppId={'securitySolutionUI'}
           >
             <DataQualityProvider
               httpFetch={http.fetch}

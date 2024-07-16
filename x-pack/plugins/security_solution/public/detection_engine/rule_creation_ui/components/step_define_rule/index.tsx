@@ -26,7 +26,6 @@ import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -118,7 +117,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
-  browserFields: BrowserFields;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
   setIsThreatQueryBarValid: (valid: boolean) => void;
@@ -167,7 +165,6 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
 
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
-  browserFields,
   dataSourceType,
   defaultSavedQuery,
   enableThresholdSuppression,
@@ -293,10 +290,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [aggFields]
   );
 
-  const [
-    threatIndexPatternsLoading,
-    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
-  ] = useFetchIndex(threatIndex);
+  const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
+    useFetchIndex(threatIndex);
 
   // reset form when rule type changes
   useEffect(() => {
@@ -452,7 +447,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}
-        threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
@@ -464,7 +458,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       handleResetThreatIndices,
       indexPattern,
       setIsThreatQueryBarValid,
-      threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
       threatIndexPatternsLoading,
@@ -821,7 +814,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={QueryBarDefineRule}
         componentProps={
           {
-            browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
             isDisabled: isLoading || shouldLoadQueryDynamically || timelineQueryLoading,
@@ -841,7 +833,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [
       handleOpenTimelineSearch,
       shouldLoadQueryDynamically,
-      browserFields,
       indexPattern,
       isLoading,
       timelineQueryLoading,

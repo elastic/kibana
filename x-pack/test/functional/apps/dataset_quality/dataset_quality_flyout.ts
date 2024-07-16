@@ -149,17 +149,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       it('should shows the integration section for integrations', async () => {
         await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-        const integrationNameElements = await PageObjects.datasetQuality.getFlyoutElementsByText(
-          '[data-test-subj=datasetQualityFlyoutFieldValue]',
-          apacheIntegrationId
-        );
-
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors
             .datasetQualityFlyoutFieldsListIntegrationDetails
         );
 
-        expect(integrationNameElements.length).to.eql(1);
+        await retry.tryForTime(5000, async () => {
+          const integrationNameExists = await PageObjects.datasetQuality.doesTextExist(
+            PageObjects.datasetQuality.testSubjectSelectors
+              .datasetQualityFlyoutFieldsListIntegrationDetails,
+            apacheIntegrationId
+          );
+          expect(integrationNameExists).to.be(true);
+        });
 
         await PageObjects.datasetQuality.closeFlyout();
       });

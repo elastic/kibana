@@ -18,7 +18,12 @@ import {
 
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import type { ThreatDetailsRow } from './helpers';
-import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment, getFirstSeen } from './helpers';
+import {
+  getEnrichmentIdentifiers,
+  isInvestigationTimeEnrichment,
+  getFirstSeen,
+  buildThreatDetailsItems,
+} from './helpers';
 import { EnrichmentButtonContent } from './enrichment_button_content';
 import { ThreatSummaryTitle } from './threat_summary_title';
 import { InspectButton } from '../../inspect';
@@ -26,8 +31,6 @@ import { QUERY_ID } from '../../../containers/cti/event_enrichment';
 import * as i18n from './translations';
 import { ThreatSummaryTable } from './threat_summary_table';
 import { REFERENCE } from '../../../../../common/cti/constants';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
@@ -81,19 +84,6 @@ const columns: Array<EuiBasicTableColumn<ThreatDetailsRow>> = [
     name: '',
   },
 ];
-
-const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
-  Object.keys(enrichment)
-    .sort()
-    .map((field) => ({
-      title: field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
-        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
-        : field,
-      description: {
-        fieldName: field,
-        value: getFirstElement(enrichment[field]),
-      },
-    }));
 
 const EnrichmentAccordion: React.FC<{
   enrichment: CtiEnrichment;

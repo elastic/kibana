@@ -38,6 +38,7 @@ import type {
   DroppableStateSnapshot,
 } from '@hello-pangea/dnd';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
@@ -103,6 +104,8 @@ jest.mock('@kbn/expandable-flyout', () => {
     useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
   };
 });
+
+const mockedTelemetry = createTelemetryServiceMock();
 
 jest.mock('../../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../../common/components/link_to');
@@ -255,6 +258,7 @@ describe('Body', () => {
         savedObjects: {
           client: {},
         },
+        telemetry: mockedTelemetry,
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),

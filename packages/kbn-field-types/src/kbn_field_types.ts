@@ -50,6 +50,10 @@ export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
 
 export function esFieldTypeToKibanaFieldType(type: string) {
+  // 'counter_integer', 'counter_long', 'counter_double'...
+  if (type.startsWith('counter_')) {
+    return KBN_FIELD_TYPES.NUMBER;
+  }
   switch (type) {
     case ES_FIELD_TYPES._INDEX:
       return KBN_FIELD_TYPES.STRING;

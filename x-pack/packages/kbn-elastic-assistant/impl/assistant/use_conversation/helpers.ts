@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Prompt } from '../types';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../assistant_context/types';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
@@ -75,7 +75,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
  *
  * @param allSystemPrompts All available System Prompts
  */
-export const getDefaultNewSystemPrompt = (allSystemPrompts: Prompt[]) =>
+export const getDefaultNewSystemPrompt = (allSystemPrompts: PromptResponse[]) =>
   allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts?.[0];
 
 /**
@@ -88,15 +88,15 @@ export const getDefaultSystemPrompt = ({
   allSystemPrompts,
   conversation,
 }: {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversation: Conversation | undefined;
-}): Prompt | undefined => {
+}): PromptResponse | undefined => {
   const conversationSystemPrompt = allSystemPrompts.find(
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );
   const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
-  return conversationSystemPrompt ?? defaultNewSystemPrompt;
+  return conversationSystemPrompt?.id ? conversationSystemPrompt : defaultNewSystemPrompt;
 };
 
 /**
@@ -109,9 +109,9 @@ export const getInitialDefaultSystemPrompt = ({
   allSystemPrompts,
   conversation,
 }: {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversation: Conversation | undefined;
-}): Prompt | undefined => {
+}): PromptResponse | undefined => {
   const conversationSystemPrompt = allSystemPrompts.find(
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );
@@ -133,7 +133,7 @@ export const getConversationApiConfig = ({
   connectors,
   defaultConnector,
 }: {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversation: Conversation;
   connectors?: AIConnector[];
   defaultConnector?: AIConnector;

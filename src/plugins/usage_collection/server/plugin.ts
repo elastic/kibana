@@ -33,7 +33,7 @@ export interface UsageCollectionSetup {
   /**
    * Returns a usage counter by type
    */
-  getUsageCounterByType: (type: string) => UsageCounter | undefined;
+  getUsageCounterByDomainId: (type: string) => UsageCounter | undefined;
   /**
    * Creates a usage collector to collect plugin telemetry data.
    * registerCollector must be called to connect the created collector with the service.
@@ -112,13 +112,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       bufferDurationMs: config.usageCounters.bufferDuration.asMilliseconds(),
     });
 
-    const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);
+    const usageCountersServiceSetup = this.usageCountersService.setup(core);
+    const { createUsageCounter, getUsageCounterByDomainId } = usageCountersServiceSetup;
 
-    const uiCountersUsageCounter = createUsageCounter('uiCounter');
     const router = core.http.createRouter();
     setupRoutes({
       router,
-      uiCountersUsageCounter,
+      usageCountersServiceSetup,
       getSavedObjects: () => this.savedObjects,
       collectorSet,
       config: {
@@ -141,7 +141,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       toApiFieldNames: collectorSet.toApiFieldNames,
       toObject: collectorSet.toObject,
       createUsageCounter,
-      getUsageCounterByType,
+      getUsageCounterByDomainId,
     };
   }
 
