@@ -274,50 +274,6 @@ export interface NonLangChainExecuteParams {
   response: KibanaResponseFactory;
   telemetry: AnalyticsServiceSetup;
 }
-export const nonLangChainExecute = async ({
-  messages,
-  abortSignal,
-  actionTypeId,
-  connectorId,
-  logger,
-  actionsClient,
-  onLlmResponse,
-  response,
-  request,
-  telemetry,
-}: NonLangChainExecuteParams) => {
-  logger.debug('Executing via actions framework directly');
-  const result = await executeAction({
-    abortSignal,
-    onLlmResponse,
-    actionsClient,
-    connectorId,
-    actionTypeId,
-    params: {
-      subAction: request.body.subAction,
-      subActionParams: {
-        model: request.body.model,
-        messages,
-        ...(actionTypeId === '.gen-ai'
-          ? { n: 1, stop: null, temperature: 0.2 }
-          : { temperature: 0, stopSequences: [] }),
-      },
-    },
-    logger,
-  });
-
-  telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-    actionTypeId,
-    model: request.body.model,
-    assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
-  });
-  return response.ok({
-    body: result,
-    ...(request.body.subAction === 'invokeAI'
-      ? { headers: { 'content-type': 'application/json' } }
-      : {}),
-  });
-};
 
 export interface LangChainExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;

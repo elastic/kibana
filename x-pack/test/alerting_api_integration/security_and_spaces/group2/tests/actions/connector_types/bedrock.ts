@@ -12,14 +12,9 @@ import {
   bedrockClaude2SuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { PassThrough } from 'stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -429,38 +424,6 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               status: 'ok',
               connector_id: bedrockActionId,
               data: { message: bedrockClaude2SuccessResponse.completion },
-            });
-          });
-
-          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
-            await new Promise<void>((resolve, reject) => {
-              const passThrough = new PassThrough();
-
-              supertest
-                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-                .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-                .on('error', reject)
-                .send({
-                  actionTypeId: '.bedrock',
-                  subAction: 'invokeStream',
-                  message: 'Hello world',
-                  isEnabledKnowledgeBase: false,
-                  isEnabledRAGAlerts: false,
-                  replacements: {},
-                })
-                .pipe(passThrough);
-              const responseBuffer: Uint8Array[] = [];
-              passThrough.on('data', (chunk) => {
-                responseBuffer.push(chunk);
-              });
-
-              passThrough.on('end', () => {
-                const parsed = parseBedrockBuffer(responseBuffer);
-                expect(parsed).to.eql('Hello world, what a unique string!');
-                resolve();
-              });
             });
           });
 
