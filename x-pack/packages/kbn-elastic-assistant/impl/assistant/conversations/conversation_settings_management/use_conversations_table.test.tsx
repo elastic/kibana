@@ -70,14 +70,14 @@ describe('useConversationsTable', () => {
 
     expect(conversationsList[0].title).toBe(alertConvo.title);
     expect(conversationsList[0].connectorTypeTitle).toBe('OpenAI');
-    expect(conversationsList[0].systemPromptTitle).toBe('Default system prompt');
+    expect(conversationsList[0].systemPromptTitle).toBeUndefined();
 
     expect(conversationsList[1].title).toBe(welcomeConvo.title);
     expect(conversationsList[1].connectorTypeTitle).toBe('OpenAI');
-    expect(conversationsList[1].systemPromptTitle).toBe('Default system prompt');
+    expect(conversationsList[1].systemPromptTitle).toBeUndefined();
 
     expect(conversationsList[2].title).toBe(customConvo.title);
     expect(conversationsList[2].connectorTypeTitle).toBe('OpenAI');
-    expect(conversationsList[2].systemPromptTitle).toBe('Default system prompt');
+    expect(conversationsList[2].systemPromptTitle).toBeUndefined();
   });
 });

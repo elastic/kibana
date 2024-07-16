@@ -15,10 +15,7 @@ import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
-import {
-  getConversationApiConfig,
-  getFallbackDefaultSystemPrompt,
-} from '../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 
@@ -119,9 +116,9 @@ export const useConversationsTable = () => {
         );
         const connectorTypeTitle = getConnectorTypeTitle(connector, actionTypeRegistry);
 
-        const systemPrompt: PromptResponse | undefined =
-          allSystemPrompts.find(({ id }) => id === conversation.apiConfig?.defaultSystemPromptId) ??
-          getFallbackDefaultSystemPrompt({ allSystemPrompts });
+        const systemPrompt: PromptResponse | undefined = allSystemPrompts.find(
+          ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
+        );
 
         const systemPromptTitle = systemPrompt?.name || systemPrompt?.id;
 
