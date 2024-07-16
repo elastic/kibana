@@ -15,6 +15,7 @@ import {
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 
 const tilde = '`';
 const codeDelimiter = '```';
@@ -146,27 +147,63 @@ describe('useConversation helpers', () => {
       replacements: {},
       title: '1',
     };
-    test('should return the conversation system prompt if it exists', () => {
+    test('should return the conversation system prompt', () => {
       const result = getDefaultSystemPrompt({ allSystemPrompts, conversation });
 
       expect(result).toEqual(allSystemPrompts[2]);
     });
 
-    test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist within all system prompts', () => {
-      const conversationWithoutSystemPrompt: Conversation = {
+    test('should return undefined if the conversation system prompt does not exist', () => {
+      const result = getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation: {
+          ...conversation,
+          apiConfig: {
+            ...conversation.apiConfig,
+            defaultSystemPromptId: undefined,
+          },
+        } as Conversation,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    test('should return the default (starred) isNewConversationDefault system prompt if conversation id is empty', () => {
+      const testConversation: Conversation = {
         apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
         replacements: {},
         category: 'assistant',
-        id: '4', // this id does not exist within allSystemPrompts
+        id: '',
         messages: [],
         title: '4',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts,
-        conversation: { ...conversationWithoutSystemPrompt, id: '' },
+        conversation: testConversation,
       });
 
       expect(result).toEqual(allSystemPrompts[1]);
+    });
+
+    test('should return the default system prompt if conversation id is empty and no "isNewConversationDefault" prompt found', () => {
+      const testConversation: Conversation = {
+        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+        replacements: {},
+        category: 'assistant',
+        id: '',
+        messages: [],
+        title: '4',
+      };
+      const mockAllSystemPrompts = [
+        { ...defaultSystemPrompt, isNewConversationDefault: false },
+        mockSystemPrompt,
+      ];
+      const result = getDefaultSystemPrompt({
+        allSystemPrompts: mockAllSystemPrompts,
+        conversation: testConversation,
+      });
+
+      expect(result).toEqual(mockAllSystemPrompts[0]);
     });
 
     test('should return undefined if conversation system prompt does not exist and there are no system prompts', () => {
@@ -179,15 +216,14 @@ describe('useConversation helpers', () => {
         conversation: conversationWithoutSystemPrompt,
       });
 
-      expect(result).toEqual(undefined);
+      expect(result).toBeUndefined();
     });
 
     test('should return undefined if conversation system prompt does not exist within all system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         ...conversation,
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-        replacements: {},
-        id: '4', // this id does not exist within allSystemPrompts
+        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai', defaultSystemPromptId: 'xxx' },
+        id: '4',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts: allSystemPromptsNoDefault,
