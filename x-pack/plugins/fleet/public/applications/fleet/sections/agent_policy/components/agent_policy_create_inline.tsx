@@ -62,9 +62,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
     generateNewAgentPolicyWithDefaults({
       name: agentPolicyName,
       has_fleet_server: isFleetServerPolicy,
-      ...(spaceSettings?.allowedNamespacePrefixes?.[0]
-        ? { namespace: spaceSettings.allowedNamespacePrefixes[0] }
-        : {}),
+      namespace: spaceSettings.defaultNamespace,
     })
   );
 
@@ -79,7 +77,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   );
 
   const validation = agentPolicyFormValidation(newAgentPolicy, {
-    allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+    allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
   });
 
   const createAgentPolicy = useCallback(async () => {

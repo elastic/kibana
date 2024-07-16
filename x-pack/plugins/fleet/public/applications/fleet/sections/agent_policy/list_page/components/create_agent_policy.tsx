@@ -52,7 +52,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   const spaceSettings = useSpaceSettingsContext();
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
-      namespace: spaceSettings?.allowedNamespacePrefixes[0] ?? 'default',
+      namespace: spaceSettings.defaultNamespace,
     })
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);

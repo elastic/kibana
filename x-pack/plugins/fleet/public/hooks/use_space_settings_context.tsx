@@ -12,13 +12,14 @@ import { ExperimentalFeaturesService } from '../services';
 import { useAuthz } from './use_authz';
 import { useGetSpaceSettings } from './use_request';
 
-const spaceSettingsContext = createContext<
-  | undefined
-  | {
-      isInitialLoading: boolean;
-      allowedNamespacePrefixes: string[];
-    }
->(undefined);
+const spaceSettingsContext = createContext<{
+  isInitialLoading?: boolean;
+  allowedNamespacePrefixes: string[];
+  defaultNamespace: string;
+}>({
+  allowedNamespacePrefixes: [],
+  defaultNamespace: 'default',
+});
 
 export const SpaceSettingsContextProvider: React.FC<{
   enabled?: boolean;
@@ -38,6 +39,7 @@ export const SpaceSettingsContextProvider: React.FC<{
     return {
       isInitialLoading: spaceSettingsReq.isInitialLoading,
       allowedNamespacePrefixes: spaceSettingsReq.data?.item.allowed_namespace_prefixes ?? [],
+      defaultNamespace: spaceSettingsReq.data?.item.allowed_namespace_prefixes?.[0] ?? 'default',
     };
   }, [spaceSettingsReq.isInitialLoading, spaceSettingsReq.data]);
 

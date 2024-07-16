@@ -54,7 +54,7 @@ export function usePackagePolicySteps({
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
       name: 'Agent policy 1',
-      namespace: spaceSettings?.allowedNamespacePrefixes?.[0] ?? 'default',
+      namespace: spaceSettings.defaultNamespace,
     })
   );
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);

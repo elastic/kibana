@@ -116,13 +116,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
       name: 'Agent policy 1',
-      namespace: spaceSettings?.allowedNamespacePrefixes?.[0] ?? 'default',
+      namespace: spaceSettings.defaultNamespace,
     })
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy, {
-    allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+    allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
   });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
