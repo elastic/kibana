@@ -553,6 +553,8 @@ export function LensEditConfigurationFlyout({
                     query={query}
                     flyoutType="overlay"
                     isTableView={attributes.visualizationType !== 'lnsDatatable'}
+                    initialRowHeight={0}
+                    controlColumnIds={['openDetails']}
                   />
                   <EuiSpacer />
                 </>

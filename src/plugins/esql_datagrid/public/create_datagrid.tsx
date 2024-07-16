@@ -22,10 +22,15 @@ interface ESQLDataGridProps {
   dataView: DataView;
   columns: DatatableColumn[];
   query: AggregateQuery;
+  /**
+   * Optional parameters
+   */
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
   initialColumns?: DatatableColumn[];
   fullHeight?: boolean;
+  initialRowHeight?: number;
+  controlColumnIds?: string[]; // default: ['openDetails', 'select']
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));

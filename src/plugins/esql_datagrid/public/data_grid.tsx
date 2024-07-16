@@ -31,6 +31,8 @@ interface ESQLDataGridProps {
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
   initialColumns?: DatatableColumn[];
+  initialRowHeight?: number;
+  controlColumnIds?: string[];
 }
 type DataTableColumnsMeta = Record<
   string,
@@ -47,7 +49,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
   );
-  const [rowHeight, setRowHeight] = useState<number>(5);
+  const [rowHeight, setRowHeight] = useState<number>(props.initialRowHeight ?? 5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const onSetColumns = useCallback((columns) => {
     setActiveColumns(columns);
@@ -134,8 +137,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}
       sampleSizeState={rows.length}
-      rowsPerPageState={10}
+      rowsPerPageState={rowsPerPage}
+      rowsPerPageOptions={[10, 25]}
       onSetColumns={onSetColumns}
+      onUpdateRowsPerPage={setRowsPerPage}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       showTimeCol
@@ -149,6 +154,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       configRowHeight={5}
       rowHeightState={rowHeight}
       onUpdateRowHeight={setRowHeight}
+      controlColumnIds={props.controlColumnIds}
     />
   );
 };
