@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import {
+import type {
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
@@ -21,10 +21,14 @@ import {
   DataProviderResult,
   PinnedEvent,
   Note,
+} from '../../../../common/api/timeline';
+import {
   RowRendererId,
+  DataProviderType,
+  TimelineStatus,
+  TimelineType,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
 import type { TimelineModel } from '../../store/model';
