@@ -11,42 +11,68 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiBadge,
+  EuiLink,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
 export const SinglePingResult = ({ ping, loading }: { ping?: Ping; loading: boolean }) => {
-  const ip = !loading ? ping?.resolve?.ip : undefined;
-  const durationUs = !loading ? ping?.monitor?.duration?.us ?? NaN : NaN;
-  const rtt = !loading ? ping?.resolve?.rtt?.us ?? NaN : NaN;
-  const url = !loading ? ping?.url?.full : undefined;
-  const responseStatus = !loading ? ping?.http?.response?.status_code : undefined;
+  const ip = ping?.resolve?.ip;
+  const durationUs = ping?.monitor?.duration?.us ?? NaN;
+  const rtt = ping?.resolve?.rtt?.us ?? NaN;
+  const url = ping?.url?.full;
+  const responseStatus = ping?.http?.response?.status_code;
 
   return (
-    <EuiDescriptionList type="column" compressed={true}>
-      <EuiDescriptionListTitle>IP</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{ip}</EuiDescriptionListDescription>
-      <EuiDescriptionListTitle>{DURATION_LABEL}</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {isNaN(durationUs) ? '' : formatTestDuration(durationUs)}
-      </EuiDescriptionListDescription>
-      <EuiDescriptionListTitle>rtt</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        {isNaN(rtt) ? '' : formatTestDuration(rtt)}
-      </EuiDescriptionListDescription>
-      <EuiDescriptionListTitle>URL</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{url}</EuiDescriptionListDescription>
+    <>
+      {loading && <EuiProgress size="xs" color="accent" />}
+      <EuiDescriptionList type="column" compressed={true}>
+        <EuiDescriptionListTitle>
+          {i18n.translate('xpack.synthetics.singlePingResult.ipDescriptionListTitleLabel', {
+            defaultMessage: 'IP',
+          })}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{ip}</EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{DURATION_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {isNaN(durationUs) ? '' : formatTestDuration(durationUs)}
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          {i18n.translate('xpack.synthetics.singlePingResult.rttDescriptionListTitleLabel', {
+            defaultMessage: 'rtt',
+          })}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {isNaN(rtt) ? '' : formatTestDuration(rtt)}
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>
+          {i18n.translate('xpack.synthetics.singlePingResult.urlDescriptionListTitleLabel', {
+            defaultMessage: 'URL',
+          })}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription className="eui-textBreakWord">
+          <EuiLink data-test-subj="syntheticsSinglePingResultLink" href={url}>
+            {url}
+          </EuiLink>
+        </EuiDescriptionListDescription>
 
-      {responseStatus ? (
-        <>
-          <EuiDescriptionListTitle>Response status</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <EuiBadge>{responseStatus}</EuiBadge>
-          </EuiDescriptionListDescription>
-        </>
-      ) : null}
-    </EuiDescriptionList>
+        {responseStatus ? (
+          <>
+            <EuiDescriptionListTitle>
+              {i18n.translate(
+                'xpack.synthetics.singlePingResult.responseStatusDescriptionListTitleLabel',
+                { defaultMessage: 'Response status' }
+              )}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiBadge>{responseStatus}</EuiBadge>
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
+      </EuiDescriptionList>
+    </>
   );
 };
 

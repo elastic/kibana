@@ -188,13 +188,13 @@ const PanelHeader = ({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-        <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
+        <EuiFlexItem>{TitleNode}</EuiFlexItem>
         <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
           <StatusBadge
             status={parseBadgeStatus(latestPing?.summary?.down! > 0 ? 'fail' : 'success')}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={false}>
           <EuiText css={{ whiteSpace: 'nowrap' }} size="xs" color={euiTheme.colors.darkShade}>
             {lastRunTimestamp}
           </EuiText>
