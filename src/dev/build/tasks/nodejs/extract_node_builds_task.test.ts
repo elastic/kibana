@@ -88,6 +88,13 @@ it('runs expected fs operations', async () => {
             "clone": true,
           },
         ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/default/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-arm64/node.exe,
+          Object {
+            "clone": true,
+          },
+        ],
       ],
       "untar": Array [
         Array [
