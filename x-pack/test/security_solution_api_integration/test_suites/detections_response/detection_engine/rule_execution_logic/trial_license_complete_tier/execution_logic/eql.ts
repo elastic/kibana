@@ -929,6 +929,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    // skipped on MKI since feature flags are not supported there
     describe('@skipInServerlessMKI manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
