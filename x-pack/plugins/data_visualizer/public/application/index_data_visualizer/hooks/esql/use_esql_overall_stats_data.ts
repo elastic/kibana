@@ -243,18 +243,17 @@ export const useESQLOverallStatsData = (
   const startFetch = useCallback(
     async function fetchOverallStats() {
       try {
-        if (!fieldStatsRequest) {
+        if (!fieldStatsRequest || fieldStatsRequest.lastRefresh === 0) {
           return;
         }
 
-        if (fieldStatsRequest.lastRefresh === 0) {
-          return;
-        }
+        // Prevent requests from being called again when user clicks refresh consecutively too fast
+        // or when Discover forces a refresh right after query or filter changes
         if (
           fieldStatsRequest.id === undefined &&
           previousExecutionTs.current !== undefined &&
           (fieldStatsRequest.lastRefresh === previousExecutionTs.current ||
-            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 1000)
+            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 800)
         ) {
           return;
         }
