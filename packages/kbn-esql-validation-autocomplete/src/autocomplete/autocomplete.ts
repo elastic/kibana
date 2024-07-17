@@ -1431,12 +1431,7 @@ async function getOptionArgsSuggestions(
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
   const optionDef = getCommandOption(option.name);
-  const {
-    nodeArg,
-    argIndex,
-    lastArg,
-    isIncompleteItem: isIncomplete,
-  } = extractArgMeta(option, node);
+  const { nodeArg, argIndex, lastArg } = extractArgMeta(option, node);
   const suggestions = [];
   const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
 
