@@ -38,6 +38,6 @@ export const SETTINGS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.settingsDescription',
   {
     defaultMessage:
-      "When adding Prompt Context throughout the Security App that may contain sensitive information, you can choose which fields are sent, and whether to enable anonymization for these fields. This will replace the field's value with a random string before sending the conversation. Helpful defaults are provided below.",
+      'Define privacy settings for event data sent to third-party LLM providers. You can choose which fields to include, and which to anonymize by replacing their values with random strings. Helpful defaults are provided below.',
   }
 );
