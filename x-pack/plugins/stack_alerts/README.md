@@ -8,7 +8,7 @@ routes, etc.
 The plugin `setup` and `start` contracts for this plugin are the following
 type, which provides some runtime capabilities.  Each built-in alertType will
 have it's own top-level property in the `IService` interface, if it needs to
-expose functionality.
+expose functionality. 
 
 ```ts
 export interface IService {
