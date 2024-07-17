@@ -29,7 +29,7 @@ export interface GetUsageCounter {
  */
 export interface UsageCountersServiceSetup extends GetUsageCounter {
   /**
-   * Creates and registers a usage counter to collect daily aggregated plugin counter events
+   * Registers a usage counter to collect daily aggregated plugin counter events
    */
   createUsageCounter: (domainId: string, params?: CreateUsageCounterParams) => UsageCounter;
 }

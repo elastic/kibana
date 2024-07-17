@@ -7,35 +7,32 @@
  */
 
 import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs';
 import moment from 'moment';
 import type {
   ISavedObjectsRepository,
-  SavedObjectsFindOptions,
   SavedObjectsRepository,
+  SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { Logger, LogMeta } from '@kbn/core/server';
 
 import { type IUsageCounter, UsageCounter } from './usage_counter';
 import type { UsageCounters } from '../../common';
-import {
-  storeCounter,
-  serializeCounterKey,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-  type UsageCountersSavedObjectAttributes,
-} from './saved_objects';
-import { usageCountersSearchParamsToKueryFilter } from './usage_counters_service_utils';
 import type {
-  UsageCounterSnapshot,
   UsageCountersServiceSetup,
   UsageCountersServiceStart,
   UsageCountersSearchOptions,
   UsageCountersSearchParams,
   UsageCountersSearchResult,
   CreateUsageCounterParams,
-  GetUsageCounter,
 } from './types';
+import {
+  storeCounter,
+  serializeCounterKey,
+  registerUsageCountersSavedObjectTypes,
+} from './saved_objects';
+import { registerUsageCountersRollups } from './rollups';
+import { searchUsageCounters } from './search';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -48,18 +45,23 @@ export interface UsageCountersServiceDeps {
 }
 
 /* internal */
+export interface UsageCountersServiceSetupDeps {
+  savedObjects: SavedObjectsServiceSetup;
+}
+
+/* internal */
 export interface UsageCountersServiceStartDeps {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export class UsageCountersService implements GetUsageCounter {
+export class UsageCountersService {
   private readonly stop$ = new Rx.Subject<void>();
   private readonly retryCount: number;
   private readonly bufferDurationMs: number;
 
   private readonly counterSets = new Map<string, UsageCounter>();
   private readonly source$ = new Rx.Subject<UsageCounters.v1.CounterMetric>();
-  private readonly counter$ = this.source$.pipe(rxOp.multicast(new Rx.Subject()), rxOp.refCount());
+  private readonly counter$ = this.source$.pipe(Rx.multicast(new Rx.Subject()), Rx.refCount());
   private readonly flushCache$ = new Rx.Subject<void>();
   private readonly stopCaching$ = new Rx.Subject<void>();
 
@@ -73,14 +75,14 @@ export class UsageCountersService implements GetUsageCounter {
     this.bufferDurationMs = bufferDurationMs;
   }
 
-  public setup = (): UsageCountersServiceSetup => {
+  public setup = ({ savedObjects }: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
     const cache$ = new Rx.ReplaySubject<UsageCounters.v1.CounterMetric>();
     const storingCache$ = new Rx.BehaviorSubject<boolean>(false);
     // flush cache data from cache -> source
     this.flushCache$
       .pipe(
-        rxOp.exhaustMap(() => cache$),
-        rxOp.takeUntil(this.stop$)
+        Rx.exhaustMap(() => cache$),
+        Rx.takeUntil(this.stop$)
       )
       .subscribe((data) => {
         storingCache$.next(true);
@@ -90,14 +92,17 @@ export class UsageCountersService implements GetUsageCounter {
     // store data into cache when not paused
     storingCache$
       .pipe(
-        rxOp.distinctUntilChanged(),
-        rxOp.switchMap((isStoring) => (isStoring ? Rx.EMPTY : this.source$)),
-        rxOp.takeUntil(Rx.merge(this.stopCaching$, this.stop$))
+        Rx.distinctUntilChanged(),
+        Rx.switchMap((isStoring) => (isStoring ? Rx.EMPTY : this.source$)),
+        Rx.takeUntil(Rx.merge(this.stopCaching$, this.stop$))
       )
       .subscribe((data) => {
         cache$.next(data);
         storingCache$.next(false);
       });
+
+    // register the usage-counter and usage-counters (deprecated) types
+    registerUsageCountersSavedObjectTypes(savedObjects);
 
     return {
       createUsageCounter: this.createUsageCounter,
@@ -111,16 +116,16 @@ export class UsageCountersService implements GetUsageCounter {
     this.counter$
       .pipe(
         /* buffer source events every ${bufferDurationMs} */
-        rxOp.bufferTime(this.bufferDurationMs),
+        Rx.bufferTime(this.bufferDurationMs),
         /**
          * bufferTime will trigger every ${bufferDurationMs}
          * regardless if source emitted anything or not.
          * using filter will stop cut the pipe short
          */
-        rxOp.filter((counters) => Array.isArray(counters) && counters.length > 0),
-        rxOp.map((counters) => Object.values(this.mergeCounters(counters))),
-        rxOp.takeUntil(this.stop$),
-        rxOp.concatMap((counters) => this.storeDate$(counters, this.repository!))
+        Rx.filter((counters) => Array.isArray(counters) && counters.length > 0),
+        Rx.map((counters) => Object.values(this.mergeCounters(counters))),
+        Rx.takeUntil(this.stop$),
+        Rx.concatMap((counters) => this.storeDate$(counters, this.repository!))
       )
       .subscribe((results) => {
         this.logger.debug<UsageCountersLogMeta>('Store counters into savedObjects', {
@@ -132,6 +137,16 @@ export class UsageCountersService implements GetUsageCounter {
 
     this.flushCache$.next();
 
+    // we start a regular, timer-based cleanup
+    registerUsageCountersRollups({
+      logger: this.logger,
+      usageCounters: {
+        getUsageCounterByDomainId: this.getUsageCounterByDomainId,
+      },
+      internalRepository: this.repository,
+      pluginStop$: this.stop$,
+    });
+
     return {
       search: this.search,
     };
@@ -139,6 +154,7 @@ export class UsageCountersService implements GetUsageCounter {
 
   public stop = () => {
     this.stop$.next();
+    this.stop$.complete();
   };
 
   private storeDate$(
@@ -148,8 +164,8 @@ export class UsageCountersService implements GetUsageCounter {
     return Rx.forkJoin(
       counters.map((metric) =>
         Rx.defer(() => storeCounter({ metric, soRepository })).pipe(
-          rxOp.retry(this.retryCount),
-          rxOp.catchError((error) => {
+          Rx.retry(this.retryCount),
+          Rx.catchError((error) => {
             this.logger.warn(error);
             return Rx.of(error);
           })
@@ -175,7 +191,7 @@ export class UsageCountersService implements GetUsageCounter {
     return counterSet;
   };
 
-  getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
+  private getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
     return this.counterSets.get(type);
   };
 
@@ -207,7 +223,7 @@ export class UsageCountersService implements GetUsageCounter {
     }, {} as Record<string, UsageCounters.v1.CounterMetric>);
   };
 
-  public search = async (
+  private search = async (
     params: UsageCountersSearchParams,
     options: UsageCountersSearchOptions = {}
   ): Promise<UsageCountersSearchResult> => {
@@ -215,56 +231,6 @@ export class UsageCountersService implements GetUsageCounter {
       throw new Error('Cannot search before this service is started. Please call start() first.');
     }
 
-    const { namespace: filterNamespace } = params;
-    const { perPage = 100, page = 1 } = options;
-
-    const filter = usageCountersSearchParamsToKueryFilter(params);
-
-    const findParams: SavedObjectsFindOptions = {
-      ...(filterNamespace && { namespaces: [filterNamespace] }),
-      type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-      filter,
-      searchFields: [USAGE_COUNTERS_SAVED_OBJECT_TYPE],
-      perPage,
-      page,
-    };
-    const res = await this.repository.find<UsageCountersSavedObjectAttributes>(findParams);
-
-    const countersMap = new Map<string, UsageCounterSnapshot>();
-    res.saved_objects.forEach(({ attributes, updated_at: updatedAt, namespaces }) => {
-      const namespace = namespaces?.[0];
-      const key = serializeCounterKey({ ...attributes, namespace });
-
-      let counterSnapshot = countersMap.get(key);
-
-      if (!counterSnapshot) {
-        counterSnapshot = {
-          domainId: attributes.domainId,
-          counterName: attributes.counterName,
-          counterType: attributes.counterType,
-          source: attributes.source,
-          ...(namespace && namespaces?.[0] && { namespace: namespaces[0] }),
-          records: [
-            {
-              updatedAt: updatedAt!,
-              count: attributes.count,
-            },
-          ],
-        };
-
-        countersMap.set(key, counterSnapshot!);
-      } else {
-        counterSnapshot.records.push({
-          updatedAt: updatedAt!,
-          count: attributes.count,
-        });
-      }
-    });
-
-    return {
-      counters: Array.from(countersMap.values()),
-    };
+    return await searchUsageCounters(this.repository, params, options);
   };
 }

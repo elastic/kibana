@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { type Subject, ReplaySubject } from 'rxjs';
 import type {
   PluginInitializerContext,
   Logger,
@@ -21,8 +20,6 @@ import type { ICollectorSet } from './collector/types';
 import type { UsageCountersServiceSetup, UsageCountersServiceStart } from './usage_counters/types';
 import { CollectorSet } from './collector';
 import { UsageCountersService } from './usage_counters';
-import { registerUsageCountersSavedObjectTypes } from './usage_counters/saved_objects';
-import { registerUsageCountersRollups } from './usage_counters/rollups';
 
 /** Plugin's setup API **/
 export type UsageCollectionSetup = ICollectorSet & UsageCountersServiceSetup;
@@ -34,11 +31,9 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   private usageCountersService?: UsageCountersService;
-  private pluginStop$: Subject<void>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
-    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(core: CoreSetup): UsageCollectionSetup {
@@ -51,15 +46,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
-    registerUsageCountersSavedObjectTypes(core.savedObjects);
-
     this.usageCountersService = new UsageCountersService({
       logger: this.logger.get('usage-collection', 'usage-counters-service'),
       retryCount: config.usageCounters.retryCount,
       bufferDurationMs: config.usageCounters.bufferDuration.asMilliseconds(),
     });
 
-    const usageCountersSetup = this.usageCountersService.setup();
+    const usageCountersSetup = this.usageCountersService.setup(core);
 
     const router = core.http.createRouter();
     setupRoutes({
@@ -104,12 +97,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     if (config.usageCounters.enabled) {
       const usageCountersStart = this.usageCountersService.start({ savedObjects });
 
-      registerUsageCountersRollups({
-        logger: this.logger,
-        usageCounters: this.usageCountersService,
-        internalRepository: this.savedObjects,
-        pluginStop$: this.pluginStop$,
-      });
       return {
         search: usageCountersStart.search,
       };
@@ -126,8 +113,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
 
   public stop() {
     this.logger.debug('Stopping plugin');
-    this.pluginStop$.next();
-    this.pluginStop$.complete();
     this.usageCountersService?.stop();
   }
 }

@@ -7,15 +7,6 @@
  */
 
 import moment from 'moment';
-
-/**
- * isSavedObjectOlderThan => used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
- */
-jest.mock('../saved_objects', () => ({
-  ...jest.requireActual('../saved_objects'),
-  isSavedObjectOlderThan: jest.fn(),
-}));
-
 import type { Logger, ISavedObjectsRepository, ElasticsearchClient } from '@kbn/core/server';
 import {
   type TestElasticsearchUtils,
@@ -24,6 +15,12 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
+jest.mock('../saved_objects', () => ({
+  ...jest.requireActual('../saved_objects'),
+  // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+  isSavedObjectOlderThan: jest.fn(),
+}));
+
 import {
   isSavedObjectOlderThan,
   serializeCounterKey,
@@ -31,9 +28,9 @@ import {
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from '../rollups/constants';
-import { GetUsageCounter } from '../types';
+import type { GetUsageCounter } from '../types';
 import { rollUsageCountersIndices } from '../rollups/rollups';
-import { CounterAttributes, createCounters, toCounterMetric } from './counter_utils';
+import { type CounterAttributes, createCounters, toCounterMetric } from './counter_utils';
 
 const isSavedObjectOlderThanMock = isSavedObjectOlderThan as jest.MockedFunction<
   typeof isSavedObjectOlderThan

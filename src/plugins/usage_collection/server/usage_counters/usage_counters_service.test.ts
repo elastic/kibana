@@ -7,10 +7,22 @@
  */
 
 /* eslint-disable dot-notation */
-import { UsageCountersService } from './usage_counters_service';
-import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import * as rxOp from 'rxjs';
 import moment from 'moment';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import { UsageCountersService } from './usage_counters_service';
+
+jest.mock('./rollups', () => ({
+  ...jest.requireActual('./rollups'),
+  // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+  registerUsageCountersRollups: jest.fn(),
+}));
+
+import { registerUsageCountersRollups } from './rollups';
+
+const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.MockedFunction<
+  typeof registerUsageCountersRollups
+>;
 
 const tick = () => {
   jest.useRealTimers();
@@ -22,6 +34,7 @@ describe('UsageCountersService', () => {
   const bufferDurationMs = 100;
   const mockNow = 1617954426939;
   const logger = loggingSystemMock.createLogger();
+  const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
 
   beforeEach(() => {
@@ -34,17 +47,41 @@ describe('UsageCountersService', () => {
 
   it('stores data in cache during setup', async () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
-    const { createUsageCounter } = usageCountersService.setup();
+    const { createUsageCounter } = usageCountersService.setup(coreSetup);
 
     const usageCounter = createUsageCounter('test-counter');
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA', namespace: 'second', source: 'ui' });
 
-    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = rxOp.firstValueFrom(
+      usageCountersService['source$'].pipe(rxOp.toArray())
+    );
     usageCountersService['flushCache$'].next();
     usageCountersService['source$'].complete();
     await expect(dataInSourcePromise).resolves.toHaveLength(2);
+  });
+
+  it('registers savedObject types during setup', () => {
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
+    usageCountersService.setup(coreSetup);
+    expect(coreSetup.savedObjects.registerType).toBeCalledTimes(2);
+  });
+
+  it('triggers regular cleanup of old counters on start', () => {
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
+    usageCountersService.start(coreStart);
+
+    expect(registerUsageCountersRollupsMock).toHaveBeenCalledTimes(1);
+    expect(registerUsageCountersRollupsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logger: expect.any(Object),
+        usageCounters: {
+          getUsageCounterByDomainId: expect.any(Function),
+        },
+        internalRepository: expect.any(Object),
+      })
+    );
   });
 
   it('flushes cached data on start', async () => {
@@ -55,14 +92,16 @@ describe('UsageCountersService', () => {
     mockRepository.incrementCounter = mockIncrementCounter;
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
-    const { createUsageCounter } = usageCountersService.setup();
+    const { createUsageCounter } = usageCountersService.setup(coreSetup);
 
     const usageCounter = createUsageCounter('test-counter');
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA', namespace: 'second', source: 'ui' });
 
-    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = rxOp.firstValueFrom(
+      usageCountersService['source$'].pipe(rxOp.toArray())
+    );
     usageCountersService.start(coreStart);
     usageCountersService['source$'].complete();
 
@@ -95,7 +134,7 @@ describe('UsageCountersService', () => {
     mockRepository.incrementCounter = mockIncrementCounter;
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
-    const { createUsageCounter } = usageCountersService.setup();
+    const { createUsageCounter } = usageCountersService.setup(coreSetup);
     jest.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
@@ -172,7 +211,7 @@ describe('UsageCountersService', () => {
     mockRepository.incrementCounter = mockIncrementCounter;
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
-    const { createUsageCounter } = usageCountersService.setup();
+    const { createUsageCounter } = usageCountersService.setup(coreSetup);
     jest.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
@@ -211,7 +250,7 @@ describe('UsageCountersService', () => {
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
 
-    const { createUsageCounter } = usageCountersService.setup();
+    const { createUsageCounter } = usageCountersService.setup(coreSetup);
     jest.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 

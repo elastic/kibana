@@ -7,8 +7,8 @@
  */
 
 import { type KueryNode, nodeTypes } from '@kbn/es-query';
-import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from './saved_objects';
-import type { UsageCountersSearchParams } from './types';
+import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { UsageCountersSearchParams } from '../types';
 
 export function usageCountersSearchParamsToKueryFilter(
   params: UsageCountersSearchParams

@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import type { Logger, ISavedObjectsRepository, ElasticsearchClient } from '@kbn/core/server';
+import type { ISavedObjectsRepository, ElasticsearchClient } from '@kbn/core/server';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -16,9 +16,9 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { serializeCounterKey, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../..';
-import { UsageCountersService } from '../usage_counters_service';
 import { type CounterAttributes, createCounters, toCounterMetric } from './counter_utils';
 import type { UsageCounterSnapshot } from '../types';
+import { searchUsageCounters } from '../search';
 
 // domainId, counterName, counterType, source, count, namespace?
 const FIRST_DAY_COUNTERS: CounterAttributes[] = [
@@ -54,8 +54,7 @@ const THIRD_DAY_COUNTERS: CounterAttributes[] = [
 describe('usage-counters#search', () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
-  let usageCounters: UsageCountersService;
-  let logger: Logger;
+  let internalRepository: ISavedObjectsRepository;
 
   beforeAll(async () => {
     const { startES } = createTestServers({
@@ -69,22 +68,16 @@ describe('usage-counters#search', () => {
     await root.setup();
     const start = await root.start();
 
-    logger = root.logger.get('test daily rollups');
-    const internalRepository = start.savedObjects.createInternalRepository([
+    internalRepository = start.savedObjects.createInternalRepository([
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     ]);
 
     await createTestCounters(internalRepository, start.elasticsearch.client.asInternalUser);
-
-    usageCounters = new UsageCountersService({ logger, retryCount: 1, bufferDurationMs: 5000 });
-
-    usageCounters.setup();
-    usageCounters.start(start);
   });
 
   describe('namespace agnostic search', () => {
     it('returns counters in the default namespace', async () => {
-      const dashboardsNoNamespace = await usageCounters.search({
+      const dashboardsNoNamespace = await searchUsageCounters(internalRepository, {
         domainId: 'dashboards',
       });
 
@@ -121,7 +114,7 @@ describe('usage-counters#search', () => {
 
   describe('namespace search', () => {
     it('returns all counters that match namespace', async () => {
-      const dashboardsFirstNamespace = await usageCounters.search({
+      const dashboardsFirstNamespace = await searchUsageCounters(internalRepository, {
         domainId: 'dashboards',
         namespace: 'first',
       });
@@ -153,7 +146,7 @@ describe('usage-counters#search', () => {
     });
 
     it('does not return counters that belong to other namespaces', async () => {
-      const someDomainSecondNamespace = await usageCounters.search({
+      const someDomainSecondNamespace = await searchUsageCounters(internalRepository, {
         domainId: 'someDomain',
         namespace: 'second',
       });
@@ -163,7 +156,7 @@ describe('usage-counters#search', () => {
 
   describe('specific counter search', () => {
     it('allows searching for specific counters (name + type) on specific namespaces', async () => {
-      const dashboardsByName = await usageCounters.search({
+      const dashboardsByName = await searchUsageCounters(internalRepository, {
         domainId: 'dashboards',
         counterName: 'aDashboardId',
         counterType: 'viewed',
@@ -202,7 +195,7 @@ describe('usage-counters#search', () => {
   describe('date filters', () => {
     it('allow searching for counters that are more recent than the given date', async () => {
       const from = moment('2024-07-03T00:00:00.000Z');
-      const dashboardsFrom = await usageCounters.search({
+      const dashboardsFrom = await searchUsageCounters(internalRepository, {
         domainId: 'dashboards',
         from: '2024-07-03T00:00:00.000Z',
       });
