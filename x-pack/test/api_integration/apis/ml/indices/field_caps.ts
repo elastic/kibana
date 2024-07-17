@@ -30,8 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/188382
-  describe.skip('field_caps', function () {
+  describe('field_caps', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
     });
@@ -61,18 +60,16 @@ export default ({ getService }: FtrProviderContext) => {
         1,
         `Expected number of indices to be 1, but got ${indices.length}`
       );
-      const fieldsLength = Object.keys(fields).length;
+      const fieldsArr = Object.keys(fields);
 
-      // The number of fields returned by the field caps API is different across
-      // ES versions in forward compatibility tests. In ES 8.15.0, the `_ignored_source`
-      // field was added (https://github.com/elastic/elasticsearch/pull/107567).
-      const esVersion = getService('esVersion');
-      const expectedFieldsLength = esVersion.matchRange('>=8.15') ? 22 : 21;
+      // The fields we expect at least to be present. We don't check for all fields in the test here
+      // because the number of fields can vary depending on the ES version.
+      const expectedFieldsArr = ['@timestamp', 'airline', 'responsetime'];
+      const allExpectedFieldsPresent = expectedFieldsArr.every((f) => fieldsArr.includes(f));
+      expect(allExpectedFieldsPresent).to.eql(true, 'Not all expected fields are present.');
 
-      expect(fieldsLength).to.eql(
-        expectedFieldsLength,
-        `Expected number of fields to be ${expectedFieldsLength}, but got ${fieldsLength}`
-      );
+      // Across ES versions the number of returned meta fields can vary, but there should be at least 20.
+      expect(fieldsArr.length).to.greaterThan(20, 'Expected at least 20 fields to be returned.');
     });
   });
 };

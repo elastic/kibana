@@ -8909,11 +8909,7 @@ const BootstrapCommand = {
       const forceInstallStartTime = Date.now();
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["removeYarnIntegrityFileIfExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'));
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['clean']);
-      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline, {
-        env: {
-          RE2_DOWNLOAD_MIRROR: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2'
-        }
-      });
+      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
       timings.push({
         id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime
