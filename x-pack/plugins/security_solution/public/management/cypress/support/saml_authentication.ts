@@ -43,7 +43,7 @@ export const samlAuthentication = async (
         },
         rolesFilename
       );
-      return sessionManager.getSessionCookieForRole(role).then((cookie) => {
+      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role).then((cookie) => {
         return {
           cookie,
           username: hostOptions.username,

@@ -25754,7 +25754,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"password\" | \"bool\" | \"select\" | \"textarea\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
