@@ -172,7 +172,11 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'flyout.initializing.dataStreamDetails.assertBreakdownFieldIsEcs';
+      value: 'flyout.initializing.assertBreakdownFieldIsEcs.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.assertBreakdownFieldIsEcs.done';
       context: DefaultDatasetQualityStateContext;
     }
   | {

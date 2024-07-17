@@ -148,7 +148,9 @@ export const useDatasetDetailsTelemetry = () => {
   } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const loadingState = useSelector(service, (state) => ({
-    dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
+    dataStreamDetailsLoading:
+      state.matches('flyout.initializing.dataStreamDetails.fetching') ||
+      state.matches('flyout.initializing.assertBreakdownFieldIsEcs.fetching'),
   }));
 
   const canUserAccessDashboards = useSelector(

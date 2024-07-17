@@ -357,21 +357,9 @@ export const createPureDatasetQualityControllerStateMachine = (
                           actions: ['storeFlyoutOptions'],
                         },
                         BREAKDOWN_FIELD_CHANGE: {
-                          target: 'assertBreakdownFieldIsEcs',
-                        },
-                      },
-                    },
-                    assertBreakdownFieldIsEcs: {
-                      entry: ['storeFlyoutOptions'],
-                      invoke: {
-                        src: 'assertBreakdownFieldIsEcs',
-                        onDone: {
-                          target: 'done',
-                          actions: ['storeBreakdownFieldIsEcs'],
-                        },
-                        onError: {
-                          target: 'done',
-                          actions: ['notifyAssertBreakdownFieldEcsFailed'],
+                          target:
+                            '#DatasetQualityController.flyout.initializing.assertBreakdownFieldIsEcs.fetching',
+                          actions: ['storeFlyoutOptions'],
                         },
                       },
                     },
@@ -404,6 +392,25 @@ export const createPureDatasetQualityControllerStateMachine = (
                         },
                       },
                     },
+                  },
+                },
+                assertBreakdownFieldIsEcs: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'assertBreakdownFieldIsEcs',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeBreakdownFieldIsEcs'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['notifyAssertBreakdownFieldEcsFailed'],
+                        },
+                      },
+                    },
+                    done: {},
                   },
                 },
               },

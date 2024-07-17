@@ -68,13 +68,13 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     (state) => state.context.flyout.isBreakdownFieldEcs
   );
 
-  const isBreakdownFieldEcsAsserted = useSelector(
-    service,
-    (state) =>
-      state.matches('flyout.initializing.dataStreamDetails.done') &&
-      state.history?.matches('flyout.initializing.dataStreamDetails.assertBreakdownFieldIsEcs') &&
+  const isBreakdownFieldEcsAsserted = useSelector(service, (state) => {
+    return (
+      state.matches('flyout.initializing.assertBreakdownFieldIsEcs.done') &&
+      state.history?.matches('flyout.initializing.assertBreakdownFieldIsEcs.fetching') &&
       isBreakdownFieldEcs !== null
-  );
+    );
+  });
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
