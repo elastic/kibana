@@ -6,9 +6,10 @@
  */
 
 import { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entities-data-access-plugin/common';
 import { EntityDefinition } from '@kbn/entities-schema';
 
-export const SO_ENTITY_DEFINITION_TYPE = 'entity-definition';
+export { SO_ENTITY_DEFINITION_TYPE };
 
 export const entityDefinition: SavedObjectsType = {
   name: SO_ENTITY_DEFINITION_TYPE,

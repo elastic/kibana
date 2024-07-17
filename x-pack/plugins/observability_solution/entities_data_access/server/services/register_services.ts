@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-
-export interface RegisterServicesParams {
-  logger: Logger;
-  deps: {};
-}
+import { RegisterServicesParams } from '../types';
+import { createIndexPatternService } from './index_pattern_service';
 
 export function registerServices(params: RegisterServicesParams) {
-  return {};
+  return {
+    indexPatternService: createIndexPatternService(params),
+  };
 }

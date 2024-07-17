@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-const path = require('path');
+export const ENTITY_BASE_PREFIX = 'entities' as const;
+export const ENTITY_HISTORY = 'history' as const;
+export const ENTITY_LATEST = 'latest' as const;
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../../..'),
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/assets_data_access'],
-};
+export const SO_ENTITY_DEFINITION_TYPE = 'entity-definition';

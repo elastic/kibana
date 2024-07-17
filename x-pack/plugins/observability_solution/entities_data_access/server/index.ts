@@ -6,11 +6,11 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import type { AssetsDataAccessPluginSetup, AssetsDataAccessPluginStart } from './plugin';
+import type { EntitiesDataAccessPluginSetup, EntitiesDataAccessPluginStart } from './plugin';
 
-export type { AssetsDataAccessPluginSetup, AssetsDataAccessPluginStart };
+export type { EntitiesDataAccessPluginSetup, EntitiesDataAccessPluginStart };
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { AssetsDataAccessPlugin } = await import('./plugin');
-  return new AssetsDataAccessPlugin(initializerContext);
+  const { EntitiesDataAccessPlugin } = await import('./plugin');
+  return new EntitiesDataAccessPlugin(initializerContext);
 }

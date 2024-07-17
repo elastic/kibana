@@ -6,11 +6,12 @@
  */
 
 import { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { EntitiesDataAccessPluginStart } from '@kbn/entities-data-access-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EntityManagerConfig } from '../common/config';
 
 export interface EntityManagerServerSetup {
@@ -20,6 +21,7 @@ export interface EntityManagerServerSetup {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   isServerless: boolean;
+  entitiesDataAccess: EntitiesDataAccessPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -33,4 +35,5 @@ export interface EntityManagerPluginSetupDependencies {
 export interface EntityManagerPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  entitiesDataAccess: EntitiesDataAccessPluginStart;
 }

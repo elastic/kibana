@@ -87,6 +87,7 @@ export class EntityManagerServerPlugin
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.entitiesDataAccess = plugins.entitiesDataAccess;
     }
 
     const esClient = core.elasticsearch.client.asInternalUser;

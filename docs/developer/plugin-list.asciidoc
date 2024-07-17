@@ -470,7 +470,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entities_data_access[entitiesDataAccess]
 |WARNING: Missing README.
 
 
