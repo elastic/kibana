@@ -8,7 +8,14 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
-import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTable,
+  DataLoadingState,
+  type SortOrder,
+  renderCustomToolbar,
+} from '@kbn/unified-data-table';
+import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
@@ -129,6 +136,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   return (
     <UnifiedDataTable
       columns={activeColumns}
+      css={css`
+        .unifiedDataTableToolbar {
+          padding: 4px 0px;
+        }
+      `}
       rows={rows}
       columnsMeta={columnsMeta}
       services={services}
@@ -155,6 +167,36 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rowHeightState={rowHeight}
       onUpdateRowHeight={setRowHeight}
       controlColumnIds={props.controlColumnIds}
+      renderCustomToolbar={(customToolbarProps) => {
+        return renderCustomToolbar({
+          ...customToolbarProps,
+          toolbarProps: {
+            ...customToolbarProps.toolbarProps,
+            hasRoomForGridControls: true,
+          },
+          gridProps: {
+            additionalControls: (
+              <EuiLink
+                href="#"
+                color="text"
+                css={css`
+                  display: flex;
+                  align-items: center;
+                `}
+              >
+                <EuiIcon
+                  type="discoverApp"
+                  size="s"
+                  css={css`
+                    margin-right: 4px;
+                  `}
+                />
+                <EuiText size="xs">Open in Discover</EuiText>
+              </EuiLink>
+            ),
+          },
+        });
+      }}
     />
   );
 };
