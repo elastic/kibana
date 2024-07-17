@@ -6,25 +6,22 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   BulkUpdateRulesRequestBody,
   validateUpdateRuleProps,
   BulkCrudRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
 import {
   transformBulkError,
   buildSiemResponse,
   createBulkErrorObject,
 } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
@@ -99,11 +96,11 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await detectionRulesClient.updateRule({
+                const updatedRule = await detectionRulesClient.updateRule({
                   ruleUpdate: payloadRule,
                 });
 
-                return transformValidateBulkError(rule.id, rule);
+                return updatedRule;
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

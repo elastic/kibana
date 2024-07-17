@@ -28,7 +28,10 @@ import {
 import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
+import {
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../common/entity_analytics/risk_engine';
 import { createTransform, getLatestTransformId } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
@@ -70,6 +73,12 @@ export class RiskScoreDataClient {
     this.writerCache.set(namespace, writer);
     return writer;
   }
+
+  public refreshRiskScoreIndex = async () => {
+    await this.options.esClient.indices.refresh({
+      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
+    });
+  };
 
   public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
     getRiskInputsIndex({

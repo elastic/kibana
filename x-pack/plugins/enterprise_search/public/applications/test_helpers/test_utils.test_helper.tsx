@@ -51,6 +51,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     },
   },
   connectorTypes: [],
+  coreSecurity: undefined,
   data: dataPluginMock.createStartContract(),
   esConfig: {
     elasticsearch_host: 'https://your_deployment_url',
@@ -61,6 +62,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   indexMappingComponent: () => {
     return <></>;
   },
+  isSearchHomepageEnabled: false,
   isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
@@ -83,6 +85,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
+  searchHomepage: undefined,
   searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
@@ -91,7 +94,6 @@ export const mockKibanaProps: KibanaLogicProps = {
   share: sharePluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
-  user: null,
 };
 
 type LogicFile = LogicWrapper<any>;
@@ -114,7 +116,7 @@ interface TestHelper {
   defaultMockValues: typeof DEFAULT_VALUES;
   mountLogic: (logicFile: LogicFile, props?: object) => void;
   prepare: (options?: PrepareOptions) => void;
-  render: (children: JSX.Element) => void;
+  render: (children: JSX.Element) => ReturnType<typeof testingLibraryRender>;
 }
 
 export const TestHelper: TestHelper = {
@@ -147,7 +149,7 @@ export const TestHelper: TestHelper = {
     TestHelper.actionsToRun.forEach((action) => {
       action();
     });
-    testingLibraryRender(
+    return testingLibraryRender(
       <I18nProvider>
         <Provider>{children}</Provider>
       </I18nProvider>

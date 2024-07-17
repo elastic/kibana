@@ -120,6 +120,22 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.setValue('euiColorPickerAnchor', hexValue);
   }
 
+  async openSolutionViewSelect() {
+    const solutionViewSelect = await this.testSubjects.find('solutionViewSelect');
+    const classes = await solutionViewSelect.getAttribute('class');
+
+    const isOpen = classes?.includes('isOpen') ?? false;
+    if (!isOpen) {
+      await solutionViewSelect.click();
+    }
+  }
+
+  async changeSolutionView(solution: 'es' | 'oblt' | 'security' | 'classic') {
+    await this.openSolutionViewSelect();
+    const serialized = solution.charAt(0).toUpperCase() + solution.slice(1);
+    await this.testSubjects.click(`solutionView${serialized}Option`);
+  }
+
   async clickShowFeatures() {
     await this.testSubjects.click('show-hide-section-link');
   }
@@ -205,6 +221,11 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async confirmDeletingSpace() {
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
+
+  // Generic for any confirm modal
+  async confirmModal() {
     await this.testSubjects.click('confirmModalConfirmButton');
   }
 

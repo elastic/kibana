@@ -227,6 +227,7 @@ const RiskEnginePreview = () => {
             showDatePicker={true}
             displayStyle={'inPage'}
             submitButtonStyle={'iconOnly'}
+            dataTestSubj="risk-score-preview-search-bar-input"
           />
         )}
       </EuiFormRow>

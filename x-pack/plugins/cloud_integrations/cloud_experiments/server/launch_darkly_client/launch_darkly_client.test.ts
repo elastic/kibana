@@ -7,7 +7,7 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { ldClientMock } from './launch_darkly_client.test.mock';
-import LaunchDarkly from 'launchdarkly-node-server-sdk';
+import LaunchDarkly from '@launchdarkly/node-server-sdk';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 
 describe('LaunchDarklyClient - server', () => {

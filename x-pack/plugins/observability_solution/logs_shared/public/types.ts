@@ -10,8 +10,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { LogsSharedLocators } from '../common/locators';
 import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
@@ -38,6 +38,7 @@ export interface LogsSharedClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  share: SharePluginStart;
   uiActions: UiActionsStart;
 }
 

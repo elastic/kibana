@@ -101,7 +101,7 @@ export function DegradedDocs({
 const degradedDocsTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.flyoutDegradedDocsTooltip"
-    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset."
+    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your data set."
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>

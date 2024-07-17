@@ -25,7 +25,7 @@ const getHref = (k: string) => k;
 describe('Card utils', () => {
   describe('mapToCard', () => {
     beforeEach(() => {
-      ExperimentalFeaturesService.init({});
+      ExperimentalFeaturesService.init({} as any);
     });
 
     it('should use the installed version if available, without prelease', () => {

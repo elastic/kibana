@@ -20,6 +20,7 @@ import { Actions } from '../../../stores/request';
 import {
   AutocompleteType,
   containsUrlParams,
+  getAutoIndentedRequests,
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
@@ -31,9 +32,9 @@ import {
   getUrlPathCompletionItems,
   replaceRequestVariables,
   SELECTED_REQUESTS_CLASSNAME,
+  shouldTriggerSuggestions,
   stringifyRequest,
   trackSentRequests,
-  getAutoIndentedRequests,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -41,6 +42,10 @@ import { StorageQuotaError } from '../../../components/storage_quota_error';
 import { ContextValue } from '../../../contexts';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
+const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
+const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
+const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
+const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -53,10 +58,25 @@ export class MonacoEditorActionsProvider {
     this.highlightedLines = this.editor.createDecorationsCollection();
     this.editor.focus();
 
-    const debouncedHighlightRequests = debounce(() => this.highlightRequests(), 200, {
-      leading: true,
-    });
+    const debouncedHighlightRequests = debounce(
+      () => this.highlightRequests(),
+      DEBOUNCE_HIGHLIGHT_WAIT_MS,
+      {
+        leading: true,
+      }
+    );
     debouncedHighlightRequests();
+
+    const debouncedTriggerSuggestions = debounce(
+      () => {
+        this.triggerSuggestions();
+      },
+      DEBOUNCE_AUTOCOMPLETE_WAIT_MS,
+      {
+        leading: false,
+        trailing: true,
+      }
+    );
 
     // init all listeners
     editor.onDidChangeCursorPosition(async (event) => {
@@ -70,6 +90,13 @@ export class MonacoEditorActionsProvider {
     });
     editor.onDidContentSizeChange(async (event) => {
       await debouncedHighlightRequests();
+    });
+
+    editor.onKeyUp((event) => {
+      // trigger autocomplete on backspace
+      if (event.keyCode === monaco.KeyCode.Backspace) {
+        debouncedTriggerSuggestions();
+      }
     });
   }
 
@@ -191,7 +218,7 @@ export class MonacoEditorActionsProvider {
       const requests = await this.getRequests();
       if (!requests.length) {
         toasts.add(
-          i18n.translate('console.notification.error.noRequestSelectedTitle', {
+          i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
           })
@@ -222,15 +249,21 @@ export class MonacoEditorActionsProvider {
         });
 
         if (saveToHistoryError) {
-          const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
-            defaultMessage: 'Could not save request to Console history.',
-          });
+          const errorTitle = i18n.translate(
+            'console.notification.monaco.error.couldNotSaveRequestTitle',
+            {
+              defaultMessage: 'Could not save request to Console history.',
+            }
+          );
           if (isQuotaExceededError(saveToHistoryError)) {
             const toast = notifications.toasts.addWarning({
-              title: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
-                defaultMessage:
-                  'Request history is full. Clear the console history or disable saving new requests.',
-              }),
+              title: i18n.translate(
+                'console.notification.monaco.error.historyQuotaReachedMessage',
+                {
+                  defaultMessage:
+                    'Request history is full. Clear the console history or disable saving new requests.',
+                }
+              ),
               text: toMountPoint(
                 StorageQuotaError({
                   onClearHistory: () => {
@@ -281,7 +314,7 @@ export class MonacoEditorActionsProvider {
           payload: undefined,
         });
         toasts.addError(e, {
-          title: i18n.translate('console.notification.error.unknownErrorTitle', {
+          title: i18n.translate('console.notification.monaco.error.unknownErrorTitle', {
             defaultMessage: 'Unknown Request Error',
           }),
         });
@@ -589,5 +622,23 @@ export class MonacoEditorActionsProvider {
    */
   public getCurrentPosition(): monaco.IPosition {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
+  }
+
+  private triggerSuggestions() {
+    const model = this.editor.getModel();
+    const position = this.editor.getPosition();
+    if (!model || !position) {
+      return;
+    }
+    const lineContentBefore = model.getValueInRange({
+      startLineNumber: position.lineNumber,
+      startColumn: 1,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+    // if the line is empty or it matches specified regex, trigger suggestions
+    if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
+      this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+    }
   }
 }

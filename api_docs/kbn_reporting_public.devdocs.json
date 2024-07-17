@@ -21,7 +21,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ spaceId?: string | undefined; isDeprecated?: boolean | undefined; title: string; version: string; layout?: { id?: ",
+              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",

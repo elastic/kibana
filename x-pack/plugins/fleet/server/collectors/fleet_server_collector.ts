@@ -60,7 +60,7 @@ export const getFleetServerUsage = async (
     });
 
     for (const item of res.items) {
-      policyIds.add(item.policy_id);
+      item.policy_ids.forEach((id: string) => policyIds.add(id));
     }
 
     if (res.items.length === 0) {

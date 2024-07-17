@@ -24,6 +24,7 @@ import {
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   FLEET_SETUP_LOCK_TYPE,
+  SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -86,8 +87,14 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
-import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
-import { migratePackagePolicySetRequiresRootToV8150 } from './migrations/to_v8_15_0';
+import {
+  packagePolicyV13AdvancedFields,
+  packagePolicyV10OnWriteScanFix,
+} from './model_versions/security_solution';
+import {
+  migratePackagePolicyIdsToV8150,
+  migratePackagePolicySetRequiresRootToV8150,
+} from './migrations/to_v8_15_0';
 
 /*
  * Saved object types and mappings
@@ -114,6 +121,22 @@ export const getSavedObjectTypes = (
           status: { type: 'keyword' },
           uuid: { type: 'text' },
           started_at: { type: 'date' },
+        },
+      },
+    },
+    [SPACE_SETTINGS_SAVED_OBJECT_TYPE]: {
+      name: SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'single',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          // allowed_namespace_prefixes: { enabled: false },
+          // managed_by: { type: 'keyword', index: false },
         },
       },
     },
@@ -457,6 +480,7 @@ export const getSavedObjectTypes = (
           enabled: { type: 'boolean' },
           is_managed: { type: 'boolean' },
           policy_id: { type: 'keyword' },
+          policy_ids: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -584,12 +608,34 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                package: { properties: { requires_root: { type: 'boolean' } } },
+                policy_ids: { type: 'keyword' },
               },
             },
             {
               type: 'data_backfill',
               backfillFn: migratePackagePolicySetRequiresRootToV8150,
+            },
+          ],
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package: { properties: { requires_root: { type: 'boolean' } } },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: migratePackagePolicyIdsToV8150,
+            },
+          ],
+        },
+        '13': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV13AdvancedFields,
             },
           ],
         },
@@ -651,6 +697,10 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          additional_spaces_installed_kibana: {
+            type: 'flattened',
+            index: false,
+          },
           install_started_at: { type: 'date' },
           install_version: { type: 'keyword' },
           install_status: { type: 'keyword' },
@@ -689,6 +739,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 latest_executed_state: { type: 'object', enabled: false },
+              },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                additional_spaces_installed_kibana: { type: 'flattened', index: false },
               },
             },
           ],

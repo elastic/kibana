@@ -9,9 +9,8 @@ import React from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { Query } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react-dom/test-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
@@ -21,7 +20,7 @@ import Expressions from './custom_threshold_rule_expression';
 import { AlertParams, CustomThresholdPrefillOptions } from './types';
 
 jest.mock('../../utils/kibana_react');
-jest.mock('./components/rule_condition_chart/rule_condition_chart', () => ({
+jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
   RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
@@ -62,6 +61,7 @@ describe('Expression', () => {
       currentOptions,
       adHocDataViewList: [],
     };
+    const queryClient = new QueryClient();
     const wrapper = mountWithIntl(
       <QueryClientProvider client={queryClient}>
         <Expressions

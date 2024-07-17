@@ -9,19 +9,27 @@ import objectHash from 'object-hash';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { RuleWithInMemorySuppression, SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule } from '../../rule_schema';
+import type {
+  CompleteRule,
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  ThreatRuleParams,
+} from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
+import { generateId } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
+
+type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
 
 /**
  * wraps suppressed alerts
@@ -59,12 +67,13 @@ export const wrapSuppressedAlerts = ({
       fields: event.fields,
     });
 
-    const id = objectHash([
+    const id = generateId(
       event._index,
-      event._id,
-      `${spaceId}:${completeRule.alertId}`,
-      suppressionTerms,
-    ]);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      event._id!,
+      String(event._version),
+      `${spaceId}:${completeRule.alertId}`
+    );
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 

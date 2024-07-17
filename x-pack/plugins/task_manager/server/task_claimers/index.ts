@@ -6,6 +6,7 @@
  */
 
 import { Subject, Observable } from 'rxjs';
+import { Logger } from '@kbn/core/server';
 
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
@@ -13,7 +14,8 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { claimAvailableTasksDefault } from './strategy_default';
-import { CLAIM_STRATEGY_DEFAULT } from '../config';
+import { claimAvailableTasksMget } from './strategy_mget';
+import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
 
 export interface TaskClaimerOpts {
   getCapacity: (taskType?: string | undefined) => number;
@@ -25,6 +27,7 @@ export interface TaskClaimerOpts {
   unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
+  logger: Logger;
 }
 
 export interface ClaimOwnershipResult {
@@ -39,10 +42,31 @@ export interface ClaimOwnershipResult {
 
 export type TaskClaimerFn = (opts: TaskClaimerOpts) => Observable<ClaimOwnershipResult>;
 
-export function getTaskClaimer(strategy: string): TaskClaimerFn {
+let WarnedOnInvalidClaimer = false;
+
+export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn {
   switch (strategy) {
     case CLAIM_STRATEGY_DEFAULT:
       return claimAvailableTasksDefault;
+    case CLAIM_STRATEGY_MGET:
+      return claimAvailableTasksMget;
   }
-  throw new Error(`Unknown task claiming strategy (${strategy})`);
+
+  if (!WarnedOnInvalidClaimer) {
+    WarnedOnInvalidClaimer = true;
+    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to default`);
+  }
+  return claimAvailableTasksDefault;
+}
+
+export function getEmptyClaimOwnershipResult() {
+  return {
+    stats: {
+      tasksUpdated: 0,
+      tasksConflicted: 0,
+      tasksClaimed: 0,
+      tasksRejected: 0,
+    },
+    docs: [],
+  };
 }

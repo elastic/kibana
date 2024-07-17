@@ -88,6 +88,34 @@ describe('Saved Objects type validator', () => {
       const data = createMockObject({ attributes: { foo: 'hi' } });
       expect(() => validator.validate(data)).not.toThrowError();
     });
+
+    it('validates attributes for types without defined schemas', () => {
+      validator = new SavedObjectsTypeValidator({
+        logger,
+        type,
+        validationMap: {},
+        defaultVersion,
+      });
+      const data = createMockObject({ attributes: undefined });
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
+        `"[attributes]: expected value of type [object] but got [undefined]"`
+      );
+    });
+
+    it('validates top level properties for types without defined schemas', () => {
+      validator = new SavedObjectsTypeValidator({
+        logger,
+        type,
+        validationMap: {},
+        defaultVersion,
+      });
+      const data = createMockObject({ attributes: { foo: 'bar' } });
+      // @ts-expect-error Intentionally malformed object
+      data.updated_at = false;
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
+        `"[updated_at]: expected value of type [string] but got [boolean]"`
+      );
+    });
   });
 
   describe('schema selection', () => {

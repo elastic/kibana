@@ -14,6 +14,7 @@ import {
   RULE_EXECUTION_TYPE_BACKFILL,
   RULE_EXECUTION_TYPE_STANDARD,
 } from '../../../../../../common/translations';
+import { useKibana } from '../../../../../../common/lib/kibana';
 
 interface ExecutionRunTypeFilterProps {
   items: RuleRunType[];
@@ -26,6 +27,8 @@ const ExecutionRunTypeFilterComponent: React.FC<ExecutionRunTypeFilterProps> = (
   selectedItems,
   onChange,
 }) => {
+  const { telemetry } = useKibana().services;
+
   const renderItem = useCallback((item: RuleRunType) => {
     if (item === RuleRunTypeEnum.backfill) {
       return RULE_EXECUTION_TYPE_BACKFILL;
@@ -36,13 +39,21 @@ const ExecutionRunTypeFilterComponent: React.FC<ExecutionRunTypeFilterProps> = (
     }
   }, []);
 
+  const handleSelectionChange = useCallback(
+    (types: RuleRunType[]) => {
+      onChange(types);
+      telemetry.reportEventLogFilterByRunType({ runType: types });
+    },
+    [onChange, telemetry]
+  );
+
   return (
     <MultiselectFilter<RuleRunType>
       dataTestSubj="ExecutionRunTypeFilter"
       title={i18n.FILTER_TITLE}
       items={items}
       selectedItems={selectedItems}
-      onSelectionChange={onChange}
+      onSelectionChange={handleSelectionChange}
       renderItem={renderItem}
     />
   );

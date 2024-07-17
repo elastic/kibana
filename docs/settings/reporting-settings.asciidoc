@@ -245,6 +245,7 @@ Choose the API method used to page through data during CSV export. Valid options
 [NOTE]
 ============
 Each method has its own unique limitations which are important to understand.
+
 * Scroll API: Search is limited to 500 shards at the very most. In cases where data shards are unavailable or time out, the export may return partial data.
 * PIT API: Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or datastreams. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
 ============

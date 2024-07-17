@@ -36,7 +36,7 @@ jest.mock('../utils/create_or_update_index', () => ({
 }));
 
 jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
-jest.spyOn(transforms, 'startTransform').mockResolvedValue(Promise.resolve());
+jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
 describe('RiskScoreDataClient', () => {
   let riskScoreDataClient: RiskScoreDataClient;
@@ -428,11 +428,19 @@ describe('RiskScoreDataClient', () => {
           },
           sync: {
             time: {
-              delay: '2s',
+              delay: '0s',
               field: '@timestamp',
             },
           },
           transform_id: 'risk_score_latest_transform_default',
+          settings: {
+            unattended: true,
+          },
+          _meta: {
+            version: 2,
+            managed: true,
+            managed_by: 'security-entity-analytics',
+          },
         },
       });
     });

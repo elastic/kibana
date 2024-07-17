@@ -1,0 +1,94 @@
+get:
+  summary: Get a runtime field in the default space
+  operationId: getRuntimeFieldDefault
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/parameters/field_name.yaml'
+    - $ref: '../components/parameters/view_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_view:
+                type: object
+              fields:
+                type: array
+                items:
+                  type: object
+          examples:
+            getRuntimeFieldResponse:
+              $ref: '../components/examples/get_runtime_field_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+
+delete:
+  summary: Delete a runtime field from a data view in the default space
+  operationId: deleteRuntimeFieldDefault
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/parameters/field_name.yaml'
+    - $ref: '../components/parameters/view_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+
+post:
+  summary: Update a runtime field in the default space
+  operationId: updateRuntimeFieldDefault
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/parameters/field_name.yaml'
+    - $ref: '../components/parameters/view_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+            type: object
+            required:
+              - runtimeField
+            properties:
+              runtimeField:
+                type: object
+                description: |
+                  The runtime field definition object.
+
+                  You can update following fields:
+
+                  - `type`
+                  - `script`
+        examples:
+          updateRuntimeFieldRequest:
+            $ref: '../components/examples/update_runtime_field_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

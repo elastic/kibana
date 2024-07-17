@@ -10,6 +10,7 @@ export interface AssistantAvatarProps {
   size?: keyof typeof sizeMap;
   children?: ReactNode;
   css?: React.SVGProps<SVGElement>['css'];
+  className?: string;
 }
 
 export const sizeMap = {
@@ -20,7 +21,7 @@ export const sizeMap = {
   xs: 16,
 };
 
-export function AssistantAvatar({ size = 's', css }: AssistantAvatarProps) {
+export function AssistantAvatar({ size = 's', css, className }: AssistantAvatarProps) {
   const sizePx = sizeMap[size];
   return (
     <svg
@@ -30,6 +31,7 @@ export function AssistantAvatar({ size = 's', css }: AssistantAvatarProps) {
       viewBox="0 0 64 64"
       fill="none"
       css={css}
+      className={className}
     >
       <path fill="#F04E98" d="M36 28h24v36H36V28Z" />
       <path fill="#00BFB3" d="M4 46c0-9.941 8.059-18 18-18h6v36h-6c-9.941 0-18-8.059-18-18Z" />

@@ -269,6 +269,7 @@ export const MetricExpression = ({
               helpText={i18n.translate('xpack.infra.waffle.alerting.customMetrics.helpText', {
                 defaultMessage:
                   'Choose a name to help identify your custom metric. Defaults to "<function> of <field name>".',
+                ignoreTag: true,
               })}
             >
               <EuiFieldText

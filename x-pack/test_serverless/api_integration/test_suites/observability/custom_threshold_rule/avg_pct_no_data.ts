@@ -12,10 +12,11 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { omit } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { kbnTestConfig } from '@kbn/test';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
 import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
-import { RoleCredentials } from '../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -24,7 +25,9 @@ export default function ({ getService }: FtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -37,7 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
     let alertId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await dataViewApi.create({
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
@@ -46,14 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
-        .delete(`/api/actions/connector/${actionId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -68,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {
@@ -210,9 +208,10 @@ export default function ({ getService }: FtrProviderContext) {
           docCountTarget: 1,
         });
 
+        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `http://localhost:5620/app/observability/alerts/${alertId}`
+          `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           'Average system.cpu.user.pct reported no data in the last 5m'

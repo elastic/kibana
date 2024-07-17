@@ -18,8 +18,7 @@ import type {
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
-  columnExists,
-  getColumnHit,
+  lookupColumn,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -42,6 +41,7 @@ import {
   getAllFunctions,
   isSingleItem,
   nonNullable,
+  getColumnExists,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -70,6 +70,7 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
   buildValueDefinitions,
+  buildFieldsDefinitionsWithMetadata,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -84,11 +85,20 @@ import {
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
   getQueryForFields,
+  getSourcesFromCommands,
   isAggFunctionUsedAlready,
+  removeQuoteForSuggestedSources,
 } from './helper';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
+type GetDataSourceFn = (sourceName: string) => Promise<
+  | {
+      name: string;
+      dataStreams?: Array<{ name: string; title?: string }>;
+    }
+  | undefined
+>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[]
@@ -203,6 +213,7 @@ export async function suggest(
     resourceRetriever
   );
   const getSources = getSourcesRetriever(resourceRetriever);
+  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -223,6 +234,7 @@ export async function suggest(
       ast,
       astContext,
       getSources,
+      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -281,7 +293,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildFieldsDefinitionsWithMetadata(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -303,7 +315,21 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     const list = (await helper()) || [];
     // hide indexes that start with .
-    return buildSourcesDefinitions(list.filter(({ hidden }) => !hidden).map(({ name }) => name));
+    return buildSourcesDefinitions(
+      list
+        .filter(({ hidden }) => !hidden)
+        .map(({ name, dataStreams, title }) => {
+          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title };
+        })
+    );
+  };
+}
+
+function getDatastreamsForIntegrationRetriever(resourceRetriever?: ESQLCallbacks) {
+  const helper = getSourcesHelper(resourceRetriever);
+  return async (sourceName: string) => {
+    const list = (await helper()) || [];
+    return list.find(({ name }) => name === sourceName);
   };
 }
 
@@ -321,7 +347,9 @@ function workoutBuiltinOptions(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
-  return { skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnHit(nodeArg.name, references)) };
+  return {
+    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg, references)),
+  };
 }
 
 function areCurrentArgsValid(
@@ -388,7 +416,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = getColumnHit(arg.name, references);
+      const hit = lookupColumn(arg, references);
       if (hit) {
         return hit.type;
       }
@@ -475,6 +503,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
+  getDatastreamsForIntegration: GetDataSourceFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -829,9 +858,30 @@ async function getExpressionSuggestionsByType(
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        // FROM <suggest>
-        // @TODO: filter down the suggestions here based on other existing sources defined
-        suggestions.push(...(await getSources()));
+        const index = getSourcesFromCommands(commands, 'index');
+        const canRemoveQuote = isNewExpression && innerText.includes('"');
+
+        // This is going to be empty for simple indices, and not empty for integrations
+        if (index && index.text && index.text !== EDITOR_MARKER) {
+          const source = index.text.replace(EDITOR_MARKER, '');
+          const dataSource = await getDatastreamsForIntegration(source);
+
+          const newDefinitions = buildSourcesDefinitions(
+            dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
+          );
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
+          );
+        } else {
+          // FROM <suggest>
+          // @TODO: filter down the suggestions here based on other existing sources defined
+          const sourcesDefinitions = await getSources();
+          suggestions.push(
+            ...(canRemoveQuote
+              ? removeQuoteForSuggestedSources(sourcesDefinitions)
+              : sourcesDefinitions)
+          );
+        }
       }
     }
   }
@@ -1129,10 +1179,10 @@ async function getFunctionArgsSuggestions(
   const isUnknownColumn =
     arg &&
     isColumnItem(arg) &&
-    !columnExists(arg, {
+    !getColumnExists(arg, {
       fields: fieldsMap,
       variables: variablesExcludingCurrentCommandOnes,
-    }).hit;
+    });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
@@ -1206,7 +1256,7 @@ async function getFunctionArgsSuggestions(
       (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
     );
 
-    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+    const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
 
@@ -1480,7 +1530,10 @@ async function getOptionArgsSuggestions(
   }
 
   if (command.name === 'dissect') {
-    if (option.args.length < 1 && optionDef) {
+    if (
+      option.args.filter((arg) => !(isSingleItem(arg) && arg.type === 'unknown')).length < 1 &&
+      optionDef
+    ) {
       suggestions.push(colonCompleteItem, semiColonCompleteItem);
     }
   }

@@ -12,6 +12,7 @@ const groupBySchema = t.union([
   t.literal('slo.tags'),
   t.literal('status'),
   t.literal('slo.indicator.type'),
+  t.literal('slo.instanceId'),
   t.literal('_index'),
 ]);
 

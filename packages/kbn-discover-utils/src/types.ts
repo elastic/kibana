@@ -10,8 +10,12 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
-export interface EsHitRecord extends Omit<SearchHit, '_source'> {
-  _source?: Record<string, unknown>;
+type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
+
+export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | '_source'> {
+  _index?: DiscoverSearchHit['_index'];
+  _id?: DiscoverSearchHit['_id'];
+  _source?: DiscoverSearchHit['_source'];
 }
 
 /**

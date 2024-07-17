@@ -1,5 +1,5 @@
 post:
-  summary: Resets an SLO.
+  summary: Reset an SLO
   operationId: resetSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the

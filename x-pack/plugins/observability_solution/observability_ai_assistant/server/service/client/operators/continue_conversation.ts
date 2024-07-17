@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
-import { pick, take } from 'lodash';
+import { last, pick, take } from 'lodash';
 import {
   catchError,
   concat,
@@ -133,13 +133,17 @@ function getFunctionDefinitions({
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
-  disableFunctions: boolean;
+  disableFunctions:
+    | boolean
+    | {
+        except: string[];
+      };
 }) {
-  if (functionLimitExceeded || disableFunctions) {
+  if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
-  const systemFunctions = functionClient
+  let systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
     .filter(
@@ -147,6 +151,10 @@ function getFunctionDefinitions({
         !def.visibility ||
         [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
     );
+
+  if (typeof disableFunctions === 'object') {
+    systemFunctions = systemFunctions.filter((fn) => disableFunctions.except.includes(fn.name));
+  }
 
   const actions = functionClient.getActions();
 
@@ -164,7 +172,7 @@ export function continueConversation({
   signal,
   functionCallsLeft,
   requestInstructions,
-  knowledgeBaseInstructions,
+  userInstructions,
   logger,
   disableFunctions,
   tracer,
@@ -175,9 +183,13 @@ export function continueConversation({
   signal: AbortSignal;
   functionCallsLeft: number;
   requestInstructions: Array<string | UserInstruction>;
-  knowledgeBaseInstructions: UserInstruction[];
+  userInstructions: UserInstruction[];
   logger: Logger;
-  disableFunctions: boolean;
+  disableFunctions:
+    | boolean
+    | {
+        except: string[];
+      };
   tracer: LangTracer;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
@@ -193,17 +205,15 @@ export function continueConversation({
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
       registeredInstructions: functionClient.getInstructions(),
-      knowledgeBaseInstructions,
+      userInstructions,
       requestInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
     initialMessages
   );
 
-  const lastMessage =
-    messagesWithUpdatedSystemMessage[messagesWithUpdatedSystemMessage.length - 1].message;
-
-  const isUserMessage = lastMessage.role === MessageRole.User;
+  const lastMessage = last(messagesWithUpdatedSystemMessage)?.message;
+  const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
 
@@ -221,7 +231,7 @@ export function continueConversation({
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
-    const functionCallName = lastMessage.function_call?.name;
+    const functionCallName = lastMessage?.function_call?.name;
 
     if (!functionCallName) {
       // reply from the LLM without a function request,
@@ -314,7 +324,7 @@ export function continueConversation({
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,
-              knowledgeBaseInstructions,
+              userInstructions,
               requestInstructions,
               logger,
               disableFunctions,

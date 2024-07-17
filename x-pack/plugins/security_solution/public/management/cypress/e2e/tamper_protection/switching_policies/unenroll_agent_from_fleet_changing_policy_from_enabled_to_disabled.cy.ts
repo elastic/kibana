@@ -54,9 +54,11 @@ describe(
     beforeEach(() => {
       login();
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
-        createdHost = host as CreateAndEnrollEndpointHostResponse;
-      });
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
+        (host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
+        }
+      );
     });
 
     after(() => {
@@ -79,7 +81,7 @@ describe(
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // Change agent policy and wait for action to be completed
-      reAssignFleetAgentToPolicy(createdHost.agentId, policy.policy_id).then((hasChanged) => {
+      reAssignFleetAgentToPolicy(createdHost.agentId, policy.policy_ids[0]).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
           expect(isUnenrolled).to.eql(true);

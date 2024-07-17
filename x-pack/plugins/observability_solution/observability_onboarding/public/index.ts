@@ -13,6 +13,7 @@ import {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ObservabilityOnboardingPlugin,
   ObservabilityOnboardingPluginSetup,
@@ -28,9 +29,16 @@ export interface ConfigSchema {
   };
 }
 
+export interface AppContext {
+  isServerless: boolean;
+  stackVersion: string;
+}
+
 export interface ObservabilityOnboardingAppServices {
   application: ApplicationStart;
   http: HttpStart;
+  share: SharePluginStart;
+  context: AppContext;
   config: ConfigSchema;
   docLinks: DocLinksStart;
   chrome: ChromeStart;

@@ -33,26 +33,21 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
-        .delete(`/api/actions/connector/${actionId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
+
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },
         conflicts: 'proceed',
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {

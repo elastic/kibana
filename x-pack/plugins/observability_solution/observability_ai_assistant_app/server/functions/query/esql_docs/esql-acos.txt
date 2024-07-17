@@ -1,12 +1,29 @@
-ACOS
+## ACOS
 
-Syntax
-Parameters
-number
-Number between -1 and 1. If null, the function returns null.
-DescriptionReturns the arccosine of n as an angle, expressed in radians.Supported types
-Example
+The `ACOS` function in ES|QL returns the arccosine of a number as an angle, expressed in radians. The number should be between -1 and 1. If the input is null, the function will return null.
+
+### Syntax
+
+`ACOS(number)`
+
+#### Parameters
+
+`number`: A number between -1 and 1. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how to use the `ACOS` function in ES|QL queries:
+
 ```esql
 ROW a=.9
-| EVAL acos=ACOS(a)
+| EVAL acos = ACOS(a)
 ```
+
+In this example, the `ACOS` function is used to calculate the arccosine of 0.9.
+
+```esql
+ROW a=-.5
+| EVAL acos = ACOS(a)
+```
+
+In this example, the `ACOS` function is used to calculate the arccosine of -0.5.

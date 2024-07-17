@@ -59,6 +59,8 @@ import {
   useFleetServerHostsOptions,
 } from './hooks';
 
+import { CustomFields } from './custom_fields';
+
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
@@ -116,6 +118,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -208,6 +211,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   return (
     <>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -253,6 +257,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
@@ -303,7 +308,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <CustomFields
+        updateAgentPolicy={updateAgentPolicy}
+        agentPolicy={agentPolicy}
+        isDisabled={disabled || agentPolicy.is_managed === true}
+      />
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -402,6 +413,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       {AgentTamperProtectionSection}
 
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -463,6 +475,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -503,6 +516,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -543,6 +557,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -583,6 +598,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -625,6 +641,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -709,6 +726,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage

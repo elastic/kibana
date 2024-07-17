@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventTypeOpts } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/core/server';
 
 export interface SendMessageEventData {
   connectorType: string;

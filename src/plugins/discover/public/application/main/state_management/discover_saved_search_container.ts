@@ -341,12 +341,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
     const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
 
-    const isSame =
-      isEqual(prevValue, nextValue) ||
-      // By default, viewMode: undefined is equivalent to documents view
-      // So they should be treated as same
-      (key === 'viewMode' &&
-        (prevValue ?? VIEW_MODE.DOCUMENT_LEVEL) === (nextValue ?? VIEW_MODE.DOCUMENT_LEVEL));
+    const isSame = isEqual(prevValue, nextValue);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
@@ -406,6 +401,16 @@ function getSavedSearchFieldForComparison(
       visContext.attributes.title = 'same';
     }
     return visContext;
+  }
+
+  if (fieldName === 'breakdownField') {
+    return savedSearch.breakdownField || ''; // ignore the difference between an empty string and undefined
+  }
+
+  if (fieldName === 'viewMode') {
+    // By default, viewMode: undefined is equivalent to documents view
+    // So they should be treated as same
+    return savedSearch.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   }
 
   return savedSearch[fieldName];

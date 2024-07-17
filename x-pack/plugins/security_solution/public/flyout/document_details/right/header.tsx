@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutHeader } from '@elastic/eui';
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
@@ -14,7 +15,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
-import { useRightPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
   AlertsCasesTourSteps,
@@ -23,7 +24,7 @@ import {
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 
-export interface PanelHeaderProps {
+export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   /**
    * Id of the tab selected in the parent component to display its content
    */
@@ -40,8 +41,8 @@ export interface PanelHeaderProps {
 }
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  ({ selectedTabId, setSelectedTabId, tabs, ...flyoutHeaderProps }) => {
+    const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
     const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
 
@@ -88,7 +89,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
     );
 
     return (
-      <FlyoutHeader>
+      <FlyoutHeader {...flyoutHeaderProps}>
         {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
         <EuiSpacer size="m" />
         <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>

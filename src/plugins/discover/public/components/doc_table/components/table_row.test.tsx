@@ -113,16 +113,16 @@ describe('Doc table row component', () => {
   describe('details row', () => {
     it('should be empty by default', () => {
       const component = mountComponent(defaultProps);
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeFalsy();
     });
 
     it('should expand the detail row when the toggle arrow is clicked', () => {
       const component = mountComponent(defaultProps);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
 
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeFalsy();
       toggleButton.simulate('click');
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeTruthy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeTruthy();
     });
 
     it('should hide the single/surrounding views for ES|QL mode', () => {
@@ -133,7 +133,7 @@ describe('Doc table row component', () => {
       const component = mountComponent(props);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
       toggleButton.simulate('click');
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').text()).toBe('Expanded result');
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').text()).toBe('Expanded result');
       expect(findTestSubject(component, 'docTableRowAction').length).toBeFalsy();
     });
   });

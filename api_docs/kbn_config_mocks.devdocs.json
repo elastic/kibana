@@ -268,7 +268,7 @@
           "Observable",
           "<",
           "Config",
-          ">, [], unknown>; setSchema: jest.MockInstance<void, [path: ",
+          ">, [], unknown>; setGlobalStripUnknownKeys: jest.MockInstance<void, [stripUnknownKeys: boolean], unknown>; setSchema: jest.MockInstance<void, [path: ",
           {
             "pluginId": "@kbn/config",
             "scope": "common",

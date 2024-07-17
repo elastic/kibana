@@ -57,7 +57,7 @@ jest.mock('../utils/create_or_update_index', () => ({
 }));
 
 jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
-jest.spyOn(transforms, 'startTransform').mockResolvedValue(Promise.resolve());
+jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
 describe('RiskEngineDataClient', () => {
   for (const useDataStreamForAlerts of [false, true]) {

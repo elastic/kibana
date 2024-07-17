@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { LeftPanelTour } from './tour';
-import { LeftPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -31,15 +31,15 @@ const mockStore = createMockStore(undefined, undefined, undefined, {
   ...storageMock,
 });
 
-const renderLeftPanelTour = (context: LeftPanelContext = mockContextValue) =>
+const renderLeftPanelTour = (context: DocumentDetailsContext = mockContextValue) =>
   render(
     <TestProviders store={mockStore}>
-      <LeftPanelContext.Provider value={context}>
+      <DocumentDetailsContext.Provider value={context}>
         <LeftPanelTour />
         {Object.values(FLYOUT_TOUR_CONFIG_ANCHORS).map((i, idx) => (
           <div key={idx} data-test-subj={i} />
         ))}
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

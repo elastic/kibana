@@ -48,11 +48,11 @@ describe('wrapSuppressedNewTermsAlerts', () => {
       primaryTimestamp: '@timestamp',
     });
 
-    expect(alerts[0]._id).toEqual('3b67aa2ebdc628afc98febc65082d2d83a116d79');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('3b67aa2ebdc628afc98febc65082d2d83a116d79');
+    expect(alerts[0]._id).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1']);
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/app/security/alerts/redirect/3b67aa2ebdc628afc98febc65082d2d83a116d79?index=.alerts-security.alerts-default'
+      'http://somekibanabaseurl.com/app/security/alerts/redirect/a36d9fe6fe4b2f65058fb1a487733275f811af58?index=.alerts-security.alerts-default'
     );
     expect(alerts[0]._source[ALERT_SUPPRESSION_DOCS_COUNT]).toEqual(0);
     expect(alerts[0]._source[ALERT_INSTANCE_ID]).toEqual(
@@ -83,10 +83,10 @@ describe('wrapSuppressedNewTermsAlerts', () => {
       primaryTimestamp: '@timestamp',
     });
 
-    expect(alerts[0]._id).toEqual('3e0436a03b735af12d6e5358cb36d2c3b39425a8');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('3e0436a03b735af12d6e5358cb36d2c3b39425a8');
+    expect(alerts[0]._id).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/app/security/alerts/redirect/3e0436a03b735af12d6e5358cb36d2c3b39425a8?index=.alerts-security.alerts-default'
+      'http://somekibanabaseurl.com/app/security/alerts/redirect/a36d9fe6fe4b2f65058fb1a487733275f811af58?index=.alerts-security.alerts-default'
     );
     expect(alerts[0]._source[ALERT_SUPPRESSION_DOCS_COUNT]).toEqual(0);
     expect(alerts[0]._source[ALERT_INSTANCE_ID]).toEqual(
@@ -111,10 +111,10 @@ describe('wrapSuppressedNewTermsAlerts', () => {
       primaryTimestamp: '@timestamp',
     });
 
-    expect(alerts[0]._id).toEqual('f8a029df9c99e245dc83977153a0612178f3d2e8');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('f8a029df9c99e245dc83977153a0612178f3d2e8');
+    expect(alerts[0]._id).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/f8a029df9c99e245dc83977153a0612178f3d2e8?index=.alerts-security.alerts-otherSpace'
+      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/f7877a31b1cc83373dbc9ba5939ebfab1db66545?index=.alerts-security.alerts-otherSpace'
     );
   });
 
@@ -132,11 +132,11 @@ describe('wrapSuppressedNewTermsAlerts', () => {
       primaryTimestamp: '@timestamp',
     });
 
-    expect(alerts[0]._id).toEqual('cb8684ec72592346d32839b1838e4f4080dc052e');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('cb8684ec72592346d32839b1838e4f4080dc052e');
+    expect(alerts[0]._id).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.2']);
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/cb8684ec72592346d32839b1838e4f4080dc052e?index=.alerts-security.alerts-otherSpace'
+      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea?index=.alerts-security.alerts-otherSpace'
     );
   });
 });

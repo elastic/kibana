@@ -143,6 +143,11 @@ export const registerExportRoute = (
   router.post(
     {
       path: '/_export',
+      options: {
+        summary: `Export saved objects`,
+        tags: ['oas-tag:saved objects'],
+        access: 'public',
+      },
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),

@@ -27,7 +27,7 @@
         "label": "bundle",
         "description": [],
         "signature": [
-          "({ sourceGlob, outputFilePath, specInfo, }: ",
+          "({ sourceGlob, outputFilePath, options, }: ",
           {
             "pluginId": "@kbn/openapi-bundler",
             "scope": "common",
@@ -46,7 +46,7 @@
             "id": "def-common.bundle.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled-{version}.schema.yaml',\n  specInfo,\n}",
+            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled-{version}.schema.yaml',\n  options,\n}",
             "description": [],
             "signature": [
               {
@@ -103,15 +103,13 @@
           },
           {
             "parentPluginId": "@kbn/openapi-bundler",
-            "id": "def-common.BundlerConfig.specInfo",
+            "id": "def-common.BundlerConfig.options",
             "type": "Object",
             "tags": [],
-            "label": "specInfo",
+            "label": "options",
             "description": [],
             "signature": [
-              "Omit<Partial<",
-              "OpenAPIV3",
-              ".InfoObject>, \"version\"> | undefined"
+              "BundleOptions | undefined"
             ],
             "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,

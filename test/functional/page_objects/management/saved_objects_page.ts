@@ -357,7 +357,7 @@ export class SavedObjectsPageObject extends FtrService {
           error: await error.getVisibleText(),
         };
       })
-    );
+    ).then((result) => result.sort((a, b) => a.id.localeCompare(b.id)));
   }
 
   async getTableSummary() {

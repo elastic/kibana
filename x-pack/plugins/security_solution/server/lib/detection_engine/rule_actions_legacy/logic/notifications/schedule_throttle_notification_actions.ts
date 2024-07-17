@@ -69,7 +69,7 @@ export const scheduleThrottledNotificationActions = async ({
       kibanaSiemAppUrl,
     });
 
-    logger.debug(
+    logger.debug(() =>
       [
         `The notification throttle resultsLink created is: ${resultsLink}.`,
         ' Notification throttle is querying the results using',
@@ -117,7 +117,7 @@ export const scheduleThrottledNotificationActions = async ({
 
     // Subtract any deconflicted differences from the total count.
     const signalsCount = signalsCountFromResults + signals.length - deconflictedDiff;
-    logger.debug(
+    logger.debug(() =>
       [
         `The notification throttle query result size before deconflicting duplicates is: ${resultsFlattened.length}.`,
         ` The notification throttle passed in signals size before deconflicting duplicates is: ${signals.length}.`,

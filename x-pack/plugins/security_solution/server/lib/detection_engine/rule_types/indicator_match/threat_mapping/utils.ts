@@ -243,7 +243,8 @@ export const getSignalValueMap = ({
       if (!acc[field][fieldValue]) {
         acc[field][fieldValue] = [];
       }
-      acc[field][fieldValue].push(event._id);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      acc[field][fieldValue].push(event._id!);
     });
     return acc;
   }, {});

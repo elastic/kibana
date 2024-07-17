@@ -28,7 +28,7 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/rule_management/detection_rules_client';
+import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 
 export interface IRequestContextFactory {
@@ -65,8 +65,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [, startPlugins] = await core.getStartServices();
-    const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    const [_, startPlugins] = await core.getStartServices();
+    const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
 
@@ -114,7 +114,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getDetectionRulesClient: () => {
+      getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
           ml: plugins.ml,
@@ -122,11 +122,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
         });
 
-        return createDetectionRulesClient(
-          startPlugins.alerting.getRulesClientWithRequest(request),
-          mlAuthz
-        );
-      },
+        return createDetectionRulesClient({
+          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          savedObjectsClient: coreContext.savedObjects.client,
+          mlAuthz,
+        });
+      }),
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
@@ -148,7 +149,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           return null;
         }
 
-        const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
+        const username = coreContext.security.authc.getCurrentUser()?.username || 'elastic';
         return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
 
