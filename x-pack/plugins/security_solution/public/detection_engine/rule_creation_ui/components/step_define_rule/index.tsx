@@ -472,6 +472,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       indexPatternsFields: indexPattern.fields,
     });
 
+  /** Suppression fields being selected is a special case for our form logic, as we can't
+   * disable these fields and leave users in a bad state that they cannot change.
+   * The exception is threshold rules, which use an existing threshold field for the same
+   * purpose and so are treated as if the field is always selected.  */
+  const areSuppressionFieldsSelected = !isThresholdRule && groupByFields.length > 0;
+
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
@@ -489,7 +495,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     areSuppressionFieldsDisabledBySequence ||
     areSuppressionFieldsDisabledByMlFields;
 
-  const isSuppressionGroupByDisabled = areSuppressionFieldsDisabled || isEsqlSuppressionLoading;
+  const isSuppressionGroupByDisabled =
+    (areSuppressionFieldsDisabled || isEsqlSuppressionLoading) && !areSuppressionFieldsSelected;
 
   const suppressionGroupByDisabledText = useMemo(() => {
     if (areSuppressionFieldsDisabledBySequence) {
@@ -523,8 +530,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * - Eql sequence is used
    * - ML Field information is not available
    */
-  const isGroupByChildrenDisabled =
-    areSuppressionFieldsDisabled || (isThresholdRule ? false : !groupByFields?.length);
+  const isGroupByChildrenDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   /**
    * Per rule execution radio option is disabled
@@ -562,7 +568,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *  - when no group by fields selected
    * -  Eql sequence is used and suppression fields are in the default state
    * */
-  const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !groupByFields.length;
+  const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
