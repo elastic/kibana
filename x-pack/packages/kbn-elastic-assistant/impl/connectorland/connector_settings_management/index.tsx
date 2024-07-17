@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { useAssistantContext } from '../../assistant_context';
 
@@ -32,13 +33,17 @@ const ConnectorsSettingsManagementComponent: React.FC = () => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-      <EuiTitle size={'s'}>
+      <EuiTitle size="xs">
         <h2>{i18n.CONNECTOR_SETTINGS_MANAGEMENT_TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>{i18n.CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION}</EuiText>
+        <EuiFlexItem
+          css={css`
+            align-self: center;
+          `}
+        >
+          <EuiText size="m">{i18n.CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION}</EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

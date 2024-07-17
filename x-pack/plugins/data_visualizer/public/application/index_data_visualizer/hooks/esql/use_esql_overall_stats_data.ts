@@ -159,7 +159,6 @@ const getESQLDocumentCountStats = async (
       handleError({
         request,
         error,
-        onError,
         title: i18n.translate('xpack.dataVisualizer.esql.docCountNoneTimeseriesError', {
           defaultMessage: `Error getting total count for ES|QL data:`,
         }),
@@ -193,6 +192,7 @@ const fieldStatsErrorTitle = i18n.translate(
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
+        id?: string;
         earliest: number | undefined;
         latest: number | undefined;
         aggInterval: TimeBucketsInterval;
@@ -214,7 +214,10 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const previousExecutionTs = useRef<number | undefined>(undefined);
   const previousDocCountRequest = useRef('');
+  const previousError = useRef<Error | undefined>();
+
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
@@ -224,27 +227,46 @@ export const useESQLOverallStatsData = (
     getInitialProgress()
   );
   const onError = useCallback(
-    (error, title?: string) =>
+    (error: Error, title?: string) => {
+      // If a previous error already occured, no need to show the toast again
+      if (previousError.current) {
+        return;
+      }
+      previousError.current = error;
       toasts.addError(error, {
         title: title ?? fieldStatsErrorTitle,
-      }),
+      });
+    },
     [toasts]
   );
 
   const startFetch = useCallback(
     async function fetchOverallStats() {
       try {
-        cancelRequest();
-
-        if (!fieldStatsRequest) {
+        if (!fieldStatsRequest || fieldStatsRequest.lastRefresh === 0) {
           return;
         }
+
+        // Prevent requests from being called again when user clicks refresh consecutively too fast
+        // or when Discover forces a refresh right after query or filter changes
+        if (
+          fieldStatsRequest.id === undefined &&
+          previousExecutionTs.current !== undefined &&
+          (fieldStatsRequest.lastRefresh === previousExecutionTs.current ||
+            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 800)
+        ) {
+          return;
+        }
+        previousExecutionTs.current = fieldStatsRequest.lastRefresh;
+
+        cancelRequest();
+
         setOverallStatsProgress({
           ...getInitialProgress(),
           isRunning: true,
           error: undefined,
         });
-
+        previousError.current = undefined;
         const {
           searchQuery,
           intervalMs,
@@ -453,6 +475,11 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        setOverallStatsProgress({
+          loaded: 100,
+          isRunning: false,
+          error,
+        });
         setQueryHistoryStatus(false);
         // If error already handled in sub functions, no need to propogate
         if (error.name !== 'AbortError' && error.handled !== true) {
