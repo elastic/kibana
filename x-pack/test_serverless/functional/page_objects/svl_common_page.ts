@@ -75,7 +75,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
      */
     async loginWithRole(role: string) {
       log.debug(`Fetch the cookie for '${role}' role`);
-      const sidCookie = await svlUserManager.getSessionCookieForRole(role);
+      const sidCookie = await svlUserManager.getInteractiveUserSessionCookieWithRoleScope(role);
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,

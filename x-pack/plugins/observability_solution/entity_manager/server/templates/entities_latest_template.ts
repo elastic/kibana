@@ -23,6 +23,7 @@ export const getEntitiesLatestIndexTemplateConfig = (
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
     ecs_version: '8.0.0',
+    managed: true,
   },
   ignore_missing_component_templates: getCustomLatestTemplateComponents(definitionId),
   composed_of: [

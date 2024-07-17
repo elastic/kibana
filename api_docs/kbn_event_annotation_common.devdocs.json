@@ -569,6 +569,18 @@
       },
       {
         "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.defaultRangeAnnotationLabel",
+        "type": "string",
+        "tags": [],
+        "label": "defaultRangeAnnotationLabel",
+        "description": [],
+        "path": "packages/kbn-event-annotation-common/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
         "id": "def-common.EVENT_ANNOTATION_GROUP_TYPE",
         "type": "string",
         "tags": [],
