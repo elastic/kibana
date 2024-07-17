@@ -450,7 +450,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as TParameters,
         },
       },
       user: {
