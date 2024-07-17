@@ -482,6 +482,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const areSuppressionFieldsDisabledByMlFields =
     isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length);
 
+  const isThresholdSuppressionDisabled = isThresholdRule && !enableThresholdSuppression;
+
   const areSuppressionFieldsDisabled =
     !isAlertSuppressionLicenseValid ||
     areSuppressionFieldsDisabledBySequence ||
@@ -540,8 +542,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * - Eql sequence is used and suppression fields are in the default state
    * - ML Field information is not available
    */
-  const isPerTimePeriodDisabled =
-    areSuppressionFieldsDisabled || (isThresholdRule && !enableThresholdSuppression);
+  const isPerTimePeriodDisabled = areSuppressionFieldsDisabled || isThresholdSuppressionDisabled;
 
   /**
    * Suppression duration is disabled when
@@ -552,7 +553,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * - ML Field information is not available
    * */
   const isDurationDisabled =
-    areSuppressionFieldsDisabled || (!enableThresholdSuppression && groupByFields?.length === 0);
+    !areSuppressionFieldsSelected &&
+    (areSuppressionFieldsDisabled || isThresholdSuppressionDisabled);
 
   /**
    * Suppression missing fields is disabled when
