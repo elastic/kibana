@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -25,16 +25,16 @@ export interface TryInConsoleButtonProps {
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
   showIcon?: boolean;
-  link?: boolean;
+  type?: 'link' | 'button' | 'emptyButton';
 }
 export const TryInConsoleButton = ({
   request,
   application,
   consolePlugin,
   sharePlugin,
-  content,
+  content = TRY_IN_CONSOLE,
   showIcon = true,
-  link = false,
+  type = 'emptyButton',
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -64,22 +64,27 @@ export const TryInConsoleButton = ({
     }
   };
 
-  if (link) {
-    return (
-      <EuiLink data-test-subj="tryInConsoleLink" onClick={onClick}>
-        {content ?? TRY_IN_CONSOLE}
-      </EuiLink>
-    );
-  }
+  const commonProps = {
+    'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
+    onClick,
+  };
+  const iconType = showIcon ? 'popout' : undefined;
 
-  return (
-    <EuiButtonEmpty
-      data-test-subj="tryInConsoleButton"
-      onClick={onClick}
-      iconType={showIcon ? 'popout' : undefined}
-      size="s"
-    >
-      {content ?? TRY_IN_CONSOLE}
-    </EuiButtonEmpty>
-  );
+  switch (type) {
+    case 'link':
+      return <EuiLink {...commonProps}>{content}</EuiLink>;
+    case 'button':
+      return (
+        <EuiButton color="primary" iconType={iconType} size="s" {...commonProps}>
+          {content}
+        </EuiButton>
+      );
+    case 'emptyButton':
+    default:
+      return (
+        <EuiButtonEmpty iconType={iconType} size="s" {...commonProps}>
+          {content}
+        </EuiButtonEmpty>
+      );
+  }
 };
