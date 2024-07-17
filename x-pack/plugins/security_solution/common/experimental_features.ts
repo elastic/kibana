@@ -156,7 +156,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI assistant on rule creation form when query has error
    */
-  AIAssistantOnRuleCreationFormEnabled: false,
+  AIAssistantOnRuleCreationFormEnabled: true,
 
   /**
    * Disables the timeline save tour.
@@ -167,7 +167,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables alerts suppression for ES|QL rules
    */
-  alertSuppressionForEsqlRuleEnabled: false,
+  alertSuppressionForEsqlRuleEnabled: true,
 
   /**
    * Enables the risk engine privileges route
@@ -178,7 +178,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables alerts suppression for machine learning rules
    */
-  alertSuppressionForMachineLearningRuleEnabled: false,
+  alertSuppressionForMachineLearningRuleEnabled: true,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -247,12 +247,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new rule's bulk action to manage custom highlighted fields
    */
-  bulkCustomHighlightedFieldsEnabled: false,
+  bulkCustomHighlightedFieldsEnabled: true,
 
   /**
    * Enables the manual rule run
    */
-  manualRuleRunEnabled: false,
+  manualRuleRunEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
