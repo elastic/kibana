@@ -8,7 +8,12 @@
 import { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
+import {
+  findEntityDefinitions,
+  getEntityDefinitionState,
+} from '../../lib/entities/find_entity_definition';
+import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
+import { EntityDefinitionWithState } from '../../lib/entities/types';
 
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,

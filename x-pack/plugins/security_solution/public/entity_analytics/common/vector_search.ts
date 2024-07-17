@@ -10,9 +10,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
 import { ENTITY_DEFINITION_ID } from './entity_model';
 
-const PIPELINE_ID = `${ENTITY_DEFINITION_ID}@custom`;
+const PIPELINE_ID = `${ENTITY_DEFINITION_ID}-latest@custom`;
 const MODEL_FIELD = 'text_field';
-const TARGET_INDEX_FIELD = 'entity.identityFields.user.name';
+const TARGET_INDEX_FIELD = 'user.name';
 const TARGET_INDEX_EMBEDDINGS_FIELD = `test_user_name_embeddings`;
 const MODEL_ID = '.multilingual-e5-small';
 
@@ -112,16 +112,15 @@ const getModelAPI = (http: HttpSetup) =>
 
 const installModelAPI = (http: HttpSetup) =>
   http.fetch(`/internal/ml/trained_models/install_elastic_trained_model/${MODEL_ID}`, {
-    version: '1',
     method: 'POST',
     headers: {
       'elastic-api-version': 1,
     },
-    // body: JSON.stringify({
-    //   input: {
-    //     field_names: ['text_field'],
-    //   },
-    // }),
+    body: JSON.stringify({
+      input: {
+        field_names: ['text_field'],
+      },
+    }),
   });
 
 const deployModelAPI = (http: HttpSetup) =>
