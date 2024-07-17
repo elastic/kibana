@@ -157,7 +157,7 @@ export interface CodeEditorProps {
   accessibilityOverlayEnabled?: boolean;
 
   /**
-   * Enables the Search bar functionality in the editor. Defaults to `false`.
+   * Enables the Search bar functionality in the editor. Disabled by default.
    */
   enableFindAction?: boolean;
 
@@ -193,7 +193,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
   accessibilityOverlayEnabled = true,
-  enableFindAction = false,
+  enableFindAction,
   dataTestSubj,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
