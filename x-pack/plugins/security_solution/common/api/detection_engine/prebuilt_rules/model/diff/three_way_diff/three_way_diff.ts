@@ -114,9 +114,9 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
 
   /**
    * Enum of possible conflict outcomes of a three-way diff:
-   *   - NON_SOLVABLE: current != target and we couldn't automatically resolve the conflict between them
-   *   - SOLVABLE: current != target and we automatically resolved the conflict between them
-   *   - NO:
+   *   - NON_SOLVABLE_CONFLICT: current != target and we couldn't automatically resolve the conflict between them
+   *   - SOLVABLE_CONFLICT: current != target and we automatically resolved the conflict between them
+   *   - NO_CONFLICT:
    *       - current == target (value won't change)
    *       - current != target && current == base (stock rule will get a new value)
    *
