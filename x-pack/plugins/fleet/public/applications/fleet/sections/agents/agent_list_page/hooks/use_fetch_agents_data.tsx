@@ -41,6 +41,7 @@ export function useFetchAgentsData() {
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
   const defaultKuery: string = (urlParams.kuery as string) || '';
+  const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -64,6 +65,7 @@ export function useFetchAgentsData() {
     'unhealthy',
     'updating',
     'offline',
+    ...(urlHasInactive ? ['inactive'] : []),
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -103,11 +105,7 @@ export function useFetchAgentsData() {
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
 
   kuery =
-    includeUnenrolled && kuery
-      ? `status:unenrolled or (${kuery})`
-      : includeUnenrolled
-      ? `status:*`
-      : kuery;
+    includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
 
   const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<

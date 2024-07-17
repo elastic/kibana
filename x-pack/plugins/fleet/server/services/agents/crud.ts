@@ -265,10 +265,7 @@ export async function getAgentsByKuery(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
-  if (
-    !kuery?.toLowerCase().includes('status:*') &&
-    !kuery?.toLowerCase().includes('status:unenrolled')
-  ) {
+  if (!kuery?.toLowerCase().includes('status:*')) {
     filters.push(ENROLLED_AGENT_CONDITION);
   }
 
