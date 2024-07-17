@@ -48,7 +48,7 @@ describe('LoadWindow', () => {
       expected: 1,
     },
   ])(
-    '#getAverage produces the correct average for observations: $observations',
+    '#getAverage produces the correct average for $averageLast observations. Observations added: $observations',
     ({ observations, averageLast, expected }) => {
       const lw = new LoadWindow(WINDOW_SIZE);
       // reverse so that our test observations are in the order they appear above
