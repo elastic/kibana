@@ -169,15 +169,20 @@ export default function ({ getService }: FtrProviderContext) {
         assertTransformsResponseBody(body, expectedTransforms);
       });
 
-      it('creates ingest pipeline', async () => {
+      it('creates ingest pipelines', async () => {
         const sloRevision = 1;
-        const pipelineResponse = await esClient.ingest.getPipeline({
+        const rollupPipelineResponse = await esClient.ingest.getPipeline({
           id: getSLOSummaryPipelineId(sloId, sloRevision),
         });
-        const expectedPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+        const expectedRollupPipeline = `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
+        expect(rollupPipelineResponse[expectedRollupPipeline]).not.to.be(undefined);
 
-        expect(pipelineResponse[expectedPipeline]).not.to.be(undefined);
-        expect(pipelineResponse[expectedPipeline].description).to.be(
+        const summaryPipelineResponse = await esClient.ingest.getPipeline({
+          id: getSLOSummaryPipelineId(sloId, sloRevision),
+        });
+        const expectedSummaryPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+        expect(summaryPipelineResponse[expectedSummaryPipeline]).not.to.be(undefined);
+        expect(summaryPipelineResponse[expectedSummaryPipeline].description).to.be(
           `Ingest pipeline for SLO summary data [id: ${sloId}, revision: ${sloRevision}]`
         );
       });
