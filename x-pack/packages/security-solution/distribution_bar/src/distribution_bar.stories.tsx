@@ -7,7 +7,7 @@
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
-import { DistributionBar as DistributionBarComponent } from './distribution_bar';
+import { DistributionBar as DistributionBarComponent } from '..';
 
 const mockDataFindings = [
   {

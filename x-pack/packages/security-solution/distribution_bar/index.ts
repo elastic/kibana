@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-// import { DistributionBar } from './src/distribution_bar';
+export { DistributionBar } from './src/distribution_bar';
