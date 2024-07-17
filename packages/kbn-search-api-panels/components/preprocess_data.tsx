@@ -219,7 +219,7 @@ export const PreprocessDataPanel: React.FC<{
                       aria-label={i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataTransformation.learnMore.ariaLabel',
                         {
-                          defaultMessage: 'Learn more about Data transformation',
+                          defaultMessage: 'Learn more about data transformation',
                         }
                       )}
                     >
@@ -267,7 +267,7 @@ export const PreprocessDataPanel: React.FC<{
                       aria-label={i18n.translate(
                         'searchApiPanels.preprocessData.overview.pipelineHandling.learnMore.ariaLabel',
                         {
-                          defaultMessage: 'Learn more about Pipeline handling',
+                          defaultMessage: 'Learn more about pipeline handling',
                         }
                       )}
                     >
