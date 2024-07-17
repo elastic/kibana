@@ -1,0 +1,10 @@
+{
+  "description": "Security Solution Exceptions common package",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "name": "@kbn/securitysolution-exceptions-common",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "openapi:generate": "node scripts/openapi_generate"
+  }
+}

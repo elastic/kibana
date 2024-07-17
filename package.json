@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.13.1",
+    "node": "20.15.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -131,6 +131,7 @@
     "@formatjs/intl-pluralrules": "^5.2.12",
     "@formatjs/intl-relativetimeformat": "^11.2.12",
     "@formatjs/intl-utils": "^3.8.4",
+    "@formatjs/ts-transformer": "^3.13.14",
     "@grpc/grpc-js": "^1.8.22",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",
@@ -762,6 +763,7 @@
     "@kbn/securitysolution-ecs": "link:packages/kbn-securitysolution-ecs",
     "@kbn/securitysolution-es-utils": "link:packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-exception-list-components": "link:packages/kbn-securitysolution-exception-list-components",
+    "@kbn/securitysolution-exceptions-common": "link:packages/kbn-securitysolution-exceptions-common",
     "@kbn/securitysolution-hook-utils": "link:packages/kbn-securitysolution-hook-utils",
     "@kbn/securitysolution-io-ts-alerting-types": "link:packages/kbn-securitysolution-io-ts-alerting-types",
     "@kbn/securitysolution-io-ts-list-types": "link:packages/kbn-securitysolution-io-ts-list-types",
@@ -1125,7 +1127,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2": "1.20.9",
+    "re2js": "0.4.1",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-diff-view": "^3.2.0",

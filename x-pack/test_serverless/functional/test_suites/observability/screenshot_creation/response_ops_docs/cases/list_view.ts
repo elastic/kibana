@@ -24,7 +24,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   describe('list view', function () {
     let roleAuthc: RoleCredentials;
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
           title: 'Metrics inventory',
