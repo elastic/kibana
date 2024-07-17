@@ -116,7 +116,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity and alert previews
    */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewEnabled: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
