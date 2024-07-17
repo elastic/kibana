@@ -63,6 +63,7 @@ const mockShareContext = {
   i18n: i18nServiceMock.createStartContract(),
 };
 const CSV = 'CSV' as const;
+const PNG = 'PNG' as const;
 describe('Share modal tabs', () => {
   it('should render export tab when there are share menu items that are not disabled', async () => {
     const testItem = [
@@ -85,5 +86,18 @@ describe('Share modal tabs', () => {
       </ShareTabsContext.Provider>
     );
     expect(wrapper.find('[data-test-subj="export"]').exists()).toBeFalsy();
+  });
+
+  it('should render export tab is at least one is not disabled', async () => {
+    const testItem = [
+      { shareMenuItem: { name: 'test', disabled: false }, label: CSV, generateExport: jest.fn() },
+      { shareMenuItem: { name: 'test', disabled: true }, label: PNG, generateExport: jest.fn() },
+    ];
+    const wrapper = mountWithIntl(
+      <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItem }}>
+        <ShareMenuTabs />
+      </ShareTabsContext.Provider>
+    );
+    expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
   });
 });

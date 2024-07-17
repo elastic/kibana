@@ -34,8 +34,10 @@ export const ShareMenuTabs = () => {
 
   tabs.push(linkTab);
 
+  const enabledItems = shareMenuItems.filter(({ shareMenuItem }) => !shareMenuItem?.disabled);
+
   // do not show the export tab if the license is disabled
-  if (shareMenuItems.length > 0 && shareMenuItems[0].shareMenuItem?.disabled !== true) {
+  if (shareMenuItems.length > 0 && enabledItems.length > 0) {
     tabs.push(exportTab);
   }
 
