@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { taskModelVersions } from './task_model_versions';
-export { backgroundTaskNodeModelVersions } from './background_task_node_model_versions';
+export { KibanaDiscoveryService } from './kibana_discovery_service';

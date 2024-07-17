@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { taskModelVersions } from './task_model_versions';
-export { backgroundTaskNodeModelVersions } from './background_task_node_model_versions';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const backgroundTaskNodeSchemaV1 = schema.object({
+  id: schema.string(),
+  last_seen: schema.string(),
+});
+
+export type BackgroundTaskNode = TypeOf<typeof backgroundTaskNodeSchemaV1>;
