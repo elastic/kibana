@@ -20,19 +20,22 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import { SortBy, useProcessList, ProcessListContextProvider } from '../../hooks/use_process_list';
+import { ProcessListContextProvider, type SortBy } from '../../hooks/use_process_list';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
-import { useIntersectingState } from '../../hooks/use_intersecting_state';
+import { ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { useRequestObservable } from '../../hooks/use_request_observable';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -41,11 +44,12 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 
 export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const { request$ } = useRequestObservable();
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
+  const { request$ } = useRequestObservable();
+  const { isActiveTab } = useTabSwitcherContext();
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
@@ -54,9 +58,6 @@ export const Processes = () => {
   );
 
   const toTimestamp = useMemo(() => getDateRangeInTimestamp().to, [getDateRangeInTimestamp]);
-  const state = useIntersectingState(ref, {
-    currentTimestamp: toTimestamp,
-  });
 
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
@@ -68,18 +69,38 @@ export const Processes = () => {
     return { [field]: asset.name };
   }, [asset.name, asset.type]);
 
-  const {
-    loading,
-    error,
-    response,
-    makeRequest: reload,
-  } = useProcessList(
-    hostTerm,
-    state.currentTimestamp,
-    sortBy,
-    parseSearchString(searchText),
-    sourceId,
-    request$
+  const searchFilter = useMemo(() => parseSearchString(searchText), [searchText]);
+  const parsedSortBy = useMemo(
+    () =>
+      sortBy.name === 'runtimeLength'
+        ? {
+            ...sortBy,
+            name: 'startTime',
+          }
+        : sortBy,
+    [sortBy]
+  );
+
+  const { data, status, error, refetch } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/metrics/process_list', {
+        method: 'POST',
+        body: JSON.stringify({
+          hostTerm,
+          sourceId,
+          to: toTimestamp,
+          sortBy: parsedSortBy,
+          searchFilter,
+        }),
+      });
+
+      return decodeOrThrow(ProcessListAPIResponseRT)(response);
+    },
+    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp],
+    {
+      requestObservable$: request$,
+      autoFetch: isActiveTab('processes'),
+    }
   );
 
   const debouncedSearchOnChange = useMemo(() => {
@@ -109,13 +130,15 @@ export const Processes = () => {
     setSearchText('');
   }, [setUrlState]);
 
+  const isLoading = isPending(status);
+
   return (
-    <ProcessListContextProvider hostTerm={hostTerm} to={state.currentTimestamp}>
+    <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
       <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
         <EuiFlexItem grow={false}>
           <SummaryTable
-            isLoading={loading && !response}
-            processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
+            isLoading={isLoading}
+            processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
           />
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="xs">
@@ -137,10 +160,10 @@ export const Processes = () => {
           {!error && (
             <EuiFlexGroup alignItems="flexStart">
               <EuiFlexItem>
-                {loading && !response ? (
+                {isLoading ? (
                   <EuiLoadingSpinner />
                 ) : (
-                  (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+                  (data?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -172,9 +195,9 @@ export const Processes = () => {
         <EuiFlexItem grow={false}>
           {!error ? (
             <ProcessesTable
-              currentTime={state.currentTimestamp}
-              isLoading={loading || !response}
-              processList={response?.processList ?? []}
+              currentTime={toTimestamp}
+              isLoading={isLoading}
+              processList={data?.processList ?? []}
               sortBy={sortBy}
               error={searchQueryError?.message}
               setSortBy={setSortBy}
@@ -196,7 +219,7 @@ export const Processes = () => {
                   data-test-subj="infraAssetDetailsTabComponentTryAgainButton"
                   color="primary"
                   fill
-                  onClick={reload}
+                  onClick={refetch}
                 >
                   <FormattedMessage
                     id="xpack.infra.metrics.nodeDetails.processListRetry"
