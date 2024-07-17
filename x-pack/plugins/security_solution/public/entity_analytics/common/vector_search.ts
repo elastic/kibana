@@ -114,6 +114,9 @@ const installModelAPI = (http: HttpSetup) =>
   http.fetch(`/internal/ml/trained_models/install_elastic_trained_model/${MODEL_ID}`, {
     version: '1',
     method: 'POST',
+    headers: {
+      'elastic-api-version': 1,
+    },
     // body: JSON.stringify({
     //   input: {
     //     field_names: ['text_field'],

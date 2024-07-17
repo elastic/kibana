@@ -81,4 +81,5 @@ const entityDefinition = {
     timestampField: '@timestamp',
     interval: '1m',
   },
+  version: '1.0.0',
 };
