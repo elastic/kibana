@@ -18,3 +18,4 @@ export const LOGS_FEATURE_ID = 'logs';
 export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 
 export const SNAPSHOT_API_MAX_METRICS = 20;
+export const METRICS_EXPLORER_API_MAX_METRICS = 20;
