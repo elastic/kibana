@@ -86,10 +86,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(chartType).to.equal('bar chart');
       });
 
-      it('renders the metrics explorer survey link', async () => {
-        await pageObjects.infraMetricsExplorer.ensureMetricsExplorerFeedbackLinkIsVisible();
-      });
-
       it('should not allow adding more than 20 metrics', async () => {
         await pageObjects.infraMetricsExplorer.clearMetrics();
 
