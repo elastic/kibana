@@ -222,7 +222,9 @@ describe('KibanaDiscoveryService', () => {
         'current-node-id'
       );
 
-      expect(logger.info).toHaveBeenCalledWith('Current node has been deleted');
+      expect(logger.info).toHaveBeenCalledWith(
+        'Removed this node from the Kibana Discovery Service'
+      );
     });
 
     it('logs an error when failed', async () => {
