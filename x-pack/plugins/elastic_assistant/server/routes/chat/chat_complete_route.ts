@@ -23,11 +23,8 @@ import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_te
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
-  DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
-  createOrUpdateConversationWithUserInput,
-  getPluginNameFromRequest,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -152,46 +149,18 @@ export const chatCompleteRoute = (
           });
 
           let newConversation: ConversationResponse | undefined | null;
-          // Fetch any tools registered by the request's originating plugin
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const enableKnowledgeBaseByDefault =
-            ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-          // TODO: remove non-graph persistance when KB will be enabled by default
           if (conversationsDataClient && !conversationId && request.body.persist) {
-            newConversation = enableKnowledgeBaseByDefault
-              ? await createConversationWithUserInput({
-                  actionTypeId,
-                  connectorId,
-                  conversationId,
-                  conversationsDataClient,
-                  promptId: request.body.promptId,
-                  replacements: latestReplacements,
-                  newMessages: messages,
-                  model: request.body.model,
-                })
-              : await createOrUpdateConversationWithUserInput({
-                  actionTypeId,
-                  connectorId,
-                  conversationId,
-                  conversationsDataClient,
-                  promptId: request.body.promptId,
-                  replacements: latestReplacements,
-                  newMessages: messages,
-                  model: request.body.model,
-                  actionsClient,
-                  responseLanguage: request.body.responseLanguage,
-                  logger,
-                });
-            if (newConversation == null) {
-              return assistantResponse.error({
-                body: `conversation id: "${conversationId}" not updated`,
-                statusCode: 400,
-              });
-            }
+            newConversation = await createConversationWithUserInput({
+              actionTypeId,
+              connectorId,
+              conversationId,
+              conversationsDataClient,
+              promptId: request.body.promptId,
+              replacements: latestReplacements,
+              newMessages: messages,
+              model: request.body.model,
+            });
+
             // messages are anonymized by conversationsDataClient
             messages = newConversation?.messages?.map((c) => ({
               role: c.role,
@@ -218,7 +187,6 @@ export const chatCompleteRoute = (
 
           return await langChainExecute({
             abortSignal,
-            isEnabledKnowledgeBase: true,
             isStream: request.body.isStream ?? false,
             actionsClient,
             actionTypeId,
@@ -240,8 +208,6 @@ export const chatCompleteRoute = (
           const error = transformError(err as Error);
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
             model: request.body.model,
             errorMessage: error.message,
             // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
