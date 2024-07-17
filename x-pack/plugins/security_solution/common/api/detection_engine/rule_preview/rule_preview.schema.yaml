@@ -67,20 +67,20 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                  - $ref: '../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
-                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
-                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
 
 components:
   schemas:
