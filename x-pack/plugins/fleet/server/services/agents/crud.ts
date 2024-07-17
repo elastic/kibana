@@ -158,6 +158,9 @@ export async function getAgentTags(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
+  if (!kuery?.toLowerCase().includes('status:*')) {
+    filters.push(ENROLLED_AGENT_CONDITION);
+  }
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
@@ -183,33 +186,6 @@ export async function getAgentTags(
     }
     throw err;
   }
-}
-
-export function getElasticsearchQuery(
-  kuery: string,
-  showInactive = false,
-  includeHosted = false,
-  hostedPolicies: string[] = [],
-  extraFilters: string[] = []
-): estypes.QueryDslQueryContainer | undefined {
-  const filters = [];
-
-  if (kuery && kuery !== '') {
-    filters.push(kuery);
-  }
-
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  if (!includeHosted && hostedPolicies.length > 0) {
-    filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
-  }
-
-  filters.push(...extraFilters);
-
-  const kueryNode = _joinFilters(filters);
-  return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
 }
 
 export async function getAgentsByKuery(
