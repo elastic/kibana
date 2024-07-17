@@ -320,7 +320,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 className="eui-scrollBar"
                 grow={true}
                 css={css`
-                  max-height: 550px;
+                  max-height: 519px;
                   overflow-y: scroll;
                 `}
               >
