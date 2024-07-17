@@ -6,6 +6,7 @@
  */
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe(
   'App Features for Security Complete PLI',
@@ -17,5 +18,8 @@ describe(
       },
     },
   },
-  () => checkOsqueryResponseActionsPermissions(false)
+  () => {
+    cy.login(ServerlessRoleName.SOC_MANAGER);
+    checkOsqueryResponseActionsPermissions(false);
+  }
 );

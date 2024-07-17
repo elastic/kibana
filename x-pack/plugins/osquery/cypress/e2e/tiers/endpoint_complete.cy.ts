@@ -6,6 +6,7 @@
  */
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe(
   'App Features for Enpoint Complete PLI',
@@ -20,5 +21,8 @@ describe(
       },
     },
   },
-  () => checkOsqueryResponseActionsPermissions(true)
+  () => {
+    cy.login(ServerlessRoleName.SOC_MANAGER);
+    checkOsqueryResponseActionsPermissions(true);
+  }
 );
