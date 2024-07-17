@@ -110,7 +110,8 @@ export const getInstalledPackages = async ({
   http,
   abortSignal,
 }: RequestDeps): Promise<EpmPackageResponse> =>
-  http.get<EpmPackageResponse>(`${FLEET_PACKAGES_PATH}?prerelease=true`, {
+  http.get<EpmPackageResponse>(FLEET_PACKAGES_PATH, {
     headers: fleetDefaultHeaders,
+    query: { prerelease: true },
     signal: abortSignal,
   });
