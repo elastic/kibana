@@ -49,6 +49,7 @@ interface GetDefaultAssistantGraphParams {
   replacements: Replacements;
   llmType: string | undefined;
   bedrockChatEnabled?: boolean;
+  isStreaming: boolean;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -68,6 +69,7 @@ export const getDefaultAssistantGraph = ({
   replacements,
   llmType,
   bedrockChatEnabled,
+  isStreaming,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -181,7 +183,14 @@ export const getDefaultAssistantGraph = ({
     graph.addNode(PERSIST_CONVERSATION_CHANGES_NODE, persistConversationChangesNode);
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);
-    graph.addNode(RESPOND_NODE, respondNode);
+
+    const hasRespondStep =
+      isStreaming && llmType && bedrockChatEnabled && ['bedrock'].includes(llmType);
+
+    if (hasRespondStep) {
+      graph.addNode(RESPOND_NODE, respondNode);
+      graph.addEdge(RESPOND_NODE, END);
+    }
 
     // Add edges, alternating between agent and action until finished
     graph.addConditionalEdges(START, shouldContinueGetConversationEdge, {
@@ -197,12 +206,8 @@ export const getDefaultAssistantGraph = ({
     // Add conditional edge for basic routing
     graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, {
       continue: TOOLS_NODE,
-      end:
-        llmType && bedrockChatEnabled && ['bedrock', 'gemini'].includes(llmType)
-          ? RESPOND_NODE
-          : END,
+      end: hasRespondStep ? RESPOND_NODE : END,
     });
-    graph.addEdge(RESPOND_NODE, END);
     graph.addEdge(TOOLS_NODE, AGENT_NODE);
     // Compile the graph
     return graph.compile();

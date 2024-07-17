@@ -13,6 +13,7 @@ import {
   SecretsSchema,
   RunActionParamsSchema,
   RunActionResponseSchema,
+  RunActionRawResponseSchema,
   RunApiResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIActionResponseSchema,

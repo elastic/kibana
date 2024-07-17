@@ -7,5 +7,6 @@
 
 export { ActionsClientBedrockChatModel } from './bedrock_chat';
 export { ActionsClientChatOpenAI } from './chat_openai';
+export { ActionsClientGeminiChatModel } from './gemini_chat';
 export { ActionsClientLlm } from './llm';
 export { ActionsClientSimpleChatModel } from './simple_chat_model';

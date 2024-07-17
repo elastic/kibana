@@ -60,6 +60,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       connectorId,
       llmType,
       logger,
+      apiKey: '',
       // possible client model override,
       // let this be undefined otherwise so the connector handles the model
       model: request.body.model,
@@ -153,6 +154,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     llmType,
     bedrockChatEnabled,
+    isStreaming: isStream,
   });
   const inputs = { input: latestMessage[0]?.content as string };
 

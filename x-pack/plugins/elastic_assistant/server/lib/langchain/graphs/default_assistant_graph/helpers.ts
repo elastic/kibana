@@ -82,7 +82,6 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-
   if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
     const stream = await assistantGraph.streamEvents(
       inputs,
@@ -92,19 +91,19 @@ export const streamGraph = async ({
         tags: traceOptions?.tags ?? [],
         version: 'v2',
       },
-      { includeNames: ['Summarizer'] }
+      llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
     );
 
     for await (const { event, data } of stream) {
       if (event === 'on_chat_model_stream') {
         const msg = data.chunk as AIMessageChunk;
 
-        if (!msg.tool_call_chunks?.length) {
+        if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
           push({ payload: msg.content, type: 'content' });
         }
       }
 
-      if (event === 'on_chat_model_end') {
+      if (event === 'on_chat_model_end' && !data.output.lc_kwargs?.tool_calls?.length) {
         handleStreamEnd(data.output.content);
       }
     }

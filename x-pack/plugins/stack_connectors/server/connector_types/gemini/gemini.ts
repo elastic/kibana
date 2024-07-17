@@ -16,6 +16,7 @@ import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import {
   RunActionParamsSchema,
   RunApiResponseSchema,
+  RunActionRawResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
@@ -26,6 +27,7 @@ import {
   Secrets,
   RunActionParams,
   RunActionResponse,
+  RunActionRawResponse,
   RunApiResponse,
   DashboardActionParams,
   DashboardActionResponse,
@@ -219,17 +221,18 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       },
       signal,
       timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-      responseSchema: RunApiResponseSchema,
+      responseSchema: raw ? RunActionRawResponseSchema : RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
     const response = await this.request(requestArgs);
-    const candidate = response.data.candidates[0];
-    const usageMetadata = response.data.usageMetadata;
-    const completionText = candidate.content.parts[0].text;
 
     if (raw) {
       return response.data;
     }
+
+    const candidate = response.data.candidates[0];
+    const usageMetadata = response.data.usageMetadata;
+    const completionText = candidate.content.parts[0].text;
 
     return { completion: completionText, usageMetadata };
   }
@@ -312,23 +315,14 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
-    console.error('invokeStream', JSON.stringify(messages, null, 2));
-    let res;
-
-    try {
-      res = (await this.streamAPI({
-        // body: JSON.stringify(formatGeminiPayload(messages, temperature)),
-        body: JSON.stringify(messages),
-        model,
-        stopSequences,
-        signal,
-        timeout,
-      })) as unknown as IncomingMessage;
-    } catch (e) {
-      console.error('eee', e);
-    }
-
-    return res;
+    return (await this.streamAPI({
+      // body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+      body: JSON.stringify(messages),
+      model,
+      stopSequences,
+      signal,
+      timeout,
+    })) as unknown as IncomingMessage;
   }
 }
 

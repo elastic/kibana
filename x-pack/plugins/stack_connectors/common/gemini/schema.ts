@@ -20,7 +20,7 @@ export const SecretsSchema = schema.object({
 });
 
 export const RunActionParamsSchema = schema.object({
-  body: schema.string(),
+  body: schema.any(),
   model: schema.maybe(schema.string()),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
@@ -53,7 +53,7 @@ export const RunActionResponseSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
-export const RunActionRawResponse = schema.any();
+export const RunActionRawResponseSchema = schema.any();
 
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.any(),
