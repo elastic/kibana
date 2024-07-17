@@ -66,11 +66,10 @@ export const SETTINGS_BADGE = i18n.translate(
   }
 );
 
-export const SETTINGS_DESCRIPTION = i18n.translate(
+export const KNOWLEDGE_BASE_DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.settingsDescription',
   {
-    defaultMessage:
-      'Powered by ELSER, the Knowledge Base enables the ability to recall documents and other relevant context within your conversation.',
+    defaultMessage: 'documentation',
   }
 );
 
@@ -78,6 +77,13 @@ export const KNOWLEDGE_BASE_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseLabel',
   {
     defaultMessage: 'Knowledge Base',
+  }
+);
+
+export const SETUP_KNOWLEDGE_BASE_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.setupKnowledgeBaseButton',
+  {
+    defaultMessage: 'Setup',
   }
 );
 

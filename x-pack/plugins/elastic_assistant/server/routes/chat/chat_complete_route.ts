@@ -23,10 +23,8 @@ import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_te
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
-  DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
   createOrUpdateConversationWithUserInput,
-  getPluginNameFromRequest,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -151,20 +149,9 @@ export const chatCompleteRoute = (
           });
 
           let updatedConversation: ConversationResponse | undefined | null;
-          // Fetch any tools registered by the request's originating plugin
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const enableKnowledgeBaseByDefault =
-            ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-          // TODO: remove non-graph persistance when KB will be enabled by default
-          if (
-            (!enableKnowledgeBaseByDefault || (enableKnowledgeBaseByDefault && !conversationId)) &&
-            request.body.persist &&
-            conversationsDataClient
-          ) {
+
+          // TODO: Remove non-graph persistence now that KB is enabled by default
+          if (!conversationId && request.body.persist && conversationsDataClient) {
             updatedConversation = await createOrUpdateConversationWithUserInput({
               actionsClient,
               actionTypeId,
@@ -209,7 +196,6 @@ export const chatCompleteRoute = (
 
           return await langChainExecute({
             abortSignal,
-            isEnabledKnowledgeBase: true,
             isStream: request.body.isStream ?? false,
             actionsClient,
             actionTypeId,
@@ -231,8 +217,6 @@ export const chatCompleteRoute = (
           const error = transformError(err as Error);
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
             model: request.body.model,
             errorMessage: error.message,
             // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
