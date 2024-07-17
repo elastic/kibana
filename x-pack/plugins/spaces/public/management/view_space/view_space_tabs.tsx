@@ -15,7 +15,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
 import { ViewSpaceContent } from './view_space_content_tab';
-import { ViewSpaceEnabledFeatures } from './view_space_enabled_features_tab';
+import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
 import { ViewSpaceAssignedRoles } from './view_space_roles';
 import type { Space } from '../../../common';
 import { getEnabledFeatures } from '../lib/feature_utils';
