@@ -2518,7 +2518,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\""
+          "\"dashed\" | \"solid\" | \"dotted\""
         ],
         "path": "packages/kbn-visualization-ui-components/types.ts",
         "deprecated": false,
