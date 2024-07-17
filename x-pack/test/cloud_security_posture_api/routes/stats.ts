@@ -26,6 +26,7 @@ import {
   cspmComplianceDashboardDataMockV2,
 } from './mocks/benchmark_score_mock';
 import { findingsMockData } from './mocks/findings_mock';
+import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 
 const removeRealtimeCalculatedFields = (trends: PostureTrend[]) => {
   return trends.map((trend: PostureTrend) => {
@@ -61,6 +62,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const cspSecurity = CspSecurityCommonProvider(providerContext);
 
   /**
    * required before indexing findings
@@ -293,6 +296,76 @@ export default function (providerContext: FtrProviderContext) {
           benchmarks: resBenchmarks,
           trend: trends,
         }).to.eql(kspmComplianceDashboardDataMockV2);
+      });
+    });
+
+    describe('GET stats API with user that has specific access', async () => {
+      beforeEach(async () => {
+        await index.removeFindings();
+        await index.removeScores();
+
+        await waitForPluginInitialized();
+      });
+      it('GET stats API V1 with user with read access', async () => {
+        await index.addScores(getBenchmarkScoreMockData('cspm', true));
+        await index.addScores(getBenchmarkScoreMockData('cspm', false));
+        await index.addFindings([findingsMockData[1]]);
+
+        const { status } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/stats/cspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            'role_security_read_user',
+            cspSecurity.getPasswordForUser('role_security_read_user')
+          );
+        expect(status).to.be(200);
+      });
+      it('GET stats API V1 with user with read access', async () => {
+        await index.addScores(getBenchmarkScoreMockData('cspm', true));
+        await index.addScores(getBenchmarkScoreMockData('cspm', false));
+        await index.addFindings([findingsMockData[1]]);
+
+        const { status } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/stats/cspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            'role_security_read_user',
+            cspSecurity.getPasswordForUser('role_security_read_user')
+          );
+        expect(status).to.be(200);
+      });
+      it('GET stats API V2 with user with read access', async () => {
+        await index.addScores(getBenchmarkScoreMockData('cspm', true));
+        await index.addScores(getBenchmarkScoreMockData('cspm', false));
+        await index.addFindings([findingsMockData[1]]);
+
+        const { status } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/stats/cspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            'role_security_read_user',
+            cspSecurity.getPasswordForUser('role_security_read_user')
+          );
+        expect(status).to.be(200);
+      });
+
+      it('GET stats API V2 with user without read access', async () => {
+        await index.addScores(getBenchmarkScoreMockData('kspm', true));
+        await index.addScores(getBenchmarkScoreMockData('kspm', false));
+        await index.addFindings([findingsMockData[0]]);
+
+        const { status } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/stats/kspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            'role_security_no_read_user',
+            cspSecurity.getPasswordForUser('role_security_no_read_user')
+          );
+        expect(status).to.be(403);
       });
     });
   });

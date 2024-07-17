@@ -27,13 +27,13 @@ properties:
     $ref: 'assignees.yaml'
   category:
     type:
-      - "string"
-      - "null"
+      - 'string'
+      - 'null'
     description: The case category.
   closed_at:
     type:
-      - "string"
-      - "null"
+      - 'string'
+      - 'null'
     format: date-time
   closed_by:
     $ref: 'case_response_closed_by_properties.yaml'
@@ -81,7 +81,6 @@ properties:
   customFields:
     type: array
     description: Custom field values for the case.
-    x-technical-preview: true
     items:
       type: object
       properties:
@@ -92,8 +91,8 @@ properties:
       - A case description.
   duration:
     type:
-      - "integer"
-      - "null"
+      - 'integer'
+      - 'null'
     description: >
       The elapsed time from the creation of the case to its closure (in seconds).
       If the case has not been closed, the duration is set to null. If the case
@@ -112,9 +111,9 @@ properties:
   settings:
     $ref: 'settings.yaml'
   severity:
-    $ref: 'severity_property.yaml'
+    $ref: 'case_severity.yaml'
   status:
-    $ref: 'status.yaml'
+    $ref: 'case_status.yaml'
   tags:
     type: array
     items:
@@ -135,8 +134,8 @@ properties:
       - 0
   updated_at:
     type:
-      - "string"
-      - "null"
+      - 'string'
+      - 'null'
     format: date-time
   updated_by:
     $ref: 'case_response_updated_by_properties.yaml'

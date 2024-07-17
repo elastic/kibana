@@ -98,6 +98,7 @@ test('generates gauge chart config', async () => {
                 "query": Object {
                   "esql": "from test | count=count()",
                 },
+                "timeField": undefined,
               },
             },
           },
@@ -189,6 +190,7 @@ test('generates gauge chart config with goal and max', async () => {
                 "query": Object {
                   "esql": "from test | count=count() | eval max=1000 | eval goal=500",
                 },
+                "timeField": undefined,
               },
             },
           },
