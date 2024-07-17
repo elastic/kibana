@@ -16,16 +16,11 @@ import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_know
 const ESQL_RESOURCE = 'esql';
 
 /**
- * Self-contained component that renders a button to install the knowledge base.
+ * Self-contained component that renders a button to set up the knowledge base.
  *
- * Only renders if `assistantKnowledgeBaseByDefault` feature flag is enabled.
  */
-export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
-  const {
-    assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
-    http,
-    toasts,
-  } = useAssistantContext();
+export const SetupKnowledgeBaseButton: React.FC = React.memo(() => {
+  const { http, toasts } = useAssistantContext();
 
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
@@ -41,24 +36,24 @@ export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
     setupKB(ESQL_RESOURCE);
   }, [setupKB]);
 
-  if (!enableKnowledgeBaseByDefault || isSetupComplete) {
+  if (isSetupComplete) {
     return null;
   }
 
   return (
     <EuiButton
       color="primary"
-      data-test-subj="install-knowledge-base-button"
+      data-test-subj="setup-knowledge-base-button"
       fill
       isLoading={isSetupInProgress}
       iconType="importAction"
       onClick={onInstallKnowledgeBase}
     >
       {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {
-        defaultMessage: 'Install Knowledge Base',
+        defaultMessage: 'Setup Knowledge Base',
       })}
     </EuiButton>
   );
 });
 
-InstallKnowledgeBaseButton.displayName = 'InstallKnowledgeBaseButton';
+SetupKnowledgeBaseButton.displayName = 'SetupKnowledgeBaseButton';
