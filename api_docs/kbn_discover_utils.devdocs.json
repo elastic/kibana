@@ -979,6 +979,159 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelCoalescedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelCoalescedValue",
+        "description": [],
+        "signature": [
+          "(logLevel: unknown) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          " | undefined"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelCoalescedValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "logLevel",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelCoalescedValueLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelCoalescedValueLabel",
+        "description": [],
+        "signature": [
+          "(coalescedValue: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelCoalescedValueLabel.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "coalescedValue",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogLevelCoalescedValue",
+                "text": "LogLevelCoalescedValue"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelColor",
+        "description": [],
+        "signature": [
+          "(logLevelCoalescedValue: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          ", euiTheme: ",
+          "EuiThemeComputed",
+          "<{}>) => string | undefined"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelColor.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "logLevelCoalescedValue",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogLevelCoalescedValue",
+                "text": "LogLevelCoalescedValue"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelColor.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "euiTheme",
+            "description": [],
+            "signature": [
+              "EuiThemeComputed",
+              "<{}>"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getMessageFieldWithFallbacks",
         "type": "Function",
         "tags": [],
@@ -1397,7 +1550,7 @@
             "section": "def-common.EsHitRecord",
             "text": "EsHitRecord"
           },
-          " extends Omit<DiscoverSearchHit, \"_source\" | \"_index\" | \"_id\">"
+          " extends Omit<DiscoverSearchHit, \"_id\" | \"_source\" | \"_index\">"
         ],
         "path": "packages/kbn-discover-utils/src/types.ts",
         "deprecated": false,
@@ -1948,6 +2101,18 @@
         "label": "IgnoredReason",
         "description": [],
         "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogLevelCoalescedValue",
+        "type": "Enum",
+        "tags": [],
+        "label": "LogLevelCoalescedValue",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

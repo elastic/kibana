@@ -1894,6 +1894,18 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ELASTIC_AI_ASSISTANT_INTERNAL_CONVERSATIONS_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_AI_ASSISTANT_INTERNAL_CONVERSATIONS_URL",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ELASTIC_AI_ASSISTANT_INTERNAL_URL",
         "type": "string",
         "tags": [],

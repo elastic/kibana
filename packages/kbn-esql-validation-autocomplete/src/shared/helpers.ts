@@ -563,6 +563,10 @@ export function isRestartingExpression(text: string) {
   return getLastCharFromTrimmed(text) === ',';
 }
 
+export function shouldBeQuotedSource(text: string) {
+  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
+  return /[:"=|,[\]\/ \t\r\n]/.test(text);
+}
 export function shouldBeQuotedText(
   text: string,
   { dashSupported }: { dashSupported?: boolean } = {}
