@@ -61,36 +61,43 @@ const createComponentTemplate = async (http: HttpSetup) =>
   });
 
 const installModelSettings = async (http: HttpSetup) => {
+  // eslint-disable-next-line no-console
   console.log('create ingest pipeline');
   await createIngestPipelineAPI(http);
-
+  // eslint-disable-next-line no-console
   console.log('create component template');
   await createComponentTemplate(http);
 };
 
 const installModel = async (http: HttpSetup) => {
-  const [model] = await getModelAPI(http);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [model] = (await getModelAPI(http)) as [any];
   if (model) {
+    // eslint-disable-next-line no-console
     console.log('-------------- model already installed');
   } else {
+    // eslint-disable-next-line no-console
     console.log('install model api call');
     await installModelAPI(http);
   }
-
+  // eslint-disable-next-line no-console
   console.log('await for model to be ready');
   await waitForModelInstallation(http);
-
+  // eslint-disable-next-line no-console
   console.log('deploy model api call');
   await deployModelAPI(http);
 };
 
 const waitForModelInstallation = async (http: HttpSetup) => {
-  let [tempModel] = await getModelAPI(http);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let [tempModel] = (await getModelAPI(http)) as [any];
 
   while (!tempModel.fully_defined) {
+    // eslint-disable-next-line no-console
     console.log('waiting 2 seconds for model installation...');
     await new Promise((resolve) => setTimeout(resolve, 2000)); // wait 2 seconds
-    [tempModel] = await getModelAPI(http);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [tempModel] = (await getModelAPI(http)) as [any];
   }
 };
 

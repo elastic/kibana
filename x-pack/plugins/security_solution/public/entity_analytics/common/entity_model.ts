@@ -31,11 +31,13 @@ export const useEntityModel = () => {
         body: JSON.stringify(entityDefinition),
       })
       .then((response) => {
+        // eslint-disable-next-line no-console
         console.log(response);
       });
   }, [http]);
 
   const get = useCallback(() => {
+    // eslint-disable-next-line no-console
     console.log('Getting entity model');
 
     if (!http) return Promise.resolve([]);
@@ -50,6 +52,7 @@ export const useEntityModel = () => {
   }, [http]);
 
   const deleteAPI = useCallback(() => {
+    // eslint-disable-next-line no-console
     console.log('Deleting entity model');
 
     if (!http) return Promise.resolve([]);
