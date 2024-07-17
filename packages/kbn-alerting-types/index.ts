@@ -14,6 +14,6 @@ export * from './builtin_action_groups_types';
 export * from './circuit_breaker_message_header';
 export * from './r_rule_types';
 export * from './rule_notify_when_type';
-export * from './rule_registry_types';
+export * from './search_strategy_types';
 export * from './rule_type_types';
 export * from './rule_types';
