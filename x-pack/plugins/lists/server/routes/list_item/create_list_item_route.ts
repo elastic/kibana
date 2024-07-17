@@ -41,40 +41,41 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
           const { id, list_id: listId, value, meta, refresh } = request.body;
           const lists = await getListClient(context);
           const list = await lists.getList({ id: listId });
+
           if (list == null) {
             return siemResponse.error({
               body: `list id: "${listId}" does not exist`,
               statusCode: 404,
             });
-          } else {
-            if (id != null) {
-              const listItem = await lists.getListItem({ id });
-              if (listItem != null) {
-                return siemResponse.error({
-                  body: `list item id: "${id}" already exists`,
-                  statusCode: 409,
-                });
-              }
-            }
-            const createdListItem = await lists.createListItem({
-              deserializer: list.deserializer,
-              id,
-              listId,
-              meta,
-              refresh,
-              serializer: list.serializer,
-              type: list.type,
-              value,
-            });
+          }
 
-            if (createdListItem != null) {
-              return response.ok({ body: CreateListItemResponse.parse(createdListItem) });
-            } else {
+          if (id != null) {
+            const listItem = await lists.getListItem({ id });
+            if (listItem != null) {
               return siemResponse.error({
-                body: 'list item invalid',
-                statusCode: 400,
+                body: `list item id: "${id}" already exists`,
+                statusCode: 409,
               });
             }
+          }
+          const createdListItem = await lists.createListItem({
+            deserializer: list.deserializer,
+            id,
+            listId,
+            meta,
+            refresh,
+            serializer: list.serializer,
+            type: list.type,
+            value,
+          });
+
+          if (createdListItem != null) {
+            return response.ok({ body: CreateListItemResponse.parse(createdListItem) });
+          } else {
+            return siemResponse.error({
+              body: 'list item invalid',
+              statusCode: 400,
+            });
           }
         } catch (err) {
           const error = transformError(err);

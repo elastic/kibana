@@ -9165,14 +9165,42 @@ describe('validation logic', () => {
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats max(booleanField)', [
-          'Argument of [max] must be [number], found value [booleanField] type [boolean]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
         testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
           'Argument of [max] must be [number], found value [concat("20", "22")] type [string]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats max(cartesianPointField)', [
+          'Argument of [max] must be [number], found value [cartesianPointField] type [cartesian_point]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(booleanField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(booleanField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(booleanField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(booleanField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(booleanField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(booleanField) > 0', [
+          'EVAL does not support function max',
         ]);
       });
 
@@ -9309,14 +9337,42 @@ describe('validation logic', () => {
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats min(booleanField)', [
-          'Argument of [min] must be [number], found value [booleanField] type [boolean]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
         testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
           'Argument of [min] must be [number], found value [concat("20", "22")] type [string]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats min(cartesianPointField)', [
+          'Argument of [min] must be [number], found value [cartesianPointField] type [cartesian_point]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(booleanField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(booleanField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(booleanField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(booleanField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(booleanField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(booleanField) > 0', [
+          'EVAL does not support function min',
         ]);
       });
 
