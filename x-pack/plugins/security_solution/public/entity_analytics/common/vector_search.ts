@@ -86,14 +86,14 @@ const installModel = async (http: HttpSetup) => {
 const waitForModelInstallation = async (http: HttpSetup) => {
   let [tempModel] = await getModelAPI(http);
 
-  while (!tempModel.fully_defined) {
+  while (!tempModel || !tempModel.fully_defined) {
     console.log('waiting 2 seconds for model installation...');
     await new Promise((resolve) => setTimeout(resolve, 2000)); // wait 2 seconds
     [tempModel] = await getModelAPI(http);
   }
 };
 
-const getModelAPI = (http: HttpSetup) =>
+const getModelAPI = async (http: HttpSetup) =>
   http
     .fetch(`/internal/ml/trained_models/${MODEL_ID}`, {
       version: '1',
@@ -113,6 +113,7 @@ const getModelAPI = (http: HttpSetup) =>
 const installModelAPI = (http: HttpSetup) =>
   http.fetch(`/internal/ml/trained_models/install_elastic_trained_model/${MODEL_ID}`, {
     method: 'POST',
+    version: '1',
     headers: {
       'elastic-api-version': 1,
     },
