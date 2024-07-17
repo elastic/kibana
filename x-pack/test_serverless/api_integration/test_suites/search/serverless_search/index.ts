@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./api_key'));
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./homepage'));
   });
 }
