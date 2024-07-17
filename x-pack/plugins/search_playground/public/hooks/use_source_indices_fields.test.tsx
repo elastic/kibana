@@ -26,6 +26,10 @@ import { IndicesQuerySourceFields } from '../types';
 describe('useSourceIndicesFields Hook', () => {
   let postMock: jest.Mock;
 
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <PlaygroundProvider>{children}</PlaygroundProvider>
   );
