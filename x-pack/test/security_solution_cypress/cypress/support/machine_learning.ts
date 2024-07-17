@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from '../tasks/api_calls/common';
 
@@ -16,7 +17,7 @@ import { rootRequest } from '../tasks/api_calls/common';
  * @returns the response from the setup module request
  */
 export const executeSetupModuleRequest = ({ moduleName }: { moduleName: string }) =>
-  rootRequest({
+  rootRequest<{ jobs: Array<{ success: boolean; error?: { status: number } }> }>({
     headers: {
       'elastic-api-version': 1,
     },
@@ -32,6 +33,23 @@ export const executeSetupModuleRequest = ({ moduleName }: { moduleName: string }
       applyToAllSpaces: true,
     },
   });
+
+/**
+ *
+ * Calls {@link executeSetupModuleRequest} until all jobs in the module are
+ * successfully set up.
+ * @param moduleName the name of the ML module to set up
+ * @returns the response from the setup module request
+ */
+export const setupMlModulesWithRetry = ({ moduleName }: { moduleName: string }) =>
+  recurse(
+    () => executeSetupModuleRequest({ moduleName }),
+    (response) =>
+      response.body.jobs.every(
+        (job) => job.success || (job.error?.status && job.error.status < 500)
+      ),
+    { delay: 1000 }
+  );
 
 /**
  *

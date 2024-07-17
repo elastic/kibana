@@ -26,10 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/185216
   describe('Inference endpoints', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
@@ -41,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         log.debug('[Cleanup error] Error deleting trained model and saved ml objects');
         throw err;
       }
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('create inference endpoint', async () => {
