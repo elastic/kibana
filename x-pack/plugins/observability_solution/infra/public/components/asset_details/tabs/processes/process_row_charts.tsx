@@ -23,17 +23,23 @@ import { IconChartLine } from '@kbn/chart-icons';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
-import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
 import { createFormatter } from '../../../../../common/formatters';
-import { MetricsExplorerAggregation } from '../../../../../common/http_api';
+import {
+  MetricsExplorerAggregation,
+  ProcessListAPIChartResponseRT,
+} from '../../../../../common/http_api';
 import { Process } from './types';
 import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
-import { useRequestObservable } from '../../hooks/use_request_observable';
 import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
+import { useProcessListContext } from '../../hooks/use_process_list';
+import { useRequestObservable } from '../../hooks/use_request_observable';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
 interface Props {
   command: string;
@@ -67,16 +73,38 @@ const EmptyChartPlaceholder = ({ metricName }: { metricName: string }) => (
 
 export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) => {
   const { request$ } = useRequestObservable();
-  const { loading, error, response } = useProcessListRowChart(command, request$);
+  const { hostTerm, indexPattern, to } = useProcessListContext();
+  const { isActiveTab } = useTabSwitcherContext();
 
-  const isLoading = loading || !response;
+  const { data, status, error } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/metrics/process_list/chart', {
+        method: 'POST',
+        body: JSON.stringify({
+          hostTerm,
+          indexPattern,
+          to,
+          command,
+        }),
+      });
+
+      return decodeOrThrow(ProcessListAPIChartResponseRT)(response);
+    },
+    [command, hostTerm, indexPattern, to],
+    {
+      requestObservable$: request$,
+      autoFetch: isActiveTab('processes'),
+    }
+  );
+
+  const isLoading = isPending(status) || !data;
 
   const cpuChart = error ? (
     <EuiEmptyPrompt iconType="warning" title={<EuiText>{failedToLoadChart}</EuiText>} />
   ) : isLoading ? (
     <EuiLoadingChart />
   ) : hasCpuData ? (
-    <ProcessChart timeseries={response!.cpu} color={Color.color2} label={cpuMetricLabel} />
+    <ProcessChart timeseries={data.cpu} color={Color.color2} label={cpuMetricLabel} />
   ) : (
     <EmptyChartPlaceholder metricName={cpuMetricLabel} />
   );
@@ -85,7 +113,7 @@ export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) 
   ) : isLoading ? (
     <EuiLoadingChart />
   ) : hasMemoryData ? (
-    <ProcessChart timeseries={response!.memory} color={Color.color0} label={memoryMetricLabel} />
+    <ProcessChart timeseries={data.memory} color={Color.color0} label={memoryMetricLabel} />
   ) : (
     <EmptyChartPlaceholder metricName={memory} />
   );
