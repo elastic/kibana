@@ -79,14 +79,19 @@ export const templateSerializer = (
     return data;
   }
 
-  const { fields: connectorFields = null, key, name, ...rest } = data;
+  const {
+    fields: connectorFields = null,
+    key,
+    name,
+    customFields: templateCustomFields,
+    ...rest
+  } = data;
 
   const serializedConnectorFields = getConnectorsFormSerializer({ fields: connectorFields });
   const nonEmptyFields = removeEmptyFields({ ...rest });
 
   const {
     connectorId,
-    customFields: templateCustomFields,
     syncAlerts = false,
     templateTags,
     templateDescription,
