@@ -61,7 +61,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const result = await dataClient?.findDocuments({
             perPage: 100,
             page: 1,
-            filter: `users:{ "${userFilter}" } AND title:${request.body.title}`,
+            filter: `users:{ ${userFilter} } AND title:${request.body.title}`,
             fields: ['title'],
           });
           if (result?.data != null && result.total > 0) {

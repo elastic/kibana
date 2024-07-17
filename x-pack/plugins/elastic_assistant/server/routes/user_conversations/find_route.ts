@@ -66,7 +66,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ ${userFilter}" }${additionalFilter}`,
+            filter: `users:{ ${userFilter} }${additionalFilter}`,
             fields: query.fields,
           });
 

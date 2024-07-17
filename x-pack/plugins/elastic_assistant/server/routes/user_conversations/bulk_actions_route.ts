@@ -181,7 +181,7 @@ export const bulkActionConversationsRoute = (
             const result = await dataClient?.findDocuments<EsConversationSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ "${userFilter}" } AND (${body.create
+              filter: `users:{ ${userFilter} } AND (${body.create
                 .map((c) => `title:${c.title}`)
                 .join(' OR ')})`,
               fields: ['title'],
