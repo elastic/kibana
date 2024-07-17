@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       const requestHeader = svlCommonApi.getInternalRequestHeader();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       createConnector = async () => {
         removeOpenAIConnector = await createOpenAIConnector({
           supertest: supertestWithoutAuth,
@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // await removeOpenAIConnector?.();
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await pageObjects.svlCommonPage.forceLogout();
     });
 

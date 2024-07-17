@@ -1550,7 +1550,7 @@
             "section": "def-common.EsHitRecord",
             "text": "EsHitRecord"
           },
-          " extends Omit<DiscoverSearchHit, \"_source\" | \"_index\" | \"_id\">"
+          " extends Omit<DiscoverSearchHit, \"_id\" | \"_source\" | \"_index\">"
         ],
         "path": "packages/kbn-discover-utils/src/types.ts",
         "deprecated": false,
