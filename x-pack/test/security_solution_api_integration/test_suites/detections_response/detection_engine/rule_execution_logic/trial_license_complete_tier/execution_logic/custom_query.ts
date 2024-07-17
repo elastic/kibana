@@ -104,17 +104,11 @@ export default ({ getService }: FtrProviderContext) => {
         useCreate: true,
         docsOnly: true,
       });
-      await deleteAllRules(supertest, log);
-
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
     afterEach(async () => {
       await esDeleteAllIndices('.preview.alerts*');
-      await esArchiver.unload(auditbeatPath);
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
-      await deleteAllRules(supertest, log);
     });
 
     after(async () => {
