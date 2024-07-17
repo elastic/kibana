@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
-        await waitForCases({ supertest, log });
+        await waitForCases(supertest, log);
         const cases = await getCases(supertest);
         expect(cases.cases[0].totalAlerts).toBeGreaterThan(0);
         expect(alerts.hits.hits.length).toBeGreaterThan(0);

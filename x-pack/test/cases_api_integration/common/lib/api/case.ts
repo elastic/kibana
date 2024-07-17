@@ -37,13 +37,7 @@ export const createCase = async (
   return theCase;
 };
 
-export const waitForCases = async ({
-  supertest,
-  log,
-}: {
-  supertest: SuperTest.Agent;
-  log: ToolingLog;
-}): Promise<void> => {
+export const waitForCases = async (supertest: SuperTest.Agent, log: ToolingLog): Promise<void> => {
   await waitFor(
     async () => {
       const response = await getCases(supertest);
@@ -61,16 +55,13 @@ export const waitForCases = async ({
 export const getCases = async (
   supertest: SuperTest.Agent,
   expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, string | string[]> = {}
 ): Promise<CasesFindResponse> => {
-  const apiCall = supertest.get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/_find`);
-
-  setupAuth({ apiCall, headers, auth });
-
-  const { body: theCase } = await apiCall
+  const { body: theCase } = await supertest
+    .get(`${CASES_URL}/_find`)
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
+    .set('elastic-api-version', '2023-10-31')
     .set(headers)
     .expect(expectedHttpCode);
 
