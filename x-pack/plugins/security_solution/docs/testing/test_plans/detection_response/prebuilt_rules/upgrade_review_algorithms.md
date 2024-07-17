@@ -240,10 +240,11 @@ And <field_name> field should not be returned from the `upgrade/_review` API end
 And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version | current_version         | target_version          | merged_version          |
-| single line string | name       | N/A          | "A"                     | "A"                     | "A"                     |
-| number             | risk_score | N/A          | 1                       | 1                       | 1                       |
-| array of scalars   | tags       | N/A          | ["one", "three", "two"] | ["three", "one", "two"] | ["one", "three", "two"] |
+| algorithm          | field_name  | base_version | current_version                           | target_version                            | merged_version                            |
+| single line string | name        | N/A          | "A"                                       | "A"                                       | "A"                                       |
+| multi line string  | description | N/A          | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
+| number             | risk_score  | N/A          | 1                                         | 1                                         | 1                                         |
+| array of scalars   | tags        | N/A          | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`
@@ -261,9 +262,10 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  | merged_version |
-| single line string | name       | N/A          | "B"             | "C"             | "C"            |
-| number             | risk_score | N/A          | 2               | 3               | 3              |
+| algorithm          | field_name  | base_version | current_version                           | target_version                                  | merged_version                                  |
+| single line string | name        | N/A          | "B"                                       | "C"                                             | "C"                                             |
+| multi line string  | description | N/A          | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
+| number             | risk_score  | N/A          | 2                                         | 3                                               | 3                                               |
 ```
 
 #### **Scenario: `-BC` - Rule field is an array of scalar values**
