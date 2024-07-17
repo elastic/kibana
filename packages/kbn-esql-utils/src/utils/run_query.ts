@@ -14,6 +14,8 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 
+export const hasEarliestLatestParams = (query: string) => /\?earliest|\?latest/i.test(query);
+
 export const getEarliestLatestParams = (query: string, time?: TimeRange) => {
   const earliestNamedParams = /\?earliest/i.test(query);
   const latestNamedParams = /\?latest/i.test(query);

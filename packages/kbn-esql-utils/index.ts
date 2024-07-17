@@ -22,6 +22,7 @@ export {
   getESQLResults,
   getTimeFieldFromESQLQuery,
   getEarliestLatestParams,
+  hasEarliestLatestParams,
   TextBasedLanguages,
 } from './src';
 

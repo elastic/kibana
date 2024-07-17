@@ -15,6 +15,7 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   getEarliestLatestParams,
+  hasEarliestLatestParams,
 } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
@@ -116,11 +117,11 @@ export class ESQLSource
   }
 
   getApplyGlobalQuery() {
-    return this._descriptor.narrowByGlobalSearch;
+    return this._descriptor.narrowByGlobalSearch || hasEarliestLatestParams(this._descriptor.esql);
   }
 
   async isTimeAware() {
-    return this._descriptor.narrowByGlobalTime;
+    return this._descriptor.narrowByGlobalTime || hasEarliestLatestParams(this._descriptor.esql);
   }
 
   getApplyGlobalTime() {
