@@ -10,6 +10,11 @@ import { css } from '@emotion/react';
 
 export interface DistributionBarProps {
   stats: Array<{ key: string; count: number; color: string }>;
+  ['data-test-subj']?: string;
+}
+
+export interface EmptyBarProps {
+  ['data-test-subj']?: string;
 }
 
 const styles = {
@@ -19,7 +24,7 @@ const styles = {
   `,
 };
 
-const EmptyBar = () => {
+const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) => {
   const { euiTheme } = useEuiTheme();
 
   const emptyBarStyle = [
@@ -30,14 +35,14 @@ const EmptyBar = () => {
     `,
   ];
 
-  return <span css={emptyBarStyle} />;
+  return <span css={emptyBarStyle} data-test-subj={`${dataTestSubj}__emptyBar`} />;
 };
 
 export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
   props
 ) {
   const { euiTheme } = useEuiTheme();
-  const { stats } = props;
+  const { stats, 'data-test-subj': dataTestSubj } = props;
   const parts = stats.map((stat) => {
     const partStyle = [
       styles.base,
@@ -55,8 +60,9 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
       css={css`
         gap: ${euiTheme.size.xxs};
       `}
+      data-test-subj={dataTestSubj}
     >
-      {parts.length ? parts : <EmptyBar />}
+      {parts.length ? parts : <EmptyBar data-test-subj={dataTestSubj} />}
     </EuiFlexGroup>
   );
 });
