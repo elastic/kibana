@@ -40,6 +40,11 @@ describe('EventLoopUtilizationMonitor', () => {
         Object {
           "active": 1,
           "idle": 1,
+          "load": Object {
+            "long": 0.09,
+            "medium": 0.17,
+            "short": 0.34,
+          },
           "utilization": 1,
         }
       `);
