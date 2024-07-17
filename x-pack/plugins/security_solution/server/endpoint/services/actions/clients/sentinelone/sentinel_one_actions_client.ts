@@ -502,15 +502,23 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async getFileInfo(actionId: string, agentId: string): Promise<UploadedFileInfo> {
+    await this.ensureValidActionId(actionId);
+    const actionDetails = await this.fetchActionDetails(actionId);
+
+    const {
+      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
+      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
+    } = this.options.endpointService.experimentalFeatures;
+
     if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+      (actionDetails.command === 'get-file' && !isGetFileEnabled) ||
+      (actionDetails.command === 'running-processes' && !isRunningProcessesEnabled)
     ) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
         400
       );
     }
-    await this.ensureValidActionId(actionId);
 
     const fileInfo: UploadedFileInfo = {
       actionId,
@@ -525,19 +533,39 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     try {
-      const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+      switch (actionDetails.command) {
+        case 'get-file':
+          {
+            const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
 
-      // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
-      // calling the download API, which would return the following error:
-      // {  "errors":[ {
-      //      "code":4100010,
-      //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
-      //      "title":"Resource not found"
-      // } ] }
-      fileInfo.status = 'READY';
-      fileInfo.created = agentResponse.meta?.createdAt ?? '';
-      fileInfo.name = agentResponse.meta?.filename ?? '';
-      fileInfo.mimeType = 'application/octet-stream';
+            // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
+            // calling the download API, which would return the following error:
+            // {  "errors":[ {
+            //      "code":4100010,
+            //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
+            //      "title":"Resource not found"
+            // } ] }
+            fileInfo.status = 'READY';
+            fileInfo.created = agentResponse.meta?.createdAt ?? '';
+            fileInfo.name = agentResponse.meta?.filename ?? '';
+            fileInfo.mimeType = 'application/octet-stream';
+          }
+          break;
+
+        case 'running-processes':
+          {
+            // FIXME:PT delete below and implement
+            const status = 'foo';
+            fileInfo.status = status;
+          }
+          break;
+
+        default:
+          throw new ResponseActionsClientError(
+            `${actionDetails.command} does not support file downloads`,
+            400
+          );
+      }
     } catch (e) {
       // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
       if (!(e instanceof ResponseActionAgentResponseEsDocNotFound)) {
@@ -751,6 +779,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     if (abortSignal.aborted) {
       return;
     }
+    const addResponsesToQueueIfAny = (responseList: LogsEndpointActionResponse[]): void => {
+      if (responseList.length > 0) {
+        addToQueue(...responseList);
+      }
+    };
+
     for await (const pendingActions of this.fetchAllPendingActions()) {
       if (abortSignal.aborted) {
         return;
@@ -766,22 +800,35 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
           case 'unisolate':
-            {
-              const isolationResponseDocs = await this.checkPendingIsolateOrReleaseActions(
+            addResponsesToQueueIfAny(
+              await this.checkPendingIsolateOrReleaseActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
                 >,
                 actionType as 'isolate' | 'unisolate'
-              );
-              if (isolationResponseDocs.length) {
-                addToQueue(...isolationResponseDocs);
-              }
-            }
+              )
+            );
             break;
 
+          case 'running-processes':
+            addResponsesToQueueIfAny(
+              await this.checkPendingRunningProcessesAction(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    undefined,
+                    GetProcessesActionOutputContent,
+                    SentinelOneProcessesRequestMeta
+                  >
+                >
+              )
+            );
+            break;
+
+          // FIXME:PT refactor kill-process entry here when that PR is merged
+
           case 'get-file':
-            {
-              const responseDocsForGetFile = await this.checkPendingGetFileActions(
+            addResponsesToQueueIfAny(
+              await this.checkPendingGetFileActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     ResponseActionGetFileParameters,
@@ -789,11 +836,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     SentinelOneGetFileRequestMeta
                   >
                 >
-              );
-              if (responseDocsForGetFile.length) {
-                addToQueue(...responseDocsForGetFile);
-              }
-            }
+              )
+            );
             break;
         }
       }
@@ -1140,6 +1184,19 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     return completedResponses;
+  }
+
+  private async checkPendingRunningProcessesAction(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        undefined,
+        GetProcessesActionOutputContent,
+        SentinelOneProcessesRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    return [];
+    // FIXME:PT implement
   }
 
   private async checkPendingGetFileActions(
