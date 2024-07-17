@@ -13,6 +13,7 @@ the tests given the constraint on an available package registry.
 
 1. Using Docker
 2. Running your own local package registry
+
 3. Using the default external package registry
 
 These scenarios will be outlined the sections below.
