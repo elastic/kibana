@@ -127,6 +127,7 @@ export const buildDataViewMock = ({
     },
     getRuntimeField: () => null,
     getAllowHidden: () => false,
+    setFieldCount: jest.fn(),
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;
