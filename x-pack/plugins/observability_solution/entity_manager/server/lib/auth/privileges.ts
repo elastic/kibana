@@ -36,6 +36,20 @@ export const requiredEnablementPrivileges = {
   cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
 };
 
+export const requiredDisablementPrivileges = {
+  cluster: ['manage_transform', 'manage_ingest_pipelines'],
+  application: [
+    {
+      application: 'kibana-.kibana',
+      privileges: [
+        'saved_object:entity-definition/delete',
+        'saved_object:entity-discovery-api-key/delete',
+      ],
+      resources: ['*'],
+    },
+  ],
+};
+
 export const canRunEntityDiscovery = async (client: ElasticsearchClient) => {
   const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
     body: {
@@ -61,4 +75,8 @@ export const canEnableEntityDiscovery = async (client: ElasticsearchClient) => {
   return (
     canRun && requiredEnablementPrivileges.cluster.some((k) => grantedClusterPrivileges[k] === true)
   );
+};
+
+export const canDisableEntityDiscovery = async (client: ElasticsearchClient) => {
+  return true;
 };

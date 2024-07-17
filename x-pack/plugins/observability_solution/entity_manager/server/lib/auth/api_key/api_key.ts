@@ -52,7 +52,7 @@ export const generateEntityDiscoveryAPIKey = async (
   server: EntityManagerServerSetup,
   req: KibanaRequest
 ): Promise<EntityDiscoveryAPIKey | undefined> => {
-  const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
+  const apiKey = await server.security.authc.apiKeys.create(req, {
     name: 'Entity discovery API key',
     role_descriptors: {
       entity_discovery_admin: requiredRunTimePrivileges,
