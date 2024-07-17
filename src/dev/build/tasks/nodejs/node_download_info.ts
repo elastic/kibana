@@ -15,9 +15,12 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
   const arch = platform.getNodeArch();
   let variants = ['default'];
   if (platform.isLinux()) {
-    variants = ['glibc-217'];
-    if (platform.isServerless() || process.env.CI_USE_POINTER_COMPRESSION)
-      variants.push('pointer-compression');
+    if (Boolean(process.env.CI_USE_POINTER_COMPRESSION)) {
+      variants = ['pointer-compression'];
+    } else {
+      variants = ['glibc-217'];
+      if (platform.isServerless()) variants.push('pointer-compression');
+    }
   }
 
   return variants.map((variant) => {

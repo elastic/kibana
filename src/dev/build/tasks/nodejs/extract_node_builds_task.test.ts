@@ -28,19 +28,20 @@ log.setWriters([testWriter]);
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (s) => typeof s === 'string' && s.includes(nodeVersion),
-    (s) => s.split(nodeVersion).join('<node version>')
-  )
-);
 
 // The node variant may be overriden by an environment variable,
 // to provide test coverage against pointer-compression
 expect.addSnapshotSerializer(
   createRecursiveSerializer(
-    (s) => typeof s === 'string' && Boolean(s.match(/(glibc-217|pointer-compression)/)),
-    (s) => s.replace('glibc-217', '<node variant>').replace('pointer-compression', '<node variant>')
+    (s) =>
+      typeof s === 'string' &&
+      (s.includes(nodeVersion) || Boolean(s.match(/(glibc-217|pointer-compression)/))),
+    (s) =>
+      s
+        .split(nodeVersion)
+        .join('<node version>')
+        .replace('glibc-217', '<node variant>')
+        .replace('pointer-compression', '<node variant>')
   )
 );
 
@@ -130,6 +131,20 @@ it('runs expected fs operations', async () => {
         Array [
           <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64,
           Object {
             "strip": 1,
           },
