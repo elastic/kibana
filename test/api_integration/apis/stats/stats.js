@@ -7,39 +7,66 @@
  */
 
 import expect from '@kbn/expect';
+import { schema } from '@kbn/config-schema';
+
+const statsResponseSchema = schema.object({
+  kibana: schema.object({
+    name: schema.string(),
+    uuid: schema.string(),
+    host: schema.string(),
+    transport_address: schema.string(),
+    version: schema.string(),
+    snapshot: schema.string(),
+    status: schema.string(),
+  }),
+  process: schema.object({
+    pid: schema.number(),
+    uptime_ms: schema.number(),
+    event_loop_delay: schema.number(),
+    event_loop_utilization: schema.object({
+      active: schema.number(),
+      idle: schema.number(),
+      utilization: schema.number(),
+      load: schema.object({
+        short: schema.number(),
+        medium: schema.number(),
+        long: schema.number(),
+      }),
+    }),
+    memory: schema.object({
+      heap: schema.object({
+        total_bytes: schema.number(),
+        used_bytes: schema.number(),
+        size_limit: schema.number(),
+      }),
+      resident_set_size_bytes: schema.number(),
+    }),
+  }),
+  os: schema.object({
+    memory: schema.object({
+      free_bytes: schema.number(),
+      total_bytes: schema.number(),
+    }),
+    uptime_ms: schema.number(),
+    load: schema.object({
+      '1m': schema.number(),
+      '5m': schema.number(),
+      '15m': schema.number(),
+    }),
+  }),
+  response_times: schema.object({
+    avg_ms: schema.maybe(schema.number()),
+    max_ms: schema.maybe(schema.number()),
+  }),
+  requests: schema.object({
+    total: schema.number(),
+    disconnects: schema.number(),
+  }),
+  concurrent_connections: schema.number(),
+});
 
 const assertStatsAndMetrics = (body) => {
-  expect(body.kibana.name).to.be.a('string');
-  expect(body.kibana.uuid).to.be.a('string');
-  expect(body.kibana.host).to.be.a('string');
-  expect(body.kibana.transport_address).to.be.a('string');
-  expect(body.kibana.version).to.be.a('string');
-  expect(body.kibana.snapshot).to.be.a('boolean');
-  expect(body.kibana.status).to.be.a('string');
-
-  expect(body.process.memory.heap.total_bytes).to.be.a('number');
-  expect(body.process.memory.heap.used_bytes).to.be.a('number');
-  expect(body.process.memory.heap.size_limit).to.be.a('number');
-  expect(body.process.memory.resident_set_size_bytes).to.be.a('number');
-  expect(body.process.pid).to.be.a('number');
-  expect(body.process.uptime_ms).to.be.a('number');
-  expect(body.process.event_loop_delay).to.be.a('number');
-
-  expect(body.os.memory.free_bytes).to.be.a('number');
-  expect(body.os.memory.total_bytes).to.be.a('number');
-  expect(body.os.uptime_ms).to.be.a('number');
-
-  expect(body.os.load['1m']).to.be.a('number');
-  expect(body.os.load['5m']).to.be.a('number');
-  expect(body.os.load['15m']).to.be.a('number');
-
-  expect(body.response_times.avg_ms).not.to.be(null); // ok if is undefined
-  expect(body.response_times.max_ms).not.to.be(null); // ok if is undefined
-
-  expect(body.requests.total).to.be.a('number');
-  expect(body.requests.disconnects).to.be.a('number');
-
-  expect(body.concurrent_connections).to.be.a('number');
+  expect(() => statsResponseSchema.validate(body)).not.to.throwError();
 };
 
 export default function ({ getService }) {
