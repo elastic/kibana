@@ -237,7 +237,7 @@ export const OneOfTaskTypes = (field: string, types: string[]): MustCondition =>
 export function tasksWithPartitions(partitions: number[]): estypes.QueryDslQueryContainer {
   return {
     bool: {
-      must: [
+      filter: [
         {
           bool: {
             should: [

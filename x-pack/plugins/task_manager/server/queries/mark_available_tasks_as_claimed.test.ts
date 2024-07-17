@@ -272,7 +272,7 @@ if (doc['task.runAt'].size()!=0) {
     expect(tasksWithPartitions([1, 2, 3])).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
-          "must": Array [
+          "filter": Array [
             Object {
               "bool": Object {
                 "should": Array [
