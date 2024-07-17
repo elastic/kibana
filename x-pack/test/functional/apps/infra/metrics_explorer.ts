@@ -90,9 +90,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraMetricsExplorer.clearMetrics();
 
         const fields = [
-          'process.cpu.pct',
-          'process.memory.pct',
-          'system.core.total.pct',
+          'kubernetes.pod.cpu.usage.limit.pct',
+          'kubernetes.pod.memory.usage.bytes',
+          'kubernetes.pod.memory.usage.limit.pct',
           'system.core.user.pct',
           'system.core.nice.pct',
           'system.core.idle.pct',
@@ -107,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'system.cpu.softirq.pct',
           'system.cpu.steal.pct',
           'system.cpu.user.norm.pct',
-          'system.memory.free',
+          'kubernetes.pod.memory.usage.node.pct',
           'kubernetes.pod.cpu.usage.node.pct',
           'docker.cpu.total.pct',
         ];
