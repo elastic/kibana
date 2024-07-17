@@ -514,11 +514,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 },
                 userError: result.userError,
               });
-            } else if (
-              !(result.warningMessages.length > 0) &&
-              !(wrapperWarnings.length > 0) &&
-              !(wrapperErrors.length > 0)
-            ) {
+            } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
                 `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
