@@ -24,7 +24,6 @@ export default ({ getService }: FtrProviderContext) => {
     const timeFieldName = '@timestamp';
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       // create two data views
       await supertest
@@ -39,7 +38,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -90,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
       // set second aggregation
       await testSubjects.click('thresholdRuleCustomEquationEditorAddAggregationFieldButton');
       await testSubjects.click('aggregationNameB');
-      await testSubjects.setValue('ruleKqlFilterSearchField', 'service.name : "opbeans-node"');
+      await testSubjects.setValue('o11ySearchField', 'service.name : "opbeans-node"');
       await testSubjects.click('o11yClosablePopoverTitleButton');
     });
 
