@@ -26,15 +26,12 @@ import {
 import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
 import { BundleRefProcessor } from './process_document/document_processors/bundle_refs';
 import { RemoveUnusedComponentsProcessor } from './process_document/document_processors/remove_unused_components';
+import { insertRefByPointer } from '../utils/insert_by_json_pointer';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
     super(message);
   }
-}
-
-export interface BundledDocument extends ResolvedDocument {
-  bundledRefs: ResolvedRef[];
 }
 
 interface BundleDocumentOptions {
@@ -58,7 +55,7 @@ interface BundleDocumentOptions {
 export async function bundleDocument(
   absoluteDocumentPath: string,
   options?: BundleDocumentOptions
-): Promise<BundledDocument> {
+): Promise<ResolvedDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(
       `bundleDocument expects an absolute document path but got "${absoluteDocumentPath}"`
@@ -114,7 +111,9 @@ export async function bundleDocument(
     );
   }
 
-  return { ...resolvedDocument, bundledRefs: Array.from(bundleRefsProcessor.getBundledRefs()) };
+  injectBundledRefs(resolvedDocument, bundleRefsProcessor.getBundledRefs());
+
+  return resolvedDocument;
 }
 
 interface MaybeObjectWithPaths {
@@ -127,4 +126,13 @@ function hasPaths(document: MaybeObjectWithPaths): boolean {
     document.paths !== null &&
     Object.keys(document.paths).length > 0
   );
+}
+
+function injectBundledRefs(
+  resolvedDocument: ResolvedDocument,
+  refs: IterableIterator<ResolvedRef>
+): void {
+  for (const ref of refs) {
+    insertRefByPointer(ref.pointer, ref.refNode, resolvedDocument.document);
+  }
 }

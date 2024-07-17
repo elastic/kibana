@@ -24,6 +24,16 @@ import {
 import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
 import { bulkUpdatePrompts } from '../../api/prompts/bulk_update_prompts';
 
+export const DEFAULT_ANONYMIZATION_FIELDS = {
+  page: 0,
+  perPage: 0,
+  total: 0,
+  data: [],
+};
+
+export const DEFAULT_CONVERSATIONS: Record<string, Conversation> = {};
+
+export const DEFAULT_PROMPTS: FindPromptsResponse = { page: 0, perPage: 0, total: 0, data: [] };
 interface UseSettingsUpdater {
   assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
@@ -57,7 +67,8 @@ export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
   allPrompts: FindPromptsResponse,
   conversationsLoaded: boolean,
-  anonymizationFields: FindAnonymizationFieldsResponse
+  promptsLoaded: boolean,
+  anonymizationFields: FindAnonymizationFieldsResponse = DEFAULT_ANONYMIZATION_FIELDS // Put default as a constant to avoid re-creating it on every render
 ): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
@@ -100,7 +111,6 @@ export const useSettingsUpdater = (
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
-
   /**
    * Reset all pending settings
    */
@@ -115,6 +125,7 @@ export const useSettingsUpdater = (
     setUpdatedSystemPromptSettings(
       allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
     );
+    setPromptsBulkActions({});
     setUpdatedAnonymizationData(anonymizationFields);
   }, [allPrompts, anonymizationFields, assistantStreamingEnabled, conversations, knowledgeBase]);
 
@@ -188,6 +199,8 @@ export const useSettingsUpdater = (
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
 
+    setPromptsBulkActions({});
+    setConversationsSettingsBulkActions({});
     return (
       (bulkResult?.success ?? true) &&
       (bulkAnonymizationFieldsResult?.success ?? true) &&
@@ -234,6 +247,18 @@ export const useSettingsUpdater = (
       setConversationSettings(conversations);
     }
   }, [conversations, conversationsLoaded]);
+
+  useEffect(() => {
+    // Update quick prompts settings when prompts are loaded
+    if (promptsLoaded) {
+      setUpdatedQuickPromptSettings(
+        allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+      );
+      setUpdatedSystemPromptSettings(
+        allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+      );
+    }
+  }, [allPrompts.data, promptsLoaded]);
 
   return {
     conversationSettings,
