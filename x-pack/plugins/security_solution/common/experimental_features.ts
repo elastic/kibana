@@ -129,6 +129,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
+   * Adds a new Langgraph-based ES|QL generation tool
+   */
+  assistantGraphEsqlTool: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
