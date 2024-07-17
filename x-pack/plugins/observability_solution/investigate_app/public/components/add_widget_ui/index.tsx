@@ -121,9 +121,6 @@ export function AddWidgetUI({
           <EuiFlexItem grow={false}>
             <AddFromLibraryButton onWidgetAdd={onWidgetAdd} />
           </EuiFlexItem>
-          {/* <EuiFlexItem grow={false}>
-            <CreateVisualizationButton onWidgetAdd={onWidgetAdd} />
-          </EuiFlexItem> */}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
