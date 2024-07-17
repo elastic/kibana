@@ -56,16 +56,16 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         pageIndex,
         pageSize,
       }),
-    // To avoid flash of loading state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
-    keepPreviousData: true,
     refetchOnWindowFocus: false,
     context: AlertsQueryContext,
-    initialData: {
+    enabled: featureIds.length > 0,
+    // To avoid flash of empty state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
+    keepPreviousData: true,
+    placeholderData: {
       total: -1,
       alerts: [],
       oldAlertsData: [],
       ecsAlertsData: [],
     },
-    enabled: featureIds.length > 0,
   });
 };

@@ -254,7 +254,7 @@ describe('useSearchAlertsQuery', () => {
     );
   });
 
-  it('returns empty initial data', () => {
+  it('returns empty placeholder data', () => {
     const { result } = renderHook(() => useSearchAlertsQuery(params), {
       wrapper,
     });

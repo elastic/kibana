@@ -334,10 +334,9 @@ const AlertsTableStateWithQueryProvider = memo(
 
     const {
       data: alertsData,
-      isLoading,
       refetch,
-      isInitialLoading,
       isSuccess,
+      isFetching: isLoading,
     } = useSearchAlertsQuery({
       data,
       ...queryParams,
@@ -359,10 +358,10 @@ const AlertsTableStateWithQueryProvider = memo(
     }, [queryParams.pageIndex, refetch]);
 
     useEffect(() => {
-      if (onLoaded && isInitialLoading && !isLoading && isSuccess) {
+      if (onLoaded && !isLoading && isSuccess) {
         onLoaded(alerts);
       }
-    }, [alerts, isInitialLoading, isLoading, isSuccess, onLoaded]);
+    }, [alerts, isLoading, isSuccess, onLoaded]);
 
     const mutedAlertIds = useMemo(() => {
       return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
@@ -565,7 +564,18 @@ const AlertsTableStateWithQueryProvider = memo(
       };
     }, [activeBulkActionsReducer, mutedAlerts]);
 
-    return hasAlertsTableConfiguration ? (
+    if (!hasAlertsTableConfiguration) {
+      return (
+        <EuiEmptyPrompt
+          data-test-subj="alertsTableNoConfiguration"
+          iconType="watchesApp"
+          title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+          body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+        />
+      );
+    }
+
+    return (
       <AlertsTableContext.Provider value={alertsTableContext}>
         {!isLoading && alertsCount === 0 && (
           <InspectButtonContainer>
@@ -580,24 +590,19 @@ const AlertsTableStateWithQueryProvider = memo(
         {(isLoading || isBrowserFieldDataLoading) && (
           <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
         )}
-        {alertsCount !== 0 && isCasesContextAvailable && (
-          <CasesContext
-            owner={alertsTableConfiguration.cases?.owner ?? []}
-            permissions={casesPermissions}
-            features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
-          >
+        {alertsCount > 0 &&
+          (isCasesContextAvailable ? (
+            <CasesContext
+              owner={alertsTableConfiguration.cases?.owner ?? []}
+              permissions={casesPermissions}
+              features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
+            >
+              <AlertsTable {...tableProps} />
+            </CasesContext>
+          ) : (
             <AlertsTable {...tableProps} />
-          </CasesContext>
-        )}
-        {alertsCount !== 0 && !isCasesContextAvailable && <AlertsTable {...tableProps} />}
+          ))}
       </AlertsTableContext.Provider>
-    ) : (
-      <EuiEmptyPrompt
-        data-test-subj="alertsTableNoConfiguration"
-        iconType="watchesApp"
-        title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
-        body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
-      />
     );
   }
 );
