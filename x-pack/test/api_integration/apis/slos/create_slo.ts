@@ -142,7 +142,6 @@ export default function ({ getService }: FtrProviderContext) {
                   ],
                 },
               },
-              runtime_mappings: {},
             },
             dest: {
               index: '.slo-observability.sli-v3.3',
