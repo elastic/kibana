@@ -7,7 +7,15 @@
  */
 
 import { memoize } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, switchMap, tap, withLatestFrom } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  Observable,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 import {
   OptionsListRequest,
@@ -21,37 +29,29 @@ import { buildEsQuery } from '@kbn/es-query';
 
 import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
-import { OptionsListComponentState, OptionsListControlApi } from './types';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
+import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
+import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 
 export function fetchAndValidate$({
   api,
   services,
   stateManager,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec'> & {
-    controlFetch$: Observable<ControlFetchContext>;
-    loadingSuggestions$: BehaviorSubject<boolean>;
-    allowExpensiveQueries$: BehaviorSubject<boolean>;
-    debouncedSearchString: Observable<string>;
-  };
+  api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec' | 'setBlockingError'> &
+    Pick<OptionsListComponentApi, 'loadMoreSubject' | 'allowExpensiveQueries$'> & {
+      controlFetch$: Observable<ControlFetchContext>;
+      loadingSuggestions$: BehaviorSubject<boolean>;
+      debouncedSearchString: Observable<string>;
+    };
   services: {
     http: CoreStart['http'];
     uiSettings: CoreStart['uiSettings'];
     data: DataPublicPluginStart;
   };
-  stateManager: ControlStateManager<
-    Pick<
-      OptionsListComponentState,
-      | 'fieldName'
-      | 'runPastTimeout'
-      | 'sort'
-      | 'searchTechnique'
-      | 'selectedOptions'
-      | 'requestSize'
-    >
-  >;
+  stateManager: ControlStateManager<OptionsListComponentState>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
-  let prevRequestAbortController: AbortController | undefined;
+  let abortController: AbortController = new AbortController();
 
   return combineLatest([
     api.dataViews,
@@ -61,9 +61,14 @@ export function fetchAndValidate$({
     api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,
-    stateManager.requestSize,
+    // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
+    api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
   ]).pipe(
-    withLatestFrom(stateManager.runPastTimeout, stateManager.selectedOptions),
+    withLatestFrom(
+      stateManager.requestSize,
+      stateManager.runPastTimeout,
+      stateManager.selectedOptions
+    ),
     switchMap(
       async ([
         [
@@ -74,17 +79,28 @@ export function fetchAndValidate$({
           searchString,
           sort,
           searchTechnique,
-          requestSize,
         ],
+        requestSize,
         runPastTimeout,
         selectedOptions,
       ]) => {
         const dataView = dataViews?.[0];
-        if (!dataView || !fieldSpec) {
+        if (
+          !dataView ||
+          !fieldSpec ||
+          !isValidSearch({ searchString, fieldType: fieldSpec.type, searchTechnique })
+        ) {
           return { suggestions: [] };
         }
 
+        /** Abort any in-progress requests */
+        abortController.abort();
+        const newAbortController = new AbortController();
+        abortController = newAbortController;
+
         /** Fetch the suggestions list + perform validation */
+        api.loadingSuggestions$.next(true);
+
         const request = {
           sort,
           dataView,
@@ -99,14 +115,6 @@ export function fetchAndValidate$({
         };
 
         try {
-          api.loadingSuggestions$.next(true);
-
-          const abortController = new AbortController();
-          if (prevRequestAbortController) {
-            prevRequestAbortController.abort();
-            prevRequestAbortController = abortController;
-          }
-
           return await cachedOptionsListRequest(request, abortController.signal, services);
         } catch (error) {
           // Remove rejected results from memoize cache

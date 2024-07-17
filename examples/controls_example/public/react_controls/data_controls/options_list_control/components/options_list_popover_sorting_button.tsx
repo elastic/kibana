@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   Direction,
@@ -21,7 +21,7 @@ import {
   EuiSelectableOption,
   EuiToolTip,
 } from '@elastic/eui';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import {
   getCompatibleSortingTypes,
@@ -57,17 +57,10 @@ export const OptionsListPopoverSortingButton = ({
 }) => {
   const { api, stateManager } = useOptionsListContext();
 
-  const fieldSpec = useStateFromPublishingSubject(api.fieldSpec);
-
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
-  const [selectedSort, setSelectedSort] = useState(
-    stateManager.sort.getValue() ?? OPTIONS_LIST_DEFAULT_SORT
-  );
+  const [sort, fieldSpec] = useBatchedPublishingSubjects(stateManager.sort, api.fieldSpec);
 
-  /** When selected sort changes, push to state manager */
-  useEffect(() => {
-    stateManager.sort.next(selectedSort);
-  }, [selectedSort, stateManager.sort]);
+  const selectedSort = useMemo(() => sort ?? OPTIONS_LIST_DEFAULT_SORT, [sort]);
 
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
     return getCompatibleSortingTypes(fieldSpec?.type).map((key) => {
@@ -86,13 +79,13 @@ export const OptionsListPopoverSortingButton = ({
       setSortByOptions(updatedOptions);
       const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
       if (selectedOption) {
-        setSelectedSort({
+        stateManager.sort.next({
           ...selectedSort,
           by: selectedOption.data.sortBy,
         });
       }
     },
-    [selectedSort, setSelectedSort]
+    [selectedSort, stateManager.sort]
   );
 
   const SortButton = () => (
@@ -141,7 +134,7 @@ export const OptionsListPopoverSortingButton = ({
                 idSelected={selectedSort.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction}
                 legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
                 onChange={(value) => {
-                  setSelectedSort({
+                  stateManager.sort.next({
                     ...selectedSort,
                     direction: value as Direction,
                   });

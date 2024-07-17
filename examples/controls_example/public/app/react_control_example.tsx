@@ -76,7 +76,7 @@ const controlGroupPanels = {
   },
   [rangeSliderControlId]: {
     type: RANGE_SLIDER_CONTROL_TYPE,
-    order: 2,
+    order: 1,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -100,7 +100,7 @@ const controlGroupPanels = {
   },
   [optionsListId]: {
     type: OPTIONS_LIST_CONTROL_TYPE,
-    order: 1,
+    order: 2,
     grow: true,
     width: 'medium',
     explicitInput: {

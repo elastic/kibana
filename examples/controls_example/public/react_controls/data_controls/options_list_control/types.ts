@@ -10,6 +10,7 @@ import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { DataControlApi, DefaultDataControlState } from '../types';
 
 export interface OptionsListDisplaySettings {
@@ -52,4 +53,5 @@ export type OptionsListComponentApi = OptionsListControlApi &
     deselectOption: (key: string) => void;
     makeSelection: (key: string, showOnlySelected: boolean) => void;
     allowExpensiveQueries$: PublishingSubject<boolean>;
+    loadMoreSubject: BehaviorSubject<null>;
   };

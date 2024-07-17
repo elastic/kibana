@@ -146,8 +146,9 @@ export const OptionsListPopoverSuggestions = ({
       // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
       // have to scroll **all the way** to the bottom in order to load more options
       stateManager.requestSize.next(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
+      api.loadMoreSubject.next(null); // trigger refetch with loadMoreSubject
     }
-  }, [stateManager.requestSize, totalCardinality]);
+  }, [api.loadMoreSubject, stateManager.requestSize, totalCardinality]);
 
   const renderOption = useCallback(
     (option, searchStringValue) => {

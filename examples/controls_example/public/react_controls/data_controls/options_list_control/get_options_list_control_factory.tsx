@@ -135,10 +135,6 @@ export const getOptionsListControlFactory = ({
           debounceTime(100) // debounce set loading so that it doesn't flash as the user types
         )
         .subscribe((isLoading) => {
-          // clear previous loading error on next loading start
-          if (isLoading && dataControl.api.blockingError.value) {
-            dataControl.api.setBlockingError(undefined);
-          }
           dataControl.api.setDataLoading(isLoading);
         });
 
@@ -174,6 +170,7 @@ export const getOptionsListControlFactory = ({
           selections$.next(undefined);
           existsSelected$.next(false);
           excludeSelected$.next(false);
+          requestSize$.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
           sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
 
@@ -193,26 +190,39 @@ export const getOptionsListControlFactory = ({
         });
 
       /** Fetch the suggestions and perform validation */
+      const loadMoreSubject = new BehaviorSubject<null>(null);
       const fetchSubscription = fetchAndValidate$({
         services: { http: core.http, uiSettings: core.uiSettings, data: dataService },
         api: {
+          ...dataControl.api,
+          loadMoreSubject,
           loadingSuggestions$,
-          dataViews: dataControl.api.dataViews,
-          fieldSpec: dataControl.api.fieldSpec,
-          controlFetch$: controlGroupApi.controlFetch$(uuid),
-          allowExpensiveQueries$,
           debouncedSearchString,
+          allowExpensiveQueries$,
+          controlFetch$: controlGroupApi.controlFetch$(uuid),
         },
         stateManager,
       }).subscribe((result) => {
+        // if there was an error during fetch, set blocking error and return early
         if (Object.hasOwn(result, 'error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
           return;
         }
+
+        // otherwise, fetch was successful so set all attributes from result
         const successResponse = result as OptionsListSuccessResponse;
         availableOptions$.next(successResponse.suggestions);
         totalCardinality$.next(successResponse.totalCardinality ?? 0);
         invalidSelections$.next(new Set(successResponse.invalidSelections ?? []));
+
+        // reset the request size back to the minimum (if it's not already)
+        if (stateManager.requestSize.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE)
+          stateManager.requestSize.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
+
+        // if there was a previous error, clear it
+        if (dataControl.api.blockingError.getValue()) {
+          dataControl.api.setBlockingError(undefined);
+        }
       });
 
       /** Remove all other selections if this control is single select */
@@ -292,6 +302,11 @@ export const getOptionsListControlFactory = ({
       const componentApi = {
         ...api,
         selections$,
+        loadMoreSubject,
+        totalCardinality$,
+        availableOptions$,
+        invalidSelections$,
+        allowExpensiveQueries$,
         deselectOption: (key: string) => {
           // delete from selections
           const selectedOptions = selections$.getValue() ?? [];
@@ -333,10 +348,6 @@ export const getOptionsListControlFactory = ({
             selections$.next([...selectedOptions, key]);
           }
         },
-        invalidSelections$,
-        totalCardinality$,
-        availableOptions$,
-        allowExpensiveQueries$,
       };
 
       return {
