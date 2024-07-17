@@ -8,8 +8,11 @@ import React from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+/** DistributionBar component props */
 export interface DistributionBarProps {
+  /** distribution data points */
   stats: Array<{ key: string; count: number; color: string }>;
+  /** data-test-subj used for querying the component in tests */
   ['data-test-subj']?: string;
 }
 
@@ -38,6 +41,10 @@ const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) =
   return <span css={emptyBarStyle} data-test-subj={`${dataTestSubj}__emptyBar`} />;
 };
 
+/**
+ * Security Solution DistributionBar component.
+ * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
+ */
 export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
   props
 ) {

@@ -6,3 +6,4 @@
  */
 
 export { DistributionBar } from './src/distribution_bar';
+export type { DistributionBarProps } from './src/distribution_bar';
