@@ -8,7 +8,6 @@
 import { uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetAgentsResponse,
@@ -21,7 +20,6 @@ import type {
   GetAgentUploadsResponse,
   PostAgentReassignResponse,
   PostRetrieveAgentsByActionsResponse,
-  Agent,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -45,18 +43,7 @@ import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
-
-export function verifyNamespace(agent: Agent, currentNamespace?: string) {
-  const isInNamespace =
-    (currentNamespace && agent.namespaces?.includes(currentNamespace)) ||
-    (!currentNamespace &&
-      (!agent.namespaces ||
-        agent.namespaces.length === 0 ||
-        agent.namespaces?.includes(DEFAULT_NAMESPACE_STRING)));
-  if (!isInNamespace) {
-    throw new FleetNotFoundError(`${agent.id} not found in namespace`);
-  }
-}
+import { isAgentInNamespace } from '../../services/agents/namespace';
 
 export const getAgentHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
@@ -68,7 +55,9 @@ export const getAgentHandler: FleetRequestHandler<
 
     let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
 
-    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
+    if (!isAgentInNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace())) {
+      throw new FleetNotFoundError(`${agent.id} not found in namespace`);
+    }
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -90,12 +79,17 @@ export const getAgentHandler: FleetRequestHandler<
   }
 };
 
-export const deleteAgentHandler: RequestHandler<
+export const deleteAgentHandler: FleetRequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   try {
-    const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    if (!isAgentInNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace())) {
+      throw new FleetNotFoundError(`${agent.id} not found in namespace`);
+    }
 
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
@@ -116,12 +110,12 @@ export const deleteAgentHandler: RequestHandler<
   }
 };
 
-export const updateAgentHandler: RequestHandler<
+export const updateAgentHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.params>,
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
 
@@ -134,6 +128,11 @@ export const updateAgentHandler: RequestHandler<
   }
 
   try {
+    const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    if (!isAgentInNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace())) {
+      throw new FleetNotFoundError(`${agent.id} not found in namespace`);
+    }
+
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),

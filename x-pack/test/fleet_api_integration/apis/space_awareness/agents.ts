@@ -132,5 +132,41 @@ export default function (providerContext: FtrProviderContext) {
         expect(err?.message).to.match(/404 "Not Found"/);
       });
     });
+
+    describe('PUT /agents/{id}', () => {
+      it('should allow to update an agent in the same space', async () => {
+        await apiClient.updateAgent(testSpaceAgent1, { tags: ['foo'] }, TEST_SPACE_1);
+      });
+
+      it('should not allow to update an agent from a different space from the default space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.updateAgent(testSpaceAgent1, { tags: ['foo'] });
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+    });
+
+    describe('DELETE /agents/{id}', () => {
+      it('should allow to delete an agent in the same space', async () => {
+        await apiClient.deleteAgent(testSpaceAgent1, TEST_SPACE_1);
+      });
+
+      it('should not allow to delete an agent from a different space from the default space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.deleteAgent(testSpaceAgent1);
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+    });
   });
 }
