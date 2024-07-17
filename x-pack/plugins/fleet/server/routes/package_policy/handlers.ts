@@ -62,6 +62,8 @@ import {
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
+import type { IntegrationPoliciesEvent } from '../../telemetry/types';
+
 import {
   canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
@@ -69,7 +71,6 @@ import {
   sendEvent,
   getTelemetryEvent,
 } from './utils';
-import { IntegrationPoliciesEvent } from '../../telemetry/types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -458,7 +459,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
     if (canUseReusablePolicies && (newData.policy_ids ?? []).length > 1) {
       telemetryEvent = getTelemetryEvent({
-        id: `${newData?.id}` || packagePolicy.id,
+        id: newData?.id ? `${newData.id}` : packagePolicy.id,
         policyIds: newData.policy_ids,
         name: newData.name,
         pkgName: pkg?.name ? pkg.name : '',
