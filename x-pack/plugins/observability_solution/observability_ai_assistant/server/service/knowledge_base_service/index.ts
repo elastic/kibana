@@ -303,7 +303,7 @@ export class KnowledgeBaseService {
     user,
     modelId,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     namespace: string;
     user?: { name: string };
@@ -311,11 +311,12 @@ export class KnowledgeBaseService {
   }): Promise<RecalledEntry[]> {
     const query = {
       bool: {
-        should: queries.map((text) => ({
+        should: queries.map(({ text, boost = 1 }) => ({
           text_expansion: {
             'ml.tokens': {
               model_text: text,
               model_id: modelId,
+              boost,
             },
           },
         })),
@@ -352,7 +353,7 @@ export class KnowledgeBaseService {
     asCurrentUser,
     modelId,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     asCurrentUser: ElasticsearchClient;
     modelId: string;
   }): Promise<RecalledEntry[]> {
@@ -378,15 +379,16 @@ export class KnowledgeBaseService {
       const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
       const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
 
-      return queries.map((query) => {
+      return queries.map(({ text, boost = 1 }) => {
         return {
           bool: {
             should: [
               {
                 text_expansion: {
                   [vectorField]: {
-                    model_text: query,
+                    model_text: text,
                     model_id: modelId,
+                    boost,
                   },
                 },
               },
@@ -431,7 +433,7 @@ export class KnowledgeBaseService {
     namespace,
     asCurrentUser,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     user?: { name: string };
     namespace: string;

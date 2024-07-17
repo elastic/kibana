@@ -650,7 +650,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
