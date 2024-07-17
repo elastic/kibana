@@ -7,3 +7,12 @@
  */
 
 export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';
+
+export const DEFAULT_ROUTE_UI_SETTING_ID = 'defaultRoute';
+
+export const DEFAULT_ROUTES = {
+  classic: '/app/home',
+  es: '/app/enterprise_search/overview',
+  oblt: '/app/observabilityOnboarding',
+  security: '/app/security/get_started',
+};
