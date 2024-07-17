@@ -79,7 +79,7 @@ export const PreprocessDataPanel: React.FC<{
                       aria-label={i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataEnrichment.learnMore.ariaLabel',
                         {
-                          defaultMessage: 'Learn more about Data enrichment',
+                          defaultMessage: 'Learn more about data enrichment',
                         }
                       )}
                     >
@@ -124,7 +124,7 @@ export const PreprocessDataPanel: React.FC<{
                       aria-label={i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataFiltering.learnMore.ariaLabel',
                         {
-                          defaultMessage: 'Learn more about Data filtering',
+                          defaultMessage: 'Learn more about data filtering',
                         }
                       )}
                     >
@@ -171,7 +171,7 @@ export const PreprocessDataPanel: React.FC<{
                       aria-label={i18n.translate(
                         'searchApiPanels.preprocessData.overview.arrayJsonHandling.learnMore.ariaLabel',
                         {
-                          defaultMessage: 'Learn more about Array/JSON handling',
+                          defaultMessage: 'Learn more about array/JSON handling',
                         }
                       )}
                     >
