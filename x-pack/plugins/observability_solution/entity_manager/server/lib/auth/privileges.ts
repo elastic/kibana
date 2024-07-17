@@ -11,6 +11,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ENTITY_INDICES_PATTERN } from '../../../common/constants_entities';
+import { SO_ENTITY_DEFINITION_TYPE, SO_ENTITY_DISCOVERY_API_KEY_TYPE } from '../../saved_objects';
 import { BUILT_IN_ALLOWED_INDICES } from '../entities/built_in/constants';
 
 export const canManageEntityDefinition = async (client: ElasticsearchClient) => {
@@ -29,7 +30,7 @@ const canDeleteEntityDefinition = async (client: ElasticsearchClient) => {
   return hasAllRequested;
 };
 
-const canCreateAPIKey = async (client: ElasticsearchClient) => {
+const canManageAPIKey = async (client: ElasticsearchClient) => {
   const { cluster, application } = await client.security.hasPrivileges({
     body: apiKeyCreationPrivileges,
   });
@@ -56,7 +57,7 @@ const canDeleteAPIKey = async (client: ElasticsearchClient) => {
 };
 
 export const canEnableEntityDiscovery = async (client: ElasticsearchClient) => {
-  return Promise.all([canCreateAPIKey(client), canManageEntityDefinition(client)]).then((results) =>
+  return Promise.all([canManageAPIKey(client), canManageEntityDefinition(client)]).then((results) =>
     results.every(Boolean)
   );
 };
@@ -95,7 +96,7 @@ export const entityDefinitionRuntimePrivileges = {
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: ['saved_object:entity-definition/*'],
+      privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`],
       resources: ['*'],
     },
   ],
@@ -106,7 +107,7 @@ const entityDefinitionDeletionPrivileges = {
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: ['saved_object:entity-definition/delete'],
+      privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/delete`],
       resources: ['*'],
     },
   ],
@@ -118,7 +119,7 @@ const apiKeyCreationPrivileges = {
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: ['saved_object:entity-discovery-api-key/*'],
+      privileges: [`saved_object:${SO_ENTITY_DISCOVERY_API_KEY_TYPE}/*`],
       resources: ['*'],
     },
   ],
@@ -130,7 +131,7 @@ const apiKeyDeletionPrivileges = {
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: ['saved_object:entity-discovery-api-key/delete'],
+      privileges: [`saved_object:${SO_ENTITY_DISCOVERY_API_KEY_TYPE}/delete`],
       resources: ['*'],
     },
   ],
