@@ -8,7 +8,7 @@
 
 import './editor_menu.scss';
 
-import React, { useEffect, useRef, useCallback, type ComponentProps } from 'react';
+import React, { useEffect, useCallback, type ComponentProps } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -16,7 +16,6 @@ import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
 import { useGetDashboardPanels, DashboardPanelSelectionListFlyout } from './add_new_panel';
 import { pluginServices } from '../../services/plugin_services';
-import type { DashboardServices } from '../../services/types';
 import { useDashboardAPI } from '../dashboard_app';
 
 interface EditorMenuProps
@@ -25,7 +24,7 @@ interface EditorMenuProps
 }
 
 export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
-  const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
+  // const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
   const dashboardAPI = useDashboardAPI();
 
   const {
@@ -43,9 +42,9 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
   useEffect(() => {
     // ensure opened dashboard is closed if a navigation event happens;
     return () => {
-      flyoutRef.current?.close();
+      dashboardAPI.clearOverlays();
     };
-  }, []);
+  }, [dashboardAPI]);
 
   const openDashboardPanelSelectionFlyout = useCallback(
     function openDashboardPanelSelectionFlyout() {
@@ -55,7 +54,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
 
       const mount = toMountPoint(
         React.createElement(function () {
-          const closeFlyout = () => flyoutRef.current?.close();
+          const closeFlyout = () => dashboardAPI.clearOverlays();
 
           // kick off dashboard panel fetch
           fetchDashboardPanels(closeFlyout);
@@ -73,15 +72,21 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         { analytics, theme, i18n: i18nStart }
       );
 
-      flyoutRef.current = overlays.openFlyout(mount, {
-        size: 'm',
-        maxWidth: 500,
-        paddingSize: flyoutPanelPaddingSize,
-        'aria-labelledby': 'addPanelsFlyout',
-        'data-test-subj': 'dashboardPanelSelectionFlyout',
-      });
+      dashboardAPI.openOverlay(
+        overlays.openFlyout(mount, {
+          size: 'm',
+          maxWidth: 500,
+          paddingSize: flyoutPanelPaddingSize,
+          'aria-labelledby': 'addPanelsFlyout',
+          'data-test-subj': 'dashboardPanelSelectionFlyout',
+          onClose(overlayRef) {
+            dashboardAPI.clearOverlays();
+            overlayRef.close();
+          },
+        })
+      );
     },
-    [analytics, theme, i18nStart, overlays, fetchDashboardPanels, panels$]
+    [analytics, theme, i18nStart, dashboardAPI, overlays, fetchDashboardPanels, panels$]
   );
 
   return (
