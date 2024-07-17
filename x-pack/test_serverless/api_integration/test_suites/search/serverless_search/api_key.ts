@@ -24,10 +24,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('API Key routes', function () {
     describe('GET api_keys', function () {
       before(async () => {
-        roleAuthc = await svlUserManager.createApiKeyForRole('developer');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('developer');
       });
       after(async () => {
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
       it('return apiKeys', async () => {
         const { body } = await supertestWithoutAuth
@@ -66,11 +66,11 @@ export default function ({ getService }: FtrProviderContext) {
       };
       before(async () => {
         await deleteAllApiKeys();
-        roleAuthc = await svlUserManager.createApiKeyForRole('developer');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('developer');
       });
       after(async () => {
         await deleteAllApiKeys();
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
       it('can create a key that expires', async () => {
         const createBody = {

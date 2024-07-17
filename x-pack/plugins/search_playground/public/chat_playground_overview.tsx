@@ -7,8 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './utils/query_client';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { App } from './components/app';
@@ -25,19 +23,17 @@ export const ChatPlaygroundOverview: React.FC = () => {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <PlaygroundProvider>
-        <EuiPageTemplate
-          offset={0}
-          restrictWidth={false}
-          data-test-subj="svlPlaygroundPage"
-          grow={false}
-          panelled={false}
-        >
-          <App showDocs />
-          {embeddableConsole}
-        </EuiPageTemplate>
-      </PlaygroundProvider>
-    </QueryClientProvider>
+    <PlaygroundProvider>
+      <EuiPageTemplate
+        offset={0}
+        restrictWidth={false}
+        data-test-subj="svlPlaygroundPage"
+        grow={false}
+        panelled={false}
+      >
+        <App showDocs />
+        {embeddableConsole}
+      </EuiPageTemplate>
+    </PlaygroundProvider>
   );
 };
