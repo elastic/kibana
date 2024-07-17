@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Request, Server } from '@hapi/hapi';
+import { Request, Server, ServerStateCookieOptions } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';
@@ -16,6 +16,7 @@ import type {
   SessionStorage,
   SessionStorageCookieOptions,
 } from '@kbn/core-http-server';
+
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> {
@@ -76,6 +77,7 @@ export async function createCookieSessionStorageFactory<T extends object>(
   log: Logger,
   server: Server,
   cookieOptions: SessionStorageCookieOptions<T>,
+  disableEmbedding: boolean,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
   validateOptions(cookieOptions);
@@ -101,6 +103,14 @@ export async function createCookieSessionStorageFactory<T extends object>(
       clearInvalid: false,
       isHttpOnly: true,
       isSameSite: cookieOptions.sameSite ?? false,
+      contextualize: (
+        definition: Omit<ServerStateCookieOptions, 'isSameSite'> & { isSameSite: string }
+      ) => {
+        // correctly appends the Partitioned attribute to the cookie
+        if (definition.isSameSite === 'None' && definition.isSecure && !disableEmbedding) {
+          definition.isSameSite = 'None;Partitioned';
+        }
+      },
     },
     validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
