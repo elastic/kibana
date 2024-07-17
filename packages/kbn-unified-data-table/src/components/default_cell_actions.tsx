@@ -46,7 +46,7 @@ export const FilterInBtn = (
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '+', field);
       }}
-      iconType="plusInCircle"
+      iconType="filterInclude"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterForButton"
@@ -73,7 +73,7 @@ export const FilterOutBtn = (
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '-', field);
       }}
-      iconType="minusInCircle"
+      iconType="filterExclude"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterOutButton"

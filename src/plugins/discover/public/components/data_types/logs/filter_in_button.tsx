@@ -29,7 +29,7 @@ export const FilterInButton = ({ property, value }: { property: string; value: s
     <EuiFlexItem key="addToFilterAction">
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="filterInclude"
         aria-label={ariaFilterForText}
         onClick={onFilterForAction}
         data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}

@@ -153,8 +153,8 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           ) : (
             <div>
               <EuiButtonIcon
-                iconSize="s"
-                iconType="plusInCircle"
+                iconSize="m"
+                iconType="filterInclude"
                 onClick={() => onAddFilter(field, fieldValue, '+')}
                 aria-label={i18n.translate(
                   'unifiedFieldList.fieldStats.filterValueButtonAriaLabel',
@@ -174,8 +174,8 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 }}
               />
               <EuiButtonIcon
-                iconSize="s"
-                iconType="minusInCircle"
+                iconSize="m"
+                iconType="filterExclude"
                 onClick={() => onAddFilter(field, fieldValue, '-')}
                 aria-label={i18n.translate(
                   'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
