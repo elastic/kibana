@@ -8,6 +8,7 @@
 
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import type { monaco } from '@kbn/monaco';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { builtinFunctions } from '../../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
@@ -241,15 +242,14 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createSuggestContext(text: string, triggerCharacter?: string) {
+export function createCompletionContext(
+  triggerCharacter?: string
+): monaco.languages.CompletionContext {
   if (triggerCharacter) {
     return { triggerCharacter, triggerKind: 1 }; // any number is fine here
   }
-  const foundTriggerCharIndexes = triggerCharacters.map((char) => text.lastIndexOf(char));
-  const maxIndex = Math.max(...foundTriggerCharIndexes);
   return {
-    triggerCharacter: text[maxIndex],
-    triggerKind: 1,
+    triggerKind: 0,
   };
 }
 
