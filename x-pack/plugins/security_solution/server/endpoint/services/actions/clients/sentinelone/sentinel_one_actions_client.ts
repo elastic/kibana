@@ -74,6 +74,7 @@ import type {
   GetProcessesActionOutputContent,
   SentinelOneProcessesRequestMeta,
   SentinelOneKillProcessResponseMeta,
+  SentinelOneProcessesResponseMeta,
 } from '../../../../../../common/endpoint/types';
 import type {
   GetProcessesRequestBody,
@@ -1213,8 +1214,99 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       >
     >
   ): Promise<LogsEndpointActionResponse[]> {
-    return [];
-    // FIXME:PT implement
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    for (const pendingAction of actionRequests) {
+      const actionRequest = pendingAction.action;
+      const s1ParentTaskId = actionRequest.meta?.parentTaskId;
+
+      if (!s1ParentTaskId) {
+        completedResponses.push(
+          this.buildActionResponseEsDoc<
+            GetProcessesActionOutputContent,
+            SentinelOneProcessesResponseMeta
+          >({
+            actionId: actionRequest.EndpointActions.action_id,
+            agentId: Array.isArray(actionRequest.agent.id)
+              ? actionRequest.agent.id[0]
+              : actionRequest.agent.id,
+            data: {
+              command: 'running-processes',
+              comment: '',
+            },
+            error: {
+              message: `Action request missing SentinelOne 'parentTaskId' value - unable check on its status`,
+            },
+          })
+        );
+
+        warnings.push(
+          `Response Action [${actionRequest.EndpointActions.action_id}] is missing [meta.parentTaskId]! (should not have happened)`
+        );
+      } else {
+        const s1TaskStatusApiResponse =
+          await this.sendAction<SentinelOneGetRemoteScriptStatusApiResponse>(
+            SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
+            { parentTaskId: s1ParentTaskId }
+          );
+
+        if (s1TaskStatusApiResponse.data?.data.length) {
+          const processListScriptExecStatus = s1TaskStatusApiResponse.data.data[0];
+          const taskState = this.calculateTaskState(processListScriptExecStatus);
+
+          if (!taskState.isPending) {
+            this.log.debug(`Action is completed - generating response doc for it`);
+
+            const error: LogsEndpointActionResponse['error'] = taskState.isError
+              ? {
+                  message: `Action failed to execute in SentinelOne. message: ${taskState.message}`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                GetProcessesActionOutputContent,
+                SentinelOneProcessesResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'running-processes',
+                  comment: taskState.message,
+                  output: {
+                    type: 'json',
+                    content: {
+                      code: '',
+                      entries: [],
+                    },
+                  },
+                },
+                error,
+                meta: {
+                  taskId: processListScriptExecStatus.id,
+                },
+              })
+            );
+          }
+        }
+      }
+    }
+
+    this.log.debug(
+      () =>
+        `${completedResponses.length} running-processes action responses generated:\n${stringify(
+          completedResponses
+        )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
   }
 
   private async checkPendingGetFileActions(
