@@ -1293,7 +1293,7 @@ x-pack/test_serverless/api_integration/test_suites/common/security_response_head
 x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @elastic/kibana-telemetry @shahinakmal
 
 # Kibana Localization
-/src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
+/src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
 /src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
