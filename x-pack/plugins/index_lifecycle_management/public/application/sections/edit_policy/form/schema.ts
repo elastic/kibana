@@ -128,6 +128,11 @@ const shardSizeField = {
   serializer: serializers.stringToNumber,
 };
 
+const allowWriteAfterShrinkField = {
+  label: i18nTexts.editPolicy.allowWriteAfterShrinkLabel,
+  defaultValue: false,
+};
+
 const getPriorityField = (phase: PhaseExceptDelete) => ({
   defaultValue: defaultIndexPriority[phase],
   label: i18nTexts.editPolicy.indexPriorityFieldLabel,
@@ -458,6 +463,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         shrink: {
           number_of_shards: numberOfShardsField,
           max_primary_shard_size: shardSizeField,
+          allow_write_after_shrink: allowWriteAfterShrinkField,
         },
         set_priority: {
           priority: getPriorityField('hot'),
@@ -474,6 +480,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         shrink: {
           number_of_shards: numberOfShardsField,
           max_primary_shard_size: shardSizeField,
+          allow_write_after_shrink: allowWriteAfterShrinkField,
         },
         forcemerge: {
           max_num_segments: maxNumSegmentsField,
