@@ -14,6 +14,7 @@ import {
   type SortOrder,
   renderCustomToolbar,
 } from '@kbn/unified-data-table';
+import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -170,7 +171,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                   margin-right: 4px;
                 `}
               />
-              <EuiText size="xs">Open in Discover</EuiText>
+              <EuiText size="xs">
+                {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
+                  defaultMessage: 'Open in Discover.',
+                })}
+              </EuiText>
             </EuiLink>
           ),
         },
