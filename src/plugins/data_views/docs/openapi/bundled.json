@@ -1187,7 +1187,7 @@
         "summary": "Update data view fields metadata in the default space",
         "operationId": "updateFieldsMetadataDefault",
         "x-technical-preview": true,
-        "description": "Update fields presentation metadata such as count, customLabel and format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
+        "description": "Update fields presentation metadata such as count, customLabel, customDescription, and format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
         "tags": [
           "data views"
         ],
@@ -3072,11 +3072,16 @@
         }
       },
       "update_field_metadata_request": {
-        "summary": "Set popularity count for field foo.",
+        "summary": "Update multiple metadata fields.",
         "value": {
           "fields": {
-            "foo": {
-              "count": 123
+            "field1": {
+              "count": 123,
+              "customLabel": "Field 1 label"
+            },
+            "field2": {
+              "customLabel": "Field 2 label",
+              "customDescription": "Field 2 description"
             }
           }
         }

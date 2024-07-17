@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       const [unencryptedPayload] = await usageApi.getTelemetryStats(
         { unencrypted: true },
         { authHeader: roleAuthc.apiKeyHeader }
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should pass the schema validation (ensures BWC with Classic offering)', () => {
