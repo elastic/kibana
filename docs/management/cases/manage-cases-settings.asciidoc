@@ -57,9 +57,7 @@ To update a connector, click *Update <connector name>* and edit the connector fi
 [[case-custom-fields]]
 === Custom fields
 
-added::[8.15.0]
-
-You can add optional and required fields for customized case collaboration.
+You can add optional and required fields for customized case collaboration. added:[8.15.0]
 
 To create a custom field:
 
