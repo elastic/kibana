@@ -100,26 +100,6 @@ describe('global header', () => {
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
-  it('points to the resolved Add data URL by useVariation', () => {
-    (useLocation as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
-
-    const customResolvedUrl = '/test/url';
-    useVariationMock.mockImplementationOnce(
-      (cloudExperiments, featureFlagName, defaultValue, setter) => {
-        setter(customResolvedUrl);
-      }
-    );
-    const { queryByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    const link = queryByTestId('add-data');
-    expect(link?.getAttribute('href')).toBe(customResolvedUrl);
-  });
-
   it.each(sourcererPaths)('shows sourcerer on %s page', (pathname) => {
     (useLocation as jest.Mock).mockReturnValue({ pathname });
 
