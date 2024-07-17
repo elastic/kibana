@@ -8,7 +8,6 @@
 import { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
@@ -16,7 +15,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.get<unknown, { page?: number; perPage?: number }, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
+      path: '/internal/entities/definition',
       validate: {
         query: schema.object({
           page: schema.maybe(schema.number()),
