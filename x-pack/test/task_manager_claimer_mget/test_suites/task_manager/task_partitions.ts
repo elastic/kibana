@@ -47,6 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const testHistoryIndex = '.kibana_task_manager_test_result';
+  const testNode1 = 'test-node-1';
+  const testNode2 = 'test-node-2';
 
   function scheduleTask(
     task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
@@ -66,6 +68,22 @@ export default function ({ getService }: FtrProviderContext) {
       .get('/api/sample_tasks')
       .expect(200)
       .then((response) => response.body);
+  }
+
+  function updateKibanaNodes() {
+    const lastSeen = new Date().toISOString();
+    return Promise.all([
+      supertest
+        .post('/api/update_kibana_node')
+        .set('kbn-xsrf', 'xxx')
+        .send({ id: testNode1, lastSeen })
+        .expect(200),
+      supertest
+        .post('/api/update_kibana_node')
+        .set('kbn-xsrf', 'xxx')
+        .send({ id: testNode2, lastSeen })
+        .expect(200),
+    ]);
   }
 
   async function historyDocs({
@@ -96,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       .then((result) => (result as unknown as SearchResults).hits.hits);
   }
 
-  describe('task partition', () => {
+  describe('task partitions', () => {
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
       if (exists) {
@@ -129,19 +147,22 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+      await es.deleteByQuery({
+        index: '.kibana_task_manager',
+        refresh: true,
+        body: { query: { terms: { id: [testNode1, testNode2] } } },
+      });
     });
 
-    it('should claim low priority tasks if there is capacity', async () => {
+    it('should tasks with partitions assigned to this kibana node', async () => {
       const partitions: Record<string, number> = {
         '0': 127,
         '1': 147,
         '2': 23,
-        '3': 180,
-        '4': 136,
       };
 
       const tasksToSchedule = [];
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) {
         tasksToSchedule.push(
           scheduleTask({
             id: `${i}`,
@@ -156,23 +177,39 @@ export default function ({ getService }: FtrProviderContext) {
       let tasks: any[] = [];
       await retry.try(async () => {
         tasks = (await currentTasks()).docs;
-        expect(tasks.length).to.eql(5);
+        expect(tasks.length).to.eql(3);
       });
 
       const taskIds = tasks.map((task) => task.id);
       await asyncForEach(scheduledTasks, async (scheduledTask) => {
         expect(taskIds).to.contain(scheduledTask.id);
         expect(scheduledTask.partition).to.eql(partitions[scheduledTask.id]);
-        await retry.try(async () => {
-          const doc: RawDoc[] = await historyDocs({ taskId: scheduledTask.id });
 
-          // taskId 2 should not run on this kibana node
-          if (scheduledTask.id === '2') {
-            expect(doc.length).to.eql(0);
-          } else {
-            expect(doc.length).to.eql(1);
+        let taskRanOnThisNode: boolean = false;
+        let counter = 0;
+        await retry.try(async () => {
+          await updateKibanaNodes();
+
+          const doc: RawDoc[] = await historyDocs({ taskId: scheduledTask.id });
+          if (doc.length === 1) {
+            taskRanOnThisNode = true;
+            return;
           }
+
+          if (counter > 20) {
+            return;
+          }
+          counter++;
+
+          throw new Error(`The task ID: ${scheduledTask.id} has not run yet`);
         });
+
+        // taskId 2 should not run on this kibana node
+        if (scheduledTask.id === '2') {
+          expect(taskRanOnThisNode).to.be(false);
+        } else {
+          expect(taskRanOnThisNode).to.be(true);
+        }
       });
     });
   });

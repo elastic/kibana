@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { assignPodPartitions } from './assign_pod_partitions';
 
 function range(start: number, end: number) {
@@ -18,12 +19,14 @@ function range(start: number, end: number) {
 export const MAX_PARTITIONS = 256;
 
 export class TaskPartitioner {
-  private readonly podName: string;
   private readonly allPartitions: number[];
+  private readonly podName: string;
+  private kibanaDiscoveryService: KibanaDiscoveryService;
 
-  constructor(podName: string) {
+  constructor(podName: string, kibanaDiscoveryService: KibanaDiscoveryService) {
     this.allPartitions = range(0, MAX_PARTITIONS);
     this.podName = podName;
+    this.kibanaDiscoveryService = kibanaDiscoveryService;
   }
 
   getAllPartitions(): number[] {
@@ -41,7 +44,7 @@ export class TaskPartitioner {
   }
 
   private async getAllPodNames(): Promise<string[]> {
-    // hard coding these for now, until the disovery service is complete
-    return Promise.resolve([this.podName, 'test-pod-2', 'test-pod-3']);
+    const nodes = await this.kibanaDiscoveryService.getActiveKibanaNodes();
+    return nodes.map((node) => node.id);
   }
 }

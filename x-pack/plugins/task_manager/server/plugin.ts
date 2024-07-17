@@ -99,7 +99,6 @@ export class TaskManagerPlugin
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private kibanaDiscoveryService?: KibanaDiscoveryService;
-  private podName?: string;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -122,9 +121,6 @@ export class TaskManagerPlugin
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
-
-    const serverInfo = core.http.getServerInfo();
-    this.podName = serverInfo.name;
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -287,7 +283,7 @@ export class TaskManagerPlugin
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
 
-      const taskPartitioner = new TaskPartitioner(this.podName!);
+      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
