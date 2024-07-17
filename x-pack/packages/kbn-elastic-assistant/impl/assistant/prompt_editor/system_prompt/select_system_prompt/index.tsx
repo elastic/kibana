@@ -43,6 +43,9 @@ export interface Props {
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
+  onSelectedConversationChange?: (result: Conversation) => void;
+  setConversationSettings?: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversationsSettingsBulkActions?: React.Dispatch<Record<string, Conversation>>;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
@@ -59,6 +62,9 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
+  onSelectedConversationChange,
+  setConversationSettings,
+  setConversationsSettingsBulkActions,
 }) => {
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
@@ -74,15 +80,16 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (promptId?: string) => {
+    async (promptId?: string) => {
       if (conversation && conversation.apiConfig) {
-        setApiConfig({
+        const result = await setApiConfig({
           conversation,
           apiConfig: {
             ...conversation.apiConfig,
             defaultSystemPromptId: promptId,
           },
         });
+        return result;
       }
     },
     [conversation, setApiConfig]
@@ -112,7 +119,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const options = useMemo(() => getOptions({ prompts: allSystemPrompts }), [allSystemPrompts]);
 
   const onChange = useCallback(
-    (selectedSystemPromptId) => {
+    async (selectedSystemPromptId) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
         setIsSettingsModalVisible(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
@@ -122,10 +129,30 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       if (onSystemPromptSelectionChange != null) {
         onSystemPromptSelectionChange(selectedSystemPromptId);
       }
-      setSelectedSystemPrompt(selectedSystemPromptId);
+      const result = await setSelectedSystemPrompt(selectedSystemPromptId);
+      if (result) {
+        setConversationSettings?.((prev: Record<string, Conversation>) => {
+          const newConversationsSettings = Object.entries(prev).reduce<
+            Record<string, Conversation>
+          >((acc, [key, convo]) => {
+            if (result.title === convo.title) {
+              acc[result.id] = result;
+            } else {
+              acc[key] = convo;
+            }
+            return acc;
+          }, {});
+          return newConversationsSettings;
+        });
+        onSelectedConversationChange?.(result);
+        setConversationsSettingsBulkActions?.({});
+      }
     },
     [
+      onSelectedConversationChange,
       onSystemPromptSelectionChange,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
       setIsSettingsModalVisible,
       setSelectedSettingsTab,
       setSelectedSystemPrompt,
