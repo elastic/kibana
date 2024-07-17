@@ -93,7 +93,7 @@ export function useFetchAgentsData() {
   );
 
   // filters kuery
-  const kuery = useMemo(() => {
+  let kuery = useMemo(() => {
     return getKuery({
       search,
       selectedAgentPolicies,
@@ -101,6 +101,13 @@ export function useFetchAgentsData() {
       selectedStatus,
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+
+  kuery =
+    includeUnenrolled && kuery
+      ? `status:unenrolled or (${kuery})`
+      : includeUnenrolled
+      ? `status:*`
+      : kuery;
 
   const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
@@ -153,7 +160,6 @@ export function useFetchAgentsData() {
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
               showInactive,
-              includeUnenrolled,
               showUpgradeable,
               getStatusSummary: true,
               withMetrics: displayAgentMetrics,
@@ -277,7 +283,6 @@ export function useFetchAgentsData() {
       sortField,
       sortOrder,
       showInactive,
-      includeUnenrolled,
       showUpgradeable,
       displayAgentMetrics,
       allTags,

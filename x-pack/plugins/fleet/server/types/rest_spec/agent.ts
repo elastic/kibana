@@ -33,7 +33,6 @@ export const GetAgentsRequestSchema = {
         })
       ),
       showInactive: schema.boolean({ defaultValue: false }),
-      includeUnenrolled: schema.boolean({ defaultValue: false }),
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
       getStatusSummary: schema.boolean({ defaultValue: false }),

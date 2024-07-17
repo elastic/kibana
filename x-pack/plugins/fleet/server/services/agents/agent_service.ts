@@ -79,7 +79,6 @@ export interface AgentClient {
   listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
-      includeUnenrolled?: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
       searchAfter?: SortResults;
       pitId?: string;
@@ -114,7 +113,6 @@ class AgentClientImpl implements AgentClient {
   public async listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
-      includeUnenrolled?: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
     }
   ) {

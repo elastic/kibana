@@ -217,7 +217,6 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
-    includeUnenrolled?: boolean;
     spaceId?: string;
     getStatusSummary?: boolean;
     sortField?: string;
@@ -241,7 +240,6 @@ export async function getAgentsByKuery(
     sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
-    includeUnenrolled = false,
     getStatusSummary = false,
     showUpgradeable,
     searchAfter,
@@ -267,7 +265,10 @@ export async function getAgentsByKuery(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
-  if (!includeUnenrolled) {
+  if (
+    !kuery?.toLowerCase().includes('status:*') &&
+    !kuery?.toLowerCase().includes('status:unenrolled')
+  ) {
     filters.push(ENROLLED_AGENT_CONDITION);
   }
 
