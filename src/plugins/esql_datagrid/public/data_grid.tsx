@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -31,6 +32,7 @@ interface ESQLDataGridProps {
   core: CoreStart;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
   rows: ESQLRow[];
   dataView: DataView;
   columns: DatatableColumn[];
@@ -133,6 +135,56 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.fieldFormats,
   ]);
 
+  const discoverLocator = useMemo(() => {
+    return props.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+  }, [props.share?.url.locators]);
+
+  const renderToolbar = useCallback(
+    (customToolbarProps) => {
+      const discoverLink = discoverLocator?.getRedirectUrl({
+        dataViewSpec: props.dataView.toSpec(),
+        timeRange: props.data.query.timefilter.timefilter.getTime(),
+        query: props.query,
+        columns: activeColumns,
+      });
+      return renderCustomToolbar({
+        ...customToolbarProps,
+        toolbarProps: {
+          ...customToolbarProps.toolbarProps,
+          hasRoomForGridControls: true,
+        },
+        gridProps: {
+          additionalControls: (
+            <EuiLink
+              href={discoverLink}
+              color="text"
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <EuiIcon
+                type="discoverApp"
+                size="s"
+                css={css`
+                  margin-right: 4px;
+                `}
+              />
+              <EuiText size="xs">Open in Discover</EuiText>
+            </EuiLink>
+          ),
+        },
+      });
+    },
+    [
+      activeColumns,
+      discoverLocator,
+      props.data.query.timefilter.timefilter,
+      props.dataView,
+      props.query,
+    ]
+  );
+
   return (
     <UnifiedDataTable
       columns={activeColumns}
@@ -167,36 +219,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rowHeightState={rowHeight}
       onUpdateRowHeight={setRowHeight}
       controlColumnIds={props.controlColumnIds}
-      renderCustomToolbar={(customToolbarProps) => {
-        return renderCustomToolbar({
-          ...customToolbarProps,
-          toolbarProps: {
-            ...customToolbarProps.toolbarProps,
-            hasRoomForGridControls: true,
-          },
-          gridProps: {
-            additionalControls: (
-              <EuiLink
-                href="#"
-                color="text"
-                css={css`
-                  display: flex;
-                  align-items: center;
-                `}
-              >
-                <EuiIcon
-                  type="discoverApp"
-                  size="s"
-                  css={css`
-                    margin-right: 4px;
-                  `}
-                />
-                <EuiText size="xs">Open in Discover</EuiText>
-              </EuiLink>
-            ),
-          },
-        });
-      }}
+      renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
     />
   );
 };

@@ -25,6 +25,7 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/shared-ux-utility",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -60,6 +60,7 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
             data={deps.data}
             fieldFormats={deps.fieldFormats}
             core={deps.core}
+            share={deps.share}
             {...props}
           />
         )}
