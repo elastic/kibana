@@ -29,7 +29,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflictResolutionResult.NO,
+        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
       })
     );
   });
@@ -48,7 +48,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflictResolutionResult.NO,
+        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
       })
     );
   });
@@ -67,7 +67,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         merged_version: mockVersions.target_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Target,
-        conflict: ThreeWayDiffConflictResolutionResult.NO,
+        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
       })
     );
   });
@@ -86,7 +86,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflictResolutionResult.NO,
+        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
       })
     );
   });
@@ -106,7 +106,7 @@ describe('scalarArrayDiffAlgorithm', () => {
         merged_version: expectedMergedVersion,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Merged,
-        conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
+        conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT,
       })
     );
   });
@@ -126,7 +126,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflictResolutionResult.NO,
+          conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
         })
       );
     });
@@ -145,7 +145,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflictResolutionResult.NO,
+          conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
         })
       );
     });
@@ -166,7 +166,7 @@ describe('scalarArrayDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflictResolutionResult.NO,
+          conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
         })
       );
     });
@@ -187,7 +187,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: expectedMergedVersion,
             diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });
@@ -207,7 +207,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: expectedMergedVersion,
             diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });
@@ -227,7 +227,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: expectedMergedVersion,
             diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });
@@ -247,7 +247,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: expectedMergedVersion,
             diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
             merge_outcome: ThreeWayMergeOutcome.Merged,
-            conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
+            conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT,
           })
         );
       });
@@ -268,7 +268,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: mockVersions.current_version,
             diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });
@@ -287,7 +287,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: mockVersions.current_version,
             diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });
@@ -306,7 +306,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: mockVersions.target_version,
             diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
             merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });
@@ -325,7 +325,7 @@ describe('scalarArrayDiffAlgorithm', () => {
             merged_version: [],
             diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflictResolutionResult.NO,
+            conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
           })
         );
       });

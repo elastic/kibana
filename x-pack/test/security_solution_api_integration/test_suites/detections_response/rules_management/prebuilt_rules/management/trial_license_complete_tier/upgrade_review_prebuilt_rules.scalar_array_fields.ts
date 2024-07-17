@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merged_version: 2,
               diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflictResolutionResult.NO,
+              conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
             },
           });
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merged_version: ['one', 'two', 'four'],
               diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
               merge_outcome: ThreeWayMergeOutcome.Current,
-              conflict: ThreeWayDiffConflictResolutionResult.NO,
+              conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: false,
             },
             version: {
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merged_version: 2,
               diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflictResolutionResult.NO,
+              conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
             },
           });
@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merged_version: ['one', 'two', 'four'],
               diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflictResolutionResult.NO,
+              conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
             },
             version: {
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merged_version: 2,
               diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflictResolutionResult.NO,
+              conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
             },
           });
@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['one', 'two', 'four'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Current,
-                conflict: ThreeWayDiffConflictResolutionResult.NO,
+                conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: false,
               },
               version: {
@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                conflict: ThreeWayDiffConflictResolutionResult.NO,
+                conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
               },
             });
@@ -283,7 +283,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['one', 'two', 'four', 'five'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT,
                 has_update: true,
               },
               version: {
@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                conflict: ThreeWayDiffConflictResolutionResult.NO,
+                conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
               },
             });
@@ -346,7 +346,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['one', 'three'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT,
                 has_update: true,
               },
               version: {
@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                conflict: ThreeWayDiffConflictResolutionResult.NO,
+                conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
               },
             });
@@ -409,7 +409,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['ONE', 'one', 'THREE'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT,
                 has_update: true,
               },
               version: {
@@ -419,7 +419,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                conflict: ThreeWayDiffConflictResolutionResult.NO,
+                conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
               },
             });
@@ -466,7 +466,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: ['five'],
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Merged,
-                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE,
+                conflict: ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT,
                 has_update: true,
               },
               version: {
@@ -476,7 +476,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merged_version: 2,
                 diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Target,
-                conflict: ThreeWayDiffConflictResolutionResult.NO,
+                conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
               },
             });
@@ -528,7 +528,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   merged_version: 2,
                   diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                   merge_outcome: ThreeWayMergeOutcome.Target,
-                  conflict: ThreeWayDiffConflictResolutionResult.NO,
+                  conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                   has_update: true,
                 },
               });
@@ -579,7 +579,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   merged_version: ['one', 'two', 'five'],
                   diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                   merge_outcome: ThreeWayMergeOutcome.Target,
-                  conflict: ThreeWayDiffConflictResolutionResult.NO,
+                  conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                   has_update: true,
                 },
                 version: {
@@ -588,7 +588,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   merged_version: 2,
                   diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                   merge_outcome: ThreeWayMergeOutcome.Target,
-                  conflict: ThreeWayDiffConflictResolutionResult.NO,
+                  conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                   has_update: true,
                 },
               });

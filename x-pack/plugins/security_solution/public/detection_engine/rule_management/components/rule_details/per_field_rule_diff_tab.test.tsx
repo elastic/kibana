@@ -19,7 +19,7 @@ import { PerFieldRuleDiffTab } from './per_field_rule_diff_tab';
 
 const ruleFieldsDiffBaseFieldsMock = {
   diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-  conflict: ThreeWayDiffConflictResolutionResult.NO,
+  conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
   has_update: true,
   merge_outcome: ThreeWayMergeOutcome.Target,
 };

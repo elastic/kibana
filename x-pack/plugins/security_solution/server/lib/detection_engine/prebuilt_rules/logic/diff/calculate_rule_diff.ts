@@ -91,10 +91,10 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
         counts.numberFieldsWithUpdates += 1;
       }
 
-      if (fieldDiff.conflict !== ThreeWayDiffConflictResolutionResult.NO) {
+      if (fieldDiff.conflict !== ThreeWayDiffConflictResolutionResult.NO_CONFLICT) {
         counts.numberFieldsWithConflicts += 1;
 
-        if (fieldDiff.conflict === ThreeWayDiffConflictResolutionResult.NON_SOLVABLE) {
+        if (fieldDiff.conflict === ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT) {
           counts.numberFieldsWithNonSolvableConflicts += 1;
         }
       }

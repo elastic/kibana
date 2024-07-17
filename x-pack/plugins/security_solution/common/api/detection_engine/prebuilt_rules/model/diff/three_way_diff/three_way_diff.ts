@@ -20,9 +20,9 @@ export const MissingVersion = Symbol('MissingVersion');
 export type MissingVersion = typeof MissingVersion;
 
 export enum ThreeWayDiffConflictResolutionResult {
-  NO = 'NO',
-  SOLVABLE = 'SOLVABLE',
-  NON_SOLVABLE = 'NON_SOLVABLE',
+  NO_CONFLICT = 'NO_CONFLICT',
+  SOLVABLE_CONFLICT = 'SOLVABLE_CONFLICT',
+  NON_SOLVABLE_CONFLICT = 'NON_SOLVABLE_CONFLICT',
 }
 
 /**
