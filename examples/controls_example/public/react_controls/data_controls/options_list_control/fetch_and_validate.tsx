@@ -23,7 +23,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
-import { OptionsListRequestCache } from './options_list_request_cache';
+import { OptionsListFetchCache } from './options_list_fetch_cache';
 import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
@@ -44,9 +44,8 @@ export function fetchAndValidate$({
   };
   stateManager: ControlStateManager<OptionsListComponentState>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
+  const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
-
-  const requestCache = new OptionsListRequestCache();
 
   return combineLatest([
     api.dataViews,
@@ -114,7 +113,7 @@ export function fetchAndValidate$({
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runRequest(request, newAbortController.signal, services);
+          return await requestCache.runFetchRequest(request, newAbortController.signal, services);
         } catch (error) {
           return { error };
         }

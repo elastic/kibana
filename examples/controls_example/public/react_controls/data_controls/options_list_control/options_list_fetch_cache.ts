@@ -21,7 +21,7 @@ import { DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public
 import { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
 
-const REQUEST_CACHE_SIZE = 50; // only store a max of 50 requests
+const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute
 
 const optionsListResponseWasFailure = (
@@ -30,7 +30,7 @@ const optionsListResponseWasFailure = (
   return (response as OptionsListFailureResponse).error !== undefined;
 };
 
-export class OptionsListRequestCache {
+export class OptionsListFetchCache {
   private cache: LRUCache<string, OptionsListSuccessResponse>;
 
   constructor() {
@@ -75,7 +75,7 @@ export class OptionsListRequestCache {
     });
   };
 
-  public async runRequest(
+  public async runFetchRequest(
     request: OptionsListRequest,
     abortSignal: AbortSignal,
     services: {
