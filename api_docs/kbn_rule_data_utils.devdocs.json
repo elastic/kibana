@@ -1834,7 +1834,7 @@
         "label": "STATUS_VALUES",
         "description": [],
         "signature": [
-          "\"in-progress\" | \"open\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
