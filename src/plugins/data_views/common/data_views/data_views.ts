@@ -1230,9 +1230,11 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) {
     if (!indexPattern.id) return;
+    /*
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPattern.id);
     }
+    */
 
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
@@ -1325,9 +1327,11 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
+    /*
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
+    */
     this.dataViewCache.delete(indexPatternId);
     this.dataViewLazyCache.delete(indexPatternId);
     return this.savedObjectsClient.delete(indexPatternId);
