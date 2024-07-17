@@ -222,7 +222,8 @@ describe('setRecoveredAlertsContext', () => {
       getRecoveredAlerts: jest.fn().mockReturnValue([
         {
           alert: {
-            getId: () => alertUuid,
+            getUuid: () => alertUuid,
+            getId: () => idWithLocation,
             getState: () => ({}),
             setContext: jest.fn(),
             getUuid: () => alertUuid,
@@ -266,7 +267,7 @@ describe('setRecoveredAlertsContext', () => {
       tz: 'UTC',
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
+      id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
         configId: '12345',
@@ -295,7 +296,8 @@ describe('setRecoveredAlertsContext', () => {
       getRecoveredAlerts: jest.fn().mockReturnValue([
         {
           alert: {
-            getId: () => alertUuid,
+            getUuid: () => alertUuid,
+            getId: () => idWithLocation,
             getState: () => ({}),
             setContext: jest.fn(),
             getUuid: () => alertUuid,
@@ -339,7 +341,7 @@ describe('setRecoveredAlertsContext', () => {
       tz: 'UTC',
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
+      id: idWithLocation,
       context: {
         configId: '12345',
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -368,7 +370,8 @@ describe('setRecoveredAlertsContext', () => {
       getRecoveredAlerts: jest.fn().mockReturnValue([
         {
           alert: {
-            getId: () => alertUuid,
+            getId: () => idWithLocation,
+            getUuid: () => alertUuid,
             getState: () => ({}),
             setContext: jest.fn(),
             getUuid: () => alertUuid,
@@ -412,7 +415,7 @@ describe('setRecoveredAlertsContext', () => {
       tz: 'UTC',
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
+      id: idWithLocation,
       context: {
         configId,
         idWithLocation,
