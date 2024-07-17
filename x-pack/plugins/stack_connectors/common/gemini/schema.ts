@@ -62,6 +62,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  tools: schema.maybe(schema.arrayOf(schema.any())),
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({

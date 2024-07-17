@@ -35,7 +35,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
     super({
       ...props,
       apiKey: 'asda',
-      temperature: 0,
+      maxOutputTokens: 2048,
     });
 
     this.#actionsClient = actionsClient;
@@ -94,6 +94,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       ...parameters,
       contents: prompt,
     };
+
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
       const requestBody = {
         actionId: 'my-gemini-ai' || this.#connectorId,
@@ -101,24 +102,51 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
           subAction: 'invokeStream',
           subActionParams: {
             model: 'gemini-1.5-pro-preview-0409' || this.model,
-            messages: request,
+            messages: request.contents.reduce((acc, item) => {
+              if (!acc?.length) {
+                acc.push(item);
+                return acc;
+              }
+
+              if (acc[acc.length - 1].role === item.role) {
+                acc[acc.length - 1].parts = acc[acc.length - 1].parts.concat(item.parts);
+                return acc;
+              }
+
+              acc.push(item);
+              return acc;
+            }, []),
+            tools: request.tools,
           },
         },
       };
 
       const actionResult = await this.#actionsClient.execute(requestBody);
 
+      if (actionResult.status === 'error') {
+        throw new Error(actionResult.serviceMessage);
+      }
+
       return actionResult.data;
     });
 
     let usageMetadata: UsageMetadata | undefined;
     let index = 0;
+    let partialStreamChunk = '';
     for await (const rawStreamChunk of stream) {
-      const parsedStreamChunk = rawStreamChunk
-        .toString()
-        .split('\n')
-        .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
-        .map((line) => JSON.parse(line.replace('data: ', '')))[0];
+      const streamChunk = rawStreamChunk.toString();
+
+      const nextChunk = `${partialStreamChunk + streamChunk}`;
+
+      let parsedStreamChunk;
+      try {
+        parsedStreamChunk = JSON.parse(nextChunk.replaceAll('data: ', '').replaceAll('\r\n', ''));
+        partialStreamChunk = '';
+      } catch (_) {
+        partialStreamChunk += nextChunk;
+      }
+
+      if (!parsedStreamChunk || parsedStreamChunk.candidates[0].finishReason) continue;
 
       const response = {
         ...parsedStreamChunk,

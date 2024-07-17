@@ -314,10 +314,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     temperature = 0,
     signal,
     timeout,
+    tools,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     return (await this.streamAPI({
-      // body: JSON.stringify(formatGeminiPayload(messages, temperature)),
-      body: JSON.stringify(messages),
+      body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),
       model,
       stopSequences,
       signal,
@@ -342,21 +342,26 @@ const formatGeminiPayload = (
 
   for (const row of data) {
     const correctRole = row.role === 'assistant' ? 'model' : 'user';
-    if (correctRole === 'user' && previousRole === 'user') {
-      /** Append to the previous 'user' content
-       * This is to ensure that multiturn requests alternate between user and model
-       */
-      payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
+    // if data is already preformatted by ActionsClientGeminiChatModel
+    if (row.parts) {
+      payload.contents.push(row);
     } else {
-      // Add a new entry
-      payload.contents.push({
-        role: correctRole,
-        parts: [
-          {
-            text: row.content,
-          },
-        ],
-      });
+      if (correctRole === 'user' && previousRole === 'user') {
+        /** Append to the previous 'user' content
+         * This is to ensure that multiturn requests alternate between user and model
+         */
+        payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
+      } else {
+        // Add a new entry
+        payload.contents.push({
+          role: correctRole,
+          parts: [
+            {
+              text: row.content,
+            },
+          ],
+        });
+      }
     }
     previousRole = correctRole;
   }
