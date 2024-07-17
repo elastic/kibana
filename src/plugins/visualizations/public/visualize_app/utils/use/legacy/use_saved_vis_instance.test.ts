@@ -9,16 +9,16 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
-import { setTypes } from '../../../services';
+import { setTypes } from '../../../../services';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
-import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { VisualizeConstants } from '../../../../common/constants';
-import { createVisEditorsRegistry } from '../../../vis_editors_registry';
+import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../../breadcrumbs';
+import { VisualizeConstants } from '../../../../../common/constants';
+import { createVisEditorsRegistry } from '../../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
-import type { EmbeddableApiHandler, VisualizeServices } from '../../types';
-import type { TypesStart } from '../../../vis_types';
+import type { EmbeddableApiHandler, VisualizeServices } from '../../../types';
+import type { TypesStart } from '../../../../vis_types';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const savedVisId = '9ca7aa90-b892-11e8-a6d9-e546fe2bba5f';
@@ -35,14 +35,14 @@ const mockEmbeddableApiHandler = {
   openInspector: jest.fn(),
 } as unknown as EmbeddableApiHandler;
 
-jest.mock('../get_visualization_instance', () => ({
+jest.mock('../../get_visualization_instance', () => ({
   getVisualizationInstance: jest.fn(() => mockSavedVisInstance),
 }));
 const mockGetVisualizationInstance = jest.requireMock(
-  '../get_visualization_instance'
+  '../../get_visualization_instance'
 ).getVisualizationInstance;
 
-jest.mock('../breadcrumbs', () => ({
+jest.mock('../../breadcrumbs', () => ({
   getEditBreadcrumbs: jest.fn((args, title) => title),
   getCreateBreadcrumbs: jest.fn((text) => text),
 }));

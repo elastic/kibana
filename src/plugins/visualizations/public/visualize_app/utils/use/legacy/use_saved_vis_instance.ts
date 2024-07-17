@@ -40,7 +40,7 @@ export const useSavedVisInstance = (
   embeddableApiHandler: EmbeddableApiHandler,
   originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined,
-  embeddableInput?: VisualizeEditorInput
+  embeddableInput?: Omit<VisualizeEditorInput, 'serializedVis'>
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
