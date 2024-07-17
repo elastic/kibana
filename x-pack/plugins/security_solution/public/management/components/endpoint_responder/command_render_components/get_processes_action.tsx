@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 import { KeyValueDisplay } from '../../key_value_display';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
@@ -84,7 +85,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     return (
       <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
         {agentType === 'sentinel_one' ? (
-          <div>{'TODO:PT SENTINELONE RESULTS HERE'}</div>
+          <SentinelOneRunningProcessesResults action={completedActionDetails} />
         ) : (
           <EndpointRunningProcessesResults action={completedActionDetails} agentId={endpointId} />
         )}
@@ -182,12 +183,42 @@ const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProp
 EndpointRunningProcessesResults.displayName = 'EndpointRunningProcessesResults';
 
 interface SentinelOneRunningProcessesResultsProps {
-  action: ActionDetails<GetProcessesActionOutputContent>;
+  action: MaybeImmutable<ActionDetails<GetProcessesActionOutputContent>>;
+  /**
+   * If defined, the results will only be displayed for the given agent id.
+   * If undefined, then responses for all agents are displayed
+   */
+  agentId?: string;
 }
 
 const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResultsProps>(
-  ({ action }) => {
-    return <div>{'SentinelOneRunningProcessesResults placeholder'}</div>;
+  ({ action, agentId }) => {
+    const agentIds = agentId ? [agentId] : action.agents;
+
+    return (
+      <>
+        {agentIds.length === 1 ? (
+          <ResponseActionFileDownloadLink action={action} canAccessFileDownloadLink={true} />
+        ) : (
+          agentIds.map((id) => {
+            return (
+              <div key={id}>
+                <KeyValueDisplay
+                  name={action.hosts[id].name}
+                  value={
+                    <ResponseActionFileDownloadLink
+                      action={action}
+                      agentId={id}
+                      canAccessFileDownloadLink={true}
+                    />
+                  }
+                />
+              </div>
+            );
+          })
+        )}
+      </>
+    );
   }
 );
 SentinelOneRunningProcessesResults.displayName = 'SentinelOneRunningProcessesResults';
