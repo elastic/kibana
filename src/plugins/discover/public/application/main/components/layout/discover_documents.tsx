@@ -436,6 +436,7 @@ function DiscoverDocumentsComponent({
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 customControlColumnsConfiguration={customControlColumnsConfiguration}
                 additionalFieldGroups={additionalFieldGroups}
+                showDensitySelector={true}
               />
             </CellActionsProvider>
           </div>

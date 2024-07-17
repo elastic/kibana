@@ -31,6 +31,7 @@ import {
   EuiDataGridProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -75,7 +76,6 @@ import {
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
   DEFAULT_ROWS_PER_PAGE,
-  GRID_STYLE,
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
@@ -90,6 +90,7 @@ import {
   getColorIndicatorControlColumn,
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
+import { useDensity } from '../hooks/use_density';
 
 export type SortOrder = [string, string];
 
@@ -232,6 +233,14 @@ export interface UnifiedDataTableProps {
    * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
+  /**
+   * Whether or not to show the density selector
+   */
+  showDensitySelector?: boolean;
+  /**
+   * Update row height state
+   */
+  onUpdateDensity?: (density: EuiDataGridStyle) => void;
   /**
    * Is text base lang mode enabled
    */
@@ -467,6 +476,8 @@ export const UnifiedDataTable = ({
   cellContext,
   renderCellPopover,
   getRowIndicator,
+  showDensitySelector = false,
+  onUpdateDensity,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -753,6 +764,8 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight,
   });
 
+  const { density, onChangeDensity } = useDensity({ storage, consumer, onUpdateDensity });
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
@@ -940,29 +953,30 @@ export const UnifiedDataTable = ({
   );
 
   const showDisplaySelector = useMemo(() => {
-    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {};
-
-    if (onUpdateRowHeight) {
-      options.allowDensity = false;
-    }
+    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {
+      allowDensity: showDensitySelector,
+    };
 
     if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
       options.allowRowHeight = false;
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
-        <UnifiedDataTableAdditionalDisplaySettings
-          rowHeight={rowHeight}
-          rowHeightLines={rowHeightLines}
-          onChangeRowHeight={onChangeRowHeight}
-          onChangeRowHeightLines={onChangeRowHeightLines}
-          headerRowHeight={headerRowHeight}
-          headerRowHeightLines={headerRowHeightLines}
-          onChangeHeaderRowHeight={onChangeHeaderRowHeight}
-          onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
-          maxAllowedSampleSize={maxAllowedSampleSize}
-          sampleSize={sampleSizeState}
-          onChangeSampleSize={onUpdateSampleSize}
-        />
+        <>
+          {showDensitySelector ? <EuiHorizontalRule margin="s" /> : ''}
+          <UnifiedDataTableAdditionalDisplaySettings
+            rowHeight={rowHeight}
+            rowHeightLines={rowHeightLines}
+            onChangeRowHeight={onChangeRowHeight}
+            onChangeRowHeightLines={onChangeRowHeightLines}
+            headerRowHeight={headerRowHeight}
+            headerRowHeightLines={headerRowHeightLines}
+            onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+            onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
+            maxAllowedSampleSize={maxAllowedSampleSize}
+            sampleSize={sampleSizeState}
+            onChangeSampleSize={onUpdateSampleSize}
+          />
+        </>
       );
     }
 
@@ -1053,6 +1067,12 @@ export const UnifiedDataTable = ({
     );
   }
 
+  const gridStyle: EuiDataGridStyle = {
+    ...density,
+    onChange: onChangeDensity,
+    ...gridStyleOverride,
+  };
+
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
@@ -1106,7 +1126,7 @@ export const UnifiedDataTable = ({
               toolbarVisibility={toolbarVisibility}
               rowHeightsOptions={rowHeightsOptions}
               inMemory={inMemory}
-              gridStyle={gridStyleOverride ?? GRID_STYLE}
+              gridStyle={gridStyle}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={customTrailingControlColumn}

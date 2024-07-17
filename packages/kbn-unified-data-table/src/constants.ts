@@ -27,10 +27,11 @@ export const defaultMonacoEditorWidth = 370;
 export const defaultTimeColumnWidth = 212;
 export const kibanaJSON = 'kibana-json';
 
+// Matches the EuiDataGrid "compact" density options
 export const GRID_STYLE: EuiDataGridStyle = {
   border: 'horizontal',
   fontSize: 's',
-  cellPadding: 'l',
+  cellPadding: 's',
   rowHover: 'highlight',
   header: 'underline',
   stripes: true,

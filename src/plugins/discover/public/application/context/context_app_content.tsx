@@ -223,6 +223,7 @@ export function ContextAppContent({
               configHeaderRowHeight={3}
               settings={gridSettings}
               onResize={onResize}
+              showDensitySelector={true}
             />
           </CellActionsProvider>
         </div>

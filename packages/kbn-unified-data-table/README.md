@@ -52,6 +52,8 @@ Props description:
 | **externalCustomRenderers** | (optional)Record<string,(props: EuiDataGridCellValueElementProps) => React.ReactNode>; | An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering. |
 | **consumer** | (optional)string | Name of the UnifiedDataTable consumer component or application. |
 | **componentsTourSteps** | (optional)Record<string,string> | Optional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour. |
+| **showDensitySelector** | (optional)boolean | Optional boolean to toggle whether or not to show the density selector. |
+| **onUpdateDensity** | (optional)(EuiDataGridStyle) => void; | Optional callback when the density configuration is modified. |
 
 *Required **services** list:
 ```
