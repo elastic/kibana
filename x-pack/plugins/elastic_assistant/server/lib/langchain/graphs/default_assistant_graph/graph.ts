@@ -184,8 +184,7 @@ export const getDefaultAssistantGraph = ({
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);
 
-    const hasRespondStep =
-      isStreaming && llmType && bedrockChatEnabled && ['bedrock'].includes(llmType);
+    const hasRespondStep = isStreaming && bedrockChatEnabled && llmType === 'bedrock';
 
     if (hasRespondStep) {
       graph.addNode(RESPOND_NODE, respondNode);

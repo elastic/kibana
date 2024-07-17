@@ -7064,15 +7064,6 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/google-common@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@langchain/google-common/-/google-common-0.0.20.tgz#00d8e9b8f346c986366e199d4aaf19be1f97f1fd"
-  integrity sha512-kH1Bwh1tKxzIU+IFhOLLxuY7GjYjO+iebd3Gaih3smtQNldMidrYO2CRYtesnvD9AKJxvforU7neeux39fysoA==
-  dependencies:
-    "@langchain/core" ">=0.2.16 <0.3.0"
-    uuid "^10.0.0"
-    zod-to-json-schema "^3.22.4"
-
 "@langchain/google-genai@^0.0.22":
   version "0.0.22"
   resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-0.0.22.tgz#520796606f7bdb4b60f9d34ea54a0d3fcaa82930"

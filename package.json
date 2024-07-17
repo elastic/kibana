@@ -941,7 +941,6 @@
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "0.2.18",
     "@langchain/core": "^0.2.16",
-    "@langchain/google-common": "^0.0.20",
     "@langchain/google-genai": "^0.0.22",
     "@langchain/langgraph": "^0.0.28",
     "@langchain/openai": "^0.1.3",
