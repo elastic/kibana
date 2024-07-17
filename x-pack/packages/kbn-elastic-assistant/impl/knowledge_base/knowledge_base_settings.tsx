@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
