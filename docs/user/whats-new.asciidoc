@@ -11,5 +11,10 @@ Previous versions: {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}
 === Cases
 
 {kib} cases offer a new powerful capability to enhance the efficiency of your analyst teams with _templates_. 
-You can manage multiple templates, each of which can be used to auto-populate values in a case with pre-defined knowledge. This streamlines the investigative process and significantly reduces time to resolution.
-Learn more in <<manage-cases-settings>>.
+You can manage multiple templates, each of which can be used to auto-populate values in a case with pre-defined knowledge.
+This streamlines the investigative process and significantly reduces time to resolution.
+
+In 8.11, custom fields were added to cases and they are now moving from technical preview to general availability.
+You can set custom field values in your templates to enhance consistency across cases.
+
+Learn more about custom fields and templates in <<manage-cases-settings>>.
