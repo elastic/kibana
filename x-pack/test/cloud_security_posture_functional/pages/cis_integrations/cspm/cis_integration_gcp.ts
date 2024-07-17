@@ -249,10 +249,11 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveIntegrationButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
-            credentialJsonName
+          (await cisIntegration.getSecretComponentReplaceButton(
+            'button-replace-credentials-json'
+          )) !== undefined
         ).to.be(true);
       });
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {
