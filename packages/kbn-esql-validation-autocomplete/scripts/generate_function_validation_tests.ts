@@ -25,6 +25,7 @@ import {
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 import { getMaxMinNumberOfParams } from '../src/validation/helpers';
+import { isNumericType } from '../src/shared/esql_to_kibana_type';
 
 export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
 
@@ -316,7 +317,7 @@ function generateWhereCommandTestsForEvalFunction(
   for (const { params, returnType, ...restSign } of supportedSignatures) {
     const correctMapping = getFieldMapping(params);
     testCases.set(
-      `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
+      `from a_index | where ${!isNumericType(returnType) ? 'length(' : ''}${
         // hijacking a bit this function to produce a function call
         getFunctionSignatures(
           {
@@ -326,7 +327,7 @@ function generateWhereCommandTestsForEvalFunction(
           },
           { withTypes: false }
         )[0].declaration
-      }${returnType !== 'number' ? ')' : ''} > 0`,
+      }${!isNumericType(returnType) ? ')' : ''} > 0`,
       []
     );
 
@@ -337,7 +338,7 @@ function generateWhereCommandTestsForEvalFunction(
       supportedTypesAndFieldNames
     );
     testCases.set(
-      `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
+      `from a_index | where ${!isNumericType(returnType) ? 'length(' : ''}${
         // hijacking a bit this function to produce a function call
         getFunctionSignatures(
           {
@@ -347,7 +348,7 @@ function generateWhereCommandTestsForEvalFunction(
           },
           { withTypes: false }
         )[0].declaration
-      }${returnType !== 'number' ? ')' : ''} > 0`,
+      }${!isNumericType(returnType) ? ')' : ''} > 0`,
       expectedErrors
     );
   }
@@ -542,7 +543,7 @@ function generateEvalCommandTestsForEvalFunction(
     signatureWithGreatestNumberOfParams.params
   ).concat({
     name: 'extraArg',
-    type: 'number',
+    type: 'integer',
   });
 
   // get the expected args from the first signature in case of errors
@@ -660,7 +661,7 @@ function generateStatsCommandTestsForAggFunction(
     testCases.set(`from a_index | stats var = ${correctSignature}`, []);
     testCases.set(`from a_index | stats ${correctSignature}`, []);
 
-    if (signRest.returnType === 'number') {
+    if (isNumericType(signRest.returnType)) {
       testCases.set(`from a_index | stats var = round(${correctSignature})`, []);
       testCases.set(`from a_index | stats round(${correctSignature})`, []);
       testCases.set(
@@ -713,7 +714,7 @@ function generateStatsCommandTestsForAggFunction(
     }
 
     // test only numeric functions for now
-    if (params[0].type === 'number') {
+    if (isNumericType(params[0].type)) {
       const nestedBuiltin = 'numberField / 2';
       const fieldMappingWithNestedBuiltinFunctions = getFieldMapping(params);
       fieldMappingWithNestedBuiltinFunctions[0].name = nestedBuiltin;
@@ -965,9 +966,21 @@ function generateSortCommandTestsForAggFunction(
 const generateSortCommandTestsForGroupingFunction = generateSortCommandTestsForAggFunction;
 
 const fieldTypesToConstants: Record<SupportedFieldType, string> = {
+  // @TODO: verify
   string: '"a"',
-  number: '5',
+  text: '"a"',
+  keyword: '"a"',
+  double: '5.5',
+  integer: '5',
+  long: '5',
+  unsigned_long: '5',
+  int: '5',
+  counter_integer: '5',
+  counter_long: '5',
+  counter_double: '5.5',
   date: 'now()',
+  datetime: 'to_datetime("2021-01-01T00:00:00Z")',
+  date_period: 'to_date_period("2021-01-01/2021-01-02")',
   boolean: 'true',
   version: 'to_version("1.0.0")',
   ip: 'to_ip("127.0.0.1")',
@@ -1005,8 +1018,29 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
 
 const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toDoubleSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_double')!;
+const toLongSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_long')!;
+const toUnsignedLongSignature = evalFunctionDefinitions.find(
+  ({ name }) => name === 'to_unsigned_long'
+)!;
+const toCounterIntegerSignature = evalFunctionDefinitions.find(
+  ({ name }) => name === 'to_counter_integer'
+)!;
+const toCounterLongSignature = evalFunctionDefinitions.find(
+  ({ name }) => name === 'to_counter_long'
+)!;
+const toCounterDoubleSignature = evalFunctionDefinitions.find(
+  ({ name }) => name === 'to_counter_double'
+)!;
+const toDatetimeSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toTextSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_text')!;
+const toKeywordSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_keyword')!;
+
 const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
 const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toDatePeriodSignature = evalFunctionDefinitions.find(
+  ({ name }) => name === 'to_date_period'
+)!;
 const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
 const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
 const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
@@ -1019,8 +1053,10 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 )!;
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
+// @TODO: verify again
 const nestedFunctions: Record<SupportedFieldType, string> = {
-  number: prepareNestedFunction(toInteger),
+  double: prepareNestedFunction(toDoubleSignature),
+  integer: prepareNestedFunction(toInteger),
   string: prepareNestedFunction(toStringSignature),
   date: prepareNestedFunction(toDateSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
@@ -1030,6 +1066,16 @@ const nestedFunctions: Record<SupportedFieldType, string> = {
   geo_shape: prepareNestedFunction(toGeoShapeSignature),
   cartesian_point: prepareNestedFunction(toCartesianPointSignature),
   cartesian_shape: prepareNestedFunction(toCartesianShapeSignature),
+  unsigned_long: prepareNestedFunction(toUnsignedLongSignature),
+  long: prepareNestedFunction(toLongSignature),
+  int: prepareNestedFunction(toInteger),
+  counter_integer: prepareNestedFunction(toCounterIntegerSignature),
+  counter_long: prepareNestedFunction(toCounterLongSignature),
+  counter_double: prepareNestedFunction(toCounterDoubleSignature),
+  datetime: prepareNestedFunction(toDatetimeSignature),
+  text: prepareNestedFunction(toTextSignature),
+  keyword: prepareNestedFunction(toKeywordSignature),
+  date_period: prepareNestedFunction(toDatePeriodSignature),
 };
 
 function getFieldName(

@@ -8,19 +8,23 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
+// @TODO: verify against full list
+// https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
 export const supportedFieldTypes = [
   'double',
-  // 'unsigned_long',
-  // 'long',
+  'unsigned_long',
+  'long',
   'integer',
-  // 'int',
-  // 'counter_integer',
-  // 'counter_long',
-  // 'counter_double',
+  'int',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
   'date',
-  // 'text',
+  'datetime',
+  'date_period',
+  'text',
   'keyword',
-  // 'string',
+  'string',
   'boolean',
   'ip',
   'cartesian_point',
@@ -41,8 +45,18 @@ export type FunctionParameterType =
   | 'any'
   | 'chrono_literal'
   | 'time_literal'
-  | 'number[]'
+  | 'time_duration'
+  | 'double[]'
+  | 'unsigned_long[]'
+  | 'long[]'
+  | 'integer[]'
+  | 'int[]'
+  | 'counter_integer[]'
+  | 'counter_long[]'
+  | 'counter_double[]'
   | 'string[]'
+  | 'keyword[]'
+  | 'text[]'
   | 'boolean[]'
   | 'any[]'
   | 'date[]';
@@ -57,6 +71,9 @@ export type FunctionReturnType =
   | 'counter_long'
   | 'counter_double'
   | 'date'
+  | 'datetime'
+  | 'date_period'
+  | 'time_duration'
   | 'any'
   | 'boolean'
   | 'text'

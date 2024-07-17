@@ -520,7 +520,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP t ON a', []);
     });
 
-    describe.only('keep', () => {
+    describe('keep', () => {
       testErrorsAndWarnings('from index | keep ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
       testErrorsAndWarnings(
         'from index | keep keywordField, doubleField, integerField, dateField',

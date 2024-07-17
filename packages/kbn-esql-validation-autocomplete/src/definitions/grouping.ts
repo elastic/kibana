@@ -30,15 +30,15 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       },
       {
         params: [
-          { name: 'field', type: 'number' },
-          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'field', type: 'integer' },
+          { name: 'buckets', type: 'integer', constantOnly: true },
         ],
-        returnType: 'number',
+        returnType: 'integer',
       },
       {
         params: [
           { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'buckets', type: 'integer', constantOnly: true },
           { name: 'startDate', type: 'string', constantOnly: true },
           { name: 'endDate', type: 'string', constantOnly: true },
         ],
@@ -47,7 +47,7 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       {
         params: [
           { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'buckets', type: 'integer', constantOnly: true },
           { name: 'startDate', type: 'date', constantOnly: true },
           { name: 'endDate', type: 'date', constantOnly: true },
         ],
@@ -56,7 +56,7 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       {
         params: [
           { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'buckets', type: 'integer', constantOnly: true },
           { name: 'startDate', type: 'string', constantOnly: true },
           { name: 'endDate', type: 'date', constantOnly: true },
         ],
@@ -65,7 +65,7 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       {
         params: [
           { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'buckets', type: 'integer', constantOnly: true },
           { name: 'startDate', type: 'date', constantOnly: true },
           { name: 'endDate', type: 'string', constantOnly: true },
         ],
@@ -73,12 +73,12 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       },
       {
         params: [
-          { name: 'field', type: 'number' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startValue', type: 'number', constantOnly: true },
-          { name: 'endValue', type: 'number', constantOnly: true },
+          { name: 'field', type: 'integer' },
+          { name: 'buckets', type: 'integer', constantOnly: true },
+          { name: 'startValue', type: 'integer', constantOnly: true },
+          { name: 'endValue', type: 'integer', constantOnly: true },
         ],
-        returnType: 'number',
+        returnType: 'integer',
       },
     ],
     examples: [

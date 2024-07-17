@@ -441,7 +441,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               abortController
             ).result;
             const columns =
-              table?.columns.map((c) => ({ name: c.name, type: c.meta.esType })) || [];
+              table?.columns.map((c) => ({ name: c.name, type: c.meta.esType ?? c.meta.type })) ||
+              [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet

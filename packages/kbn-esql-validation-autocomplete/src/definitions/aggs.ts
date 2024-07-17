@@ -32,7 +32,7 @@ function createNumericAggDefinition({
     signatures: [
       {
         params: [
-          { name: 'column', type: 'number', noNestingFunctions: true },
+          { name: 'column', type: 'integer', noNestingFunctions: true },
           ...args.map(({ name: paramName, type, constantOnly }) => ({
             name: paramName,
             type,
@@ -40,7 +40,7 @@ function createNumericAggDefinition({
             constantOnly,
           })),
         ],
-        returnType: 'number',
+        returnType: 'integer',
       },
     ],
     examples: [
@@ -87,7 +87,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the n percentile of a field.',
       }
     ),
-    args: [{ name: 'percentile', type: 'number' as const, value: '90', constantOnly: true }],
+    args: [{ name: 'percentile', type: 'integer' as const, value: '90', constantOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)
@@ -101,12 +101,12 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
-          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
-          returnType: 'number',
+          params: [{ name: 'column', type: 'integer', noNestingFunctions: true }],
+          returnType: 'integer',
         },
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
-          returnType: 'number',
+          returnType: 'date',
         },
         {
           params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
@@ -124,12 +124,12 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
-          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
-          returnType: 'number',
+          params: [{ name: 'column', type: 'integer', noNestingFunctions: true }],
+          returnType: 'integer',
         },
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
-          returnType: 'number',
+          returnType: 'date',
         },
         {
           params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
@@ -158,7 +158,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
               optional: true,
             },
           ],
-          returnType: 'number',
+          returnType: 'long',
         },
       ],
       examples: [`from index | stats result = count(field)`, `from index | stats count(field)`],
@@ -177,9 +177,9 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [
             { name: 'column', type: 'any', noNestingFunctions: true },
-            { name: 'precision', type: 'number', noNestingFunctions: true, optional: true },
+            { name: 'precision', type: 'integer', noNestingFunctions: true, optional: true },
           ],
-          returnType: 'number',
+          returnType: 'long',
         },
       ],
       examples: [
@@ -250,7 +250,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             },
             {
               name: 'limit',
-              type: 'number',
+              type: 'integer',
               noNestingFunctions: true,
               optional: false,
               constantOnly: true,
@@ -285,21 +285,22 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
+          // @TODO  @Q: Verify how can we support multiple numeric types
           params: [
             {
               name: 'number',
-              type: 'number',
+              type: 'double',
               noNestingFunctions: true,
               optional: false,
             },
             {
               name: 'weight',
-              type: 'number',
+              type: 'double',
               noNestingFunctions: true,
               optional: false,
             },
           ],
-          returnType: 'number',
+          returnType: 'double',
         },
       ],
       examples: [

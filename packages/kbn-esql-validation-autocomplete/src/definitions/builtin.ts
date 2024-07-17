@@ -9,12 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
+type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
+
 function createMathDefinition(
   name: string,
-  types: Array<
-    | (FunctionParameterType & FunctionReturnType)
-    | [FunctionParameterType, FunctionParameterType, FunctionReturnType]
-  >,
+  functionSignatures: MathFunctionSignature[],
   description: string,
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -24,22 +23,14 @@ function createMathDefinition(
     description,
     supportedCommands: ['eval', 'where', 'row', 'stats', 'metrics', 'sort'],
     supportedOptions: ['by'],
-    signatures: types.map((type) => {
-      if (Array.isArray(type)) {
-        return {
-          params: [
-            { name: 'left', type: type[0] },
-            { name: 'right', type: type[1] },
-          ],
-          returnType: type[2],
-        };
-      }
+    signatures: functionSignatures.map((functionSignature) => {
+      const [lhs, rhs, result] = functionSignature;
       return {
         params: [
-          { name: 'left', type },
-          { name: 'right', type },
+          { name: 'left', type: lhs },
+          { name: 'right', type: rhs },
         ],
-        returnType: type,
+        returnType: result,
       };
     }),
     validate,
@@ -68,8 +59,8 @@ function createComparisonDefinition(
     signatures: [
       {
         params: [
-          { name: 'left', type: 'number' },
-          { name: 'right', type: 'number' },
+          { name: 'left', type: 'integer' },
+          { name: 'right', type: 'integer' },
         ],
         returnType: 'boolean',
       },
@@ -130,31 +121,107 @@ function createComparisonDefinition(
   };
 }
 
+const addTypeTable: MathFunctionSignature[] = [
+  ['date_period', 'date_period', 'date_period'],
+  ['date_period', 'datetime', 'datetime'],
+  ['datetime', 'date_period', 'datetime'],
+  ['datetime', 'time_duration', 'datetime'],
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['time_duration', 'datetime', 'datetime'],
+  ['time_duration', 'time_duration', 'time_duration'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
+const subtractTypeTable: MathFunctionSignature[] = [
+  ['date_period', 'date_period', 'date_period'],
+  ['datetime', 'date_period', 'datetime'],
+  ['datetime', 'time_duration', 'datetime'],
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['time_duration', 'datetime', 'datetime'],
+  ['time_duration', 'time_duration', 'time_duration'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
+const multiplyTypeTable: MathFunctionSignature[] = [
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
+const divideTypeTable: MathFunctionSignature[] = [
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
+const modulusTypeTable: MathFunctionSignature[] = [
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
 export const mathFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+    addTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+    subtractTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
   ),
   createMathDefinition(
     '*',
-    ['number'],
+    multiplyTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.multiplyDoc', {
       defaultMessage: 'Multiply (*)',
     })
   ),
   createMathDefinition(
     '/',
-    ['number'],
+    divideTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.divideDoc', {
       defaultMessage: 'Divide (/)',
     }),
@@ -187,37 +254,91 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
   createMathDefinition(
     '%',
-    ['number'],
+    modulusTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.moduleDoc', {
       defaultMessage: 'Module (%)',
-    }),
-    (fnDef) => {
-      const [left, right] = fnDef.args;
-      const messages = [];
-      if (!Array.isArray(left) && !Array.isArray(right)) {
-        if (right.type === 'literal' && right.literalType === 'number') {
-          if (right.value === 0) {
-            messages.push({
-              type: 'warning' as const,
-              code: 'moduleByZero',
-              text: i18n.translate(
-                'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
-                {
-                  defaultMessage: 'Module by zero can return null value: {left}%{right}',
-                  values: {
-                    left: left.text,
-                    right: right.value,
-                  },
-                }
-              ),
-              location: fnDef.location,
-            });
-          }
-        }
-      }
-      return messages;
-    }
+    })
   ),
+  // createMathDefinition(
+  //   '-',
+  //   ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
+  //     defaultMessage: 'Subtract (-)',
+  //   })
+  // ),
+  // createMathDefinition(
+  //   '*',
+  //   ['number'],
+  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.multiplyDoc', {
+  //     defaultMessage: 'Multiply (*)',
+  //   })
+  // ),
+  // createMathDefinition(
+  //   '/',
+  //   ['number'],
+  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.divideDoc', {
+  //     defaultMessage: 'Divide (/)',
+  //   }),
+  //   (fnDef) => {
+  //     const [left, right] = fnDef.args;
+  //     const messages = [];
+  //     if (!Array.isArray(left) && !Array.isArray(right)) {
+  //       if (right.type === 'literal' && right.literalType === 'number') {
+  //         if (right.value === 0) {
+  //           messages.push({
+  //             type: 'warning' as const,
+  //             code: 'divideByZero',
+  //             text: i18n.translate(
+  //               'kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero',
+  //               {
+  //                 defaultMessage: 'Cannot divide by zero: {left}/{right}',
+  //                 values: {
+  //                   left: left.text,
+  //                   right: right.value,
+  //                 },
+  //               }
+  //             ),
+  //             location: fnDef.location,
+  //           });
+  //         }
+  //       }
+  //     }
+  //     return messages;
+  //   }
+  // ),
+  // createMathDefinition(
+  //   '%',
+  //   ['number'],
+  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.moduleDoc', {
+  //     defaultMessage: 'Module (%)',
+  //   }),
+  //   (fnDef) => {
+  //     const [left, right] = fnDef.args;
+  //     const messages = [];
+  //     if (!Array.isArray(left) && !Array.isArray(right)) {
+  //       if (right.type === 'literal' && right.literalType === 'number') {
+  //         if (right.value === 0) {
+  //           messages.push({
+  //             type: 'warning' as const,
+  //             code: 'moduleByZero',
+  //             text: i18n.translate(
+  //               'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
+  //               {
+  //                 defaultMessage: 'Module by zero can return null value: {left}%{right}',
+  //                 values: {
+  //                   left: left.text,
+  //                   right: right.value,
+  //                 },
+  //               }
+  //             ),
+  //             location: fnDef.location,
+  //           });
+  //         }
+  //       }
+  //     }
+  //     return messages;
+  //   }
+  // ),
 ];
 
 const comparisonFunctions: FunctionDefinition[] = [
@@ -385,7 +506,7 @@ const inFunctions: FunctionDefinition[] = [
   signatures: [
     {
       params: [
-        { name: 'left', type: 'number' },
+        { name: 'left', type: 'integer' },
 
         { name: 'right', type: 'any[]' },
       ],

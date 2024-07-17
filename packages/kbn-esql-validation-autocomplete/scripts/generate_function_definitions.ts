@@ -239,11 +239,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
         ...signature,
         params: signature.params.map((param: any) => ({
           ...param,
-          type: param.type, // @TODO @Q  esqlToKibanaType(param.type),
           type: param.type,
           description: undefined,
         })),
-        returnType: signature.returnType, // @TODO @Q esqlToKibanaType(signature.returnType),
+        returnType: signature.returnType,
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
           ? signature.params.filter((param: any) => !param.optional).length
