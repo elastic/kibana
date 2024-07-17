@@ -122,7 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Applies the correct quick filter', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
 
-        let firstSolutionFilter;
+        let firstSolutionFilter: any;
         await retry.try(async () => {
           const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
           firstSolutionFilter = quickFilters
@@ -143,9 +143,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Disables all other solution filters when SIEM is applied', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
 
-        let quickFilters;
-        let filter;
-
+        let quickFilters: any;
+        let filter: any;
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
           filter = quickFilters
@@ -174,9 +173,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Disables the SIEM solution filter when any other is applied', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
 
-        let quickFilters;
-        let filter;
-
+        let quickFilters: any;
+        let filter: any;
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
           filter = quickFilters
