@@ -134,24 +134,22 @@ const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConn
   return (
     <EuiPopover
       button={
-        <EuiLink data-test-subj="createConnectorPopoverButton" onClick={openPopover}>
-          {i18n.CREATE_CONNECTOR}
-        </EuiLink>
+        <EuiText size="s">
+          <EuiLink data-test-subj="createConnectorPopoverButton" onClick={openPopover}>
+            {i18n.CREATE_CONNECTOR}
+          </EuiLink>
+        </EuiText>
       }
       isOpen={isOpen}
       closePopover={closePopover}
       data-test-subj="createConnectorPopover"
     >
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <ConnectorSetup
-            actionTypeIds={AllowedActionTypeIds}
-            onConnectorSaved={onConnectorSavedAndClose}
-            onClose={closePopover}
-            compressed
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ConnectorSetup
+        actionTypeIds={AllowedActionTypeIds}
+        onConnectorSaved={onConnectorSavedAndClose}
+        onClose={closePopover}
+        compressed
+      />
     </EuiPopover>
   );
 });
