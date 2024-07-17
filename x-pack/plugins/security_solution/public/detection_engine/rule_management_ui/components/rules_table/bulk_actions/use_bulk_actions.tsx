@@ -92,6 +92,7 @@ export const useBulkActions = ({
   const isBulkCustomHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
     'bulkCustomHighlightedFieldsEnabled'
   );
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -455,14 +456,18 @@ export const useBulkActions = ({
               onClick: handleExportAction,
               icon: undefined,
             },
-            {
-              key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
-              name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
-              'data-test-subj': 'scheduleRuleRunBulk',
-              disabled: containsLoading || (!containsEnabled && !isAllSelected),
-              onClick: handleScheduleRuleRunAction,
-              icon: undefined,
-            },
+            ...(isManualRuleRunEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+                    name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+                    'data-test-subj': 'scheduleRuleRunBulk',
+                    disabled: containsLoading || (!containsEnabled && !isAllSelected),
+                    onClick: handleScheduleRuleRunAction,
+                    icon: undefined,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -604,6 +609,7 @@ export const useBulkActions = ({
       filterOptions,
       completeBulkEditForm,
       startServices,
+      isManualRuleRunEnabled,
     ]
   );
 
