@@ -32,7 +32,7 @@ expect.addSnapshotSerializer({
   test: (value) =>
     typeof value === 'string' &&
     (value.includes(nodeVersion) ||
-      Boolean(value.match(/(glibc-217|pointer-compression|default)/)) ||
+      Boolean(value.match(/(glibc-217|pointer-compression)/)) ||
       value.startsWith(REPO_ROOT)),
   print: (value) =>
     typeof value === 'string'
