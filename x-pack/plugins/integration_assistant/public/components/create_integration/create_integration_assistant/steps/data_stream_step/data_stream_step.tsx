@@ -215,11 +215,11 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 </EuiFormRow>
                 <EuiFormRow label={i18n.DATA_COLLECTION_METHOD_LABEL}>
                   <EuiComboBox
-                    // name="dataCollectionMethod"
                     data-test-subj="dataCollectionMethodInput"
                     options={InputTypeOptions}
                     selectedOptions={selectedInputTypeOptions}
                     onChange={onChange.inputTypes}
+                    fullWidth
                   />
                 </EuiFormRow>
                 <SampleLogsInput integrationSettings={integrationSettings} />
