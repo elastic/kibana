@@ -101,6 +101,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     };
   }, [getVis, serializeStateFn]);
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
+  const visTitle = useMemo(() => savedVisInstance?.vis.title, [savedVisInstance?.vis.title]);
   useExecutionContext(services.executionContext, {
     type: 'application',
     page: `editor${editorName ? `:${editorName}` : ''}`,
@@ -131,7 +132,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useVisEditorBreadcrumbs({
     services,
     originatingApp,
-    visTitle: savedVisInstance?.vis.title,
+    visTitle,
   });
 
   useEffect(() => {

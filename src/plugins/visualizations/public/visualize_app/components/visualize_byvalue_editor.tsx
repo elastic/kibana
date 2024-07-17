@@ -44,6 +44,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     filterManager,
     queryString,
   } = services.data.query;
+  const { savedSearch } = services;
 
   const embeddableApiHandler = useEmbeddableApiHandler();
   const {
@@ -162,7 +163,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
             query={queryString.getQuery() as Query}
             dataView={currentAppState?.dataView}
             uiState={uiState}
-            linked={Boolean(currentAppState?.linked)}
+            savedSearchService={savedSearch}
           />
         </EuiErrorBoundary>
       )}

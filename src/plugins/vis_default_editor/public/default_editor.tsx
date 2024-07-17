@@ -43,7 +43,7 @@ export type DefaultEditorProps = Omit<EditorRenderProps, 'linked'> & {
   dataView?: string;
   savedSearchService: SavedSearchPublicPluginStart;
   references: Reference[];
-  onRedirectToLegacy: () => void;
+  onRedirectToLegacy?: () => void;
 };
 
 function DefaultEditor({
@@ -161,7 +161,7 @@ function DefaultEditor({
                   // Saved object URLs don't contain information about the visualization type
                   // On the edit route, we need to wait until the vis is loaded to determine if it's TSVB or not
                   // If it is, redirect to the legacy editor
-                  if (embeddableVis.type.name === 'metrics') {
+                  if (onRedirectToLegacy && embeddableVis.type.name === 'metrics') {
                     onRedirectToLegacy();
                     return;
                   }
