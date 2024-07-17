@@ -40,7 +40,7 @@ const metadataFields = {
     documentation_url:
       'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-index-field.html',
   },
-} as TMetadataFields
+} as TMetadataFields;
 
 const integrationFields = {
   '1password.item_usages': {
