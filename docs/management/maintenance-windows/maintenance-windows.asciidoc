@@ -11,7 +11,9 @@ preview::[]
 You can schedule single or recurring maintenance windows to temporarily reduce rule notifications.
 For example, a maintenance window prevents false alarms during planned outages.
 
-By default, maintenance windows affect all rules in all {kib} apps and spaces.
+By default, a maintenance window affects all rules in all {kib} apps within its space.
+You can refine the scope of a maintenance window by adding filters and rule categories.
+
 Alerts continue to be generated, however notifications are suppressed as follows:
 
 - When an alert occurs during a maintenance window, there are no notifications.
