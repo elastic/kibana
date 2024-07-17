@@ -78,22 +78,24 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
-    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
+    const CustomCellRenderer = externalCustomRenderers?.[columnId];
+
+    if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
-          {externalCustomRenderers[columnId]({
-            rowIndex,
-            columnId,
-            isDetails,
-            setCellProps,
-            isExpandable,
-            isExpanded,
-            colIndex,
-            row,
-            dataView,
-            fieldFormats,
-            closePopover,
-          })}
+          <CustomCellRenderer
+            rowIndex={rowIndex}
+            columnId={columnId}
+            isDetails={isDetails}
+            setCellProps={setCellProps}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            colIndex={colIndex}
+            row={row}
+            dataView={dataView}
+            fieldFormats={fieldFormats}
+            closePopover={closePopover}
+          />
         </span>
       );
     }
