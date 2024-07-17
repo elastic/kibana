@@ -513,7 +513,12 @@ export const closeErrorToast = () => {
 };
 
 export const checkToastMessageAndClose = (message: string) => {
-  cy.get(TOASTER_BODY).contains(message).get(TOASTER_CLOSE_ICON).click();
+  cy.get(TOASTER_BODY)
+    .contains(message)
+    .parents(TOASTER_BODY)
+    .parent()
+    .find(TOASTER_CLOSE_ICON)
+    .click();
 };
 
 export const goToEditRuleActionsSettingsOf = (name: string) => {
