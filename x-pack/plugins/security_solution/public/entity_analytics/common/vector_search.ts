@@ -10,7 +10,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
 import { ENTITY_DEFINITION_ID } from './entity_model';
 
-const PIPELINE_ID = `${ENTITY_DEFINITION_ID}-latest@custom`;
+const PIPELINE_ID = `${ENTITY_DEFINITION_ID}-latest@platform`;
+const INDEX_COMPONENT_NAME = `${ENTITY_DEFINITION_ID}-latest@platform`;
 const MODEL_FIELD = 'text_field';
 const TARGET_INDEX_FIELD = 'user.name';
 const TARGET_INDEX_EMBEDDINGS_FIELD = `test_user_name_embeddings`;
@@ -36,7 +37,7 @@ const createComponentTemplate = async (http: HttpSetup) =>
   http.fetch(`/api/index_management/component_templates`, {
     method: 'POST',
     body: JSON.stringify({
-      name: `${ENTITY_DEFINITION_ID}@custom`,
+      name: INDEX_COMPONENT_NAME,
       template: {
         mappings: {
           properties: {
