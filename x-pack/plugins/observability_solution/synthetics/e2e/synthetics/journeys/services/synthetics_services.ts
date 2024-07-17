@@ -229,4 +229,12 @@ export class SyntheticsServices {
       console.log(e);
     }
   }
+
+  async getRules() {
+    const response = await axios.post(this.kibanaUrl + '/internal/alerting/rules/_find', {
+      auth: { username: 'elastic', password: 'changeme' },
+      headers: { 'kbn-xsrf': 'true' },
+    });
+    return response.data;
+  }
 }

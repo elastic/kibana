@@ -60,6 +60,8 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   });
 
   step('verify rule creation', async () => {
+    const rules = await services.getRules();
+
     await page.getByTestId('syntheticsAlertsRulesButton').click();
     await page.getByTestId('manageTlsRuleName').click();
     await page.getByTestId('createNewTlsRule').click();
