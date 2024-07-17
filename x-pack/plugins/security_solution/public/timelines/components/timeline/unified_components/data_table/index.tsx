@@ -187,6 +187,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           }
         } else {
           closeFlyout();
+          setExpandedDoc(undefined);
         }
       },
       [tableRows, handleOnEventDetailPanelOpened, closeFlyout]
