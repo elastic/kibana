@@ -26,7 +26,9 @@ export const muteAlertRoute = (
         summary: `Mute an alert`,
       },
       validate: {
-        params: muteAlertParamsSchemaV1,
+        request: {
+          params: muteAlertParamsSchemaV1,
+        },
       },
     },
     router.handleLegacyErrors(
