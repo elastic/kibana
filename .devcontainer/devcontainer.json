@@ -10,7 +10,8 @@
 				"terminal.integrated.shell.linux": "/usr/bin/zsh"
 			},
 			"extensions": [
-				"dbaeumer.vscode-eslint"
+				"dbaeumer.vscode-eslint",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	},
@@ -19,5 +20,11 @@
 		5601
 	],
 	"postCreateCommand": "/workspaces/kibana/.devcontainer/scripts/bootstrap.sh",
-	"remoteUser": "vscode"
+	"remoteUser": "vscode",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest",
+			"dockerDashComposeVersion": "latest"
+		}
+	}
 }

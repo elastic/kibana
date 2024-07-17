@@ -30,8 +30,7 @@ RUN if [ ! -d "$HOME/.oh-my-zsh" ]; then \
   sed -i 's/plugins=(git)/plugins=(git ssh-agent npm docker zsh-autosuggestions)/' /home/vscode/.zshrc
 
 # Docker-in-Docker setup
-RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && \
-  docker --version
+RUN usermod -aG docker vscode
 
 # This is for documentation. Ports are exposed via devcontainer.json
 EXPOSE 9200 5601
