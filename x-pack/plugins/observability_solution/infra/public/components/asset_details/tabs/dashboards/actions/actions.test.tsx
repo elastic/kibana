@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditDashboard, UnlinkDashboard, LinkDashboard } from '.';
+import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 import * as hooks from '../../../hooks/use_saved_objects_permissions';
 
 const TEST_CURRENT_DASHBOARD = {
@@ -18,7 +19,28 @@ const TEST_CURRENT_DASHBOARD = {
   dashboardFilterAssetIdEnabled: true,
 } as const;
 
+jest.mock('../../../hooks/use_tab_switcher');
+
+const tabSwitcherContextHookMock = useTabSwitcherContext as jest.MockedFunction<
+  typeof useTabSwitcherContext
+>;
+
 describe('Custom Dashboards Actions', () => {
+  const mockUseSearchSession = () => {
+    tabSwitcherContextHookMock.mockReturnValue({
+      ...tabSwitcherContextHookMock(),
+      isActiveTab: jest.fn(() => true),
+    });
+  };
+
+  beforeAll(() => {
+    mockUseSearchSession();
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render the edit dashboard action when the user can edit', () => {
     jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
