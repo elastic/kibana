@@ -60,11 +60,11 @@ export class KibanaDiscoveryService {
     } catch (e) {
       if (!this.started) {
         this.logger.error(
-          `Kibana Discovery Service couldn't be started and will be retried in 10s, error:${e.message}`
+          `Kibana Discovery Service couldn't be started and will be retried in ${DISCOVERY_INTERVAL}ms, error:${e.message}`
         );
       } else {
         this.logger.error(
-          `Background Task Node couldn't be updated. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
+          `Kibana Discovery Service couldn't update this node's last_seen timestamp. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
         );
       }
     } finally {
@@ -102,7 +102,7 @@ export class KibanaDiscoveryService {
   public async deleteCurrentNode() {
     try {
       await this.savedObjectsRepository.delete(BACKGROUND_TASK_NODE_SO_NAME, this.currentNode);
-      this.logger.info('Current node has been deleted');
+      this.logger.info('Removed this node from the Kibana Discovery Service');
     } catch (e) {
       this.logger.error(`Deleting current node has failed. error: ${e.message}`);
     }

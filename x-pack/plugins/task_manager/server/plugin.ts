@@ -359,7 +359,7 @@ export class TaskManagerPlugin
   }
 
   public stop() {
-    if (this.kibanaDiscoveryService && this.kibanaDiscoveryService.isStarted()) {
+    if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
     }
   }

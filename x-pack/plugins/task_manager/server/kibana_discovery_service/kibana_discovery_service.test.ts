@@ -142,7 +142,7 @@ describe('KibanaDiscoveryService', () => {
 
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
-        "Kibana Discovery Service couldn't be started and will be retried in 10s, error:foo"
+        "Kibana Discovery Service couldn't be started and will be retried in 10000ms, error:foo"
       );
       expect(logger.info).not.toHaveBeenCalled();
       expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -177,7 +177,7 @@ describe('KibanaDiscoveryService', () => {
       expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), DISCOVERY_INTERVAL);
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
-        "Background Task Node couldn't be updated. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
+        "Kibana Discovery Service couldn't update this node's last_seen timestamp. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
       );
     });
   });

@@ -67,7 +67,7 @@ export function taskRunner(
           const { saved_objects: inactiveNodes } =
             await savedObjectsRepository.find<BackgroundTaskNode>({
               type: BACKGROUND_TASK_NODE_SO_NAME,
-              perPage: 10000,
+              perPage: 100,
               page: 1,
               filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen < now-${CLEANUP_LOOKBACK}`,
             });
@@ -83,7 +83,7 @@ export function taskRunner(
             });
 
             const deletedNodes = nodesToDelete.map((node) => node.id);
-            logger.info(`Inactive Kibana nodes: ${deletedNodes}, have been successfully deleted`);
+            logger.debug(`Inactive Kibana nodes: ${deletedNodes}, have been successfully deleted`);
           }
 
           return {

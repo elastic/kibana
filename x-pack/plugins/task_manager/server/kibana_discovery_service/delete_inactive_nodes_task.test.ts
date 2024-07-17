@@ -45,7 +45,7 @@ const createFindResponse = (
   soList: Array<SavedObjectsFindResult<BackgroundTaskNode>>
 ): SavedObjectsFindResponse<BackgroundTaskNode, unknown> => ({
   total: 1,
-  per_page: 10000,
+  per_page: 100,
   page: 1,
   saved_objects: soList,
 });
@@ -93,7 +93,7 @@ describe('Delete inactive background task nodes', () => {
       { force: true, refresh: false }
     );
 
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       'Inactive Kibana nodes: 123,456,789, have been successfully deleted'
     );
 
