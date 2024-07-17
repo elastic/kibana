@@ -9,26 +9,45 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface DistributionBarProps {
-  data: Array<{ key: string; count: number; color: string }>;
+  stats: Array<{ key: string; count: number; color: string }>;
 }
+
+const styles = {
+  base: css`
+    border-radius: 2px;
+    height: 5px;
+  `,
+};
+
+const EmptyBar = () => {
+  const { euiTheme } = useEuiTheme();
+
+  const emptyBarStyle = [
+    styles.base,
+    css`
+      background-color: ${euiTheme.colors.lightShade};
+      flex: 1;
+    `,
+  ];
+
+  return <span css={emptyBarStyle} />;
+};
 
 export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
   props
 ) {
   const { euiTheme } = useEuiTheme();
-  const { data } = props;
-  const items = data.map((item) => {
-    return (
-      <span
-        key={item.key}
-        css={css`
-          background-color: ${item.color};
-          border-radius: 2px;
-          height: 5px;
-          flex: ${item.count};
-        `}
-      />
-    );
+  const { stats } = props;
+  const parts = stats.map((stat) => {
+    const partStyle = [
+      styles.base,
+      css`
+        background-color: ${stat.color};
+        flex: ${stat.count};
+      `,
+    ];
+
+    return <span key={stat.key} css={partStyle} />;
   });
 
   return (
@@ -37,7 +56,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
         gap: ${euiTheme.size.xxs};
       `}
     >
-      {items}
+      {parts.length ? parts : <EmptyBar />}
     </EuiFlexGroup>
   );
 });

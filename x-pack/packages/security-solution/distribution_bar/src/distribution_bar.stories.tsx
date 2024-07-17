@@ -9,7 +9,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { DistributionBar as DistributionBarComponent } from '..';
 
-const mockDataFindings = [
+const mockStatsFindings = [
   {
     key: 'passed',
     count: 90,
@@ -22,7 +22,7 @@ const mockDataFindings = [
   },
 ];
 
-const mockDataAlerts = [
+const mockStatsAlerts = [
   {
     key: 'low',
     count: 30,
@@ -56,12 +56,18 @@ export const DistributionBar = () => {
       <h4>{'Findings'}</h4>
     </EuiTitle>,
     <EuiSpacer size={'s'} />,
-    <DistributionBarComponent data={mockDataFindings} />,
+    <DistributionBarComponent stats={mockStatsFindings} />,
     <EuiSpacer size={'m'} />,
     <EuiTitle size={'xs'}>
       <h4>{'Alerts'}</h4>
     </EuiTitle>,
     <EuiSpacer size={'s'} />,
-    <DistributionBarComponent data={mockDataAlerts} />,
+    <DistributionBarComponent stats={mockStatsAlerts} />,
+    <EuiSpacer size={'m'} />,
+    <EuiTitle size={'xs'}>
+      <h4>{'Empty state'}</h4>
+    </EuiTitle>,
+    <EuiSpacer size={'s'} />,
+    <DistributionBarComponent stats={[]} />,
   ];
 };
