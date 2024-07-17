@@ -90,19 +90,13 @@ export const streamGraph = async ({
 
   let finalMessage = '';
   let conversationId: string | undefined;
-  const stream = assistantGraph
-    .withListeners({
-      onEnd: (run: Run) => {
-        conversationId = handleEndRun(run);
-      },
-    })
-    .streamEvents(inputs, {
-      callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      streamMode: 'values',
-      tags: traceOptions?.tags ?? [],
-      version: 'v1',
-    });
+  const stream = assistantGraph.streamEvents(inputs, {
+    callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+    runName: DEFAULT_ASSISTANT_GRAPH_ID,
+    streamMode: 'values',
+    tags: traceOptions?.tags ?? [],
+    version: 'v1',
+  });
 
   let currentOutput = '';
   let finalOutputIndex = -1;
@@ -231,7 +225,6 @@ export const invokeGraph = async ({
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
   return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
     let traceData: TraceData = {};
-    let conversationId: string | undefined;
     if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
       traceData = {
         // Transactions ID since this span is the parent
@@ -240,19 +233,13 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-    const r = await assistantGraph
-      .withListeners({
-        onEnd: (run: Run) => {
-          conversationId = handleEndRun(run);
-        },
-      })
-      .invoke(inputs, {
-        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-        runName: DEFAULT_ASSISTANT_GRAPH_ID,
-        tags: traceOptions?.tags ?? [],
-      });
+    const r = await assistantGraph.invoke(inputs, {
+      callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+      runName: DEFAULT_ASSISTANT_GRAPH_ID,
+      tags: traceOptions?.tags ?? [],
+    });
     const output = r.agentOutcome.returnValues.output;
-
+    const conversationId = r.conversation?.id;
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }
