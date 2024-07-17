@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { Space } from '@kbn/spaces-plugin/common';
@@ -16,13 +16,14 @@ import { DEFAULT_ROUTES } from '../common/constants';
 
 describe('ui settings', () => {
   const core = coreMock.createSetup();
+  const logger = loggingSystemMock.createLogger();
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
 
   describe('defaultRoute', () => {
     it('should only accept relative urls', () => {
-      const uiSettings = getUiSettings(core);
+      const uiSettings = getUiSettings(core, logger);
       const validate = getValidationFn(uiSettings.defaultRoute);
 
       expect(() => validate('/some-url')).not.toThrow();
@@ -36,7 +37,7 @@ describe('ui settings', () => {
 
     describe('getValue()', () => {
       it('should return classic when neither "space" nor "request" is provided', async () => {
-        const { defaultRoute } = getUiSettings(core);
+        const { defaultRoute } = getUiSettings(core, logger);
         await expect(defaultRoute.getValue!()).resolves.toBe(DEFAULT_ROUTES.classic);
       });
 
@@ -47,7 +48,7 @@ describe('ui settings', () => {
           const mockSpace: Pick<Space, 'solution'> = { solution };
           spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
           core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
-          const { defaultRoute } = getUiSettings(core);
+          const { defaultRoute } = getUiSettings(core, logger);
 
           await expect(defaultRoute.getValue!({ request: {} as any })).resolves.toBe(
             DEFAULT_ROUTES[solution]
@@ -60,7 +61,7 @@ describe('ui settings', () => {
 
         spaces.spacesService.getActiveSpace.mockRejectedValue(new Error('something went wrong'));
         core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
-        const { defaultRoute } = getUiSettings(core);
+        const { defaultRoute } = getUiSettings(core, logger);
 
         await expect(defaultRoute.getValue!({ request: {} as any })).resolves.toBe(
           DEFAULT_ROUTES.classic
