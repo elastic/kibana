@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { of, throwError } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
-import { useSearchAlertsQuery } from './use_search_alerts_query';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { UseSearchAlertsQueryParams } from '../../..';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import React, { FunctionComponent } from 'react';
+import { of } from 'rxjs';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react-hooks';
+import type { UseSearchAlertsQueryParams } from '../../..';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
+import { useSearchAlertsQuery } from './use_search_alerts_query';
 
 const searchResponse = {
   id: '0',
@@ -254,118 +254,17 @@ describe('useSearchAlertsQuery', () => {
     );
   });
 
-  it('call search with correct arguments', async () => {
-    renderHook(() => useSearchAlertsQuery(params), { wrapper });
-    expect(mockDataPlugin.search.search).toHaveBeenCalledTimes(1);
-    expect(mockDataPlugin.search.search).toHaveBeenCalledWith(
-      {
-        featureIds: params.featureIds,
-        fields: [...params.fields!],
-        pagination: {
-          pageIndex: params.pageIndex,
-          pageSize: params.pageSize,
-        },
-        query: {
-          ids: {
-            values: ['alert-id-1'],
-          },
-        },
-        sort: params.sort,
-      },
-      { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
-    );
-  });
-
-  it('skips the fetch correctly', () => {
-    const { result } = renderHook(() => useSearchAlertsQuery({ ...params }, { enabled: false }), {
-      wrapper,
-    });
-
-    expect(mockDataPlugin.search.search).not.toHaveBeenCalled();
-    expect(result.current.data).toEqual(
-      expect.objectContaining({
-        ...expectedResponse,
-        alerts: [],
-      })
-    );
-  });
-
-  it('handles search error', async () => {
-    const obs$ = throwError('simulated search error');
-    mockDataPlugin.search.search.mockReturnValue(obs$);
-    const { result, waitForValueToChange } = renderHook(() => useSearchAlertsQuery(params), {
-      wrapper,
-    });
-
-    await waitForValueToChange(() => result.current.data);
-
-    expect(result.current.data).toEqual(
-      expect.objectContaining({
-        ...expectedResponse,
-        alerts: [],
-        total: 0,
-      })
-    );
-
-    expect(mockDataPlugin.search.showError).toHaveBeenCalled();
-  });
-
-  it('returns the correct response if the search response is running', async () => {
-    const obs$ = of<IKibanaSearchResponse>({ ...searchResponse, isRunning: true });
-    mockDataPlugin.search.search.mockReturnValue(obs$);
+  it('returns empty initial data', () => {
     const { result } = renderHook(() => useSearchAlertsQuery(params), {
       wrapper,
     });
 
-    expect(result.current.data).toEqual(
-      expect.objectContaining({
-        ...expectedResponse,
-        alerts: [],
-        total: -1,
-      })
-    );
-  });
-
-  it('returns the correct total alerts if the total alerts in the response is an object', async () => {
-    const obs$ = of<IKibanaSearchResponse>({
-      ...searchResponse,
-      rawResponse: {
-        ...searchResponse.rawResponse,
-        hits: { ...searchResponse.rawResponse.hits, total: { value: 2 } },
-      },
+    expect(result.current.data).toEqual({
+      total: -1,
+      alerts: [],
+      oldAlertsData: [],
+      ecsAlertsData: [],
     });
-
-    mockDataPlugin.search.search.mockReturnValue(obs$);
-    const { result, waitForValueToChange } = renderHook(() => useSearchAlertsQuery(params), {
-      wrapper,
-    });
-    await waitForValueToChange(() => result.current.data);
-
-    expect(result.current.data!.total).toEqual(2);
-  });
-
-  it('does not return an alert without fields', () => {
-    const obs$ = of<IKibanaSearchResponse>({
-      ...searchResponse,
-      rawResponse: {
-        ...searchResponse.rawResponse,
-        hits: {
-          ...searchResponse.rawResponse.hits,
-          hits: [
-            {
-              _index: '.internal.alerts-security.alerts-default-000001',
-              _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
-              _score: 1,
-            },
-          ],
-        },
-      },
-    });
-
-    mockDataPlugin.search.search.mockReturnValue(obs$);
-    const { result } = renderHook(() => useSearchAlertsQuery(params), { wrapper });
-
-    expect(result.current.data!.alerts).toEqual([]);
   });
 
   it('does not fetch with no feature ids', () => {

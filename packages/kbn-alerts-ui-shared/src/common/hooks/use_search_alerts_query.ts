@@ -7,77 +7,26 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type {
-  MappingRuntimeFields,
-  QueryDslFieldAndFormat,
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
-import { set } from '@kbn/safer-lodash-set';
-import type { UseQueryOptions } from '@tanstack/react-query/src/types';
-import type { Alert } from '@kbn/alerting-types';
-import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '@kbn/alerting-types';
+
+import { SetOptional } from 'type-fest';
+import { searchAlerts, type SearchAlertsParams } from '../apis/search_alerts/search_alerts';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
-import type { EsQuerySnapshot, LegacyField } from '../types';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
 
-export interface UseSearchAlertsQueryParams {
-  // Dependencies
-  /**
-   * Kibana data plugin, used to perform the query
-   */
-  data: DataPublicPluginStart;
-  // Parameters
-  /**
-   * Array of feature ids used for authorization and area-based filtering
-   */
-  featureIds: ValidFeatureId[];
-  /**
-   * ES query to perform on the affected alert indices
-   */
-  query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  /**
-   * The alert document fields to include in the response
-   */
-  fields?: QueryDslFieldAndFormat[];
-  /**
-   * Sort combinations to apply to the query
-   */
-  sort?: SortCombinations[];
-  /**
-   * Runtime mappings to apply to the query
-   */
-  runtimeMappings?: MappingRuntimeFields;
-  /**
-   * The page index to fetch
-   */
-  pageIndex?: number;
-  /**
-   * The page size to fetch
-   */
-  pageSize?: number;
-}
+export type UseSearchAlertsQueryParams = SetOptional<
+  Omit<SearchAlertsParams, 'signal'>,
+  'query' | 'sort' | 'pageIndex' | 'pageSize'
+>;
 
-export interface AlertsQueryData {
-  alerts: Alert[];
-  oldAlertsData: LegacyField[][];
-  ecsAlertsData: unknown[];
-  total: number;
-  querySnapshot?: EsQuerySnapshot;
-}
-
-export const searchAlertsQueryPrefix = ['alerts', 'searchAlerts'] as const;
+export const searchAlertsQueryPrefix = ['alerts', searchAlerts.name];
 
 /**
  * Query alerts
+ *
+ * When testing components that depend on this hook, prefer mocking the `searchAlerts` function instead of the hook itself.
+ * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
-export const useSearchAlertsQuery = (
-  { data, ...params }: UseSearchAlertsQueryParams,
-  options?: UseQueryOptions
-) => {
+export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
   const {
     featureIds,
     fields,
@@ -93,105 +42,30 @@ export const useSearchAlertsQuery = (
     pageIndex = 0,
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
   } = params;
-  return useQuery(
-    [...searchAlertsQueryPrefix, JSON.stringify(params)],
-    ({ signal }): Promise<AlertsQueryData> =>
-      lastValueFrom(
-        data.search
-          .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
-            {
-              featureIds,
-              fields,
-              query,
-              pagination: { pageIndex, pageSize },
-              sort,
-              runtimeMappings,
-            },
-            {
-              strategy: 'privateRuleRegistryAlertsSearchStrategy',
-              abortSignal: signal,
-            }
-          )
-          .pipe(
-            filter((response) => !response.isRunning),
-            map((response) => {
-              const { rawResponse } = response;
-              let total = 0;
-              if (rawResponse.hits.total) {
-                if (typeof rawResponse.hits.total === 'number') {
-                  total = rawResponse.hits.total;
-                } else if (typeof rawResponse.hits.total === 'object') {
-                  total = rawResponse.hits.total?.value ?? 0;
-                }
-              }
-              const alerts = rawResponse.hits.hits.reduce<Alert[]>((acc, hit) => {
-                if (hit.fields) {
-                  acc.push({
-                    ...hit.fields,
-                    _id: hit._id,
-                    _index: hit._index,
-                  } as Alert);
-                }
-                return acc;
-              }, []);
-
-              const { oldAlertsData, ecsAlertsData } = alerts.reduce<{
-                oldAlertsData: LegacyField[][];
-                ecsAlertsData: unknown[];
-              }>(
-                (acc, alert) => {
-                  const itemOldData = Object.entries(alert).reduce<
-                    Array<{ field: string; value: string[] }>
-                  >((oldData, [key, value]) => {
-                    oldData.push({ field: key, value: value as string[] });
-                    return oldData;
-                  }, []);
-                  const ecsData = Object.entries(alert).reduce((ecs, [key, value]) => {
-                    set(ecs, key, value ?? []);
-                    return ecs;
-                  }, {});
-                  acc.oldAlertsData.push(itemOldData);
-                  acc.ecsAlertsData.push(ecsData);
-                  return acc;
-                },
-                { oldAlertsData: [], ecsAlertsData: [] }
-              );
-
-              return {
-                alerts,
-                oldAlertsData,
-                ecsAlertsData,
-                total,
-                querySnapshot: {
-                  request: response?.inspect?.dsl ?? [],
-                  response: [JSON.stringify(rawResponse)] ?? [],
-                },
-              };
-            }),
-            catchError((error) => {
-              data.search.showError(error);
-              return of({
-                alerts: [],
-                oldAlertsData: [],
-                ecsAlertsData: [],
-                total: 0,
-              });
-            })
-          )
-      ),
-    {
-      // To avoid flash of loading state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      context: AlertsQueryContext,
-      initialData: {
-        total: -1,
-        alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
-      },
-      enabled: featureIds.length > 0,
-      ...(options as object),
-    }
-  );
+  return useQuery({
+    queryKey: searchAlertsQueryPrefix.concat(JSON.stringify(params)),
+    queryFn: ({ signal }) =>
+      searchAlerts({
+        data,
+        signal,
+        featureIds,
+        fields,
+        query,
+        sort,
+        runtimeMappings,
+        pageIndex,
+        pageSize,
+      }),
+    // To avoid flash of loading state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+    context: AlertsQueryContext,
+    initialData: {
+      total: -1,
+      alerts: [],
+      oldAlertsData: [],
+      ecsAlertsData: [],
+    },
+    enabled: featureIds.length > 0,
+  });
 };
