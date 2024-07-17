@@ -67,6 +67,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('ruleNameInput').fill('Synthetics tls rule');
 
     await page.getByTestId('saveRuleButton').click();
+    await page.getByTestId('confirmModalConfirmButton').click();
   });
 
   step('Monitor is as up in overview page', async () => {
