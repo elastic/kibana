@@ -448,3 +448,51 @@ export const fleetUsagesSchema: RootSchema<any> = {
     _meta: { description: 'id of the deployment', optional: true },
   },
 };
+
+export const fleetIntegrationsSchema: RootSchema<any> = {
+  total_policies_count: {
+    type: 'long',
+    _meta: {
+      description: 'Count of total number of integration policies in this kibana',
+    },
+  },
+  total_shared_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Count of total number of integration policies shared across agent policies in this kibana',
+    },
+  },
+  shared_integrations: {
+    properties: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Name of the integration policy' },
+      },
+      pkg_name: {
+        type: 'keyword',
+        _meta: {
+          description: 'Name of the integration package installed on the integration policy',
+        },
+      },
+      pkg_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Version of the integration package installed on the integration policy',
+        },
+      },
+      shared_by_policies_count: {
+        type: 'long',
+        _meta: {
+          description: 'Count of agent policies sharing the integration policy',
+        },
+      },
+      agents: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents installed on the integration policy',
+        },
+      },
+    },
+  },
+};

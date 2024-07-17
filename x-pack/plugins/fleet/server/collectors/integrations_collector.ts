@@ -13,7 +13,7 @@ import { packagePolicyService } from '../services';
 export interface IntegrationsDetails {
   totalPoliciesCount: number;
   totalSharedCount: number;
-  sharedIntegrations: SharedIntegration[];
+  sharedIntegrations: SharedIntegration;
 }
 
 interface SharedIntegration {
@@ -26,9 +26,9 @@ interface SharedIntegration {
 
 export const getIntegrationsDetails = async (
   soClient?: SavedObjectsClient
-): Promise<IntegrationsDetails | undefined> => {
+): Promise<IntegrationsDetails[]> => {
   if (!soClient) {
-    return undefined;
+    return [];
   }
   const allPackagePolicies = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
@@ -40,19 +40,20 @@ export const getIntegrationsDetails = async (
   });
   const totalSharedCount = sharedPackagePolicies.length;
 
-  const sharedIntegrations = (sharedPackagePolicies || []).map((packagePolicy) => {
-    return {
-      name: packagePolicy.name,
-      pkgName: packagePolicy.package?.name,
-      pkgVersion: packagePolicy.package?.version,
-      sharedByPoliciesCount: packagePolicy.policy_ids.length,
-      agents: packagePolicy.agents,
-    };
-  });
-
-  return {
-    totalPoliciesCount,
-    totalSharedCount,
-    sharedIntegrations,
-  };
+  const integrationsDetails: IntegrationsDetails[] = (sharedPackagePolicies || []).map(
+    (packagePolicy) => {
+      return {
+        totalPoliciesCount,
+        totalSharedCount,
+        sharedIntegrations: {
+          name: packagePolicy.name,
+          pkgName: packagePolicy.package?.name,
+          pkgVersion: packagePolicy.package?.version,
+          sharedByPoliciesCount: packagePolicy.policy_ids.length,
+          agents: packagePolicy.agents,
+        },
+      };
+    }
+  );
+  return integrationsDetails;
 };

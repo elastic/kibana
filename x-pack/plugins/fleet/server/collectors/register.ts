@@ -43,7 +43,7 @@ export interface FleetUsage extends Usage, AgentData {
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
   agents_per_output_type: AgentsPerOutputType[];
-  integrations_details?: IntegrationsDetails;
+  integrations_details: IntegrationsDetails[];
 }
 
 export const fetchFleetUsage = async (

@@ -17,7 +17,11 @@ import type { FleetUsage } from '../../collectors/register';
 
 import { appContextService } from '../app_context';
 
-import { fleetAgentsSchema, fleetUsagesSchema } from './fleet_usages_schema';
+import {
+  fleetAgentsSchema,
+  fleetUsagesSchema,
+  fleetIntegrationsSchema,
+} from './fleet_usages_schema';
 
 const FLEET_USAGES_EVENT_TYPE = 'fleet_usage';
 const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
@@ -132,8 +136,10 @@ export class FleetUsageSender {
       appContextService
         .getLogger()
         .debug(() => 'Integrations details telemetry: ' + JSON.stringify(integrationsDetails));
-      core.analytics.reportEvent(FLEET_INTEGRATIONS_EVENT_TYPE, {
-        integrations_details: integrationsDetails,
+      integrationsDetails.forEach((integrationDetailsObj) => {
+        core.analytics.reportEvent(FLEET_INTEGRATIONS_EVENT_TYPE, {
+          integrations_details: integrationDetailsObj,
+        });
       });
     } catch (error) {
       appContextService
@@ -188,6 +194,11 @@ export class FleetUsageSender {
     core.analytics.registerEventType({
       eventType: FLEET_AGENTS_EVENT_TYPE,
       schema: fleetAgentsSchema,
+    });
+
+    core.analytics.registerEventType({
+      eventType: FLEET_INTEGRATIONS_EVENT_TYPE,
+      schema: fleetIntegrationsSchema,
     });
   }
 }
