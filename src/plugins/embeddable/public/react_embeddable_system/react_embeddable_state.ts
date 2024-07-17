@@ -7,7 +7,6 @@
  */
 
 import {
-  apiHasPanelSaveCheck,
   apiHasRuntimeChildState,
   apiHasSaveNotification,
   HasSerializedChildState,
@@ -41,17 +40,17 @@ export const initializeReactEmbeddableState = async <
   parentApi: HasSerializedChildState<SerializedState>
 ) => {
   const serializedState = parentApi.getSerializedStateForChild(uuid);
-  const deserializedRuntimeState = serializedState
+  const lastSavedRuntimeState = serializedState
     ? await factory.deserializeState(serializedState)
     : ({} as RuntimeState);
 
   // If the parent provides runtime state for the child (usually as a state backup or cache),
   // we merge it with the last saved runtime state.
-  const overrideRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
+  const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
     ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
     : ({} as Partial<RuntimeState>);
 
-  const initialRuntimeState = { ...deserializedRuntimeState, ...overrideRuntimeState };
+  const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
 
   const startStateDiffing = (comparators: StateComparators<RuntimeState>) => {
     const subscription = new Subscription();
@@ -63,16 +62,12 @@ export const initializeReactEmbeddableState = async <
       }, {} as RuntimeState);
     };
 
-    // the last saved state subject is initialized with the deserialized state from the parent. If the panel is new, lastSavedState will be undefined.
-    const initialLastSavedState =
-      apiHasPanelSaveCheck(parentApi) && !parentApi.isPanelSaved(uuid)
-        ? undefined
-        : deserializedRuntimeState;
-    const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialLastSavedState);
+    // the last saved state subject is always initialized with the deserialized state from the parent.
+    const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(lastSavedRuntimeState);
     if (apiHasSaveNotification(parentApi)) {
       subscription.add(
+        // any time the parent saves, the current state becomes the last saved state...
         parentApi.saveNotification$.subscribe(() => {
-          // any time the parent saves, the current state becomes the last saved state...
           lastSavedState$.next(snapshotRuntimeState());
         })
       );
