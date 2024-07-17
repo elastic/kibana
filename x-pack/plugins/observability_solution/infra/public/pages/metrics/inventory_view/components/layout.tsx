@@ -25,7 +25,7 @@ import {
   useWaffleOptionsContext,
   WaffleLegendOptions,
 } from '../hooks/use_waffle_options';
-import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
+import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../common/inventory/types';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
@@ -37,7 +37,7 @@ import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
   currentView?: InventoryView | null;
-  reload: () => Promise<any>;
+  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;

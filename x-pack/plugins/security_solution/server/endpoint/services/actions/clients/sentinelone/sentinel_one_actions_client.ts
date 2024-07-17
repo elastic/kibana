@@ -29,7 +29,11 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
-import type { SentinelOneKillProcessScriptArgs, SentinelOneScriptArgs } from './types';
+import type {
+  SentinelOneKillProcessScriptArgs,
+  SentinelOneScriptArgs,
+  SentinelOneProcessListScriptArgs,
+} from './types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
@@ -67,9 +71,12 @@ import type {
   SentinelOneKillProcessRequestMeta,
   UploadedFileInfo,
   ResponseActionParametersWithProcessName,
+  GetProcessesActionOutputContent,
+  SentinelOneProcessesRequestMeta,
   SentinelOneKillProcessResponseMeta,
 } from '../../../../../../common/endpoint/types';
 import type {
+  GetProcessesRequestBody,
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
 } from '../../../../../../common/api/endpoint';
@@ -666,6 +673,80 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionDetails;
   }
 
+  public async runningProcesses(
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `processes not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      GetProcessesActionOutputContent,
+      Partial<SentinelOneProcessesRequestMeta>
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'running-processes',
+      meta: { parentTaskId: '' },
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        const s1AgentDetails = await this.getAgentDetails(reqIndexOptions.endpoint_ids[0]);
+        const processesScriptInfo = await this.fetchScriptInfo<SentinelOneProcessListScriptArgs>(
+          'running-processes',
+          s1AgentDetails.osType
+        );
+
+        try {
+          const s1Response = await this.sendAction<SentinelOneExecuteScriptResponse>(
+            SUB_ACTION.EXECUTE_SCRIPT,
+            {
+              filter: {
+                uuids: actionRequest.endpoint_ids[0],
+              },
+              script: {
+                scriptId: processesScriptInfo.scriptId,
+                taskDescription: this.buildExternalComment(reqIndexOptions),
+                requiresApproval: false,
+                outputDestination: 'SentinelCloud',
+                inputParams: processesScriptInfo.buildScriptArgs({}),
+              },
+            }
+          );
+
+          reqIndexOptions.meta = {
+            parentTaskId: s1Response.data?.data?.parentTaskId ?? '',
+          };
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation<
+      undefined,
+      GetProcessesActionOutputContent
+    >(reqIndexOptions);
+
+    return actionDetails;
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,
@@ -673,7 +754,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     if (abortSignal.aborted) {
       return;
     }
-
     for await (const pendingActions of this.fetchAllPendingActions()) {
       if (abortSignal.aborted) {
         return;
@@ -749,14 +829,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async fetchScriptInfo<
     TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
   >(
-    scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process'>,
+    scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process' | 'running-processes'>,
     osType: string | 'linux' | 'macos' | 'windows'
   ): Promise<FetchScriptInfoResponse<TScriptOptions>> {
     const searchQueryParams: Mutable<Partial<SentinelOneGetRemoteScriptsParams>> = {
       query: '',
       osTypes: osType,
     };
-    let buildScriptArgs = NOOP_THROW as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
+    let buildScriptArgs: FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'] =
+      NOOP_THROW as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
     let isDesiredScript: (
       scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number]
     ) => boolean = () => false;
@@ -766,7 +847,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       case 'kill-process':
         searchQueryParams.query = 'terminate';
         searchQueryParams.scriptType = 'action';
-
         isDesiredScript = (scriptInfo) => {
           return (
             scriptInfo.creator === 'SentinelOne' &&
@@ -776,6 +856,22 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             /-processes/i.test(scriptInfo.inputInstructions ?? '')
           );
         };
+        break;
+
+      case 'running-processes':
+        if (osType === 'windows') {
+          throw new ResponseActionsClientError(
+            `Retrieval of running processes for Windows host is not supported by SentinelOne`,
+            405
+          );
+        }
+
+        searchQueryParams.query = 'process list';
+        searchQueryParams.scriptType = 'dataCollection';
+        isDesiredScript = (scriptInfo) => {
+          return scriptInfo.creator === 'SentinelOne' && scriptInfo.creatorId === '-1';
+        };
+
         break;
 
       default:
@@ -800,9 +896,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
+    // Define the `buildScriptArgs` callback for the Script type
     switch (scriptType) {
       case 'kill-process':
-        buildScriptArgs = (args: SentinelOneKillProcessScriptArgs) => {
+        buildScriptArgs = ((args: SentinelOneKillProcessScriptArgs) => {
           if (!args.processName) {
             throw new ResponseActionsClientError(
               `'processName' missing while building script args for [${s1Script.scriptName} (id: ${s1Script.id})] script`
@@ -815,8 +912,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
           // Linux + Macos
           return `--terminate --processes "${args.processName}" --force`;
-        };
+        }) as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
 
+        break;
+
+      case 'running-processes':
+        buildScriptArgs = () => '';
         break;
     }
 

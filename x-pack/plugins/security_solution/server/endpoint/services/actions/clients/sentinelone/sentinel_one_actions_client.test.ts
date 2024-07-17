@@ -40,7 +40,10 @@ import type {
   SentinelOneKillProcessRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  ResponseActionGetFileRequestBody,
+  GetProcessesRequestBody,
+} from '../../../../../../common/api/endpoint';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -82,14 +85,15 @@ describe('SentinelOneActionsClient class', () => {
     s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
   });
 
-  it.each(['suspendProcess', 'runningProcesses', 'execute', 'upload', 'scan'] as Array<
-    keyof ResponseActionsClient
-  >)('should throw an un-supported error for %s', async (methodName) => {
-    // @ts-expect-error Purposely passing in empty object for options
-    await expect(s1ActionsClient[methodName]({})).rejects.toBeInstanceOf(
-      ResponseActionsNotSupportedError
-    );
-  });
+  it.each(['suspendProcess', 'execute', 'upload', 'scan'] as Array<keyof ResponseActionsClient>)(
+    'should throw an un-supported error for %s',
+    async (methodName) => {
+      // @ts-expect-error Purposely passing in empty object for options
+      await expect(s1ActionsClient[methodName]({})).rejects.toBeInstanceOf(
+        ResponseActionsNotSupportedError
+      );
+    }
+  );
 
   it('should error if multiple agent ids are received', async () => {
     const payload = createS1IsolationOptions();
@@ -1467,6 +1471,165 @@ describe('SentinelOneActionsClient class', () => {
       await s1ActionsClient.killProcess(killProcessActionRequest);
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+  });
+
+  describe('#runningProcesses()', () => {
+    let processesActionRequest: GetProcessesRequestBody;
+
+    beforeEach(() => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
+        true;
+
+      processesActionRequest = responseActionsClientMock.createRunningProcessesOptions();
+    });
+
+    it('should error if feature flag is disabled', async () => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
+        false;
+
+      await expect(s1ActionsClient.runningProcesses(processesActionRequest)).rejects.toThrow(
+        `processes not supported for sentinel_one agent type. Feature disabled`
+      );
+    });
+
+    it('should error if host is running Windows', async () => {
+      connectorActionsMock.execute.mockResolvedValue(
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: sentinelOneMock.createGetAgentsResponse([
+            sentinelOneMock.createSentinelOneAgentDetails({ osType: 'windows' }),
+          ]),
+        })
+      );
+
+      await expect(s1ActionsClient.runningProcesses(processesActionRequest)).rejects.toThrow(
+        'Retrieval of running processes for Windows host is not supported by SentinelOne'
+      );
+    });
+
+    it('should retrieve script execution information from S1 using host OS', async () => {
+      await s1ActionsClient.runningProcesses(processesActionRequest);
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'getRemoteScripts',
+          subActionParams: {
+            osTypes: 'linux',
+            query: 'process list',
+            scriptType: 'dataCollection',
+          },
+        },
+      });
+    });
+
+    it('should error if unable to get S1 script information', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: { data: [] },
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.runningProcesses(processesActionRequest)).rejects.toThrow(
+        'Unable to find a script from SentinelOne to handle [running-processes] response action for host running [linux])'
+      );
+    });
+
+    it('should send execute script request to S1 for process list', async () => {
+      await s1ActionsClient.runningProcesses(processesActionRequest);
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'executeScript',
+          subActionParams: {
+            filter: { uuids: '1-2-3' },
+            script: {
+              inputParams: '',
+              outputDestination: 'SentinelCloud',
+              requiresApproval: false,
+              scriptId: '1466645476786791838',
+              taskDescription: expect.stringContaining(
+                'Action triggered from Elastic Security by user [foo] for action [running-processes'
+              ),
+            },
+          },
+        },
+      });
+    });
+
+    it('should return action details on success', async () => {
+      await s1ActionsClient.runningProcesses(processesActionRequest);
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should create action request doc with expected meta info', async () => {
+      await s1ActionsClient.runningProcesses(processesActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'running-processes',
+                comment: 'test comment',
+                hosts: { '1-2-3': { name: 'sentinelone-1460' } },
+                parameters: undefined,
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+              parentTaskId: 'task-789',
+            },
+            user: { id: 'foo' },
+          },
+          index: '.logs-endpoint.actions-default',
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+    });
+
+    it('should update cases', async () => {
+      processesActionRequest = {
+        ...processesActionRequest,
+        case_ids: ['case-1'],
+      };
+      await s1ActionsClient.runningProcesses(processesActionRequest);
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+
+    it('should still create action request when running in automated mode', async () => {
+      classConstructorOptions.isAutomated = true;
+      classConstructorOptions.connectorActions =
+        responseActionsClientMock.createNormalizedExternalConnectorClient(
+          sentinelOneMock.createConnectorActionsClient()
+        );
+      s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
+      await s1ActionsClient.runningProcesses(processesActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            error: { message: 'Action [running-processes] not supported' },
+          }),
+        }),
+        { meta: true }
+      );
     });
   });
 });
