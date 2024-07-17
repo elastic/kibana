@@ -70,6 +70,7 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
   buildValueDefinitions,
+  buildFieldsDefinitionsWithMetadata,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -292,7 +293,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildFieldsDefinitionsWithMetadata(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -1540,7 +1541,14 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    if (isNewExpression) {
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
+    }
   }
 
   if (command.name === 'stats') {

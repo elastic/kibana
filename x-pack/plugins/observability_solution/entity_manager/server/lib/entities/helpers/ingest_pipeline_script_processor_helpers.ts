@@ -8,13 +8,24 @@
 import { first, last } from 'lodash';
 
 export function initializePathScript(field: string) {
-  return field.split('.').reduce((acc, _part, currentIndex, parts) => {
+  const fieldParts = field.split('.');
+
+  if (fieldParts.length === 1) {
+    return '';
+  }
+
+  return fieldParts.reduce((acc, _part, currentIndex, parts) => {
+    if (currentIndex + 1 === parts.length) {
+      return acc;
+    }
+
     const currentSegment = parts.slice(0, currentIndex + 1).join('.');
     const next = `
         if (ctx.${currentSegment} == null) {
             ctx.${currentSegment} = new HashMap();
         }
       `;
+
     return `${acc}\n${next}`;
   }, '');
 }
