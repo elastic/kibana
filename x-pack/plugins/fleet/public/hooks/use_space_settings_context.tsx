@@ -25,7 +25,8 @@ export const SpaceSettingsContextProvider: React.FC<{
   enabled?: boolean;
   children?: React.ReactNode;
 }> = ({ enabled = true, children }) => {
-  const { useSpaceAwareness } = ExperimentalFeaturesService.get();
+  // try {
+  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const authz = useAuthz();
   const isAllowed =
     authz.fleet.allAgentPolicies ||
@@ -44,6 +45,11 @@ export const SpaceSettingsContextProvider: React.FC<{
   }, [spaceSettingsReq.isInitialLoading, spaceSettingsReq.data]);
 
   return <spaceSettingsContext.Provider value={settings}>{children}</spaceSettingsContext.Provider>;
+  // } catch (err) {
+  //   console.log('ERROR', err);
+  // }
+
+  // return null;
 };
 
 export function useSpaceSettingsContext() {
