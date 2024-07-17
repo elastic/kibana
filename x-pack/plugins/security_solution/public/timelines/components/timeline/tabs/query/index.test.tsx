@@ -28,6 +28,9 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { Direction } from '../../../../../../common/search_strategy';
 import * as helpers from '../../../../../common/lib/kuery';
 import { waitFor } from '@testing-library/react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -58,6 +61,10 @@ jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
 }));
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
@@ -92,6 +99,15 @@ describe('Timeline', () => {
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
+
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        if (feature === 'unifiedComponentsInTimelineDisabled') {
+          return true;
+        }
+        return allowedExperimentalValues[feature];
+      }
+    );
 
     props = {
       columns: defaultHeaders,

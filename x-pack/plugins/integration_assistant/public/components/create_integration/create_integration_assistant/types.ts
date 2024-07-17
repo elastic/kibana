@@ -5,10 +5,24 @@
  * 2.0.
  */
 
+import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { InputType } from '../../../../common';
 
-// TODO: find a better home for this type
-export type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+interface GenAiConfig {
+  apiUrl?: string;
+  defaultModel?: string;
+}
+
+export type AIConnector = ActionConnector<GenAiConfig> & {
+  // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
+  apiProvider?: OpenAiProviderType;
+};
+export type ConfiguredAIConnectorType = UserConfiguredActionConnector<
+  GenAiConfig,
+  Record<string, unknown>
+>;
 
 export interface IntegrationSettings {
   title?: string;

@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { ProtectionModes, AntivirusRegistrationModes } from '../types';
+import { AntivirusRegistrationModes, ProtectionModes } from '../types';
 
 import { isBillablePolicy } from './policy_config_helpers';
 
@@ -82,8 +82,8 @@ export const policyFactory = (
         file: 'info',
       },
       antivirus_registration: {
-        mode: AntivirusRegistrationModes.disabled,
-        enabled: false,
+        mode: AntivirusRegistrationModes.sync,
+        enabled: true, // Defaults to true since Malware protection is set to prevent and mode is set to sync
       },
       attack_surface_reduction: {
         credential_hardening: {

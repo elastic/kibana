@@ -21,7 +21,6 @@ import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpe
 
 import type { FieldsData } from '../types';
 import type {
-  BrowserField,
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
@@ -30,7 +29,6 @@ import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view
 import { getSourcererScopeId } from '../../../../helpers';
 
 export interface ThreatSummaryDescription {
-  browserField: BrowserField;
   data: FieldsData | undefined;
   eventId: string;
   index: number;
@@ -63,7 +61,6 @@ export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
-  browserField,
   data,
   eventId,
   index,
@@ -179,7 +176,6 @@ const EnrichmentSummaryComponent: React.FC<{
                     scopeId={scopeId}
                     value={value}
                     data={fieldsData}
-                    browserField={browserField}
                     isDraggable={isDraggable}
                     isReadOnly={isReadOnly}
                   />
@@ -210,7 +206,6 @@ const EnrichmentSummaryComponent: React.FC<{
                     scopeId={scopeId}
                     value={value}
                     data={fieldsData}
-                    browserField={browserField}
                     isDraggable={isDraggable}
                     isReadOnly={isReadOnly}
                   />

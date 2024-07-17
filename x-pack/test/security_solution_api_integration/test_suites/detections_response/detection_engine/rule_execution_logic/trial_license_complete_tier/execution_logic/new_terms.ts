@@ -46,8 +46,8 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
   // TODO: add a new service for loading archiver files similar to "getService('es')"
+  const utils = getService('securitySolutionUtils');
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
@@ -99,6 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
     // suricata-sensor-san-francisco appears in a document at 2019-02-19T20:42:08.230Z, but also appears
     // in earlier documents so is not new. An alert should not be generated for that term.
     it('should generate 1 alert with 1 selected field', async () => {
+      const username = await utils.getUsername();
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
@@ -214,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': ELASTICSEARCH_USERNAME,
+        'kibana.alert.rule.created_by': username,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -232,7 +233,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'new_terms',
-        'kibana.alert.rule.updated_by': ELASTICSEARCH_USERNAME,
+        'kibana.alert.rule.updated_by': username,
         'kibana.alert.rule.version': 1,
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',

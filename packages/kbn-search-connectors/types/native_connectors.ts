@@ -1861,14 +1861,20 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.jira.cloudServiceAccountLabel', {
-          defaultMessage: 'Jira Cloud service account id',
+          defaultMessage: 'Jira Cloud email address',
         }),
         options: [],
         order: 6,
         placeholder: 'me@example.com',
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.jira.cloudServiceAccountTooltip',
+          {
+            defaultMessage:
+              'Email address associated with Jira Cloud account. E.g. jane.doe@gmail.com',
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],

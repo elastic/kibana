@@ -17,7 +17,10 @@ import { i18n } from '@kbn/i18n';
 import type { ActionErrorResult } from '../../../../../../../common/types';
 
 import { buildQuery } from '../../agent_details_page/components/agent_logs/build_query';
-import { ViewLogsButton } from '../../agent_details_page/components/agent_logs/view_logs_button';
+import {
+  ViewLogsButton,
+  getFormattedRange,
+} from '../../agent_details_page/components/agent_logs/view_logs_button';
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
@@ -30,11 +33,12 @@ const TruncatedEuiText = styled(EuiText)`
 
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
-  const isLogsUIAvailable = !coreStart.cloud?.isServerlessEnabled;
 
-  const getLogsButton = (agentId: string, timestamp: string, viewInLogs: boolean) => {
-    const startTime = moment(timestamp).subtract(5, 'm').toISOString();
-    const endTime = moment(timestamp).add(5, 'm').toISOString();
+  const getLogsButton = (agentId: string, timestamp: string) => {
+    const start = moment(timestamp).subtract(5, 'm').toISOString();
+    const end = moment(timestamp).add(5, 'm').toISOString();
+    const startTime = getFormattedRange(start);
+    const endTime = getFormattedRange(end);
 
     const logStreamQuery = buildQuery({
       agentId,
@@ -43,12 +47,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
       userQuery: '',
     });
     return (
-      <ViewLogsButton
-        viewInLogs={viewInLogs}
-        logStreamQuery={logStreamQuery}
-        startTime={startTime}
-        endTime={endTime}
-      />
+      <ViewLogsButton logStreamQuery={logStreamQuery} startTime={startTime} endTime={endTime} />
     );
   };
 
@@ -86,7 +85,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
         const errorItem = (action.latestErrors ?? []).find((item) => item.agentId === agentId);
         return (
           <RedirectAppLinks coreStart={coreStart}>
-            {getLogsButton(agentId, errorItem!.timestamp, !!isLogsUIAvailable)}
+            {getLogsButton(agentId, errorItem!.timestamp)}
           </RedirectAppLinks>
         );
       },

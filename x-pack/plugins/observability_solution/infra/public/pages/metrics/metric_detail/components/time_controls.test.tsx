@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../../utils/use_kibana_ui_setting', () => ({
+jest.mock('../../../../hooks/use_kibana_ui_setting', () => ({
   _esModule: true,
   useKibanaUiSetting: jest.fn(() => [
     [

@@ -22,30 +22,51 @@ import type { HistogramField, NumericColumnStatsMap } from './types';
 const MAX_CHART_COLUMNS = 20;
 
 /**
- * Returns aggregation intervals for the supplied document fields.
+ * Interface for the parameters required to fetch aggregation intervals.
+ */
+export interface FetchAggIntervalsParams {
+  /** The Elasticsearch client to use for the query. */
+  esClient: ElasticsearchClient;
+  /** An optional abort signal to cancel the request. */
+  abortSignal?: AbortSignal;
+  /** The arguments for the aggregation query. */
+  arguments: {
+    /** The index pattern to query against. */
+    indexPattern: string;
+    /** The query to filter documents. */
+    query: estypes.QueryDslQueryContainer;
+    /** The fields to aggregate on. */
+    fields: HistogramField[];
+    /** The size of the sampler shard. */
+    samplerShardSize: number;
+    /** Optional runtime mappings for the query. */
+    runtimeMappings?: estypes.MappingRuntimeFields;
+    /** Optional probability for random sampling. */
+    randomSamplerProbability?: number;
+    /** Optional seed for random sampling. */
+    randomSamplerSeed?: number;
+  };
+}
+/**
+ * Asynchronously fetches aggregation intervals from an Elasticsearch client.
  *
- * @param client - The Elasticsearch client.
- * @param indexPattern - The index pattern to search.
- * @param query - The query to filter documents.
- * @param fields - An array of field definitions for which aggregation intervals are requested.
- * @param samplerShardSize - The shard size parameter for sampling aggregations. A value less than 1 indicates no sampling.
- * @param runtimeMappings - Optional runtime mappings to apply.
- * @param abortSignal - Optional AbortSignal for canceling the request.
- * @param randomSamplerProbability - Optional probability value for random sampling.
- * @param randomSamplerSeed - Optional seed value for random sampling.
- * @returns A promise that resolves to a map of aggregation intervals for the specified fields.
+ * @param params - The parameters for fetching aggregation intervals.
+ * @returns A promise that resolves to a map of numeric column statistics.
  */
 export const fetchAggIntervals = async (
-  client: ElasticsearchClient,
-  indexPattern: string,
-  query: estypes.QueryDslQueryContainer,
-  fields: HistogramField[],
-  samplerShardSize: number,
-  runtimeMappings?: estypes.MappingRuntimeFields,
-  abortSignal?: AbortSignal,
-  randomSamplerProbability?: number,
-  randomSamplerSeed?: number
+  params: FetchAggIntervalsParams
 ): Promise<NumericColumnStatsMap> => {
+  const { esClient, abortSignal, arguments: args } = params;
+  const {
+    indexPattern,
+    query,
+    fields,
+    samplerShardSize,
+    runtimeMappings,
+    randomSamplerProbability,
+    randomSamplerSeed,
+  } = args;
+
   if (
     samplerShardSize >= 1 &&
     randomSamplerProbability !== undefined &&
@@ -77,7 +98,7 @@ export const fetchAggIntervals = async (
     seed: randomSamplerSeed,
   });
 
-  const body = await client.search(
+  const body = await esClient.search(
     {
       index: indexPattern,
       size: 0,

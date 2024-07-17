@@ -52,6 +52,20 @@ export const useUnsavedChangesPrompt = ({
   cancelButtonText = DEFAULT_CANCEL_BUTTON,
 }: Props) => {
   useEffect(() => {
+    if (hasUnsavedChanges) {
+      const handler = (event: BeforeUnloadEvent) => {
+        // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
+        // whether or not a user wants to leave the current site.
+        event.preventDefault();
+        event.returnValue = '';
+      };
+      // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [hasUnsavedChanges]);
+
+  useEffect(() => {
     if (!hasUnsavedChanges) {
       return;
     }

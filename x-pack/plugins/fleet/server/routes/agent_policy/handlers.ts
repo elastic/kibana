@@ -215,7 +215,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
@@ -261,7 +261,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, ...data } = request.body;
 
   const spaceId = fleetContext.spaceId;
@@ -271,11 +271,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      {
-        force,
-        user: user || undefined,
-        spaceId,
-      }
+      { force, user, spaceId }
     );
     const body: UpdateAgentPolicyResponse = { item: agentPolicy };
     return response.ok({
@@ -300,16 +296,14 @@ export const copyAgentPolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const agentPolicy = await agentPolicyService.copy(
       soClient,
       esClient,
       request.params.agentPolicyId,
       request.body,
-      {
-        user: user || undefined,
-      }
+      { user }
     );
 
     const body: CopyAgentPolicyResponse = { item: agentPolicy };
@@ -329,16 +323,13 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
       esClient,
       request.body.agentPolicyId,
-      {
-        user: user || undefined,
-        force: request.body.force,
-      }
+      { user, force: request.body.force }
     );
     return response.ok({
       body,
@@ -386,7 +377,9 @@ export const getFullAgentPolicy: FleetRequestHandler<
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
         soClient,
         request.params.agentPolicyId,
-        { standalone: request.query.standalone === true }
+        {
+          standalone: request.query.standalone === true,
+        }
       );
       if (fullAgentPolicy) {
         const body: GetFullAgentPolicyResponse = {

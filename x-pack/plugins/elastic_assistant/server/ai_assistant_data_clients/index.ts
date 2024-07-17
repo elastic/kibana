@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';

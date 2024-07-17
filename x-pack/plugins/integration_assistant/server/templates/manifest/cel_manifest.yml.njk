@@ -1,0 +1,339 @@
+- input: cel
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: data_stream.dataset
+      type: text
+      title: Dataset name
+      description: |
+        Dataset to write data to. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+      default: cel.cel
+      required: true
+      show_user: true
+    - name: pipeline
+      type: text
+      title: Ingest Pipeline
+      description: |
+        The Ingest Node pipeline ID to be used by the integration.
+      required: false
+      show_user: true
+    - name: resource_url
+      type: text
+      title: Resource URL
+      description: i.e. scheme://host:port/path
+      show_user: true
+      required: true
+      default: https://server.example.com:8089/api
+    - name: resource_interval
+      type: text
+      title: Resource Interval
+      description: How often the API is polled, supports seconds, minutes and hours.
+      show_user: true
+      required: true
+      default: 1m
+    - name: program
+      type: textarea
+      title: The CEL program to be run for each polling.
+      description: |
+        Program is the CEL program that is executed each polling period to get and transform the API data.
+        More information can be found in the [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html#_execution).
+      show_user: true
+      multi: false
+      required: true
+      default: |
+        # // Fetch the agent's public IP every minute and note when the last request was made.
+        # // It does not use the Resource URL configuration value.
+        # bytes(get("https://api.ipify.org/?format=json").Body).as(body, {
+        #     "events": [body.decode_json().with({
+        #         "last_requested_at": has(state.cursor) && has(state.cursor.last_requested_at) ?
+        #             state.cursor.last_requested_at
+        #         :
+        #             now
+        #     })],
+        #     "cursor": {"last_requested_at": now}
+        # })
+    - name: state
+      type: yaml
+      title: Initial CEL evaluation state
+      description: |
+        State is the initial state to be provided to the program. If it has a cursor field, that field will be overwritten by any stored cursor, but will be available if no stored cursor exists.
+        More information can be found in the [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html#input-state-cel).
+      show_user: true
+      multi: false
+      required: false
+    - name: regexp
+      type: yaml
+      title: Defined Regular Expressions
+      description: |
+        Regexps is the set of regular expression to be made available to the program by name. The syntax used is [RE2](https://github.com/google/re2/wiki/Syntax).
+        More information can be found in the [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html#regexp-cel).
+      show_user: true
+      multi: false
+      required: false
+      default: |
+        #products: '(?i)(Elasticsearch|Beats|Logstash|Kibana)'
+        #solutions: '(?i)(Search|Observability|Security)'
+    - name: username
+      type: text
+      title: Basic Auth Username
+      show_user: true
+      required: false
+      description: The username to be used with Basic Auth headers
+    - name: password
+      type: password
+      title: Basic Auth Password
+      show_user: true
+      required: false
+      description: The password to be used with Basic Auth headers
+      secret: true
+    - name: digest_username
+      type: text
+      title: Digest Auth Username
+      show_user: true
+      required: false
+      description: The username to be used with Digest Auth headers
+    - name: digest_password
+      type: password
+      title: Digest Auth Password
+      show_user: true
+      required: false
+      description: The password to be used with Digest Auth headers
+      secret: true
+    - name: digest_no_reuse
+      type: bool
+      title: Digest No Challenge Reuse
+      show_user: true
+      required: false
+      description: Selecting no challenge reuse prevents the transport from reusing digest challenges
+    - name: oauth_id
+      type: text
+      title: OAuth2 Client ID
+      description: Client ID used for OAuth2 authentication
+      show_user: true
+      required: false
+    - name: oauth_secret
+      type: password
+      title: OAuth2 Client Secret
+      description: Client secret used for OAuth2 authentication
+      show_user: true
+      required: false
+      secret: true
+    - name: oauth_token_url
+      type: text
+      title: OAuth2 Token URL
+      description: The URL endpoint that will be used to generate the tokens during the oAuth2 flow. It is required if no oauth_custom variable is set or provider is not specified in oauth_custom variable.
+      show_user: true
+      required: false
+      secret: false
+    - name: redact_fields
+      type: text
+      title: Redacted fields
+      description: |
+        Fields to redact in debug logs. When logging at debug-level the input state and CEL evaluation state are included
+        in logs. This may leak secrets, so list sensitive state fields in this configuration.
+      show_user: true
+      multi: true
+      required: false
+    - name: delete_redacted_fields
+      type: bool
+      title: Delete redacted fields
+      description: |
+        The default behavior for field redaction is to replace characters with `*`s. If field value length or presence will
+        leak information, the fields can be deleted from logging by setting this configuration to true.
+      show_user: true
+      multi: false
+      default: false
+      required: true
+    - name: resource_ssl
+      type: yaml
+      title: Resource SSL Configuration
+      description: i.e. certificate_authorities, supported_protocols, verification_mode etc, more examples found in the [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-ssl.html#ssl-common-config)
+      multi: false
+      required: false
+      show_user: false
+    - name: resource_timeout
+      type: text
+      title: Resource Timeout
+      description: Duration before declaring that the HTTP client connection has timed out. Valid time units are ns, us, ms, s, m, h. Default is "30"s.
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_proxy_url
+      type: text
+      title: Resource Proxy
+      description: This specifies proxy configuration in the form of `http[s]://<user>:<password>@<server name/ip>:<port>`.
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_retry_max_attempts
+      type: text
+      title: Resource Retry Max Attempts
+      description: The maximum number of retries for the HTTP client. Default is "5".
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_retry_wait_min
+      type: text
+      title: Resource Retry Wait Min
+      description: The minimum time to wait before a retry is attempted. Default is "1s".
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_retry_wait_max
+      type: text
+      title: Resource Retry Wait Max
+      description: The maximum time to wait before a retry is attempted. Default is "60s".
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_redirect_forward_headers
+      type: bool
+      title: Resource Redirect Forward Headers
+      description: When set to true resource headers are forwarded in case of a redirect. Default is "false".
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_redirect_headers_ban_list
+      type: text
+      title: Resource Redirect Headers Ban List
+      description: When Redirect Forward Headers is set to true, all headers except the ones defined in this list will be forwarded. All headers are forwarded by default.
+      show_user: false
+      multi: true
+      required: false
+    - name: resource_redirect_max_redirects
+      type: text
+      title: Resource Redirect Max Redirects
+      description: The maximum number of redirects to follow for a resource. Default is "10".
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_rate_limit_limit
+      type: text
+      title: Resource Rate Limit
+      description: The value of the response that specifies the total limit.
+      show_user: false
+      multi: false
+      required: false
+    - name: resource_rate_limit_burst
+      type: text
+      title: Resource Rate Limit Burst
+      description: The maximum burst size. Burst is the maximum number of resource requests that can be made above the overall rate limit.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_provider
+      type: text
+      title: OAuth2 Provider
+      description: Used to configure supported oAuth2 providers. Each supported provider will require specific settings. It is not set by default. Supported providers are "azure" and "google".
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_scopes
+      type: text
+      title: OAuth2 Scopes
+      description: A list of scopes that will be resourceed during the oAuth2 flow. It is optional for all providers.
+      show_user: false
+      multi: true
+      required: false
+    - name: oauth_google_credentials_file
+      type: text
+      title: OAuth2 Google Credentials File
+      description: The full path to the credentials file for Google.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_google_credentials_json
+      type: text
+      title: OAuth2 Google Credentials JSON
+      description: Your Google credentials information as raw JSON.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_google_jwt_file
+      type: text
+      title: OAuth2 Google JWT File
+      description: Full path to the JWT Account Key file for Google.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_google_jwt_json
+      type: text
+      title: OAuth2 Google JWT JSON
+      description: Your Google JWT information as raw JSON.
+      multi: false
+      required: false
+      show_user: false
+    - name: oauth_google_delegated_account
+      type: text
+      title: OAuth2 Google Delegated account
+      description: Email of the delegated account used to create the credentials (usually an admin).
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_azure_tenant_id
+      type: text
+      title: OAuth2 Azure Tenant ID
+      description: Optional setting used for authentication when using Azure provider. Since it is used in the process to generate the token_url, it can’t be used in combination with it.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_azure_resource
+      type: text
+      title: OAuth2 Azure Resource
+      description: Optional setting for the accessed WebAPI resource when using azure provider.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_okta_jwt_file
+      type: text
+      title: OAuth2 Okta JWT File
+      description: Full path to the JWT account private key file for Okta.
+      show_user: false
+      multi: false
+      required: false
+    - name: oauth_okta_jwt_json
+      type: text
+      title: OAuth2 Okta JWT JSON
+      description: Your Okta JWT private key as raw JSON.
+      multi: false
+      required: false
+      show_user: false
+    - name: oauth_okta_jwt_pem
+      type: text
+      title: OAuth2 Okta JWT PEM
+      description: Your Okta JWT private key encoded as a PEM block.
+      multi: false
+      required: false
+      show_user: false
+    - name: oauth_endpoint_params
+      type: yaml
+      title: OAuth2 Endpoint Params
+      description: Set of values that will be sent on each resource to the token_url. Each param key can have multiple values. Can be set for all providers except google.
+      show_user: false
+      multi: false
+      required: false
+    - name: processors
+      type: yaml
+      title: Processors
+      multi: false
+      required: false
+      show_user: false
+      description: >
+        Processors are used to reduce the number of fields in the exported event or to enhance the event with metadata. This executes in the agent before the logs are parsed. See [Processors](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) for details.
+    - name: tags
+      type: text
+      title: Tags
+      multi: true
+      show_user: false
+      default:
+        - forwarded
+    - name: enable_request_tracer
+      type: bool
+      title: Enable request tracing
+      multi: false
+      required: false
+      show_user: false
+      description: >
+        The request tracer logs HTTP requests and responses to the agent's local file-system for debugging configurations. Enabling this request tracing compromises security and should only be used for debugging. See [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html#_resource_tracer_filename) for details.

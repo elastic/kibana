@@ -284,7 +284,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
           ? `${this.soClient.getCurrentNamespace()}:`
           : '';
         return {
-          id: _id.replace(`${namespacePrefix}${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
+          id: _id!.replace(`${namespacePrefix}${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
           policy_id: policyId,
           policy_name: policyIdNameDictionary[policyId] ?? null,
           created_at: _source.created_at,

@@ -47,10 +47,8 @@ import { DRAG_DROP_FIELD } from './data_table/translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
-import type { TimelineModel } from '../../../store/model';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from './default_headers';
-import type { TimelineDataGridCellContext } from '../types';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -120,8 +118,6 @@ interface Props {
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
-  pinnedEventIds: TimelineModel['pinnedEventIds'];
-  eventIdToNoteIds: TimelineModel['eventIdToNoteIds'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -146,8 +142,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   dataView,
   trailingControlColumns,
   leadingControlColumns,
-  pinnedEventIds,
-  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -169,22 +163,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
-
-  const [eventIdsAddingNotes, setEventIdsAddingNotes] = useState<Set<string>>(new Set());
-
-  const onToggleShowNotes = useCallback(
-    (eventId?: string) => {
-      if (!eventId) return;
-      const newSet = new Set(eventIdsAddingNotes);
-      if (newSet.has(eventId)) {
-        newSet.delete(eventId);
-        setEventIdsAddingNotes(newSet);
-      } else {
-        setEventIdsAddingNotes(newSet.add(eventId));
-      }
-    },
-    [eventIdsAddingNotes]
-  );
 
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({
@@ -373,17 +351,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  const cellContext: TimelineDataGridCellContext = useMemo(() => {
-    return {
-      events,
-      pinnedEventIds,
-      eventIdsAddingNotes,
-      onToggleShowNotes,
-      eventIdToNoteIds,
-      refetch,
-    };
-  }, [events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds, refetch]);
-
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
@@ -460,8 +427,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
                       leadingControlColumns={leadingControlColumns}
-                      cellContext={cellContext}
-                      eventIdToNoteIds={eventIdToNoteIds}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

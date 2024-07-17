@@ -13,6 +13,12 @@ export const LinksStrings = {
     i18n.translate('links.description', {
       defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
     }),
+  embeddable: {
+    getUnsupportedLinkTypeError: () =>
+      i18n.translate('links.embeddable.unsupportedLinkTypeError', {
+        defaultMessage: 'Unsupported link type',
+      }),
+  },
   editor: {
     getAddButtonLabel: () =>
       i18n.translate('links.editor.addButtonLabel', {
@@ -100,7 +106,7 @@ export const LinksStrings = {
         }),
       getErrorDuringSaveToastTitle: () =>
         i18n.translate('links.editor.unableToSaveToastTitle', {
-          defaultMessage: 'Error saving Link panel',
+          defaultMessage: 'Error saving links panel',
         }),
     },
     linkEditor: {

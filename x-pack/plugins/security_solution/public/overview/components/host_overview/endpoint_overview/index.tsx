@@ -9,11 +9,7 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import {
-  AgentStatus,
-  EndpointAgentStatus,
-} from '../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -29,7 +25,6 @@ interface Props {
 }
 
 export const EndpointOverview = React.memo<Props>(({ contextID, data, scopeId }) => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   const getDefaultRenderer = useCallback(
     (fieldName: string, fieldData: EndpointFields, attrName: string) => (
       <DefaultFieldRenderer
@@ -82,23 +77,15 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data, scopeId })
         {
           title: i18n.FLEET_AGENT_STATUS,
           description:
-            // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
             data != null && data.hostInfo ? (
-              agentStatusClientEnabled ? (
-                <AgentStatus agentId={data.hostInfo.metadata.agent.id} agentType="endpoint" />
-              ) : (
-                <EndpointAgentStatus
-                  endpointHostInfo={data.hostInfo}
-                  data-test-subj="endpointHostAgentStatus"
-                />
-              )
+              <AgentStatus agentId={data.hostInfo.metadata.agent.id} agentType="endpoint" />
             ) : (
               getEmptyTagValue()
             ),
         },
       ],
     ];
-  }, [agentStatusClientEnabled, data, getDefaultRenderer]);
+  }, [data, getDefaultRenderer]);
 
   return (
     <>

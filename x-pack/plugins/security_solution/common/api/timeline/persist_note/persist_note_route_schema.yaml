@@ -15,8 +15,8 @@ servers:
 paths:
   /api/note:
     patch:
-      operationId: persistNoteroute
-      description: Persists a note to a timeline.
+      operationId: persistNoteRoute
+      summary: Persists a note to a timeline.
       tags:
         - access:securitySolution
       requestBody:
@@ -41,8 +41,8 @@ paths:
                   type: string
                   nullable: true
       responses:
-        200:
-          description: Indicates the favorite status was successfully updated.
+        '200':
+          description: Indicates the note was successfully created.
           content:
             application/json:
               schema:

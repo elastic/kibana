@@ -19,18 +19,15 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import {
   MonitorStatusActionGroup,
   SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
 } from '../../common/constants/synthetics_alerts';
-import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
-import {
-  getUptimeIndexPattern,
-  IndexPatternTitleAndFields,
-} from '../legacy_uptime/lib/requests/get_index_pattern';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
 import { StatusCheckFilters } from '../../common/runtime_types';
-import { UptimeEsClient } from '../lib';
+import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
@@ -311,14 +308,14 @@ export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.re
 });
 
 export const formatFilterString = async (
-  uptimeEsClient: UptimeEsClient,
+  syntheticsEsClient: SyntheticsEsClient,
   filters?: StatusCheckFilters,
   search?: string
 ) =>
   await generateFilterDSL(
     () =>
       getUptimeIndexPattern({
-        uptimeEsClient,
+        syntheticsEsClient,
       }),
     filters,
     search
@@ -352,10 +349,13 @@ export const generateFilterDSL = async (
   return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const syntheticsRuleTypeFieldMap = {
+  ...syntheticsRuleFieldMap,
+  ...legacyExperimentalFieldMap,
+};
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
 };

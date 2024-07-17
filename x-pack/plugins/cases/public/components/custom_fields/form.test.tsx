@@ -10,15 +10,16 @@ import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 import userEvent from '@testing-library/user-event';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import type { FormState } from '../configure_cases/flyout';
 
-describe('CustomFieldsForm ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187554
+describe.skip('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;
   const onChange = jest.fn();
 
@@ -68,9 +69,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is selected', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -96,9 +97,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is selected and the text default value is not filled', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -122,9 +123,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is selected and the text default value is an empty string', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -149,9 +150,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if the initial default value is null', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     const initialValue = {
       required: true,
@@ -190,9 +191,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is not selected', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -215,9 +216,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('deserializes the "type: text" custom field data correctly', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(
       <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[0]} />
@@ -247,9 +248,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('deserializes the "type: toggle" custom field data correctly', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(
       <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[1]} />

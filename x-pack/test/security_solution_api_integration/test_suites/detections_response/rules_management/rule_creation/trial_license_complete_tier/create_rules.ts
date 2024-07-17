@@ -48,9 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@serverless @ess create_rules', () => {
     describe('rule creation', () => {
@@ -75,6 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('elastic admin', () => {
         it('creates a custom query rule', async () => {
+          const username = await utils.getUsername();
           const { body } = await securitySolutionApi
             .createRule({ body: getCustomQueryRuleParams() })
             .expect(200);
@@ -82,13 +81,14 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toEqual(
             expect.objectContaining({
               ...getCustomQueryRuleParams(),
-              created_by: ELASTICSEARCH_USERNAME,
-              updated_by: ELASTICSEARCH_USERNAME,
+              created_by: username,
+              updated_by: username,
             })
           );
         });
 
         it('creates a saved query rule', async () => {
+          const username = await utils.getUsername();
           const savedQueryRuleParams = getSavedQueryRuleParams({
             data_view_id: 'my-data-view',
             type: 'saved_query',
@@ -102,8 +102,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toEqual(
             expect.objectContaining({
               ...savedQueryRuleParams,
-              created_by: ELASTICSEARCH_USERNAME,
-              updated_by: ELASTICSEARCH_USERNAME,
+              created_by: username,
+              updated_by: username,
             })
           );
         });

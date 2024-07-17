@@ -133,8 +133,6 @@ const useResponderDataForEndpointHost = (
   endpointAgentId: string,
   enabled: boolean = true
 ): ResponderDataForEndpointHost => {
-  // FIXME:PT is this the correct API to call? or should we call the agent status api instead
-
   const {
     data: endpointHostInfo,
     isFetching,

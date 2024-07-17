@@ -35,11 +35,9 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           isInvalid={false}
           labelType="label"
         >
-          <EuiFilePicker
+          <EuiFilePickerClass
             accept=".svg"
             className="mapsImageUpload"
-            compressed={false}
-            display="large"
             initialPromptText="Select or drag and drop an SVG icon"
             isInvalid={false}
             onChange={[Function]}
@@ -254,11 +252,9 @@ exports[`should render an empty custom icon modal 1`] = `
           isInvalid={false}
           labelType="label"
         >
-          <EuiFilePicker
+          <EuiFilePickerClass
             accept=".svg"
             className="mapsImageUpload"
-            compressed={false}
-            display="large"
             initialPromptText="Select or drag and drop an SVG icon"
             isInvalid={false}
             onChange={[Function]}
