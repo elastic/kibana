@@ -47,6 +47,7 @@ export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDi
         size="s"
         color="success"
         href={docLinks?.links.securitySolution.avcResults}
+        target="_blank"
         data-test-subj="avcReadTheBlog"
       >
         <FormattedMessage
