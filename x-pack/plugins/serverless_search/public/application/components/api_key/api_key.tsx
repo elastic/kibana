@@ -131,7 +131,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                       aria-label={i18n.translate(
                         'xpack.serverlessSearch.apiKey.newButton.ariaLabel',
                         {
-                          defaultMessage: 'Add new API Key',
+                          defaultMessage: 'Add new API key',
                         }
                       )}
                     >
