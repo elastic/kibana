@@ -124,7 +124,8 @@ export class CreateSLO {
 
   public async inspect(params: CreateSLOParams): Promise<{
     slo: CreateSLOParams;
-    pipeline: Record<string, any>;
+    rollUpPipeline: Record<string, any>;
+    summaryPipeline: Record<string, any>;
     rollUpTransform: TransformPutTransformRequest;
     summaryTransform: TransformPutTransformRequest;
     temporaryDoc: Record<string, any>;
@@ -135,13 +136,15 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = await this.transformManager.inspect(slo);
-    const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
+    const rollUpPipeline = getSLOPipelineTemplate(slo);
+    const summaryPipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
     const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
     return {
       slo,
-      pipeline,
+      rollUpPipeline,
+      summaryPipeline,
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
