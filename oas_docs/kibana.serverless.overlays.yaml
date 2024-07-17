@@ -1,0 +1,10 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Add x-beta to all operations
+  version: 0.0.1
+actions:
+  - target: '$.paths[*][*]'
+    description: Add x-beta
+    update:
+      x-beta: true
