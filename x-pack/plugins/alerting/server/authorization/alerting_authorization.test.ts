@@ -15,7 +15,7 @@ import { AlertingAuthorization } from './alerting_authorization';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
-import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { WriteOperations, AlertingAuthorizationEntity, ReadOperations } from './types';
 
 const mockAuthorizationAction = (

@@ -10,7 +10,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
 import { RuleTypeRegistry } from '../types';
