@@ -19,7 +19,7 @@ import { NavigationServerStartDependencies } from './types';
  */
 export const getUiSettings = (
   core: CoreSetup<NavigationServerStartDependencies>,
-  logger: Logger
+  logger?: Logger
 ): Record<string, UiSettingsParams> => {
   return {
     [DEFAULT_ROUTE_UI_SETTING_ID]: {
@@ -39,7 +39,7 @@ export const getUiSettings = (
           const solution = activeSpace?.solution ?? 'classic';
           return DEFAULT_ROUTES[solution] ?? DEFAULT_ROUTES.classic;
         } catch (e) {
-          logger.error(`Failed to retrieve active space: ${e.message}`);
+          logger?.error(`Failed to retrieve active space: ${e.message}`);
           return DEFAULT_ROUTES.classic;
         }
       },
