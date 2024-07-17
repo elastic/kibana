@@ -39,6 +39,10 @@
     "initialize-server:edr-workflows": "node ./scripts/index.js server edr_workflows trial_license_complete_tier",
     "run-tests:edr-workflows": "node ./scripts/index.js runner edr_workflows trial_license_complete_tier",
 
+
+    "initialize-server:investigations:basic_essentials": "node scripts/index.js server investigation basic_license_essentials_tier",
+    "run-tests:investigations:basic_essentials": "node scripts/index.js runner investigation basic_license_essentials_tier",
+
     "initialize-server:investigations": "node scripts/index.js server investigation trial_license_complete_tier",
     "run-tests:investigations": "node scripts/index.js runner investigation trial_license_complete_tier",
 
@@ -376,6 +380,10 @@
     "investigations:timeline:runner:qa:serverless:release": "npm run run-tests:investigations timeline serverless qaEnv",
     "investigations:timeline:server:ess": "npm run initialize-server:investigations timeline ess",
     "investigations:timeline:runner:ess": "npm run run-tests:investigations timeline ess essEnv",
+
+
+    "investigations:basic:timeline:server:ess": "npm run initialize-server:investigations:basic_essentials timeline ess",
+    "investigations:basic:timeline:runner:ess": "npm run run-tests:investigations:basic_essentials timeline ess essEnv",
 
     "investigations:saved-objects:server:serverless": "npm run initialize-server:investigations saved_objects serverless",
     "investigations:saved-objects:runner:serverless": "npm run run-tests:investigations saved_objects serverless serverlessEnv",
