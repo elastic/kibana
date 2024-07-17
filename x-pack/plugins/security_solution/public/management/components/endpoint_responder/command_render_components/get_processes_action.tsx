@@ -7,11 +7,14 @@
 
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KeyValueDisplay } from '../../key_value_display';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
+  ActionDetails,
   GetProcessesActionOutputContent,
+  MaybeImmutable,
   ProcessesRequestBody,
 } from '../../../../../common/endpoint/types';
 import { useSendGetEndpointProcessesRequest } from '../../../hooks/response_actions/use_send_get_endpoint_processes_request';
@@ -73,6 +76,33 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       dataTestSubj: 'getProcesses',
     });
 
+    if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
+      return result;
+    }
+
+    // Show results
+    return (
+      <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
+        {agentType === 'sentinel_one' ? (
+          <div>{'TODO:PT SENTINELONE RESULTS HERE'}</div>
+        ) : (
+          <EndpointRunningProcessesResults action={completedActionDetails} agentId={endpointId} />
+        )}
+      </ResultComponent>
+    );
+  }
+);
+GetProcessesActionResult.displayName = 'GetProcessesActionResult';
+
+interface EndpointRunningProcessesResultsProps {
+  action: MaybeImmutable<ActionDetails<GetProcessesActionOutputContent>>;
+  /** If defined, only the results for the given agent id will be displayed. Else, all agents output will be displayed */
+  agentId?: string;
+}
+
+const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProps>(
+  ({ action, agentId }) => {
+    const agentIds: string[] = agentId ? [agentId] : [...action.agents];
     const columns = useMemo(
       () => [
         {
@@ -116,27 +146,48 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       []
     );
 
-    const tableEntries = useMemo(() => {
-      if (endpointId) {
-        return completedActionDetails?.outputs?.[endpointId]?.content.entries ?? [];
-      }
-      return [];
-    }, [completedActionDetails?.outputs, endpointId]);
-
-    if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
-      return result;
-    }
-
-    // Show results
     return (
-      <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-        <StyledEuiBasicTable
-          data-test-subj={'getProcessListTable'}
-          items={[...tableEntries]}
-          columns={columns}
-        />
-      </ResultComponent>
+      <>
+        {agentIds.length > 1 ? (
+          agentIds.map((id) => {
+            const hostName = action.hosts[id].name;
+
+            return (
+              <div key={hostName}>
+                <KeyValueDisplay
+                  name={hostName}
+                  value={
+                    <StyledEuiBasicTable
+                      data-test-subj={'getProcessListTable'}
+                      items={action.outputs?.[id]?.content.entries ?? []}
+                      columns={columns}
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </div>
+            );
+          })
+        ) : (
+          <StyledEuiBasicTable
+            data-test-subj={'getProcessListTable'}
+            items={action.outputs?.[agentIds[0]]?.content.entries ?? []}
+            columns={columns}
+          />
+        )}
+      </>
     );
   }
 );
-GetProcessesActionResult.displayName = 'GetProcessesActionResult';
+EndpointRunningProcessesResults.displayName = 'EndpointRunningProcessesResults';
+
+interface SentinelOneRunningProcessesResultsProps {
+  action: ActionDetails<GetProcessesActionOutputContent>;
+}
+
+const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResultsProps>(
+  ({ action }) => {
+    return <div>{'SentinelOneRunningProcessesResults placeholder'}</div>;
+  }
+);
+SentinelOneRunningProcessesResults.displayName = 'SentinelOneRunningProcessesResults';
