@@ -13,11 +13,14 @@ import type { EventLoopUtilization } from 'perf_hooks';
  * @public
  */
 export interface EventLoopUtilizationWithLoad extends EventLoopUtilization {
-  /** Event-loop utilization represented as an average of a number of collections as buckets */
+  /**
+   * Event-loop utilization represented as an average of a number of collections as buckets
+   * @remark 3 load windows borrows from the `uptime` CLI tool on macOS and Linux, but is not necessarily 1m, 5m, 15m. The
+   *         actual time range covered is determined by our collection interval (configured via `ops.interval`, default 5s)
+   *         and the number of samples held in each window. So by default short: 15s, medium: 30s and long 60s.
+   */
   load: {
-    /**
-     * The load for the short window
-     */
+    /** The load for the short window */
     short: number;
     /** The load for the medium window */
     medium: number;
