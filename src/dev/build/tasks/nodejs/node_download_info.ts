@@ -15,12 +15,13 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
   const arch = platform.getNodeArch();
   let variants = ['default'];
   if (platform.isLinux()) {
-    if (Boolean(process.env.CI_USE_POINTER_COMPRESSION)) {
+    // CI_USE_POINTER_COMPRESSION is an override for running all tests with pointer compression enabled
+    if (Boolean(process.env.CI_USE_POINTER_COMPRESSION) && !platform.isServerless()) {
       variants = ['pointer-compression'];
     } else {
       variants = ['glibc-217'];
-      if (platform.isServerless()) variants.push('pointer-compression');
     }
+    if (platform.isServerless()) variants.push('pointer-compression');
   }
 
   return variants.map((variant) => {
