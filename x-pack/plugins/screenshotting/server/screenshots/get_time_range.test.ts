@@ -6,8 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ConfigType } from '@kbn/screenshotting-server';
 import { createMockBrowserDriver } from '../browsers/mock';
-import { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
 import { getTimeRange } from './get_time_range';
