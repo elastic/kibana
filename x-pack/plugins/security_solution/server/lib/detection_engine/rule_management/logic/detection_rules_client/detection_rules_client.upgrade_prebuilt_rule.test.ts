@@ -33,9 +33,14 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
+    actionsClient = {
+      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as jest.Mocked<ActionsClient>;
     rulesClient = rulesClientMock.create();
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({

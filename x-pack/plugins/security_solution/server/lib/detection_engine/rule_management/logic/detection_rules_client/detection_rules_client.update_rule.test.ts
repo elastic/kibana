@@ -115,7 +115,7 @@ describe('DetectionRulesClient.updateRule', () => {
         },
       ],
     };
-    const existingRule = getRuleMock(getQueryRuleParams());
+    const existingRule = getRulesSchemaMock();
     (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
     rulesClient.update.mockResolvedValue(
       getRuleMock(getQueryRuleParams(), {
