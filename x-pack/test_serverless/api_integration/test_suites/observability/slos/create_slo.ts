@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 import { ALL_VALUE } from '@kbn/slo-schema';
-
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '@kbn/slo-plugin/common/constants';
@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('creates ingest pipelines', async () => {
         const sloRevision = 1;
         const rollupPipelineResponse = await esClient.ingest.getPipeline({
-          id: getSLOSummaryPipelineId(sloId, sloRevision),
+          id: getSLOPipelineId(sloId, sloRevision),
         });
         const expectedRollupPipeline = `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
         expect(rollupPipelineResponse[expectedRollupPipeline]).not.to.be(undefined);
