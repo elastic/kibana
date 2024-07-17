@@ -22,9 +22,12 @@ export const useEntityModel = () => {
     if (!http) return Promise.resolve();
 
     return http
-      .fetch('/internal/api/entities/definition', {
+      .fetch('/internal/entities/definition', {
         version: '1',
         method: 'POST',
+        headers: {
+          'elastic-api-version': 1,
+        },
         body: JSON.stringify(entityDefinition),
       })
       .then((response) => {
@@ -37,7 +40,7 @@ export const useEntityModel = () => {
 
     if (!http) return Promise.resolve([]);
 
-    return http.fetch('/internal/api/entities/definition', {
+    return http.fetch('/internal/entities/definition', {
       version: '1',
       method: 'GET',
       query: {
@@ -51,7 +54,7 @@ export const useEntityModel = () => {
 
     if (!http) return Promise.resolve([]);
 
-    return http.fetch(`/internal/api/entities/definition/${ENTITY_DEFINITION_ID}`, {
+    return http.fetch(`/internal/entities/definition/${ENTITY_DEFINITION_ID}`, {
       version: '1',
       method: 'DELETE',
     });
@@ -81,4 +84,5 @@ const entityDefinition = {
     timestampField: '@timestamp',
     interval: '1m',
   },
+  version: '1.0.0',
 };
