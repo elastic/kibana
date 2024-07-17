@@ -7,16 +7,31 @@
  */
 
 require('../../../src/setup_node_env');
-const { resolve } = require('path');
+const { join, resolve } = require('path');
 const { generate } = require('@kbn/openapi-generator');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const ROOT = resolve(__dirname, '..');
 
 (async () => {
   await generate({
-    title: 'OpenAPI Endpoint exceptions API Schemas',
+    title: 'OpenAPI Endpoint Exceptions API Schemas',
     rootDir: ROOT,
-    sourceGlob: './**/*.schema.yaml',
+    sourceGlob: './api/**/*.schema.yaml',
     templateName: 'zod_operation_schema',
+  });
+
+  await generate({
+    title: 'Endpoint Exceptions API client for tests',
+    rootDir: ROOT,
+    sourceGlob: './api/**/*.schema.yaml',
+    templateName: 'api_client_supertest',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/test/api_integration/services/security_solution_endpoint_exceptions_api.gen.ts'
+      ),
+    },
   });
 })();
