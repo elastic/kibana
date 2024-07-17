@@ -76,7 +76,6 @@ export async function getRelevantFieldNames({
 
   const fieldNamesToAnalyze = fieldNames.slice(0, MAX_CHUNKS * FIELD_NAMES_PER_CHUNK);
 
-
   const relevantFields = await Promise.all(
     chunk(fieldNamesToAnalyze, FIELD_NAMES_PER_CHUNK).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
