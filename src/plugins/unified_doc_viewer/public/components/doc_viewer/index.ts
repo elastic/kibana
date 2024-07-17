@@ -8,6 +8,8 @@
 
 import { UnifiedDocViewer } from './doc_viewer';
 
+export { getUnifiedDocViewerTabs } from './doc_viewer_tabs';
+
 // Required for usage in React.lazy
 // eslint-disable-next-line import/no-default-export
 export default UnifiedDocViewer;
