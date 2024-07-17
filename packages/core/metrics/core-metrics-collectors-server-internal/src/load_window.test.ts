@@ -26,36 +26,55 @@ describe('LoadWindow', () => {
 
   const WINDOW_SIZE = 3;
   it.each([
-    { observations: [0.44, 0.55, 0.66], averageLast: 3, expected: 0.55 },
-    { observations: [0.44, 0.55, 0.66].reverse(), averageLast: 3, expected: 0.55 }, // should be same as above
-    { observations: [0.44, 0.55, 0.66], averageLast: 1, expected: 0.44 },
-    { observations: [0.201, 0.33, 0.44], averageLast: 3, expected: 0.33 },
-    { observations: [0.44, 0.55, 0.66], averageLast: 2, expected: 0.5 },
-    { observations: [0.44, 0.55, 0.66], averageLast: -1, expected: 0.44 },
+    { name: 'base case', observations: [0.44, 0.55, 0.66], averageLast: 3, expected: 0.55 },
     {
+      name: 'reverse base case',
+      observations: [0.44, 0.55, 0.66].reverse(),
+      averageLast: 3,
+      expected: 0.55,
+    }, // should be same as above
+    {
+      name: 'include one observation',
+      observations: [0.44, 0.55, 0.66],
+      averageLast: 1,
+      expected: 0.44,
+    },
+    {
+      name: 'include excess observations',
+      observations: [0.201, 0.33, 0.44],
+      averageLast: 4,
+      expected: 0.33,
+    },
+    {
+      name: 'subset of observations',
+      observations: [0.44, 0.55, 0.66],
+      averageLast: 2,
+      expected: 0.5,
+    },
+    {
+      name: 'includes at least one observation',
+      observations: [0.44, 0.55, 0.66],
+      averageLast: -1,
+      expected: 0.44,
+    },
+    {
+      name: 'excess observations',
       observations: [1, 0.99, 0.55, 0.66, 0.44, 0.55, 0.66, 0.77],
       averageLast: 1000,
       expected: 0.85,
     },
     {
+      name: 'bad observation data',
       observations: [-1, -0.99, -0.55, -0.66, -0.44],
       averageLast: 10000,
       expected: 0,
     },
-    {
-      observations: [1, 0.99, 0.55, 0.66],
-      averageLast: 1,
-      expected: 1,
-    },
-  ])(
-    '#getAverage produces the correct average for $averageLast observations. Observations added: $observations',
-    ({ observations, averageLast, expected }) => {
-      const lw = new LoadWindow(WINDOW_SIZE);
-      // reverse so that our test observations are in the order they appear above
-      for (const observation of observations.reverse()) {
-        lw.addObservation(observation);
-      }
-      expect(lw.getAverage(averageLast)).toBe(expected);
+  ])('$name', ({ observations, averageLast, expected }) => {
+    const lw = new LoadWindow(WINDOW_SIZE);
+    // reverse so that our test observations are in the order they appear above
+    for (const observation of observations.reverse()) {
+      lw.addObservation(observation);
     }
-  );
+    expect(lw.getAverage(averageLast)).toBe(expected);
+  });
 });
